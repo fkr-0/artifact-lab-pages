@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GROOVE STATION v3.0 // P2P MUSIC COLLAB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a12;
+      --bg-secondary: #12121f;
+      --bg-tertiary: #1a1a2e;
+      --fg-primary: #00ffff;
+      --fg-secondary: #ff00ff;
+      --accent: #00ff88;
+      --accent-secondary: #ff3366;
+      --glow-primary: rgba(0, 255, 255, 0.5);
+      --glow-secondary: rgba(255, 0, 255, 0.5);
+      --grid-color: rgba(0, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg-primary);
+      color: var(--fg-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanlines overlay */
+    .scanlines {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 1000;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+
+    /* Main layout */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
+      border-bottom: 1px solid var(--fg-primary);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--fg-primary), var(--fg-secondary), var(--fg-primary), transparent);
+      animation: headerGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes headerGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 10px var(--glow-primary), 0 0 30px var(--glow-primary);
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.disconnected { background: var(--accent-secondary); box-shadow: 0 0 10px var(--accent-secondary); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    /* Main workspace */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr 280px;
+      grid-template-rows: auto 1fr auto;
+      gap: 0;
+      padding: 0.5rem;
+    }
+
+    /* Panels */
+    .panel {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 31, 0.9) 100%);
+      border: 1px solid var(--fg-primary);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--fg-primary), var(--fg-secondary));
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--fg-secondary);
+    }
+
+    .panel-body {
+      padding: 0.5rem;
+    }
+
+    /* Lobby Panel */
+    .lobby-panel {
+      grid-row: 1 / 4;
+      grid-column: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Transport Panel */
+    .transport-panel {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    /* Sequencer Panel */
+    .sequencer-panel {
+      grid-row: 2;
+      grid-column: 2;
+      min-height: 300px;
+    }
+
+    /* Mixer Panel */
+    .mixer-panel {
+      grid-row: 1 / 3;
+      grid-column: 3;
+    }
+
+    /* Effects Panel */
+    .effects-panel {
+      grid-row: 3;
+      grid-column: 2 / 4;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.4rem 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: var(--fg-primary);
+      font-family: inherit;
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--fg-primary);
+      box-shadow: 0 0 15px var(--glow-primary);
+    }
+
+    .btn.active {
+      background: var(--fg-primary);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--fg-primary), var(--fg-secondary));
+      border: none;
+    }
+
+    .btn-small { padding: 0.25rem 0.5rem; font-size: 0.6rem; }
+
+    /* Input fields */
+    .input {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: var(--fg-primary);
+      font-family: inherit;
+      font-size: 0.75rem;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--fg-primary);
+      box-shadow: 0 0 10px var(--glow-primary);
+    }
+
+    /* Faders and knobs */
+    .fader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .fader {
+      -webkit-appearance: none;
+      width: 80px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .fader::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--fg-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--glow-primary);
+    }
+
+    .fader-vertical {
+      -webkit-appearance: none;
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 6px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .fader-vertical::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 10px;
+      background: var(--fg-primary);
+      border-radius: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--glow-primary);
+    }
+
+    .fader-label {
+      font-size: 0.6rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+    }
+
+    .fader-value {
+      font-size: 0.6rem;
+      color: var(--accent);
+      min-width: 30px;
+      text-align: center;
+    }
+
+    /* Toggle switch */
+    .toggle {
+      width: 36px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle.active { background: var(--accent); }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle.active::after { transform: translateX(16px); }
+
+    /* Transport controls */
+    .transport-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .transport-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--fg-primary);
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--fg-primary);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .transport-btn:hover {
+      background: rgba(0, 255, 255, 0.1);
+      box-shadow: 0 0 20px var(--glow-primary);
+    }
+
+    .transport-btn.playing {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .bpm-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .bpm-display {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--fg-primary);
+      text-shadow: 0 0 10px var(--glow-primary);
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .metronome-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .beat-indicator {
+      display: flex;
+      gap: 4px;
+    }
+
+    .beat-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.1s ease;
+    }
+
+    .beat-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Sequencer */
+    .sequencer-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .sequencer-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .piano-roll {
+      flex: 1;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .piano-roll-grid {
+      display: grid;
+      min-width: 100%;
+    }
+
+    .piano-key {
+      height: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      padding-right: 4px;
+      font-size: 0.5rem;
+      color: rgba(255,255,255,0.4);
+      justify-content: flex-end;
+    }
+
+    .piano-key.black { background: rgba(0,0,0,0.4); }
+    .piano-key.white { background: rgba(255,255,255,0.02); }
+
+    .note-cell {
+      width: 20px;
+      height: 20px;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .note-cell:hover { background: rgba(0, 255, 255, 0.1); }
+
+    .note-cell.active {
+      background: var(--fg-primary);
+      box-shadow: 0 0 8px var(--glow-primary);
+    }
+
+    .playhead {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: var(--accent-secondary);
+      box-shadow: 0 0 10px var(--accent-secondary);
+      pointer-events: none;
+      transition: left 0.05s linear;
+    }
+
+    /* Mixer channel */
+    .mixer-channels {
+      display: flex;
+      gap: 4px;
+      padding: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .mixer-channel {
+      min-width: 60px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .channel-name {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .channel-color {
+      width: 100%;
+      height: 3px;
+      border-radius: 1px;
+      margin-bottom: 0.25rem;
+    }
+
+    .vu-meter {
+      width: 8px;
+      height: 60px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vu-level {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, var(--accent), var(--fg-primary), var(--accent-secondary));
+      transition: height 0.05s ease;
+    }
+
+    .channel-controls {
+      display: flex;
+      gap: 2px;
+      margin-top: 0.25rem;
+    }
+
+    .channel-btn {
+      width: 20px;
+      height: 16px;
+      font-size: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .channel-btn.active {
+      background: var(--fg-primary);
+      color: var(--bg-primary);
+      border-color: var(--fg-primary);
+    }
+
+    .channel-btn.solo.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .master-channel {
+      min-width: 70px;
+      border-color: var(--fg-primary);
+    }
+
+    /* Effects */
+    .effects-rack {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .effect-unit {
+      min-width: 120px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 0.5rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .effect-unit:hover {
+      border-color: var(--fg-secondary);
+    }
+
+    .effect-unit.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    }
+
+    .effect-title {
+      font-size: 0.6rem;
+      color: var(--fg-secondary);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .effect-param {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .effect-param label {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.5);
+      min-width: 40px;
+    }
+
+    .effect-param input {
+      flex: 1;
+    }
+
+    /* Module rack */
+    .module-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .module-item[draggable="true"] {
+      cursor: grab;
+    }
+
+    .module-item:active {
+      cursor: grabbing;
+    }
+
+    .module-item.dragging {
+      opacity: 0.5;
+      border-color: var(--fg-secondary);
+    }
+
+    .module-item:hover {
+      border-color: var(--fg-primary);
+    }
+
+    .module-item.selected {
+      border-color: var(--fg-secondary);
+      background: rgba(255, 0, 255, 0.1);
+    }
+
+    .module-color {
+      width: 8px;
+      height: 100%;
+      min-height: 30px;
+      border-radius: 2px;
+    }
+
+    .module-info {
+      flex: 1;
+    }
+
+    .module-name {
+      font-size: 0.7rem;
+      color: var(--fg-primary);
+    }
+
+    .module-type {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* User list */
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
+
+    .user-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .user-name {
+      font-size: 0.65rem;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-status {
+      font-size: 0.5rem;
+      color: var(--accent);
+    }
+
+    /* Lobby info */
+    .lobby-info {
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .lobby-id {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.5);
+      word-break: break-all;
+    }
+
+    .lobby-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: linear-gradient(0deg, var(--bg-secondary) 0%, transparent 100%);
+      border-top: 1px solid var(--fg-primary);
+      padding: 0.5rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.65rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--fg-primary);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--fg-primary);
+    }
+
+    .modal-body { margin-bottom: 1rem; }
+
+    .modal-footer {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .form-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.25rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+      .lobby-panel { grid-row: auto; grid-column: auto; }
+      .transport-panel { grid-row: auto; grid-column: auto; }
+      .sequencer-panel { grid-row: auto; grid-column: auto; min-height: 200px; }
+      .mixer-panel { grid-row: auto; grid-column: auto; }
+      .effects-panel { grid-row: auto; grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">GROOVE STATION</div>
+      <div class="status-bar">
+        <div class="status-dot" id="connectionDot"></div>
+        <span id="connectionStatus">DISCONNECTED</span>
+        <span>|</span>
+        <span>PEERS: <span id="peerCount">0</span></span>
+        <span>|</span>
+        <span id="currentTime">--:--:--</span>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Lobby Panel -->
+      <aside class="panel lobby-panel">
+        <div class="panel-header">
+          <span class="panel-title">LOBBY</span>
+        </div>
+        <div class="panel-body">
+          <div id="lobbySection">
+            <!-- Lobby info or create/join buttons -->
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <button class="btn" id="btnCreateLobby" style="width: 100%; margin-bottom: 0.25rem;">CREATE LOBBY</button>
+            <button class="btn" id="btnJoinLobby" style="width: 100%; margin-bottom: 0.25rem;">JOIN LOBBY</button>
+            <button class="btn" id="btnLeaveLobby" style="width: 100%; display: none;">LEAVE LOBBY</button>
+          </div>
+
+          <div class="panel-header" style="margin-top: 1rem;">
+            <span class="panel-title">MODULES</span>
+            <button class="btn btn-small" id="btnAddModule">+ ADD</button>
+          </div>
+          <div class="module-list" id="moduleList">
+            <!-- Modules listed here -->
+          </div>
+
+          <div class="panel-header" style="margin-top: 1rem;">
+            <span class="panel-title">USERS</span>
+          </div>
+          <div class="user-list" id="userList">
+            <!-- Users listed here -->
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <button class="btn" id="btnSaveSession" style="width: 100%; margin-bottom: 0.25rem;">SAVE SESSION</button>
+            <button class="btn" id="btnLoadSession" style="width: 100%; margin-bottom: 0.25rem;">LOAD SESSION</button>
+            <button class="btn" id="btnExportSession" style="width: 100%;">EXPORT JSON</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Transport Panel -->
+      <section class="panel transport-panel">
+        <div class="transport-controls">
+          <button class="transport-btn" id="btnStop" title="Stop">&#9632;</button>
+          <button class="transport-btn" id="btnPlay" title="Play">&#9658;</button>
+
+          <div class="bpm-control">
+            <button class="btn btn-small" id="btnBpmDown">-</button>
+            <div class="bpm-display" id="bpmDisplay">120</div>
+            <button class="btn btn-small" id="btnBpmUp">+</button>
+          </div>
+
+          <div class="beat-indicator" id="beatIndicator">
+            <div class="beat-dot"></div>
+            <div class="beat-dot"></div>
+            <div class="beat-dot"></div>
+            <div class="beat-dot"></div>
+          </div>
+
+          <div class="metronome-control">
+            <span class="fader-label">METRO</span>
+            <input type="range" class="fader" id="metronomeVolume" min="0" max="100" value="50">
+            <span class="fader-value" id="metronomeVolumeValue">50</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="fader-label">BARS</span>
+            <select class="input" id="barsSelect" style="width: 60px;">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4" selected>4</option>
+              <option value="8">8</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sequencer Panel -->
+      <section class="panel sequencer-panel">
+        <div class="sequencer-container">
+          <div class="sequencer-toolbar">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="panel-title">PIANO ROLL</span>
+              <select class="input" id="moduleSelect" style="width: 120px;">
+                <option value="">Select Module...</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-small" id="btnClearNotes">CLEAR</button>
+              <button class="btn btn-small" id="btnRandomNotes">RANDOM</button>
+            </div>
+          </div>
+          <div class="piano-roll" id="pianoRoll">
+            <div class="playhead" id="playhead"></div>
+            <!-- Piano roll grid rendered here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Mixer Panel -->
+      <section class="panel mixer-panel">
+        <div class="panel-header">
+          <span class="panel-title">MIXER</span>
+        </div>
+        <div class="mixer-channels" id="mixerChannels">
+          <div class="mixer-channel master-channel">
+            <div class="channel-name">MASTER</div>
+            <div class="vu-meter"><div class="vu-level" id="masterVuL"></div></div>
+            <input type="range" class="fader-vertical" id="masterVolume" min="0" max="100" value="80">
+            <span class="fader-value" id="masterVolumeValue">80</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Effects Panel -->
+      <section class="panel effects-panel">
+        <div class="panel-header">
+          <span class="panel-title">EFFECTS RACK</span>
+        </div>
+        <div class="effects-rack" id="effectsRack">
+          <!-- Effects units rendered here -->
+        </div>
+        <div style="padding: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+          <button class="btn btn-small" id="btnAddEffect">+ ADD EFFECT</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>
+        <span style="color: var(--accent);">GROOVE STATION v3.0</span>
+        <span>|</span>
+        <span>P2P MUSIC COLLABORATION</span>
+      </div>
+      <div>
+        <span id="sessionInfo">No active session</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Create Lobby Modal -->
+  <div class="modal-overlay" id="createLobbyModal">
+    <div class="modal">
+      <h3 class="modal-title">CREATE LOBBY</h3>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Lobby Name</label>
+          <input type="text" class="input" id="lobbyName" placeholder="My Groove Session">
+        </div>
+        <div class="form-group">
+          <label class="form-label">BPM</label>
+          <input type="number" class="input" id="lobbyBpm" value="120" min="60" max="200">
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+          <label class="form-label" style="margin: 0;">Lock Lobby</label>
+          <div class="toggle" id="lobbyLock"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelCreate">CANCEL</button>
+        <button class="btn btn-primary" id="btnConfirmCreate">CREATE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Join Lobby Modal -->
+  <div class="modal-overlay" id="joinLobbyModal">
+    <div class="modal">
+      <h3 class="modal-title">JOIN LOBBY</h3>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Host Peer ID</label>
+          <input type="text" class="input" id="hostPeerId" placeholder="Paste host peer ID here">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input type="text" class="input" id="userName" placeholder="Producer">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelJoin">CANCEL</button>
+        <button class="btn btn-primary" id="btnConfirmJoin">JOIN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Module Modal -->
+  <div class="modal-overlay" id="addModuleModal">
+    <div class="modal">
+      <h3 class="modal-title">ADD MODULE</h3>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Module Type</label>
+          <select class="input" id="moduleType">
+            <optgroup label="Sound Apps as Rig Modules">
+              <option value="field-recorder">Field Recorder</option>
+              <option value="groove-station">Groove Station</option>
+              <option value="synthesizer">Synthesizer</option>
+              <option value="peer-music-groove">Peer Music Groove</option>
+              <option value="wave-synth-modular">Wave Synth Modular</option>
+              <option value="nexus-field-recorder">NEXUS Field Recorder</option>
+            </optgroup>
+            <optgroup label="Low-level Module Types">
+              <option value="sampler">Sampler (Single Sound)</option>
+              <option value="rack">Rack (8 Pads)</option>
+              <option value="synth">Basic Synth</option>
+              <option value="multisynth">Multi-Osc Synth (FM)</option>
+              <option value="wavetable">Wavetable Synth</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Module Name</label>
+          <input type="text" class="input" id="moduleName" placeholder="My Module">
+        </div>
+        <div class="form-group" id="samplerOptions" style="display: none;">
+          <label class="form-label">Quick Load Sample (optional)</label>
+          <input type="file" class="input" id="sampleFile" accept="audio/*">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnCancelModule">CANCEL</button>
+        <button class="btn btn-primary" id="btnConfirmModule">ADD</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sample Editor Modal -->
+  <div class="modal-overlay" id="sampleEditorModal">
+    <div class="modal" style="max-width: 500px;">
+      <h3 class="modal-title">SAMPLE EDITOR</h3>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Module: <span id="sampleEditorModuleName">-</span></label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Load Sample</label>
+          <input type="file" class="input" id="sampleEditorFile" accept="audio/*">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pitch (semitones)</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-small" id="pitchDown">-</button>
+            <span id="pitchValue" style="min-width: 30px; text-align: center;">0</span>
+            <button class="btn btn-small" id="pitchUp">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Attack</label>
+          <input type="range" class="fader" id="sampleAttack" min="0" max="100" value="1" style="width: 100%;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Release</label>
+          <input type="range" class="fader" id="sampleRelease" min="0" max="100" value="10" style="width: 100%;">
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" id="sampleLoop">
+          <label class="form-label" style="margin: 0;">Loop</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnTestSample">TEST</button>
+        <button class="btn btn-primary" id="btnCloseSampleEditor">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- PeerJS for P2P communication -->
+  <script src="https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js"></script>
+  <!-- PeerNet lib (optional, for advanced features) -->
+  <script src="peernet.js"></script>
+  <!-- Main application -->
+  <script src="app.js"></script>
+</body>
+</html>

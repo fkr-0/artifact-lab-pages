@@ -48,6 +48,7 @@ INCLUDE_DIRS=(
     "brawl/ethic-brawl"
     "peernet-orca"
     "peer-music-groove"
+    "PeerModGroove"
     "bathroom-emergency-guide"
     "aster-relay-identity-nightline-configurable"
 )

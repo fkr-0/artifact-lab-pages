@@ -991,44 +991,6 @@
     }
     .toggle-sw.on { background: rgba(0,255,136,0.2); border-color: var(--accent); }
     .toggle-sw.on::after { left: 20px; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-
-    .sound-select, .sound-range {
-      width: 120px; background: rgba(0,0,0,0.35); color: var(--fg-primary);
-      border: 1px solid rgba(0,255,255,0.25); border-radius: 4px; padding: 0.25rem;
-      font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
-    }
-    .peer-context-menu {
-      position: fixed; min-width: 150px; z-index: 10000; display: none;
-      background: rgba(4,8,16,0.96); border: 1px solid rgba(0,255,255,0.35);
-      box-shadow: 0 0 20px rgba(0,255,255,0.18); backdrop-filter: blur(10px);
-      color: var(--fg-primary); font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
-      border-radius: 6px; overflow: hidden;
-    }
-    .peer-context-menu-item { padding: 0.55rem 0.7rem; cursor: pointer; display:flex; gap:0.5rem; align-items:center; }
-    .peer-context-menu-item:hover { background: rgba(0,255,255,0.12); color: var(--accent); }
-    .peer-chat {
-      position: fixed; width: 260px; min-height: 220px; z-index: 9998;
-      background: rgba(4,8,16,0.94); border: 1px solid rgba(0,255,255,0.35);
-      box-shadow: 0 0 24px rgba(0,255,255,0.18); backdrop-filter: blur(12px);
-      border-radius: 8px; overflow: hidden; font-family: 'Share Tech Mono', monospace;
-      color: var(--fg-primary);
-    }
-    .peer-chat-hdr {
-      display:flex; align-items:center; justify-content:space-between; cursor:move;
-      padding:0.5rem 0.65rem; background:rgba(0,255,255,0.08);
-      border-bottom:1px solid rgba(0,255,255,0.18); color:var(--accent);
-      font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.08em;
-    }
-    .peer-chat-close { background:none; border:0; color:var(--accent-secondary); cursor:pointer; }
-    .peer-chat-log { height: 142px; overflow:auto; padding:0.6rem; font-size:0.72rem; line-height:1.45; }
-    .peer-chat-line { margin-bottom:0.35rem; overflow-wrap:anywhere; }
-    .peer-chat-line.me { color:var(--accent); }
-    .peer-chat-line.them { color:var(--fg-primary); }
-    .peer-chat-input {
-      width:100%; box-sizing:border-box; border:0; border-top:1px solid rgba(0,255,255,0.18);
-      background:rgba(0,0,0,0.45); color:var(--fg-primary); padding:0.55rem;
-      outline:none; font-family:'Share Tech Mono',monospace;
-    }
   </style>
 </head>
 <body data-theme="default">
@@ -1181,32 +1143,6 @@
       </div>
     </div>
 
-
-
-    <div>
-      <div class="settings-sect-title">Funny Sounds</div>
-      <div class="setting-row">
-        <span>Enable UI sounds</span>
-        <div class="toggle-sw" id="toggleSounds" onclick="toggleSoundEnabled()"></div>
-      </div>
-      <div class="setting-row">
-        <span>Volume</span>
-        <input class="sound-range" id="soundVolume" type="range" min="0" max="1" step="0.01" onchange="setSoundVolume(this.value)" oninput="setSoundVolume(this.value)">
-      </div>
-      <div class="setting-row">
-        <span>Sound theme</span>
-        <select class="sound-select" id="soundTheme" onchange="setSoundTheme(this.value)">
-          <option value="retro">retro</option>
-          <option value="soft">soft</option>
-          <option value="glitch">glitch</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <span>Test sound</span>
-        <button class="hdr-btn" onclick="playSound('success', true)">▶ TEST</button>
-      </div>
-    </div>
-
     <div>
       <div class="settings-sect-title">Keyboard Shortcuts</div>
       <div style="font-size:0.7rem;color:rgba(0,255,255,0.55);line-height:2;">
@@ -1214,22 +1150,6 @@
         <div><kbd style="border:1px solid rgba(0,255,255,0.3);padding:0 4px;border-radius:2px;">Esc</kbd> Clear / close</div>
         <div><kbd style="border:1px solid rgba(0,255,255,0.3);padding:0 4px;border-radius:2px;">S</kbd> Toggle settings</div>
         <div><kbd style="border:1px solid rgba(0,255,255,0.3);padding:0 4px;border-radius:2px;">Ctrl+1…8</kbd> Switch theme</div>
-      </div>
-    </div>
-
-    <div>
-      <div class="settings-sect-title">Shared Peernet Core</div>
-      <div class="setting-row">
-        <span>Optional shared layer</span>
-        <div class="toggle-sw" id="toggleSharedPeernet" onclick="toggleSharedPeernet()"></div>
-      </div>
-      <div class="setting-row">
-        <span>Shared status</span>
-        <span id="settingSharedPeernetStatus" style="color:rgba(0,255,255,0.5)">Idle</span>
-      </div>
-      <div class="setting-row">
-        <span>Shared peers</span>
-        <span id="settingSharedPeernetCount" style="color:var(--fg-primary)">0</span>
       </div>
     </div>
 
@@ -1274,15 +1194,6 @@
   </div>
 </div>
 
-
-<!-- Peer Context Menu -->
-<div class="peer-context-menu" id="peerContextMenu">
-  <div class="peer-context-menu-item" onclick="peerContextAction('chat')"><span>💬</span><span>Open floating chat</span></div>
-  <div class="peer-context-menu-item" onclick="peerContextAction('ping')"><span>📡</span><span>Ping peer</span></div>
-</div>
-
-<div id="peerChatLayer"></div>
-
 <!-- Embedded App Modal -->
 <div class="app-modal" id="appModal">
   <div class="app-modal-content">
@@ -1296,7 +1207,6 @@
 
 <!-- PeerJS for P2P -->
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script src="../peernetjs/peernet-shared-core.js"></script>
 
 <script>
 // ============================================
@@ -1620,140 +1530,8 @@ const state = {
     openApps: new Map(),
     activeAppId: null,
     nextAppId: 1
-  },
-  peerUi: {
-    contextPeerId: null,
-    chats: new Map(),
-    nextChatOffset: 0
   }
 };
-
-// ============================================
-// FUNNY SOUNDS - v8-style, configurable
-// ============================================
-
-const soundState = Object.assign(
-  { enabled: true, volume: 0.3, theme: 'retro' },
-  JSON.parse(localStorage.getItem('v9-sound') || '{}')
-);
-let audioContext = null;
-
-function saveSoundSettings() {
-  localStorage.setItem('v9-sound', JSON.stringify(soundState));
-}
-
-function ensureAudioContext() {
-  if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioContext.state === 'suspended') audioContext.resume();
-  return audioContext;
-}
-
-function playSound(type = 'click', force = false) {
-  if (!force && !soundState.enabled) return;
-  const ctx = ensureAudioContext();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  const sets = {
-    retro: { click:[880,'square'], success:[1320,'triangle'], join:[660,'sawtooth'], leave:[220,'sine'], chat:[980,'triangle'], ping:[1500,'square'] },
-    soft: { click:[420,'sine'], success:[720,'triangle'], join:[540,'triangle'], leave:[260,'sine'], chat:[620,'sine'], ping:[840,'triangle'] },
-    glitch: { click:[1200,'square'], success:[2100,'sawtooth'], join:[180,'square'], leave:[90,'sine'], chat:[1660,'square'], ping:[2600,'sawtooth'] }
-  };
-  const def = (sets[soundState.theme] || sets.retro)[type] || sets.retro.click;
-  const now = ctx.currentTime;
-  osc.frequency.value = def[0];
-  osc.type = def[1];
-  gain.gain.setValueAtTime(Math.max(0.001, soundState.volume), now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-  osc.start(now);
-  osc.stop(now + 0.13);
-}
-
-function toggleSoundEnabled() {
-  soundState.enabled = !soundState.enabled;
-  saveSoundSettings();
-  updateSettingsPanel();
-  playSound('success', true);
-}
-
-function setSoundVolume(value) {
-  soundState.volume = Math.max(0, Math.min(1, parseFloat(value) || 0));
-  saveSoundSettings();
-}
-
-function setSoundTheme(theme) {
-  soundState.theme = theme;
-  saveSoundSettings();
-  playSound('success', true);
-}
-
-document.addEventListener('pointerdown', e => {
-  if (e.button === 0 && !e.target.closest('.peer-chat') && !e.target.closest('.peer-context-menu')) playSound('click');
-}, { passive: true });
-
-// ============================================
-// OPTIONAL SHARED PEERNET CORE - additive adapter
-// ============================================
-
-const sharedPeernetState = Object.assign(
-  { enabled: false },
-  JSON.parse(localStorage.getItem('v9-shared-peernet') || '{}')
-);
-let sharedPeernet = null;
-let sharedPeernetPeers = [];
-
-function saveSharedPeernetSettings() {
-  localStorage.setItem('v9-shared-peernet', JSON.stringify(sharedPeernetState));
-}
-
-function toggleSharedPeernet() {
-  sharedPeernetState.enabled = !sharedPeernetState.enabled;
-  saveSharedPeernetSettings();
-  if (sharedPeernetState.enabled) startSharedPeernet();
-  else stopSharedPeernet();
-  updateSettingsPanel();
-}
-
-function startSharedPeernet() {
-  if (sharedPeernet || !window.PeernetSharedCore) return;
-  sharedPeernet = new PeernetSharedCore({
-    namespace: 'nexus-peernet-global',
-    hubId: 'nexus-peernet-global-hub-01',
-    username: state.p2p.username,
-    color: getConnectionColor('local')
-  });
-  sharedPeernet.on('open', payload => {
-    sharedPeernetStatus('online ' + payload.id.slice(0, 8));
-    playSound('success');
-  });
-  sharedPeernet.on('hub:ready', () => sharedPeernetStatus('hub'));
-  sharedPeernet.on('hub:join', () => sharedPeernetStatus('joined'));
-  sharedPeernet.on('peers', peers => {
-    sharedPeernetPeers = peers;
-    updateSettingsPanel();
-  });
-  sharedPeernet.on('peer:join', () => playSound('join'));
-  sharedPeernet.on('peer:leave', () => playSound('leave'));
-  sharedPeernet.on('message:chat', payload => receivePeerChat(payload.id, payload.data));
-  sharedPeernet.on('error', err => sharedPeernetStatus('error: ' + ((err && err.type) || 'unknown')));
-  sharedPeernet.start();
-  sharedPeernetStatus('starting');
-}
-
-function stopSharedPeernet() {
-  if (sharedPeernet) sharedPeernet.stop();
-  sharedPeernet = null;
-  sharedPeernetPeers = [];
-  sharedPeernetStatus('idle');
-}
-
-function sharedPeernetStatus(text) {
-  const el = document.getElementById('settingSharedPeernetStatus');
-  if (el) el.textContent = text;
-}
-
 
 // ============================================
 // TAG FILTERING
@@ -2594,8 +2372,6 @@ function registerConn(conn, knownUsername) {
 
   conn.on('data', data => handleP2PData(conn.peer, data));
   conn.on('close', () => {
-    playSound('leave');
-    appendPeerChatLine(conn.peer, 'SYSTEM', 'peer disconnected', 'them');
     if (state.p2p.isHub) {
       // tell others this peer left
       broadcastAll({ type: 'peer-left', id: conn.peer }, conn.peer);
@@ -2619,7 +2395,6 @@ function connectDirectly(peerId, username) {
   const conn = state.p2p.peer.connect(peerId, { reliable: true });
   conn.on('open', () => {
     registerConn(conn, username);
-    playSound('join');
     conn.send({ type: 'hello', username: state.p2p.username });
     updateP2PUsers();
     updateP2PHdrStatus();
@@ -2637,7 +2412,6 @@ function handleP2PData(peerId, data) {
       // Hub receives this from a new client
       if (!state.p2p.isHub) return;
       entry.username = data.username || entry.username;
-      playSound('join');
       // Send full peer list to newcomer
       const peers = [];
       state.p2p.connections.forEach((e, id) => {
@@ -2657,12 +2431,10 @@ function handleP2PData(peerId, data) {
 
     case 'new-peer':
       // Hub tells us a new peer joined — connect directly
-      playSound('join');
       connectDirectly(data.id, data.username);
       break;
 
     case 'peer-left':
-      playSound('leave');
       state.p2p.connections.delete(data.id);
       updateP2PUsers();
       updateP2PHdrStatus();
@@ -2676,21 +2448,6 @@ function handleP2PData(peerId, data) {
     case 'username':
       entry.username = data.username;
       updateP2PUsers();
-      break;
-
-    case 'chat':
-      receivePeerChat(peerId, data);
-      break;
-
-    case 'ping':
-      playSound('ping');
-      entry.conn.send({ type: 'pong', at: Date.now() });
-      appendPeerChatLine(peerId, 'SYSTEM', 'ping received', 'them');
-      break;
-
-    case 'pong':
-      playSound('success');
-      appendPeerChatLine(peerId, 'SYSTEM', 'pong received', 'them');
       break;
   }
 }
@@ -2846,7 +2603,7 @@ function updateP2PUsers() {
     if (seen.has(name)) return;
     seen.add(name);
     html += `
-      <div class="p2p-user" data-peer-id="${peerId}" title="Right-click for peer actions">
+      <div class="p2p-user">
         <div class="cursor" style="background:${entry.color}"></div>
         <span>${name}</span>
       </div>
@@ -2856,132 +2613,6 @@ function updateP2PUsers() {
   container.innerHTML = html;
   updateP2PHdrStatus();
 }
-
-
-
-// ============================================
-// PEER CONTEXT MENU + FLOATING CHATS
-// ============================================
-
-function showPeerContextMenu(peerId, x, y) {
-  state.peerUi.contextPeerId = peerId;
-  const menu = document.getElementById('peerContextMenu');
-  menu.style.display = 'block';
-  menu.style.left = Math.min(x, window.innerWidth - 170) + 'px';
-  menu.style.top = Math.min(y, window.innerHeight - 90) + 'px';
-}
-
-function hidePeerContextMenu() {
-  const menu = document.getElementById('peerContextMenu');
-  if (menu) menu.style.display = 'none';
-}
-
-function peerContextAction(action) {
-  const peerId = state.peerUi.contextPeerId;
-  if (!peerId) return;
-  const entry = state.p2p.connections.get(peerId);
-  if (action === 'chat') openPeerChat(peerId);
-  if (action === 'ping' && entry && entry.conn.open) {
-    entry.conn.send({ type: 'ping', at: Date.now() });
-    appendPeerChatLine(peerId, 'SYSTEM', 'ping sent', 'me');
-    playSound('ping');
-  }
-  hidePeerContextMenu();
-}
-
-function openPeerChat(peerId) {
-  if (state.peerUi.chats.has(peerId)) {
-    state.peerUi.chats.get(peerId).querySelector('.peer-chat-input')?.focus();
-    return state.peerUi.chats.get(peerId);
-  }
-  const entry = state.p2p.connections.get(peerId);
-  const name = (entry && entry.username) || peerId.slice(0, 8);
-  const el = document.createElement('div');
-  el.className = 'peer-chat';
-  const offset = state.peerUi.nextChatOffset++ % 4;
-  el.style.right = (20 + offset * 18) + 'px';
-  el.style.bottom = (20 + offset * 28) + 'px';
-  el.innerHTML = `
-    <div class="peer-chat-hdr">
-      <span>💬 ${escapeHtml(name)}</span>
-      <button class="peer-chat-close" title="Close">✕</button>
-    </div>
-    <div class="peer-chat-log"></div>
-    <input class="peer-chat-input" placeholder="message ${escapeHtml(name)}…" />
-  `;
-  document.getElementById('peerChatLayer').appendChild(el);
-  state.peerUi.chats.set(peerId, el);
-
-  el.querySelector('.peer-chat-close').onclick = () => {
-    el.remove();
-    state.peerUi.chats.delete(peerId);
-  };
-  el.querySelector('.peer-chat-input').onkeydown = e => {
-    if (e.key !== 'Enter') return;
-    const msg = e.target.value.trim();
-    if (!msg) return;
-    e.target.value = '';
-    sendPeerChat(peerId, msg);
-  };
-  makePeerChatDraggable(el);
-  playSound('success');
-  return el;
-}
-
-function sendPeerChat(peerId, msg) {
-  const entry = state.p2p.connections.get(peerId);
-  appendPeerChatLine(peerId, state.p2p.username || 'Me', msg, 'me');
-  if (entry && entry.conn.open) entry.conn.send({ type: 'chat', msg, username: state.p2p.username, at: Date.now() });
-  else if (sharedPeernet) sharedPeernet.send(peerId, { type: 'chat', msg, username: state.p2p.username, at: Date.now() });
-}
-
-function receivePeerChat(peerId, data) {
-  openPeerChat(peerId);
-  appendPeerChatLine(peerId, data.username || 'Peer', data.msg || '', 'them');
-  playSound('chat');
-}
-
-function appendPeerChatLine(peerId, who, msg, side) {
-  const el = state.peerUi.chats.get(peerId);
-  if (!el) return;
-  const log = el.querySelector('.peer-chat-log');
-  const line = document.createElement('div');
-  line.className = 'peer-chat-line ' + (side || 'them');
-  line.textContent = `${who}: ${msg}`;
-  log.appendChild(line);
-  log.scrollTop = log.scrollHeight;
-}
-
-function makePeerChatDraggable(el) {
-  const hdr = el.querySelector('.peer-chat-hdr');
-  let dragging = false, dx = 0, dy = 0;
-  hdr.addEventListener('pointerdown', e => {
-    dragging = true; dx = e.clientX - el.offsetLeft; dy = e.clientY - el.offsetTop;
-    el.setPointerCapture?.(e.pointerId);
-  });
-  hdr.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    el.style.left = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, e.clientX - dx)) + 'px';
-    el.style.top = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, e.clientY - dy)) + 'px';
-    el.style.right = 'auto'; el.style.bottom = 'auto';
-  });
-  hdr.addEventListener('pointerup', () => dragging = false);
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>'"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[ch]));
-}
-
-document.getElementById('p2pUsers').addEventListener('contextmenu', e => {
-  const row = e.target.closest('[data-peer-id]');
-  if (!row) return;
-  e.preventDefault();
-  showPeerContextMenu(row.dataset.peerId, e.clientX, e.clientY);
-});
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.peer-context-menu')) hidePeerContextMenu();
-});
 
 function getConnectionColor(id) {
   const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#88ff00'];
@@ -3003,7 +2634,6 @@ function setUsername() {
   if (!username) return;
   state.p2p.username = username;
   localStorage.setItem('v9-username', username);
-  if (sharedPeernet) sharedPeernet.setIdentity({ username, color: getConnectionColor('local') });
 
   // Broadcast to all open connections
   state.p2p.connections.forEach((entry) => {
@@ -3138,18 +2768,6 @@ function updateSettingsPanel() {
   document.getElementById('settingP2pStatus').textContent = state.p2p.peer ? 'Connected' : 'Offline';
   document.getElementById('settingPeerCount').textContent = pc;
   document.getElementById('settingUsername').textContent = state.p2p.username || '—';
-  const soundToggle = document.getElementById('toggleSounds');
-  if (soundToggle) soundToggle.classList.toggle('on', !!soundState.enabled);
-  const soundVolume = document.getElementById('soundVolume');
-  if (soundVolume) soundVolume.value = soundState.volume;
-  const soundTheme = document.getElementById('soundTheme');
-  if (soundTheme) soundTheme.value = soundState.theme;
-  const sharedToggle = document.getElementById('toggleSharedPeernet');
-  if (sharedToggle) sharedToggle.classList.toggle('on', !!sharedPeernetState.enabled);
-  const sharedStatus = document.getElementById('settingSharedPeernetStatus');
-  if (sharedStatus && !sharedPeernet) sharedStatus.textContent = sharedPeernetState.enabled ? 'starting' : 'idle';
-  const sharedCount = document.getElementById('settingSharedPeernetCount');
-  if (sharedCount) sharedCount.textContent = sharedPeernetPeers.length;
 }
 
 // ============================================
@@ -3379,7 +2997,6 @@ setTimeout(() => {
   if (!state.p2p.peer) {
     initP2P();
   }
-  if (sharedPeernetState.enabled) startSharedPeernet();
 }, 500);
 
 // Cleanup on unload
@@ -3387,7 +3004,6 @@ window.addEventListener('beforeunload', () => {
   if (state.p2p.peer) {
     state.p2p.peer.destroy();
   }
-  if (sharedPeernet) sharedPeernet.stop();
 });
 </script>
 
