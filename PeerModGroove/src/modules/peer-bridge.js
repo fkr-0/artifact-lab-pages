@@ -23,8 +23,8 @@ export class PeerBridgeModule extends ModuleBase {
 
   async connect(username = 'pilot') {
     this.lobby = new PeernetLobby(this.lobbyId, { debug: false });
-    this.lobby.on('status', e => { this.status = e.detail.text; this.render(); });
-    this.lobby.on('data', e => {
+    this.lobby.addEventListener('status', e => { this.status = e.detail.text; this.render(); });
+    this.lobby.addEventListener('data', e => {
       const data = e.detail.data;
       if (data?.type === 'pmg-packet') this.emitPacket(data.packet, data.inputId || 'control');
     });
