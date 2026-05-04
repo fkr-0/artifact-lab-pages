@@ -1053,6 +1053,11 @@
     .storage-list { max-height: 115px; overflow:auto; font-size:0.68rem; color:rgba(0,255,255,0.65); }
     .storage-row { display:flex; justify-content:space-between; gap:0.5rem; padding:0.25rem 0; border-bottom:1px solid rgba(0,255,255,0.06); cursor:pointer; }
     .storage-row:hover { color:var(--accent); }
+    .miniapp-chat-log { max-height: 130px; overflow:auto; font-size:0.68rem; border:1px solid rgba(0,255,255,0.08); padding:0.4rem; }
+    .miniapp-chat-line { margin-bottom:0.25rem; overflow-wrap:anywhere; }
+    .miniapp-file-list { max-height: 80px; overflow:auto; font-size:0.68rem; color:rgba(0,255,255,0.65); }
+    .badger-chip { display:inline-flex; gap:0.35rem; align-items:center; border:1px solid rgba(0,255,255,0.2); padding:0.25rem 0.4rem; border-radius:999px; font-size:0.72rem; }
+
 
 
 
@@ -1263,6 +1268,24 @@
 
 
 
+
+
+    <div>
+      <div class="settings-sect-title">Lobby Mini-Apps</div>
+      <div class="user-manager-panel">
+        <div class="miniapp-chat-log" id="lobbyChatLog"></div>
+        <input id="lobbyChatInput" placeholder="lobby message…" onkeydown="if(event.key==='Enter') sendLobbyChat()">
+        <div class="user-manager-actions">
+          <button class="mini-btn" onclick="sendLobbyChat()">send chat</button>
+          <button class="mini-btn" onclick="showOwnBadger()">my badger</button>
+          <input id="miniFileInput" type="file" style="display:none" onchange="sendMiniFileToContextPeer(this.files[0])">
+          <button class="mini-btn" onclick="document.getElementById('miniFileInput').click()">send file…</button>
+        </div>
+        <div id="ownBadger" class="badger-chip">badger: —</div>
+        <div class="miniapp-file-list" id="miniFileList"></div>
+      </div>
+    </div>
+
     <div>
       <div class="settings-sect-title">Unified User</div>
       <div class="user-manager-panel">
@@ -1387,6 +1410,8 @@
   <div class="peer-context-menu-item" onclick="peerContextAction('profile')"><span>👤</span><span>Open user card</span></div>
   <div class="peer-context-menu-item" onclick="peerContextAction('chat')"><span>💬</span><span>Open floating chat</span></div>
     <div class="peer-context-menu-item" onclick="peerContextAction('ping')"><span>📡</span><span>Ping peer</span></div>
+  <div class="peer-context-menu-item" onclick="peerContextAction('file')"><span>📎</span><span>Send file</span></div>
+  <div class="peer-context-menu-item" onclick="peerContextAction('verify')"><span>🦡</span><span>Compare badger</span></div>
 </div>
 
 <div id="peerChatLayer"></div>
@@ -1435,6 +1460,7 @@
 <script src="../peernetjs/peernet-storage-manager.js"></script>
 <script src="../peernetjs/peernet-app-loader.js"></script>
 <script src="../peernetjs/peernet-session-router.js"></script>
+<script src="../peernetjs/peernet-mini-apps.js"></script>
 
 <script>
 // ============================================
@@ -1889,6 +1915,7 @@ function startSharedPeernet() {
   bindUnifiedUserManagerToSharedCore();
   bindUnifiedUserManagerToSharedCore();
   bindSessionManagerToSharedCore();
+  bindMiniAppsToSharedCore();
   sharedPeernet.start();
   sharedPeernetStatus('starting');
 }
@@ -1987,6 +2014,68 @@ if (peernetSessionRouter) {
     peernetSessionManager.on('session:join', s => peernetSessionRouter.apply(s));
     peernetSessionManager.on('session:remote-update', s => peernetSessionRouter.apply(s));
   }
+}
+
+// ============================================
+// LOBBY MINI-APPS - chat, files, badger verification
+// ============================================
+const peernetMiniApps = window.PeernetMiniApps ? new PeernetMiniApps({ userManager: peernetUserManager }) : null;
+
+function bindMiniAppsToSharedCore() {
+  if (peernetMiniApps && sharedPeernet) peernetMiniApps.bind(sharedPeernet);
+}
+
+function sendLobbyChat() {
+  const input = document.getElementById('lobbyChatInput');
+  const text = (input && input.value.trim()) || '';
+  if (!text || !peernetMiniApps) return;
+  input.value = '';
+  peernetMiniApps.sendChat(text);
+  playSound('chat');
+}
+
+function renderLobbyChat(msg) {
+  const log = document.getElementById('lobbyChatLog');
+  if (!log || !msg) return;
+  const line = document.createElement('div');
+  line.className = 'miniapp-chat-line';
+  line.textContent = `${(msg.from && msg.from.username) || 'peer'}: ${msg.text || ''}`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showOwnBadger() {
+  if (!peernetMiniApps) return;
+  const b = peernetMiniApps.badger(sharedPeernet && sharedPeernet.myId);
+  const el = document.getElementById('ownBadger');
+  if (el) el.textContent = 'badger: ' + b.text;
+}
+
+function sendMiniFileToContextPeer(file) {
+  const peerId = state.peerUi.contextPeerId;
+  if (!file || !peerId || !peernetMiniApps) return;
+  peernetMiniApps.offerFile(peerId, file);
+}
+
+function renderMiniFile(file) {
+  const list = document.getElementById('miniFileList');
+  if (!list || !file) return;
+  const row = document.createElement('div');
+  row.className = 'save-state-row';
+  row.innerHTML = file.url
+    ? `<a href="${file.url}" download="${escapeHtml(file.name)}">${escapeHtml(file.name)}</a><span>ready</span>`
+    : `<span>${escapeHtml(file.name || file.fileId)}</span><span>${file.size || ''}</span>`;
+  list.prepend(row);
+}
+
+if (peernetMiniApps) {
+  peernetMiniApps.on('chat', renderLobbyChat);
+  peernetMiniApps.on('file:offer', renderMiniFile);
+  peernetMiniApps.on('file:ready', renderMiniFile);
+  peernetMiniApps.on('verify:badger', data => {
+    const b = data && data.badger;
+    if (b) alert('Compare badger out-of-band: ' + b.text);
+  });
 }
 
 // SESSION-AWARE APP LOADER
@@ -3341,6 +3430,8 @@ function peerContextAction(action) {
   const entry = state.p2p.connections.get(peerId);
   if (action === 'profile') showPeerProfileCard(peerId);
   if (action === 'chat') openPeerChat(peerId);
+  if (action === 'verify') { peernetMiniApps?.sendBadger(peerId); playSound('success'); }
+  if (action === 'file') { document.getElementById('miniFileInput')?.click(); }
   if (action === 'ping' && entry && entry.conn.open) {
     entry.conn.send({ type: 'ping', at: Date.now() });
     appendPeerChatLine(peerId, 'SYSTEM', 'ping sent', 'me');
