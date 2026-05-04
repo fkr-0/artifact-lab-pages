@@ -1433,6 +1433,7 @@
 <script src="../peernetjs/peernet-user-manager.js"></script>
 <script src="../peernetjs/peernet-session-manager.js"></script>
 <script src="../peernetjs/peernet-storage-manager.js"></script>
+<script src="../peernetjs/peernet-app-loader.js"></script>
 
 <script>
 // ============================================
@@ -1970,6 +1971,21 @@ function createV9SaveState() {
   renderUnifiedUserSettings();
   renderSharedSessions();
   renderLocalSnapshots();
+
+// ============================================
+// SESSION-AWARE APP LOADER
+// ============================================
+const peernetAppLoader = window.PeernetAppLoader ? new PeernetAppLoader({
+  sessionManager: peernetSessionManager,
+  applyState: applyV9StoredState,
+  captureState: captureV9SessionState
+}) : null;
+
+if (peernetAppLoader) {
+  peernetAppLoader.bind();
+  peernetAppLoader.wrapOpenApp();
+}
+
   playSound('success', true);
 }
 
