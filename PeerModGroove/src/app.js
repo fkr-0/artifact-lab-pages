@@ -3,9 +3,17 @@
 import { AudioRuntime } from './core/audio.js';
 import { PatchBay } from './core/patchbay.js';
 import { PortType } from './core/contracts.js';
+import { PeernetStack } from './core/peernet-stack.js';
+import { PeernetStack } from './core/peernet-stack.js';
 import { ClockModule } from './modules/clock.js';
 import { PianoRollModule } from './modules/piano-roll.js';
 import { BasicSynthModule } from './modules/basic-synth.js';
+import { CleanSynthModule } from './modules/clean-synth.js';
+import { CleanSamplerModule } from './modules/clean-sampler.js';
+import { OcraGridModule } from './modules/ocra-grid.js';
+import { CleanSynthModule } from './modules/clean-synth.js';
+import { CleanSamplerModule } from './modules/clean-sampler.js';
+import { OcraGridModule } from './modules/ocra-grid.js';
 import { FieldRecorderModule } from './modules/field-recorder.js';
 import { MixerModule } from './modules/mixer.js';
 import { PeerBridgeModule } from './modules/peer-bridge.js';
@@ -14,6 +22,9 @@ const moduleFactories = {
   clock: () => new ClockModule(),
   pianoroll: () => new PianoRollModule(),
   synth: () => new BasicSynthModule(),
+  cleansynth: () => new CleanSynthModule(),
+  sampler: () => new CleanSamplerModule(),
+  ocra: () => new OcraGridModule(),
   field: () => new FieldRecorderModule(),
   peer: () => new PeerBridgeModule()
 };
@@ -29,6 +40,11 @@ class PeerModGrooveApp {
     this.mixerStripEl = document.querySelector('#mixerStrip');
     this.clock = null;
     this.mixer = null;
+    this.peernet = new PeernetStack({
+      namespace: 'peermodgroove',
+      capture: () => this.serializeRig(),
+      apply: payload => this.applyRig(payload)
+    });
   }
 
   async init() {
@@ -36,6 +52,7 @@ class PeerModGrooveApp {
     this.bindChrome();
     this.patchBay.addEventListener('packet', e => this.logPacket(e.detail));
     this.patchBay.addEventListener('route:add', () => this.renderRoutes());
+    this.bindPeernetStack();
     await this.bootstrapDefaultRig();
   }
 
@@ -67,6 +84,36 @@ class PeerModGrooveApp {
       this.clock?.stop();
     });
 
+    document.querySelector('#btnConnectPeer').addEventListener('click', () => {
+      const username = document.querySelector('#pilotName').value || 'pilot';
+      this.peernet.start({ username });
+    });
+
+    document.querySelector('#btnSaveSnapshot').addEventListener('click', () => {
+      const snap = this.peernet.snapshot('Manual PeerModGroove Snapshot');
+      if (snap) this.logText(`storage snapshot: ${snap.title}`);
+    });
+
+    document.querySelector('#btnCreateSession').addEventListener('click', () => {
+      const session = this.peernet.createSession('PeerModGroove Rig Session');
+      if (session) this.logText(`session created: ${session.title}`);
+    });
+
+    document.querySelector('#btnConnectPeer').addEventListener('click', () => {
+      const username = document.querySelector('#pilotName').value || 'pilot';
+      this.peernet.start({ username });
+    });
+
+    document.querySelector('#btnSaveSnapshot').addEventListener('click', () => {
+      const snap = this.peernet.snapshot('Manual PeerModGroove Snapshot');
+      if (snap) this.logText(`storage snapshot: ${snap.title}`);
+    });
+
+    document.querySelector('#btnCreateSession').addEventListener('click', () => {
+      const session = this.peernet.createSession('PeerModGroove Rig Session');
+      if (session) this.logText(`session created: ${session.title}`);
+    });
+
     document.querySelector('#addModule').addEventListener('change', async e => {
       const factory = moduleFactories[e.target.value];
       e.target.value = '';
@@ -81,19 +128,40 @@ class PeerModGrooveApp {
     this.mixer = new MixerModule(this.runtime, { id: 'main-mixer' });
     this.clock = new ClockModule({ id: 'main-clock' });
     const piano = new PianoRollModule({ id: 'main-pianoroll' });
-    const synth = new BasicSynthModule({ id: 'main-synth' });
+    const synth = new CleanSynthModule({ id: 'main-synth', title: 'Main Clean Synth' });
+    const ocra = new OcraGridModule({ id: 'main-ocra' });
+    const sampler = new CleanSamplerModule({ id: 'main-sampler' });
     const field = new FieldRecorderModule({ id: 'field-recorder' });
     const peer = new PeerBridgeModule({ id: 'peer-bridge' });
 
-    for (const module of [this.mixer, this.clock, piano, synth, field, peer]) {
+    for (const module of [this.mixer, this.clock, piano, ocra, synth, sampler, field, peer]) {
       await this.addModule(module, { autoConnectAudio: true });
     }
 
     this.patchBay.connect({ moduleId: this.clock.id, outputId: 'clock' }, { moduleId: piano.id, inputId: 'clock' });
     this.patchBay.connect({ moduleId: piano.id, outputId: 'midi' }, { moduleId: synth.id, inputId: 'midi' });
+    this.patchBay.connect({ moduleId: this.clock.id, outputId: 'clock' }, { moduleId: ocra.id, inputId: 'clock' });
+    this.patchBay.connect({ moduleId: ocra.id, outputId: 'midi' }, { moduleId: synth.id, inputId: 'midi' });
+    this.patchBay.connect({ moduleId: ocra.id, outputId: 'midi' }, { moduleId: sampler.id, inputId: 'midi' });
     this.patchBay.connect({ moduleId: piano.id, outputId: 'midi' }, { moduleId: peer.id, inputId: 'midi' });
     this.patchBay.connect({ moduleId: peer.id, outputId: 'midi' }, { moduleId: synth.id, inputId: 'midi' });
     this.renderRoutes();
+  }
+
+  bindPeernetStack() {
+    this.peernet.addEventListener('status', e => {
+      document.querySelector('#peerStatus').textContent = e.detail.text;
+    });
+    this.peernet.addEventListener('presence', e => {
+      document.querySelector('#peerCount').textContent = `${e.detail.length} peers`;
+    });
+    this.peernet.addEventListener('storage', e => {
+      document.querySelector('#storageStatus').textContent = `last save: ${new Date(e.detail.createdAt).toLocaleTimeString()}`;
+    });
+    this.peernet.addEventListener('packet', e => {
+      const packet = e.detail?.packet;
+      if (packet) this.logText(`remote packet: ${packet.kind}/${packet.type}`);
+    });
   }
 
   async addModule(module, { autoConnectAudio = false } = {}) {
@@ -117,6 +185,7 @@ class PeerModGrooveApp {
     for (const module of this.patchBay.modules.values()) {
       await module.start?.(this.runtime.context);
       if (module.outputs?.some(p => p.type === PortType.AUDIO) && module !== this.mixer) {
+        module.disconnectAudio?.();
         module.connectAudio(this.runtime.destination);
       }
     }
@@ -145,7 +214,7 @@ class PeerModGrooveApp {
     strip.className = 'strip';
     strip.dataset.stripId = module.id;
     strip.innerHTML = `
-      <strong>${module.title}</strong>
+      <strong title="${module.title}">${module.title}</strong>
       <small>${module.kind}</small>
       <input type="range" min="0" max="100" value="70">
     `;
@@ -163,11 +232,72 @@ class PeerModGrooveApp {
   }
 
   logPacket({ from, outputId, packet }) {
+    this.peernet.broadcastPacket(packet, outputId);
     const row = document.createElement('div');
     row.className = `packet ${packet.kind}`;
     row.textContent = `${from}:${outputId} :: ${packet.kind}/${packet.type}${packet.note ? ` ${packet.note}` : ''}`;
     this.logEl.prepend(row);
     while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
+  }
+
+  logText(text) {
+    const row = document.createElement('div');
+    row.className = 'packet control';
+    row.textContent = text;
+    this.logEl.prepend(row);
+    while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
+  }
+
+  serializeRig() {
+    return {
+      version: 1,
+      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || { id: module.id, kind: module.kind, title: module.title }),
+      routes: this.patchBay.routes
+    };
+  }
+
+  applyRig(payload) {
+    this.logText(`restore requested: ${payload?.modules?.length || 0} modules`);
+  }
+
+  logText(text) {
+    const row = document.createElement('div');
+    row.className = 'packet control';
+    row.textContent = text;
+    this.logEl.prepend(row);
+    while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
+  }
+
+  logText(text) {
+    const row = document.createElement('div');
+    row.className = 'packet control';
+    row.textContent = text;
+    this.logEl.prepend(row);
+    while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
+  }
+
+  serializeRig() {
+    return {
+      version: 1,
+      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || { id: module.id, kind: module.kind, title: module.title }),
+      routes: this.patchBay.routes
+    };
+  }
+
+  applyRig(payload) {
+    this.logText(`restore requested: ${payload?.modules?.length || 0} modules`);
+  }
+
+  serializeRig() {
+    return {
+      version: 1,
+      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || { id: module.id, kind: module.kind, title: module.title }),
+      routes: this.patchBay.routes
+    };
+  }
+
+  applyRig(payload) {
+    this.logText(`restore requested: ${payload?.modules?.length || 0} modules`);
   }
 }
 
