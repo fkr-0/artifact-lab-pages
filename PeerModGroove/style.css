@@ -71,3 +71,172 @@ button:hover, select:hover { border-color: var(--accent); background: rgba(0,255
 .footer a { color: var(--accent); }
 
 @media (max-width: 1000px) { .workspace { grid-template-columns: 1fr; } .topbar { align-items: flex-start; flex-direction: column; } }
+
+/* UI hardening pass: prevent controls from crossing card/panel borders. */
+.topbar > *, .panel, .module-card, .strip, .drop-zone, .event-log, .routes { min-width: 0; }
+.transport span { max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(0,255,255,.12); padding: .35rem .5rem; border-radius: 999px; background: rgba(0,0,0,.2); }
+select, input, button, textarea { max-width: 100%; }
+button, .mini-button { white-space: nowrap; }
+.module-card { contain: layout paint; overflow: hidden; }
+.mount { overflow: hidden; }
+.module-head { padding-right: 1.75rem; }
+.module-head strong, .strip strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.module-head small, .microcopy { overflow-wrap: anywhere; }
+.file-input { display: block; font-size: .72rem; }
+.drop-zone { border: 1px dashed rgba(0,255,255,.28); background: rgba(0,0,0,.24); padding: .65rem; border-radius: 6px; min-height: 3rem; display: grid; place-items: center; text-align: center; overflow-wrap: anywhere; }
+.drop-zone.hot { border-color: var(--good); background: rgba(0,255,136,.10); }
+.button-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .35rem; }
+.button-row button { padding-inline: .35rem; overflow: hidden; text-overflow: ellipsis; }
+.inline-check { display: flex; align-items: center; gap: .45rem; font-size: .72rem; color: var(--muted); margin-top: .5rem; }
+.inline-check input { width: auto; }
+.ocra-grid { display: grid; gap: .25rem; }
+.ocra-grid input { width: 100%; border: 1px solid rgba(0,255,255,.18); background: linear-gradient(90deg, rgba(0,255,136,.18) calc(var(--cursor-col, 0) * 12.5%), rgba(0,0,0,.42) 0); color: var(--fg); border-radius: 4px; padding: .38rem .45rem; letter-spacing: .18em; font-family: var(--font); }
+.resizable-mixer { resize: horizontal; overflow: auto; min-width: 245px; max-width: 48vw; }
+.mixer-strip { max-height: 34vh; overflow: auto; padding-right: .2rem; }
+.strip input[type="range"] { width: 100%; min-width: 0; }
+.routes, .event-log { max-width: 100%; overflow: auto; }
+.routes li { margin-bottom: .35rem; overflow-wrap: anywhere; }
+.packet { overflow-wrap: anywhere; }
+.peer-panel { display: grid; gap: .35rem; }
+
+@media (max-width: 1000px) {
+  .resizable-mixer { resize: vertical; max-width: none; width: auto; }
+  .transport span { max-width: 100%; }
+}
+
+/* Enhancement pass: containment + resizable mixer + denser module UI */
+.workspace, .panel, .module-card, .mount, .strip, .topbar, .transport { min-width: 0; }
+.panel { overflow: hidden; }
+.rack { overflow: auto; max-height: calc(100vh - 8rem); }
+.inspector { overflow: auto; max-height: calc(100vh - 8rem); }
+.resizable-mixer {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 260px;
+  max-width: min(560px, 96vw);
+  width: clamp(280px, 24vw, 420px);
+}
+.transport span {
+  border: 1px solid rgba(0,255,255,.18);
+  background: rgba(0,0,0,.25);
+  padding: .42rem .55rem;
+  border-radius: 999px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.modules { grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.module-card {
+  contain: layout paint;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  max-width: 100%;
+}
+.mount, .mount > * { max-width: 100%; }
+.module-head {
+  padding-right: 1.65rem;
+  overflow: hidden;
+}
+.module-head strong,
+.strip strong,
+.list-name,
+.artifact-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.module-head small,
+.microcopy {
+  overflow-wrap: anywhere;
+}
+button, select, input, textarea { max-width: 100%; }
+select.mini-input, .mini-input, .file-input {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.button-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .4rem;
+}
+.button-row button { padding-inline: .35rem; }
+.drop-zone {
+  border: 1px dashed rgba(0,255,255,.28);
+  background: rgba(0,0,0,.22);
+  border-radius: 6px;
+  padding: .7rem;
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.drop-zone.hot {
+  border-color: var(--good);
+  background: rgba(0,255,136,.10);
+  color: var(--fg);
+}
+.ocra-grid {
+  display: grid;
+  gap: .3rem;
+  width: 100%;
+}
+.ocra-grid input {
+  width: 100%;
+  border: 1px solid rgba(255,43,214,.25);
+  background:
+    linear-gradient(90deg, transparent calc((100% / 8) * var(--cursor-col, 0)), rgba(0,255,136,.18) calc((100% / 8) * var(--cursor-col, 0)), rgba(0,255,136,.18) calc((100% / 8) * (var(--cursor-col, 0) + 1)), transparent calc((100% / 8) * (var(--cursor-col, 0) + 1))),
+    rgba(0,0,0,.28);
+  color: var(--fg);
+  border-radius: 4px;
+  padding: .4rem .5rem;
+  font-family: var(--font);
+  letter-spacing: .12em;
+}
+.inline-check {
+  display: flex;
+  gap: .45rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: .72rem;
+  margin-top: .35rem;
+}
+.inline-check input { width: auto; }
+.mixer-strip {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  align-items: start;
+}
+.strip {
+  min-width: 0;
+  overflow: hidden;
+}
+.strip input { width: 100%; }
+.event-log, .routes {
+  overflow-wrap: anywhere;
+}
+.routes li { margin-bottom: .4rem; }
+.peer-panel {
+  border: 1px solid rgba(0,255,136,.16);
+  background: rgba(0,255,136,.045);
+  border-radius: 8px;
+  padding: .75rem;
+}
+@media (max-width: 1000px) {
+  .resizable-mixer {
+    resize: vertical;
+    width: auto;
+    max-width: none;
+    max-height: none;
+  }
+  .rack, .inspector { max-height: none; }
+}
+@media (max-width: 560px) {
+  .transport { width: 100%; justify-content: stretch; }
+  .transport > * { flex: 1 1 100%; }
+  .button-row { grid-template-columns: 1fr; }
+  .modules { grid-template-columns: 1fr; }
+}

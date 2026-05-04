@@ -22,6 +22,7 @@
       </div>
       <nav class="transport">
         <span id="audioStatus">audio: cold</span>
+        <span id="peerStatus">peer: offline</span>
         <button id="btnBootAudio">BOOT AUDIO</button>
         <button id="btnStart">START CLOCK</button>
         <button id="btnStop" class="danger">STOP</button>
@@ -37,10 +38,35 @@
             <option value="clock">Transport Clock · emits clock</option>
             <option value="pianoroll">Piano Roll · emits midi-like control</option>
             <option value="synth">Basic Synth · receives midi / emits audio</option>
+            <option value="cleansynth">Clean Synth · polished midi voice</option>
+            <option value="sampler">Clean Sampler · midi/trigger sample voice</option>
+            <option value="ocra">OCRA Grid · clocked midi + submix</option>
             <option value="field">Field Recorder · emits audio</option>
             <option value="peer">Peer Bridge · broadcasts control</option>
           </select>
           <p class="microcopy">Modules advertise ports. The patch bay routes JSON-safe midi/control packets. Audio modules feed the central mixer by default.</p>
+        </div>
+        <div class="peer-panel">
+          <h2>Peer Session Stack</h2>
+          <input id="pilotName" class="mini-input" value="pilot" aria-label="Pilot name">
+          <div class="button-row">
+            <button id="btnConnectPeer" type="button">CONNECT</button>
+            <button id="btnCreateSession" type="button">SESSION</button>
+            <button id="btnSaveSnapshot" type="button">SNAP</button>
+          </div>
+          <p class="microcopy"><span id="peerCount">0 peers</span> · <span id="storageStatus">storage ready</span></p>
+          <p class="microcopy">identity → PeernetUserManager · network → PeernetSharedCore · sessions → PeernetSessionManager · storage → PeernetStorageManager</p>
+        </div>
+        <div class="peer-panel">
+          <h2>Peer Session Stack</h2>
+          <input id="pilotName" class="mini-input" value="pilot" aria-label="Pilot name">
+          <div class="button-row">
+            <button id="btnConnectPeer" type="button">CONNECT</button>
+            <button id="btnCreateSession" type="button">SESSION</button>
+            <button id="btnSaveSnapshot" type="button">SNAP</button>
+          </div>
+          <p class="microcopy"><span id="peerCount">0 peers</span> · <span id="storageStatus">storage ready</span></p>
+          <p class="microcopy">identity → PeernetUserManager · network → PeernetSharedCore · sessions → PeernetSessionManager · storage → PeernetStorageManager</p>
         </div>
         <div>
           <h2>Copied source cargo</h2>
@@ -53,8 +79,8 @@
         <div class="modules" id="modules"></div>
       </section>
 
-      <aside class="panel inspector">
-        <h2>Central Mixer</h2>
+      <aside class="panel inspector resizable-mixer">
+        <h2>Master Mixer</h2>
         <div class="mixer-strip" id="mixerStrip"></div>
         <h2>Patch Routes</h2>
         <ol class="routes" id="routes"></ol>
@@ -69,6 +95,10 @@
     </footer>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="./vendor/peernet/peernet-shared-core.js"></script>
+  <script src="./vendor/peernet/peernet-user-manager.js"></script>
+  <script src="./vendor/peernet/peernet-session-manager.js"></script>
+  <script src="./vendor/peernet/peernet-storage-manager.js"></script>
   <script type="module" src="./src/app.js"></script>
 </body>
 </html>
