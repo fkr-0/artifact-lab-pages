@@ -1,0 +1,77 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{asterrelay}[2026/03/29 Aster Relay Nightline identity package]
+
+\RequirePackage{xcolor}
+\RequirePackage{geometry}
+\RequirePackage{fancyhdr}
+\RequirePackage{titlesec}
+\RequirePackage{hyperref}
+\RequirePackage{tcolorbox}
+\RequirePackage{listings}
+\RequirePackage{inconsolata}
+
+\definecolor{arObs}{HTML}{090b16}
+\definecolor{arNight}{HTML}{10142a}
+\definecolor{arIndigo}{HTML}{1b2455}
+\definecolor{arRelay}{HTML}{6e58ff}
+\definecolor{arViolet}{HTML}{9b7dff}
+\definecolor{arMist}{HTML}{dfe4ff}
+\definecolor{arIce}{HTML}{f5f7ff}
+\definecolor{arLine}{HTML}{2f3b78}
+\definecolor{arMuted}{HTML}{8a93b8}
+\definecolor{arCyan}{HTML}{74efff}
+\definecolor{arMagenta}{HTML}{ff69d6}
+
+\newcommand{\BrandName}{ASTER RELAY}
+\newcommand{\BrandLine}{Learn quietly. Build carefully. Protect each other.}
+\newcommand{\BrandDescriptor}{practical privacy and mutual tech literacy}
+
+\geometry{margin=26mm}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=arRelay,
+  urlcolor=arCyan,
+  citecolor=arViolet
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textsf{\small \BrandName}}
+\fancyhead[R]{\textsf{\small \thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{arLine}\leaders\hrule height \headrulewidth\hfill}}
+
+\titleformat{\section}{\Large\bfseries\sffamily\color{arIce}}{}{0pt}{}
+\titleformat{\subsection}{\large\bfseries\sffamily\color{arRelay}}{}{0pt}{}
+
+\tcbset{
+  colback=arNight!20!black,
+  colframe=arLine,
+  coltext=arMist,
+  arc=3mm,
+  boxrule=.4pt
+}
+
+\lstdefinestyle{asterrelay}{%
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{arNight},
+  frame=single,
+  rulecolor=\color{arLine},
+  keywordstyle=\color{arRelay}\bfseries,
+  commentstyle=\color{arMuted}\itshape,
+  stringstyle=\color{arCyan},
+  showstringspaces=false,
+  breaklines=true
+}
+
+\newcommand{\asterrelaytitle}[1]{%
+  \begin{center}
+    {\sffamily\bfseries\LARGE\color{arIce} #1\par}
+    \vspace{3mm}
+    {\sffamily\small\color{arCyan}\BrandLine\par}
+    \vspace{4mm}
+    {\color{arRelay}\rule{0.18\linewidth}{1.2pt}\par}
+  \end{center}
+}
+
+\newcommand{\pixelaccent}{\textcolor{arMagenta}{\rule{1.2em}{0.6ex}}}

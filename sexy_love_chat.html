@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Magical Love Chat</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+      }
+
+      .rainbow-bg {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background: linear-gradient(
+          45deg,
+          #ff9a9e,
+          #fecfef,
+          #fecfef,
+          #a18cd1,
+          #fbc2eb,
+          #a6c1ee,
+          #fbc2eb,
+          #ff9a9e,
+          #ffd1ff,
+          #c3cfe2,
+          #ffecd2,
+          #fcb69f,
+          #ff9a9e
+        );
+        background-size: 600% 600%;
+        animation: rainbowShift 20s ease infinite;
+      }
+
+      @keyframes rainbowShift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      #floatCanvas {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        padding-bottom: 80px;
+      }
+
+      .intro {
+        text-align: center;
+        animation: fadeIn 1.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .intro h1 {
+        font-size: 2.8rem;
+        color: #6b21a8;
+        text-shadow:
+          2px 2px 0px #f0abfc,
+          4px 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.03);
+        }
+      }
+
+      .hearts-container {
+        display: flex;
+        gap: 50px;
+        justify-content: center;
+        margin: 30px 0;
+      }
+
+      .heart-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.3s ease;
+        animation: bounce 1.2s ease-in-out infinite;
+      }
+
+      .heart-btn:nth-child(2) {
+        animation-delay: 0.4s;
+      }
+
+      .heart-btn:hover {
+        transform: scale(1.15);
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+      }
+
+      .heart-btn .emoji {
+        font-size: 100px;
+        display: block;
+        filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.15));
+        transition: all 0.3s ease;
+      }
+
+      .heart-btn:hover .emoji {
+        filter: drop-shadow(6px 6px 12px rgba(168, 85, 247, 0.4));
+      }
+
+      .heart-btn .name {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        font-size: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+        pointer-events: none;
+      }
+
+      .error-msg {
+        font-size: 1.6rem;
+        color: #dc2626;
+        font-weight: bold;
+        animation: shake 0.5s ease;
+        margin-top: 15px;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+
+      .hint {
+        color: #7c3aed;
+        font-size: 1.1rem;
+        margin-top: 25px;
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .lobby {
+        text-align: center;
+        animation: fadeIn 1s ease;
+        max-width: 90%;
+      }
+
+      .lobby h2 {
+        font-size: 1.8rem;
+        color: #6b21a8;
+        margin-bottom: 20px;
+      }
+
+      .lobby-box {
+        background: rgba(255, 255, 255, 0.92);
+        padding: 25px;
+        border-radius: 25px;
+        margin: 15px auto;
+        box-shadow: 0 8px 25px rgba(168, 85, 247, 0.25);
+        max-width: 420px;
+      }
+
+      .lobby-box p {
+        color: #7c3aed;
+        margin-bottom: 12px;
+      }
+
+      .status-box {
+        background: linear-gradient(135deg, #faf5ff, #fdf2f8);
+        padding: 18px;
+        border-radius: 18px;
+        margin: 18px 0;
+        border: 2px dashed #c084fc;
+      }
+
+      .status-box .status-icon {
+        font-size: 50px;
+        animation: bounce 1.2s ease-in-out infinite;
+      }
+
+      .status-box .status-text {
+        color: #7c3aed;
+        font-size: 1.1rem;
+        margin-top: 10px;
+      }
+
+      .secret-hint {
+        background: #fef3f8;
+        padding: 15px;
+        border-radius: 12px;
+        margin-top: 15px;
+        border: 2px dashed #f9a8d4;
+      }
+
+      .secret-hint p {
+        font-size: 0.85rem;
+        color: #a855f7;
+      }
+
+      .secret-hint code {
+        display: block;
+        margin-top: 8px;
+        padding: 8px;
+        background: white;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        color: #6b21a8;
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        background: linear-gradient(135deg, #ec4899, #a855f7);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
+        margin-top: 10px;
+      }
+
+      .copy-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .chat-container {
+        width: 100%;
+        max-width: 480px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 15px 50px rgba(168, 85, 247, 0.35);
+        border: 3px solid #c084fc;
+        animation: slideUp 0.5s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .chat-header {
+        background: linear-gradient(90deg, #ec4899, #a855f7, #ec4899);
+        background-size: 200% 200%;
+        animation: gradientMove 4s ease infinite;
+        padding: 16px;
+        text-align: center;
+        color: white;
+      }
+
+      @keyframes gradientMove {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      .chat-header h2 {
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .connection-status {
+        font-size: 0.85rem;
+        padding: 4px 12px;
+        border-radius: 15px;
+        margin-top: 6px;
+        display: inline-block;
+        font-weight: 600;
+      }
+
+      .connection-status.connected {
+        background: rgba(34, 197, 94, 0.35);
+      }
+
+      .connection-status.waiting {
+        background: rgba(251, 191, 36, 0.35);
+      }
+
+      .messages {
+        height: 250px;
+        overflow-y: auto;
+        padding: 15px;
+        background: linear-gradient(180deg, #faf5ff, #fdf2f8);
+        position: relative;
+      }
+
+      .message {
+        margin-bottom: 12px;
+        padding: 10px 15px;
+        border-radius: 20px;
+        max-width: 80%;
+        animation: popIn 0.3s ease;
+      }
+
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.85);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .message.from-me {
+        margin-left: auto;
+        background: linear-gradient(135deg, #c084fc, #a855f7);
+        color: white;
+        border-bottom-right-radius: 5px;
+      }
+
+      .message.from-partner {
+        margin-right: auto;
+        background: linear-gradient(135deg, #f9a8d4, #f472b6);
+        color: white;
+        border-bottom-left-radius: 5px;
+      }
+
+      .message.from-system {
+        margin: 8px auto;
+        background: rgba(168, 85, 247, 0.15);
+        color: #6b21a8;
+        text-align: center;
+        font-size: 0.85rem;
+        max-width: 90%;
+      }
+
+      .message .sender {
+        font-size: 0.65rem;
+        opacity: 0.75;
+        margin-bottom: 3px;
+      }
+
+      .emoji-bar {
+        padding: 12px;
+        background: #fdf2f8;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        border-top: 2px solid #fbcfe8;
+      }
+
+      .emoji-btn {
+        font-size: 1.6rem;
+        padding: 8px 12px;
+        background: linear-gradient(135deg, #fef3f8, #f3e8ff);
+        border: 2px solid #e9d5ff;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .emoji-btn:hover {
+        transform: scale(1.2);
+        border-color: #c084fc;
+      }
+
+      .reactions {
+        padding: 10px;
+        background: #faf5ff;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+        border-top: 2px solid #e9d5ff;
+      }
+
+      .reaction-btn {
+        padding: 8px 14px;
+        background: linear-gradient(135deg, #f9a8d4, #c084fc);
+        color: #581c87;
+        border: none;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .reaction-btn:hover {
+        transform: scale(1.08);
+      }
+
+      .input-area {
+        padding: 15px;
+        background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+        display: flex;
+        gap: 8px;
+      }
+
+      .input-area input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 2px solid #c084fc;
+        border-radius: 40px;
+        font-size: 0.95rem;
+        outline: none;
+        background: white;
+      }
+
+      .input-area input:focus {
+        border-color: #a855f7;
+      }
+
+      .send-btn {
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #ec4899, #a855f7);
+        color: white;
+        border: none;
+        border-radius: 40px;
+        font-size: 0.95rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .send-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .game-section {
+        padding: 15px;
+        background: linear-gradient(135deg, #fef3f8, #f3e8ff);
+        border-top: 2px solid #e9d5ff;
+      }
+
+      .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .game-title {
+        font-size: 0.9rem;
+        color: #6b21a8;
+        font-weight: bold;
+      }
+
+      .game-status {
+        font-size: 0.8rem;
+        color: #7c3aed;
+      }
+
+      #graphCanvas {
+        display: block;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 15px;
+        border: 2px solid #e9d5ff;
+        cursor: pointer;
+      }
+
+      .new-game-btn {
+        margin-top: 10px;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .new-game-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .heart-explosion {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .explosion-heart {
+        position: absolute;
+        font-size: 30px;
+        animation: explodeHeart 2s ease-out forwards;
+      }
+
+      @keyframes explodeHeart {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--tx), var(--ty)) scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      .chat-heart {
+        position: absolute;
+        font-size: 18px;
+        animation: floatUp 3s ease-out forwards;
+        pointer-events: none;
+      }
+
+      @keyframes floatUp {
+        0% {
+          transform: translateY(0) scale(1);
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-100px) scale(0.5);
+          opacity: 0;
+        }
+      }
+
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(90deg, #ec4899, #a855f7, #ec4899);
+        background-size: 200% 200%;
+        animation: gradientMove 4s ease infinite;
+        padding: 12px;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        z-index: 100;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .messages::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .messages::-webkit-scrollbar-track {
+        background: #f3e8ff;
+        border-radius: 8px;
+      }
+
+      .messages::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #c084fc, #ec4899);
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rainbow-bg"></div>
+    <canvas id="floatCanvas"></canvas>
+    <div id="heartExplosion" class="heart-explosion"></div>
+
+    <div class="container">
+      <!-- Intro Screen -->
+      <div id="introScreen" class="intro">
+        <h1>Magical Love Chat</h1>
+        <div class="hearts-container">
+          <button class="heart-btn" onclick="selectSam()">
+            <span class="emoji">&#128151;</span>
+            <span class="name">Sam</span>
+          </button>
+          <button class="heart-btn" onclick="selectDave()">
+            <span class="emoji" id="daveEmoji">&#128156;</span>
+            <span class="name" id="daveName">Dave</span>
+          </button>
+        </div>
+        <p id="errorMsg" class="error-msg hidden">no, nono, no!</p>
+        <p class="hint">Click your heart to enter...</p>
+      </div>
+
+      <!-- Lobby Screen (Sam waiting) -->
+      <div id="lobbyScreen" class="lobby hidden">
+        <h2>Waiting for Dave...</h2>
+        <div class="lobby-box">
+          <div class="status-box">
+            <div class="status-icon">&#129412;</div>
+            <div class="status-text" id="lobbyStatus">No one there! :(</div>
+          </div>
+          <div class="secret-hint">
+            <p>Send Dave the secret door link:</p>
+            <code id="secretLink"></code>
+            <button class="copy-btn" onclick="copySecretLink()">Copy Secret Link</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connecting Screen (Dave joining) -->
+      <div id="connectingScreen" class="lobby hidden">
+        <h2>Connecting to Sam...</h2>
+        <div class="lobby-box">
+          <div class="status-box">
+            <div class="status-icon">&#10024;</div>
+            <div class="status-text">Creating magical connection...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Screen -->
+      <div id="chatScreen" class="chat-container hidden">
+        <div class="chat-header">
+          <h2 id="chatTitle">Chat</h2>
+          <div class="connection-status connected" id="connectionStatus">Connected &lt;3 :D</div>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="emoji-bar" id="emojiBar"></div>
+        <div class="reactions">
+          <button class="reaction-btn" onclick="sendReaction('so romantic!')">so romantic!</button>
+          <button class="reaction-btn" onclick="sendReaction('aww adorable')">aww adorable</button>
+          <button class="reaction-btn" onclick="sendReaction('thinking of you...')">
+            thinking of you...
+          </button>
+        </div>
+        <div class="input-area">
+          <input
+            type="text"
+            id="messageInput"
+            placeholder="Type something sweet..."
+            onkeypress="handleKeyPress(event)"
+          />
+          <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+        <div class="game-section">
+          <div class="game-header">
+            <span class="game-title">Graph Coloring Game</span>
+            <span class="game-status" id="gameStatus"
+              >Color all nodes - no neighbors same color!</span
+            >
+          </div>
+          <canvas id="graphCanvas" width="300" height="180"></canvas>
+          <button class="new-game-btn" onclick="startNewGame()">New Graph</button>
+        </div>
+      </div>
+
+      <!-- Full Screen -->
+      <div id="fullScreen" class="lobby hidden">
+        <h2>Room is Full</h2>
+        <div class="lobby-box">
+          <div class="status-box">
+            <div class="status-icon">&#128148;</div>
+            <div class="status-text">Two lovebirds are already chatting!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Made with love and unicorns</footer>
+
+    <script>
+      // State
+      let username = 'sam'
+      let peer = null
+      let conn = null
+      let connected = false
+      let audioContext = null
+      let musicStarted = false
+
+      // HEARTCODED: Single fixed lobby
+      const HEARTCODE_ID = 'magical-love-chat-heartcoded-lobby-2024'
+      const SECRET_DOOR = 'lovedovey123'
+
+      // Graph game state
+      let graphNodes = []
+      let graphEdges = []
+      const graphColors = ['#ef4444', '#22c55e', '#3b82f6']
+
+      // Elements
+      const introScreen = document.getElementById('introScreen')
+      const lobbyScreen = document.getElementById('lobbyScreen')
+      const connectingScreen = document.getElementById('connectingScreen')
+      const chatScreen = document.getElementById('chatScreen')
+      const fullScreen = document.getElementById('fullScreen')
+      const messagesDiv = document.getElementById('messages')
+      const messageInput = document.getElementById('messageInput')
+      const graphCanvas = document.getElementById('graphCanvas')
+      const graphCtx = graphCanvas.getContext('2d')
+      const emojiBar = document.getElementById('emojiBar')
+
+      // Emoji buttons
+      const heartEmojis = [
+        '&#128151;',
+        '&#128156;',
+        '&#128149;',
+        '&#128147;',
+        '&#128148;',
+        '&#10084;',
+        '&#128420;',
+      ]
+
+      function initEmojiBar() {
+        emojiBar.innerHTML = ''
+        heartEmojis.forEach((emoji, i) => {
+          const btn = document.createElement('button')
+          btn.className = 'emoji-btn'
+          btn.innerHTML = emoji
+          btn.onclick = () => sendHeartEmoji(i)
+          emojiBar.appendChild(btn)
+        })
+      }
+      initEmojiBar()
+
+      // Floating canvas
+      const canvas = document.getElementById('floatCanvas')
+      const ctx = canvas.getContext('2d')
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+      }
+      resizeCanvas()
+      window.addEventListener('resize', resizeCanvas)
+
+      const emojis = ['&#128151;', '&#128156;', '&#128149;', '&#10024;', '&#128420;', '&#127752;']
+      const floatingItems = []
+
+      for (let i = 0; i < 20; i++) {
+        floatingItems.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          emoji: emojis[Math.floor(Math.random() * emojis.length)],
+          speed: 0.3 + Math.random() * 1.5,
+          size: 12 + Math.random() * 20,
+          angle: Math.random() * Math.PI * 2,
+          opacity: 0.25 + Math.random() * 0.35,
+        })
+      }
+
+      function animateFloat() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        floatingItems.forEach((item) => {
+          ctx.font = `${item.size}px Arial`
+          ctx.globalAlpha = item.opacity
+          const span = document.createElement('span')
+          span.innerHTML = item.emoji
+          ctx.fillText(span.textContent, item.x, item.y)
+          item.y -= item.speed
+          item.x += Math.sin(item.angle) * 0.3
+          item.angle += 0.015
+          if (item.y < -50) {
+            item.y = canvas.height + 50
+            item.x = Math.random() * canvas.width
+          }
+        })
+        ctx.globalAlpha = 1
+        requestAnimationFrame(animateFloat)
+      }
+      animateFloat()
+
+      // Heart selection
+      function selectSam() {
+        username = 'sam'
+        createRoom()
+      }
+
+      function selectDave() {
+        const daveEmoji = document.getElementById('daveEmoji')
+        const daveName = document.getElementById('daveName')
+        const errorMsg = document.getElementById('errorMsg')
+        daveEmoji.innerHTML = '&#10060;'
+        daveName.textContent = 'NO!'
+        errorMsg.classList.remove('hidden')
+        setTimeout(() => {
+          daveEmoji.innerHTML = '&#128156;'
+          daveName.textContent = 'Dave'
+          errorMsg.classList.add('hidden')
+        }, 1200)
+      }
+
+      // Create room (Sam)
+      function createRoom() {
+        showScreen('lobby')
+        startMusic()
+
+        // Show secret link for Dave
+        const secretUrl = `${window.location.origin}${window.location.pathname}?dave=${SECRET_DOOR}`
+        document.getElementById('secretLink').textContent = secretUrl
+
+        const peerId = `${HEARTCODE_ID}-sam`
+        peer = new Peer(peerId)
+
+        peer.on('open', (id) => {
+          console.log('Sam waiting:', id)
+          updateLobbyStatus(false)
+        })
+
+        peer.on('connection', (connection) => {
+          if (conn) {
+            connection.close()
+            return
+          }
+          handleConnection(connection)
+        })
+
+        peer.on('error', (err) => {
+          console.log('Peer error:', err)
+          if (err.type === 'unavailable-id') {
+            showScreen('full')
+            document.querySelector('#fullScreen .status-text').textContent =
+              'Sam is already waiting!'
+          }
+        })
+      }
+
+      // Join room (Dave - via secret door)
+      function joinRoom() {
+        username = 'dave'
+        showScreen('connecting')
+        startMusic()
+
+        const peerId = `${HEARTCODE_ID}-dave-${Date.now()}`
+        peer = new Peer(peerId)
+
+        peer.on('open', () => {
+          const samPeerId = `${HEARTCODE_ID}-sam`
+          const connection = peer.connect(samPeerId, { reliable: true })
+
+          connection.on('error', () => {
+            showScreen('intro')
+            alert('Sam is not waiting right now!')
+          })
+
+          handleConnection(connection)
+        })
+
+        peer.on('error', (err) => {
+          console.log('Peer error:', err)
+          if (err.type === 'peer-unavailable') {
+            showScreen('intro')
+            alert('Sam is not waiting right now! Click Sam to create a room first.')
+          }
+        })
+      }
+
+      // Handle connection
+      function handleConnection(connection) {
+        conn = connection
+
+        conn.on('open', () => {
+          connected = true
+          showScreen('chat')
+          updateLobbyStatus(true)
+          document.getElementById('chatTitle').textContent =
+            `${username === 'sam' ? 'Sam' : 'Dave'}'s Chat`
+          addMessage('system', `Connected! ${username === 'sam' ? 'Dave' : 'Sam'} joined!`)
+          startNewGame()
+        })
+
+        conn.on('data', (data) => {
+          if (data.type === 'message' || data.type === 'reaction') {
+            const partnerName = data.from === 'sam' ? 'Sam' : 'Dave'
+            addMessage('partner', data.text, partnerName)
+          } else if (data.type === 'heart') {
+            spawnHeartsLocal(data.index)
+          } else if (data.type === 'graph') {
+            graphNodes = data.nodes
+            graphEdges = data.edges
+            renderGraph()
+          } else if (data.type === 'graphUpdate') {
+            graphNodes[data.nodeIndex].colorIndex = data.colorIndex
+            renderGraph()
+            checkGraphSolved()
+          } else if (data.type === 'newGame') {
+            graphNodes = data.nodes
+            graphEdges = data.edges
+            renderGraph()
+            document.getElementById('gameStatus').textContent =
+              'Color all nodes - no neighbors same color!'
+          }
+        })
+
+        conn.on('close', () => {
+          connected = false
+          showScreen('intro')
+          if (peer) peer.destroy()
+          peer = null
+          conn = null
+        })
+      }
+
+      function updateLobbyStatus(isConnected) {
+        const statusEl = document.getElementById('lobbyStatus')
+        if (isConnected) {
+          statusEl.textContent = 'Connected <3 :D'
+        } else {
+          statusEl.textContent = 'No one there! :('
+        }
+      }
+
+      // Show screen
+      function showScreen(screen) {
+        ;[introScreen, lobbyScreen, connectingScreen, chatScreen, fullScreen].forEach((s) =>
+          s.classList.add('hidden')
+        )
+        switch (screen) {
+          case 'intro':
+            introScreen.classList.remove('hidden')
+            break
+          case 'lobby':
+            lobbyScreen.classList.remove('hidden')
+            break
+          case 'connecting':
+            connectingScreen.classList.remove('hidden')
+            break
+          case 'chat':
+            chatScreen.classList.remove('hidden')
+            break
+          case 'full':
+            fullScreen.classList.remove('hidden')
+            break
+        }
+      }
+
+      // Copy secret link
+      function copySecretLink() {
+        const link = document.getElementById('secretLink').textContent
+        navigator.clipboard.writeText(link).then(() => {
+          const btn = document.querySelector('.copy-btn')
+          btn.textContent = 'Copied!'
+          setTimeout(() => (btn.textContent = 'Copy Secret Link'), 1200)
+        })
+      }
+
+      // Messages
+      function addMessage(type, text, senderName = '') {
+        const msgDiv = document.createElement('div')
+        msgDiv.className = `message from-${type === 'system' ? 'system' : type === 'me' ? 'me' : 'partner'}`
+        if (type !== 'system') {
+          const senderDiv = document.createElement('div')
+          senderDiv.className = 'sender'
+          senderDiv.textContent =
+            type === 'me' ? `You (${username === 'sam' ? 'Sam' : 'Dave'})` : senderName
+          msgDiv.appendChild(senderDiv)
+        }
+        const textDiv = document.createElement('div')
+        textDiv.textContent = text
+        msgDiv.appendChild(textDiv)
+        messagesDiv.appendChild(msgDiv)
+        messagesDiv.scrollTop = messagesDiv.scrollHeight
+      }
+
+      function sendMessage() {
+        const text = messageInput.value.trim()
+        if (!text || !connected) return
+        conn.send({ type: 'message', from: username, text })
+        addMessage('me', text)
+        messageInput.value = ''
+      }
+
+      function sendReaction(text) {
+        if (!connected) return
+        conn.send({ type: 'reaction', from: username, text })
+        addMessage('me', text)
+      }
+
+      function handleKeyPress(e) {
+        if (e.key === 'Enter') sendMessage()
+      }
+
+      // Heart emojis
+      function sendHeartEmoji(index) {
+        if (!connected) return
+        spawnHeartsLocal(index)
+        conn.send({ type: 'heart', index: index })
+      }
+
+      function spawnHeartsLocal(index) {
+        const emoji = ['💖', '💜', '💕', '💗', '💓', '❤️', '🩷'][index] || '💖'
+        for (let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            const heart = document.createElement('div')
+            heart.className = 'chat-heart'
+            heart.textContent = emoji
+            heart.style.left = `${15 + Math.random() * 70}%`
+            heart.style.bottom = '0'
+            messagesDiv.appendChild(heart)
+            setTimeout(() => heart.remove(), 3000)
+          }, i * 80)
+        }
+      }
+
+      // Graph game
+      function generateGraph() {
+        const nodeCount = 5 + Math.floor(Math.random() * 3)
+        graphNodes = []
+        graphEdges = []
+
+        const positions = []
+        for (let i = 0; i < nodeCount; i++) {
+          let x, y, valid
+          let attempts = 0
+          do {
+            x = 40 + Math.random() * 220
+            y = 30 + Math.random() * 120
+            valid = positions.every((p) => Math.hypot(p.x - x, p.y - y) > 50)
+            attempts++
+          } while (!valid && attempts < 50)
+          positions.push({ x, y })
+          graphNodes.push({ x, y, colorIndex: 0 })
+        }
+
+        const connectedSet = new Set([0])
+        const unconnected = new Set([...Array(nodeCount).keys()].slice(1))
+
+        while (unconnected.size > 0) {
+          const from = [...connectedSet][Math.floor(Math.random() * connectedSet.size)]
+          const to = [...unconnected][Math.floor(Math.random() * unconnected.size)]
+          graphEdges.push([from, to])
+          connectedSet.add(to)
+          unconnected.delete(to)
+        }
+
+        const extraEdges = 1 + Math.floor(Math.random() * 2)
+        for (let i = 0; i < extraEdges; i++) {
+          const from = Math.floor(Math.random() * nodeCount)
+          const to = Math.floor(Math.random() * nodeCount)
+          if (
+            from !== to &&
+            !graphEdges.some(
+              (e) => (e[0] === from && e[1] === to) || (e[0] === to && e[1] === from)
+            )
+          ) {
+            graphEdges.push([from, to])
+          }
+        }
+      }
+
+      function renderGraph() {
+        graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height)
+
+        graphCtx.strokeStyle = '#c084fc'
+        graphCtx.lineWidth = 2
+        graphEdges.forEach(([a, b]) => {
+          graphCtx.beginPath()
+          graphCtx.moveTo(graphNodes[a].x, graphNodes[a].y)
+          graphCtx.lineTo(graphNodes[b].x, graphNodes[b].y)
+          graphCtx.stroke()
+        })
+
+        graphNodes.forEach((node, i) => {
+          graphCtx.beginPath()
+          graphCtx.arc(node.x, node.y, 18, 0, Math.PI * 2)
+          graphCtx.fillStyle = graphColors[node.colorIndex]
+          graphCtx.fill()
+          graphCtx.strokeStyle = '#581c87'
+          graphCtx.lineWidth = 2
+          graphCtx.stroke()
+
+          graphCtx.fillStyle = '#fff'
+          graphCtx.font = 'bold 12px sans-serif'
+          graphCtx.textAlign = 'center'
+          graphCtx.textBaseline = 'middle'
+          graphCtx.fillText(i + 1, node.x, node.y)
+        })
+      }
+
+      function handleGraphClick(e) {
+        const rect = graphCanvas.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+
+        for (let i = 0; i < graphNodes.length; i++) {
+          const node = graphNodes[i]
+          if (Math.hypot(node.x - x, node.y - y) < 18) {
+            node.colorIndex = (node.colorIndex + 1) % 3
+            renderGraph()
+
+            if (connected && conn) {
+              conn.send({ type: 'graphUpdate', nodeIndex: i, colorIndex: node.colorIndex })
+            }
+
+            checkGraphSolved()
+            break
+          }
+        }
+      }
+
+      graphCanvas.addEventListener('click', handleGraphClick)
+
+      function checkGraphSolved() {
+        const valid = graphEdges.every(
+          ([a, b]) => graphNodes[a].colorIndex !== graphNodes[b].colorIndex
+        )
+        if (valid && graphNodes.length > 0) {
+          document.getElementById('gameStatus').textContent = 'Solved! Amazing!'
+          triggerHeartExplosion()
+        }
+      }
+
+      function triggerHeartExplosion() {
+        const container = document.getElementById('heartExplosion')
+        container.innerHTML = ''
+        const hearts = ['💖', '💜', '💕', '💗', '✨', '🦄', '❤️']
+
+        for (let i = 0; i < 50; i++) {
+          const heart = document.createElement('div')
+          heart.className = 'explosion-heart'
+          heart.textContent = hearts[Math.floor(Math.random() * hearts.length)]
+          heart.style.left = '50%'
+          heart.style.top = '50%'
+          const angle = (Math.random() * 360 * Math.PI) / 180
+          const distance = 150 + Math.random() * 300
+          heart.style.setProperty('--tx', `${Math.cos(angle) * distance}px`)
+          heart.style.setProperty('--ty', `${Math.sin(angle) * distance}px`)
+          container.appendChild(heart)
+          setTimeout(() => heart.remove(), 2000)
+        }
+      }
+
+      function startNewGame() {
+        generateGraph()
+        renderGraph()
+        document.getElementById('gameStatus').textContent =
+          'Color all nodes - no neighbors same color!'
+
+        if (connected && conn) {
+          conn.send({ type: 'newGame', nodes: graphNodes, edges: graphEdges })
+        }
+      }
+
+      // Better music
+      function startMusic() {
+        if (musicStarted) return
+        musicStarted = true
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)()
+
+        const chords = [
+          [146.83, 185.0, 220.0],
+          [164.81, 196.0, 246.94],
+          [174.61, 220.0, 261.63],
+          [146.83, 185.0, 220.0],
+          [130.81, 164.81, 196.0],
+          [146.83, 185.0, 220.0],
+          [164.81, 196.0, 246.94],
+          [174.61, 196.0, 220.0],
+        ]
+
+        const melodyScale = [293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25, 587.33, 659.25]
+
+        let chordIndex = 0
+        let melodyIndex = 0
+        let beat = 0
+
+        function playChord() {
+          if (!audioContext) return
+          const chord = chords[chordIndex % chords.length]
+
+          chord.forEach((freq, i) => {
+            const osc = audioContext.createOscillator()
+            const gain = audioContext.createGain()
+            osc.connect(gain)
+            gain.connect(audioContext.destination)
+            osc.type = 'triangle'
+            osc.frequency.value = freq
+            gain.gain.setValueAtTime(0.04, audioContext.currentTime)
+            gain.gain.exponentialRampToValueAtTime(0.005, audioContext.currentTime + 2)
+            osc.start(audioContext.currentTime)
+            osc.stop(audioContext.currentTime + 2)
+          })
+
+          chordIndex++
+          setTimeout(playChord, 2000)
+        }
+
+        function playMelody() {
+          if (!audioContext) return
+
+          if (Math.random() > 0.15) {
+            const osc = audioContext.createOscillator()
+            const gain = audioContext.createGain()
+            osc.connect(gain)
+            gain.connect(audioContext.destination)
+
+            osc.type = 'sine'
+            const noteIdx =
+              (melodyIndex + Math.floor(Math.random() * 3) - 1 + melodyScale.length) %
+              melodyScale.length
+            osc.frequency.value = melodyScale[noteIdx] * (1 + Math.floor(beat / 8) * 0.05)
+
+            gain.gain.setValueAtTime(0.025, audioContext.currentTime)
+            gain.gain.exponentialRampToValueAtTime(0.005, audioContext.currentTime + 0.4)
+
+            osc.start(audioContext.currentTime)
+            osc.stop(audioContext.currentTime + 0.4)
+          }
+
+          melodyIndex = (melodyIndex + 1) % melodyScale.length
+          beat++
+          setTimeout(playMelody, 350 + Math.random() * 100)
+        }
+
+        function playArpeggio() {
+          if (!audioContext) return
+
+          const chord = chords[Math.floor(beat / 4) % chords.length]
+          const noteIdx = Math.floor(Math.random() * chord.length)
+
+          const osc = audioContext.createOscillator()
+          const gain = audioContext.createGain()
+          osc.connect(gain)
+          gain.connect(audioContext.destination)
+          osc.type = 'sine'
+          osc.frequency.value = chord[noteIdx] * 2
+          gain.gain.setValueAtTime(0.015, audioContext.currentTime)
+          gain.gain.exponentialRampToValueAtTime(0.003, audioContext.currentTime + 0.3)
+          osc.start(audioContext.currentTime)
+          osc.stop(audioContext.currentTime + 0.3)
+
+          setTimeout(playArpeggio, 200 + Math.random() * 150)
+        }
+
+        playChord()
+        setTimeout(playMelody, 300)
+        setTimeout(playArpeggio, 600)
+      }
+
+      // Check URL for secret door on load
+      const params = new URLSearchParams(window.location.search)
+      const daveSecret = params.get('dave')
+
+      if (daveSecret === SECRET_DOOR) {
+        // Dave is entering through the secret door!
+        joinRoom()
+      }
+    </script>
+  </body>
+</html>

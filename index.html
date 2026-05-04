@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="refresh" content="0; url=app-hub/v9-portal.html"/>
+  <title>Artifacts Collection - Redirecting...</title>
+  <script>
+    // Immediate redirect to v9 portal
+    window.location.href = 'app-hub/v9-portal.html';
+  </script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a12;
+      color: #00ffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .loader {
+      text-align: center;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(0, 255, 255, 0.1);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h1 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+      opacity: 0.8;
+    }
+    a {
+      color: #00ff88;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <h1>Loading Artifacts Collection...</h1>
+    <p style="font-size:12px; opacity:0.6; margin-top:0.5rem;">
+      If not redirected, <a href="app-hub/v9-portal.html">click here</a>
+    </p>
+  </div>
+</body>
+</html>

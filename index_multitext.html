@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dot Viewer – Multi‑Text &amp; Save/Load</title>
+  <!-- Google Fonts for a clean typographic feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <!-- Interact.js for draggable/resizable elements -->
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <style>
+    :root {
+      --primary-bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --accent: #333;
+      --border-radius: 8px;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: var(--primary-bg);
+      color: var(--accent);
+    }
+    #viewer {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 90%;
+      max-width: 1000px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .slide {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    .slide img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    /* Overlay for DS/Pages indicator */
+    .overlay {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 20;
+    }
+    /* Container holding all notes */
+    #notes-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none; /* allow underlying interactions when no note */
+    }
+    /* Individual note blocks */
+    .note {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      padding: 4px;
+      min-width: 120px;
+      min-height: 50px;
+      overflow: auto;
+      resize: none;
+      box-sizing: border-box;
+      font-size: 14px;
+      font-family: 'Roboto', sans-serif;
+      z-index: 10;
+      pointer-events: all; /* enable drag/resizing */
+      /* Use transform for x/y translation */
+    }
+    /* Info section below the slide */
+    #info-section {
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      border-top: 1px solid #eee;
+    }
+    #info-section h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    #info-section p {
+      margin: 0 0 8px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    #info-section textarea {
+      width: 100%;
+      height: 80px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 8px;
+    }
+    .controls button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: #1976d2;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .controls button:hover {
+      background: #115293;
+    }
+    .hidden-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div id="viewer">
+  <div class="card">
+    <div class="slide" id="slide-container">
+      <img id="slide-image" src="" alt="Szene" />
+      <div class="overlay" id="overlay"></div>
+      <!-- Container to hold multiple note blocks -->
+      <div id="notes-container"></div>
+    </div>
+    <div id="info-section">
+      <h3 id="title"></h3>
+      <p id="critique"></p>
+      <label for="corrections"><strong>Korrekturen:</strong></label>
+      <textarea id="corrections" placeholder="Notiere hier Korrekturen für diese Seite"></textarea>
+    </div>
+  </div>
+  <div class="controls">
+    <button id="prevBtn">Zurück</button>
+    <button id="nextBtn">Weiter</button>
+    <button id="addNoteBtn">Textfeld hinzufügen</button>
+    <button id="saveJsonBtn">Als JSON speichern</button>
+    <button id="saveXmlBtn">Als XML speichern</button>
+    <button id="loadBtn">Daten laden</button>
+    <input type="file" id="fileInput" class="hidden-input" accept=".json,.xml" />
+  </div>
+</div>
+
+<script>
+  // Predefined slides with image sources and design critique
+  const slides = [
+    {"src": "pics/01-file-VN6ZfwlSu7rbE1UV.jpg", "ds": "DS01", "pages": "S01-S02", "critique": "Dot muss extrem klein sein und links unten platziert werden; negative Fläche und sanfte Grautöne mit einer dezenten Tau-Spur dominieren; der Horizont liegt im oberen Drittel."},
+    {"src": "pics/02-file-fzte2ujeUW7Sr45e.jpg", "ds": "DS02", "pages": "S03-S04", "critique": "Dot soll groß und zentriert auf einem grauen Podest stehen; viel Platz für den Titel oberhalb lassen; die rechte Seite bleibt fast leer für das Impressum; sanftes Grau."},
+    {"src": "pics/03-file-0vvwLKhfktrH1YCt.jpg", "ds": "DS03", "pages": "S05-S06", "critique": "Verwende mehrere Grauabstufungen für Hügel und Himmel; Dot sitzt winzig in der Mitte; auf der rechten Seite wird Dot etwas größer; dezente Körnung im Boden und ein Herr-Grau-Kasten unten rechts."},
+    {"src": "pics/04-file-wCm52oBs5AZYEdao.jpg", "ds": "DS04", "pages": "S07-S08", "critique": "Dot sitzt am Bach, während im Hintergrund nur eine Wiesel-Silhouette zu sehen ist; die rechte Seite ist reiner Atmosphärenraum mit minimalem Grauwechsel; betone das Wort ‘hmmm’ typografisch; keine Herr-Grau-Box."},
+    {"src": "pics/05-file-TSJ1qTS-sPi3281A.jpg", "ds": "DS05", "pages": "S09-S10", "critique": "Zeige das Bachufer mit kleinen Wiesel- und Pfau-Figuren; die Grenze zwischen den Grauzonen soll subtil durch leichte Temperaturunterschiede angedeutet werden; die Reimzeilen von Dot leicht eingerückt; Herr-Grau-Kasten unten."},
+    {"src": "pics/06-file-6cQA6ytTNFg6iwPn.jpg", "ds": "DS06", "pages": "S11-S12", "critique": "Links erwärmt sich der Boden, ein kleiner ‘Vulkan’ am Horizont; rechts erscheint Rot groß mit feuriger Frisur und kleinen Stiefeln; die Farbseite muss warm wirken; kein Herr-Grau-Kasten."},
+    {"src": "pics/07-file-scvBYta8LCKCFm3T.jpg", "ds": "DS07", "pages": "S13-S14", "critique": "Dot und Rot stehen sich gegenüber; Dot ist noch vorsichtig; auf der rechten Seite berühren sie sich und Dots Rand erhält einen roten Schimmer; Herr-Grau-Kasten freundlich unten platziert."},
+    {"src": "pics/08-file-3c7vK1sZbz0hanc1.jpg", "ds": "DS08", "pages": "S15-S16", "critique": "Dot ist wieder allein, mit einem kleinen roten Saum; die Welt wirkt minimal wärmer; Dot bewegt sich wobbelt weiter und der Summenlaut wird durch ‘hmmm—zack’ hervorgehoben."},
+    {"src": "pics/09-file-NC1kfgKzCSXIfKu7.jpg", "ds": "DS09", "pages": "S17-S18", "critique": "Das Grau wird heller wie Milchglas; Gelb erscheint schwebend, mit sanftem Hof; der Summenlaut ‘hmmm—pling’ wird betont; das Licht darf nicht blenden."},
+    {"src": "pics/10-file-8pvfq_gmt-ZUIVvu.jpg", "ds": "DS10", "pages": "S19-S20", "critique": "Zeige Details: Hügelkante, Wolkenmuster, ein ernstes Insekt; Dot und Gelb stehen nebeneinander, Dot wirkt heller; Herr-Grau-Kasten ordnet sich unten rechts ein."},
+    {"src": "pics/11-file-YlUkQ1R9h1M9O1KF.jpg", "ds": "DS11", "pages": "S21-S22", "critique": "Dot trägt nun Rots und Gelbs Saum; die Welt kühlt sich leicht ab; der Summenlaut ‘hmmm—pling—hm’ endet mit einem leisen ‘hm’; der Text muss weit gestreut werden."},
+    {"src": "pics/12-file-wFxNj4HqM5GoAdm1.jpg", "ds": "DS12", "pages": "S23-S24", "critique": "Der Fluss wird als ruhige Linie gezeichnet; Blau steht am Ufer, eine stille Präsenz wie Abend und Wasser; viel Luft auf der Seite lassen."},
+    {"src": "pics/13-file-HwURSwLeSlUC6uqn.jpg", "ds": "DS13", "pages": "S25-S26", "critique": "Blau berührt Dot zärtlich; der Raum wird maximal; die rechte Seite zeigt nur Worte, die weit auseinander stehen; der Summenlaut ‘hmmm—hmm’ wird fast grafisch dargestellt; Herr-Grau-Box unten."},
+    {"src": "pics/14-file-DeEmkDXo2eiJClek.jpg", "ds": "DS14", "pages": "S27-S28", "critique": "Runde Wege laden ein; Rot wartet, Gelb schwebt heran, Blau ist schon da; rechts sitzen alle Figuren zusammen mit sichtbarer Summen-Wellenlinie dazwischen; keine Herr-Grau-Box."},
+    {"src": "pics/15-file-to09d6cYsUGcIUQz.jpg", "ds": "DS15", "pages": "S29-S30", "critique": "Alle sitzen ruhig auf der Rundwiese; im Hintergrund tauchen sanfte Spuren von warmem, grünem und violettem Licht auf; Dot spricht ruhig; Detail soll entdeckt werden, nicht laut sein."},
+    {"src": "pics/16-file-iJBCVNoELx43tZvp.jpg", "ds": "DS16", "pages": "S31-S32", "critique": "Rot hat eine Ideenwolke, Gelb einen strahlenden Finger, Blau ein skeptisches Gesicht; Dot wird kleiner dargestellt, um die Nervosität zu zeigen; Herr-Grau-Kasten soll diese Spannung kommentieren."},
+    {"src": "pics/17-file-mkWRTpMKzOo_WwB5.jpg", "ds": "DS17", "pages": "S33-S34", "critique": "Ein Kreisritual: Die vier stehen zusammen, Dot zittert leicht; der Reim steht im Fokus und muss typografisch hervorgehoben werden; jede Figur reagiert sichtbar; ein Herr-Grau-Kasten beobachtet."},
+    {"src": "pics/18-file-6aXTQhuVIHEgvgJK.jpg", "ds": "DS18", "pages": "S35-S36", "critique": "Am Anfang des Mischens tanzen warme, helle und tiefe Bögen; Dot steht im Zentrum und glänzt mit zarten Farbsäumen; der Summenlaut ‘hmmm—pling—hmm’ erklingt hier harmonisch."},
+    {"src": "pics/19-file-04xK7npi40A5f9SU.jpg", "ds": "DS19", "pages": "S37-S38", "critique": "Die Bögen werden dichter und enger; das Bild wird spannungsvoller; Dot wird an den Bildrand gedrückt; das Chaos darf aber lesbar bleiben."},
+    {"src": "pics/20-file-agMRFO3THwqnSmdn.jpg", "ds": "DS20", "pages": "S39-S40", "critique": "Nach dem Farbsog ist alles zu viel; die Seite wird braun, nicht schokoladenfarbig sondern matschig; Dot ist winzig und allein; der Herr-Grau-Kasten tröstet leise."},
+    {"src": "pics/21-file-YFJZ57mBfdIOjpsZ.jpg", "ds": "DS21", "pages": "S41-S42", "critique": "In der braunen Ruhe hört Dot das eigene Summen wieder; es stellt sich die Frage ‘hmmm?’; auf der rechten Seite schreit Dot ‘STOPP’ ohne lautes Typo; Dots Rand ist wieder klar."},
+    {"src": "pics/22-file-2B-E6JsyTpsSqII8.jpg", "ds": "DS22", "pages": "S43-S44", "critique": "Die Farben werden entknotet: vier Hände öffnen langsam einen Knoten; auf der rechten Seite stehen die vier wieder mit Abstand und Blickkontakt; Dot erklärt, dass es alle behalten, aber sich selbst nicht verlieren möchte."},
+    {"src": "pics/23-file-M6XNP-xpSdzXRscu.jpg", "ds": "DS23", "pages": "S45-S46", "critique": "Dot denkt an einen Kreis mit Platz; auf der rechten Seite entsteht ein Farbkreis aus Rot–Gelb–Blau, mit atmendem Abstand; ein Herr-Grau-Kasten philosophiert über Ordnung als höfliche Form."},
+    {"src": "pics/24-file-BLX0-uYv_lKHJgxr.jpg", "ds": "DS24", "pages": "S47-S48", "critique": "Orange springt zwischen Rot und Gelb hervor, Grün hebt den Kopf ruhig zwischen Gelb und Blau, Violett tritt leise zwischen Blau und Rot; Dot beobachtet staunend; die Sekundärfarben müssen kurz und charakterstark erscheinen."},
+    {"src": "pics/25-file-joTf0604uwJUzEM9.jpg", "ds": "DS25", "pages": "S49-S50", "critique": "Dot steht am stillen See, der Himmel spiegelt sich; in der Spiegelung zeigt sich Dot mit rotem Funken, gelbem Hauch und blauem Schimmer; dies ist eine introspektive Szene ohne Herr-Grau-Kasten."},
+    {"src": "pics/26-file-cqq3qWUG07Tn7vXA.jpg", "ds": "DS26", "pages": "S51-S52", "critique": "Die Welt wird langsam farbig: links wird die Wiese grün und der Himmel blau, auf der rechten Seite blühen liebevoll Rot-, Gelb- und Orangetöne; Braun bleibt als Erde, Stamm und Schatten erhalten; der Übergang erfolgt sanft."}
+  ];
+
+  // Prepare a saved state array: each entry has {notes: [], correction: ''}
+  let savedData = slides.map(() => ({ notes: [], correction: '' }));
+  let currentIndex = 0;
+
+  // Utility to create a note block
+  function createNote(noteData = {}) {
+    const note = document.createElement('div');
+    note.classList.add('note');
+    note.contentEditable = true;
+    // Set dimensions and position
+    const x = typeof noteData.x === 'number' ? noteData.x : 50;
+    const y = typeof noteData.y === 'number' ? noteData.y : 50;
+    const width = typeof noteData.width === 'number' ? noteData.width : 200;
+    const height = typeof noteData.height === 'number' ? noteData.height : 80;
+    note.style.width = width + 'px';
+    note.style.height = height + 'px';
+    // Use CSS transform for translation
+    note.style.transform = `translate(${x}px, ${y}px)`;
+    note.dataset.x = x;
+    note.dataset.y = y;
+    // Fill content
+    note.innerHTML = noteData.content || 'Notiz…';
+    // Append to notes container
+    document.getElementById('notes-container').appendChild(note);
+    // Make draggable and resizable using interact.js
+    interact(note)
+      .draggable({
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: document.getElementById('slide-container'),
+            endOnly: true
+          })
+        ],
+        listeners: {
+          move(event) {
+            const target = event.target;
+            let x = (parseFloat(target.dataset.x) || 0) + event.dx;
+            let y = (parseFloat(target.dataset.y) || 0) + event.dy;
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.dataset.x = x;
+            target.dataset.y = y;
+          }
+        }
+      })
+      .resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictEdges({
+            outer: document.getElementById('slide-container'),
+            endOnly: true
+          }),
+          interact.modifiers.restrictSize({
+            min: { width: 100, height: 50 }
+          })
+        ],
+        listeners: {
+          move(event) {
+            const target = event.target;
+            let x = parseFloat(target.dataset.x) || 0;
+            let y = parseFloat(target.dataset.y) || 0;
+            // update dimensions
+            let width = parseFloat(target.style.width) + event.deltaRect.width;
+            let height = parseFloat(target.style.height) + event.deltaRect.height;
+            target.style.width = width + 'px';
+            target.style.height = height + 'px';
+            // update position
+            x += event.deltaRect.left;
+            y += event.deltaRect.top;
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.dataset.x = x;
+            target.dataset.y = y;
+          }
+        }
+      });
+  }
+
+  // Save current page state: notes and corrections
+  function saveCurrentPage() {
+    // Collect notes
+    const notes = [];
+    document.querySelectorAll('#notes-container .note').forEach(note => {
+      const x = parseFloat(note.dataset.x) || 0;
+      const y = parseFloat(note.dataset.y) || 0;
+      const style = window.getComputedStyle(note);
+      const width = parseFloat(style.width);
+      const height = parseFloat(style.height);
+      notes.push({ content: note.innerHTML, x, y, width, height });
+    });
+    savedData[currentIndex].notes = notes;
+    savedData[currentIndex].correction = document.getElementById('corrections').value;
+  }
+
+  // Load a particular slide and its saved state
+  function loadSlide(index) {
+    // Save current page before switching
+    saveCurrentPage();
+    // Wrap index within range
+    if (index < 0) index = slides.length - 1;
+    if (index >= slides.length) index = 0;
+    currentIndex = index;
+    const slide = slides[currentIndex];
+    // Update image and overlay
+    document.getElementById('slide-image').src = slide.src;
+    document.getElementById('overlay').textContent = `${slide.ds} (${slide.pages})`;
+    // Update title and critique
+    document.getElementById('title').textContent = `${slide.ds} – Seiten ${slide.pages}`;
+    document.getElementById('critique').textContent = slide.critique;
+    // Load corrections
+    document.getElementById('corrections').value = savedData[currentIndex].correction || '';
+    // Clear existing notes
+    const container = document.getElementById('notes-container');
+    container.innerHTML = '';
+    // Recreate notes
+    (savedData[currentIndex].notes || []).forEach(note => createNote(note));
+  }
+
+  // Initialize first slide
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSlide(0);
+  });
+
+  // Navigation buttons
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    loadSlide(currentIndex - 1);
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    loadSlide(currentIndex + 1);
+  });
+
+  // Keyboard navigation: left/right arrows (when not typing)
+  document.addEventListener('keydown', (e) => {
+    const active = document.activeElement;
+    // Skip if currently editing a note or textarea
+    const skip = active && (active.contentEditable === 'true' || active.tagName.toLowerCase() === 'textarea' || active.tagName.toLowerCase() === 'input');
+    if (skip) return;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      loadSlide(currentIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      loadSlide(currentIndex + 1);
+    }
+  });
+
+  // Add note button
+  document.getElementById('addNoteBtn').addEventListener('click', () => {
+    createNote({});
+  });
+
+  // Save JSON button
+  document.getElementById('saveJsonBtn').addEventListener('click', () => {
+    saveCurrentPage();
+    const dataStr = JSON.stringify(savedData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dot_viewer_data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Convert savedData to XML string
+  function toXml(data) {
+    let xml = '<slides>';
+    data.forEach((page, idx) => {
+      xml += `<slide index="${idx}" image="${slides[idx].src}">`;
+      // correction element with CDATA
+      xml += '<correction><![CDATA[' + (page.correction || '') + ']]></correction>';
+      xml += '<notes>';
+      (page.notes || []).forEach(note => {
+        xml += `<note x="${note.x}" y="${note.y}" width="${note.width}" height="${note.height}"><![CDATA[${note.content}]]></note>`;
+      });
+      xml += '</notes>';
+      xml += '</slide>';
+    });
+    xml += '</slides>';
+    return xml;
+  }
+
+  // Save XML button
+  document.getElementById('saveXmlBtn').addEventListener('click', () => {
+    saveCurrentPage();
+    const xmlStr = toXml(savedData);
+    const blob = new Blob([xmlStr], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dot_viewer_data.xml';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Load data button: trigger file input
+  document.getElementById('loadBtn').addEventListener('click', () => {
+    document.getElementById('fileInput').click();
+  });
+
+  // Handle file selection and parse JSON or XML
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const content = evt.target.result;
+      try {
+        if (file.name.toLowerCase().endsWith('.json')) {
+          const data = JSON.parse(content);
+          if (Array.isArray(data) && data.length === slides.length) {
+            savedData = data;
+          } else {
+            alert('Ungültige JSON-Daten.');
+            return;
+          }
+        } else if (file.name.toLowerCase().endsWith('.xml')) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(content, 'application/xml');
+          const slideNodes = doc.getElementsByTagName('slide');
+          const newData = [];
+          for (let i = 0; i < slideNodes.length; i++) {
+            const slideNode = slideNodes[i];
+            const corrNode = slideNode.getElementsByTagName('correction')[0];
+            const correction = corrNode ? corrNode.textContent : '';
+            const notes = [];
+            const noteNodes = slideNode.getElementsByTagName('note');
+            for (let j = 0; j < noteNodes.length; j++) {
+              const nn = noteNodes[j];
+              notes.push({
+                content: nn.textContent || '',
+                x: parseFloat(nn.getAttribute('x')) || 0,
+                y: parseFloat(nn.getAttribute('y')) || 0,
+                width: parseFloat(nn.getAttribute('width')) || 200,
+                height: parseFloat(nn.getAttribute('height')) || 80
+              });
+            }
+            newData.push({ correction, notes });
+          }
+          if (newData.length === slides.length) {
+            savedData = newData;
+          } else {
+            alert('Ungültige XML-Daten.');
+            return;
+          }
+        } else {
+          alert('Nicht unterstütztes Dateiformat.');
+          return;
+        }
+        // After loading, refresh current slide
+        loadSlide(currentIndex);
+      } catch (err) {
+        console.error(err);
+        alert('Fehler beim Laden der Daten: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    // Reset file input so the same file can be loaded again if needed
+    e.target.value = '';
+  });
+</script>
+</body>
+</html>

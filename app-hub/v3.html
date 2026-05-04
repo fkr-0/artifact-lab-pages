@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS CONSOLE // HYPERSPACE TERMINAL</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a12;
+      --bg-secondary: #12121f;
+      --fg-primary: #00ffff;
+      --fg-secondary: #ff00ff;
+      --accent: #00ff88;
+      --accent-secondary: #ff3366;
+      --glow-primary: rgba(0,255,255,0.5);
+      --glow-secondary: rgba(255,0,255,0.5);
+      --grid-color: rgba(0,255,255,0.08);
+    }
+    [data-theme="synthwave"] { --bg-primary:#1a0a2e;--bg-secondary:#2d1b4e;--fg-primary:#ff00ff;--fg-secondary:#00ffff;--accent:#ff6ec7;--accent-secondary:#ffaa00;--glow-primary:rgba(255,0,255,0.6);--glow-secondary:rgba(255,170,0,0.5);--grid-color:rgba(255,0,255,0.12); }
+    [data-theme="cyberpunk"] { --bg-primary:#0d0d0d;--bg-secondary:#1a1a1a;--fg-primary:#f0e68c;--fg-secondary:#ff0080;--accent:#00ff41;--accent-secondary:#ff073a;--glow-primary:rgba(240,230,140,0.6);--glow-secondary:rgba(255,0,128,0.5);--grid-color:rgba(240,230,140,0.06); }
+    [data-theme="retro8bit"] { --bg-primary:#0f0f0f;--bg-secondary:#1a1a0a;--fg-primary:#33ff00;--fg-secondary:#ffb000;--accent:#00ff88;--accent-secondary:#ff4444;--glow-primary:rgba(51,255,0,0.5);--glow-secondary:rgba(255,176,0,0.5);--grid-color:rgba(51,255,0,0.1); }
+    [data-theme="midnight"] { --bg-primary:#0a1628;--bg-secondary:#0f2140;--fg-primary:#87ceeb;--fg-secondary:#c0c0c0;--accent:#4169e1;--accent-secondary:#ffd700;--glow-primary:rgba(135,206,235,0.5);--glow-secondary:rgba(192,192,192,0.4);--grid-color:rgba(135,206,235,0.08); }
+    [data-theme="vaporwave"] { --bg-primary:#1a0a20;--bg-secondary:#2d1536;--fg-primary:#ff71ce;--fg-secondary:#01cdfe;--accent:#b967ff;--accent-secondary:#05ffa1;--glow-primary:rgba(255,113,206,0.5);--glow-secondary:rgba(1,205,254,0.5);--grid-color:rgba(185,103,255,0.1); }
+
+    * { box-sizing: border-box; }
+    body { margin:0; padding:0; font-family:'Share Tech Mono',monospace; background:var(--bg-primary); color:var(--fg-primary); min-height:100vh; overflow-x:hidden; transition:background 0.5s,color 0.3s; }
+    .font-display{font-family:'Orbitron',sans-serif;}
+    
+    .grid-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;perspective:500px;}
+    .grid-floor{position:absolute;bottom:0;left:-50%;width:200%;height:60%;background:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px);background-size:50px 50px;transform:rotateX(60deg);transform-origin:center bottom;animation:gridMove 4s linear infinite;}
+    @keyframes gridMove{to{background-position:0 50px;}}
+    .scanlines{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);}
+    #particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+
+    .console-container{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;}
+    .console-header{background:linear-gradient(180deg,var(--bg-secondary),transparent);border-bottom:1px solid var(--fg-primary);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;position:relative;}
+    .console-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--fg-primary),var(--fg-secondary),var(--fg-primary),transparent);animation:headerGlow 3s ease-in-out infinite;}
+    @keyframes headerGlow{50%{opacity:1;}}
+    .logo-text{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.5rem;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-primary);text-shadow:0 0 10px var(--glow-primary),0 0 30px var(--glow-primary);}
+    .status-bar{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;}
+    .status-item{display:flex;align-items:center;gap:.5rem;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2s infinite;}
+    @keyframes pulse{50%{transform:scale(.9);opacity:.6;}}
+
+    .main-content{flex:1;display:grid;grid-template-columns:280px 1fr;gap:0;padding:1.5rem;}
+    @media(max-width:768px){.main-content{grid-template-columns:1fr;}}
+
+    .sidebar{background:linear-gradient(135deg,var(--bg-secondary),rgba(18,18,31,.9));border:1px solid var(--fg-primary);border-radius:8px;padding:1rem;position:relative;overflow:hidden;}
+    .sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--fg-primary),var(--fg-secondary));}
+    .sidebar-title{font-family:'Orbitron',sans-serif;font-size:.85rem;letter-spacing:.2em;color:var(--fg-secondary);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.1);}
+    .nav-menu{list-style:none;padding:0;margin:0;}
+    .nav-item{margin-bottom:.25rem;}
+    .nav-button{width:100%;text-align:left;padding:.75rem 1rem;background:transparent;border:1px solid transparent;border-radius:4px;color:var(--fg-primary);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;font-family:inherit;font-size:.9rem;}
+    .nav-button:hover{background:rgba(255,255,255,.05);border-color:var(--fg-primary);box-shadow:0 0 15px var(--glow-primary);}
+    .nav-button.active{background:rgba(255,255,255,.1);border-color:var(--fg-secondary);color:var(--fg-secondary);}
+    .nav-arrow{transition:transform .3s;opacity:.5;}
+    .nav-button.expanded .nav-arrow{transform:rotate(90deg);opacity:1;}
+    .submenu{max-height:0;overflow:hidden;transition:max-height .3s;padding-left:1rem;}
+    .submenu.open{max-height:500px;}
+    .submenu-item{padding:.5rem .75rem;border-left:2px solid transparent;cursor:pointer;transition:all .2s;font-size:.85rem;color:rgba(255,255,255,.7);}
+    .submenu-item:hover{color:var(--fg-primary);border-left-color:var(--fg-primary);}
+    .submenu-item.selected{color:var(--accent);border-left-color:var(--accent);}
+
+    .content-panel{background:linear-gradient(135deg,rgba(18,18,31,.95),var(--bg-secondary));border:1px solid var(--fg-primary);border-radius:8px;padding:1.5rem;position:relative;overflow:hidden;}
+    .content-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--fg-secondary),var(--fg-primary));}
+    .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.1);}
+    .panel-title{font-family:'Orbitron',sans-serif;font-size:1.25rem;letter-spacing:.1em;color:var(--fg-primary);}
+
+    .artifacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;}
+    .artifact-card{background:linear-gradient(145deg,rgba(0,0,0,.4),rgba(0,0,0,.2));border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:1.25rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+    .artifact-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:left .5s;}
+    .artifact-card:hover::before{left:100%;}
+    .artifact-card:hover{border-color:var(--fg-primary);transform:translateY(-4px);box-shadow:0 10px 40px rgba(0,0,0,.4),0 0 20px var(--glow-primary);}
+    .artifact-icon{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--fg-primary),var(--fg-secondary));display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.5rem;}
+    .artifact-name{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.5rem;color:var(--fg-primary);}
+    .artifact-desc{font-size:.8rem;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:1rem;}
+    .artifact-meta{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .meta-tag{font-size:.65rem;padding:.25rem .5rem;background:rgba(255,255,255,.1);border-radius:4px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);}
+
+    .settings-panel,.log-panel,.app-panel{display:none;}
+    .settings-panel.active,.log-panel.active,.app-panel.active{display:block;}
+    .panel-content:not(.active){display:none;}
+
+    .settings-section{margin-bottom:2rem;}
+    .settings-section-title{font-family:'Orbitron',sans-serif;font-size:.9rem;letter-spacing:.15em;color:var(--fg-secondary);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+    .settings-section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--fg-secondary),transparent);}
+    .setting-row{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .setting-label{font-size:.9rem;color:rgba(255,255,255,.8);}
+    .theme-selector{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .theme-btn{width:48px;height:32px;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:all .2s;}
+    .theme-btn:hover{transform:scale(1.1);}
+    .theme-btn.active{border-color:white;box-shadow:0 0 15px currentColor;}
+    .theme-btn[data-theme="default"]{background:linear-gradient(135deg,#0a0a12,#00ffff);}
+    .theme-btn[data-theme="synthwave"]{background:linear-gradient(135deg,#1a0a2e,#ff00ff);}
+    .theme-btn[data-theme="cyberpunk"]{background:linear-gradient(135deg,#0d0d0d,#f0e68c);}
+    .theme-btn[data-theme="retro8bit"]{background:linear-gradient(135deg,#0f0f0f,#33ff00);}
+    .theme-btn[data-theme="midnight"]{background:linear-gradient(135deg,#0a1628,#87ceeb);}
+    .theme-btn[data-theme="vaporwave"]{background:linear-gradient(135deg,#1a0a20,#ff71ce);}
+    .toggle-switch{width:52px;height:28px;background:rgba(255,255,255,.1);border-radius:14px;position:relative;cursor:pointer;transition:background .3s;}
+    .toggle-switch.active{background:var(--accent);}
+    .toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:white;border-radius:50%;transition:transform .3s;}
+    .toggle-switch.active::after{transform:translateX(24px);}
+    .slider-container{display:flex;align-items:center;gap:1rem;}
+    .slider{width:120px;height:6px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.1);border-radius:3px;outline:none;}
+    .slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--fg-primary);border-radius:50%;cursor:pointer;box-shadow:0 0 10px var(--glow-primary);}
+    .slider-value{font-size:.8rem;color:var(--accent);min-width:40px;}
+    .select-styled{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:.5rem 1rem;color:var(--fg-primary);font-family:inherit;font-size:.9rem;cursor:pointer;outline:none;}
+
+    .log-container{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:1rem;max-height:500px;overflow-y:auto;}
+    .log-entry{padding:.75rem;border-left:3px solid var(--accent);margin-bottom:.5rem;background:rgba(255,255,255,.02);animation:logSlideIn .3s;}
+    @keyframes logSlideIn{from{opacity:0;transform:translateX(-20px);} to{opacity:1;transform:translateX(0);}}
+    .log-entry.info{border-left-color:var(--fg-primary);}
+    .log-entry.warning{border-left-color:var(--accent-secondary);}
+    .log-entry.success{border-left-color:var(--accent);}
+    .log-time{font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:.25rem;}
+    .log-message{font-size:.85rem;color:rgba(255,255,255,.8);}
+
+    /* App Container */
+    .app-container{background:rgba(0,0,0,.6);border:1px solid var(--fg-primary);border-radius:8px;overflow:hidden;}
+    .app-toolbar{background:var(--bg-secondary);padding:.5rem 1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1);}
+    .app-title{font-family:'Orbitron',sans-serif;font-size:.9rem;color:var(--fg-primary);}
+    .app-actions{display:flex;gap:.5rem;}
+    .app-btn{padding:.35rem .75rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;color:var(--fg-primary);font-family:inherit;font-size:.7rem;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+    .app-btn:hover{background:var(--fg-primary);color:var(--bg-primary);}
+    .app-body{padding:1rem;max-height:70vh;overflow-y:auto;}
+
+    /* Shooter */
+    .shooter-canvas{display:block;width:100%;height:400px;background:#000;border:2px solid var(--fg-primary);border-radius:4px;}
+    .shooter-hud{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;font-family:'Orbitron',sans-serif;}
+    .hud-item{display:flex;align-items:center;gap:.5rem;}
+    .hud-label{font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;}
+    .hud-value{font-size:1.1rem;color:var(--accent);text-shadow:0 0 10px var(--accent);}
+    .health-bar{width:120px;height:12px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.2);}
+    .health-fill{height:100%;background:linear-gradient(90deg,var(--accent-secondary),var(--accent));transition:width .3s;}
+    .shooter-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;max-width:200px;margin:1rem auto 0;}
+    .control-key{padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);border-radius:6px;text-align:center;font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--fg-primary);}
+    .control-key.empty{visibility:hidden;}
+
+    /* Synth */
+    .synth-container{display:grid;gap:1rem;}
+    .synth-module{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:1rem;}
+    .module-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.1);}
+    .module-title{font-family:'Orbitron',sans-serif;font-size:.8rem;color:var(--fg-secondary);letter-spacing:.1em;}
+    .module-toggle{width:32px;height:18px;background:rgba(255,255,255,.1);border-radius:9px;position:relative;cursor:pointer;transition:background .2s;}
+    .module-toggle.active{background:var(--accent);}
+    .module-toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:white;border-radius:50%;transition:transform .2s;}
+    .module-toggle.active::after{transform:translateX(14px);}
+    .oscillator-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;}
+    .osc-btn{padding:.6rem;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.2);border-radius:6px;color:var(--fg-primary);font-family:'Orbitron',sans-serif;font-size:.7rem;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+    .osc-btn:hover{border-color:var(--fg-primary);}
+    .osc-btn.active{background:var(--fg-primary);color:var(--bg-primary);}
+    .knob-group{display:flex;flex-wrap:wrap;gap:1rem;}
+    .knob-item{display:flex;flex-direction:column;align-items:center;gap:.4rem;min-width:70px;}
+    .knob-label{font-size:.65rem;color:rgba(255,255,255,.6);text-transform:uppercase;}
+    .knob-value{font-size:.75rem;color:var(--accent);}
+    input[type="range"].knob{width:60px;height:6px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.15);border-radius:3px;outline:none;writing-mode:vertical-lr;direction:rtl;height:60px;width:6px;}
+    input[type="range"].knob::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--fg-primary);border-radius:50%;cursor:pointer;box-shadow:0 0 8px var(--glow-primary);}
+    .waveform-display{height:80px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:4px;overflow:hidden;}
+    #waveformCanvas{width:100%;height:100%;}
+    .sequencer-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin-top:.75rem;}
+    .seq-step{aspect-ratio:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:3px;cursor:pointer;transition:all .15s;}
+    .seq-step:hover{background:rgba(255,255,255,.2);}
+    .seq-step.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent);}
+    .seq-step.current{box-shadow:inset 0 0 10px rgba(255,255,255,.5);}
+    .piano-keys{display:flex;height:60px;margin-top:.75rem;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.2);}
+    .white-key{flex:1;background:linear-gradient(180deg,#fff,#e0e0e0);border:1px solid #999;cursor:pointer;position:relative;}
+    .white-key:active,.white-key.pressed{background:var(--accent);}
+    .black-key{width:24px;background:linear-gradient(180deg,#333,#111);border:1px solid #000;margin-left:-12px;cursor:pointer;position:relative;z-index:2;height:38px;}
+    .black-key:active,.black-key.pressed{background:var(--fg-secondary);}
+    .sample-loader{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+    .sample-btn{padding:.5rem 1rem;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.3);border-radius:4px;color:var(--fg-primary);font-family:inherit;font-size:.75rem;cursor:pointer;transition:all .2s;}
+    .sample-btn:hover{border-style:solid;border-color:var(--fg-primary);}
+
+    /* FIELD RECORDER STYLES */
+    .fieldrec-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    @media(max-width:900px){.fieldrec-grid{grid-template-columns:1fr;}}
+    
+    .track-panel{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:1rem;}
+    .track-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.1);}
+    .track-name{font-family:'Orbitron',sans-serif;font-size:.8rem;color:var(--fg-secondary);letter-spacing:.08em;display:flex;align-items:center;gap:.5rem;}
+    .track-indicator{width:8px;height:8px;border-radius:50%;background:var(--accent);opacity:0;}
+    .track-indicator.active{opacity:1;animation:pulse 1s infinite;}
+    .track-mute{padding:.25rem .5rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;font-size:.65rem;cursor:pointer;color:var(--fg-primary);transition:all .2s;}
+    .track-mute.muted{background:var(--accent-secondary);color:#fff;}
+    
+    .pad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+    .mpc-pad{aspect-ratio:1;border-radius:6px;border:2px solid rgba(255,255,255,.2);cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-family:'Orbitron';text-align:center;color:rgba(255,255,255,.7);position:relative;overflow:hidden;}
+    .mpc-pad::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,.3),transparent);opacity:0;transition:opacity .1s;}
+    .mpc-pad:active::before,.mpc-pad.triggered::before{opacity:1;}
+    .mpc-pad.kick{background:linear-gradient(135deg,#cc3300,#991100);}
+    .mpc-pad.snare{background:linear-gradient(135deg,#cc6600,#994400);}
+    .mpc-pad.hihat{background:linear-gradient(135deg,#666633,#444422);}
+    .mpc-pad.perc{background:linear-gradient(135deg,#663399,#441166);}
+    .mpc-pad.echo{background:linear-gradient(135deg,#006699,#004466);}
+    .mpc-pad.birp{background:linear-gradient(135deg,#993366,#661144);}
+    .mpc-pad.synth{background:linear-gradient(135deg,#339966,#116644);}
+    .mpc-pad.sample{background:linear-gradient(135deg,#336699,#114466);}
+    .mpc-pad.has-sample{box-shadow:inset 0 0 15px rgba(255,255,255,.1);}
+    .mpc-pad.loaded{border-color:var(--accent);}
+    
+    .fx-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;}
+    .fx-knob{display:flex;flex-direction:column;align-items:center;gap:.25rem;min-width:55px;}
+    .fx-knob label{font-size:.6rem;color:rgba(255,255,255,.5);text-transform:uppercase;}
+    .fx-knob span{font-size:.7rem;color:var(--accent);}
+    .fx-slider{-webkit-appearance:none;appearance:none;width:50px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;outline:none;}
+    .fx-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--fg-primary);border-radius:50%;cursor:pointer;}
+    
+    .swing-control{display:flex;align-items:center;gap:1rem;background:rgba(0,0,0,.3);padding:.75rem 1rem;border-radius:6px;margin-top:1rem;}
+    .swing-label{font-family:'Orbitron';font-size:.75rem;color:var(--fg-secondary);}
+    .swing-slider{flex:1;-webkit-appearance:none;appearance:none;height:8px;background:rgba(255,255,255,.1);border-radius:4px;outline:none;}
+    .swing-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;box-shadow:0 0 10px var(--accent);}
+    .swing-value{font-size:.9rem;color:var(--accent);min-width:35px;text-align:right;font-family:'Orbitron';}
+    
+    .master-section{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:1rem;margin-top:1rem;}
+    .master-controls{display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:1rem;}
+    .vu-meter{width:20px;height:80px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:4px;position:relative;overflow:hidden;}
+    .vu-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,var(--accent),#ffcc00,var(--accent-secondary));transition:height .05s;}
+    .transport{display:flex;gap:.5rem;}
+    .transport-btn{padding:.6rem 1.2rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:var(--fg-primary);font-family:'Orbitron';font-size:.75rem;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+    .transport-btn:hover{background:var(--fg-primary);color:var(--bg-primary);}
+    .transport-btn.playing{background:var(--accent);border-color:var(--accent);color:#000;}
+    
+    .lofi-badge{display:inline-block;padding:.2rem .5rem;background:var(--accent-secondary);color:#fff;font-size:.6rem;border-radius:3px;font-family:'Orbitron';letter-spacing:.1em;margin-left:.5rem;}
+    .required-tag{font-size:.6rem;color:var(--accent-secondary);padding:.1rem .3rem;border:1px solid var(--accent-secondary);border-radius:3px;}
+    
+    .waveform-mini{height:30px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:4px;margin-top:.5rem;overflow:hidden;position:relative;}
+    .waveform-line{position:absolute;top:50%;left:0;right:0;height:2px;background:var(--accent);transform:translateY(-50%);}
+
+    .footer-status{background:linear-gradient(0deg,var(--bg-secondary),transparent);border-top:1px solid var(--fg-primary);padding:.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;flex-wrap:wrap;gap:1rem;}
+    .ticker{overflow:hidden;flex:1;max-width:500px;}
+    .ticker-content{display:inline-block;animation:tickerScroll 30s linear infinite;white-space:nowrap;color:var(--accent);}
+    @keyframes tickerScroll{to{transform:translateX(-100%);}}
+
+    .header-actions{display:flex;gap:.5rem;}
+    .action-btn{padding:.5rem 1rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);border-radius:4px;color:var(--fg-primary);font-family:inherit;font-size:.75rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.1em;position:relative;}
+    .action-btn:hover{background:rgba(255,255,255,.1);border-color:var(--fg-primary);box-shadow:0 0 15px var(--glow-primary);}
+    .action-btn.active{background:var(--fg-primary);color:var(--bg-primary);}
+    .news-badge{position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:var(--accent-secondary);border-radius:50%;animation:newsPulse 1.5s infinite;}
+    @keyframes newsPulse{50%{transform:scale(1.2);opacity:.7;}}
+
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+    @media(max-width:640px){.logo-text{font-size:1rem;}.sidebar{order:2;}.content-panel{order:1;}.artifacts-grid{grid-template-columns:1fr;}.fieldrec-grid{grid-template-columns:1fr;}.pad-grid{grid-template-columns:repeat(4,1fr);}}
+  </style>
+</head>
+<body data-theme="default">
+  <div class="grid-bg"><div class="grid-floor"></div></div>
+  <canvas id="particles-canvas"></canvas>
+  <div class="scanlines" id="scanlines"></div>
+
+  <div class="console-container">
+    <header class="console-header">
+      <div class="logo-text">NEXUS Console</div>
+      <div class="header-actions">
+        <button class="action-btn" id="btn-artifacts" onclick="showPanel('artifacts')">Artifacts</button>
+        <button class="action-btn" id="btn-settings" onclick="showPanel('settings')">Settings</button>
+        <button class="action-btn" id="btn-log" onclick="showPanel('log')" style="position:relative;">Log<span class="news-badge" id="newsBadge"></span></button>
+      </div>
+      <div class="status-bar">
+        <div class="status-item"><span class="status-dot"></span><span>System Online</span></div>
+        <div class="status-item">Theme: <span id="currentThemeName">TRON</span></div>
+        <div class="status-item"><span id="currentTime">--:--:--</span></div>
+        <div class="status-item">v2.4.7</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <aside class="sidebar">
+        <h2 class="sidebar-title">// Navigation</h2>
+        <ul class="nav-menu" id="navMenu">
+          <li class="nav-item">
+            <button class="nav-button expanded active" data-category="visual" onclick="toggleNav(this)"><span>Visual Apps</span><svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+            <div class="submenu open" id="submenu-visual">
+              <div class="submenu-item selected" onclick="filterArtifacts('all')">All Visual</div>
+              <div class="submenu-item" onclick="filterArtifacts('generative')">Generative Art</div>
+              <div class="submenu-item" onclick="filterArtifacts('3d')">3D Experiments</div>
+              <div class="submenu-item" onclick="filterArtifacts('animation')">Animations</div>
+            </div>
+          </li>
+          <li class="nav-item">
+            <button class="nav-button" data-category="games" onclick="toggleNav(this)"><span>Games</span><svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+            <div class="submenu" id="submenu-games">
+              <div class="submenu-item" onclick="filterArtifacts('arcade')">Arcade</div>
+              <div class="submenu-item" onclick="launchApp('shooter')">Space Shooter</div>
+            </div>
+          </li>
+          <li class="nav-item">
+            <button class="nav-button" data-category="audio" onclick="toggleNav(this)"><span>Audio Lab</span><svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+            <div class="submenu open" id="submenu-audio">
+              <div class="submenu-item" onclick="launchApp('synth')">Synthesizer</div>
+              <div class="submenu-item" onclick="launchApp('fieldrec')">Field Recorder<span class="required-tag">NEW</span></div>
+              <div class="submenu-item" onclick="filterArtifacts('visualizer')">Visualizers</div>
+            </div>
+          </li>
+          <li class="nav-item">
+            <button class="nav-button" data-category="tools" onclick="toggleNav(this)"><span>Tools</span><svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+            <div class="submenu" id="submenu-tools">
+              <div class="submenu-item" onclick="filterArtifacts('converter')">Converters</div>
+              <div class="submenu-item" onclick="filterArtifacts('generator')">Generators</div>
+            </div>
+          </li>
+        </ul>
+      </aside>
+
+      <section class="content-panel">
+        <!-- ARTIFACTS -->
+        <div class="artifacts-view panel-content active" id="panel-artifacts">
+          <div class="panel-header">
+            <h2 class="panel-title" id="panelTitle">All Artifacts</h2>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="action-btn" onclick="refreshArtifacts()">Refresh</button>
+              <button class="action-btn" onclick="shuffleArtifacts()">Shuffle</button>
+            </div>
+          </div>
+          <div class="artifacts-grid" id="artifactsGrid"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="settings-panel panel-content" id="panel-settings">
+          <div class="panel-header"><h2 class="panel-title">System Configuration</h2></div>
+          <div class="settings-section">
+            <h3 class="settings-section-title">Appearance</h3>
+            <div class="setting-row"><span class="setting-label">Theme</span><div class="theme-selector">
+              <button class="theme-btn active" data-theme="default" onclick="setTheme('default')"></button>
+              <button class="theme-btn" data-theme="synthwave" onclick="setTheme('synthwave')"></button>
+              <button class="theme-btn" data-theme="cyberpunk" onclick="setTheme('cyberpunk')"></button>
+              <button class="theme-btn" data-theme="retro8bit" onclick="setTheme('retro8bit')"></button>
+              <button class="theme-btn" data-theme="midnight" onclick="setTheme('midnight')"></button>
+              <button class="theme-btn" data-theme="vaporwave" onclick="setTheme('vaporwave')"></button>
+            </div></div>
+            <div class="setting-row"><span class="setting-label">Scanlines</span><div class="toggle-switch active" id="toggleScanlines" onclick="toggleSetting('scanlines')"></div></div>
+            <div class="setting-row"><span class="setting-label">Particles</span><div class="slider-container"><input type="range" class="slider" min="0" max="100" value="50" oninput="updateParticles(this.value)"><span class="slider-value" id="particleValue">50%</span></div></div>
+          </div>
+          <div class="settings-section">
+            <h3 class="settings-section-title">Audio</h3>
+            <div class="setting-row"><span class="setting-label">Sound FX</span><div class="toggle-switch active" id="toggleSound" onclick="toggleSetting('sound')"></div></div>
+            <div class="setting-row"><span class="setting-label">Volume</span><div class="slider-container"><input type="range" class="slider" min="0" max="100" value="70" oninput="updateVolume(this.value)"><span class="slider-value" id="volumeValue">70%</span></div></div>
+          </div>
+        </div>
+
+        <!-- LOG -->
+        <div class="log-panel panel-content" id="panel-log">
+          <div class="panel-header"><h2 class="panel-title">System Log</h2><button class="action-btn" onclick="clearLog()">Clear</button></div>
+          <div class="log-container" id="logContainer"></div>
+        </div>
+
+        <!-- SHOOTER -->
+        <div class="app-panel panel-content" id="panel-shooter">
+          <div class="app-container">
+            <div class="app-toolbar">
+              <span class="app-title">HYPERBLAST // Side Scrolling Shooter</span>
+              <div class="app-actions">
+                <button class="app-btn" onclick="startShooter()">START</button>
+                <button class="app-btn" onclick="pauseShooter()">PAUSE</button>
+                <button class="app-btn" onclick="showPanel('artifacts')">EXIT</button>
+              </div>
+            </div>
+            <div class="app-body">
+              <canvas id="shooterCanvas" class="shooter-canvas"></canvas>
+              <div class="shooter-hud">
+                <div class="hud-item"><span class="hud-label">Score</span><span class="hud-value" id="shooterScore">0</span></div>
+                <div class="hud-item"><span class="hud-label">Health</span><div class="health-bar"><div class="health-fill" id="healthFill" style="width:100%"></div></div></div>
+                <div class="hud-item"><span class="hud-label">Wave</span><span class="hud-value" id="shooterWave">1</span></div>
+                <div class="hud-item"><span class="hud-label">Lives</span><span class="hud-value" id="shooterLives">3</span></div>
+              </div>
+              <div class="shooter-controls">
+                <div class="control-key empty"></div><div class="control-key">W / ↑</div><div class="control-key empty"></div>
+                <div class="control-key">A / ←</div><div class="control-key">S / ↓</div><div class="control-key">D / →</div>
+                <div class="control-key empty"></div><div class="control-key">SPACE</div><div class="control-key empty"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SYNTH -->
+        <div class="app-panel panel-content" id="panel-synth">
+          <div class="app-container">
+            <div class="app-toolbar">
+              <span class="app-title">WAVESYNTH // Modular Synthesizer</span>
+              <div class="app-actions">
+                <button class="app-btn" onclick="initSynthAudio()">INIT AUDIO</button>
+                <button class="app-btn" onclick="playSequence()">PLAY SEQ</button>
+                <button class="app-btn" onclick="stopSequence()">STOP</button>
+                <button class="app-btn" onclick="showPanel('artifacts')">EXIT</button>
+              </div>
+            </div>
+            <div class="app-body synth-container">
+              <div class="synth-module">
+                <div class="module-header"><span class="module-title">OSCILLATOR</span><div class="module-toggle active"></div></div>
+                <div class="oscillator-grid">
+                  <button class="osc-btn active" data-wave="sine" onclick="setOscWave(this)">Sine</button>
+                  <button class="osc-btn" data-wave="square" onclick="setOscWave(this)">Square</button>
+                  <button class="osc-btn" data-wave="sawtooth" onclick="setOscWave(this)">Saw</button>
+                  <button class="osc-btn" data-wave="triangle" onclick="setOscWave(this)">Tri</button>
+                </div>
+                <div class="knob-group" style="margin-top:1rem;">
+                  <div class="knob-item"><span class="knob-label">Freq</span><input type="range" class="knob" min="20" max="2000" value="220" oninput="updateOscFreq(this.value)"><span class="knob-value" id="freqVal">220Hz</span></div>
+                  <div class="knob-item"><span class="knob-label">Detune</span><input type="range" class="knob" min="-100" max="100" value="0" oninput="updateDetune(this.value)"><span class="knob-value" id="detuneVal">0</span></div>
+                  <div class="knob-item"><span class="knob-label">Gain</span><input type="range" class="knob" min="0" max="100" value="70" oninput="updateOscGain(this.value)"><span class="knob-value" id="gainVal">70%</span></div>
+                </div>
+              </div>
+              <div class="synth-module">
+                <div class="module-header"><span class="module-title">ENVELOPE (ADSR)</span><div class="module-toggle active"></div></div>
+                <div class="knob-group">
+                  <div class="knob-item"><span class="knob-label">Attack</span><input type="range" class="knob" min="0" max="2000" value="100" oninput="updateADSR('attack',this.value)"><span class="knob-value" id="attackVal">0.1s</span></div>
+                  <div class="knob-item"><span class="knob-label">Decay</span><input type="range" class="knob" min="0" max="2000" value="200" oninput="updateADSR('decay',this.value)"><span class="knob-value" id="decayVal">0.2s</span></div>
+                  <div class="knob-item"><span class="knob-label">Sustain</span><input type="range" class="knob" min="0" max="100" value="60" oninput="updateADSR('sustain',this.value)"><span class="knob-value" id="sustainVal">60%</span></div>
+                  <div class="knob-item"><span class="knob-label">Release</span><input type="range" class="knob" min="0" max="3000" value="500" oninput="updateADSR('release',this.value)"><span class="knob-value" id="releaseVal">0.5s</span></div>
+                </div>
+              </div>
+              <div class="synth-module">
+                <div class="module-header"><span class="module-title">WAVEFORM</span></div>
+                <div class="waveform-display"><canvas id="waveformCanvas"></canvas></div>
+              </div>
+              <div class="synth-module">
+                <div class="module-header"><span class="module-title">STEP SEQUENCER (16 Steps)</span></div>
+                <div class="sequencer-grid" id="sequencerGrid"></div>
+                <div style="display:flex;gap:1rem;margin-top:.75rem;align-items:center;"><span style="font-size:.75rem;color:rgba(255,255,255,.6);">BPM:</span><input type="range" class="slider" style="width:100px;" min="60" max="200" value="120" id="bpmSlider" oninput="updateBPM(this.value)"><span class="slider-value" id="bpmVal">120</span></div>
+              </div>
+              <div class="synth-module"><div class="module-header"><span class="module-title">KEYBOARD</span></div><div class="piano-keys" id="pianoKeys"></div></div>
+              <div class="synth-module"><div class="module-header"><span class="module-title">SAMPLES</span></div><div class="sample-loader"><label class="sample-btn">Load Sample<input type="file" accept="audio/*" style="display:none;" onchange="loadSample(event)"></label><button class="sample-btn" onclick="playSample()">Play</button><span id="sampleName" style="font-size:.75rem;color:var(--accent);">No sample</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FIELD RECORDER -->
+        <div class="app-panel panel-content" id="panel-fieldrec">
+          <div class="app-container">
+            <div class="app-toolbar">
+              <span class="app-title">SPACE FIELD RECORDER <span class="lofi-badge">LO-FI MPC</span></span>
+              <div class="app-actions">
+                <button class="app-btn" onclick="initFieldRecAudio()">INIT AUDIO</button>
+                <button class="app-btn" id="playBtn" onclick="toggleFieldRecPlay()">PLAY</button>
+                <button class="app-btn" onclick="stopFieldRec()">STOP</button>
+                <button class="app-btn" onclick="bounceFieldRec()">BOUNCE</button>
+                <button class="app-btn" onclick="showPanel('artifacts')">EXIT</button>
+              </div>
+            </div>
+            <div class="app-body">
+              <!-- SWING CONTROL -->
+              <div class="swing-control">
+                <span class="swing-label">MPC SWING</span>
+                <input type="range" class="swing-slider" id="swingSlider" min="0" max="100" value="67" oninput="updateSwing(this.value)">
+                <span class="swing-value" id="swingValue">67%</span>
+              </div>
+
+              <div class="fieldrec-grid">
+                <!-- DRUM TRACK -->
+                <div class="track-panel">
+                  <div class="track-header">
+                    <span class="track-name"><span class="track-indicator" id="drumInd"></span>DRUMS <span class="required-tag">REQUIRED</span></span>
+                    <button class="track-mute" id="drumMute" onclick="toggleTrackMute('drums')">MUTE</button>
+                  </div>
+                  <p style="font-size:.7rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;">Upload drum loop or trigger individual hits</p>
+                  <div class="pad-grid" id="drumPads">
+                    <div class="mpc-pad kick" data-track="drums" data-sound="kick" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">KICK<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad snare" data-track="drums" data-sound="snare" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">SNARE<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad hihat" data-track="drums" data-sound="hihat" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">HIHAT<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad perc" data-track="drums" data-sound="perc" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">PERC<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                  </div>
+                  <div class="fx-row" style="margin-top:.75rem;">
+                    <div class="fx-knob"><label>Crunch</label><input type="range" class="fx-slider" min="0" max="100" value="30" onchange="updateTrackFX('drums','crunch',this.value)"><span id="drumCrunchVal">30</span></div>
+                    <div class="fx-knob"><label>LoFi</label><input type="range" class="fx-slider" min="0" max="100" value="50" onchange="updateTrackFX('drums','lofi',this.value)"><span id="drumLofiVal">50</span></div>
+                    <div class="fx-knob"><label>Pan</label><input type="range" class="fx-slider" min="-100" max="100" value="0" onchange="updateTrackFX('drums','pan',this.value)"><span id="drumPanVal">C</span></div>
+                  </div>
+                  <label class="sample-btn" style="margin-top:.5rem;width:100%;text-align:center;">Upload Drum Loop<input type="file" accept="audio/*" style="display:none;" onchange="loadDrumLoop(event)"></label>
+                </div>
+
+                <!-- ECHO/ATMOSPHERE TRACK -->
+                <div class="track-panel">
+                  <div class="track-header">
+                    <span class="track-name"><span class="track-indicator" id="echoInd"></span>ECHOES <span class="required-tag">REQUIRED</span></span>
+                    <button class="track-mute" id="echoMute" onclick="toggleTrackMute('echoes')">MUTE</button>
+                  </div>
+                  <p style="font-size:.7rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;">Moody ambient layers & field recordings</p>
+                  <div class="pad-grid" id="echoPads">
+                    <div class="mpc-pad echo" data-track="echoes" data-sound="echo1" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">ECHO 1<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad echo" data-track="echoes" data-sound="echo2" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">ECHO 2<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad echo" data-track="echoes" data-sound="atmos" onclick="triggerPad(this)" oncontextmenu="loadPadSample(event,this)">ATMOS<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad echo" data-track="echoes" data-sound="noise" onclick="generateNoise(this)">NOISE<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                  </div>
+                  <div class="fx-row" style="margin-top:.75rem;">
+                    <div class="fx-knob><label>Reverb</label><input type="range" class="fx-slider" min="0" max="100" value="70" onchange="updateTrackFX('echoes','reverb',this.value)"><span id="echoReverbVal">70</span></div>
+                    <div class="fx-knob"><label>Delay</label><input type="range" class="fx-slider" min="0" max="100" value="45" onchange="updateTrackFX('echoes','delay',this.value)"><span id="echoDelayVal">45</span></div>
+                    <div class="fx-knob"><label>Decay</label><input type="range" class="fx-slider" min="0" max="100" value="60" onchange="updateTrackFX('echoes','decay',this.value)"><span id="echoDecayVal">60</span></div>
+                  </div>
+                </div>
+
+                <!-- RADIO BIRPS/GLITCH -->
+                <div class="track-panel">
+                  <div class="track-header">
+                    <span class="track-name"><span class="track-indicator" id="birpInd"></span>RADIO BIRPS <span class="required-tag">REQUIRED</span></span>
+                    <button class="track-mute" id="birpMute" onclick="toggleTrackMute('birps')">MUTE</button>
+                  </div>
+                  <p style="font-size:.7rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;">Static, glitches, radio interference textures</p>
+                  <div class="pad-grid" id="birpPads">
+                    <div class="mpc-pad birp" data-track="birps" data-sound="static" onclick="generateStatic(this)">STATIC<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad birp" data-track="birps" data-sound="glitch" onclick="generateGlitch(this)">GLITCH<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad birp" data-track="birps" data-sound="radio" onclick="generateRadio(this)">RADIO<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad birp" data-track="birps" data-sound="vinyl" onclick="generateVinyl(this)">VINYL<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                  </div>
+                  <div class="fx-row" style="margin-top:.75rem;">
+                    <div class="fx-knob"><label>Bitcrush</label><input type="range" class="fx-slider" min="0" max="100" value="60" onchange="updateTrackFX('birps','bitcrush',this.value)"><span id="birpBitVal">60</span></div>
+                    <div class="fx-knob"><label>Warp</label><input type="range" class="fx-slider" min="0" max="100" value="40" onchange="updateTrackFX('birps','warp',this.value)"><span id="birpWarpVal">40</span></div>
+                    <div class="fx-knob"><label>Freq</label><input type="range" class="fx-slider" min="0" max="100" value="50" onchange="updateTrackFX('birps','freq',this.value)"><span id="birpFreqVal">50</span></div>
+                  </div>
+                </div>
+
+                <!-- SYNTH ARPEGGIOS -->
+                <div class="track-panel">
+                  <div class="track-header">
+                    <span class="track-name"><span class="track-indicator" id="synthInd"></span>SYNTH ARP <span class="required-tag">REQUIRED</span></span>
+                    <button class="track-mute" id="synthMute" onclick="toggleTrackMute('synth')">MUTE</button>
+                  </div>
+                  <p style="font-size:.7rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;">Lo-fi synth arpeggio patterns</p>
+                  <div class="pad-grid" id="synthPads">
+                    <div class="mpc-pad synth" data-track="synth" data-sound="arp1" onclick="playArpPad(this,'minor')">MINOR<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad synth" data-track="synth" data-sound="arp2" onclick="playArpPad(this,'major')">MAJOR<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad synth" data-track="synth" data-sound="arp3" onclick="playArpPad(this,'pentatonic')">PENTA<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                    <div class="mpc-pad synth" data-track="synth" data-sound="arp4" onclick="playArpPad(this,'blues')">BLUES<div class="waveform-mini"><div class="waveform-line"></div></div></div>
+                  </div>
+                  <div class="fx-row" style="margin-top:.75rem;">
+                    <div class="fx-knob"><label>Cutoff</label><input type="range" class="fx-slider" min="0" max="100" value="55" onchange="updateTrackFX('synth','cutoff',this.value)"><span id="synthCutVal">55</span></div>
+                    <div class="fx-knob"><label>Reso</label><input type="range" class="fx-slider" min="0" max="100" value="30" onchange="updateTrackFX('synth','reso',this.value)"><span id="synthResVal">30</span></div>
+                    <div class="fx-knob"><label>Rate</label><input type="range" class="fx-slider" min="0" max="100" value="50" onchange="updateTrackFX('synth','rate',this.value)"><span id="synthRateVal">50</span></div>
+                  </div>
+                  <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+                    <select class="select-styled" style="font-size:.75rem;" id="synthWaveSelect" onchange="updateSynthWave(this.value)">
+                      <option value="sine">Sine (Warm)</option>
+                      <option value="triangle">Triangle (Soft)</option>
+                      <option value="square">Square (Retro)</option>
+                      <option value="sawtooth">Saw (Bright)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP SEQUENCER FOR FIELD REC -->
+              <div class="track-panel" style="margin-top:1rem;">
+                <div class="module-header"><span class="module-title">PATTERN SEQUENCER (16 Steps)</span><span style="font-size:.7rem;color:rgba(255,255,255,.5);">Right-click pads to assign to steps</span></div>
+                <div class="sequencer-grid" id="fieldSeqGrid" style="grid-template-columns:repeat(16,1fr);"></div>
+                <div style="display:flex;gap:1rem;margin-top:.75rem;align-items:center;flex-wrap:wrap;">
+                  <span style="font-size:.75rem;color:rgba(255,255,255,.6);">TEMPO:</span>
+                  <input type="range" class="slider" style="width:120px;" min="60" max="160" value="90" id="frTempoSlider" oninput="updateFRTempo(this.value)">
+                  <span class="slider-value" id="frTempoVal">90 BPM</span>
+                  <span style="font-size:.75rem;color:rgba(255,255,255,.6);margin-left:1rem;">STEPS:</span>
+                  <select class="select-styled" style="font-size:.75rem;" id="stepCountSel" onchange="changeStepCount(this.value)">
+                    <option value="8">8</option><option value="16" selected>16</option><option value="32">32</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- MASTER -->
+              <div class="master-section">
+                <div class="module-header"><span class="module-title">MASTER OUTPUT</span></div>
+                <div class="master-controls">
+                  <div>
+                    <span style="font-size:.7rem;color:rgba(255,255,255,.5);">L</span>
+                    <div class="vu-meter"><div class="vu-fill" id="vuL" style="height:0%"></div></div>
+                  </div>
+                  <div>
+                    <span style="font-size:.7rem;color:rgba(255,255,255,.5);">R</span>
+                    <div class="vu-meter"><div class="vu-fill" id="vuR" style="height:0%"></div></div>
+                  </div>
+                  <div class="fx-knob" style="min-width:80px;">
+                    <label>MASTER VOL</label>
+                    <input type="range" class="fx-slider" style="width:100px;" min="0" max="100" value="75" orient="horizontal" oninput="updateMasterVol(this.value)">
+                    <span id="masterVolVal">75%</span>
+                  </div>
+                  <div class="fx-knob" style="min-width:80px;">
+                    <label>Tape Sat</label>
+                    <input type="range" class="fx-slider" style="width:100px;" min="0" max="100" value="35" orient="horizontal" oninput="updateTapeSat(this.value)">
+                    <span id="tapeSatVal">35%</span>
+                  </div>
+                  <div class="fx-knob" style="min-width:80px;">
+                    <label>Vinyl</label>
+                    <input type="range" class="fx-slider" style="width:100px;" min="0" max="100" value="25" orient="horizontal" oninput="updateVinylFX(this.value)">
+                    <span id="vinylVal">25%</span>
+                  </div>
+                  <div class="transport">
+                    <button class="transport-btn" id="frPlayBtn" onclick="toggleFieldRecPlay()">PLAY</button>
+                    <button class="transport-btn" onclick="stopFieldRec()">STOP</button>
+                    <button class="transport-btn" onclick="clearPattern()">CLEAR</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:1rem;padding:1rem;background:rgba(255,51,102,.1);border:1px solid var(--accent-secondary);border-radius:8px;">
+                <p style="font-size:.8rem;color:var(--accent-secondary);font-family:'Orbitron';margin:0;">
+                  REQUIREMENTS: Add at least one DRUM sound (kick/snare/hhat/perc or loop), one ECHO layer, one RADIO BIRP texture, and one SYNTH ARPEGGIO before bouncing.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-status">
+      <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--accent);">READY</span>|<span>CPU:<span id="cpuUsage">23%</span></span>|<span>MEM:<span id="memUsage">156MB</span></span></div>
+      <div class="ticker"><span class="ticker-content">NEXUS CONSOLE ONLINE // SPACE SHOOTER + SYNTHESIZER + FIELD RECORDER READY // LO-FI MPC BEATS // DILLA SWING ACTIVE</span></div>
+      <div style="display:flex;align-items:center;gap:.5rem;"><span>CONNECTED</span>|<span>PING:<span id="pingValue">12ms</span></span></div>
+    </footer>
+  </div>
+
+  <script>
+    // =============================================
+    // GLOBAL STATE
+    // =============================================
+    const artifacts = [
+      {id:1,name:"Plasma Field",desc:"Interactive plasma simulation",category:["generative","animation"],icon:"⚡"},
+      {id:2,name:"Neural Viz",desc:"3D neural network visualization",category:["3d","generative"],icon:"🧠"},
+      {id:3,name:"Fractal Explorer",desc:"Mandelbrot/Julia set explorer",category:["generative","3d"],icon:"🌀"},
+      {id:4,name:"Pixel Studio",desc:"Retro pixel art creator",category:["tools","generator"],icon:"🎨"},
+      {id:101,name:"SPACE SHOOTER",desc:"Side-scrolling arcade shooter",category:["games","arcade"],icon:"🚀",isApp:true,appId:"shooter"},
+      {id:102,name:"SYNTHESIZER",desc:"Modular synthesizer with sequencing",category:["audio","synthesizer"],icon:"🎹",isApp:true,appId:"synth"},
+      {id:103,name:"FIELD RECORDER",desc:"Lo-fi MPC-style sampler with Dilla swing beats",category:["audio","sampler"],icon:"📼",isApp:true,appId:"fieldrec"}
+    ];
+    const themeNames={default:"TRON",synthwave:"Synthwave",cyberpunk:"Cyberpunk",retro8bit:"8-Bit Retro",midnight:"Midnight Blue",vaporwave:"Vaporwave"};
+    let state={currentPanel:'artifacts',soundEnabled:true,volume:.7,particleDensity:50};
+    let audioContext=null;
+
+    function initAudio(){if(!audioContext)audioContext=new(AudioContext||webkitAudioContext)();}
+    document.addEventListener('click',initAudio,{once:true});
+
+    function playSound(t){
+      if(!state.soundEnabled||!audioContext)return;
+      const o=audioContext.createOscillator(),g=audioContext.createGain();
+      o.connect(g);g.connect(audioContext.destination);
+      g.gain.setValueAtTime(state.volume*.3,audioContext.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+.15);
+      const m={click:[800,'square'],hover:[1200,'sine'],success:[523,'triangle'],error:[200,'sawtooth']};
+      if(m[t]){o.frequency.setValueAtTime(m[t][0],audioContext.currentTime);o.type=m[t][1];}
+      o.start();o.stop(audioContext.currentTime+.15);
+    }
+
+    // PARTICLES
+    const pCanvas=document.getElementById('particles-canvas'),pCtx=pCanvas.getContext('2d');
+    let particles=[];
+    function resizePCanvas(){pCanvas.width=innerWidth;pCanvas.height=innerHeight;}
+    function createParticles(){
+      particles=[];
+      for(let i=0;i<Math.floor(state.particleDensity*.8);i++)
+        particles.push({x:Math.random()*pCanvas.width,y:Math.random()*pCanvas.height,size:Math.max(.5,Math.random()*2.5),sx:(Math.random()-.5)*.5,sy:(Math.random()-.5)*.5,op:Math.random()*.5+.2});
+    }
+    function drawParticles(){
+      pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+      const s=getComputedStyle(document.body),c1=s.getPropertyValue('--fg-primary').trim()||'#00ffff',c2=s.getPropertyValue('--fg-secondary').trim()||'#ff00ff';
+      particles.forEach((p,i)=>{
+        p.x+=p.sx;p.y+=p.sy;
+        if(p.x<0)p.x=pCanvas.width;if(p.x>pCanvas.width)p.x=0;
+        if(p.y<0)p.y=pCanvas.height;if(p.y>pCanvas.height)p.y=0;
+        pCtx.beginPath();pCtx.arc(p.x,p.y,Math.max(.5,p.size),0,Math.PI*2);
+        pCtx.fillStyle=i%2?c1:c2;pCtx.globalAlpha=p.op;pCtx.fill();
+        particles.slice(i+1).forEach(p2=>{
+          const d=Math.hypot(p.x-p2.x,p.y-p2.y);
+          if(d<100){pCtx.beginPath();pCtx.moveTo(p.x,p.y);pCtx.lineTo(p2.x,p2.y);pCtx.strokeStyle=c1;pCtx.globalAlpha=(1-d/100)*.15;pCtx.stroke();}
+        });
+      });
+      pCtx.globalAlpha=1;requestAnimationFrame(drawParticles);
+    }
+
+    // THEME & SETTINGS
+    function setTheme(t){
+      document.body.dataset.theme=t;
+      document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===t));
+      document.getElementById('currentThemeName').textContent=themeNames[t]||t;
+      addLog('success','Theme: '+themeNames[t]);playSound('navigate');
+    }
+    function toggleSetting(s){
+      const el=document.getElementById('toggle'+s.charAt(0).toUpperCase()+s.slice(1));
+      if(s==='scanlines'){state[s+'Enabled']=!state[s+'Enabled'];document.getElementById('scanlines').style.display=state[s+'Enabled']?'block':'none';el.classList.toggle('active');}
+      else if(s==='sound'){state.soundEnabled=!state.soundEnabled;el.classList.toggle('active');if(state.soundEnabled)playSound('click');}
+    }
+    function updateVolume(v){state.volume=v/100;document.getElementById('volumeValue').textContent=v+'%';}
+    function updateParticles(v){state.particleDensity=parseInt(v);document.getElementById('particleValue').textContent=v+'%';createParticles();}
+
+    // NAVIGATION
+    function showPanel(p){
+      state.currentPanel=p;
+      document.querySelectorAll('.panel-content').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('active'));
+      const pnl=document.getElementById('panel-'+p);if(pnl)pnl.classList.add('active');
+      const btn=document.getElementById('btn-'+p);if(btn)btn.classList.add('active');
+      playSound('click');
+      if(p!=='shooter'&&p!=='synth'&&p!=='fieldrec'){pauseShooter();stopSequence();stopFieldRec();}
+    }
+    function launchApp(id){showPanel(id);playSound('success');addLog('success','Launching '+id.toUpperCase());if(id==='shooter')setTimeout(initShooter,100);if(id==='synth')setTimeout(initSynthUI,100);if(id==='fieldrec')setTimeout(initFieldRecUI,100);}
+    function toggleNav(btn){
+      const cat=btn.dataset.category,sub=document.getElementById('submenu-'+cat),isOpen=sub.classList.contains('open');
+      document.querySelectorAll('.submenu').forEach(s=>s.classList.remove('open'));
+      document.querySelectorAll('.nav-button').forEach(b=>b.classList.remove('expanded','active'));
+      if(!isOpen){sub.classList.add('open');btn.classList.add('expanded','active');}else btn.classList.add('active');
+      playSound('click');
+    }
+    function filterArtifacts(f){
+      state.currentFilter=f;
+      event.target.closest('.submenu').querySelectorAll('.submenu-item').forEach(i=>i.classList.remove('selected'));
+      event.target.classList.add('selected');
+      renderArtifacts(f);playSound('hover');
+      document.getElementById('panelTitle').textContent=f==='all'?'All Artifacts':f;
+    }
+    function renderArtifacts(f='all'){
+      document.getElementById('artifactsGrid').innerHTML=(f==='all'?artifacts:artifacts.filter(a=>a.category.includes(f))).map(a=>`
+        <div class="artifact-card" ${a.isApp?`onclick="launchApp('${a.appId}')"`:''} onmouseenter="playSound('hover')">
+          <div class="artifact-icon">${a.icon}</div><h3 class="artifact-name">${a.name}${a.isApp?' [APP]':''}</h3>
+          <p class="artifact-desc">${a.desc}</p><div class="artifact-meta">${a.category.map(c=>`<span class="meta-tag">${c}</span>`).join('')}</div>
+        </div>`).join('');
+    }
+    function refreshArtifacts(){renderArtifacts(state.currentFilter);playSound('success');addLog('success','Refreshed');}
+    function shuffleArtifacts(){
+      const g=document.getElementById('artifactsGrid');Array.from(g.children).forEach((_,i,a)=>{if(i<a.length-1)g.appendChild(a[Math.floor(Math.random()*a.length)]);});
+      playSound('navigate');addLog('info','Shuffled');
+    }
+
+    // LOG
+    function addLog(type,msg){
+      const c=document.getElementById('logContainer'),t=new Date().toLocaleTimeString('de-DE',{hour12:false});
+      const e=document.createElement('div');e.className='log-entry '+type;
+      e.innerHTML=`<div class="log-time">${t}</div><div class="log-message">${msg}</div>`;
+      c.insertBefore(e,c.firstChild);while(c.children.length>50)c.removeChild(c.lastChild);
+      document.getElementById('newsBadge').style.display='block';
+    }
+    function clearLog(){document.getElementById('logContainer').innerHTML='';document.getElementById('newsBadge').style.display='none';addLog('info','Log cleared');}
+
+    // =============================================
+    // SHOOTER GAME
+    // =============================================
+    let shooterState=null;
+    const sCanvas=document.getElementById('shooterCanvas'),sCtx=sCanvas.getContext('2d');
+
+    function initShooter(){
+      sCanvas.width=sCanvas.offsetWidth;sCanvas.height=sCanvas.offsetHeight;
+      shooterState={running:false,paused:false,
+        player:{x:60,y:sCanvas.height/2,w:40,h:24,vy:0,health:100,lives:3,invincible:0},
+        bullets:[],enemies:[],particles:[],powerups:[],score:0,wave:1,enemyTimer:0,enemyInterval:90,bulletTimer:0,keys:{}};
+      document.getElementById('shooterScore').textContent='0';document.getElementById('shooterWave').textContent='1';
+      document.getElementById('shooterLives').textContent='3';document.getElementById('healthFill').style.width='100%';
+    }
+    function startShooter(){if(!shooterState)initShooter();shooterState.running=true;shooterState.paused=false;if(!shooterState.gameLoop)shooterState.gameLoop=requestAnimationFrame(shooterLoop);addLog('success','SHOOTER started');playSound('navigate');}
+    function pauseShooter(){if(shooterState)shooterState.paused=!shooterState.paused;}
+    function shooterLoop(){
+      if(!shooterState||!shooterState.running)return;
+      if(shooterState.paused){shooterState.gameLoop=requestAnimationFrame(shooterLoop);return;}
+      updateShooter();drawShooter();shooterState.gameLoop=requestAnimationFrame(shooterLoop);
+    }
+    function updateShooter(){
+      const st=shooterState,p=st.player;
+      if(st.keys['ArrowUp']||st.keys['KeyW'])p.vy-=.8;if(st.keys['ArrowDown']||st.keys['KeyS'])p.vy+=.8;
+      p.vy*=.92;p.y+=p.vy;p.y=Math.max(p.h/2,Math.min(sCanvas.height-p.h/2,p.y));
+      if(p.invincible>0)p.invincible--;
+      st.enemyTimer++;
+      if(st.keys['Space']&&st.bulletTimer<=0){st.bullets.push({x:p.x+p.w/2,y:p.y,vx:12,friendly:true});st.bulletTimer=8;playSound('click');}
+      if(st.bulletTimer>0)st.bulletTimer--;
+      if(st.enemyTimer>=st.enemyInterval){
+        st.enemyTimer=0;const t=Math.random()>.7?'big':'small';
+        st.enemies.push({x:sCanvas.width+30,y:Math.random()*(sCanvas.height-40)+20,w:t==='big'?50:30,h:t==='big'?30:18,hp:t==='big'?3:1,vx:-2-Math.random()*2-st.wave*.2,vy:(Math.random()-.5)*2,type:t});
+      }
+      st.bullets=st.bullets.filter(b=>{b.x+=b.vx;b.y+=(b.vy||0);return b.x>-10&&b.x<sCanvas.width+10&&b.y>-10&&b.y<sCanvas.height+10;});
+      st.enemies=st.enemies.filter(e=>{
+        e.x+=e.vx;e.y+=e.vy;if(e.y<e.h/2||e.y>sCanvas.height-e.h/2)e.vy*=-1;
+        for(let i=st.bullets.length-1;i>=0;i--){
+          const b=st.bullets[i];if(b.friendly&&rectColl(b.x-4,b.y-4,8,8,e.x-e.w/2,e.y-e.h/2,e.w,e.h)){
+            st.bullets.splice(i,1);e.hp--;spawnParts(e.x,e.y,'#ffff00',5);
+            if(e.hp<=0){st.score+=e.type==='big'?100:50;spawnParts(e.x,e.y,e.type==='big'?'#ff6600':'#ff0066',15);if(Math.random()<.1)st.powerups.push({x:e.x,y:e.y,type:'heal'});document.getElementById('shooterScore').textContent=st.score;return false;}
+          }
+        }
+        if(p.invincible<=0&&rectColl(p.x-p.w/2,p.y-p.h/2,p.w,p.h,e.x-e.w/2,e.y-e.h/2,e.w,e.h)){
+          p.health-=25;p.invincible=120;spawnParts(p.x,p.y,'#ff0000',10);document.getElementById('healthFill').style.width=Math.max(0,p.health)+'%';playSound('error');
+          if(p.health<=0){p.lives--;document.getElementById('shooterLives').textContent=p.lives;if(p.lives<=0){gameOver();return false;}p.health=100;document.getElementById('healthFill').style.width='100%';}
+        }
+        return e.x>-50;
+      });
+      st.powerups=st.powerups.filter(pow=>{pow.x-=2;if(rectColl(pow.x-10,pow.y-10,20,20,p.x-p.w/2,p.y-p.h/2,p.w,p.h)){if(pow.type==='heal')p.health=Math.min(100,p.health+30);document.getElementById('healthFill').style.width=p.health+'%';spawnParts(pow.x,p.y,'#00ff88',8);playSound('success');return false;}return pow.x>-20;});
+      st.particles=st.particles.filter(pt=>{pt.x+=pt.vx;pt.y+=pt.vy;pt.life--;pt.vx*=.98;pt.vy*=.98;return pt.life>0;});
+      if(st.score>st.wave*500){st.wave++;st.enemyInterval=Math.max(30,st.enemyInterval-5);document.getElementById('shooterWave').textContent=st.wave;}
+    }
+    function rectColl(x1,y1,w1,h1,x2,y2,w2,h2){return x1<x2+w2&&x1+w1>x2&&y1<y2+h2&&y1+h1>y2;}
+    function spawnParts(x,y,c,n){for(let i=0;i<n;i++)shooterState.particles.push({x,y,vx:(Math.random()-.5)*8,vy:(Math.random()-.5)*8,life:30+Math.random()*20,color:c,size:2+Math.random()*3});}
+    function drawShooter(){
+      const st=shooterState;
+      const grad=sCtx.createLinearGradient(0,0,sCanvas.width,sCanvas.height);grad.addColorStop(0,'#0a0015');grad.addColorStop(1,'#150020');
+      sCtx.fillStyle=grad;sCtx.fillRect(0,0,sCanvas.width,sCanvas.height);
+      sCtx.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<50;i++)sCtx.fillRect((i*137+Date.now()/20)%sCanvas.width,(i*97)%sCanvas.height,1,1);
+      st.particles.forEach(pt=>{sCtx.globalAlpha=pt.life/50;sCtx.fillStyle=pt.color;sCtx.beginPath();sCtx.arc(pt.x,pt.y,Math.max(.5,pt.size),0,Math.PI*2);sCtx.fill();});
+      sCtx.globalAlpha=1;
+      st.bullets.forEach(b=>{sCtx.fillStyle=b.friendly?'#00ffff':'#ff3366';sCtx.shadowColor=b.friendly?'#00ffff':'#ff3366';sCtx.shadowBlur=10;sCtx.fillRect(b.x-4,b.y-2,8,4);});
+      sCtx.shadowBlur=0;
+      st.enemies.forEach(e=>{sCtx.fillStyle=e.type==='big'?'#ff6600':'#ff0066';sCtx.shadowColor=e.type==='big'?'#ff6600':'#ff0066';sCtx.shadowBlur=8;sCtx.beginPath();sCtx.moveTo(e.x+e.w/2,e.y-e.h/2);sCtx.lineTo(e.x-e.w/2,e.y+e.h/2);sCtx.lineTo(e.x-e.w/2+10,e.y);sCtx.closePath();sCtx.fill();});
+      sCtx.shadowBlur=0;
+      st.powerups.forEach(pow=>{sCtx.fillStyle='#00ff88';sCtx.shadowColor='#00ff88';sCtx.shadowBlur=10;sCtx.beginPath();sCtx.arc(pow.x,pow.y,8,0,Math.PI*2);sCtx.fill();});
+      const p=st.player;if(p.invincible%8<4)sCtx.globalAlpha=.5;
+      sCtx.fillStyle='#00ffff';sCtx.shadowColor='#00ffff';sCtx.shadowBlur=15;sCtx.beginPath();
+      sCtx.moveTo(p.x+p.w/2,p.y);sCtx.lineTo(p.x-p.w/2,p.y-p.h/2);sCtx.lineTo(p.x-p.w/3,p.y);sCtx.lineTo(p.x-p.w/2,p.y+p.h/2);sCtx.closePath();sCtx.fill();
+      sCtx.fillStyle='#ff6600';sCtx.beginPath();sCtx.moveTo(p.x-p.w/3,p.y-4);sCtx.lineTo(p.x-p.w/2-8-Math.random()*8,p.y);sCtx.lineTo(p.x-p.w/3,p.y+4);sCtx.closePath();sCtx.fill();
+      sCtx.shadowBlur=0;sCtx.globalAlpha=1;
+    }
+    function gameOver(){
+      shooterState.running=false;sCtx.fillStyle='rgba(0,0,0,.8)';sCtx.fillRect(0,0,sCanvas.width,sCanvas.height);
+      sCtx.fillStyle='#ff3366';sCtx.font='bold 36px Orbitron';sCtx.textAlign='center';sCtx.fillText('GAME OVER',sCanvas.width/2,sCanvas.height/2-20);
+      sCtx.fillStyle='#fff';sCtx.font='18px Share Tech Mono';sCtx.fillText('Final Score: '+shooterState.score,sCanvas.width/2,sCanvas.height/2+20);
+      addLog('warning','GAME OVER - Score: '+shooterState.score);
+    }
+    document.addEventListener('keydown',e=>{if(shooterState)shooterState.keys[e.code]=true;if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();});
+    document.addEventListener('keyup',e=>{if(shooterState)shooterState.keys[e.code]=false;});
+
+    // =============================================
+    // SYNTHESIZER
+    // =============================================
+    let synthState={ctx:null,osc:null,gainNode:null,analyser:null,waveType:'sine',freq:220,detune:0,oscGain:.7,attack:.1,decay:.2,sustain:.6,release:.5,sequence:new Array(16).fill(false),seqNotes:[261.63,0,329.63,0,392,0,523.25,0,587.33,0,659.25,0,783.99,0,880,0],playingSeq:false,seqStep:0,seqInterval:null,bpm:120,sampleBuffer:null};
+
+    function initSynthUI(){
+      const grid=document.getElementById('sequencerGrid');grid.innerHTML='';
+      for(let i=0;i<16;i++){const s=document.createElement('div');s.className='seq-step'+(synthState.sequence[i]?' active':'');s.onclick=function(){synthState.sequence[i]=!synthState.sequence[i];this.classList.toggle('active');};grid.appendChild(s);}
+      const piano=document.getElementById('pianoKeys');piano.innerHTML='';
+      [{n:'C',f:261.63},{n:'C#',f:277.18,blk:true},{n:'D',f:293.66},{n:'D#',f:311.13,blk:true},{n:'E',f:329.63},{n:'F',f:349.23},{n:'F#',f:369.99,blk:true},{n:'G',f:392},{n:'G#',f:415.30,blk:true},{n:'A',f:440},{n:'A#',f:466.16,blk:true},{n:'B',f:493.88},{n:'C2',f:523.25}].forEach(n=>{
+        const k=document.createElement('div');k.className=n.blk?'black-key':'white-key';k.dataset.freq=n.f;
+        k.onmousedown=function(e){e.preventDefault();playNote(+this.dataset.freq);this.classList.add('pressed');};
+        k.onmouseup=k.onmouseleave=function(){stopNote();this.classList.remove('pressed');};piano.appendChild(k);
+      });
+      const wf=document.getElementById('waveformCanvas');wf.width=wf.offsetWidth;wf.height=wf.offsetHeight;
+    }
+
+    function initSynthAudio(){
+      initAudio();if(synthState.ctx)return;
+      const actx=audioContext;synthState.ctx=actx;
+      synthState.osc=actx.createOscillator();synthState.gainNode=actx.createGain();synthState.analyser=actx.createAnalyser();synthState.analyser.fftSize=2048;
+      synthState.osc.type=synthState.waveType;synthState.osc.frequency.value=synthState.freq;synthState.gainNode.gain.value=0;
+      synthState.osc.connect(synthState.gainNode);synthState.gainNode.connect(synthState.analyser);synthState.analyser.connect(actx.destination);
+      synthState.osc.start();animateWF();addLog('success','Synth initialized');playSound('success');
+    }
+    function playNote(freq){if(!synthState.ctx)initSynthAudio();const now=synthState.ctx.currentTime;synthState.osc.frequency.setValueAtTime(freq,now);synthState.gainNode.gain.cancelScheduledValues(now);synthState.gainNode.gain.setValueAtTime(0,now);synthState.gainNode.gain.linearRampToValueAtTime(synthState.oscGain,now+synthState.attack);synthState.gainNode.gain.linearRampToValueAtTime(synthState.oscGain*synthState.sustain,now+synthState.attack+synthState.decay);}
+    function stopNote(){if(!synthState.ctx)return;const now=synthState.ctx.currentTime;synthState.gainNode.gain.cancelScheduledValues(now);synthState.gainNode.gain.setValueAtTime(synthState.gainNode.gain.value,now);synthState.gainNode.gain.linearRampToValueAtTime(0,now+synthState.release);}
+    function setOscWave(b){document.querySelectorAll('.osc-btn[data-wave]').forEach(x=>x.classList.remove('active'));b.classList.add('active');synthState.waveType=b.dataset.wave;if(synthState.osc)synthState.osc.type=synthState.waveType;}
+    function updateOscFreq(v){synthState.freq=+v;document.getElementById('freqVal').textContent=v+'Hz';if(synthState.osc)synthState.osc.frequency.value=synthState.freq;}
+    function updateDetune(v){synthState.detune=+v;document.getElementById('detuneVal').textContent=v;if(synthState.osc)synthState.osc.detune.value=synthState.detune;}
+    function updateOscGain(v){synthState.oscGain=+v/100;document.getElementById('gainVal').textContent=v+'%';}
+    function updateADSR(p,v){const val=+v/1000;synthState[p==='sustain'?'sustain':p]=p==='sustain'?+v/100:val;document.getElementById(p+'Val').textContent=p==='sustain'?v+'%':val.toFixed(1)+'s';}
+    function animateWF(){if(!synthState.analyser){requestAnimationFrame(animateWF);return;}const c=document.getElementById('waveformCanvas'),ctx=c.getContext('2d'),buf=new Uint8Array(synthState.analyser.frequencyBinCount);synthState.analyser.getByteTimeDomainData(buf);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(0,0,c.width,c.height);ctx.lineWidth=2;ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--fg-primary').trim()||'#00ffff';ctx.beginPath();let x=0;const sw=c.width/buf.length;for(let i=0;i<buf.length;i++){const v=buf[i]/128*c.height/2;if(i===0)ctx.moveTo(x,v);else ctx.lineTo(x,v);x+=sw;}ctx.stroke();requestAnimationFrame(animateWF);}
+    function playSequence(){if(synthState.playingSeq)return;initSynthAudio();synthState.playingSeq=true;const stepTime=60000/synthState.bpm/2;synthState.seqStep=0;synthState.seqInterval=setInterval(()=>{const steps=document.querySelectorAll('#sequencerGrid .seq-step');steps.forEach((s,i)=>s.classList.toggle('current',i===synthState.seqStep));if(synthState.sequence[synthState.seqStep]&&synthState.seqNotes[synthState.seqStep]){playNote(synthState.seqNotes[synthState.seqStep]);setTimeout(stopNote,(synthState.attack+synthState.decay)*900);}synthState.seqStep=(synthState.seqStep+1)%16;},stepTime);addLog('info','Sequencer playing at '+synthState.bpm+' BPM');}
+    function stopSequence(){synthState.playingSeq=false;if(synthState.seqInterval){clearInterval(synthState.seqInterval);synthState.seqInterval=null;}document.querySelectorAll('#sequencerGrid .seq-step').forEach(s=>s.classList.remove('current'));stopNote();}
+    function updateBPM(v){synthState.bpm=+v;document.getElementById('bpmVal').textContent=v;if(synthState.playingSeq){stopSequence();playSequence();}}
+    function loadSample(e){const f=e.target.files[0];if(!f)return;initSynthAudio();new FileReader().onload=ev=>{synthState.ctx.decodeAudioData(ev.target.result).then(buf=>{synthState.sampleBuffer=buf;document.getElementById('sampleName').textContent=f.name;addLog('success','Loaded: '+f.name);}).catch(()=>addLog('error','Decode failed'))};readAsArrayBuffer(f);}
+    function playSample(){if(!synthState.sampleBuffer){addLog('warning','No sample');return;}try{synthState.sampleSource?.stop();}catch(e){}synthState.sampleSource=synthState.ctx.createBufferSource();synthState.sampleSource.buffer=synthState.sampleBuffer;synthState.sampleSource.connect(synthState.ctx.destination);synthState.sampleSource.start();}
+
+    // =============================================
+    // FIELD RECORDER - THE MAIN EVENT
+    // =============================================
+    let frState = null;
+
+    function initFieldRecUI() {
+      frState = {
+        ctx: null, masterGain: null, analyser: null,
+        compressor: null, convolver: null,
+        tracks: {
+          drums: { buffers: {}, gainNode: null, crunchNode: null, lofiNode: null, panNode: null, muted: false },
+          echoes: { buffers: {}, gainNode: null, reverbNode: null, delayNode: null, decayNode: null, muted: false },
+          birps: { buffers: {}, gainNode: null, bitcrushNode: null, warpNode: null, muted: false },
+          synth: { gainNode: null, filterNode: null, osc: null, muted: false, waveType: 'triangle' }
+        },
+        sequence: new Array(32).fill(null),
+        stepCount: 16,
+        currentStep: 0,
+        playing: false,
+        intervalId: null,
+        tempo: 90,
+        swing: 67,
+        masterVol: 0.75,
+        tapeSat: 0.35,
+        vinylFX: 0.25,
+        requiredTracks: { drums: false, echoes: false, birps: false, synth: false },
+        selectedPadForStep: null
+      };
+
+      // Build sequencer grid
+      buildFRSequencer();
+
+      addLog('success', 'FIELD RECORDER initialized - Load samples to begin');
+    }
+
+    function buildFRSequencer() {
+      const grid = document.getElementById('fieldSeqGrid');
+      grid.innerHTML = '';
+      for (let i = 0; i < frState.stepCount; i++) {
+        const step = document.createElement('div');
+        step.className = 'seq-step';
+        step.dataset.step = i;
+        step.onclick = () => selectStepForAssignment(i);
+        grid.appendChild(step);
+      }
+    }
+
+    function selectStepForAssignment(idx) {
+      document.querySelectorAll('#fieldSeqGrid .seq-step').forEach((s, i) => s.classList.toggle('current', i === idx));
+      frState.selectedPadForStep = idx;
+      addLog('info', `Step ${idx + 1} selected - click a pad to assign`);
+    }
+
+    function changeStepCount(val) {
+      frState.stepCount = parseInt(val);
+      buildFRSequencer();
+      addLog('info', `Steps changed to ${val}`);
+    }
+
+    function initFieldRecAudio() {
+      initAudio();
+      if (frState && frState.ctx) return;
+      
+      const actx = audioContext;
+      frState.ctx = actx;
+
+      // Master chain
+      frState.masterGain = actx.createGain();
+      frState.masterGain.gain.value = frState.masterVol;
+
+      frState.compressor = actx.createDynamicsCompressor();
+      frState.compressor.threshold.value = -24;
+      frState.compressor.knee.value = 30;
+      frState.compressor.ratio.value = 4;
+
+      frState.analyser = actx.createAnalyser();
+      frState.analyser.fftSize = 256;
+
+      // Create impulse response for reverb/convolution
+      frState.convolver = actx.createConvolver();
+      frState.convolver.buffer = createImpulseResponse(actx, 2, 2);
+
+      // Track routing
+      Object.keys(frState.tracks).forEach(trackName => {
+        const track = frState.tracks[trackName];
+        
+        track.gainNode = actx.createGain();
+        track.gainNode.gain.value = 0.8;
+
+        if (trackName === 'drums') {
+          track.crunchNode = createBitcrush(actx, 0.3);
+          track.lofiNode = createLoFi(actx, 0.5);
+          track.panNode = actx.createStereoPanner();
+          track.panNode.pan.value = 0;
+          
+          track.gainNode.connect(track.crunchNode);
+          track.crunchNode.connect(track.lofiNode);
+          track.lofiNode.connect(track.panNode);
+          track.panNode.connect(frState.masterGain);
+        } else if (trackName === 'echoes') {
+          track.reverbNode = actx.createConvolver();
+          track.reverbNode.buffer = createImpulseResponse(actx, 3, 3);
+          track.delayNode = actx.delay(0.3);
+          track.delayNode.feedback.value = 0.4;
+          track.decayNode = actx.createGain();
+          track.decayNode.gain.value = 0.6;
+          
+          const merge = actx.createGain();
+          track.gainNode.connect(track.reverbNode);
+          track.gainNode.connect(track.delayNode);
+          track.delayNode.connect(track.decayNode);
+          track.reverbNode.connect(merge);
+          track.decayNode.connect(merge);
+          merge.connect(frState.masterGain);
+        } else if (trackName === 'birps') {
+          track.bitcrushNode = createBitcrush(actx, 0.6);
+          track.warpNode = actx.createDelay();
+          track.warpNode.delayTime.value = 0.02;
+          
+          track.gainNode.connect(track.bitcrushNode);
+          track.bitcrushNode.connect(track.warpNode);
+          track.warpNode.connect(frState.masterGain);
+        } else if (trackName === 'synth') {
+          track.filterNode = actx.createBiquadFilter();
+          track.filterNode.type = 'lowpass';
+          track.filterNode.frequency.value = 800;
+          track.filterNode.Q.value = 2;
+          
+          track.osc = actx.createOscillator();
+          track.osc.type = 'triangle';
+          track.osc.frequency.value = 220;
+          track.osc.start();
+          
+          const oscGain = actx.createGain();
+          oscGain.gain.value = 0;
+          
+          track.osc.connect(oscGain);
+          oscGain.connect(track.filterNode);
+          track.filterNode.connect(track.gainNode);
+          track.gainNode.connect(frState.masterGain);
+          
+          track._oscGain = oscGain;
+        }
+      });
+
+      frState.masterGain.connect(frState.compressor);
+      frState.compressor.connect(frState.analyser);
+      frState.analyser.connect(actx.destination);
+
+      // Start VU meter animation
+      animateVU();
+
+      addLog('success', 'Field Recorder audio engine online');
+      playSound('success');
+    }
+
+    function createImpulseResponse(ctx, duration, decay) {
+      const rate = ctx.sampleRate;
+      const length = rate * duration;
+      const buf = ctx.createBuffer(1, length, rate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+      }
+      return buf;
+    }
+
+    function createBitcrush(ctx, amount) {
+      // Simplified bitcrush using script processor or just as placeholder
+      // Real implementation would use Worklet
+      const gain = ctx.createGain();
+      gain.gain.value = 1 - (amount * 0.5);
+      return gain;
+    }
+
+    function createLoFi(ctx, amount) {
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 2000 + (1 - amount) * 8000;
+      return filter;
+    }
+
+    // PAD TRIGGERING
+    function triggerPad(padEl) {
+      initFieldRecAudio();
+      const track = padEl.dataset.track;
+      const sound = padEl.dataset.sound;
+
+      padEl.classList.add('triggered');
+      setTimeout(() => padEl.classList.remove('triggered'), 150);
+
+      // If we have a step selected, assign this pad to it
+      if (frState.selectedPadForStep !== null) {
+        frState.sequence[frState.selectedPadForStep] = { track, sound };
+        document.querySelectorAll('#fieldSeqGrid .seq-step')[frState.selectedPadForStep].classList.add('active');
+        addLog(`info`, `Assigned ${track}/${sound} to step ${frState.selectedPadForStep + 1}`);
+      }
+
+      // Play the sound
+      playFRSound(track, sound);
+
+      // Mark requirement met
+      if (!frState.requiredTracks[track]) {
+        frState.requiredTracks[track] = true;
+        document.querySelector(`#${track}Ind`)?.classList.add('active');
+        checkRequirements();
+      }
+    }
+
+    function playFRSound(track, sound) {
+      if (!frState || !frState.ctx) return;
+      const ctx = frState.ctx;
+      const t = frState.tracks[track];
+
+      if (track === 'drums' && t.buffers[sound]) {
+        playBuffer(t.buffers[sound], t.gainNode);
+      } else if (track === 'echoes' && t.buffers[sound]) {
+        playBuffer(t.buffers[sound], t.gainNode);
+      } else if (track === 'birps') {
+        // Generated sounds are played fresh each time
+        generateAndPlayBirp(sound);
+      } else if (track === 'synth') {
+        playSynthChord(sound);
+      }
+    }
+
+    function playBuffer(buf, dest) {
+      if (!buf) return;
+      const src = frState.ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(dest);
+      src.start();
+    }
+
+    // SAMPLE LOADING
+    function loadPadSample(e, padEl) {
+      e.preventDefault();
+      const file = e.target.files[0];
+      if (!file) return;
+      initFieldRecAudio();
+      
+      const reader = new FileReader();
+      reader.onload = ev => {
+        frState.ctx.decodeAudioData(ev.target.result).then(buf => {
+          const track = padEl.dataset.track;
+          const sound = padEl.dataset.sound;
+          frState.tracks[track].buffers[sound] = buf;
+          padEl.classList.add('loaded', 'has-sample');
+          addLog('success', `Loaded ${file.name} into ${track}/${sound}`);
+        }).catch(() => addLog('error', 'Failed to decode sample'));
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function loadDrumLoop(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      initFieldRecAudio();
+      new FileReader().onload = ev => {
+        frState.ctx.decodeAudioData(ev.target.result).then(buf => {
+          frState.tracks.drums.buffers.loop = buf;
+          addLog('success', `Drum loop loaded: ${file.name}`);
+          frState.requiredTracks.drums = true;
+          document.getElementById('drumInd').classList.add('active');
+          checkRequirements();
+        }).catch(() => addLog('error', 'Decode failed'));
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // GENERATED SOUNDS
+    function generateNoise(padEl) {
+      initFieldRecAudio();
+      const ctx = frState.ctx;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.3;
+      }
+      frState.tracks.echoes.buffers.noise = buf;
+      padEl?.classList.add('has-sample');
+      addLog('info', 'Generated pink noise sample');
+      frState.requiredTracks.echoes = true;
+      document.getElementById('echoInd').classList.add('active');
+      checkRequirements();
+    }
+
+    function generateStatic(padEl) {
+      initFieldRecAudio();
+      const ctx = frState.ctx;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.1)) * 0.5;
+      }
+      frState.tracks.birps.buffers.static = buf;
+      padEl?.classList.add('has-sample');
+      addLog('info', 'Generated radio static');
+      frState.requiredTracks.birps = true;
+      document.getElementById('birpInd').classList.add('active');
+      checkRequirements();
+    }
+
+    function generateGlitch(padEl) {
+      initFieldRecAudio();
+      const ctx = frState.ctx;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const seg = Math.floor(i / (data.length / 8));
+        data[i] = (Math.sin(i * 0.1 * (seg + 1) * (seg % 2 ? -1 : 1))) * 0.4 * (Math.random() > 0.1 ? 1 : 0);
+      }
+      frState.tracks.birps.buffers.glitch = buf;
+      padEl?.classList.add('has-sample');
+      addLog('info', 'Generated glitch texture');
+    }
+
+    function generateRadio(padEl) {
+      initFieldRecAudio();
+      const ctx = frState.ctx;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 1.5, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const carrier = Math.sin(i * 0.05) * 0.2;
+        const noise = (Math.random() * 2 - 1) * 0.15;
+        const mod = Math.sin(i * 0.001) > 0 ? 1 : 0.1;
+        data[i] = (carrier + noise) * mod;
+      }
+      frState.tracks.birps.buffers.radio = buf;
+      padEl?.classList.add('has-sample');
+      addLog('info', 'Generated radio interference');
+    }
+
+    function generateVinyl(padEl) {
+      initFieldRecAudio();
+      const ctx = frState.ctx;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const rumble = Math.sin(i * 0.005) * 0.1;
+        const click = Math.random() > 0.999 ? (Math.random() * 2 - 1) * 0.3 : 0;
+        const hiss = (Math.random() * 2 - 1) * 0.03;
+        data[i] = rumble + click + hiss;
+      }
+      frState.tracks.birps.buffers.vinyl = buf;
+      padEl?.classList.add('has-sample');
+      addLog('info', 'Generated vinyl crackle');
+    }
+
+    function generateAndPlayBirp(sound) {
+      const bufs = frState.tracks.birps.buffers;
+      if (bufs[sound]) {
+        playBuffer(bufs[sound], frState.tracks.birps.gainNode);
+      } else {
+        // Generate on the fly
+        switch(sound) {
+          case 'static': generateStatic(); break;
+          case 'glitch': generateGlitch(); break;
+          case 'radio': generateRadio(); break;
+          case 'vinyl': generateVinyl(); break;
+        }
+        if (bufs[sound]) playBuffer(bufs[sound], frState.tracks.birps.gainNode);
+      }
+    }
+
+    // SYNTH ARPEGGIOS
+    const arpPatterns = {
+      minor: [0, 3, 7, 10, 12, 10, 7, 3],
+      major: [0, 4, 7, 11, 12, 11, 7, 4],
+      pentatonic: [0, 3, 5, 7, 10, 12, 10, 7, 5, 3],
+      blues: [0, 3, 5, 6, 7, 10, 12, 10, 7, 6, 5, 3]
+    };
+
+    const baseFreqs = { minor: 130.81, major: 146.83, pentatonic: 110, blues: 116.54 };
+
+    function playArpPad(padEl, mode) {
+      initFieldRecAudio();
+      const ctx = frState.ctx;
+      const track = frState.tracks.synth;
+      const pattern = arpPatterns[mode];
+      const base = baseFreqs[mode];
+
+      // Play quick arpeggio sequence
+      pattern.forEach((semi, i) => {
+        const freq = base * Math.pow(2, semi / 12);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = track.waveType || 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.06);
+        gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.06 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.06 + 0.12);
+        osc.connect(track.filterNode);
+        track.filterNode.connect(gain);
+        gain.connect(track.gainNode);
+        osc.start(ctx.currentTime + i * 0.06);
+        osc.stop(ctx.currentTime + i * 0.06 + 0.13);
+      });
+
+      frState.requiredTracks.synth = true;
+      document.getElementById('synthInd').classList.add('active');
+      checkRequirements();
+    }
+
+    function updateSynthWave(wave) {
+      if (frState && frState.tracks.synth) {
+        frState.tracks.synth.waveType = wave;
+        if (frState.tracks.synth.osc) frState.tracks.synth.osc.type = wave;
+      }
+    }
+
+    // FX CONTROLS
+    function updateTrackFX(track, param, val) {
+      if (!frState || !frState.tracks[track]) return;
+      const t = frState.tracks[track];
+      const v = parseInt(val);
+      document.getElementById(track.substring(0,4) + param.charAt(0).toUpperCase() + param.slice(1) + 'Val').textContent = 
+        param === 'pan' ? (v > 0 ? 'R' + v : v < 0 ? 'L' + Math.abs(v) : 'C') : v;
+
+      switch(param) {
+        case 'crunch': if(t.crunchNode)t.crunchNode.gain.value = 1 - v/100 * 0.5; break;
+        case 'lofi': if(t.lofiNode)t.lofiNode.frequency.value = 2000 + (1-v/100)*8000; break;
+        case 'pan': if(t.panNode)t.panNode.pan.value = v/100; break;
+        case 'reverb': /* adjust wet mix */ break;
+        case 'delay': if(t.delayNode)t.delayNode.feedback.value = v/100 * 0.8; break;
+        case 'decay': if(t.decayNode)t.decayNode.gain.value = v/100; break;
+        case 'bitcrush': if(t.bitcrushNode)t.bitcrushNode.gain.value = 1 - v/100 * 0.7; break;
+        case 'warp': if(t.warpNode)t.warpNode.delayTime.value = v/100 * 0.1; break;
+        case 'cutoff': if(t.filterNode)t.filterNode.frequency.value = 200 + v/100 * 3800; break;
+        case 'reso': if(t.filterNode)t.filterNode.Q.value = 0.5 + v/100 * 15; break;
+        case 'rate': /* arp rate */ break;
+        case 'freq': /* birp freq */ break;
+      }
+    }
+
+    function toggleTrackMute(track) {
+      if (!frState || !frState.tracks[track]) return;
+      frState.tracks[track].muted = !frState.tracks[track].muted;
+      const btn = document.getElementById(track.substring(0,4) + 'Mute');
+      btn.classList.toggle('muted');
+      if (frState.tracks[track].gainNode) {
+        frState.tracks[track].gainNode.gain.value = frState.tracks[track].muted ? 0 : 0.8;
+      }
+    }
+
+    // SWING
+    function updateSwing(val) {
+      frState.swing = parseInt(val);
+      document.getElementById('swingValue').textContent = val + '%';
+    }
+
+    function getSwungDelay(stepIndex) {
+      // Even steps get delayed by swing percentage
+      if (stepIndex % 2 === 1) {
+        const swingAmount = (frState.swing - 50) / 100 * (60000 / frState.tempo / 4);
+        return swingAmount;
+      }
+      return 0;
+    }
+
+    // TRANSPORT
+    function toggleFieldRecPlay() {
+      if (!frState) initFieldRecAudio();
+      if (frState.playing) {
+        stopFieldRec();
+      } else {
+        startFieldRecPlay();
+      }
+    }
+
+    function startFieldRecPlay() {
+      if (!checkRequirements(true)) return;
+      
+      frState.playing = true;
+      frState.currentStep = 0;
+      document.getElementById('playBtn').classList.add('playing');
+      document.getElementById('frPlayBtn').classList.add('playing');
+      
+      const stepTime = 60000 / frState.tempo / 4; // 16th notes
+      
+      frState.intervalId = setInterval(() => {
+        const step = frState.currentStep % frState.stepCount;
+        
+        // Visual feedback
+        document.querySelectorAll('#fieldSeqGrid .seq-step').forEach((s, i) => {
+          s.classList.toggle('current', i === step);
+        });
+        
+        // Trigger assigned sound
+        const assignment = frState.sequence[step];
+        if (assignment) {
+          const swingDelay = getSwungDelay(step);
+          if (swingDelay > 0) {
+            setTimeout(() => playFRSound(assignment.track, assignment.sound), swingDelay);
+          } else {
+            playFRSound(assignment.track, assignment.sound);
+          }
+          
+          // Visual pad flash
+          const pad = document.querySelector(`[data-track="${assignment.track}"][data-sound="${assignment.sound}"]`);
+          if (pad) {
+            pad.classList.add('triggered');
+            setTimeout(() => pad.classList.remove('triggered'), 100);
+          }
+          
+          // Track indicator
+          const ind = document.getElementById(assignment.track + 'Ind');
+          if (ind) ind.classList.add('active');
+          setTimeout(() => ind?.classList.remove('active'), 150);
+        }
+        
+        frState.currentStep++;
+      }, stepTime);
+      
+      addLog('success', 'Playing at ' + frState.tempo + ' BPM, swing ' + frState.swing + '%');
+    }
+
+    function stopFieldRec() {
+      frState.playing = false;
+      if (frState.intervalId) {
+        clearInterval(frState.intervalId);
+        frState.intervalId = null;
+      }
+      document.getElementById('playBtn').classList.remove('playing');
+      document.getElementById('frPlayBtn').classList.remove('playing');
+      document.querySelectorAll('#fieldSeqGrid .seq-step').forEach(s => s.classList.remove('current'));
+      addLog('info', 'Stopped');
+    }
+
+    function clearPattern() {
+      frState.sequence.fill(null);
+      document.querySelectorAll('#fieldSeqGrid .seq-step').forEach(s => {
+        s.classList.remove('active');
+      });
+      addLog('info', 'Pattern cleared');
+    }
+
+    function updateFRTempo(val) {
+      frState.tempo = parseInt(val);
+      document.getElementById('frTempoVal').textContent = val + ' BPM';
+      if (frState.playing) {
+        stopFieldRec();
+        startFieldRecPlay();
+      }
+    }
+
+    // MASTER
+    function updateMasterVol(val) {
+      frState.masterVol = parseInt(val) / 100;
+      document.getElementById('masterVolVal').textContent = val + '%';
+      if (frState.masterGain) frState.masterGain.gain.value = frState.masterVol;
+    }
+
+    function updateTapeSat(val) {
+      frState.tapeSat = parseInt(val) / 100;
+      document.getElementById('tapeSatVal').textContent = val + '%';
+    }
+
+    function updateVinylFX(val) {
+      frState.vinylFX = parseInt(val) / 100;
+      document.getElementById('vinylVal').textContent = val + '%';
+    }
+
+    function animateVU() {
+      if (!frState || !frState.analyser) { requestAnimationFrame(animateVU); return; }
+      const data = new Uint8Array(frState.analyser.frequencyBinCount);
+      frState.analyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i];
+      const avg = sum / data.length;
+      const height = Math.min(100, avg / 2.55);
+      document.getElementById('vuL').style.height = height + '%';
+      document.getElementById('vuR').style.height = (height * (0.9 + Math.random() * 0.2)) + '%';
+      requestAnimationFrame(animateVU);
+    }
+
+    function bounceFieldRec() {
+      if (!checkRequirements(true)) return;
+      addLog('warning', 'Bounce: In full implementation, this would render to WAV/download. Current: playing through master output.');
+      alert('BOUNCE MODE
+
+Your lo-fi beat is being rendered...
+
+(In production: OfflineRender API to WAV download)
+
+Current: Playing live through master chain with all FX applied.');
+    }
+
+    function checkRequirements(silent = false) {
+      const req = frState.requiredTracks;
+      const hasAll = req.drums && req.echoes && req.birps && req.synth;
+      if (!hasAll && !silent) {
+        addLog('warning', 'Missing required layers: Add DRUMS + ECHOES + BIRPS + SYNTH before playback/bounce');
+      }
+      return hasAll;
+    }
+
+    // =============================================
+    // INIT
+    // =============================================
+    function updateTime(){document.getElementById('currentTime').textContent=new Date().toLocaleTimeString('de-DE',{hour12:false});}
+    function simulateStats(){document.getElementById('cpuUsage').textContent=Math.floor(Math.random()*30+15)+'%';document.getElementById('memUsage').textContent=Math.floor(Math.random()*50+130)+'MB';document.getElementById('pingValue').textContent=Math.floor(Math.random()*20+5)+'ms';}
+
+    function init(){
+      resizePCanvas();createParticles();drawParticles();renderArtifacts();
+      updateTime();setInterval(updateTime,1000);setInterval(simulateStats,3000);
+      addLog('success','NEXUS Console initialized');
+      addLog('info','Apps available: SHOOTER, SYNTH, FIELD RECORDER');
+      window.addEventListener('resize',()=>{resizePCanvas();createParticles();});
+      document.addEventListener('keydown',e=>{if(e.key==='Escape'){}if(e.key==='F1'){e.preventDefault();showPanel('log');}});
+    }
+    init();
+  </script>
+</body>
+</html>

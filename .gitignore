@@ -1,0 +1,22 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Runtime/temp
+*.pid
+*.log
+
+# Archive/export bundles (keep source files in repo)
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+
+# Local service artifacts
+.artifacts-server.pid
+
+# Nested repo snapshot (excluded from initial baseline)
+brawl/ethic-brawl/

@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dot Viewer – Erweiterte Version</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<style>
+  :root {
+    --primary-bg: #f5f5f5;
+    --card-bg: #ffffff;
+    --accent: #333;
+    --border-radius: 8px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background: var(--primary-bg);
+    color: var(--accent);
+  }
+  #viewer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .card {
+    width: 90%;
+    max-width: 1000px;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .slide {
+    position: relative;
+  }
+  .slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .overlay {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 10;
+  }
+  textarea.movable {
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    min-width: 120px;
+    min-height: 50px;
+    width: 30%;
+    height: 25%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 4px;
+    resize: both;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    z-index: 5;
+    cursor: move;
+  }
+  #info-section {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border-top: 1px solid #eee;
+  }
+  #info-section h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  #info-section p {
+    margin: 0 0 8px;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  #info-section textarea {
+    width: 100%;
+    height: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  .controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .controls button {
+    padding: 10px 20px;
+    margin: 0 8px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: #1976d2;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .controls button:hover {
+    background: #115293;
+  }
+</style>
+</head>
+<body>
+<div id="viewer">
+  <div class="card">
+    <div class="slide" id="slide-container">
+      <img id="slide-image" src="" alt="Szene" />
+      <div class="overlay" id="overlay"></div>
+      <textarea id="movable-text" class="movable" placeholder="Text hier einfügen..."></textarea>
+    </div>
+    <div id="info-section">
+      <h3 id="title"></h3>
+      <p id="critique"></p>
+      <label for="corrections"><strong>Korrekturen:</strong></label>
+      <textarea id="corrections" placeholder="Notiere hier Korrekturen für diese Seite"></textarea>
+    </div>
+  </div>
+  <div class="controls">
+    <button id="prevBtn">Zurück</button>
+    <button id="nextBtn">Weiter</button>
+  </div>
+</div>
+<script>
+  const slides = [{"src": "pics/01-file-VN6ZfwlSu7rbE1UV.jpg", "ds": "DS01", "pages": "S01-S02", "critique": "Dot muss extrem klein sein und links unten platziert werden; negative Fläche und sanfte Grautöne mit einer dezenten Tau-Spur dominieren; der Horizont liegt im oberen Drittel."}, {"src": "pics/02-file-fzte2ujeUW7Sr45e.jpg", "ds": "DS02", "pages": "S03-S04", "critique": "Dot soll groß und zentriert auf einem grauen Podest stehen; viel Platz für den Titel oberhalb lassen; die rechte Seite bleibt fast leer für das Impressum; sanftes Grau."}, {"src": "pics/03-file-0vvwLKhfktrH1YCt.jpg", "ds": "DS03", "pages": "S05-S06", "critique": "Verwende mehrere Grauabstufungen für Hügel und Himmel; Dot sitzt winzig in der Mitte; auf der rechten Seite wird Dot etwas größer; dezente Körnung im Boden und ein Herr-Grau-Kasten unten rechts."}, {"src": "pics/04-file-wCm52oBs5AZYEdao.jpg", "ds": "DS04", "pages": "S07-S08", "critique": "Dot sitzt am Bach, während im Hintergrund nur eine Wiesel-Silhouette zu sehen ist; die rechte Seite ist reiner Atmosphärenraum mit minimalem Grauwechsel; betone das Wort „hmmm\" typografisch; keine Herr-Grau-Box."}, {"src": "pics/05-file-TSJ1qTS-sPi3281A.jpg", "ds": "DS05", "pages": "S09-S10", "critique": "Zeige das Bachufer mit kleinen Wiesel- und Pfau-Figuren; die Grenze zwischen den Grauzonen soll subtil durch leichte Temperaturunterschiede angedeutet werden; die Reimzeilen von Dot leicht eingerückt; Herr-Grau-Kasten unten."}, {"src": "pics/06-file-6cQA6ytTNFg6iwPn.jpg", "ds": "DS06", "pages": "S11-S12", "critique": "Links erwärmt sich der Boden, ein kleiner „Vulkan\" am Horizont; rechts erscheint Rot groß mit feuriger Frisur und kleinen Stiefeln; die Farbseite muss warm wirken; kein Herr-Grau-Kasten."}, {"src": "pics/07-file-scvBYta8LCKCFm3T.jpg", "ds": "DS07", "pages": "S13-S14", "critique": "Dot und Rot stehen sich gegenüber; Dot ist noch vorsichtig; auf der rechten Seite berühren sie sich und Dots Rand erhält einen roten Schimmer; Herr-Grau-Kasten freundlich unten platziert."}, {"src": "pics/08-file-3c7vK1sZbz0hanc1.jpg", "ds": "DS08", "pages": "S15-S16", "critique": "Dot ist wieder allein, mit einem kleinen roten Saum; die Welt wirkt minimal wärmer; Dot bewegt sich wobbelt weiter und der Summenlaut wird durch „hmmm—zack\" hervorgehoben."}, {"src": "pics/09-file-NC1kfgKzCSXIfKu7.jpg", "ds": "DS09", "pages": "S17-S18", "critique": "Das Grau wird heller wie Milchglas; Gelb erscheint schwebend, mit sanftem Hof; der Summenlaut „hmmm—pling\" wird betont; das Licht darf nicht blenden."}, {"src": "pics/10-file-8pvfq_gmt-ZUIVvu.jpg", "ds": "DS10", "pages": "S19-S20", "critique": "Zeige Details: Hügelkante, Wolkenmuster, ein ernstes Insekt; Dot und Gelb stehen nebeneinander, Dot wirkt heller; Herr-Grau-Kasten ordnet sich unten rechts ein."}, {"src": "pics/11-file-YlUkQ1R9h1M9O1KF.jpg", "ds": "DS11", "pages": "S21-S22", "critique": "Dot trägt nun Rots und Gelbs Saum; die Welt kühlt sich leicht ab; der Summenlaut „hmmm—pling—hm\" endet mit einem leisen ‚hm‘; der Text muss weit gestreut werden."}, {"src": "pics/12-file-wFxNj4HqM5GoAdm1.jpg", "ds": "DS12", "pages": "S23-S24", "critique": "Der Fluss wird als ruhige Linie gezeichnet; Blau steht am Ufer, eine stille Präsenz wie Abend und Wasser; viel Luft auf der Seite lassen."}, {"src": "pics/13-file-HwURSwLeSlUC6uqn.jpg", "ds": "DS13", "pages": "S25-S26", "critique": "Blau berührt Dot zärtlich; der Raum wird maximal; die rechte Seite zeigt nur Worte, die weit auseinander stehen; der Summenlaut „hmmm—hmm\" wird fast grafisch dargestellt; Herr-Grau-Box unten."}, {"src": "pics/14-file-DeEmkDXo2eiJClek.jpg", "ds": "DS14", "pages": "S27-S28", "critique": "Runde Wege laden ein; Rot wartet, Gelb schwebt heran, Blau ist schon da; rechts sitzen alle Figuren zusammen mit sichtbarer Summen-Wellenlinie dazwischen; keine Herr-Grau-Box."}, {"src": "pics/15-file-to09d6cYsUGcIUQz.jpg", "ds": "DS15", "pages": "S29-S30", "critique": "Alle sitzen ruhig auf der Rundwiese; im Hintergrund tauchen sanfte Spuren von warmem, grünem und violettem Licht auf; Dot spricht ruhig; Detail soll entdeckt werden, nicht laut sein."}, {"src": "pics/16-file-iJBCVNoELx43tZvp.jpg", "ds": "DS16", "pages": "S31-S32", "critique": "Rot hat eine Ideenwolke, Gelb einen strahlenden Finger, Blau ein skeptisches Gesicht; Dot wird kleiner dargestellt, um die Nervosität zu zeigen; Herr-Grau-Kasten soll diese Spannung kommentieren."}, {"src": "pics/17-file-mkWRTpMKzOo_WwB5.jpg", "ds": "DS17", "pages": "S33-S34", "critique": "Ein Kreisritual: Die vier stehen zusammen, Dot zittert leicht; der Reim steht im Fokus und muss typografisch hervorgehoben werden; jede Figur reagiert sichtbar; ein Herr-Grau-Kasten beobachtet."}, {"src": "pics/18-file-6aXTQhuVIHEgvgJK.jpg", "ds": "DS18", "pages": "S35-S36", "critique": "Am Anfang des Mischens tanzen warme, helle und tiefe Bögen; Dot steht im Zentrum und glänzt mit zarten Farbsäumen; der Summenlaut „hmmm—pling—hmm\" erklingt hier harmonisch."}, {"src": "pics/19-file-04xK7npi40A5f9SU.jpg", "ds": "DS19", "pages": "S37-S38", "critique": "Die Bögen werden dichter und enger; das Bild wird spannungsvoller; Dot wird an den Bildrand gedrückt; das Chaos darf aber lesbar bleiben."}, {"src": "pics/20-file-agMRFO3THwqnSmdn.jpg", "ds": "DS20", "pages": "S39-S40", "critique": "Nach dem Farbsog ist alles zu viel; die Seite wird braun, nicht schokoladenfarbig sondern matschig; Dot ist winzig und allein; der Herr-Grau-Kasten tröstet leise."}, {"src": "pics/21-file-YFJZ57mBfdIOjpsZ.jpg", "ds": "DS21", "pages": "S41-S42", "critique": "In der braunen Ruhe hört Dot das eigene Summen wieder; es stellt sich die Frage „hmmm?\"; auf der rechten Seite schreit Dot „STOPP\" ohne lautes Typo; Dots Rand ist wieder klar."}, {"src": "pics/22-file-2B-E6JsyTpsSqII8.jpg", "ds": "DS22", "pages": "S43-S44", "critique": "Die Farben werden entknotet: vier Hände öffnen langsam einen Knoten; auf der rechten Seite stehen die vier wieder mit Abstand und Blickkontakt; Dot erklärt, dass es alle behalten, aber sich selbst nicht verlieren möchte."}, {"src": "pics/23-file-M6XNP-xpSdzXRscu.jpg", "ds": "DS23", "pages": "S45-S46", "critique": "Dot denkt an einen Kreis mit Platz; auf der rechten Seite entsteht ein Farbkreis aus Rot–Gelb–Blau, mit atmendem Abstand; ein Herr-Grau-Kasten philosophiert über Ordnung als höfliche Form."}, {"src": "pics/24-file-BLX0-uYv_lKHJgxr.jpg", "ds": "DS24", "pages": "S47-S48", "critique": "Orange springt zwischen Rot und Gelb hervor, Grün hebt den Kopf ruhig zwischen Gelb und Blau, Violett tritt leise zwischen Blau und Rot; Dot beobachtet staunend; die Sekundärfarben müssen kurz und charakterstark erscheinen."}, {"src": "pics/25-file-joTf0604uwJUzEM9.jpg", "ds": "DS25", "pages": "S49-S50", "critique": "Dot steht am stillen See, der Himmel spiegelt sich; in der Spiegelung zeigt sich Dot mit rotem Funken, gelbem Hauch und blauem Schimmer; dies ist eine introspektive Szene ohne Herr-Grau-Kasten."}, {"src": "pics/26-file-cqq3qWUG07Tn7vXA.jpg", "ds": "DS26", "pages": "S51-S52", "critique": "Die Welt wird langsam farbig: links wird die Wiese grün und der Himmel blau, auf der rechten Seite blühen liebevoll Rot-, Gelb- und Orangetöne; Braun bleibt als Erde, Stamm und Schatten erhalten; der Übergang erfolgt sanft."}];
+  let current = 0;
+  function showSlide(index) {
+    const slide = slides[index];
+    document.getElementById('slide-image').src = slide.src;
+    document.getElementById('overlay').textContent = `${slide.ds} ({slide.pages})`;
+    document.getElementById('title').textContent = `${slide.ds} – Seiten ${slide.pages}`;
+    document.getElementById('critique').textContent = slide.critique;
+    const movable = document.getElementById('movable-text');
+    movable.style.transform = 'translate(0px, 0px)';
+    movable.dataset.x = 0;
+    movable.dataset.y = 0;
+    movable.value = '';
+    document.getElementById('corrections').value = '';
+  }
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    current = (current - 1 + slides.length) % slides.length;
+    showSlide(current);
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    current = (current + 1) % slides.length;
+    showSlide(current);
+  });
+  interact('#movable-text')
+    .draggable({
+      inertia: true,
+      modifiers: [
+        interact.modifiers.restrictRect({
+          restriction: 'parent',
+          endOnly: true
+        })
+      ],
+      listeners: {
+        move (event) {
+          const target = event.target;
+          let x = (parseFloat(target.dataset.x) || 0) + event.dx;
+          let y = (parseFloat(target.dataset.y) || 0) + event.dy;
+          target.style.transform = `translate(${x}px, ${y}px)`;
+          target.dataset.x = x;
+          target.dataset.y = y;
+        }
+      }
+    })
+    .resizable({
+      edges: { left: true, right: true, bottom: true, top: true },
+      modifiers: [
+        interact.modifiers.restrictEdges({
+          outer: 'parent',
+          endOnly: true
+        }),
+        interact.modifiers.restrictSize({
+          min: { width: 120, height: 50 },
+          max: { width: 'parent', height: 'parent' }
+        })
+      ],
+      inertia: true,
+      listeners: {
+        move (event) {
+          let x = parseFloat(event.target.dataset.x) || 0;
+          let y = parseFloat(event.target.dataset.y) || 0;
+          event.target.style.width = `${event.rect.width}px`;
+          event.target.style.height = `${event.rect.height}px`;
+          x += event.deltaRect.left;
+          y += event.deltaRect.top;
+          event.target.style.transform = `translate(${x}px, ${y}px)`;
+          event.target.dataset.x = x;
+          event.target.dataset.y = y;
+        }
+      }
+    });
+  window.addEventListener('DOMContentLoaded', () => {
+    showSlide(current);
+  });
+</script>
+</body>
+</html>

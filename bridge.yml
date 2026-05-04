@@ -1,0 +1,96 @@
+version: 1
+name: artifacts
+description: Static artifact collection and app hub
+archiveSourceDir: .
+shell: true
+defaultTrack: dev
+
+env:
+  ARTIFACTS_DIR: /home/user/work/code/artifacts
+  ARTIFACTS_HOST: localhost
+  ARTIFACTS_PORT: "8080"
+
+commands:
+  serve:
+    description: Start the local artifacts HTTP server and open the portal.
+    run: ./artifacts-serve
+    track: dev
+    timeoutMs: 10000
+  open:
+    description: Open the default artifacts portal in a browser, starting the server if needed.
+    run: bash -lc 'source ./artifacts-server.sh && artifacts-open'
+    track: dev
+    timeoutMs: 10000
+  start:
+    description: Start the background HTTP server only.
+    run: bash -lc 'source ./artifacts-server.sh && artifacts-start'
+    track: dev
+    timeoutMs: 10000
+  stop:
+    description: Stop the background HTTP server.
+    run: bash -lc 'source ./artifacts-server.sh && artifacts-stop'
+    track: dev
+    timeoutMs: 10000
+  restart:
+    description: Restart the background HTTP server.
+    run: bash -lc 'source ./artifacts-server.sh && artifacts-restart'
+    track: dev
+    timeoutMs: 15000
+  status:
+    description: Show current artifacts server status.
+    run: bash -lc 'source ./artifacts-server.sh && artifacts-status'
+    track: dev
+    timeoutMs: 5000
+  package:
+    description: Build a dated tar.gz release package plus sha256 checksum.
+    run: ./artifacts-package
+    track: build
+    timeoutMs: 120000
+  package:tmp:
+    description: Build a release package into /tmp for smoke testing.
+    run: ./artifacts-package /tmp
+    track: build
+    timeoutMs: 120000
+  deploy:
+    description: Incrementally rsync the curated artifact set to the configured VPS target.
+    run: ./artifacts-deploy
+    track: deploy
+    timeoutMs: 300000
+  deploy:dry-run:
+    description: Preview incremental deployment without transferring files.
+    run: ./artifacts-deploy --dry-run
+    track: deploy
+    timeoutMs: 120000
+  deploy:full:
+    description: Build, upload, and extract a full package on the configured VPS target.
+    run: ./artifacts-deploy --full
+    track: deploy
+    timeoutMs: 300000
+  deploy:full:dry-run:
+    description: Build package and preview full deployment without upload/extract.
+    run: ./artifacts-deploy --full --dry-run
+    track: deploy
+    timeoutMs: 120000
+  lint:sound:
+    description: Syntax-check the peer music groove app JavaScript.
+    run: node --check peer-music-groove/app.js
+    track: test
+    timeoutMs: 10000
+  smoke:sound:
+    description: Check sound app syntax and verify expected sound module catalog names exist.
+    run: bash -lc 'node --check peer-music-groove/app.js && grep -q "SoundModuleCatalog" peer-music-groove/app.js && grep -q "field-recorder" peer-music-groove/app.js && grep -q "wave-synth-modular" peer-music-groove/app.js'
+    track: test
+    timeoutMs: 10000
+
+agent:
+  notes:
+    - Root shell scripts remain the source of truth for package/deploy/server behavior; bridge.yml exposes them as sane commands.
+    - peer-music-groove is the current shared sound-centered app surface.
+    - Sound modules implement a common getRigPort/connect/disconnect/playNote/stopNote contract and route through one mixer destination.
+  tasks:
+    - Split the shared sound module catalog into a reusable JS module if more audio apps become standalone folders.
+    - Add browser-level WebAudio smoke tests when a headless browser harness is available.
+  changelog:
+    - 2026-05-05: Added bridge commands for serve/open/start/stop/restart/status/package/deploy and sound smoke checks.
+    - 2026-05-05: Fixed lazy AudioContext initialization for modules and removed invalid connect(null) FM synth call.
+    - 2026-05-05: Added a lightweight common peer/rig module catalog and mixer port interface for sound-producing modules.

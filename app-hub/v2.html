@@ -1,0 +1,2799 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS CONSOLE // HYPERSPACE TERMINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0a0a12;
+        --bg-secondary: #12121f;
+        --fg-primary: #00ffff;
+        --fg-secondary: #ff00ff;
+        --accent: #00ff88;
+        --accent-secondary: #ff3366;
+        --glow-primary: rgba(0, 255, 255, 0.5);
+        --glow-secondary: rgba(255, 0, 255, 0.5);
+        --grid-color: rgba(0, 255, 255, 0.08);
+        --scanline-opacity: 0.03;
+      }
+
+      [data-theme='synthwave'] {
+        --bg-primary: #1a0a2e;
+        --bg-secondary: #2d1b4e;
+        --fg-primary: #ff00ff;
+        --fg-secondary: #00ffff;
+        --accent: #ff6ec7;
+        --accent-secondary: #ffaa00;
+        --glow-primary: rgba(255, 0, 255, 0.6);
+        --glow-secondary: rgba(255, 170, 0, 0.5);
+        --grid-color: rgba(255, 0, 255, 0.12);
+      }
+
+      [data-theme='cyberpunk'] {
+        --bg-primary: #0d0d0d;
+        --bg-secondary: #1a1a1a;
+        --fg-primary: #f0e68c;
+        --fg-secondary: #ff0080;
+        --accent: #00ff41;
+        --accent-secondary: #ff073a;
+        --glow-primary: rgba(240, 230, 140, 0.6);
+        --glow-secondary: rgba(255, 0, 128, 0.5);
+        --grid-color: rgba(240, 230, 140, 0.06);
+      }
+
+      [data-theme='retro8bit'] {
+        --bg-primary: #0f0f0f;
+        --bg-secondary: #1a1a0a;
+        --fg-primary: #33ff00;
+        --fg-secondary: #ffb000;
+        --accent: #00ff88;
+        --accent-secondary: #ff4444;
+        --glow-primary: rgba(51, 255, 0, 0.5);
+        --glow-secondary: rgba(255, 176, 0, 0.5);
+        --grid-color: rgba(51, 255, 0, 0.1);
+      }
+
+      [data-theme='midnight'] {
+        --bg-primary: #0a1628;
+        --bg-secondary: #0f2140;
+        --fg-primary: #87ceeb;
+        --fg-secondary: #c0c0c0;
+        --accent: #4169e1;
+        --accent-secondary: #ffd700;
+        --glow-primary: rgba(135, 206, 235, 0.5);
+        --glow-secondary: rgba(192, 192, 192, 0.4);
+        --grid-color: rgba(135, 206, 235, 0.08);
+      }
+
+      [data-theme='vaporwave'] {
+        --bg-primary: #1a0a20;
+        --bg-secondary: #2d1536;
+        --fg-primary: #ff71ce;
+        --fg-secondary: #01cdfe;
+        --accent: #b967ff;
+        --accent-secondary: #05ffa1;
+        --glow-primary: rgba(255, 113, 206, 0.5);
+        --glow-secondary: rgba(1, 205, 254, 0.5);
+        --grid-color: rgba(185, 103, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Share Tech Mono', monospace;
+        background: var(--bg-primary);
+        color: var(--fg-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+        transition:
+          background 0.5s ease,
+          color 0.3s ease;
+      }
+
+      .font-display {
+        font-family: 'Orbitron', sans-serif;
+      }
+      .font-pixel {
+        font-family: 'Press Start 2P', cursive;
+      }
+
+      /* Grid Background */
+      .grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        perspective: 500px;
+      }
+      .grid-floor {
+        position: absolute;
+        bottom: 0;
+        left: -50%;
+        width: 200%;
+        height: 60%;
+        background:
+          linear-gradient(var(--grid-color) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: rotateX(60deg);
+        transform-origin: center bottom;
+        animation: gridMove 4s linear infinite;
+      }
+      @keyframes gridMove {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 0 50px;
+        }
+      }
+
+      /* Scanlines */
+      .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 4px
+        );
+      }
+
+      /* Particles */
+      #particles-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* Main Container */
+      .console-container {
+        position: relative;
+        z-index: 10;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header */
+      .console-header {
+        background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
+        border-bottom: 1px solid var(--fg-primary);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        position: relative;
+      }
+      .console-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--fg-primary),
+          var(--fg-secondary),
+          var(--fg-primary),
+          transparent
+        );
+        animation: headerGlow 3s ease-in-out infinite;
+      }
+      @keyframes headerGlow {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .logo-text {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 1.5rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--fg-primary);
+        text-shadow:
+          0 0 10px var(--glow-primary),
+          0 0 30px var(--glow-primary);
+        animation: logoFlicker 4s infinite;
+      }
+      @keyframes logoFlicker {
+        0%,
+        97%,
+        99%,
+        100% {
+          opacity: 1;
+        }
+        98% {
+          opacity: 0.8;
+        }
+      }
+
+      .status-bar {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 10px var(--accent);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.6;
+          transform: scale(0.9);
+        }
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 0;
+        padding: 1.5rem;
+      }
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Sidebar */
+      .sidebar {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 31, 0.9) 100%);
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .sidebar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--fg-primary), var(--fg-secondary));
+      }
+      .sidebar-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.2em;
+        color: var(--fg-secondary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .nav-item {
+        margin-bottom: 0.25rem;
+      }
+      .nav-button {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        color: var(--fg-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+      .nav-button:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 15px var(--glow-primary);
+      }
+      .nav-button.active {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--fg-secondary);
+        color: var(--fg-secondary);
+        box-shadow:
+          inset 0 0 20px rgba(255, 0, 255, 0.1),
+          0 0 15px var(--glow-secondary);
+      }
+      .nav-arrow {
+        transition: transform 0.3s ease;
+        opacity: 0.5;
+      }
+      .nav-button.expanded .nav-arrow {
+        transform: rotate(90deg);
+        opacity: 1;
+      }
+      .submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding-left: 1rem;
+      }
+      .submenu.open {
+        max-height: 500px;
+      }
+      .submenu-item {
+        padding: 0.5rem 0.75rem;
+        border-left: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .submenu-item:hover {
+        color: var(--fg-primary);
+        border-left-color: var(--fg-primary);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .submenu-item.selected {
+        color: var(--accent);
+        border-left-color: var(--accent);
+      }
+
+      /* Content Panel */
+      .content-panel {
+        background: linear-gradient(135deg, rgba(18, 18, 31, 0.95) 0%, var(--bg-secondary) 100%);
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .content-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--fg-secondary), var(--fg-primary));
+      }
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .panel-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.25rem;
+        letter-spacing: 0.1em;
+        color: var(--fg-primary);
+      }
+
+      /* Artifacts Grid */
+      .artifacts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+      .artifact-card {
+        background: linear-gradient(145deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .artifact-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+      }
+      .artifact-card:hover::before {
+        left: 100%;
+      }
+      .artifact-card:hover {
+        border-color: var(--fg-primary);
+        transform: translateY(-4px);
+        box-shadow:
+          0 10px 40px rgba(0, 0, 0, 0.4),
+          0 0 20px var(--glow-primary);
+      }
+      .artifact-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--fg-primary), var(--fg-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+      .artifact-name {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--fg-primary);
+      }
+      .artifact-desc {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+      .artifact-meta {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .meta-tag {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+      }
+
+      /* Settings Panel */
+      .settings-panel,
+      .log-panel,
+      .app-panel {
+        display: none;
+      }
+      .settings-panel.active,
+      .log-panel.active,
+      .app-panel.active {
+        display: block;
+      }
+      .panel-content:not(.active) {
+        display: none;
+      }
+
+      .settings-section {
+        margin-bottom: 2rem;
+      }
+      .settings-section-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.15em;
+        color: var(--fg-secondary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .settings-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, var(--fg-secondary), transparent);
+      }
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .setting-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .theme-selector {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .theme-btn {
+        width: 48px;
+        height: 32px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .theme-btn:hover {
+        transform: scale(1.1);
+      }
+      .theme-btn.active {
+        border-color: white;
+        box-shadow: 0 0 15px currentColor;
+      }
+      .theme-btn[data-theme='default'] {
+        background: linear-gradient(135deg, #0a0a12, #00ffff);
+      }
+      .theme-btn[data-theme='synthwave'] {
+        background: linear-gradient(135deg, #1a0a2e, #ff00ff);
+      }
+      .theme-btn[data-theme='cyberpunk'] {
+        background: linear-gradient(135deg, #0d0d0d, #f0e68c);
+      }
+      .theme-btn[data-theme='retro8bit'] {
+        background: linear-gradient(135deg, #0f0f0f, #33ff00);
+      }
+      .theme-btn[data-theme='midnight'] {
+        background: linear-gradient(135deg, #0a1628, #87ceeb);
+      }
+      .theme-btn[data-theme='vaporwave'] {
+        background: linear-gradient(135deg, #1a0a20, #ff71ce);
+      }
+
+      .toggle-switch {
+        width: 52px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .toggle-switch.active {
+        background: var(--accent);
+      }
+      .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+      .toggle-switch.active::after {
+        transform: translateX(24px);
+      }
+
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .slider {
+        width: 120px;
+        height: 6px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        outline: none;
+      }
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: var(--fg-primary);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 10px var(--glow-primary);
+      }
+      .slider-value {
+        font-size: 0.8rem;
+        color: var(--accent);
+        min-width: 40px;
+      }
+
+      .select-styled {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+      }
+      .select-styled option {
+        background: var(--bg-secondary);
+        color: var(--fg-primary);
+      }
+
+      /* Log Panel */
+      .log-container {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1rem;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+      .log-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      .log-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .log-container::-webkit-scrollbar-thumb {
+        background: var(--fg-primary);
+        border-radius: 3px;
+      }
+      .log-entry {
+        padding: 0.75rem;
+        border-left: 3px solid var(--accent);
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        animation: logSlideIn 0.3s ease;
+      }
+      @keyframes logSlideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .log-entry.info {
+        border-left-color: var(--fg-primary);
+      }
+      .log-entry.warning {
+        border-left-color: var(--accent-secondary);
+      }
+      .log-entry.success {
+        border-left-color: var(--accent);
+      }
+      .log-time {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 0.25rem;
+      }
+      .log-message {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* App Container */
+      .app-container {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+      }
+      .app-toolbar {
+        background: var(--bg-secondary);
+        padding: 0.5rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .app-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
+        color: var(--fg-primary);
+      }
+      .app-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .app-btn {
+        padding: 0.35rem 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+      }
+      .app-btn:hover {
+        background: var(--fg-primary);
+        color: var(--bg-primary);
+      }
+      .app-body {
+        padding: 1rem;
+        min-height: 450px;
+      }
+
+      /* Shooter Game Styles */
+      .shooter-canvas {
+        display: block;
+        width: 100%;
+        height: 400px;
+        background: #000;
+        border: 2px solid var(--fg-primary);
+        border-radius: 4px;
+        image-rendering: pixelated;
+      }
+      .shooter-hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        font-family: 'Orbitron', sans-serif;
+      }
+      .hud-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .hud-label {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+      }
+      .hud-value {
+        font-size: 1.1rem;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent);
+      }
+      .health-bar {
+        width: 120px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .health-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-secondary), var(--accent));
+        transition: width 0.3s ease;
+      }
+      .shooter-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        max-width: 200px;
+        margin: 1rem auto 0;
+      }
+      .control-key {
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        text-align: center;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.75rem;
+        color: var(--fg-primary);
+      }
+      .control-key.empty {
+        visibility: hidden;
+      }
+
+      /* Synth Styles */
+      .synth-container {
+        display: grid;
+        gap: 1rem;
+      }
+      .synth-module {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      .module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .module-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.8rem;
+        color: var(--fg-secondary);
+        letter-spacing: 0.1em;
+      }
+      .module-toggle {
+        width: 32px;
+        height: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .module-toggle.active {
+        background: var(--accent);
+      }
+      .module-toggle::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.2s;
+      }
+      .module-toggle.active::after {
+        transform: translateX(14px);
+      }
+
+      .oscillator-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+      }
+      .osc-btn {
+        padding: 0.6rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: var(--fg-primary);
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+      }
+      .osc-btn:hover {
+        border-color: var(--fg-primary);
+      }
+      .osc-btn.active {
+        background: var(--fg-primary);
+        color: var(--bg-primary);
+        border-color: var(--fg-primary);
+      }
+
+      .knob-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .knob-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 70px;
+      }
+      .knob-label {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+      }
+      .knob-value {
+        font-size: 0.75rem;
+        color: var(--accent);
+      }
+      input[type='range'].knob {
+        width: 60px;
+        height: 6px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+        outline: none;
+        writing-mode: vertical-lr;
+        direction: rtl;
+        height: 60px;
+        width: 6px;
+      }
+      input[type='range'].knob::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        background: var(--fg-primary);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 8px var(--glow-primary);
+      }
+
+      .waveform-display {
+        height: 80px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      #waveformCanvas {
+        width: 100%;
+        height: 100%;
+      }
+
+      .sequencer-grid {
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        gap: 3px;
+        margin-top: 0.75rem;
+      }
+      .seq-step {
+        aspect-ratio: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .seq-step:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .seq-step.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 10px var(--accent);
+      }
+      .seq-step.current {
+        box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+      }
+
+      .piano-keys {
+        display: flex;
+        height: 60px;
+        margin-top: 0.75rem;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .white-key {
+        flex: 1;
+        background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%);
+        border: 1px solid #999;
+        cursor: pointer;
+        position: relative;
+      }
+      .white-key:active,
+      .white-key.pressed {
+        background: var(--accent);
+      }
+      .black-key {
+        width: 24px;
+        background: linear-gradient(180deg, #333 0%, #111 100%);
+        border: 1px solid #000;
+        margin-left: -12px;
+        cursor: pointer;
+        position: relative;
+        z-index: 2;
+        height: 38px;
+      }
+      .black-key:active,
+      .black-key.pressed {
+        background: var(--fg-secondary);
+      }
+
+      .sample-loader {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .sample-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .sample-btn:hover {
+        border-style: solid;
+        border-color: var(--fg-primary);
+      }
+
+      /* Footer */
+      .footer-status {
+        background: linear-gradient(0deg, var(--bg-secondary) 0%, transparent 100%);
+        border-top: 1px solid var(--fg-primary);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .ticker {
+        overflow: hidden;
+        flex: 1;
+        max-width: 500px;
+      }
+      .ticker-content {
+        display: inline-block;
+        animation: tickerScroll 30s linear infinite;
+        white-space: nowrap;
+        color: var(--accent);
+      }
+      @keyframes tickerScroll {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .action-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        position: relative;
+      }
+      .action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 15px var(--glow-primary);
+      }
+      .action-btn.active {
+        background: var(--fg-primary);
+        color: var(--bg-primary);
+      }
+      .news-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        background: var(--accent-secondary);
+        border-radius: 50%;
+        animation: newsPulse 1.5s infinite;
+      }
+      @keyframes newsPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.7;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      @media (max-width: 640px) {
+        .logo-text {
+          font-size: 1rem;
+        }
+        .status-bar {
+          gap: 0.75rem;
+        }
+        .sidebar {
+          order: 2;
+        }
+        .content-panel {
+          order: 1;
+        }
+        .artifacts-grid {
+          grid-template-columns: 1fr;
+        }
+        .oscillator-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .sequencer-grid {
+          grid-template-columns: repeat(8, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="default">
+    <!-- Background Effects -->
+    <div class="grid-bg"><div class="grid-floor"></div></div>
+    <canvas id="particles-canvas"></canvas>
+    <div class="scanlines" id="scanlines"></div>
+
+    <!-- Main Console -->
+    <div class="console-container">
+      <!-- Header -->
+      <header class="console-header">
+        <div class="logo-text">NEXUS Console</div>
+        <div class="header-actions">
+          <button class="action-btn" id="btn-artifacts" onclick="showPanel('artifacts')">
+            Artifacts
+          </button>
+          <button class="action-btn" id="btn-settings" onclick="showPanel('settings')">
+            Settings
+          </button>
+          <button
+            class="action-btn"
+            id="btn-log"
+            onclick="showPanel('log')"
+            style="position: relative"
+          >
+            Log<span class="news-badge" id="newsBadge"></span>
+          </button>
+        </div>
+        <div class="status-bar">
+          <div class="status-item"><span class="status-dot"></span><span>System Online</span></div>
+          <div class="status-item">Theme: <span id="currentThemeName">TRON</span></div>
+          <div class="status-item"><span id="currentTime">--:--:--</span></div>
+          <div class="status-item">v2.4.7</div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <h2 class="sidebar-title">// Navigation</h2>
+          <ul class="nav-menu" id="navMenu">
+            <li class="nav-item">
+              <button
+                class="nav-button expanded active"
+                data-category="visual"
+                onclick="toggleNav(this)"
+              >
+                <span>Visual Apps</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu open" id="submenu-visual">
+                <div class="submenu-item selected" onclick="filterArtifacts('all')">All Visual</div>
+                <div class="submenu-item" onclick="filterArtifacts('generative')">
+                  Generative Art
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('3d')">3D Experiments</div>
+                <div class="submenu-item" onclick="filterArtifacts('animation')">Animations</div>
+              </div>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" data-category="games" onclick="toggleNav(this)">
+                <span>Games</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-games">
+                <div class="submenu-item" onclick="filterArtifacts('arcade')">Arcade</div>
+                <div class="submenu-item" onclick="filterArtifacts('puzzle')">Puzzle</div>
+                <div class="submenu-item" onclick="launchApp('shooter')">Space Shooter</div>
+              </div>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" data-category="audio" onclick="toggleNav(this)">
+                <span>Audio</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-audio">
+                <div class="submenu-item" onclick="launchApp('synth')">Synthesizer</div>
+                <div class="submenu-item" onclick="filterArtifacts('sequencer')">Sequencers</div>
+                <div class="submenu-item" onclick="filterArtifacts('visualizer')">Visualizers</div>
+              </div>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" data-category="tools" onclick="toggleNav(this)">
+                <span>Tools</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-tools">
+                <div class="submenu-item" onclick="filterArtifacts('converter')">Converters</div>
+                <div class="submenu-item" onclick="filterArtifacts('generator')">Generators</div>
+              </div>
+            </li>
+          </ul>
+        </aside>
+
+        <!-- Content Panel -->
+        <section class="content-panel">
+          <!-- Artifacts View -->
+          <div class="artifacts-view panel-content active" id="panel-artifacts">
+            <div class="panel-header">
+              <h2 class="panel-title" id="panelTitle">All Artifacts</h2>
+              <div style="display: flex; gap: 0.5rem">
+                <button class="action-btn" onclick="refreshArtifacts()">Refresh</button>
+                <button class="action-btn" onclick="shuffleArtifacts()">Shuffle</button>
+              </div>
+            </div>
+            <div class="artifacts-grid" id="artifactsGrid"></div>
+          </div>
+
+          <!-- Settings View -->
+          <div class="settings-panel panel-content" id="panel-settings">
+            <div class="panel-header"><h2 class="panel-title">System Configuration</h2></div>
+            <div class="settings-section">
+              <h3 class="settings-section-title">Appearance</h3>
+              <div class="setting-row">
+                <span class="setting-label">Theme</span>
+                <div class="theme-selector">
+                  <button
+                    class="theme-btn active"
+                    data-theme="default"
+                    title="TRON Default"
+                    onclick="setTheme('default')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="synthwave"
+                    title="Synthwave"
+                    onclick="setTheme('synthwave')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="cyberpunk"
+                    title="Cyberpunk"
+                    onclick="setTheme('cyberpunk')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="retro8bit"
+                    title="8-Bit Retro"
+                    onclick="setTheme('retro8bit')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="midnight"
+                    title="Midnight Blue"
+                    onclick="setTheme('midnight')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="vaporwave"
+                    title="Vaporwave"
+                    onclick="setTheme('vaporwave')"
+                  ></button>
+                </div>
+              </div>
+              <div class="setting-row">
+                <span class="setting-label">Scanlines Effect</span>
+                <div
+                  class="toggle-switch active"
+                  id="toggleScanlines"
+                  onclick="toggleSetting('scanlines')"
+                ></div>
+              </div>
+              <div class="setting-row">
+                <span class="setting-label">Particle Density</span>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    class="slider"
+                    id="particleSlider"
+                    min="0"
+                    max="100"
+                    value="50"
+                    oninput="updateParticles(this.value)"
+                  />
+                  <span class="slider-value" id="particleValue">50%</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3 class="settings-section-title">Audio</h3>
+              <div class="setting-row">
+                <span class="setting-label">Sound Effects</span>
+                <div
+                  class="toggle-switch active"
+                  id="toggleSound"
+                  onclick="toggleSetting('sound')"
+                ></div>
+              </div>
+              <div class="setting-row">
+                <span class="setting-label">Master Volume</span>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    class="slider"
+                    id="volumeSlider"
+                    min="0"
+                    max="100"
+                    value="70"
+                    oninput="updateVolume(this.value)"
+                  />
+                  <span class="slider-value" id="volumeValue">70%</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3 class="settings-section-title">Localization</h3>
+              <div class="setting-row">
+                <span class="setting-label">Language</span>
+                <select class="select-styled" onchange="addLog('info','Language changed')">
+                  <option>English</option>
+                  <option>Deutsch</option>
+                  <option>日本語</option>
+                  <option>한국어</option>
+                  <option>中文</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Log View -->
+          <div class="log-panel panel-content" id="panel-log">
+            <div class="panel-header">
+              <h2 class="panel-title">System Log</h2>
+              <button class="action-btn" onclick="clearLog()">Clear Log</button>
+            </div>
+            <div class="log-container" id="logContainer"></div>
+          </div>
+
+          <!-- SHOOTER GAME APP -->
+          <div class="app-panel panel-content" id="panel-shooter">
+            <div class="app-container">
+              <div class="app-toolbar">
+                <span class="app-title">HYPERBLAST // Side Scrolling Shooter</span>
+                <div class="app-actions">
+                  <button class="app-btn" onclick="startShooter()">START</button>
+                  <button class="app-btn" onclick="pauseShooter()">PAUSE</button>
+                  <button class="app-btn" onclick="showPanel('artifacts')">EXIT</button>
+                </div>
+              </div>
+              <div class="app-body">
+                <canvas id="shooterCanvas" class="shooter-canvas"></canvas>
+                <div class="shooter-hud">
+                  <div class="hud-item">
+                    <span class="hud-label">Score</span>
+                    <span class="hud-value" id="shooterScore">0</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-label">Health</span>
+                    <div class="health-bar">
+                      <div class="health-fill" id="healthFill" style="width: 100%"></div>
+                    </div>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-label">Wave</span>
+                    <span class="hud-value" id="shooterWave">1</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-label">Lives</span>
+                    <span class="hud-value" id="shooterLives">3</span>
+                  </div>
+                </div>
+                <div class="shooter-controls">
+                  <div class="control-key empty"></div>
+                  <div class="control-key">W / ↑</div>
+                  <div class="control-key empty"></div>
+                  <div class="control-key">A / ←</div>
+                  <div class="control-key">S / ↓</div>
+                  <div class="control-key">D / →</div>
+                  <div class="control-key empty"></div>
+                  <div class="control-key">SPACE</div>
+                  <div class="control-key empty"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SYNTHESIZER APP -->
+          <div class="app-panel panel-content" id="panel-synth">
+            <div class="app-container">
+              <div class="app-toolbar">
+                <span class="app-title">WAVESYNTH // Modular Synthesizer</span>
+                <div class="app-actions">
+                  <button class="app-btn" onclick="initSynthAudio()">INIT AUDIO</button>
+                  <button class="app-btn" onclick="playSequence()">PLAY SEQ</button>
+                  <button class="app-btn" onclick="stopSequence()">STOP</button>
+                  <button class="app-btn" onclick="showPanel('artifacts')">EXIT</button>
+                </div>
+              </div>
+              <div class="app-body synth-container">
+                <!-- Oscillator Module -->
+                <div class="synth-module">
+                  <div class="module-header">
+                    <span class="module-title">OSCILLATOR</span>
+                    <div
+                      class="module-toggle active"
+                      id="oscToggle"
+                      onclick="this.classList.toggle('active')"
+                    ></div>
+                  </div>
+                  <div class="oscillator-grid">
+                    <button class="osc-btn active" data-wave="sine" onclick="setOscWave(this)">
+                      Sine
+                    </button>
+                    <button class="osc-btn" data-wave="square" onclick="setOscWave(this)">
+                      Square
+                    </button>
+                    <button class="osc-btn" data-wave="sawtooth" onclick="setOscWave(this)">
+                      Saw
+                    </button>
+                    <button class="osc-btn" data-wave="triangle" onclick="setOscWave(this)">
+                      Tri
+                    </button>
+                  </div>
+                  <div class="knob-group" style="margin-top: 1rem">
+                    <div class="knob-item">
+                      <span class="knob-label">Freq</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="20"
+                        max="2000"
+                        value="220"
+                        oninput="updateOscFreq(this.value)"
+                      />
+                      <span class="knob-value" id="freqVal">220Hz</span>
+                    </div>
+                    <div class="knob-item">
+                      <span class="knob-label">Detune</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="-100"
+                        max="100"
+                        value="0"
+                        oninput="updateDetune(this.value)"
+                      />
+                      <span class="knob-value" id="detuneVal">0</span>
+                    </div>
+                    <div class="knob-item">
+                      <span class="knob-label">Gain</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="0"
+                        max="100"
+                        value="70"
+                        oninput="updateOscGain(this.value)"
+                      />
+                      <span class="knob-value" id="gainVal">70%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Envelope Module -->
+                <div class="synth-module">
+                  <div class="module-header">
+                    <span class="module-title">ENVELOPE (ADSR)</span>
+                    <div
+                      class="module-toggle active"
+                      id="envToggle"
+                      onclick="this.classList.toggle('active')"
+                    ></div>
+                  </div>
+                  <div class="knob-group">
+                    <div class="knob-item">
+                      <span class="knob-label">Attack</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="0"
+                        max="2000"
+                        value="100"
+                        oninput="updateADSR('attack',this.value)"
+                      />
+                      <span class="knob-value" id="attackVal">0.1s</span>
+                    </div>
+                    <div class="knob-item">
+                      <span class="knob-label">Decay</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="0"
+                        max="2000"
+                        value="200"
+                        oninput="updateADSR('decay',this.value)"
+                      />
+                      <span class="knob-value" id="decayVal">0.2s</span>
+                    </div>
+                    <div class="knob-item">
+                      <span class="knob-label">Sustain</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="0"
+                        max="100"
+                        value="60"
+                        oninput="updateADSR('sustain',this.value)"
+                      />
+                      <span class="knob-value" id="sustainVal">60%</span>
+                    </div>
+                    <div class="knob-item">
+                      <span class="knob-label">Release</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="0"
+                        max="3000"
+                        value="500"
+                        oninput="updateADSR('release',this.value)"
+                      />
+                      <span class="knob-value" id="releaseVal">0.5s</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Filter Module -->
+                <div class="synth-module">
+                  <div class="module-header">
+                    <span class="module-title">FILTER</span>
+                    <div
+                      class="module-toggle"
+                      id="filtToggle"
+                      onclick="this.classList.toggle('active');toggleFilter()"
+                    ></div>
+                  </div>
+                  <div class="oscillator-grid" style="grid-template-columns: repeat(3, 1fr)">
+                    <button
+                      class="osc-btn active"
+                      data-filt="lowpass"
+                      onclick="setFilterType(this)"
+                    >
+                      LPF
+                    </button>
+                    <button class="osc-btn" data-filt="highpass" onclick="setFilterType(this)">
+                      HPF
+                    </button>
+                    <button class="osc-btn" data-filt="bandpass" onclick="setFilterType(this)">
+                      BPF
+                    </button>
+                  </div>
+                  <div class="knob-group" style="margin-top: 1rem">
+                    <div class="knob-item">
+                      <span class="knob-label">Cutoff</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="20"
+                        max="15000"
+                        value="5000"
+                        oninput="updateFilterCutoff(this.value)"
+                      />
+                      <span class="knob-value" id="cutoffVal">5kHz</span>
+                    </div>
+                    <div class="knob-item">
+                      <span class="knob-label">Reso</span>
+                      <input
+                        type="range"
+                        class="knob"
+                        min="0"
+                        max="20"
+                        value="5"
+                        oninput="updateFilterQ(this.value)"
+                      />
+                      <span class="knob-value" id="qVal">5</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Waveform Display -->
+                <div class="synth-module">
+                  <div class="module-header"><span class="module-title">WAVEFORM</span></div>
+                  <div class="waveform-display"><canvas id="waveformCanvas"></canvas></div>
+                </div>
+
+                <!-- Sequencer -->
+                <div class="synth-module">
+                  <div class="module-header">
+                    <span class="module-title">STEP SEQUENCER (16 Steps)</span>
+                    <div class="module-toggle active" id="seqToggle"></div>
+                  </div>
+                  <div class="sequencer-grid" id="sequencerGrid"></div>
+                  <div style="display: flex; gap: 1rem; margin-top: 0.75rem; align-items: center">
+                    <span style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6)">BPM:</span>
+                    <input
+                      type="range"
+                      class="slider"
+                      style="width: 100px"
+                      min="60"
+                      max="200"
+                      value="120"
+                      id="bpmSlider"
+                      oninput="updateBPM(this.value)"
+                    />
+                    <span class="slider-value" id="bpmVal">120</span>
+                  </div>
+                </div>
+
+                <!-- Piano Keyboard -->
+                <div class="synth-module">
+                  <div class="module-header"><span class="module-title">KEYBOARD</span></div>
+                  <div class="piano-keys" id="pianoKeys"></div>
+                </div>
+
+                <!-- Sample Loader -->
+                <div class="synth-module">
+                  <div class="module-header"><span class="module-title">SAMPLES</span></div>
+                  <div class="sample-loader">
+                    <label class="sample-btn">
+                      Load Sample
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        style="display: none"
+                        onchange="loadSample(event)"
+                      />
+                    </label>
+                    <button class="sample-btn" onclick="playSample()">Play Sample</button>
+                    <span id="sampleName" style="font-size: 0.75rem; color: var(--accent)"
+                      >No sample loaded</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer-status">
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span style="color: var(--accent)">READY</span>|<span
+            >CPU: <span id="cpuUsage">23%</span></span
+          >|<span>MEM: <span id="memUsage">156MB</span></span>
+        </div>
+        <div class="ticker">
+          <span class="ticker-content"
+            >WELCOME TO NEXUS CONSOLE // SYSTEM INITIALIZED // SPACE SHOOTER & SYNTHESIZER READY //
+            PRESS F1 FOR HELP</span
+          >
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span>CONNECTED</span>|<span>PING: <span id="pingValue">12ms</span></span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // ============================================
+      // GLOBAL STATE & DATA
+      // ============================================
+      const artifacts = [
+        {
+          id: 1,
+          name: 'Plasma Field',
+          desc: 'Interactive plasma simulation',
+          category: ['generative', 'animation'],
+          icon: '⚡',
+          url: '#plasma',
+          params: ['resolution', 'colorScheme'],
+        },
+        {
+          id: 2,
+          name: 'Neural Viz',
+          desc: '3D neural network visualization',
+          category: ['3d', 'generative'],
+          icon: '🧠',
+          url: '#neural',
+          params: ['layers', 'nodesPerLayer'],
+        },
+        {
+          id: 3,
+          name: 'Fractal Explorer',
+          desc: 'Mandelbrot/Julia set explorer',
+          category: ['generative', '3d'],
+          icon: '🌀',
+          url: '#fractal',
+          params: ['type', 'maxIterations'],
+        },
+        {
+          id: 4,
+          name: 'Pixel Studio',
+          desc: 'Retro pixel art creator',
+          category: ['tools', 'generator'],
+          icon: '🎨',
+          url: '#pixel',
+          params: ['canvasSize', 'palette'],
+        },
+        {
+          id: 5,
+          name: 'Data Viz',
+          desc: 'Dataset visualization tools',
+          category: ['tools', 'generative'],
+          icon: '📊',
+          url: '#dataviz',
+          params: ['chartType', 'dataSource'],
+        },
+        {
+          id: 6,
+          name: 'Particle Fountain',
+          desc: 'Physics particle system',
+          category: ['generative', 'animation'],
+          icon: '💫',
+          url: '#particles',
+          params: ['count', 'gravity', 'colors'],
+        },
+        {
+          id: 7,
+          name: 'Maze Generator',
+          desc: 'Procedural maze with solver',
+          category: ['games', 'puzzle'],
+          icon: '🏁',
+          url: '#maze',
+          params: ['size', 'algorithm'],
+        },
+        {
+          id: 8,
+          name: 'Starfield Nav',
+          desc: 'Warp through starfields',
+          category: ['3d', 'animation'],
+          icon: '✦',
+          url: '#starfield',
+          params: ['starDensity', 'warpSpeed'],
+        },
+        {
+          id: 101,
+          name: 'SPACE SHOOTER',
+          desc: 'Side-scrolling arcade shooter with waves, power-ups, and boss battles',
+          category: ['games', 'arcade'],
+          icon: '🚀',
+          isApp: true,
+          appId: 'shooter',
+        },
+        {
+          id: 102,
+          name: 'SYNTHESIZER',
+          desc: 'Full modular synthesizer with oscillators, filters, ADSR envelope, sequencer, and sample playback',
+          category: ['audio', 'synthesizer'],
+          icon: '🎹',
+          isApp: true,
+          appId: 'synth',
+        },
+      ]
+
+      const themeNames = {
+        default: 'TRON',
+        synthwave: 'Synthwave',
+        cyberpunk: 'Cyberpunk',
+        retro8bit: '8-Bit Retro',
+        midnight: 'Midnight Blue',
+        vaporwave: 'Vaporwave',
+      }
+
+      let state = {
+        currentPanel: 'artifacts',
+        currentFilter: 'all',
+        soundEnabled: true,
+        volume: 0.7,
+        scanlinesEnabled: true,
+        particleDensity: 50,
+        language: 'en',
+      }
+
+      let audioContext = null
+
+      // ============================================
+      // AUDIO SYSTEM
+      // ============================================
+      function initAudio() {
+        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      }
+      document.addEventListener('click', initAudio, { once: true })
+
+      function playSound(type) {
+        if (!state.soundEnabled || !audioContext) return
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+        gain.gain.setValueAtTime(state.volume * 0.3, audioContext.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15)
+        const types = {
+          click: [800, 'square'],
+          hover: [1200, 'sine'],
+          success: [523, 'triangle'],
+          error: [200, 'sawtooth'],
+          navigate: [440, 'sine'],
+        }
+        if (types[type]) {
+          osc.frequency.setValueAtTime(types[type][0], audioContext.currentTime)
+          osc.type = types[type][1]
+        }
+        osc.start(audioContext.currentTime)
+        osc.stop(audioContext.currentTime + 0.15)
+      }
+
+      // ============================================
+      // PARTICLES BACKGROUND
+      // ============================================
+      const pCanvas = document.getElementById('particles-canvas')
+      const pCtx = pCanvas.getContext('2d')
+      let particles = []
+
+      function resizePCanvas() {
+        pCanvas.width = window.innerWidth
+        pCanvas.height = window.innerHeight
+      }
+      function createParticles() {
+        particles = []
+        const count = Math.floor((state.particleDensity / 100) * 80)
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * pCanvas.width,
+            y: Math.random() * pCanvas.height,
+            size: Math.max(0.5, Math.random() * 2.5),
+            sx: (Math.random() - 0.5) * 0.5,
+            sy: (Math.random() - 0.5) * 0.5,
+            op: Math.random() * 0.5 + 0.2,
+          })
+        }
+      }
+      function drawParticles() {
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height)
+        const s = getComputedStyle(document.body)
+        const c1 = s.getPropertyValue('--fg-primary').trim() || '#00ffff'
+        const c2 = s.getPropertyValue('--fg-secondary').trim() || '#ff00ff'
+        particles.forEach((p, i) => {
+          p.x += p.sx
+          p.y += p.sy
+          if (p.x < 0) p.x = pCanvas.width
+          if (p.x > pCanvas.width) p.x = 0
+          if (p.y < 0) p.y = pCanvas.height
+          if (p.y > pCanvas.height) p.y = 0
+          pCtx.beginPath()
+          pCtx.arc(p.x, p.y, Math.max(0.5, p.size), 0, Math.PI * 2)
+          pCtx.fillStyle = i % 2 === 0 ? c1 : c2
+          pCtx.globalAlpha = p.op
+          pCtx.fill()
+          particles.slice(i + 1).forEach((p2) => {
+            const dx = p.x - p2.x,
+              dy = p.y - p2.y,
+              dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist < 100) {
+              pCtx.beginPath()
+              pCtx.moveTo(p.x, p.y)
+              pCtx.lineTo(p2.x, p2.y)
+              pCtx.strokeStyle = c1
+              pCtx.globalAlpha = (1 - dist / 100) * 0.15
+              pCtx.stroke()
+            }
+          })
+        })
+        pCtx.globalAlpha = 1
+        requestAnimationFrame(drawParticles)
+      }
+
+      function updateParticles(val) {
+        state.particleDensity = parseInt(val)
+        document.getElementById('particleValue').textContent = val + '%'
+        createParticles()
+        addLog('info', 'Particle density updated')
+      }
+
+      // ============================================
+      // THEME & SETTINGS
+      // ============================================
+      function setTheme(t) {
+        document.body.setAttribute('data-theme', t)
+        document
+          .querySelectorAll('.theme-btn')
+          .forEach((b) => b.classList.toggle('active', b.dataset.theme === t))
+        document.getElementById('currentThemeName').textContent = themeNames[t] || t
+        addLog('success', 'Theme changed to ' + themeNames[t])
+        playSound('navigate')
+      }
+      function toggleSetting(s) {
+        const el = document.getElementById('toggle' + s.charAt(0).toUpperCase() + s.slice(1))
+        if (s === 'scanlines') {
+          state.scanlinesEnabled = !state.scanlinesEnabled
+          document.getElementById('scanlines').style.display = state.scanlinesEnabled
+            ? 'block'
+            : 'none'
+          el.classList.toggle('active', state.scanlinesEnabled)
+        } else if (s === 'sound') {
+          state.soundEnabled = !state.soundEnabled
+          el.classList.toggle('active', state.soundEnabled)
+          if (state.soundEnabled) playSound('click')
+        }
+        addLog('info', s + (el.classList.contains('active') ? ' enabled' : ' disabled'))
+      }
+      function updateVolume(v) {
+        state.volume = parseInt(v) / 100
+        document.getElementById('volumeValue').textContent = v + '%'
+      }
+
+      // ============================================
+      // NAVIGATION & PANELS
+      // ============================================
+      function showPanel(panel) {
+        state.currentPanel = panel
+        document.querySelectorAll('.panel-content').forEach((p) => p.classList.remove('active'))
+        document.querySelectorAll('.action-btn').forEach((b) => b.classList.remove('active'))
+        const pnl = document.getElementById('panel-' + panel)
+        if (pnl) pnl.classList.add('active')
+        const btn = document.getElementById('btn-' + panel)
+        if (btn) btn.classList.add('active')
+        playSound('click')
+        if (panel !== 'shooter' && panel !== 'synth') {
+          pauseShooter()
+          stopSequence()
+        }
+      }
+
+      function launchApp(appId) {
+        showPanel(appId)
+        playSound('success')
+        addLog('success', 'Launching ' + appId.toUpperCase())
+        if (appId === 'shooter') setTimeout(initShooter, 100)
+        if (appId === 'synth') setTimeout(initSynthUI, 100)
+      }
+
+      function toggleNav(btn) {
+        const cat = btn.dataset.category
+        const sub = document.getElementById('submenu-' + cat)
+        const isOpen = sub.classList.contains('open')
+        document.querySelectorAll('.submenu').forEach((s) => s.classList.remove('open'))
+        document
+          .querySelectorAll('.nav-button')
+          .forEach((b) => b.classList.remove('expanded', 'active'))
+        if (!isOpen) {
+          sub.classList.add('open')
+          btn.classList.add('expanded', 'active')
+        } else btn.classList.add('active')
+        playSound('click')
+      }
+
+      function filterArtifacts(f) {
+        state.currentFilter = f
+        document.querySelectorAll('.submenu-item').forEach((i) => i.classList.remove('selected'))
+        event.target.classList.add('selected')
+        renderArtifacts(f)
+        playSound('hover')
+        document.getElementById('panelTitle').textContent = f === 'all' ? 'All Artifacts' : f
+      }
+
+      function renderArtifacts(f = 'all') {
+        const grid = document.getElementById('artifactsGrid')
+        const filtered = f === 'all' ? artifacts : artifacts.filter((a) => a.category.includes(f))
+        grid.innerHTML = filtered
+          .map(
+            (a) => `
+        <div class="artifact-card" ${a.isApp ? `onclick="launchApp('${a.appId}')"` : ''} onmouseenter="playSound('hover')">
+          <div class="artifact-icon">${a.icon}</div>
+          <h3 class="artifact-name">${a.name}${a.isApp ? ' [APP]' : ''}</h3>
+          <p class="artifact-desc">${a.desc}</p>
+          <div class="artifact-meta">${a.category.map((c) => `<span class="meta-tag">${c}</span>`).join('')}</div>
+        </div>
+      `
+          )
+          .join('')
+      }
+
+      function refreshArtifacts() {
+        renderArtifacts(state.currentFilter)
+        playSound('success')
+        addLog('success', 'Refreshed')
+      }
+      function shuffleArtifacts() {
+        const g = document.getElementById('artifactsGrid')
+        Array.from(g.children).forEach((_, i, a) => {
+          if (i < a.length - 1) g.appendChild(a[Math.floor(Math.random() * a.length)])
+        })
+        playSound('navigate')
+        addLog('info', 'Shuffled')
+      }
+
+      // ============================================
+      // LOG SYSTEM
+      // ============================================
+      function addLog(type, msg) {
+        const c = document.getElementById('logContainer')
+        const t = new Date().toLocaleTimeString('de-DE', { hour12: false })
+        const e = document.createElement('div')
+        e.className = 'log-entry ' + type
+        e.innerHTML = `<div class="log-time">${t}</div><div class="log-message">${msg}</div>`
+        c.insertBefore(e, c.firstChild)
+        while (c.children.length > 50) c.removeChild(c.lastChild)
+        document.getElementById('newsBadge').style.display = 'block'
+      }
+      function clearLog() {
+        document.getElementById('logContainer').innerHTML = ''
+        document.getElementById('newsBadge').style.display = 'none'
+        addLog('info', 'Log cleared')
+      }
+
+      // ============================================
+      // SHOOTER GAME
+      // ============================================
+      let shooterState = null
+      const sCanvas = document.getElementById('shooterCanvas')
+      const sCtx = sCanvas.getContext('2d')
+
+      function initShooter() {
+        sCanvas.width = sCanvas.offsetWidth
+        sCanvas.height = sCanvas.offsetHeight
+        shooterState = {
+          running: false,
+          paused: false,
+          player: {
+            x: 60,
+            y: sCanvas.height / 2,
+            w: 40,
+            h: 24,
+            vy: 0,
+            health: 100,
+            lives: 3,
+            invincible: 0,
+          },
+          bullets: [],
+          enemies: [],
+          particles: [],
+          powerups: [],
+          score: 0,
+          wave: 1,
+          enemyTimer: 0,
+          enemyInterval: 90,
+          keys: {},
+        }
+        document.getElementById('shooterScore').textContent = '0'
+        document.getElementById('shooterWave').textContent = '1'
+        document.getElementById('shooterLives').textContent = '3'
+        document.getElementById('healthFill').style.width = '100%'
+      }
+
+      function startShooter() {
+        if (!shooterState) initShooter()
+        shooterState.running = true
+        shooterState.paused = false
+        if (!shooterState.gameLoop) shooterState.gameLoop = requestAnimationFrame(shooterLoop)
+        addLog('success', 'SHOOTER started')
+        playSound('navigate')
+      }
+
+      function pauseShooter() {
+        if (shooterState) shooterState.paused = !shooterState.paused
+      }
+
+      function shooterLoop() {
+        if (!shooterState || !shooterState.running) {
+          return
+        }
+        if (shooterState.paused) {
+          shooterState.gameLoop = requestAnimationFrame(shooterLoop)
+          return
+        }
+        updateShooter()
+        drawShooter()
+        shooterState.gameLoop = requestAnimationFrame(shooterLoop)
+      }
+
+      function updateShooter() {
+        const st = shooterState
+        const p = st.player
+
+        // Player movement
+        if (st.keys['ArrowUp'] || st.keys['KeyW']) p.vy -= 0.8
+        if (st.keys['ArrowDown'] || st.keys['KeyS']) p.vy += 0.8
+        p.vy *= 0.92
+        p.y += p.vy
+        p.y = Math.max(p.h / 2, Math.min(sCanvas.height - p.h / 2, p.y))
+        if (p.invincible > 0) p.invincible--
+
+        // Shooting
+        st.enemyTimer++
+        if (
+          (st.keys['Space'] && st.bulletTimer === undefined) ||
+          (st.bulletTimer && st.bulletTimer <= 0)
+        ) {
+          st.bullets.push({ x: p.x + p.w / 2, y: p.y, vx: 12, friendly: true })
+          st.bulletTimer = 8
+          playSound('click')
+        }
+        if (st.bulletTimer > 0) st.bulletTimer--
+
+        // Spawn enemies
+        if (st.enemyTimer >= st.enemyInterval) {
+          st.enemyTimer = 0
+          const type = Math.random() > 0.7 ? 'big' : 'small'
+          st.enemies.push({
+            x: sCanvas.width + 30,
+            y: Math.random() * (sCanvas.height - 40) + 20,
+            w: type === 'big' ? 50 : 30,
+            h: type === 'big' ? 30 : 18,
+            hp: type === 'big' ? 3 : 1,
+            vx: -2 - Math.random() * 2 - st.wave * 0.2,
+            vy: (Math.random() - 0.5) * 2,
+            type: type,
+          })
+        }
+
+        // Update bullets
+        st.bullets = st.bullets.filter((b) => {
+          b.x += b.vx
+          b.y += b.vy || 0
+          return b.x > -10 && b.x < sCanvas.width + 10 && b.y > -10 && b.y < sCanvas.height + 10
+        })
+
+        // Update enemies
+        st.enemies = st.enemies.filter((e) => {
+          e.x += e.vx
+          e.y += e.vy
+          if (e.y < e.h / 2 || e.y > sCanvas.height - e.h / 2) e.vy *= -1
+
+          // Check bullet collision
+          for (let i = st.bullets.length - 1; i >= 0; i--) {
+            const b = st.bullets[i]
+            if (
+              b.friendly &&
+              rectCollision(b.x - 4, b.y - 4, 8, 8, e.x - e.w / 2, e.y - e.h / 2, e.w, e.h)
+            ) {
+              st.bullets.splice(i, 1)
+              e.hp--
+              spawnParticles(e.x, e.y, '#ffff00', 5)
+              if (e.hp <= 0) {
+                st.score += e.type === 'big' ? 100 : 50
+                spawnParticles(e.x, e.y, e.type === 'big' ? '#ff6600' : '#ff0066', 15)
+                if (Math.random() < 0.1) st.powerups.push({ x: e.x, y: e.y, type: 'heal' })
+                document.getElementById('shooterScore').textContent = st.score
+                return false
+              }
+            }
+          }
+
+          // Check player collision
+          if (
+            p.invincible <= 0 &&
+            rectCollision(
+              p.x - p.w / 2,
+              p.y - p.h / 2,
+              p.w,
+              p.h,
+              e.x - e.w / 2,
+              e.y - e.h / 2,
+              e.w,
+              e.h
+            )
+          ) {
+            p.health -= 25
+            p.invincible = 120
+            spawnParticles(p.x, p.y, '#ff0000', 10)
+            document.getElementById('healthFill').style.width = Math.max(0, p.health) + '%'
+            playSound('error')
+            if (p.health <= 0) {
+              p.lives--
+              document.getElementById('shooterLives').textContent = p.lives
+              if (p.lives <= 0) {
+                gameOver()
+                return false
+              }
+              p.health = 100
+              document.getElementById('healthFill').style.width = '100%'
+            }
+          }
+
+          return e.x > -50
+        })
+
+        // Powerups
+        st.powerups = st.powerups.filter((pow) => {
+          pow.x -= 2
+          if (
+            rectCollision(pow.x - 10, pow.y - 10, 20, 20, p.x - p.w / 2, p.y - p.h / 2, p.w, p.h)
+          ) {
+            if (pow.type === 'heal') {
+              p.health = Math.min(100, p.health + 30)
+              document.getElementById('healthFill').style.width = p.health + '%'
+            }
+            spawnParticles(pow.x, pow, '#00ff88', 8)
+            playSound('success')
+            return false
+          }
+          return pow.x > -20
+        })
+
+        // Particles
+        st.particles = st.particles.filter((pt) => {
+          pt.x += pt.vx
+          pt.y += pt.vy
+          pt.life--
+          pt.vx *= 0.98
+          pt.vy *= 0.98
+          return pt.life > 0
+        })
+
+        // Wave progression
+        if (st.score > st.wave * 500) {
+          st.wave++
+          st.enemyInterval = Math.max(30, st.enemyInterval - 5)
+          document.getElementById('shooterWave').textContent = st.wave
+        }
+      }
+
+      function rectCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
+        return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2
+      }
+
+      function spawnParticles(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+          shooterState.particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 30 + Math.random() * 20,
+            color,
+            size: 2 + Math.random() * 3,
+          })
+        }
+      }
+
+      function drawShooter() {
+        const st = shooterState
+        // Background
+        const grad = sCtx.createLinearGradient(0, 0, sCanvas.width, sCanvas.height)
+        grad.addColorStop(0, '#0a0015')
+        grad.addColorStop(1, '#150020')
+        sCtx.fillStyle = grad
+        sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height)
+
+        // Stars
+        sCtx.fillStyle = 'rgba(255,255,255,0.5)'
+        for (let i = 0; i < 50; i++) {
+          const sx = (i * 137 + Date.now() / 20) % sCanvas.width
+          const sy = (i * 97) % sCanvas.height
+          sCtx.fillRect(sx, sy, 1, 1)
+        }
+
+        // Particles
+        st.particles.forEach((pt) => {
+          sCtx.globalAlpha = pt.life / 50
+          sCtx.fillStyle = pt.color
+          sCtx.beginPath()
+          sCtx.arc(pt.x, pt.y, Math.max(0.5, pt.size), 0, Math.PI * 2)
+          sCtx.fill()
+        })
+        sCtx.globalAlpha = 1
+
+        // Bullets
+        st.bullets.forEach((b) => {
+          sCtx.fillStyle = b.friendly ? '#00ffff' : '#ff3366'
+          sCtx.shadowColor = b.friendly ? '#00ffff' : '#ff3366'
+          sCtx.shadowBlur = 10
+          sCtx.fillRect(b.x - 4, b.y - 2, 8, 4)
+        })
+        sCtx.shadowBlur = 0
+
+        // Enemies
+        st.enemies.forEach((e) => {
+          sCtx.fillStyle = e.type === 'big' ? '#ff6600' : '#ff0066'
+          sCtx.shadowColor = e.type === 'big' ? '#ff6600' : '#ff0066'
+          sCtx.shadowBlur = 8
+          sCtx.beginPath()
+          sCtx.moveTo(e.x + e.w / 2, e.y - e.h / 2)
+          sCtx.lineTo(e.x - e.w / 2, e.y + e.h / 2)
+          sCtx.lineTo(e.x - e.w / 2 + 10, e.y)
+          sCtx.closePath()
+          sCtx.fill()
+        })
+        sCtx.shadowBlur = 0
+
+        // Powerups
+        st.powerups.forEach((pow) => {
+          sCtx.fillStyle = '#00ff88'
+          sCtx.shadowColor = '#00ff88'
+          sCtx.shadowBlur = 10
+          sCtx.beginPath()
+          sCtx.arc(pow.x, pow.y, 8, 0, Math.PI * 2)
+          sCtx.fill()
+          sCtx.fillStyle = '#fff'
+          sCtx.font = 'bold 10px Orbitron'
+          sCtx.textAlign = 'center'
+          sCtx.fillText('+', pow.x, pow.y + 4)
+        })
+        sCtx.shadowBlur = 0
+
+        // Player
+        const p = st.player
+        if (p.invincible % 8 < 4) sCtx.globalAlpha = 0.5
+        sCtx.fillStyle = '#00ffff'
+        sCtx.shadowColor = '#00ffff'
+        sCtx.shadowBlur = 15
+        sCtx.beginPath()
+        sCtx.moveTo(p.x + p.w / 2, p.y)
+        sCtx.lineTo(p.x - p.w / 2, p.y - p.h / 2)
+        sCtx.lineTo(p.x - p.w / 3, p.y)
+        sCtx.lineTo(p.x - p.w / 2, p.y + p.h / 2)
+        sCtx.closePath()
+        sCtx.fill()
+        // Engine glow
+        sCtx.fillStyle = '#ff6600'
+        sCtx.beginPath()
+        sCtx.moveTo(p.x - p.w / 3, p.y - 4)
+        sCtx.lineTo(p.x - p.w / 2 - 8 - Math.random() * 8, p.y)
+        sCtx.lineTo(p.x - p.w / 3, p.y + 4)
+        sCtx.closePath()
+        sCtx.fill()
+        sCtx.shadowBlur = 0
+        sCtx.globalAlpha = 1
+      }
+
+      function gameOver() {
+        shooterState.running = false
+        sCtx.fillStyle = 'rgba(0,0,0,0.8)'
+        sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height)
+        sCtx.fillStyle = '#ff3366'
+        sCtx.font = 'bold 36px Orbitron'
+        sCtx.textAlign = 'center'
+        sCtx.fillText('GAME OVER', sCanvas.width / 2, sCanvas.height / 2 - 20)
+        sCtx.fillStyle = '#fff'
+        sCtx.font = '18px Share Tech Mono'
+        sCtx.fillText(
+          'Final Score: ' + shooterState.score,
+          sCanvas.width / 2,
+          sCanvas.height / 2 + 20
+        )
+        sCtx.fillText('Press START to retry', sCanvas.width / 2, sCanvas.height / 2 + 50)
+        addLog('warning', 'GAME OVER - Score: ' + shooterState.score)
+      }
+
+      // Keyboard for shooter
+      document.addEventListener('keydown', (e) => {
+        if (shooterState) shooterState.keys[e.code] = true
+        if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code))
+          e.preventDefault()
+      })
+      document.addEventListener('keyup', (e) => {
+        if (shooterState) shooterState.keys[e.code] = false
+      })
+
+      // ============================================
+      // SYNTHESIZER
+      // ============================================
+      let synthState = {
+        ctx: null,
+        osc: null,
+        gainNode: null,
+        filterNode: null,
+        analyser: null,
+        waveType: 'sine',
+        freq: 220,
+        detune: 0,
+        oscGain: 0.7,
+        attack: 0.1,
+        decay: 0.2,
+        sustain: 0.6,
+        release: 0.5,
+        filterType: 'lowpass',
+        filterCutoff: 5000,
+        filterQ: 5,
+        filterEnabled: false,
+        sequence: new Array(16).fill(false),
+        seqNotes: [
+          261.63, 0, 329.63, 0, 392, 0, 523.25, 0, 587.33, 0, 659.25, 0, 783.99, 0, 880, 0,
+        ],
+        playingSeq: false,
+        seqStep: 0,
+        seqInterval: null,
+        bpm: 120,
+        sampleBuffer: null,
+        sampleSource: null,
+      }
+
+      function initSynthUI() {
+        // Build sequencer grid
+        const grid = document.getElementById('sequencerGrid')
+        grid.innerHTML = ''
+        for (let i = 0; i < 16; i++) {
+          const step = document.createElement('div')
+          step.className = 'seq-step' + (synthState.sequence[i] ? ' active' : '')
+          step.onclick = function () {
+            synthState.sequence[i] = !synthState.sequence[i]
+            this.classList.toggle('active')
+          }
+          grid.appendChild(step)
+        }
+        // Build piano keys
+        const piano = document.getElementById('pianoKeys')
+        piano.innerHTML = ''
+        const notes = [
+          { n: 'C', f: 261.63, black: false },
+          { n: 'C#', f: 277.18, black: true },
+          { n: 'D', f: 293.66, black: false },
+          { n: 'D#', f: 311.13, black: true },
+          { n: 'E', f: 329.63, black: false },
+          { n: 'F', f: 349.23, black: false },
+          { n: 'F#', f: 369.99, black: true },
+          { n: 'G', f: 392, black: false },
+          { n: 'G#', f: 415.3, black: true },
+          { n: 'A', f: 440, black: false },
+          { n: 'A#', f: 466.16, black: true },
+          { n: 'B', f: 493.88, black: false },
+          { n: 'C2', f: 523.25, black: false },
+        ]
+        notes.forEach((n) => {
+          const k = document.createElement('div')
+          k.className = n.black ? 'black-key' : 'white-key'
+          k.dataset.freq = n.f
+          k.onmousedown = function (e) {
+            e.preventDefault()
+            playNote(parseFloat(this.dataset.freq))
+            this.classList.add('pressed')
+          }
+          k.onmouseup = function () {
+            stopNote()
+            this.classList.remove('pressed')
+          }
+          k.onmouseleave = function () {
+            stopNote()
+            this.classList.remove('pressed')
+          }
+          piano.appendChild(k)
+        })
+        // Init waveform canvas
+        const wfCanvas = document.getElementById('waveformCanvas')
+        wfCanvas.width = wfCanvas.offsetWidth
+        wfCanvas.height = wfCanvas.offsetHeight
+        drawWaveform()
+      }
+
+      function initSynthAudio() {
+        initAudio()
+        if (synthState.ctx) return
+        const actx = audioContext
+        synthState.ctx = actx
+        synthState.osc = actx.createOscillator()
+        synthState.gainNode = actx.createGain()
+        synthState.filterNode = actx.createBiquadFilter()
+        synthState.analyser = actx.createAnalyser()
+        synthState.analyser.fftSize = 2048
+        synthState.osc.type = synthState.waveType
+        synthState.osc.frequency.value = synthState.freq
+        synthState.osc.detune.value = synthState.detune
+        synthState.gainNode.gain.value = 0
+        synthState.filterNode.type = synthState.filterType
+        synthState.filterNode.frequency.value = synthState.filterCutoff
+        synthState.filterNode.Q.value = synthState.filterQ
+        synthState.osc.connect(synthState.filterNode)
+        synthState.filterNode.connect(synthState.gainNode)
+        synthState.gainNode.connect(synthState.analyser)
+        synthState.analyser.connect(actx.destination)
+        synthState.osc.start()
+        animateWaveform()
+        addLog('success', 'Synth audio initialized')
+        playSound('success')
+      }
+
+      function playNote(freq) {
+        if (!synthState.ctx) {
+          initSynthAudio()
+        }
+        const now = synthState.ctx.currentTime
+        synthState.osc.frequency.setValueAtTime(freq, now)
+        synthState.gainNode.gain.cancelScheduledValues(now)
+        synthState.gainNode.gain.setValueAtTime(0, now)
+        synthState.gainNode.gain.linearRampToValueAtTime(
+          synthState.oscGain,
+          now + synthState.attack
+        )
+        synthState.gainNode.gain.linearRampToValueAtTime(
+          synthState.oscGain * synthState.sustain,
+          now + synthState.attack + synthState.decay
+        )
+      }
+
+      function stopNote() {
+        if (!synthState.ctx) return
+        const now = synthState.ctx.currentTime
+        synthState.gainNode.gain.cancelScheduledValues(now)
+        synthState.gainNode.gain.setValueAtTime(synthState.gainNode.gain.value, now)
+        synthState.gainNode.gain.linearRampToValueAtTime(0, now + synthState.release)
+      }
+
+      function setOscWave(btn) {
+        document
+          .querySelectorAll('.osc-btn[data-wave]')
+          .forEach((b) => b.classList.remove('active'))
+        btn.classList.add('active')
+        synthState.waveType = btn.dataset.wave
+        if (synthState.osc) synthState.osc.type = synthState.waveType
+      }
+
+      function updateOscFreq(v) {
+        synthState.freq = parseFloat(v)
+        document.getElementById('freqVal').textContent = v + 'Hz'
+        if (synthState.osc) synthState.osc.frequency.value = synthState.freq
+      }
+      function updateDetune(v) {
+        synthState.detune = parseInt(v)
+        document.getElementById('detuneVal').textContent = v
+        if (synthState.osc) synthState.osc.detune.value = synthState.detune
+      }
+      function updateOscGain(v) {
+        synthState.oscGain = parseInt(v) / 100
+        document.getElementById('gainVal').textContent = v + '%'
+      }
+
+      function updateADSR(param, val) {
+        const v = parseInt(val) / 1000
+        synthState[param === 'sustain' ? 'sustain' : param] =
+          param === 'sustain' ? parseInt(val) / 100 : v
+        document.getElementById(param + 'Val').textContent =
+          param === 'sustain' ? val + '%' : v.toFixed(1) + 's'
+      }
+
+      function setFilterType(btn) {
+        document
+          .querySelectorAll('.osc-btn[data-filt]')
+          .forEach((b) => b.classList.remove('active'))
+        btn.classList.add('active')
+        synthState.filterType = btn.dataset.filt
+        if (synthState.filterNode) synthState.filterNode.type = synthState.filterType
+      }
+      function toggleFilter() {
+        synthState.filterEnabled = !synthState.filterEnabled
+      }
+      function updateFilterCutoff(v) {
+        synthState.filterCutoff = parseInt(v)
+        document.getElementById('cutoffVal').textContent = (v / 1000).toFixed(1) + 'kHz'
+        if (synthState.filterNode) synthState.filterNode.frequency.value = synthState.filterCutoff
+      }
+      function updateFilterQ(v) {
+        synthState.filterQ = parseInt(v)
+        document.getElementById('qVal').textContent = v
+        if (synthState.filterNode) synthState.filterNode.Q.value = synthState.filterQ
+      }
+
+      function animateWaveform() {
+        if (
+          !synthState.analyser ||
+          document.getElementById('panel-synth').classList.contains('active') === false
+        ) {
+          requestAnimationFrame(animateWaveform)
+          return
+        }
+        const canvas = document.getElementById('waveformCanvas')
+        const ctx = canvas.getContext('2d')
+        const bufferLength = synthState.analyser.frequencyBinCount
+        const dataArray = new Uint8Array(bufferLength)
+        synthState.analyser.getByteTimeDomainData(dataArray)
+        ctx.fillStyle = 'rgba(0,0,0,0.3)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.lineWidth = 2
+        const style = getComputedStyle(document.body)
+        ctx.strokeStyle = style.getPropertyValue('--fg-primary').trim() || '#00ffff'
+        ctx.beginPath()
+        const sliceWidth = canvas.width / bufferLength
+        let x = 0
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0
+          const y = (v * canvas.height) / 2
+          if (i === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+          x += sliceWidth
+        }
+        ctx.stroke()
+        requestAnimationFrame(animateWaveform)
+      }
+
+      function drawWaveform() {
+        const canvas = document.getElementById('waveformCanvas')
+        if (!canvas) return
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = '#000'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.strokeStyle = 'rgba(0,255,255,0.3)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(0, canvas.height / 2)
+        ctx.lineTo(canvas.width, canvas.height / 2)
+        ctx.stroke()
+      }
+
+      // Sequencer
+      function playSequence() {
+        if (synthState.playingSeq) return
+        initSynthAudio()
+        synthState.playingSeq = true
+        const stepTime = 60000 / synthState.bpm / 2 // 8th notes
+        synthState.seqStep = 0
+        synthState.seqInterval = setInterval(() => {
+          const steps = document.querySelectorAll('.seq-step')
+          steps.forEach((s, i) => s.classList.toggle('current', i === synthState.seqStep))
+          if (synthState.sequence[synthState.seqStep] && synthState.seqNotes[synthState.seqStep]) {
+            playNote(synthState.seqNotes[synthState.seqStep])
+            setTimeout(stopNote, (synthState.attack + synthState.decay) * 900)
+          }
+          synthState.seqStep = (synthState.seqStep + 1) % 16
+        }, stepTime)
+        addLog('info', 'Sequencer playing at ' + synthState.bpm + ' BPM')
+      }
+
+      function stopSequence() {
+        synthState.playingSeq = false
+        if (synthState.seqInterval) {
+          clearInterval(synthState.seqInterval)
+          synthState.seqInterval = null
+        }
+        document.querySelectorAll('.seq-step').forEach((s) => s.classList.remove('current'))
+        stopNote()
+      }
+
+      function updateBPM(v) {
+        synthState.bpm = parseInt(v)
+        document.getElementById('bpmVal').textContent = v
+        if (synthState.playingSeq) {
+          stopSequence()
+          playSequence()
+        }
+      }
+
+      // Samples
+      function loadSample(e) {
+        const file = e.target.files[0]
+        if (!file) return
+        initSynthAudio()
+        const reader = new FileReader()
+        reader.onload = function (ev) {
+          synthState.ctx
+            .decodeAudioData(ev.target.result)
+            .then((buf) => {
+              synthState.sampleBuffer = buf
+              document.getElementById('sampleName').textContent = file.name
+              addLog('success', 'Sample loaded: ' + file.name)
+            })
+            .catch((err) => addLog('error', 'Failed to load sample'))
+        }
+        reader.readAsArrayBuffer(file)
+      }
+
+      function playSample() {
+        if (!synthState.sampleBuffer || !synthState.ctx) {
+          addLog('warning', 'No sample loaded')
+          return
+        }
+        if (synthState.sampleSource)
+          try {
+            synthState.sampleSource.stop()
+          } catch (e) {}
+        synthState.sampleSource = synthState.ctx.createBufferSource()
+        synthState.sampleSource.buffer = synthState.sampleBuffer
+        synthState.sampleSource.connect(synthState.ctx.destination)
+        synthState.sampleSource.start()
+      }
+
+      // ============================================
+      // INITIALIZATION
+      // ============================================
+      function updateTime() {
+        document.getElementById('currentTime').textContent = new Date().toLocaleTimeString(
+          'de-DE',
+          { hour12: false }
+        )
+      }
+      function simulateStats() {
+        document.getElementById('cpuUsage').textContent = Math.floor(Math.random() * 30 + 15) + '%'
+        document.getElementById('memUsage').textContent =
+          Math.floor(Math.random() * 50 + 130) + 'MB'
+        document.getElementById('pingValue').textContent = Math.floor(Math.random() * 20 + 5) + 'ms'
+      }
+
+      function init() {
+        resizePCanvas()
+        createParticles()
+        drawParticles()
+        renderArtifacts()
+        updateTime()
+        setInterval(updateTime, 1000)
+        setInterval(simulateStats, 3000)
+        addLog('success', 'NEXUS Console initialized')
+        addLog('info', 'All systems nominal')
+        addLog('info', artifacts.length + ' artifacts loaded')
+        addLog('warning', 'New apps available: SHOOTER, SYNTH')
+        showPanel('artifacts')
+        window.addEventListener('resize', () => {
+          resizePCanvas()
+          createParticles()
+        })
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            /* close modals */
+          }
+          if (e.key === 'F1') {
+            e.preventDefault()
+            showPanel('log')
+          }
+        })
+      }
+
+      init()
+    </script>
+  </body>
+</html>

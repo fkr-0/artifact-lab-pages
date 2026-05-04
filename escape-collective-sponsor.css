@@ -1,0 +1,21 @@
+:root{
+  --ec-bg:#0a0911;
+  --ec-panel:#161226;
+  --ec-indigo:#575bb7;
+  --ec-violet:#b38bf3;
+  --ec-silver:#f0edff;
+  --ec-mint:#96ffd8;
+  --ec-rust:#e89f71;
+  --ec-font-headline: Inter, Arial, sans-serif;
+  --ec-font-content: "IBM Plex Mono", monospace;
+  --ec-ratio:story;
+  --ec-density:62;
+  --ec-edge:22;
+  --ec-discipline:88;
+}
+/* Sponsor usage:
+.hero{background:var(--ec-bg);color:var(--ec-silver)}
+.kicker,.meta{font-family:var(--ec-font-content);color:var(--ec-mint)}
+h1,h2{font-family:var(--ec-font-headline);letter-spacing:-.04em}
+.card{border:1px solid color-mix(in srgb,var(--ec-silver) 12%, transparent);background:linear-gradient(180deg,var(--ec-panel),var(--ec-bg))}
+*/

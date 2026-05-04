@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Font Lab Browser</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #121a31;
+      --panel-2: #18223d;
+      --text: #eff4ff;
+      --muted: #9fb0d0;
+      --accent: #7dd3fc;
+      --ok: #86efac;
+      --warn: #fbbf24;
+      --bad: #fca5a5;
+      --border: #2a385d;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { padding: 18px; }
+    h1, h2, h3, p { margin-top: 0; }
+    a { color: var(--accent); }
+    .app { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+    .panel { background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.24); }
+    .controls { position: sticky; top: 16px; }
+    .grid { display: grid; gap: 12px; }
+    .row { display: grid; gap: 8px; }
+    .row.two { grid-template-columns: 1fr 1fr; }
+    .row.three { grid-template-columns: 1fr 1fr 1fr; }
+    label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+    input, textarea, select, button {
+      width: 100%; border-radius: 10px; border: 1px solid var(--border); background: rgba(11,16,32,.7); color: var(--text);
+      padding: 10px 12px; font: inherit;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    button { cursor: pointer; background: linear-gradient(180deg, #1a3a5d, #15314f); }
+    button:hover { filter: brightness(1.08); }
+    button.secondary { background: rgba(11,16,32,.75); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .toolbar > * { flex: 1 1 180px; }
+    .canvas-wrap { display: grid; gap: 16px; }
+    .canvas-card { display: grid; gap: 10px; }
+    canvas, .svg-preview {
+      width: 100%; background:
+        linear-gradient(45deg, rgba(255,255,255,.08) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,.08) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,.08) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.08) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      border-radius: 14px; border: 1px solid var(--border);
+    }
+    .status { font-size: 13px; color: var(--muted); white-space: pre-wrap; }
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.bad { color: var(--bad); }
+    .glyph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px; }
+    .glyph-card { background: rgba(11,16,32,.5); border: 1px solid var(--border); border-radius: 14px; padding: 10px; display: grid; gap: 8px; }
+    .glyph-card canvas { aspect-ratio: 1; image-rendering: pixelated; }
+    .glyph-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+    .preview-sample { min-height: 112px; padding: 16px; border: 1px dashed var(--border); border-radius: 14px; font-size: 44px; line-height: 1.25; background: rgba(11,16,32,.35); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); padding: 6px 10px; border-radius: 999px; font-size: 12px; color: var(--muted); }
+    .note { font-size: 12px; color: var(--muted); }
+    @media (max-width: 1100px) { .app { grid-template-columns: 1fr; } .controls { position: static; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="panel controls">
+      <h1>Font Lab Browser</h1>
+      <p class="note">Single-file, browser-only font builder. Upload a glyph grid image, remove white to transparency, smooth and trace, then export an OTF plus debug assets.</p>
+
+      <div class="grid">
+        <div class="row">
+          <label>
+            Glyph grid image
+            <input id="imageFile" type="file" accept="image/*" />
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            Grid map (newline-separated; each character maps to one cell)
+            <textarea id="gridMap">ABCDEFGHIJ
+KLMNOPQRST
+UVWXYZabcd
+efghijklmn
+oopqrstuvw
+xyz0123456
+789.,!?+-/</textarea>
+          </label>
+        </div>
+
+        <div class="row two">
+          <label>
+            Family
+            <input id="familyName" value="Grid Lab Font" />
+          </label>
+          <label>
+            Style
+            <input id="styleName" value="Regular" />
+          </label>
+        </div>
+
+        <div class="row three">
+          <label>
+            White threshold
+            <input id="whiteThreshold" type="number" min="0" max="255" step="1" value="245" />
+          </label>
+          <label>
+            Blur radius
+            <input id="blurRadius" type="number" min="0" max="4" step="1" value="1" />
+          </label>
+          <label>
+            Re-threshold
+            <input id="alphaThreshold" type="number" min="0" max="255" step="1" value="64" />
+          </label>
+        </div>
+
+        <div class="row three">
+          <label>
+            Dilate
+            <input id="dilateIterations" type="number" min="0" max="6" step="1" value="0" />
+          </label>
+          <label>
+            Erode
+            <input id="erodeIterations" type="number" min="0" max="6" step="1" value="0" />
+          </label>
+          <label>
+            Raster size
+            <input id="targetRasterSize" type="number" min="48" max="512" step="16" value="128" />
+          </label>
+        </div>
+
+        <div class="row three">
+          <label>
+            Inner padding
+            <input id="glyphPadding" type="number" min="0" max="32" step="1" value="4" />
+          </label>
+          <label>
+            Left bearing
+            <input id="leftBearing" type="number" min="0" max="300" step="1" value="40" />
+          </label>
+          <label>
+            Right bearing
+            <input id="rightBearing" type="number" min="0" max="300" step="1" value="40" />
+          </label>
+        </div>
+
+        <div class="row three">
+          <label>
+            Units/em
+            <input id="unitsPerEm" type="number" min="256" max="4096" step="1" value="1000" />
+          </label>
+          <label>
+            Ascender
+            <input id="ascender" type="number" min="100" max="3000" step="1" value="800" />
+          </label>
+          <label>
+            Descender
+            <input id="descender" type="number" min="0" max="1500" step="1" value="200" />
+          </label>
+        </div>
+
+        <div class="row two">
+          <label>
+            Baseline ratio (0..1)
+            <input id="baselineRatio" type="number" min="0.1" max="0.95" step="0.01" value="0.80" />
+          </label>
+          <label>
+            Trace preset
+            <select id="tracePreset">
+              <option value="sharp">sharp</option>
+              <option value="smoothed" selected>smoothed</option>
+              <option value="detailed">detailed</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toolbar">
+          <button id="processBtn">1. Process grid</button>
+          <button id="exportOtfBtn" class="secondary" disabled>2. Export OTF</button>
+          <button id="exportZipBtn" class="secondary" disabled>3. Export ZIP</button>
+        </div>
+
+        <div>
+          <div class="pill">Browser limit: export and download only. System install/font-cache refresh must happen outside the browser.</div>
+        </div>
+
+        <div id="status" class="status">Load an image and press “Process grid”.</div>
+      </div>
+    </aside>
+
+    <main class="canvas-wrap">
+      <section class="panel canvas-card">
+        <h2>Source</h2>
+        <canvas id="sourceCanvas" width="960" height="540"></canvas>
+      </section>
+
+      <section class="panel canvas-card">
+        <h2>Preview text</h2>
+        <div id="previewSample" class="preview-sample">No exported font yet.</div>
+      </section>
+
+      <section class="panel canvas-card">
+        <h2>Processed glyphs</h2>
+        <div id="glyphGrid" class="glyph-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import ImageTracer from 'https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/+esm';
+    import opentype from 'https://unpkg.com/opentype.js/dist/opentype.module.js';
+    import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm';
+
+    const $ = (id) => document.getElementById(id);
+
+    const refs = {
+      imageFile: $('imageFile'),
+      gridMap: $('gridMap'),
+      familyName: $('familyName'),
+      styleName: $('styleName'),
+      whiteThreshold: $('whiteThreshold'),
+      blurRadius: $('blurRadius'),
+      alphaThreshold: $('alphaThreshold'),
+      dilateIterations: $('dilateIterations'),
+      erodeIterations: $('erodeIterations'),
+      targetRasterSize: $('targetRasterSize'),
+      glyphPadding: $('glyphPadding'),
+      leftBearing: $('leftBearing'),
+      rightBearing: $('rightBearing'),
+      unitsPerEm: $('unitsPerEm'),
+      ascender: $('ascender'),
+      descender: $('descender'),
+      baselineRatio: $('baselineRatio'),
+      tracePreset: $('tracePreset'),
+      processBtn: $('processBtn'),
+      exportOtfBtn: $('exportOtfBtn'),
+      exportZipBtn: $('exportZipBtn'),
+      status: $('status'),
+      sourceCanvas: $('sourceCanvas'),
+      glyphGrid: $('glyphGrid'),
+      previewSample: $('previewSample'),
+    };
+
+    const sourceCtx = refs.sourceCanvas.getContext('2d', { willReadFrequently: true });
+
+    const state = {
+      imageBitmap: null,
+      imageName: 'grid',
+      processedGlyphs: [],
+      exportedFont: null,
+      previewFontUrl: null,
+    };
+
+    function setStatus(text, tone = 'normal') {
+      refs.status.textContent = text;
+      refs.status.className = `status${tone === 'normal' ? '' : ` ${tone}`}`;
+    }
+
+    function parseGridMap(text) {
+      const normalized = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const rows = normalized.split('\n');
+      while (rows.length && rows[rows.length - 1] === '') rows.pop();
+      const width = rows.reduce((m, row) => Math.max(m, [...row].length), 0);
+      const cells = rows.map((row) => {
+        const chars = [...row];
+        while (chars.length < width) chars.push('');
+        return chars;
+      });
+      return { rows: cells.length, cols: width, cells };
+    }
+
+    function binaryAlphaFromRgba(data, whiteThreshold = 245) {
+      const out = new Uint8ClampedArray(data.length / 4);
+      for (let i = 0, j = 0; i < data.length; i += 4, j += 1) {
+        const luminance = Math.round((data[i] + data[i + 1] + data[i + 2]) / 3);
+        out[j] = luminance >= whiteThreshold ? 0 : 255;
+      }
+      return out;
+    }
+
+    function blurBinaryAlpha(alpha, width, height, radius = 0) {
+      if (radius <= 0) return new Uint8ClampedArray(alpha);
+      const src = new Uint8ClampedArray(alpha);
+      const tmp = new Float32Array(alpha.length);
+      const dst = new Uint8ClampedArray(alpha.length);
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          let sum = 0;
+          let count = 0;
+          for (let dx = -radius; dx <= radius; dx += 1) {
+            const xx = x + dx;
+            if (xx >= 0 && xx < width) {
+              sum += src[y * width + xx];
+              count += 1;
+            }
+          }
+          tmp[y * width + x] = sum / Math.max(count, 1);
+        }
+      }
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          let sum = 0;
+          let count = 0;
+          for (let dy = -radius; dy <= radius; dy += 1) {
+            const yy = y + dy;
+            if (yy >= 0 && yy < height) {
+              sum += tmp[yy * width + x];
+              count += 1;
+            }
+          }
+          dst[y * width + x] = Math.round(sum / Math.max(count, 1));
+        }
+      }
+
+      return dst;
+    }
+
+    function thresholdAlpha(alpha, threshold = 127) {
+      const out = new Uint8ClampedArray(alpha.length);
+      for (let i = 0; i < alpha.length; i += 1) {
+        out[i] = alpha[i] >= threshold ? 255 : 0;
+      }
+      return out;
+    }
+
+    function dilate(alpha, width, height, iterations = 0) {
+      let src = new Uint8ClampedArray(alpha);
+      for (let iter = 0; iter < iterations; iter += 1) {
+        const dst = new Uint8ClampedArray(src.length);
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            let on = 0;
+            for (let dy = -1; dy <= 1 && !on; dy += 1) {
+              for (let dx = -1; dx <= 1; dx += 1) {
+                const xx = x + dx;
+                const yy = y + dy;
+                if (xx >= 0 && xx < width && yy >= 0 && yy < height && src[yy * width + xx] > 0) {
+                  on = 255;
+                  break;
+                }
+              }
+            }
+            dst[y * width + x] = on;
+          }
+        }
+        src = dst;
+      }
+      return src;
+    }
+
+    function erode(alpha, width, height, iterations = 0) {
+      let src = new Uint8ClampedArray(alpha);
+      for (let iter = 0; iter < iterations; iter += 1) {
+        const dst = new Uint8ClampedArray(src.length);
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            let on = 255;
+            for (let dy = -1; dy <= 1 && on; dy += 1) {
+              for (let dx = -1; dx <= 1; dx += 1) {
+                const xx = x + dx;
+                const yy = y + dy;
+                if (!(xx >= 0 && xx < width && yy >= 0 && yy < height && src[yy * width + xx] > 0)) {
+                  on = 0;
+                  break;
+                }
+              }
+            }
+            dst[y * width + x] = on;
+          }
+        }
+        src = dst;
+      }
+      return src;
+    }
+
+    function trimBounds(alpha, width, height) {
+      let xMin = width;
+      let yMin = height;
+      let xMax = -1;
+      let yMax = -1;
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          if (alpha[y * width + x] > 0) {
+            if (x < xMin) xMin = x;
+            if (x > xMax) xMax = x;
+            if (y < yMin) yMin = y;
+            if (y > yMax) yMax = y;
+          }
+        }
+      }
+      if (xMax < xMin || yMax < yMin) return { x: 0, y: 0, width: 0, height: 0 };
+      return { x: xMin, y: yMin, width: xMax - xMin + 1, height: yMax - yMin + 1 };
+    }
+
+    function computeFontScale({ height, ascender, descender, baselineRatio }) {
+      const baselinePx = Math.max(1, height * baselineRatio);
+      const belowBaseline = Math.max(1, height - baselinePx);
+      const scaleUp = ascender / baselinePx;
+      const scaleDown = descender / belowBaseline;
+      return { scale: Math.min(scaleUp, scaleDown), baselinePx };
+    }
+
+    function sanitizeFilename(value) {
+      return String(value || 'font').trim().replace(/[^a-z0-9._-]+/gi, '-').replace(/^-+|-+$/g, '') || 'font';
+    }
+
+    function makePreviewText(glyphs) {
+      return glyphs.filter((g) => g.char).map((g) => g.char).slice(0, 48).join('') || 'Preview text';
+    }
+
+    function getConfig() {
+      const grid = parseGridMap(refs.gridMap.value);
+      return {
+        grid,
+        familyName: refs.familyName.value.trim() || 'Grid Lab Font',
+        styleName: refs.styleName.value.trim() || 'Regular',
+        whiteThreshold: Number(refs.whiteThreshold.value),
+        blurRadius: Number(refs.blurRadius.value),
+        alphaThreshold: Number(refs.alphaThreshold.value),
+        dilateIterations: Number(refs.dilateIterations.value),
+        erodeIterations: Number(refs.erodeIterations.value),
+        targetRasterSize: Number(refs.targetRasterSize.value),
+        glyphPadding: Number(refs.glyphPadding.value),
+        leftBearing: Number(refs.leftBearing.value),
+        rightBearing: Number(refs.rightBearing.value),
+        unitsPerEm: Number(refs.unitsPerEm.value),
+        ascender: Number(refs.ascender.value),
+        descender: Number(refs.descender.value),
+        baselineRatio: Number(refs.baselineRatio.value),
+        tracePreset: refs.tracePreset.value,
+      };
+    }
+
+    function drawSourceGuides(image) {
+      const canvas = refs.sourceCanvas;
+      const { width, height } = fitRect(image.width, image.height, canvas.width, canvas.height);
+      const x = Math.round((canvas.width - width) / 2);
+      const y = Math.round((canvas.height - height) / 2);
+      sourceCtx.clearRect(0, 0, canvas.width, canvas.height);
+      sourceCtx.drawImage(image, x, y, width, height);
+
+      const { grid } = getConfig();
+      if (!grid.cols || !grid.rows) return;
+
+      sourceCtx.save();
+      sourceCtx.strokeStyle = 'rgba(125, 211, 252, 0.75)';
+      sourceCtx.lineWidth = 1;
+      const cellW = width / grid.cols;
+      const cellH = height / grid.rows;
+      for (let c = 0; c <= grid.cols; c += 1) {
+        const xx = x + c * cellW;
+        sourceCtx.beginPath();
+        sourceCtx.moveTo(xx, y);
+        sourceCtx.lineTo(xx, y + height);
+        sourceCtx.stroke();
+      }
+      for (let r = 0; r <= grid.rows; r += 1) {
+        const yy = y + r * cellH;
+        sourceCtx.beginPath();
+        sourceCtx.moveTo(x, yy);
+        sourceCtx.lineTo(x + width, yy);
+        sourceCtx.stroke();
+      }
+      sourceCtx.restore();
+    }
+
+    function fitRect(srcW, srcH, maxW, maxH) {
+      const ratio = Math.min(maxW / srcW, maxH / srcH);
+      return { width: Math.max(1, Math.round(srcW * ratio)), height: Math.max(1, Math.round(srcH * ratio)) };
+    }
+
+    function makeCanvas(width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      return canvas;
+    }
+
+    function extractCellCanvas(image, col, row, cols, rows) {
+      const srcCellW = image.width / cols;
+      const srcCellH = image.height / rows;
+      const sx = Math.round(col * srcCellW);
+      const sy = Math.round(row * srcCellH);
+      const ex = Math.round((col + 1) * srcCellW);
+      const ey = Math.round((row + 1) * srcCellH);
+      const width = Math.max(1, ex - sx);
+      const height = Math.max(1, ey - sy);
+      const canvas = makeCanvas(width, height);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(image, sx, sy, width, height, 0, 0, width, height);
+      return canvas;
+    }
+
+    function alphaToCanvas(alpha, width, height) {
+      const canvas = makeCanvas(width, height);
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.createImageData(width, height);
+      for (let i = 0, j = 0; j < alpha.length; i += 4, j += 1) {
+        imageData.data[i] = 0;
+        imageData.data[i + 1] = 0;
+        imageData.data[i + 2] = 0;
+        imageData.data[i + 3] = alpha[j];
+      }
+      ctx.putImageData(imageData, 0, 0);
+      return canvas;
+    }
+
+    function paintAlphaOnWhite(alpha, width, height) {
+      const canvas = makeCanvas(width, height);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, width, height);
+      const imageData = ctx.createImageData(width, height);
+      for (let i = 0, j = 0; j < alpha.length; i += 4, j += 1) {
+        const a = alpha[j];
+        const value = a > 0 ? 0 : 255;
+        imageData.data[i] = value;
+        imageData.data[i + 1] = value;
+        imageData.data[i + 2] = value;
+        imageData.data[i + 3] = 255;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      return canvas;
+    }
+
+    function resampleCanvas(srcCanvas, targetSize) {
+      const canvas = makeCanvas(targetSize, targetSize);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.clearRect(0, 0, targetSize, targetSize);
+      const fit = fitRect(srcCanvas.width, srcCanvas.height, targetSize, targetSize);
+      const x = Math.round((targetSize - fit.width) / 2);
+      const y = Math.round((targetSize - fit.height) / 2);
+      ctx.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, x, y, fit.width, fit.height);
+      return canvas;
+    }
+
+    function preprocessGlyphCanvas(cellCanvas, config) {
+      const ctx = cellCanvas.getContext('2d', { willReadFrequently: true });
+      const src = ctx.getImageData(0, 0, cellCanvas.width, cellCanvas.height);
+      let alpha = binaryAlphaFromRgba(src.data, config.whiteThreshold);
+      alpha = blurBinaryAlpha(alpha, cellCanvas.width, cellCanvas.height, config.blurRadius);
+      alpha = thresholdAlpha(alpha, config.alphaThreshold);
+      alpha = dilate(alpha, cellCanvas.width, cellCanvas.height, config.dilateIterations);
+      alpha = erode(alpha, cellCanvas.width, cellCanvas.height, config.erodeIterations);
+      const bounds = trimBounds(alpha, cellCanvas.width, cellCanvas.height);
+
+      if (!bounds.width || !bounds.height) {
+        return {
+          trimmedCanvas: makeCanvas(config.targetRasterSize, config.targetRasterSize),
+          alpha: new Uint8ClampedArray(config.targetRasterSize * config.targetRasterSize),
+          rasterWidth: config.targetRasterSize,
+          rasterHeight: config.targetRasterSize,
+          sourceBounds: bounds,
+        };
+      }
+
+      const cropped = makeCanvas(bounds.width + config.glyphPadding * 2, bounds.height + config.glyphPadding * 2);
+      const croppedCtx = cropped.getContext('2d');
+      const croppedData = croppedCtx.createImageData(cropped.width, cropped.height);
+      for (let y = 0; y < bounds.height; y += 1) {
+        for (let x = 0; x < bounds.width; x += 1) {
+          const srcAlpha = alpha[(bounds.y + y) * cellCanvas.width + (bounds.x + x)];
+          const dx = x + config.glyphPadding;
+          const dy = y + config.glyphPadding;
+          const idx = (dy * cropped.width + dx) * 4;
+          croppedData.data[idx] = 0;
+          croppedData.data[idx + 1] = 0;
+          croppedData.data[idx + 2] = 0;
+          croppedData.data[idx + 3] = srcAlpha;
+        }
+      }
+      croppedCtx.putImageData(croppedData, 0, 0);
+
+      const normalized = resampleCanvas(cropped, config.targetRasterSize);
+      const nctx = normalized.getContext('2d', { willReadFrequently: true });
+      const ndata = nctx.getImageData(0, 0, normalized.width, normalized.height);
+      let finalAlpha = new Uint8ClampedArray(ndata.data.length / 4);
+      for (let i = 0, j = 0; i < ndata.data.length; i += 4, j += 1) {
+        finalAlpha[j] = ndata.data[i + 3];
+      }
+      finalAlpha = thresholdAlpha(finalAlpha, 1);
+
+      return {
+        trimmedCanvas: alphaToCanvas(finalAlpha, normalized.width, normalized.height),
+        alpha: finalAlpha,
+        rasterWidth: normalized.width,
+        rasterHeight: normalized.height,
+        sourceBounds: bounds,
+      };
+    }
+
+    function makeTraceOptions(preset) {
+      return {
+        colorsampling: 0,
+        numberofcolors: 2,
+        mincolorratio: 0,
+        colorquantcycles: 1,
+        pathomit: 0,
+        ltres: preset === 'sharp' ? 0.5 : preset === 'detailed' ? 0.1 : 0.2,
+        qtres: preset === 'sharp' ? 0.5 : preset === 'detailed' ? 0.1 : 0.2,
+        rightangleenhance: preset !== 'smoothed',
+        layering: 0,
+        strokewidth: 0,
+        roundcoords: 2,
+        linefilter: false,
+        scale: 1,
+      };
+    }
+
+    function extractForegroundPathData(svgString) {
+      const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+      const paths = [...doc.querySelectorAll('path')];
+      const ds = [];
+      for (const path of paths) {
+        const fill = (path.getAttribute('fill') || '').toLowerCase();
+        if (fill.includes('255,255,255') || fill === '#ffffff' || fill === 'white') continue;
+        const d = path.getAttribute('d');
+        if (d && d.trim()) ds.push(d.trim());
+      }
+      return ds.join(' ');
+    }
+
+    function glyphNameFromChar(char) {
+      const cp = char.codePointAt(0);
+      return `uni${cp.toString(16).toUpperCase().padStart(4, '0')}`;
+    }
+
+    function glyphToSvgString(glyph) {
+      return glyph.svgString || '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>';
+    }
+
+    async function canvasToBlob(canvas, type = 'image/png') {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed.')), type);
+      });
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function buildFontArtifacts() {
+      const config = getConfig();
+      if (!state.processedGlyphs.length) throw new Error('No processed glyphs available.');
+
+      const glyphs = [new opentype.Glyph({
+        name: '.notdef',
+        unicode: 0,
+        advanceWidth: config.leftBearing + config.rightBearing + 300,
+        path: new opentype.Path(),
+      })];
+
+      const usedCodepoints = new Set();
+
+      for (const glyph of state.processedGlyphs) {
+        if (!glyph.char) continue;
+        const unicode = glyph.char.codePointAt(0);
+        if (usedCodepoints.has(unicode)) continue;
+        usedCodepoints.add(unicode);
+
+        const { scale, baselinePx } = computeFontScale({
+          height: glyph.rasterHeight,
+          ascender: config.ascender,
+          descender: config.descender,
+          baselineRatio: config.baselineRatio,
+        });
+
+        let path = new opentype.Path();
+        if (glyph.pathData) {
+          path = opentype.Path.fromSVG(glyph.pathData, {
+            flipY: true,
+            flipYBase: baselinePx,
+            scale,
+            x: config.leftBearing,
+            y: 0,
+            optimize: true,
+          });
+        }
+
+        const advanceWidth = Math.max(
+          config.leftBearing + config.rightBearing + 120,
+          Math.round(config.leftBearing + config.rightBearing + glyph.rasterWidth * scale)
+        );
+
+        glyphs.push(new opentype.Glyph({
+          name: glyphNameFromChar(glyph.char),
+          unicode,
+          advanceWidth,
+          path,
+        }));
+      }
+
+      const font = new opentype.Font({
+        familyName: config.familyName,
+        styleName: config.styleName,
+        unitsPerEm: config.unitsPerEm,
+        ascender: config.ascender,
+        descender: -config.descender,
+        glyphs,
+      });
+
+      const arrayBuffer = font.toArrayBuffer();
+      const filenameBase = `${sanitizeFilename(config.familyName)}-${sanitizeFilename(config.styleName)}`;
+      return {
+        font,
+        arrayBuffer,
+        filenameBase,
+      };
+    }
+
+    async function exportOtf() {
+      const artifact = buildFontArtifacts();
+      const blob = new Blob([artifact.arrayBuffer], { type: 'font/otf' });
+      downloadBlob(blob, `${artifact.filenameBase}.otf`);
+      await updatePreviewFont(blob, artifact.font);
+      setStatus(`Exported ${artifact.filenameBase}.otf`, 'ok');
+    }
+
+    async function updatePreviewFont(blob, font) {
+      if (state.previewFontUrl) URL.revokeObjectURL(state.previewFontUrl);
+      state.previewFontUrl = URL.createObjectURL(blob);
+      let style = document.getElementById('previewFontFace');
+      if (!style) {
+        style = document.createElement('style');
+        style.id = 'previewFontFace';
+        document.head.appendChild(style);
+      }
+      const family = `${font.names.fontFamily.en.replace(/"/g, '')} Preview`;
+      style.textContent = `@font-face { font-family: "${family}"; src: url("${state.previewFontUrl}"); }`;
+      refs.previewSample.style.fontFamily = `"${family}", ui-sans-serif, system-ui, sans-serif`;
+      refs.previewSample.textContent = makePreviewText(state.processedGlyphs);
+    }
+
+    async function exportZip() {
+      const artifact = buildFontArtifacts();
+      const zip = new JSZip();
+      zip.file(`${artifact.filenameBase}.otf`, artifact.arrayBuffer);
+      zip.file('manifest.json', JSON.stringify({
+        familyName: getConfig().familyName,
+        styleName: getConfig().styleName,
+        glyphCount: state.processedGlyphs.length,
+        generatedAt: new Date().toISOString(),
+      }, null, 2));
+
+      const glyphFolder = zip.folder('glyphs');
+      for (const glyph of state.processedGlyphs) {
+        const cp = glyph.char ? glyph.char.codePointAt(0).toString(16).toUpperCase() : 'EMPTY';
+        const label = glyph.char ? sanitizeFilename(glyph.char) || `U${cp}` : `U${cp}`;
+        const pngBlob = await canvasToBlob(glyph.canvas, 'image/png');
+        glyphFolder.file(`${cp}-${label}.png`, pngBlob);
+        glyphFolder.file(`${cp}-${label}.svg`, glyphToSvgString(glyph));
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      downloadBlob(zipBlob, `${artifact.filenameBase}-bundle.zip`);
+      const fontBlob = new Blob([artifact.arrayBuffer], { type: 'font/otf' });
+      await updatePreviewFont(fontBlob, artifact.font);
+      setStatus(`Exported ${artifact.filenameBase}-bundle.zip`, 'ok');
+    }
+
+    async function processGrid() {
+      const config = getConfig();
+      if (!state.imageBitmap) throw new Error('Please upload a glyph grid image first.');
+      if (!config.grid.rows || !config.grid.cols) throw new Error('Grid map cannot be empty.');
+
+      const glyphs = [];
+      refs.glyphGrid.innerHTML = '';
+
+      for (let row = 0; row < config.grid.rows; row += 1) {
+        for (let col = 0; col < config.grid.cols; col += 1) {
+          const char = config.grid.cells[row][col] || '';
+          if (!char) continue;
+          const cellCanvas = extractCellCanvas(state.imageBitmap, col, row, config.grid.cols, config.grid.rows);
+          const processed = preprocessGlyphCanvas(cellCanvas, config);
+          const traceCanvas = paintAlphaOnWhite(processed.alpha, processed.rasterWidth, processed.rasterHeight);
+          const traceImageData = traceCanvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, traceCanvas.width, traceCanvas.height);
+          const svgString = ImageTracer.imagedataToSVG(traceImageData, makeTraceOptions(config.tracePreset));
+          const pathData = extractForegroundPathData(svgString);
+
+          const glyph = {
+            char,
+            row,
+            col,
+            canvas: processed.trimmedCanvas,
+            rasterWidth: processed.rasterWidth,
+            rasterHeight: processed.rasterHeight,
+            svgString,
+            pathData,
+          };
+          glyphs.push(glyph);
+          renderGlyphCard(glyph);
+        }
+      }
+
+      state.processedGlyphs = glyphs;
+      refs.exportOtfBtn.disabled = glyphs.length === 0;
+      refs.exportZipBtn.disabled = glyphs.length === 0;
+      refs.previewSample.textContent = makePreviewText(glyphs);
+      refs.previewSample.style.fontFamily = 'ui-sans-serif, system-ui, sans-serif';
+      setStatus(`Processed ${glyphs.length} glyphs. Ready for export.`, 'ok');
+    }
+
+    function renderGlyphCard(glyph) {
+      const card = document.createElement('div');
+      card.className = 'glyph-card';
+      const canvas = glyph.canvas.cloneNode(true);
+      canvas.getContext('2d').drawImage(glyph.canvas, 0, 0);
+
+      const meta = document.createElement('div');
+      meta.className = 'glyph-meta';
+      const charLabel = document.createElement('span');
+      charLabel.textContent = `${glyph.char} · U+${glyph.char.codePointAt(0).toString(16).toUpperCase()}`;
+      const cellLabel = document.createElement('span');
+      cellLabel.textContent = `${glyph.col + 1},${glyph.row + 1}`;
+      meta.append(charLabel, cellLabel);
+
+      card.append(canvas, meta);
+      refs.glyphGrid.appendChild(card);
+    }
+
+    async function onImageSelected(file) {
+      if (!file) return;
+      state.imageName = file.name.replace(/\.[^.]+$/, '');
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        state.imageBitmap = image;
+        drawSourceGuides(image);
+        setStatus(`Loaded ${file.name}.`, 'ok');
+        URL.revokeObjectURL(url);
+      };
+      image.onerror = () => {
+        setStatus(`Could not read ${file.name}.`, 'bad');
+        URL.revokeObjectURL(url);
+      };
+      image.src = url;
+    }
+
+    refs.imageFile.addEventListener('change', (event) => {
+      const [file] = event.target.files || [];
+      onImageSelected(file);
+    });
+
+    refs.gridMap.addEventListener('input', () => {
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+    });
+
+    refs.processBtn.addEventListener('click', async () => {
+      try {
+        setStatus('Processing glyph grid…');
+        await processGrid();
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || String(error), 'bad');
+      }
+    });
+
+    refs.exportOtfBtn.addEventListener('click', async () => {
+      try {
+        setStatus('Exporting OTF…');
+        await exportOtf();
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || String(error), 'bad');
+      }
+    });
+
+    refs.exportZipBtn.addEventListener('click', async () => {
+      try {
+        setStatus('Exporting ZIP bundle…');
+        await exportZip();
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || String(error), 'bad');
+      }
+    });
+
+    setStatus('Load an image and press “Process grid”.');
+  </script>
+</body>
+</html>

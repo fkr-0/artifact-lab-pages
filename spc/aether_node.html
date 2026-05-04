@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aether/Node Design System</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* --- CSS VARIABLES --- */
+      :root {
+        --bg-void: #09090b;
+        --bg-surface: #13111c;
+        --bg-elevated: #1a1825;
+        --fg-primary: #e8e6f2;
+        --fg-secondary: #9a94b3;
+        --accent-violet: #8b5cf6;
+        --accent-iris: #6366f1;
+        --accent-text: #c4b5fd;
+        --border-subtle: #2e2b3e;
+        --glow-color: rgba(139, 92, 246, 0.2);
+      }
+
+      /* --- GLOBAL RESET --- */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-void);
+        color: var(--fg-primary);
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* --- ABSTRACT ART BACKGROUND --- */
+      .art-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+      }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+      }
+      .orb-1 {
+        width: 600px;
+        height: 600px;
+        background: var(--accent-violet);
+        top: -200px;
+        right: -100px;
+      }
+      .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: var(--accent-iris);
+        bottom: -50px;
+        left: -100px;
+        opacity: 0.3;
+      }
+
+      /* --- NOISE TEXTURE OVERLAY --- */
+      .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      /* --- LAYOUT --- */
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+      }
+
+      /* --- HEADER / BRANDING --- */
+      .brand-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4rem;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 2rem;
+      }
+      .logo-mark {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--accent-violet), var(--accent-iris));
+        border-radius: 8px;
+        margin-right: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 4px 12px var(--glow-color);
+      }
+      .brand-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .brand-tagline {
+        margin-left: auto;
+        color: var(--fg-secondary);
+        font-size: 0.9rem;
+      }
+
+      /* --- TYPOGRAPHY --- */
+      h1,
+      h2,
+      h3 {
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        font-size: 3.5rem;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #fff 0%, var(--accent-text) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+      }
+      h2 {
+        font-size: 1.8rem;
+        color: var(--fg-primary);
+        margin-top: 3rem;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 0.5rem;
+        display: inline-block;
+      }
+      p {
+        color: var(--fg-secondary);
+        margin-bottom: 1.5rem;
+        max-width: 65ch;
+      }
+
+      .highlight {
+        color: var(--accent-text);
+        font-weight: 500;
+      }
+
+      /* --- UI COMPONENTS --- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+      }
+
+      /* Card */
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+      }
+      .card:hover {
+        border-color: var(--accent-violet);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+      }
+      .card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+      .card p {
+        font-size: 0.9rem;
+        margin-bottom: 0;
+      }
+
+      /* Buttons */
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem 0;
+      }
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-primary {
+        background: var(--accent-violet);
+        color: white;
+        border: 1px solid transparent;
+      }
+      .btn-primary:hover {
+        background: #7c3aed;
+        box-shadow: 0 4px 15px var(--glow-color);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--fg-primary);
+        border: 1px solid var(--border-subtle);
+      }
+      .btn-secondary:hover {
+        border-color: var(--fg-secondary);
+        background: var(--bg-elevated);
+      }
+
+      /* Code Blocks */
+      .code-window {
+        background: var(--bg-surface);
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        overflow: hidden;
+        margin: 2rem 0;
+      }
+      .code-header {
+        background: var(--bg-elevated);
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        gap: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--bg-muted);
+      }
+      .dot:nth-child(1) {
+        background: #ff5f56;
+      }
+      .dot:nth-child(2) {
+        background: #ffbd2e;
+      }
+      .dot:nth-child(3) {
+        background: #27c93f;
+      }
+
+      pre {
+        padding: 1.5rem;
+        overflow-x: auto;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9rem;
+        color: var(--accent-text);
+        line-height: 1.5;
+      }
+      .comment {
+        color: var(--fg-secondary);
+        font-style: italic;
+      }
+      .keyword {
+        color: var(--accent-violet);
+      }
+
+      /* Color Swatches */
+      .swatch-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 2rem 0;
+      }
+      .swatch {
+        width: 100px;
+        height: 100px;
+        border-radius: 12px;
+        display: flex;
+        align-items: flex-end;
+        padding: 0.75rem;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.7rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .swatch span {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Abstract Art Background Elements -->
+    <div class="art-background">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+    <div class="noise-overlay"></div>
+
+    <div class="container">
+      <!-- Header -->
+      <header class="brand-header">
+        <div class="logo-mark">A/</div>
+        <div class="brand-name">Aether/Node</div>
+        <div class="brand-tagline">Identity System v1.0</div>
+      </header>
+
+      <!-- Hero Section -->
+      <h1>Design for <br />Protection & Clarity.</h1>
+      <p>
+        A comprehensive design system for a tech collective focused on education and
+        self-protection. This theme, <span class="highlight">Deep Velvet</span>, utilizes a midnight
+        dark mode base with expressive violet accents to create an environment of security and
+        focus.
+      </p>
+
+      <div class="btn-group">
+        <a href="#" class="btn btn-primary">View Documentation</a>
+        <a href="#" class="btn btn-secondary">Download Assets</a>
+      </div>
+
+      <!-- Color Palette Section -->
+      <h2>The Palette</h2>
+      <p>Derived from the transition of a midnight sky into deep ultraviolet.</p>
+
+      <div class="swatch-row">
+        <div class="swatch" style="background: #09090b"><span>#09090B</span></div>
+        <div class="swatch" style="background: #13111c"><span>#13111C</span></div>
+        <div class="swatch" style="background: #8b5cf6"><span>#8B5CF6</span></div>
+        <div class="swatch" style="background: #e8e6f2"><span>#E8E6F2</span></div>
+      </div>
+
+      <!-- Components Section -->
+      <h2>UI Components</h2>
+      <p>Sleek, unobtrusive, and accessible elements designed for high readability.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Self-Protection</h3>
+          <p>
+            Tools and guides designed to safeguard digital identity in an era of rapid surveillance.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Education</h3>
+          <p>Breaking down complex tech concepts into accessible, human-readable formats.</p>
+        </div>
+      </div>
+
+      <!-- Code Style Section -->
+      <h2>Source Code Style</h2>
+      <p>
+        Code is poetry. We enforce a strict 80-character line width and high-contrast syntax
+        highlighting.
+      </p>
+
+      <div class="code-window">
+        <div class="code-header">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <pre>
+<span class="comment"># [Aether/Node] Security Utility</span>
+<span class="keyword">def</span> encrypt_payload(data):
+    <span class="keyword">if not</span> data:
+        <span class="keyword">return</span> None
+    
+    <span class="comment"># Return secured packet</span>
+    <span class="keyword">return</span> cipher.secure(data)
+            </pre>
+      </div>
+
+      <p
+        style="
+          margin-top: 4rem;
+          border-top: 1px solid var(--border-subtle);
+          padding-top: 2rem;
+          font-size: 0.8rem;
+        "
+      >
+        &copy; 2023 Aether/Node Collective. Designed for the open web.
+      </p>
+    </div>
+  </body>
+</html>
