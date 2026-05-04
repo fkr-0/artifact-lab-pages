@@ -1029,6 +1029,50 @@
       background:rgba(0,0,0,0.45); color:var(--fg-primary); padding:0.55rem;
       outline:none; font-family:'Share Tech Mono',monospace;
     }
+    .user-manager-panel {
+      border: 1px solid rgba(0,255,255,0.12); border-radius: 8px; padding: 0.75rem;
+      background: rgba(0,255,255,0.035); display:flex; flex-direction:column; gap:0.55rem;
+    }
+    .user-manager-panel input, .user-manager-panel select {
+      width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.35); color: var(--fg-primary);
+      border: 1px solid rgba(0,255,255,0.25); border-radius: 4px; padding: 0.35rem;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+    }
+    .user-manager-actions { display:flex; gap:0.4rem; flex-wrap:wrap; }
+    .mini-btn {
+      border:1px solid rgba(0,255,255,0.25); background:rgba(0,255,255,0.06); color:var(--fg-primary);
+      border-radius:4px; padding:0.3rem 0.45rem; cursor:pointer; font-family:'Share Tech Mono',monospace; font-size:0.68rem;
+    }
+    .mini-btn:hover { background:rgba(0,255,255,0.14); color:var(--accent); }
+    .save-state-list { max-height: 90px; overflow:auto; font-size:0.68rem; color:rgba(0,255,255,0.65); }
+    .save-state-row { display:flex; justify-content:space-between; gap:0.5rem; padding:0.25rem 0; border-bottom:1px solid rgba(0,255,255,0.06); }
+    .session-list { max-height: 105px; overflow:auto; font-size:0.68rem; color:rgba(0,255,255,0.65); }
+    .session-row { display:flex; justify-content:space-between; gap:0.5rem; padding:0.25rem 0; border-bottom:1px solid rgba(0,255,255,0.06); cursor:pointer; }
+    .session-row:hover { color:var(--accent); }
+    .session-active { color:var(--accent); }
+    .storage-list { max-height: 115px; overflow:auto; font-size:0.68rem; color:rgba(0,255,255,0.65); }
+    .storage-row { display:flex; justify-content:space-between; gap:0.5rem; padding:0.25rem 0; border-bottom:1px solid rgba(0,255,255,0.06); cursor:pointer; }
+    .storage-row:hover { color:var(--accent); }
+
+
+
+    .peer-profile-card {
+      position: fixed; z-index: 10001; width: 290px; display:none;
+      background: rgba(5,10,20,0.97); border:1px solid rgba(0,255,255,0.36);
+      border-radius:10px; box-shadow:0 0 28px rgba(0,255,255,0.22); backdrop-filter: blur(14px);
+      color:var(--fg-primary); font-family:'Share Tech Mono',monospace; overflow:hidden;
+    }
+    .peer-profile-head { padding:0.85rem; display:flex; gap:0.7rem; align-items:center; background:rgba(0,255,255,0.07); border-bottom:1px solid rgba(0,255,255,0.16); }
+    .peer-profile-avatar { width:42px; height:42px; border-radius:50%; box-shadow:0 0 14px currentColor; flex-shrink:0; }
+    .peer-profile-name { font-family:'Orbitron',sans-serif; color:var(--accent); font-size:0.82rem; letter-spacing:0.07em; }
+    .peer-profile-meta { font-size:0.65rem; opacity:0.72; margin-top:0.22rem; overflow-wrap:anywhere; }
+    .peer-profile-body { padding:0.8rem; display:flex; flex-direction:column; gap:0.55rem; }
+    .peer-profile-row { display:flex; justify-content:space-between; gap:0.6rem; font-size:0.68rem; border-bottom:1px solid rgba(0,255,255,0.06); padding-bottom:0.35rem; }
+    .peer-profile-chip { border:1px solid rgba(0,255,255,0.18); border-radius:999px; padding:0.12rem 0.35rem; opacity:0.78; }
+    .peer-profile-actions { display:grid; grid-template-columns: 1fr 1fr; gap:0.4rem; padding:0 0.8rem 0.8rem; }
+    .peer-profile-actions .mini-btn { width:100%; }
+    .peer-profile-close { position:absolute; top:0.4rem; right:0.45rem; background:none; border:0; color:var(--accent-secondary); cursor:pointer; }
+
   </style>
 </head>
 <body data-theme="default">
@@ -1217,6 +1261,69 @@
       </div>
     </div>
 
+
+
+    <div>
+      <div class="settings-sect-title">Unified User</div>
+      <div class="user-manager-panel">
+        <input id="umUsername" maxlength="24" placeholder="display name" onchange="updateUnifiedUserFromSettings()">
+        <input id="umColor" type="color" onchange="updateUnifiedUserFromSettings()">
+        <select id="umStatus" onchange="updateUnifiedUserFromSettings()">
+          <option value="available">available</option>
+          <option value="busy">busy</option>
+          <option value="away">away</option>
+          <option value="invisible">invisible</option>
+        </select>
+        <input id="umNote" maxlength="80" placeholder="status note" onchange="updateUnifiedUserFromSettings()">
+        <div class="setting-row">
+          <span>Auto connect shared</span>
+          <div class="toggle-sw" id="toggleUmAutoConnect" onclick="toggleUnifiedAutoConnect()"></div>
+        </div>
+        <div class="setting-row">
+          <span>Accept incoming saves</span>
+          <div class="toggle-sw" id="toggleUmIncomingSaves" onclick="toggleUnifiedIncomingSaves()"></div>
+        </div>
+        <div class="user-manager-actions">
+          <button class="mini-btn" onclick="createV9SaveState()">＋ save v9 state</button>
+          <button class="mini-btn" onclick="announceUnifiedPresence()">announce presence</button>
+        </div>
+        <div class="save-state-list" id="umSaveStates"></div>
+      </div>
+    </div>
+
+
+
+
+
+    <div>
+      <div class="settings-sect-title">Local Storage / Last Session</div>
+      <div class="user-manager-panel">
+        <div class="user-manager-actions">
+          <button class="mini-btn" onclick="saveLocalSnapshotNow()">＋ snapshot</button>
+          <button class="mini-btn" onclick="restoreLastLocalSnapshot()">↩ load last</button>
+          <button class="mini-btn" onclick="toggleLocalAutosave()" id="localAutosaveBtn">autosave</button>
+        </div>
+        <div class="storage-list" id="localSnapshotList"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="settings-sect-title">Shared Sessions</div>
+      <div class="user-manager-panel">
+        <input id="sessionTitle" maxlength="48" placeholder="session title">
+        <div class="user-manager-actions">
+          <button class="mini-btn" onclick="createSharedSessionFromV9()">＋ create</button>
+          <button class="mini-btn" onclick="saveActiveSessionFromV9()">↻ update state</button>
+          <button class="mini-btn" onclick="leaveSharedSession()">leave</button>
+        </div>
+        <div class="setting-row">
+          <span>Active session</span>
+          <span id="activeSessionName" style="color:var(--fg-primary)">none</span>
+        </div>
+        <div class="session-list" id="sessionList"></div>
+      </div>
+    </div>
+
     <div>
       <div class="settings-sect-title">Shared Peernet Core</div>
       <div class="setting-row">
@@ -1277,11 +1384,37 @@
 
 <!-- Peer Context Menu -->
 <div class="peer-context-menu" id="peerContextMenu">
+  <div class="peer-context-menu-item" onclick="peerContextAction('profile')"><span>👤</span><span>Open user card</span></div>
   <div class="peer-context-menu-item" onclick="peerContextAction('chat')"><span>💬</span><span>Open floating chat</span></div>
-  <div class="peer-context-menu-item" onclick="peerContextAction('ping')"><span>📡</span><span>Ping peer</span></div>
+    <div class="peer-context-menu-item" onclick="peerContextAction('ping')"><span>📡</span><span>Ping peer</span></div>
 </div>
 
 <div id="peerChatLayer"></div>
+
+<!-- Peer Profile Card -->
+<div class="peer-profile-card" id="peerProfileCard">
+  <button class="peer-profile-close" onclick="hidePeerProfileCard()">✕</button>
+  <div class="peer-profile-head">
+    <div class="peer-profile-avatar" id="peerProfileAvatar"></div>
+    <div>
+      <div class="peer-profile-name" id="peerProfileName">Peer</div>
+      <div class="peer-profile-meta" id="peerProfileId">—</div>
+    </div>
+  </div>
+  <div class="peer-profile-body">
+    <div class="peer-profile-row"><span>Status</span><span id="peerProfileStatus">unknown</span></div>
+    <div class="peer-profile-row"><span>Layer</span><span id="peerProfileLayer">local</span></div>
+    <div class="peer-profile-row"><span>Seen</span><span id="peerProfileSeen">now</span></div>
+    <div class="peer-profile-row"><span>Note</span><span id="peerProfileNote">—</span></div>
+    <div id="peerProfileCaps"></div>
+  </div>
+  <div class="peer-profile-actions">
+    <button class="mini-btn" onclick="peerProfileAction('chat')">💬 chat</button>
+    <button class="mini-btn" onclick="peerProfileAction('ping')">📡 ping</button>
+    <button class="mini-btn" onclick="peerProfileAction('offer-save')">🎁 send save</button>
+    <button class="mini-btn" onclick="peerProfileAction('announce')">📣 announce</button>
+  </div>
+</div>
 
 <!-- Embedded App Modal -->
 <div class="app-modal" id="appModal">
@@ -1297,6 +1430,9 @@
 <!-- PeerJS for P2P -->
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script src="../peernetjs/peernet-shared-core.js"></script>
+<script src="../peernetjs/peernet-user-manager.js"></script>
+<script src="../peernetjs/peernet-session-manager.js"></script>
+<script src="../peernetjs/peernet-storage-manager.js"></script>
 
 <script>
 // ============================================
@@ -1388,6 +1524,16 @@ const artifacts = [
     url: '../peer-music-groove/index.html',
     path: 'peer-music-groove/',
     status: 'complete'
+  },
+  {
+    id: 'peermodgroove',
+    name: 'PeerModGroove',
+    description: 'Peer-based Reason-alluded modular sound machine with autonomous MIDI/control/audio modules and central mixer.',
+    tags: ['collaborative', 'music', 'audio', 'p2p', 'modular', 'synthesizer', 'procedural'],
+    embedded: false,
+    url: '../PeerModGroove/index.html',
+    path: 'PeerModGroove/',
+    status: 'new'
   },
 
   // EMBEDDED APPS - Render directly in v9
@@ -1711,7 +1857,7 @@ function saveSharedPeernetSettings() {
 function toggleSharedPeernet() {
   sharedPeernetState.enabled = !sharedPeernetState.enabled;
   saveSharedPeernetSettings();
-  if (sharedPeernetState.enabled) startSharedPeernet();
+  if ((peernetUserManager && peernetUserManager.state.connection.autoConnect) || sharedPeernetState.enabled) startSharedPeernet();
   else stopSharedPeernet();
   updateSettingsPanel();
 }
@@ -1738,6 +1884,9 @@ function startSharedPeernet() {
   sharedPeernet.on('peer:leave', () => playSound('leave'));
   sharedPeernet.on('message:chat', payload => receivePeerChat(payload.id, payload.data));
   sharedPeernet.on('error', err => sharedPeernetStatus('error: ' + ((err && err.type) || 'unknown')));
+  bindUnifiedUserManagerToSharedCore();
+  bindUnifiedUserManagerToSharedCore();
+  bindSessionManagerToSharedCore();
   sharedPeernet.start();
   sharedPeernetStatus('starting');
 }
@@ -1752,6 +1901,284 @@ function stopSharedPeernet() {
 function sharedPeernetStatus(text) {
   const el = document.getElementById('settingSharedPeernetStatus');
   if (el) el.textContent = text;
+}
+
+// ============================================
+// UNIFIED USER MANAGER - headless + v9 settings adapter
+// ============================================
+
+const peernetUserManager = window.PeernetUserManager ? new PeernetUserManager({ storageKey: 'v9-peernet-user' }) : null;
+
+function bindUnifiedUserManagerToSharedCore() {
+  if (peernetUserManager && sharedPeernet) {
+    peernetUserManager.bindCore(sharedPeernet);
+    peernetUserManager.announcePresence();
+  }
+}
+
+function updateUnifiedUserFromSettings() {
+  if (!peernetUserManager) return;
+  const username = document.getElementById('umUsername')?.value || state.p2p.username;
+  const color = document.getElementById('umColor')?.value || getConnectionColor('local');
+  const status = document.getElementById('umStatus')?.value || 'available';
+  const note = document.getElementById('umNote')?.value || '';
+  peernetUserManager.setProfile({ username, color, status, note });
+  state.p2p.username = username;
+  const input = document.getElementById('usernameInput');
+  if (input) input.value = username;
+  localStorage.setItem('v9-username', username);
+  broadcastAll({ type: 'username', username });
+  updateP2PUsers();
+  updateSettingsPanel();
+}
+
+function toggleUnifiedAutoConnect() {
+  if (!peernetUserManager) return;
+  const next = !peernetUserManager.state.connection.autoConnect;
+  peernetUserManager.setConnection({ autoConnect: next, sharedLayer: next });
+  sharedPeernetState.enabled = next;
+  saveSharedPeernetSettings();
+  if (next) startSharedPeernet(); else stopSharedPeernet();
+  updateSettingsPanel();
+}
+
+function toggleUnifiedIncomingSaves() {
+  if (!peernetUserManager) return;
+  peernetUserManager.setConnection({ allowIncomingSaveStates: !peernetUserManager.state.connection.allowIncomingSaveStates });
+  updateSettingsPanel();
+}
+
+function announceUnifiedPresence() {
+  if (peernetUserManager) peernetUserManager.announcePresence();
+  playSound('success', true);
+}
+
+function createV9SaveState() {
+  if (!peernetUserManager) return;
+  peernetUserManager.createSaveState({
+    title: 'NEXUS v9 snapshot ' + new Date().toLocaleTimeString(),
+    app: 'nexus-v9'
+  }, {
+    theme: currentTheme,
+    activeTags: Array.from(state.activeTags),
+    tagFilterMode: state.tagFilterMode,
+    searchQuery: state.searchQuery,
+    viewMode: state.viewMode,
+    sound: soundState,
+    effects: effectState
+  });
+  renderUnifiedUserSettings();
+  renderSharedSessions();
+  renderLocalSnapshots();
+  playSound('success', true);
+}
+
+function renderUnifiedUserSettings() {
+  if (!peernetUserManager) return;
+  const snap = peernetUserManager.snapshot();
+  const profile = snap.profile;
+  const conn = snap.connection;
+  const u = document.getElementById('umUsername');
+  if (u) u.value = profile.username || state.p2p.username;
+  const c = document.getElementById('umColor');
+  if (c) c.value = profile.color || '#00ffff';
+  const st = document.getElementById('umStatus');
+  if (st) st.value = profile.status || 'available';
+  const note = document.getElementById('umNote');
+  if (note) note.value = profile.note || '';
+  const ac = document.getElementById('toggleUmAutoConnect');
+  if (ac) ac.classList.toggle('on', !!conn.autoConnect);
+  const inc = document.getElementById('toggleUmIncomingSaves');
+  if (inc) inc.classList.toggle('on', !!conn.allowIncomingSaveStates);
+  const list = document.getElementById('umSaveStates');
+  if (list) {
+    list.innerHTML = snap.saveStates.length ? snap.saveStates.slice(0, 6).map(save => `
+      <div class="save-state-row">
+        <span>${escapeHtml(save.title || save.id)}</span>
+        <span>${escapeHtml(save.app || 'app')}</span>
+      </div>
+    `).join('') : '<span style="opacity:0.55">no save states yet</span>';
+  }
+}
+
+if (peernetUserManager) {
+  peernetUserManager.on('presence', () => { sharedPeernetPeers = peernetUserManager.snapshot().peers; updateP2PUsers(); updateSettingsPanel(); });
+  peernetUserManager.on('save-state:offer', payload => {
+    if (peernetUserManager.state.connection.allowIncomingSaveStates) peernetUserManager.acceptSaveState(payload);
+    renderUnifiedUserSettings();
+  renderSharedSessions();
+  renderLocalSnapshots();
+    playSound('chat');
+  });
+}
+
+// ============================================
+// SHARED SESSION MANAGER - headless + v9 settings adapter
+// ============================================
+
+const peernetSessionManager = window.PeernetSessionManager ? new PeernetSessionManager({
+  storageKey: 'v9-peernet-sessions',
+  userManager: peernetUserManager
+}) : null;
+
+function bindSessionManagerToSharedCore() {
+  if (peernetSessionManager && sharedPeernet) peernetSessionManager.bind({ core: sharedPeernet, userManager: peernetUserManager });
+}
+
+function captureV9SessionState() {
+  return {
+    theme: currentTheme,
+    activeTags: Array.from(state.activeTags),
+    tagFilterMode: state.tagFilterMode,
+    searchQuery: state.searchQuery,
+    viewMode: state.viewMode,
+    sound: Object.assign({}, soundState),
+    effects: Object.assign({}, effectState),
+    openApps: Array.from(state.appDeck.openApps.keys ? state.appDeck.openApps.keys() : [])
+  };
+}
+
+function createSharedSessionFromV9() {
+  if (!peernetSessionManager) return;
+  if (!sharedPeernet && !sharedPeernetState.enabled) {
+    sharedPeernetState.enabled = true;
+    saveSharedPeernetSettings();
+    startSharedPeernet();
+  }
+  const input = document.getElementById('sessionTitle');
+  const title = (input && input.value.trim()) || ('NEXUS session ' + new Date().toLocaleTimeString());
+  peernetSessionManager.createSession({ title, app: 'nexus-v9' }, captureV9SessionState());
+  renderSharedSessions();
+  renderLocalSnapshots();
+  playSound('success', true);
+}
+
+function saveActiveSessionFromV9() {
+  if (!peernetSessionManager) return;
+  peernetSessionManager.updateActiveState(captureV9SessionState());
+  renderSharedSessions();
+  renderLocalSnapshots();
+  playSound('success', true);
+}
+
+function leaveSharedSession() {
+  if (!peernetSessionManager) return;
+  peernetSessionManager.leaveActiveSession();
+  renderSharedSessions();
+  renderLocalSnapshots();
+  playSound('leave', true);
+}
+
+function activateSharedSession(id) {
+  if (!peernetSessionManager) return;
+  const session = peernetSessionManager.sessions.find(s => s.id === id);
+  if (session) {
+    peernetSessionManager.joinSession(session);
+    renderSharedSessions();
+  renderLocalSnapshots();
+    playSound('success', true);
+  }
+}
+
+function renderSharedSessions() {
+  if (!peernetSessionManager) return;
+  const snap = peernetSessionManager.snapshot();
+  const active = document.getElementById('activeSessionName');
+  if (active) active.textContent = snap.activeSession ? snap.activeSession.title : 'none';
+  const list = document.getElementById('sessionList');
+  if (!list) return;
+  list.innerHTML = snap.sessions.length ? snap.sessions.slice(0, 8).map(session => `
+    <div class="session-row ${session.id === snap.activeSessionId ? 'session-active' : ''}" onclick="activateSharedSession('${session.id}')">
+      <span>${escapeHtml(session.title || session.id)}</span>
+      <span>${(session.participants || []).length}p</span>
+    </div>
+  `).join('') : '<span style="opacity:0.55">no shared sessions yet</span>';
+}
+
+if (peernetSessionManager) {
+  peernetSessionManager.on('*', () => { renderSharedSessions();
+  renderLocalSnapshots(); updateSettingsPanel(); });
+}
+
+// ============================================
+// LOCAL STORAGE MANAGER - living snapshots + last-session restore
+// ============================================
+
+let localAutosaveEnabled = JSON.parse(localStorage.getItem('v9-local-autosave') || 'true');
+const peernetStorageManager = window.PeernetStorageManager ? new PeernetStorageManager({
+  namespace: 'nexus-v9-local',
+  autosaveMs: 20000,
+  maxSnapshots: 30,
+  capture: captureV9SessionState,
+  apply: applyV9StoredState
+}) : null;
+
+function applyV9StoredState(payload) {
+  if (!payload) return;
+  if (payload.theme) setTheme(payload.theme);
+  if (payload.tagFilterMode) state.tagFilterMode = payload.tagFilterMode;
+  if (Array.isArray(payload.activeTags)) state.activeTags = new Set(payload.activeTags);
+  if (typeof payload.searchQuery === 'string') {
+    state.searchQuery = payload.searchQuery;
+    const input = document.getElementById('searchInput');
+    if (input) input.value = payload.searchQuery;
+  }
+  if (payload.viewMode) setViewMode(payload.viewMode);
+  if (payload.sound) Object.assign(soundState, payload.sound);
+  if (payload.effects) Object.assign(effectState, payload.effects);
+  localStorage.setItem('v9-sound', JSON.stringify(soundState));
+  localStorage.setItem('v9-effects', JSON.stringify(effectState));
+  updateTagButtons();
+  renderArtifacts();
+  updateSettingsPanel();
+}
+
+function saveLocalSnapshotNow() {
+  if (!peernetStorageManager) return;
+  peernetStorageManager.snapshot({ title: 'Manual snapshot ' + new Date().toLocaleTimeString(), app: 'nexus-v9', kind: 'manual' });
+  renderLocalSnapshots();
+  playSound('success', true);
+}
+
+function restoreLastLocalSnapshot() {
+  if (!peernetStorageManager) return;
+  peernetStorageManager.restore();
+  renderLocalSnapshots();
+  playSound('success', true);
+}
+
+function restoreLocalSnapshot(id) {
+  if (!peernetStorageManager) return;
+  peernetStorageManager.restore(id);
+  renderLocalSnapshots();
+  playSound('success', true);
+}
+
+function toggleLocalAutosave() {
+  localAutosaveEnabled = !localAutosaveEnabled;
+  localStorage.setItem('v9-local-autosave', JSON.stringify(localAutosaveEnabled));
+  if (localAutosaveEnabled) peernetStorageManager?.startAutosave();
+  else peernetStorageManager?.stopAutosave();
+  renderLocalSnapshots();
+}
+
+function renderLocalSnapshots() {
+  const btn = document.getElementById('localAutosaveBtn');
+  if (btn) btn.textContent = localAutosaveEnabled ? 'autosave on' : 'autosave off';
+  const list = document.getElementById('localSnapshotList');
+  if (!list || !peernetStorageManager) return;
+  list.innerHTML = peernetStorageManager.index.length ? peernetStorageManager.index.slice(0, 8).map(snap => `
+    <div class="storage-row" onclick="restoreLocalSnapshot('${snap.id}')">
+      <span>${escapeHtml(snap.title || snap.id)}</span>
+      <span>${escapeHtml(snap.kind || 'snap')}</span>
+    </div>
+  `).join('') : '<span style="opacity:0.55">no local snapshots yet</span>';
+}
+
+if (peernetStorageManager) {
+  peernetStorageManager.on('snapshot', renderLocalSnapshots);
+  peernetStorageManager.on('restore', renderLocalSnapshots);
+  if (localAutosaveEnabled) peernetStorageManager.startAutosave();
 }
 
 
@@ -2880,6 +3307,7 @@ function peerContextAction(action) {
   const peerId = state.peerUi.contextPeerId;
   if (!peerId) return;
   const entry = state.p2p.connections.get(peerId);
+  if (action === 'profile') showPeerProfileCard(peerId);
   if (action === 'chat') openPeerChat(peerId);
   if (action === 'ping' && entry && entry.conn.open) {
     entry.conn.send({ type: 'ping', at: Date.now() });
@@ -2887,6 +3315,67 @@ function peerContextAction(action) {
     playSound('ping');
   }
   hidePeerContextMenu();
+}
+
+
+function getUnifiedPeerProfile(peerId) {
+  const local = state.p2p.connections.get(peerId);
+  const unified = peernetUserManager ? peernetUserManager.snapshot().peers.find(p => p.id === peerId) : null;
+  const shared = (sharedPeernetPeers || []).find(p => p.id === peerId);
+  const merged = Object.assign({}, shared || {}, unified || {}, local || {});
+  merged.id = peerId;
+  merged.username = merged.username || merged.name || peerId.slice(0, 8);
+  merged.color = merged.color || getConnectionColor(peerId);
+  merged.layer = local ? 'local mesh' : (shared || unified ? 'shared mesh' : 'unknown');
+  return merged;
+}
+
+function showPeerProfileCard(peerId, x, y) {
+  const card = document.getElementById('peerProfileCard');
+  if (!card) return;
+  state.peerUi.contextPeerId = peerId;
+  const p = getUnifiedPeerProfile(peerId);
+  document.getElementById('peerProfileAvatar').style.background = p.color;
+  document.getElementById('peerProfileAvatar').style.color = p.color;
+  document.getElementById('peerProfileName').textContent = p.username;
+  document.getElementById('peerProfileId').textContent = p.id;
+  document.getElementById('peerProfileStatus').textContent = p.status || 'unknown';
+  document.getElementById('peerProfileLayer').textContent = p.layer;
+  document.getElementById('peerProfileSeen').textContent = p.lastSeen ? Math.max(0, Math.round((Date.now()-p.lastSeen)/1000)) + 's ago' : 'now';
+  document.getElementById('peerProfileNote').textContent = p.note || '—';
+  const caps = p.capabilities || [];
+  document.getElementById('peerProfileCaps').innerHTML = caps.length ? caps.map(c => `<span class="peer-profile-chip">${escapeHtml(c)}</span>`).join(' ') : '<span style="opacity:0.55;font-size:0.68rem">no capabilities announced</span>';
+  const px = x == null ? (window.innerWidth - 330) : x;
+  const py = y == null ? 120 : y;
+  card.style.left = Math.max(10, Math.min(window.innerWidth - 310, px)) + 'px';
+  card.style.top = Math.max(10, Math.min(window.innerHeight - 280, py)) + 'px';
+  card.style.display = 'block';
+  playSound('success');
+}
+
+function hidePeerProfileCard() {
+  const card = document.getElementById('peerProfileCard');
+  if (card) card.style.display = 'none';
+}
+
+function peerProfileAction(action) {
+  const peerId = state.peerUi.contextPeerId;
+  if (!peerId) return;
+  if (action === 'chat') openPeerChat(peerId);
+  if (action === 'ping') peerContextAction('ping');
+  if (action === 'announce') announceUnifiedPresence();
+  if (action === 'offer-save') {
+    const snap = peernetUserManager ? peernetUserManager.snapshot() : null;
+    const save = snap && snap.saveStates[0];
+    if (!save) { createV9SaveState(); }
+    const latest = peernetUserManager && peernetUserManager.snapshot().saveStates[0];
+    if (latest && peernetUserManager.offerSaveState(peerId, latest.id)) {
+      appendPeerChatLine(peerId, 'SYSTEM', 'save-state offer sent: ' + latest.title, 'me');
+      playSound('success', true);
+    } else {
+      appendPeerChatLine(peerId, 'SYSTEM', 'could not send save-state offer', 'them');
+    }
+  }
 }
 
 function openPeerChat(peerId) {
@@ -2981,6 +3470,7 @@ document.getElementById('p2pUsers').addEventListener('contextmenu', e => {
 
 document.addEventListener('click', e => {
   if (!e.target.closest('.peer-context-menu')) hidePeerContextMenu();
+  if (!e.target.closest('.peer-profile-card') && !e.target.closest('[data-peer-id]')) hidePeerProfileCard();
 });
 
 function getConnectionColor(id) {
@@ -3150,6 +3640,12 @@ function updateSettingsPanel() {
   if (sharedStatus && !sharedPeernet) sharedStatus.textContent = sharedPeernetState.enabled ? 'starting' : 'idle';
   const sharedCount = document.getElementById('settingSharedPeernetCount');
   if (sharedCount) sharedCount.textContent = sharedPeernetPeers.length;
+  renderUnifiedUserSettings();
+  renderSharedSessions();
+  renderLocalSnapshots();
+  renderUnifiedUserSettings();
+  renderSharedSessions();
+  renderLocalSnapshots();
 }
 
 // ============================================
@@ -3379,7 +3875,7 @@ setTimeout(() => {
   if (!state.p2p.peer) {
     initP2P();
   }
-  if (sharedPeernetState.enabled) startSharedPeernet();
+  if ((peernetUserManager && peernetUserManager.state.connection.autoConnect) || sharedPeernetState.enabled) startSharedPeernet();
 }, 500);
 
 // Cleanup on unload
