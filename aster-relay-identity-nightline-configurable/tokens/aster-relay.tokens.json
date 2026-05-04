@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "brandName": {
+      "value": "Aster Relay"
+    },
+    "styleVariant": {
+      "value": "Nightline"
+    },
+    "configurableName": {
+      "value": true
+    }
+  },
+  "color": {
+    "obsidian": {
+      "value": "#090b16"
+    },
+    "night": {
+      "value": "#10142a"
+    },
+    "indigo": {
+      "value": "#1b2455"
+    },
+    "relay": {
+      "value": "#6e58ff"
+    },
+    "violet": {
+      "value": "#9b7dff"
+    },
+    "mist": {
+      "value": "#dfe4ff"
+    },
+    "ice": {
+      "value": "#f5f7ff"
+    },
+    "line": {
+      "value": "#2f3b78"
+    },
+    "muted": {
+      "value": "#8a93b8"
+    },
+    "cyan": {
+      "value": "#74efff"
+    },
+    "magenta": {
+      "value": "#ff69d6"
+    },
+    "neon": {
+      "value": "#62f7ff"
+    },
+    "lime": {
+      "value": "#bfffa9"
+    }
+  },
+  "radius": {
+    "sm": {
+      "value": "8px"
+    },
+    "md": {
+      "value": "14px"
+    },
+    "lg": {
+      "value": "22px"
+    },
+    "step": {
+      "value": "12px"
+    },
+    "pill": {
+      "value": "999px"
+    }
+  },
+  "space": {
+    "xs": {
+      "value": "4px"
+    },
+    "sm": {
+      "value": "8px"
+    },
+    "md": {
+      "value": "14px"
+    },
+    "lg": {
+      "value": "22px"
+    },
+    "xl": {
+      "value": "36px"
+    },
+    "2xl": {
+      "value": "56px"
+    }
+  },
+  "type": {
+    "familyDisplay": {
+      "value": "'Inter Display', 'Inter', 'FreeSans', sans-serif"
+    },
+    "familyBody": {
+      "value": "'Inter', 'FreeSans', sans-serif"
+    },
+    "familyMono": {
+      "value": "'DejaVu Sans Mono', 'Noto Sans Mono', monospace"
+    },
+    "sizeBody": {
+      "value": "16px"
+    },
+    "sizeSmall": {
+      "value": "14px"
+    },
+    "sizeH1": {
+      "value": "40px"
+    },
+    "sizeH2": {
+      "value": "28px"
+    },
+    "leadingBody": {
+      "value": "1.62"
+    },
+    "measure": {
+      "value": "72ch"
+    },
+    "codeWrap": {
+      "value": "88"
+    }
+  },
+  "shadow": {
+    "soft": {
+      "value": "0 18px 60px rgba(0,0,0,.34)"
+    },
+    "panel": {
+      "value": "0 12px 28px rgba(0,0,0,.28)"
+    },
+    "neon": {
+      "value": "0 0 24px rgba(98,247,255,.18)"
+    }
+  }
+}

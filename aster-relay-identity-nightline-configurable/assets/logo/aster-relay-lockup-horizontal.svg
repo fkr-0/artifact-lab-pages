@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 180" fill="none">
+  <defs>
+    <linearGradient id="gWord" x1="0" y1="0" x2="760" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#74efff"/>
+      <stop offset=".5" stop-color="#6e58ff"/>
+      <stop offset="1" stop-color="#ff69d6"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="760" height="180" rx="24" fill="#090b16"/>
+  <image href="aster-relay-mark.svg" x="18" y="18" width="144" height="144"/>
+  <text x="190" y="80" font-family="Inter, FreeSans, Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="8" fill="#f5f7ff">ASTER RELAY</text>
+  <text x="190" y="116" font-family="Inter, FreeSans, Arial, sans-serif" font-size="18" font-weight="400" letter-spacing="1.4" fill="#8a93b8">practical privacy and mutual tech literacy</text>
+  <path d="M192 138H530" stroke="#2f3b78" stroke-width="2"/>
+  <path d="M196 138C230 124 288 122 340 136" stroke="#ff69d6" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+  <path d="M548 52h8v8h-8zM556 44h8v8h-8zM556 52h8v8h-8zM556 60h8v8h-8zM564 52h8v8h-8z" fill="#62f7ff" filter="url(#glow)"/>
+</svg>

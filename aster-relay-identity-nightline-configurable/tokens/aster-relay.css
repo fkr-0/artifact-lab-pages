@@ -1,0 +1,67 @@
+:root {
+  --ar-brand-name: "Aster Relay";
+  --ar-obsidian: #090b16;
+  --ar-night: #10142a;
+  --ar-indigo: #1b2455;
+  --ar-relay: #6e58ff;
+  --ar-violet: #9b7dff;
+  --ar-mist: #dfe4ff;
+  --ar-ice: #f5f7ff;
+  --ar-line: #2f3b78;
+  --ar-muted: #8a93b8;
+  --ar-cyan: #74efff;
+  --ar-magenta: #ff69d6;
+  --ar-neon: #62f7ff;
+  --ar-radius-sm: 8px;
+  --ar-radius-md: 14px;
+  --ar-radius-lg: 22px;
+  --ar-measure: 72ch;
+  --ar-comment-wrap: 88;
+}
+
+body {
+  color: var(--ar-mist);
+  background:
+    radial-gradient(circle at top left, rgba(110,88,255,.12), transparent 28rem),
+    radial-gradient(circle at bottom right, rgba(98,247,255,.07), transparent 22rem),
+    linear-gradient(180deg, var(--ar-night), var(--ar-obsidian));
+  font-family: Inter, FreeSans, Arial, sans-serif;
+}
+
+.panel {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(223,228,255,.08);
+  border-radius: var(--ar-radius-lg);
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+}
+
+.kicker {
+  color: var(--ar-cyan);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 700;
+}
+
+.pixel-accent {
+  position: relative;
+}
+.pixel-accent::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -.3em;
+  width: 4.2em; height: .16em;
+  background:
+    linear-gradient(90deg,
+      var(--ar-magenta) 0 14%,
+      transparent 14% 20%,
+      var(--ar-magenta) 20% 38%,
+      transparent 38% 44%,
+      var(--ar-magenta) 44% 68%,
+      transparent 68% 74%,
+      var(--ar-magenta) 74% 100%);
+  opacity: .78;
+}
+
+.signal-focus {
+  box-shadow: 0 0 0 1px rgba(98,247,255,.24), 0 0 22px rgba(98,247,255,.14);
+}

@@ -1,0 +1,188 @@
+#!/bin/bash
+
+# UI implementation preference - can be set to "fzf" or "select"
+# Falls back to select if fzf is not available
+UI_MODE="${UI_MODE:-auto}"
+
+parse_funs() {
+  grep -oP "(?<=^exe_)\w+" "$0"
+}
+
+# Original select-based menu implementation
+show_menu_select() {
+  local options=("$@")
+  local PS3="Choose a function to execute: "
+
+  select opt in "${options[@]}"; do
+    if [[ "${options[*]}" =~ (^|[[:space:]])"$opt"($|[[:space:]]) ]]; then
+      # remove color codes from selected option
+      clean_opt=$(echo "$opt" | sed -r 's/\x1B\[[0-9;]*[JKmsu]//g' | awk '{print $1}')
+      echo "Executing $clean_opt..."
+      exe_"$clean_opt"
+      break
+    else
+      echo "Invalid option, please try again."
+    fi
+  done
+}
+
+# FZF-based menu implementation inspired by fzfkey
+show_menu_fzf() {
+  local options=("$@")
+  local num_options=${#options[@]}
+  
+  # Prepare menu entries with function numbers and home row keys for quick selection
+  local menu_entries=()
+  local home_row_keys=(a s d f j k l w e i o)
+  
+  for i in "${!options[@]}"; do
+    local key_index=$((i % ${#home_row_keys[@]}))
+    local key="${home_row_keys[$key_index]}"
+    menu_entries+=("$(echo -e "\033[1m$key\033[0m $((i + 1))) ${options[i]}")")
+  done
+  
+  # Generate quick selection keys
+  local available_keys=""
+  for i in "${!options[@]}"; do
+    local key_index=$((i % ${#home_row_keys[@]}))
+    local key="${home_row_keys[$key_index]}"
+    if [[ $i -eq 0 ]]; then
+      available_keys="$key"
+    else
+      available_keys="$available_keys,$key"
+    fi
+  done
+  
+  # Run fzf with custom settings
+  local selected_output
+  selected_output=$(printf "%s\n" "${menu_entries[@]}" | fzf --ansi --expect="$available_keys" --height "$((num_options + 1))" --disabled --color=bg+:-1,fg+:-1:regular --pointer=' ' --info inline)
+  
+  if [[ -z "$selected_output" ]]; then
+    echo "No option selected."
+    exit 1
+  fi
+  
+  # Extract the selected key/function
+  local selected_key
+  local selected_line
+  selected_key=$(echo "$selected_output" | head -n1)
+  selected_line=$(echo "$selected_output" | tail -n1)
+  
+  # Find the function index based on the selected key
+  local selected_index=-1
+  for i in "${!options[@]}"; do
+    local key_index=$((i % ${#home_row_keys[@]}))
+    local key="${home_row_keys[$key_index]}"
+    if [[ "$selected_key" == "$key" ]]; then
+      selected_index=$i
+      break
+    fi
+  done
+  
+  # If no key match, try to parse from the line
+  if [[ $selected_index -eq -1 ]]; then
+    # Extract function name from the selected line
+    local fun_name
+    fun_name=$(echo "$selected_line" | sed -r 's/\x1B\[[0-9;]*[JKmsu]//g' | awk '{print $2}')
+    
+    # Find the matching function in options
+    for i in "${!options[@]}"; do
+      local opt_fun_name
+      opt_fun_name=$(echo "${options[i]}" | sed -r 's/\x1B\[[0-9;]*[JKmsu]//g' | awk '{print $1}')
+      if [[ "$fun_name" == "$opt_fun_name" ]]; then
+        selected_index=$i
+        break
+      fi
+    done
+  fi
+  
+  if [[ $selected_index -ge 0 ]]; then
+    # Extract function name from option
+    local clean_opt
+    clean_opt=$(echo "${options[$selected_index]}" | sed -r 's/\x1B\[[0-9;]*[JKmsu]//g' | awk '{print $1}')
+    echo "Executing $clean_opt..."
+    exe_"$clean_opt"
+  else
+    echo "Invalid selection."
+    exit 1
+  fi
+}
+
+# Main show_menu function with automatic fallback
+show_menu() {
+  # Determine which UI to use
+  if [[ "$UI_MODE" == "fzf" ]] || ( [[ "$UI_MODE" == "auto" ]] && command -v fzf &>/dev/null ); then
+    show_menu_fzf "$@"
+  else
+    echo "FZF not available or disabled. Using select menu." >&2
+    show_menu_select "$@"
+  fi
+}
+
+parse_docstring() {
+  grep -A2 -P "^exe_$1[ \(]" "$0" | tail -n2 | head -n1
+}
+
+exe_example_function() {
+  # swib slibbles
+  # $1 - The first argument
+  echo "Hello, $1!"
+}
+
+exe_example_function2() {
+  # This is another example function
+  # $1 - The test value
+  echo "The test value is: $1"
+}
+
+exe_check_ui() {
+  # This function checks which UI mode will be used
+  if [[ "$UI_MODE" == "fzf" ]] || ( [[ "$UI_MODE" == "auto" ]] && command -v fzf &>/dev/null ); then
+    echo "FZF UI mode will be used"
+  else
+    echo "Select UI mode will be used"
+  fi
+}
+
+exe_run_tests() {
+  # This function runs the test suite
+  bats ./exe_tests.bats
+}
+
+if [[ $# -eq 0 ]]; then
+  readarray -t funs < <(parse_funs)
+  funs_docstrings=()
+  for fun in "${funs[@]}"; do
+    funs_docstrings+=("$(echo -e "\e[92m$fun\e[0m") - $(parse_docstring "$fun")")
+  done
+  show_menu "${funs_docstrings[@]}"
+else
+  if [[ "$1" =~ ^[0-9]+$ ]]; then
+    index="$1"
+    funs=($(parse_funs))
+    if (( index >= 1 && index <= ${#funs[@]} )); then
+      selected_fun="${funs[$((index-1))]}"
+      echo "Executing $selected_fun..."
+      shift
+      "exe_$selected_fun" "$@"
+    else
+      echo "Invalid function index: $index"
+      exit 1
+    fi
+  else
+    command="exe_$1"
+    if type "$command" &>/dev/null; then
+      shift
+      "$command" "$@"
+    else
+      echo "Unknown function: $1"
+      exit 1
+    fi
+  fi
+fi
+run_tests() {
+  bats ./exe_tests.bats
+}
+
+# Uncomment the line below to run tests
+# run_tests

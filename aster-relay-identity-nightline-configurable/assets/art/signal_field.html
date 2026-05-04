@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Aster Relay — Signal Field</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root {
+  --bg:#090b16; --panel:#10142a; --line:#2f3b78; --violet:#6e58ff; --violet2:#9b7dff;
+  --cyan:#62f7ff; --magenta:#ff69d6; --text:#f5f7ff; --muted:#8a93b8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top left,#1b2455 0%,#090b16 48%,#090b16 100%);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+aside{padding:22px;border-right:1px solid rgba(255,255,255,.08);background:rgba(10,12,26,.82);backdrop-filter:blur(8px)}
+h1{font-size:28px;letter-spacing:.08em;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 18px}
+.group{margin:18px 0;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.02)}
+label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin:0 0 6px}
+input[type=range],input[type=number]{width:100%}
+button{background:linear-gradient(135deg,var(--violet),#8b7cff);border:none;color:white;padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer;margin-right:8px;margin-bottom:8px}
+button.alt{background:#1b2455;border:1px solid rgba(255,255,255,.12)}
+small.code{display:block;color:var(--muted);font-family:ui-monospace, monospace;margin-top:8px}
+main{display:flex;align-items:center;justify-content:center;padding:20px}
+canvas{width:min(92vh,calc(100vw - 380px));height:min(92vh,calc(100vw - 380px));max-width:1200px;max-height:1200px;border-radius:24px;box-shadow:0 20px 80px rgba(0,0,0,.45);background:#090b16}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside>
+    <h1>ASTER RELAY</h1>
+    <p class="sub">Signal Field / pixel-static / soft neon</p>
+
+    <div class="group">
+      <label>Seed</label>
+      <input id="seedInput" type="number" value="12" min="1" max="99999" />
+      <div style="margin-top:10px">
+        <button onclick="changeSeed(-1)" class="alt">Prev</button>
+        <button onclick="changeSeed(1)" class="alt">Next</button>
+        <button onclick="randomSeedBtn()">Random</button>
+      </div>
+      <small class="code">Same seed = same variation.</small>
+    </div>
+
+    <div class="group">
+      <label>Mesh density</label><input type="range" id="meshDensity" min="20" max="120" value="66" oninput="regen()" />
+      <label style="margin-top:10px">Glow</label><input type="range" id="glowAmt" min="2" max="18" value="8" oninput="regen()" />
+      <label style="margin-top:10px">Pixel scale</label><input type="range" id="pixelScale" min="4" max="16" value="8" oninput="regen()" />
+      <label style="margin-top:10px">Spray amount</label><input type="range" id="sprayAmt" min="0" max="180" value="64" oninput="regen()" />
+    </div>
+
+    <div class="group">
+      <button onclick="regen()">Regenerate</button>
+      <button class="alt" onclick="resetControls()">Reset</button>
+      <button class="alt" onclick="downloadPNG()">Download PNG</button>
+      <small class="code">Quiet by default. Keep neon sparse.</small>
+    </div>
+  </aside>
+  <main><canvas id="c" width="1200" height="1200"></canvas></main>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let seed = 12;
+function mulberry32(a) {
+  return function() {
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+function val(id) { return +document.getElementById(id).value; }
+function resetControls() {
+  document.getElementById('meshDensity').value = 66;
+  document.getElementById('glowAmt').value = 8;
+  document.getElementById('pixelScale').value = 8;
+  document.getElementById('sprayAmt').value = 64;
+  regen();
+}
+function changeSeed(d) {
+  seed = Math.max(1, seed + d);
+  document.getElementById('seedInput').value = seed;
+  regen();
+}
+function randomSeedBtn() {
+  seed = Math.floor(Math.random()*99999)+1;
+  document.getElementById('seedInput').value = seed;
+  regen();
+}
+document.getElementById('seedInput').addEventListener('change', e => {
+  seed = +e.target.value || 1;
+  regen();
+});
+function neonLine(points, color, width, shadow) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = shadow;
+  ctx.beginPath();
+  ctx.moveTo(points[0][0], points[0][1]);
+  for(let i=1;i<points.length;i++) ctx.lineTo(points[i][0], points[i][1]);
+  ctx.stroke();
+  ctx.restore();
+}
+function pixelStar(x,y,s,color) {
+  const cells=[[1,0],[0,1],[1,1],[2,1],[1,2]];
+  ctx.fillStyle=color;
+  for(const [cx,cy] of cells) ctx.fillRect(x+cx*s,y+cy*s,s,s);
+}
+function regen() {
+  const rng = mulberry32(seed);
+  const W = canvas.width, H = canvas.height;
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#1b2455');
+  grad.addColorStop(.46,'#10142a');
+  grad.addColorStop(1,'#090b16');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  // grid
+  ctx.strokeStyle = 'rgba(223,228,255,.08)';
+  ctx.lineWidth = 1;
+  const spacing = 32;
+  for(let x=16;x<W;x+=spacing) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=16;y<H;y+=spacing) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // soft auras
+  for(const [cx,cy,r,col,a] of [[300,260,220,'rgba(110,88,255,.18)',1],[900,420,180,'rgba(98,247,255,.12)',1],[880,920,220,'rgba(255,105,214,.10)',1]]) {
+    const g = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  }
+
+  // mesh
+  const nodeCount = val('meshDensity');
+  const nodes = [];
+  for(let i=0;i<nodeCount;i++) {
+    const x = 120 + rng() * 960;
+    const y = 120 + rng() * 960;
+    nodes.push([x,y]);
+  }
+  ctx.lineWidth = 1.6;
+  for(let i=0;i<nodes.length;i++) {
+    for(let j=i+1;j<nodes.length;j++) {
+      const dx = nodes[i][0]-nodes[j][0], dy = nodes[i][1]-nodes[j][1];
+      const dist = Math.hypot(dx,dy);
+      if(dist < 170 && rng() < 0.22) {
+        ctx.strokeStyle = dist < 90 ? 'rgba(98,247,255,.25)' : 'rgba(155,125,255,.16)';
+        ctx.beginPath();
+        ctx.moveTo(nodes[i][0], nodes[i][1]);
+        ctx.lineTo(nodes[j][0], nodes[j][1]);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // nodes
+  for(let i=0;i<nodes.length;i++) {
+    const [x,y] = nodes[i];
+    ctx.fillStyle = 'rgba(9,11,22,.8)';
+    ctx.strokeStyle = i%7===0 ? '#62f7ff' : '#9b7dff';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x,y,i%7===0?6:4,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  }
+
+  // neon relay lines
+  const glow = val('glowAmt');
+  neonLine([[120,860],[320,720],[520,760],[780,700],[1050,540]], '#62f7ff', 3, glow*1.2);
+  neonLine([[180,240],[360,300],[520,220],[740,300],[960,180]], '#ff69d6', 2.5, glow);
+
+  // pixel stars
+  const p = val('pixelScale');
+  for(let i=0;i<12;i++) {
+    const x = Math.floor(40 + rng()*1080);
+    const y = Math.floor(40 + rng()*1080);
+    pixelStar(x,y,p, i%3===0 ? '#62f7ff' : i%5===0 ? '#ff69d6' : '#9b7dff');
+  }
+
+  // spray
+  const spray = val('sprayAmt');
+  for(let i=0;i<spray;i++) {
+    const a = rng()*Math.PI*2;
+    const r = Math.pow(rng(),1.6)*120;
+    const x = 880 + Math.cos(a)*r;
+    const y = 830 + Math.sin(a)*r;
+    const rr = 0.5 + rng()*2;
+    ctx.fillStyle = `rgba(255,105,214,${0.08 + rng()*0.18})`;
+    ctx.beginPath(); ctx.arc(x,y,rr,0,Math.PI*2); ctx.fill();
+  }
+
+  // tag
+  ctx.save();
+  ctx.strokeStyle='rgba(255,105,214,.7)';
+  ctx.lineWidth=4;
+  ctx.lineCap='round';
+  ctx.shadowColor='#ff69d6';
+  ctx.shadowBlur=8;
+  ctx.beginPath();
+  ctx.moveTo(700,960); ctx.quadraticCurveTo(790,900,930,950); ctx.quadraticCurveTo(1010,980,1090,930);
+  ctx.stroke();
+  ctx.restore();
+
+  // caption
+  ctx.fillStyle = '#f5f7ff';
+  ctx.font = '700 58px Inter, sans-serif';
+  ctx.fillText('ASTER RELAY', 88, 1040);
+  ctx.fillStyle = '#74efff';
+  ctx.font = '600 20px Inter, sans-serif';
+  ctx.fillText('signal field / pixel-static / neon restraint', 90, 1080);
+}
+function downloadPNG() {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'aster-relay-signal-field-' + seed + '.png';
+  a.click();
+}
+regen();
+</script>
+</body>
+</html>

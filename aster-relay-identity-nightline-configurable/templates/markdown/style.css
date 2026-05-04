@@ -1,0 +1,81 @@
+:root {
+  --brand-name: "Aster Relay";
+  --bg: #090b16;
+  --panel: #0f1328;
+  --text: #dfe4ff;
+  --muted: #8a93b8;
+  --line: #2f3b78;
+  --violet: #6e58ff;
+  --violet-soft: #9b7dff;
+  --cyan: #74efff;
+  --magenta: #ff69d6;
+  --measure: 72ch;
+}
+html { background: var(--bg); }
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(110,88,255,.13), transparent 22rem),
+    radial-gradient(circle at 90% 20%, rgba(98,247,255,.08), transparent 18rem),
+    var(--bg);
+  font: 16px/1.68 Inter, FreeSans, Arial, sans-serif;
+}
+main {
+  max-width: calc(var(--measure) + 12rem);
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem;
+}
+article {
+  max-width: var(--measure);
+}
+h1,h2,h3 {
+  color: #f5f7ff;
+  letter-spacing: -.02em;
+}
+h1 {
+  font-size: clamp(2.3rem, 5vw, 3.6rem);
+  margin-bottom: .25em;
+}
+.kicker {
+  display:inline-block;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--violet), transparent);
+  margin: 2rem 0;
+}
+.callout {
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(223,228,255,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.03);
+  box-shadow: 0 0 0 1px rgba(98,247,255,.06), 0 0 22px rgba(98,247,255,.08);
+}
+.pixel-note {
+  position: relative;
+  padding-left: 1rem;
+}
+.pixel-note::before {
+  content: "";
+  position: absolute;
+  left: 0; top: .55em;
+  width: 8px; height: 8px;
+  background: var(--magenta);
+  box-shadow: 10px 0 0 var(--magenta), 5px -5px 0 var(--magenta), 5px 5px 0 var(--magenta);
+}
+.tag {
+  color: var(--magenta);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+code, pre {
+  font-family: "DejaVu Sans Mono", monospace;
+}

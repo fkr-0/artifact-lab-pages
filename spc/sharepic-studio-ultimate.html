@@ -1,0 +1,2188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sharepic Studio ULTIMATE</title>
+  <!-- MathJax for comprehensive LaTeX support -->
+  <script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    svg: {
+      fontCache: 'local'
+    },
+    startup: {
+      ready() {
+        MathJax.startup.defaultReady();
+        window.dispatchEvent(new Event('mathjax-ready'));
+      }
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --border: rgba(255,255,255,0.06);
+      --text: #fff;
+      --text80: rgba(255,255,255,0.8);
+      --text60: rgba(255,255,255,0.6);
+      --text50: rgba(255,255,255,0.5);
+      --text40: rgba(255,255,255,0.4);
+      --text30: rgba(255,255,255,0.3);
+      --text20: rgba(255,255,255,0.2);
+      --accent: #ff2d7b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+    /* HEADER */
+    .header { border-bottom:1px solid var(--border); background:rgba(10,10,15,0.8); backdrop-filter:blur(20px); position:sticky; top:0; z-index:50; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; max-width:1800px; margin:0 auto; }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .logo { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .logo svg { width:16px; height:16px; fill:#000; }
+    .header-title { font-size:14px; font-weight:600; letter-spacing:-0.02em; color:var(--text); }
+    .header-sub { font-size:10px; color:var(--text30); display:none; }
+    @media(min-width:640px){ .header-sub { display:block; } }
+    .header-right { display:flex; align-items:center; gap:8px; }
+
+    /* BUTTONS */
+    .btn { border:none; cursor:pointer; font-family:inherit; font-size:12px; display:inline-flex; align-items:center; gap:6px; border-radius:6px; padding:6px 12px; transition:all 0.15s; white-space:nowrap; }
+    .btn svg { width:14px; height:14px; flex-shrink:0; }
+    .btn-ghost { background:transparent; color:var(--text50); }
+    .btn-ghost:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+    .btn-primary { font-weight:500; color:#000; }
+    .btn-primary:hover { filter:brightness(1.1); }
+
+    /* LAYOUT */
+    .layout { max-width:1800px; margin:0 auto; display:flex; flex-direction:column; }
+    @media(min-width:1024px){ .layout { flex-direction:row; } }
+    .sidebar { width:100%; border-right:1px solid var(--border); flex-shrink:0; }
+    @media(min-width:1024px){ .sidebar { width:360px; min-height:calc(100vh - 56px); } }
+
+    /* TABS */
+    .tabs-bar { display:flex; border-bottom:1px solid var(--border); background:transparent; height:36px; padding:0; }
+    .tab-btn { flex:1; border:none; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10px; color:var(--text40); transition:all 0.15s; position:relative; font-family:inherit; }
+    .tab-btn:hover { color:var(--text60); }
+    .tab-btn.active { color:var(--text90); }
+    .tab-btn.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:rgba(255,255,255,0.3); }
+
+    /* SCROLL AREA */
+    .scroll-area { height:320px; overflow-y:auto; }
+    @media(min-width:1024px){ .scroll-area { height:calc(100vh - 56px - 36px); } }
+    .tab-panel { display:none; padding:16px; }
+    .tab-panel.active { display:block; }
+
+    /* SEPARATOR */
+    .separator { border:none; border-top:1px solid var(--border); margin:12px 0; }
+
+    /* LABELS */
+    .label { font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text30); font-weight:500; display:block; }
+    .label-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+
+    /* SLIDERS */
+    .slider-row { margin-bottom:16px; }
+    .slider-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .slider-val { font-size:11px; font-family:monospace; color:var(--text50); }
+    .slider-desc { font-size:10px; color:var(--text20); line-height:1.4; margin-top:4px; }
+    input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; outline:none; cursor:pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:14px; height:14px; background:rgba(255,255,255,0.8); border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,0.8); }
+    input[type="range"]::-moz-range-thumb { width:14px; height:14px; background:rgba(255,255,255,0.8); border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,0.8); }
+    input[type="range"]::-webkit-slider-thumb:hover { background:#fff; }
+    input[type="range"]::-moz-range-thumb:hover { background:#fff; }
+
+    /* GRID */
+    .gen-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .gen-card, .swatch-card { width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.02); text-align:left; cursor:pointer; transition:all 0.15s; font-family:inherit; color:var(--text80); }
+    .gen-card:hover, .swatch-card:hover { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); }
+    .gen-card.active, .swatch-card.active { border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.1); box-shadow:0 4px 12px rgba(255,255,255,0.05); }
+    .gen-card .name, .swatch-card .name { font-size:12px; font-weight:500; }
+    .gen-card .desc { font-size:9px; color:var(--text40); margin-top:2px; line-height:1.3; }
+    .swatch-card { position:relative; padding:12px; }
+    .swatch-card .dot { position:absolute; top:8px; right:8px; width:6px; height:6px; border-radius:50%; background:#fff; animation:pulse 2s infinite; display:none; }
+    .swatch-card.active .dot { display:block; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .swatch-colors { display:flex; gap:2px; margin-bottom:8px; }
+    .swatch-colors div { flex:1; height:12px; border-radius:2px; }
+    .swatch-colors div:first-child { border-radius:4px 2px 2px 4px; }
+    .swatch-colors div:last-child { border-radius:2px 4px 4px 2px; }
+    .swatch-card .sw-name { font-size:12px; font-weight:500; }
+    .swatch-card .sw-desc { font-size:10px; color:var(--text40); margin-top:2px; line-height:1.3; }
+
+    /* SEED */
+    .seed-row { display:flex; align-items:center; gap:8px; }
+    .seed-display { flex:1; padding:8px 12px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid var(--border); font-family:monospace; font-size:12px; color:var(--text60); }
+    .seed-btn { width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; border-radius:6px; border:1px solid transparent; background:transparent; cursor:pointer; color:var(--text40); transition:all 0.15s; }
+    .seed-btn:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+    .seed-btn svg { width:14px; height:14px; }
+
+    /* TOGGLE */
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:4px 0; }
+    .toggle-row .tl { font-size:10px; color:var(--text40); }
+    .toggle { position:relative; width:36px; height:20px; cursor:pointer; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle .track { position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:10px; transition:background 0.2s; }
+    .toggle input:checked + .track { background:var(--accent); }
+    .toggle .thumb { position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:transform 0.2s; pointer-events:none; }
+    .toggle input:checked ~ .thumb { transform:translateX(16px); }
+
+    /* TEXT INPUTS */
+    .text-input, .text-area, .text-select { width:100%; padding:6px 10px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px; color:var(--text80); font-size:12px; font-family:inherit; outline:none; transition:border-color 0.15s; }
+    .text-input:focus, .text-area:focus, .text-select:focus { border-color:rgba(255,255,255,0.2); }
+    .text-area { min-height:80px; resize:vertical; font-family:monospace; }
+    .text-select { cursor:pointer; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.5)' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; padding-right:28px; }
+    .text-select option { background:#1a1a1a; color:rgba(255,255,255,0.7); }
+
+    /* FIELD */
+    .field { margin-bottom:12px; }
+    .field .fl { font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text30); font-weight:500; margin-bottom:6px; }
+
+    /* MAIN AREA */
+    .main-area { flex:1; display:flex; align-items:center; justify-content:center; padding:16px; min-height:60vh; }
+    @media(min-width:1024px){ .main-area { padding:32px; } }
+    .canvas-wrap { width:100%; max-width:900px; position:relative; }
+    .canvas-frame { position:relative; border-radius:12px; overflow:hidden; transition:box-shadow 0.5s; }
+    #preview { width:100%; aspect-ratio:1; display:block; image-rendering:auto; }
+
+    /* RANDOMIZE BUTTON */
+    .rand-btn { width:100%; padding:16px 12px; border-radius:8px; border:1px dashed var(--border); background:transparent; cursor:pointer; color:var(--text50); font-size:12px; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.15s; }
+    .rand-btn:hover { background:rgba(255,255,255,0.05); color:var(--text); border-color:rgba(255,255,255,0.1); }
+    .rand-btn svg { width:16px; height:16px; }
+
+    /* EXPORT PRESETS */
+    .presets-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .preset-btn { padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.04); background:transparent; cursor:pointer; color:var(--text40); font-size:10px; font-family:inherit; transition:all 0.15s; height:32px; }
+    .preset-btn:hover { background:rgba(255,255,255,0.05); color:var(--text80); border-color:rgba(255,255,255,0.1); }
+    .preset-btn.active { border-color:var(--accent); color:var(--accent); }
+
+    /* SECTION HEADER */
+    .section-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+    .section-header .label { margin:0; }
+    .section-header .hint { font-size:9px; color:var(--text30); text-transform:none; }
+
+    /* COLLAPSE */
+    .collapse { cursor:pointer; user-select:none; }
+    .collapse-header { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
+    .collapse-header:hover { color:var(--text60); }
+    .collapse-arrow { transition:transform 0.2s; }
+    .collapse.collapsed .collapse-arrow { transform:rotate(-90deg); }
+    .collapse-content { overflow:hidden; transition:max-height 0.3s ease; }
+    .collapse.collapsed .collapse-content { max-height:0 !important; }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="logo" id="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Sharepic Studio <span style="color:var(--accent)">ULTIMATE</span></div>
+      <div class="header-sub">14 generators · 9 themes · LaTeX math · rich text · advanced post-processing</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-ghost" id="btn-randomize">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/></svg>
+      <span>Surprise</span>
+    </button>
+    <button class="btn btn-primary" id="btn-export">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Export</span>
+    </button>
+  </div>
+</header>
+
+<!-- Hidden container for MathJax rendering -->
+<div id="mathjax-container" style="position:absolute; visibility:hidden; pointer-events:none;"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="tabs-bar" id="tabs-bar"></div>
+    <div class="scroll-area">
+      <div class="tab-panel active" id="panel-generator"></div>
+      <div class="tab-panel" id="panel-palette"></div>
+      <div class="tab-panel" id="panel-tune"></div>
+      <div class="tab-panel" id="panel-adjust"></div>
+      <div class="tab-panel" id="panel-content"></div>
+      <div class="tab-panel" id="panel-frame"></div>
+      <div class="tab-panel" id="panel-export"></div>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <div class="canvas-wrap">
+      <div class="canvas-frame" id="canvas-frame">
+        <canvas id="preview" width="1200" height="1200"></canvas>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════════════
+  // THEMES - 9 themes (merged from both versions)
+  // ═══════════════════════════════════════════════════════════════
+  var themes = {
+    neonAlley: { name:'Neon Alley', description:'Hot pinks & electric cyans on deep black', background:'#0a0a14', colors:['#ff2d7b','#00f0ff','#39ff14','#ffe600','#ff6b35','#b833ff'], accent:'#ff2d7b' },
+    arcadeCabinet: { name:'Arcade', description:'Phosphor greens & amber CRT tones', background:'#0c0c1e', colors:['#33ff00','#ffb000','#9933ff','#00cccc','#ff3366','#88ff44'], accent:'#33ff00' },
+    sprayCan: { name:'Spray Can', description:'Bold primaries on concrete', background:'#1c1c1c', colors:['#dc143c','#ffd700','#00bfff','#ff6600','#00ff7f','#ff1493'], accent:'#dc143c' },
+    pixelSunset: { name:'Pixel Sunset', description:'Warm banding gradients & deep navy', background:'#141428', colors:['#ff6b6b','#ffa07a','#ffd93d','#c44569','#f8b500','#e15f41'], accent:'#ff6b6b' },
+    vaporTrail: { name:'Vapor Trail', description:'Soft pastels & neon glows', background:'#140828', colors:['#ff71ce','#01cdfe','#b967ff','#fffb96','#ff85a1','#7b68ee'], accent:'#ff71ce' },
+    silverScreen: { name:'Silver Screen', description:'Classic B&W film — full tonal range', background:'#0d0d0d', colors:['#ffffff','#cccccc','#999999','#666666','#444444','#222222'], accent:'#ffffff' },
+    charcoalSketch: { name:'Charcoal', description:'Mid-grey tones on dark canvas', background:'#111111', colors:['#aaaaaa','#888888','#666666','#555555','#444444','#333333'], accent:'#aaaaaa' },
+    newsprint: { name:'Newsprint', description:'High-contrast halftone dots feel', background:'#f5f0e8', colors:['#1a1a1a','#3d3d3d','#5c5c5c','#7a7a7a','#999999','#b8b8b8'], accent:'#1a1a1a' },
+    moonlight: { name:'Moonlight', description:'Cool silver-greys with faint blue tint', background:'#0a0c12', colors:['#c8d0e0','#98a4b8','#707e94','#505e74','#384460','#282e3c'], accent:'#c8d0e0' }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // GENERATORS - 14 total
+  // ═══════════════════════════════════════════════════════════════
+  var generatorInfo = {
+    kaleidoscope: { name:'Kaleidoscope', description:'Rotational symmetry with mirrored shapes', params:{complexity:'Layers', density:'Shapes', scale:'Size'} },
+    pixelCity: { name:'Pixel City', description:'Procedural city skyline in pixel style', params:{complexity:'Density', scale:'Height', density:'Windows'} },
+    sprayField: { name:'Spray Field', description:'Layered graffiti spray textures', params:{complexity:'Splatters', scale:'Spread', density:'Grit'} },
+    glitchArt: { name:'Glitch Art', description:'Digital corruption & channel splitting', params:{complexity:'Bands', disruptFactor:'Disrupt', density:'Intensity'} },
+    retroGrid: { name:'Retro Grid', description:'Synthwave perspective grid & sun', params:{complexity:'Lines', density:'Perspective'} },
+    geometricTiles: { name:'Geo Tiles', description:'Tessellated colored mosaic patterns', params:{scale:'Tile Size', complexity:'Variety', density:'Fill'} },
+    goldLeaf: { name:'Gold Leaf', description:'Asymmetric gold metallic fragment shapes', params:{complexity:'Fragments', scale:'Size', opacity:'Opacity'} },
+    hardRects: { name:'Hard Rects', description:'Bold overlapping rectangles & blocks', params:{complexity:'Count', scale:'Max Size', density:'Coverage'} },
+    gritNoise: { name:'Grit Noise', description:'Granular noise field with heavy texture', params:{density:'Intensity', complexity:'Layers'} },
+    rawGrids: { name:'Raw Grids', description:'Abstract intersecting line grids', params:{density:'Grid Lines', complexity:'Circles'} },
+    halftone: { name:'Halftone', description:'Newspaper-style halftone dot patterns', params:{scale:'Spacing', density:'Dot Size'} },
+    flowField: { name:'Flow Field', description:'Organic flowing curves following noise', params:{density:'Lines', scale:'Length', complexity:'Octaves'} },
+    dotMatrix: { name:'Dot Matrix', description:'LED display style dot patterns', params:{density:'Brightness', scale:'Dot Size'} },
+    circuitBoard: { name:'Circuit Board', description:'Technical circuit trace patterns', params:{complexity:'Traces', density:'Length', scale:'Grid'} }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // STATE - All parameters including missing ones
+  // ═══════════════════════════════════════════════════════════════
+  var state = {
+    type: 'kaleidoscope',
+    theme: 'neonAlley',
+    seed: Math.floor(Math.random() * 999999),
+    // Core parameters
+    complexity: 6,
+    density: 5,
+    scale: 5,
+    // NEW: Missing parameters from Root version
+    opacity: 100,
+    disruptFactor: 0,
+    grain: 0,
+    bgBrightness: 0,
+    contrast: 0,
+    saturation: 100,
+    // Content (text overlay)
+    content: {
+      enabled: false,
+      text: '# Sharepic Studio ULTIMATE\n\n**Create** beautiful *generative* art with precision\n\n---\n\n## LaTeX Math Examples\n\nInline: \\(E = mc^2\\) and \\(\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}\\)\n\nDisplay math:\n\n\\[\n\\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}\n\\]\n\nText between formulas works: let \\(f(x) = x^2\\) be given, then \\(f\'(x) = 2x\\).\n\n---\n\n## Features\n\n- 9 themes · 14 generators · Full LaTeX via MathJax\n- Markdown + math mixed inline\n- Export presets for all social platforms\n',
+      layout: 'center-card',
+      fontSize: 12,
+      fontFamily: 'sans',
+      padding: 8,
+      bgOverlay: 80,
+      textColor: '#ffffff',
+      headlineAccent: true,
+      headlineBold: true,
+      textBold: false,
+      lineSpacing: 1.4,
+    },
+    // Frame
+    frame: {
+      borderWidth: 0,
+      borderColor: '#ffffff',
+      borderOpacity: 60,
+      vignette: 30,
+      gradientBorder: false,
+      innerGlow: 0,
+      darkOverlay: 0
+    },
+    // Export
+    exportPreset: 0,
+    exportPresets: [
+      { name:'Instagram Post', width:1080, height:1080 },
+      { name:'Instagram Story', width:1080, height:1920 },
+      { name:'Twitter / X Post', width:1200, height:675 },
+      { name:'Twitter / X Header', width:1500, height:500 },
+      { name:'Facebook Post', width:1200, height:630 },
+      { name:'Square 2048', width:2048, height:2048 }
+    ]
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // SEEDED RANDOM
+  // ═══════════════════════════════════════════════════════════════
+  function SeededRandom(seed) {
+    this.s = ((seed % 2147483647) + 2147483647) % 2147483647 || 1;
+  }
+  SeededRandom.prototype.next = function() {
+    this.s = (this.s * 16807) % 2147483647;
+    return (this.s - 1) / 2147483646;
+  };
+  SeededRandom.prototype.nextFloat = function(min, max) {
+    return this.next() * (max - min) + min;
+  };
+  SeededRandom.prototype.nextInt = function(min, max) {
+    return Math.floor(this.next() * (max - min + 1)) + min;
+  };
+  SeededRandom.prototype.pick = function(arr) {
+    return arr[Math.floor(this.next() * arr.length)];
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // NOISE FUNCTIONS
+  // ═══════════════════════════════════════════════════════════════
+  function hash(x, y, s) {
+    var h = s;
+    h ^= x * 374761393;
+    h ^= y * 668265263;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return (h & 0x7fffffff) / 0x7fffffff;
+  }
+  function smooth(x, y, s) {
+    var ix = Math.floor(x), iy = Math.floor(y);
+    var fx = x - ix, fy = y - iy;
+    var sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    return hash(ix, iy, s) + (hash(ix + 1, iy, s) - hash(ix, iy, s)) * sx;
+  }
+  function fbm(x, y, s, o) {
+    var v = 0, a = 0.5, f = 1, m = 0;
+    for (var i = 0; i < o; i++) {
+      v += (a * (smooth(x * f, y * f, s) + smooth(x * f, y * f, s + 100))) / 2;
+      m += a;
+      a *= 0.5;
+      f *= 2;
+    }
+    return v / m;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // UTILITIES
+  // ═══════════════════════════════════════════════════════════════
+  function hexToRgb(hex) {
+    var c = hex.substring(1);
+    return [parseInt(c.substr(0, 2), 16), parseInt(c.substr(2, 2), 16), parseInt(c.substr(4, 2), 16)];
+  }
+  function rgba(r, g, b, a) { return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'; }
+  function colorAlpha(hex, a) {
+    var c = hexToRgb(hex);
+    return rgba(c[0], c[1], c[2], a);
+  }
+  function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // GENERATORS
+  // ═══════════════════════════════════════════════════════════════
+  var generators = {
+    kaleidoscope: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var cx = w / 2, cy = h / 2, seg = rng.pick([6, 8, 12]);
+      var maxR = Math.max(w, h) * 0.6;
+      ctx.save();
+      ctx.translate(cx, cy);
+      for (var L = 0; L < cfg.complexity; L++) {
+        for (var s = 0; s < seg; s++) {
+          ctx.save();
+          ctx.rotate(((Math.PI * 2) / seg) * s);
+          if (s % 2) ctx.scale(1, -1);
+          for (var i = 0; i < cfg.density; i++) {
+            var r = rng.nextFloat(20, maxR) * ((L + 1) / cfg.complexity);
+            var a = rng.nextFloat(-Math.PI / seg, Math.PI / seg);
+            ctx.save();
+            ctx.translate(Math.cos(a) * r, Math.sin(a) * r);
+            ctx.rotate(rng.nextFloat(0, Math.PI * 2));
+            ctx.globalAlpha = rng.nextFloat(0.3, 0.8) * (cfg.opacity / 100);
+            ctx.fillStyle = rng.pick(th.colors);
+            ctx.beginPath();
+            ctx.arc(0, 0, 5 + cfg.scale * rng.nextFloat(0.5, 2.5), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+    },
+
+    hardRects: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var count = Math.floor(cfg.complexity * 4);
+      for (var i = 0; i < count; i++) {
+        var rw = rng.nextFloat(50, 400) * (cfg.scale / 10);
+        var rh = rng.nextFloat(20, 200) * (cfg.scale / 10);
+        ctx.globalAlpha = rng.nextFloat(0.2, 0.8) * (cfg.opacity / 100);
+        ctx.fillStyle = rng.pick(th.colors);
+        ctx.fillRect(rng.nextFloat(-rw, w), rng.nextFloat(-rh, h), rw, rh);
+      }
+    },
+
+    flowField: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      for (var i = 0; i < cfg.density * 20; i++) {
+        var x = rng.nextFloat(0, w), y = rng.nextFloat(0, h);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.strokeStyle = rng.pick(th.colors);
+        ctx.globalAlpha = rng.nextFloat(0.2, 0.6) * (cfg.opacity / 100);
+        ctx.lineWidth = 1;
+        for (var s = 0; s < 20 + cfg.scale * 2; s++) {
+          var angle = fbm(x * 0.003, y * 0.003, state.seed, cfg.complexity / 5 + 1) * Math.PI * 4;
+          x += Math.cos(angle) * 3;
+          y += Math.sin(angle) * 3;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    },
+
+    pixelCity: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      // Stars
+      ctx.fillStyle = '#fff';
+      for (var i = 0; i < 50; i++) {
+        ctx.globalAlpha = rng.nextFloat(0.3, 1) * (cfg.opacity / 100);
+        ctx.fillRect(rng.nextInt(0, w), rng.nextInt(0, h * 0.6), 2, 2);
+      }
+      var horizon = h * 0.7;
+      var bw = 40 + cfg.scale * 5;
+      for (var x = 0; x < w; x += bw) {
+        var bh = rng.nextFloat(h * 0.2, h * 0.6) * (cfg.complexity / 10 + 0.5);
+        ctx.fillStyle = rng.pick(th.colors);
+        ctx.globalAlpha = 0.9 * (cfg.opacity / 100);
+        ctx.fillRect(x, horizon - bh, bw - 4, bh);
+        ctx.fillStyle = th.background;
+        for (var wy = horizon - bh + 10; wy < horizon - 10; wy += 15) {
+          for (var wx = x + 5; wx < x + bw - 7; wx += 12) {
+            if (rng.next() > 0.3) ctx.fillRect(wx, wy, 6, 10);
+          }
+        }
+      }
+    },
+
+    sprayField: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      // Splatters
+      for (var i = 0; i < cfg.complexity * 3; i++) {
+        var x = rng.nextFloat(0, w), y = rng.nextFloat(0, h);
+        var r = rng.nextFloat(50, 250) * (cfg.scale / 10);
+        var col = rng.pick(th.colors);
+        var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, colorAlpha(col, 0.4));
+        g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g;
+        ctx.globalAlpha = (cfg.opacity / 100);
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Grit
+      for (var i = 0; i < 20000 * (cfg.density / 10); i++) {
+        ctx.fillStyle = rng.pick(th.colors);
+        ctx.globalAlpha = rng.nextFloat(0.05, 0.3) * (cfg.opacity / 100);
+        ctx.fillRect(rng.nextFloat(0, w), rng.nextFloat(0, h), rng.nextFloat(1, 3), rng.nextFloat(1, 3));
+      }
+      ctx.globalAlpha = 1;
+    },
+
+    glitchArt: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      // Base gradient
+      var grd = ctx.createLinearGradient(0, 0, w, h);
+      grd.addColorStop(0, th.colors[0]);
+      grd.addColorStop(1, th.colors[1]);
+      ctx.globalAlpha = 0.2 * (cfg.opacity / 100);
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 1;
+      // Bands
+      var bands = 20 + cfg.complexity * 2;
+      for (var i = 0; i < bands; i++) {
+        ctx.fillStyle = rng.pick(th.colors);
+        ctx.globalAlpha = rng.nextFloat(0.1, 0.5) * (cfg.opacity / 100);
+        var y = rng.nextInt(0, h);
+        var bh = rng.nextInt(5, 50);
+        ctx.fillRect(0, y, w, bh);
+      }
+      // Disrupt
+      if (cfg.disruptFactor > 0) {
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = 0.8;
+        var off = cfg.disruptFactor;
+        ctx.drawImage(ctx.canvas, off, 0);
+        ctx.drawImage(ctx.canvas, -off, 0);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.globalAlpha = 1;
+    },
+
+    retroGrid: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var horizon = h * 0.5;
+      // Sun
+      var sunGrad = ctx.createLinearGradient(w / 2 - 100, horizon - 100, w / 2 + 100, horizon);
+      sunGrad.addColorStop(0, th.accent);
+      sunGrad.addColorStop(1, th.colors[1] || th.accent);
+      ctx.fillStyle = sunGrad;
+      ctx.beginPath();
+      ctx.arc(w / 2, horizon - 50, 120, 0, Math.PI * 2);
+      ctx.fill();
+      // Grid
+      ctx.strokeStyle = colorAlpha(th.accent, cfg.opacity / 100);
+      ctx.lineWidth = 1;
+      var gridLines = 20 + cfg.complexity;
+      for (var i = -gridLines; i <= gridLines; i++) {
+        ctx.beginPath();
+        ctx.moveTo(w / 2, horizon);
+        ctx.lineTo(w / 2 + i * w * 2, h);
+        ctx.stroke();
+      }
+      for (var i = 0; i < cfg.density * 2; i++) {
+        var t = i / (cfg.density * 2);
+        var y = horizon + (h - horizon) * (t * t * 2);
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+    },
+
+    geometricTiles: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var s = 40 + cfg.scale * 5;
+      for (var x = 0; x < w; x += s) {
+        for (var y = 0; y < h; y += s) {
+          ctx.globalAlpha = 0.8 * (cfg.opacity / 100);
+          ctx.fillStyle = rng.pick(th.colors);
+          if (rng.next() > 0.5) {
+            ctx.fillRect(x, y, s, s);
+          } else {
+            ctx.beginPath();
+            ctx.arc(x + s / 2, y + s / 2, s / 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+    },
+
+    goldLeaf: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      for (var i = 0; i < cfg.complexity * 4; i++) {
+        var x = rng.nextFloat(0, w), y = rng.nextFloat(0, h);
+        var size = rng.nextFloat(20, 120) * (cfg.scale / 10);
+        ctx.globalAlpha = rng.nextFloat(0.3, 0.9) * (cfg.opacity / 100);
+        ctx.fillStyle = rng.pick(th.colors);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rng.nextFloat(0, Math.PI * 2));
+        ctx.beginPath();
+        for (var p = 0; p < 3; p++) ctx.lineTo(rng.nextFloat(-size, size), rng.nextFloat(-size, size));
+        ctx.fill();
+        ctx.restore();
+      }
+    },
+
+    gritNoise: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var id = ctx.getImageData(0, 0, w, h), d = id.data;
+      for (var i = 0; i < d.length; i += 4) {
+        var noise = (rng.next() * 2 - 1) * 50 * (cfg.density / 10);
+        d[i] = clamp(d[i] + noise, 0, 255);
+        d[i + 1] = clamp(d[i + 1] + noise, 0, 255);
+        d[i + 2] = clamp(d[i + 2] + noise, 0, 255);
+      }
+      ctx.putImageData(id, 0, 0);
+      // Overlay color blobs
+      for (var i = 0; i < cfg.complexity; i++) {
+        var x = rng.nextFloat(0, w), y = rng.nextFloat(0, h), r = rng.nextFloat(50, 250);
+        var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, colorAlpha(rng.pick(th.colors), 0.3));
+        g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g;
+        ctx.globalAlpha = (cfg.opacity / 100);
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.globalAlpha = 1;
+    },
+
+    rawGrids: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = colorAlpha(th.accent, 0.3 * (cfg.opacity / 100));
+      ctx.lineWidth = 1;
+      for (var i = 0; i < cfg.density * 3; i++) {
+        var x = rng.nextFloat(0, w);
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (var i = 0; i < cfg.density * 3; i++) {
+        var y = rng.nextFloat(0, h);
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      for (var i = 0; i < cfg.complexity; i++) {
+        ctx.strokeStyle = rng.pick(th.colors);
+        ctx.globalAlpha = 0.8 * (cfg.opacity / 100);
+        ctx.beginPath();
+        ctx.arc(rng.nextFloat(0, w), rng.nextFloat(0, h), rng.nextFloat(50, 300), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    },
+
+    halftone: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var spacing = 12 + cfg.scale;
+      for (var y = 0; y < h; y += spacing) {
+        for (var x = 0; x < w; x += spacing) {
+          var r = rng.next() * spacing * 0.5 * (cfg.density / 10);
+          if (r > 0.5) {
+            ctx.fillStyle = rng.pick(th.colors);
+            ctx.globalAlpha = (cfg.opacity / 100);
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    },
+
+    dotMatrix: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      var s = 10;
+      for (var y = 0; y < h; y += s) {
+        for (var x = 0; x < w; x += s) {
+          var on = rng.next() > 1 - cfg.density / 15;
+          if (on) {
+            ctx.fillStyle = rng.pick(th.colors);
+            ctx.globalAlpha = (cfg.opacity / 100);
+            ctx.beginPath();
+            ctx.arc(x + s / 2, y + s / 2, s / 3, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = colorAlpha(th.accent, 0.1);
+            ctx.beginPath();
+            ctx.arc(x + s / 2, y + s / 2, s / 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    },
+
+    circuitBoard: function(ctx, w, h, th, rng, cfg) {
+      ctx.fillStyle = th.background;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = colorAlpha(th.accent, cfg.opacity / 100);
+      ctx.lineWidth = 2;
+      var grid = 20;
+      for (var i = 0; i < cfg.complexity * 10; i++) {
+        var x = rng.nextInt(0, w / grid) * grid;
+        var y = rng.nextInt(0, h / grid) * grid;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        var len = cfg.density * 2;
+        for (var k = 0; k < len; k++) {
+          var dir = rng.pick([[-1, 0], [1, 0], [0, -1], [0, 1]]);
+          x += dir[0] * grid;
+          y += dir[1] * grid;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.fillStyle = th.accent;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // LATEX MATH RENDERER
+  // ═══════════════════════════════════════════════════════════════
+  var LaTeX = {
+    // Comprehensive symbol mapping
+    symbols: {
+      // Greek letters (lowercase)
+      alpha:'α', beta:'β', gamma:'γ', delta:'δ', epsilon:'ε', zeta:'ζ', eta:'η', theta:'θ',
+      iota:'ι', kappa:'κ', lambda:'λ', mu:'μ', nu:'ν', xi:'ξ', omicron:'ο', pi:'π',
+      rho:'ρ', sigma:'σ', tau:'τ', upsilon:'υ', phi:'φ', chi:'χ', psi:'ψ', omega:'ω',
+      // Greek letters (uppercase)
+      Gamma:'Γ', Delta:'Δ', Theta:'Θ', Lambda:'Λ', Xi:'Ξ', Pi:'Π', Sigma:'Σ',
+      Phi:'Φ', Psi:'Ψ', Omega:'Ω',
+      // Math operators
+      sum:'Σ', prod:'Π', int:'∫', iint:'∬', iiint:'∮', oint:'∮',
+      sqrt:'√', infty:'∞', partial:'∂', nabla:'∇',
+      // Relations
+      leq:'≤', geq:'≥', neq:'≠', approx:'≈', equiv:'≡',
+      in:'∈', notin:'∉', subset:'⊂', subseteq:'⊆', supset:'⊃', supseteq:'⊇',
+      // Arrows
+      to:'→', gets:'←', rightarrow:'→', leftarrow:'←', leftrightarrow:'↔',
+      Rightarrow:'⇒', Leftarrow:'⇐', Leftrightarrow:'⇔',
+      // Binary operators
+      times:'×', div:'÷', cdot:'·', pm:'±', mp:'∓', circ:'∘',
+      // Logic
+      forall:'∀', exists:'∃', neg:'¬', and:'∧', or:'∨',
+      // Other
+      ldots:'...', cdots:'⋯', vdots:'⋮', ddots:'⋱',
+      angle:'∠', degree:'°', prime:'′', doubleprime:'″',
+      // Set theory
+      emptyset:'∅', cup:'∪', cap:'∩',
+      // Calculus
+      lim:'lim', max:'max', min:'min', sup:'sup', inf:'inf'
+    },
+
+    // Tokenize LaTeX expression
+    tokenize: function(latex) {
+      var tokens = [];
+      var i = 0;
+      while (i < latex.length) {
+        var c = latex[i];
+
+        // Skip whitespace
+        if (/\s/.test(c)) { i++; continue; }
+
+        // Backslash command
+        if (c === '\\') {
+          var cmdEnd = i + 1;
+          while (cmdEnd < latex.length && /[a-zA-Z]/.test(latex[cmdEnd])) cmdEnd++;
+          var cmd = latex.substring(i + 1, cmdEnd);
+          tokens.push({ type: 'command', value: cmd });
+          i = cmdEnd;
+        }
+        // Subscript
+        else if (c === '_') {
+          tokens.push({ type: 'sub' });
+          i++;
+        }
+        // Superscript
+        else if (c === '^') {
+          tokens.push({ type: 'sup' });
+          i++;
+        }
+        // Left bracket (grouping)
+        else if (c === '{') {
+          tokens.push({ type: 'lbrace' });
+          i++;
+        }
+        // Right bracket
+        else if (c === '}') {
+          tokens.push({ type: 'rbrace' });
+          i++;
+        }
+        // Parentheses (for sizing)
+        else if (c === '(') {
+          tokens.push({ type: 'lparen' });
+          i++;
+        }
+        else if (c === ')') {
+          tokens.push({ type: 'rparen' });
+          i++;
+        }
+        // Brackets
+        else if (c === '[') {
+          tokens.push({ type: 'lbracket' });
+          i++;
+        }
+        else if (c === ']') {
+          tokens.push({ type: 'rbracket' });
+          i++;
+        }
+        // Equals and other symbols
+        else if (c === '=') {
+          tokens.push({ type: 'text', value: '=' });
+          i++;
+        }
+        else if (c === '+') {
+          tokens.push({ type: 'text', value: '+' });
+          i++;
+        }
+        else if (c === '-') {
+          tokens.push({ type: 'text', value: '−' }); // minus sign
+          i++;
+        }
+        // Numbers and variables
+        else if (/[0-9a-zA-Z.]/.test(c)) {
+          var valEnd = i;
+          while (valEnd < latex.length && /[0-9a-zA-Z.]/.test(latex[valEnd])) valEnd++;
+          tokens.push({ type: 'text', value: latex.substring(i, valEnd) });
+          i = valEnd;
+        }
+        // Slash for fractions
+        else if (c === '/') {
+          tokens.push({ type: 'divide' });
+          i++;
+        }
+        else {
+          tokens.push({ type: 'text', value: c });
+          i++;
+        }
+      }
+      return tokens;
+    },
+
+    // Parse tokens into AST
+    parse: function(tokens) {
+      var self = this;
+      var pos = 0;
+
+      function peek() { return tokens[pos]; }
+      function consume() { return tokens[pos++]; }
+      function expect(type) {
+        if (peek() && peek().type === type) return consume();
+        return null;
+      }
+
+      // Parse a group (either {...} or single element)
+      function parseGroup() {
+        if (expect('lbrace')) {
+          var group = [];
+          while (peek() && peek().type !== 'rbrace') {
+            var elem = parseElement();
+            if (elem) group.push(elem);
+            else break;
+          }
+          expect('rbrace');
+          return { type: 'group', children: group };
+        }
+        return parseElement();
+      }
+
+      // Parse a single element
+      function parseElement() {
+        var tok = peek();
+        if (!tok) return null;
+
+        if (tok.type === 'command') {
+          consume();
+          var cmd = tok.value;
+
+          // Fraction: \frac{numerator}{denominator}
+          if (cmd === 'frac') {
+            var num = parseGroup();
+            var den = parseGroup();
+            return { type: 'frac', numerator: num, denominator: den };
+          }
+          // Square root: \sqrt{...} or \sqrt[n]{...}
+          else if (cmd === 'sqrt') {
+            var nextTok = peek();
+            var root = null;
+            if (nextTok && nextTok.type === 'lbracket') {
+              consume(); // [
+              var rootTokens = [];
+              while (peek() && peek().type !== 'rbracket') {
+                rootTokens.push(consume());
+              }
+              consume(); // ]
+              root = { type: 'group', children: rootTokens };
+            }
+            var body = parseGroup();
+            return { type: 'sqrt', body: body, root: root };
+          }
+          // Sum with limits: \sum_{...}^{...}
+          else if (cmd === 'sum' || cmd === 'prod' || cmd === 'int' || cmd === 'lim' ||
+                   cmd === 'max' || cmd === 'min' || cmd === 'sup' || cmd === 'inf') {
+            var symbol = self.symbols[cmd] || cmd;
+            var sub = null, sup = null;
+            if (peek() && peek().type === 'sub') {
+              consume();
+              sub = parseGroup();
+            }
+            if (peek() && peek().type === 'sup') {
+              consume();
+              sup = parseGroup();
+            }
+            return { type: 'operator', symbol: symbol, sub: sub, sup: sup };
+          }
+          // Left/Right for sized delimiters
+          else if (cmd === 'left') {
+            var delimTok = peek();
+            if (delimTok) {
+              consume();
+              return { type: 'left', delim: delimTok.value || delimTok.type };
+            }
+          }
+          else if (cmd === 'right') {
+            var delimTok = peek();
+            if (delimTok) {
+              consume();
+              return { type: 'right', delim: delimTok.value || delimTok.type };
+            }
+          }
+          // Binomial coefficient: \binom{n}{k}
+          else if (cmd === 'binom') {
+            var n = parseGroup();
+            var k = parseGroup();
+            return { type: 'binom', top: n, bottom: k };
+          }
+          // Greek letters and symbols
+          else if (self.symbols[cmd]) {
+            return { type: 'symbol', value: self.symbols[cmd] };
+          }
+          // Unknown command - treat as text
+          else {
+            return { type: 'text', value: '\\' + cmd };
+          }
+        }
+        else if (tok.type === 'text') {
+          consume();
+          return { type: 'text', value: tok.value };
+        }
+        else if (tok.type === 'lparen' || tok.type === 'lbracket') {
+          consume();
+          var inner = [];
+          while (peek() && peek().type !== 'rparen' && peek().type !== 'rbracket') {
+            var elem = parseElement();
+            if (elem) inner.push(elem);
+            else break;
+          }
+          consume(); // closing paren/bracket
+          return { type: 'group', children: inner };
+        }
+        else {
+          consume();
+          return null;
+        }
+      }
+
+      // Full expression parser
+      var expr = [];
+      while (pos < tokens.length) {
+        var elem = parseElement();
+        if (elem) {
+          // Check for subscript/superscript
+          if (peek() && peek().type === 'sub') {
+            consume();
+            elem = { type: 'sub', base: elem, sub: parseGroup() };
+          }
+          if (peek() && peek().type === 'sup') {
+            consume();
+            elem = { type: 'sup', base: elem, sup: parseGroup() };
+          }
+          expr.push(elem);
+        } else {
+          break;
+        }
+      }
+
+      return { type: 'expression', children: expr };
+    },
+
+    // Measure and calculate layout
+    measure: function(ast, ctx, fontSize) {
+      var self = this;
+      ctx.font = fontSize + 'px ' + (ctx._mathFont || 'serif');
+
+      function measureNode(node) {
+        if (!node) return { width: 0, height: fontSize, ascent: fontSize * 0.7, descent: fontSize * 0.3 };
+
+        switch (node.type) {
+          case 'text':
+          case 'symbol':
+            var metrics = ctx.measureText(node.value);
+            return { width: metrics.width, height: fontSize, ascent: fontSize * 0.7, descent: fontSize * 0.3 };
+
+          case 'group':
+            var childWidth = 0;
+            node.children.forEach(function(c) {
+              var m = measureNode(c);
+              childWidth += m.width;
+            });
+            return { width: childWidth, height: fontSize, ascent: fontSize * 0.7, descent: fontSize * 0.3 };
+
+          case 'frac':
+            var numM = measureNode(node.numerator);
+            var denM = measureNode(node.denominator);
+            return {
+              width: Math.max(numM.width, denM.width) + fontSize * 0.3,
+              height: fontSize * 2.2,
+              ascent: fontSize * 1.1,
+              descent: fontSize * 1.1
+            };
+
+          case 'sqrt':
+            var bodyM = measureNode(node.body);
+            return {
+              width: bodyM.width + fontSize * 0.5,
+              height: bodyM.height + fontSize * 0.2,
+              ascent: bodyM.ascent + fontSize * 0.1,
+              descent: bodyM.descent
+            };
+
+          case 'sup':
+            var baseM = measureNode(node.base);
+            var supM = measureNode(node.sup);
+            return {
+              width: baseM.width + supM.width,
+              height: Math.max(baseM.height, fontSize * 1.5),
+              ascent: baseM.ascent,
+              descent: baseM.descent
+            };
+
+          case 'sub':
+            var baseM = measureNode(node.base);
+            var subM = measureNode(node.sub);
+            return {
+              width: baseM.width + subM.width,
+              height: Math.max(baseM.height, fontSize * 1.2),
+              ascent: baseM.ascent,
+              descent: baseM.descent
+            };
+
+          case 'operator':
+            var opM = ctx.measureText(node.symbol);
+            var subM = node.sub ? measureNode(node.sub) : { width: 0 };
+            var supM = node.sup ? measureNode(node.sup) : { width: 0 };
+            return {
+              width: opM.width + Math.max(subM.width, supM.width),
+              height: fontSize * 1.8,
+              ascent: fontSize * 0.9,
+              descent: fontSize * 0.9
+            };
+
+          case 'binom':
+            var topM = measureNode(node.top);
+            var botM = measureNode(node.bottom);
+            return {
+              width: Math.max(topM.width, botM.width) + fontSize * 0.4,
+              height: fontSize * 2.4,
+              ascent: fontSize * 1.2,
+              descent: fontSize * 1.2
+            };
+
+          default:
+            return { width: 0, height: fontSize, ascent: fontSize * 0.7, descent: fontSize * 0.3 };
+        }
+      }
+
+      return measureNode(ast);
+    },
+
+    // Render to canvas
+    render: function(ctx, ast, x, y, fontSize, color) {
+      if (!ast) return 0;
+      var self = this;
+
+      ctx.font = fontSize + 'px ' + (ctx._mathFont || 'serif');
+      ctx.fillStyle = color || '#ffffff';
+      ctx.textBaseline = 'middle';
+
+      function renderNode(node, px, py) {
+        if (!node) return 0;
+
+        switch (node.type) {
+          case 'text':
+          case 'symbol':
+            ctx.fillText(node.value, px, py);
+            return ctx.measureText(node.value).width;
+
+          case 'group':
+            var cx = px;
+            node.children.forEach(function(c) {
+              cx += renderNode(c, cx, py);
+            });
+            return cx - px;
+
+          case 'frac': {
+            var numM = self.measure(node.numerator, ctx, fontSize * 0.85);
+            var denM = self.measure(node.denominator, ctx, fontSize * 0.85);
+            var contentWidth = Math.max(numM.width, denM.width);
+
+            // Draw horizontal line
+            ctx.fillRect(px + (contentWidth - numM.width) / 2, py - fontSize * 0.5, numM.width, 1);
+            ctx.fillRect(px + (contentWidth - denM.width) / 2, py + fontSize * 0.5, denM.width, 1);
+
+            // Draw numerator
+            var oldSize = fontSize;
+            renderNode(node.numerator, px + (contentWidth - numM.width) / 2, py - fontSize * 0.9);
+
+            // Draw denominator
+            renderNode(node.denominator, px + (contentWidth - denM.width) / 2, py + fontSize * 0.9);
+
+            return contentWidth + fontSize * 0.3;
+          }
+
+          case 'sqrt': {
+            var bodyM = self.measure(node.body, ctx, fontSize);
+            var bodyWidth = renderNode(node.body, px + fontSize * 0.4, py);
+
+            // Draw sqrt symbol
+            ctx.beginPath();
+            ctx.moveTo(px, py - fontSize * 0.2);
+            ctx.lineTo(px + fontSize * 0.1, py);
+            ctx.lineTo(px + fontSize * 0.3, py - fontSize * 0.6);
+            ctx.lineTo(px + fontSize * 0.35, py - fontSize * 0.4);
+            ctx.stroke();
+
+            // Draw overbar
+            ctx.beginPath();
+            ctx.moveTo(px + fontSize * 0.35, py - fontSize * 0.4);
+            ctx.lineTo(px + fontSize * 0.35 + bodyWidth, py - fontSize * 0.4);
+            ctx.stroke();
+
+            return fontSize * 0.4 + bodyWidth;
+          }
+
+          case 'sup': {
+            var baseWidth = renderNode(node.base, px, py + fontSize * 0.1);
+            ctx.font = (fontSize * 0.7) + 'px ' + (ctx._mathFont || 'serif');
+            var supWidth = renderNode(node.sup, px + baseWidth, py - fontSize * 0.4);
+            ctx.font = fontSize + 'px ' + (ctx._mathFont || 'serif');
+            return baseWidth + supWidth;
+          }
+
+          case 'sub': {
+            var baseWidth = renderNode(node.base, px, py - fontSize * 0.1);
+            ctx.font = (fontSize * 0.7) + 'px ' + (ctx._mathFont || 'serif');
+            var subWidth = renderNode(node.sub, px + baseWidth, py + fontSize * 0.5);
+            ctx.font = fontSize + 'px ' + (ctx._mathFont || 'serif');
+            return baseWidth + subWidth;
+          }
+
+          case 'operator': {
+            var opM = ctx.measureText(node.symbol);
+            ctx.fillText(node.symbol, px, py);
+
+            var subOffset = 0, supOffset = 0;
+            if (node.sub) {
+              ctx.font = (fontSize * 0.6) + 'px ' + (ctx._mathFont || 'serif');
+              var subM = self.measure(node.sub, ctx, fontSize * 0.6);
+              renderNode(node.sub, px + opM.width, py + fontSize * 0.6);
+              ctx.font = fontSize + 'px ' + (ctx._mathFont || 'serif');
+              subOffset = subM.width;
+            }
+            if (node.sup) {
+              ctx.font = (fontSize * 0.6) + 'px ' + (ctx._mathFont || 'serif');
+              var supM = self.measure(node.sup, ctx, fontSize * 0.6);
+              renderNode(node.sup, px + opM.width, py - fontSize * 0.6);
+              ctx.font = fontSize + 'px ' + (ctx._mathFont || 'serif');
+              supOffset = supM.width;
+            }
+
+            return opM.width + Math.max(subOffset, supOffset);
+          }
+
+          case 'binom': {
+            var topM = self.measure(node.top, ctx, fontSize * 0.85);
+            var botM = self.measure(node.bottom, ctx, fontSize * 0.85);
+            var contentWidth = Math.max(topM.width, botM.width);
+
+            // Draw parentheses
+            ctx.beginPath();
+            ctx.moveTo(px, py - fontSize * 1.0);
+            ctx.lineTo(px + fontSize * 0.1, py - fontSize * 1.0);
+            ctx.quadraticCurveTo(px + fontSize * 0.2, py, px + fontSize * 0.1, py + fontSize * 1.0);
+            ctx.lineTo(px, py + fontSize * 1.0);
+
+            ctx.moveTo(px + contentWidth + fontSize * 0.4, py - fontSize * 1.0);
+            ctx.lineTo(px + contentWidth + fontSize * 0.3, py - fontSize * 1.0);
+            ctx.quadraticCurveTo(px + contentWidth + fontSize * 0.2, py, px + contentWidth + fontSize * 0.3, py + fontSize * 1.0);
+            ctx.lineTo(px + contentWidth + fontSize * 0.4, py + fontSize * 1.0);
+            ctx.stroke();
+
+            // Draw top and bottom
+            renderNode(node.top, px + fontSize * 0.2 + (contentWidth - topM.width) / 2, py - fontSize * 0.6);
+            renderNode(node.bottom, px + fontSize * 0.2 + (contentWidth - botM.width) / 2, py + fontSize * 0.6);
+
+            return contentWidth + fontSize * 0.5;
+          }
+
+          case 'expression': {
+            var cx = px;
+            node.children.forEach(function(c) {
+              cx += renderNode(c, cx, py);
+            });
+            return cx - px;
+          }
+
+          default:
+            return 0;
+        }
+      }
+
+      return renderNode(ast, x, y);
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // RICH TEXT ENGINE (Enhanced with LaTeX support)
+  // ═══════════════════════════════════════════════════════════════
+  var RichText = {
+    parse: function(text) {
+      var blocks = [], lines = text.split('\n');
+      lines.forEach((line) => {
+        if (line.trim() === '') { blocks.push({ type:'space' }); return; }
+        if (line.match(/^#+\s/)) {
+          var level = line.match(/^(#+)/)[0].length;
+          blocks.push({ type:'h', level: Math.min(level, 4), text: this.parseInline(line.replace(/^#+\s*/, '')) });
+        } else if (line.match(/^---/)) {
+          blocks.push({ type:'hr' });
+        } else {
+          blocks.push({ type:'p', text: this.parseInline(line) });
+        }
+      });
+      return blocks;
+    },
+    parseInline: function(text) {
+      var tokens = [], re = /(\*\*.*?\*\*|\*.*?\*|\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$|`.+?`)/g, m, idx = 0;
+      while ((m = re.exec(text)) !== null) {
+        if (m.index > idx) tokens.push({ type:'text', val: text.substring(idx, m.index) });
+        var str = m[0];
+        if (str.startsWith('**')) tokens.push({ type:'bold', val: str.slice(2, -2) });
+        else if (str.startsWith('*')) tokens.push({ type:'italic', val: str.slice(1, -1) });
+        else if (str.startsWith('\\(')) tokens.push({ type:'math', val: str.slice(2, -2) });
+        else if (str.startsWith('\\[')) tokens.push({ type:'math', val: str.slice(2, -2) }); // Display math \[...\]
+        else if (str.startsWith('$$')) tokens.push({ type:'math', val: str.slice(2, -2) }); // Display math $$...$$
+        else if (str.startsWith('$')) tokens.push({ type:'math', val: str.slice(1, -1) }); // Inline math $...$
+        else if (str.startsWith('`')) tokens.push({ type:'code', val: str.slice(1, -1) });
+        idx = m.index + str.length;
+      }
+      if (idx < text.length) tokens.push({ type:'text', val: text.substring(idx) });
+      return tokens;
+    },
+    render: function(ctx, blocks, box, styles) {
+      var y = box.y;
+      ctx.textBaseline = 'top';
+      blocks.forEach((b) => {
+        if (y > box.y + box.h) return;
+        if (b.type === 'space') { y += styles.size * 0.5; return; }
+        if (b.type === 'hr') {
+          ctx.strokeStyle = colorAlpha(styles.color, 0.3);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(box.x, y + styles.size / 2);
+          ctx.lineTo(box.x + box.w, y + styles.size / 2);
+          ctx.stroke();
+          y += styles.size;
+          return;
+        }
+        if (b.type === 'h') {
+          var s = styles.size * (2.5 - (b.level - 1) * 0.4);
+          ctx.font = 'bold ' + s + 'px ' + styles.font;
+          ctx.fillStyle = styles.accent;
+          this.drawTokens(ctx, b.text, box.x, y, s, styles.font);
+          y += s * 1.4;
+        } else if (b.type === 'p') {
+          ctx.font = styles.size + 'px ' + styles.font;
+          var words = b.text, currentLine = [], x = box.x, lineHeight = styles.size * 1.4;
+          words.forEach((tok) => {
+            ctx.font = (tok.type === 'bold' ? 'bold ' : ' ') + styles.size + 'px ' + styles.font;
+            tok.w = ctx.measureText(tok.val).width;
+          });
+          ctx.font = styles.size + 'px ' + styles.font;
+          words.forEach((tok) => {
+            if (x + tok.w > box.x + box.w && currentLine.length) {
+              this.drawTokens(ctx, currentLine, box.x, y, styles.size, styles.font);
+              y += lineHeight;
+              x = box.x;
+              currentLine = [];
+            }
+            currentLine.push(tok);
+            x += tok.w;
+          });
+          if (currentLine.length) {
+            this.drawTokens(ctx, currentLine, box.x, y, styles.size, styles.font);
+            y += lineHeight;
+          }
+        }
+      });
+    },
+
+    // Async render using MathJax for proper LaTeX support
+    renderAsync: function(ctx, blocks, box, styles) {
+      return new Promise((resolve) => {
+        var y = box.y;
+        ctx.textBaseline = 'top';
+
+        // First pass: render non-math content and collect math blocks
+        var mathBlocks = [];
+        var renderQueue = [];
+
+        blocks.forEach((b, blockIdx) => {
+          if (y > box.y + box.h) return;
+          if (b.type === 'space') { y += styles.size * 0.5; return; }
+          if (b.type === 'hr') {
+            ctx.strokeStyle = colorAlpha(styles.color, 0.3);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(box.x, y + styles.size / 2);
+            ctx.lineTo(box.x + box.w, y + styles.size / 2);
+            ctx.stroke();
+            y += styles.size;
+            return;
+          }
+          if (b.type === 'h') {
+            var s = styles.size * (2.5 - (b.level - 1) * 0.4);
+            ctx.font = 'bold ' + s + 'px ' + styles.font;
+            ctx.fillStyle = styles.accent;
+            this.drawTokens(ctx, b.text, box.x, y, s, styles.font);
+            y += s * 1.4;
+          } else if (b.type === 'p') {
+            ctx.font = styles.size + 'px ' + styles.font;
+            var lineHeight = styles.size * 1.4;
+            var lines = this.wrapText(ctx, b.text, box.x, box.w, styles.size, styles.font);
+
+            lines.forEach((lineTokens) => {
+              var x = box.x;
+              lineTokens.forEach((tok) => {
+                if (tok.type === 'math') {
+                  mathBlocks.push({
+                    latex: tok.val,
+                    x: x,
+                    y: y,
+                    size: styles.size,
+                    color: styles.color || '#ffffff'
+                  });
+                  // Reserve space (will be updated after MathJax render)
+                  tok.w = styles.size * 3; // Reserve space
+                } else {
+                  ctx.font = styles.size + 'px ' + styles.font;
+                  tok.w = ctx.measureText(tok.val).width;
+                }
+                x += tok.w;
+              });
+              y += lineHeight;
+            });
+          }
+        });
+
+        // If no math blocks, resolve immediately
+        if (mathBlocks.length === 0) {
+          resolve();
+          return;
+        }
+
+        // Render math blocks with MathJax
+        var container = document.getElementById('mathjax-container');
+        var completed = 0;
+
+        mathBlocks.forEach((mb, i) => {
+          var elem = document.createElement('div');
+          elem.id = 'math-async-' + Date.now() + '-' + i;
+          elem.style.fontSize = mb.size + 'px';
+          elem.style.color = mb.color || '#ffffff';
+          elem.innerHTML = '\\[' + mb.latex + '\\]';
+          container.appendChild(elem);
+
+          MathJax.typesetPromise([elem]).then(() => {
+            var svg = elem.querySelector('svg');
+            if (svg) {
+              // Bake the color into the SVG root so currentColor resolves
+              // correctly when loaded as a blob image without a parent context
+              svg.style.color = mb.color || '#ffffff';
+              svg.setAttribute('color', mb.color || '#ffffff');
+              var svgData = new XMLSerializer().serializeToString(svg);
+              var svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+              var url = URL.createObjectURL(svgBlob);
+
+              var img = new Image();
+              img.onload = () => {
+                ctx.drawImage(img, mb.x, mb.y - img.height / 2);
+                URL.revokeObjectURL(url);
+                container.removeChild(elem);
+
+                completed++;
+                if (completed === mathBlocks.length) {
+                  resolve();
+                }
+              };
+              img.onerror = () => {
+                container.removeChild(elem);
+                completed++;
+                if (completed === mathBlocks.length) resolve();
+              };
+              img.src = url;
+            } else {
+              container.removeChild(elem);
+              completed++;
+              if (completed === mathBlocks.length) resolve();
+            }
+          }).catch(() => {
+            container.removeChild(elem);
+            completed++;
+            if (completed === mathBlocks.length) resolve();
+          });
+        });
+      });
+    },
+
+    // Helper: wrap text into lines
+    wrapText: function(ctx, tokens, startX, maxWidth, size, font) {
+      var lines = [];
+      var currentLine = [];
+      var x = 0;
+
+      tokens.forEach((tok) => {
+        ctx.font = size + 'px ' + font;
+        tok.w = ctx.measureText(tok.val).width;
+
+        if (x + tok.w > maxWidth && currentLine.length > 0) {
+          lines.push(currentLine);
+          currentLine = [tok];
+          x = tok.w;
+        } else {
+          currentLine.push(tok);
+          x += tok.w;
+        }
+      });
+
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+      }
+
+      return lines;
+    },
+
+    // MathJax rendering helper - converts LaTeX to canvas
+    renderMathJax: function(latex, ctx, x, y, size, color) {
+      var self = this;
+      return new Promise(function(resolve) {
+        var container = document.getElementById('mathjax-container');
+        var id = 'math-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+        // Create a temporary element for MathJax
+        var elem = document.createElement('div');
+        elem.id = id;
+        elem.style.fontSize = size + 'px';
+        elem.style.color = color || '#ffffff';
+        elem.innerHTML = '\\[' + latex + '\\]'; // display math for better rendering
+        container.appendChild(elem);
+
+        // Wait for MathJax to render
+        MathJax.typesetPromise([elem]).then(function() {
+          // Get the SVG
+          var svg = elem.querySelector('svg');
+          if (svg) {
+            // Set SVG size for proper scaling
+            svg.setAttribute('width', svg.getBoundingClientRect().width * 2);
+            svg.setAttribute('height', svg.getBoundingClientRect().height * 2);
+            // Bake color so currentColor resolves correctly in blob image context
+            svg.style.color = color || '#ffffff';
+            svg.setAttribute('color', color || '#ffffff');
+
+            // Serialize SVG
+            var svgData = new XMLSerializer().serializeToString(svg);
+            var svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            var url = URL.createObjectURL(svgBlob);
+
+            // Create image and draw to canvas
+            var img = new Image();
+            img.onload = function() {
+              ctx.drawImage(img, x, y - img.height / 2);
+              URL.revokeObjectURL(url);
+              container.removeChild(elem);
+              resolve(img.width);
+            };
+            img.src = url;
+          } else {
+            container.removeChild(elem);
+            resolve(0);
+          }
+        }).catch(function() {
+          container.removeChild(elem);
+          resolve(0);
+        });
+      });
+    },
+
+    // Synchronous fallback using custom LaTeX renderer (for export)
+    renderMathSync: function(latex, ctx, x, y, size, color) {
+      try {
+        var tokens = LaTeX.tokenize(latex);
+        var ast = LaTeX.parse(tokens);
+        ctx._mathFont = 'serif';
+        return LaTeX.render(ctx, ast, x, y + size / 2, size * 0.9, color || '#ffffff');
+      } catch(e) {
+        // Ultimate fallback
+        ctx.fillStyle = color || '#ffffff';
+        ctx.font = size + 'px serif';
+        ctx.fillText(latex, x, y);
+        return ctx.measureText(latex).width;
+      }
+    },
+
+    drawTokens: function(ctx, tokens, x, y, size, font) {
+      var curX = x;
+      ctx._mathFont = font;
+      tokens.forEach((t) => {
+        ctx.font = size + 'px ' + font;
+        if (t.type === 'italic') ctx.font = 'italic ' + size + 'px ' + font;
+        if (t.type === 'bold') ctx.font = 'bold ' + size + 'px ' + font;
+        ctx.fillStyle = ctx.fillStyle || '#ffffff';
+        if (t.type === 'code') ctx.fillStyle = colorAlpha(ctx.fillStyle, 0.7);
+        if (t.type === 'math') {
+          // Use synchronous LaTeX renderer for canvas export
+          var mathWidth = this.renderMathSync(t.val, ctx, curX, y + size / 2, size, ctx.fillStyle);
+          curX += mathWidth;
+        } else {
+          ctx.fillText(t.val, curX, y);
+          curX += ctx.measureText(t.val).width;
+        }
+      });
+      return curX - x;
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════
+  function render() {
+    var canvas = document.getElementById('preview');
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    var th = themes[state.theme];
+    var rng = new SeededRandom(state.seed);
+
+    // 1. Background with adjustments
+    var bgRgba = hexToRgb(th.background);
+    var bgAdj = state.bgBrightness;
+    ctx.fillStyle = 'rgb(' + clamp(bgRgba[0] + bgAdj, 0, 255) + ',' + clamp(bgRgba[1] + bgAdj, 0, 255) + ',' + clamp(bgRgba[2] + bgAdj, 0, 255) + ')';
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Generator
+    var gen = generators[state.type];
+    if (gen) {
+      gen(ctx, w, h, th, rng, state);
+    }
+
+    // 3. Post-processing: saturation
+    if (state.saturation !== 100) {
+      var id = ctx.getImageData(0, 0, w, h), d = id.data;
+      var satMult = state.saturation / 100;
+      for (var i = 0; i < d.length; i += 4) {
+        var r = d[i], g = d[i + 1], b = d[i + 2];
+        var gray = 0.299 * r + 0.587 * g + 0.114 * b;
+        d[i] = clamp(gray + (r - gray) * satMult, 0, 255);
+        d[i + 1] = clamp(gray + (g - gray) * satMult, 0, 255);
+        d[i + 2] = clamp(gray + (b - gray) * satMult, 0, 255);
+      }
+      ctx.putImageData(id, 0, 0);
+    }
+
+    // 4. Post-processing: contrast
+    if (state.contrast !== 0) {
+      var id = ctx.getImageData(0, 0, w, h), d = id.data;
+      var factor = (259 * (state.contrast + 255)) / (255 * (259 - state.contrast));
+      for (var i = 0; i < d.length; i += 4) {
+        d[i] = clamp(factor * (d[i] - 128) + 128, 0, 255);
+        d[i + 1] = clamp(factor * (d[i + 1] - 128) + 128, 0, 255);
+        d[i + 2] = clamp(factor * (d[i + 2] - 128) + 128, 0, 255);
+      }
+      ctx.putImageData(id, 0, 0);
+    }
+
+    // 5. Post-processing: grain
+    if (state.grain > 0) {
+      var id = ctx.getImageData(0, 0, w, h), d = id.data;
+      for (var i = 0; i < d.length; i += 4) {
+        var n = (Math.random() - 0.5) * state.grain * 2;
+        d[i] = clamp(d[i] + n, 0, 255);
+        d[i + 1] = clamp(d[i + 1] + n, 0, 255);
+        d[i + 2] = clamp(d[i + 2] + n, 0, 255);
+      }
+      ctx.putImageData(id, 0, 0);
+    }
+
+    // 6. Content overlay
+    if (state.content.enabled) {
+      var pad = w * (state.content.padding / 100);
+      var box = { x: pad, y: pad, w: w - pad * 2, h: h - pad * 2 };
+      var styles = {
+        font: state.content.fontFamily === 'mono' ? 'monospace' : state.content.fontFamily === 'serif' ? 'serif' : 'sans-serif',
+        size: w * 0.02 * (state.content.fontSize / 10),
+        color: '#ffffff',
+        accent: th.accent
+      };
+
+      if (state.content.layout === 'center-card') {
+        box.w = w * 0.6;
+        box.h = h * 0.6;
+        box.x = (w - box.w) / 2;
+        box.y = (h - box.h) / 2;
+        ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100);
+        roundRect(ctx, box.x, box.y, box.w, box.h, 20);
+        ctx.fill();
+      } else if (state.content.layout === 'left-panel') {
+        box.w = w * 0.4;
+        ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100);
+        ctx.fillRect(0, 0, box.w + pad * 2, h);
+        box.x = pad;
+      } else if (state.content.layout === 'right-panel') {
+        box.w = w * 0.4;
+        box.x = w * 0.55;
+        ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100);
+        ctx.fillRect(box.x - pad, 0, box.w + pad * 2, h);
+      } else if (state.content.layout === 'bottom-bar') {
+        box.y = h * 0.65;
+        box.h = h * 0.35 - pad;
+        ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100);
+        ctx.fillRect(0, box.y - pad, w, h - box.y + pad);
+      }
+
+      var blocks = RichText.parse(state.content.text);
+      // Use async render for MathJax support
+      RichText.renderAsync(ctx, blocks, box, styles).then(() => {
+        // Frame rendering happens after async text render
+        finishRender(ctx, w, h, th);
+      });
+      return; // Exit early, finishRender handles the rest
+    }
+
+    // No content - finish render directly
+    finishRender(ctx, w, h, th);
+
+    // 7. Frame: dark overlay
+    if (state.frame.darkOverlay > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,' + (state.frame.darkOverlay / 100) + ')';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 8. Frame: inner glow
+    if (state.frame.innerGlow > 0) {
+      var cx = w / 2, cy = h / 2, r = Math.sqrt(cx * cx + cy * cy);
+      var g = ctx.createRadialGradient(cx, cy, r * 0.3, cx, cy, r);
+      g.addColorStop(0, colorAlpha(th.accent, state.frame.innerGlow / 200));
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 9. Frame: vignette
+    if (state.frame.vignette > 0) {
+      var cx = w / 2, cy = h / 2, r = Math.sqrt(cx * cx + cy * cy);
+      var g = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r);
+      g.addColorStop(0, 'transparent');
+      g.addColorStop(1, 'rgba(0,0,0,' + (state.frame.vignette / 100) + ')');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 10. Frame: border
+    if (state.frame.borderWidth > 0) {
+      if (state.frame.gradientBorder) {
+        var grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100));
+        grad.addColorStop(0.5, colorAlpha(state.frame.borderColor2 || state.frame.borderColor, state.frame.borderOpacity / 100));
+        grad.addColorStop(1, colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100));
+        ctx.strokeStyle = grad;
+      } else {
+        ctx.strokeStyle = colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100);
+      }
+      ctx.lineWidth = state.frame.borderWidth;
+      ctx.strokeRect(state.frame.borderWidth / 2, state.frame.borderWidth / 2, w - state.frame.borderWidth, h - state.frame.borderWidth);
+    }
+
+    // Update UI accents
+    document.getElementById('logo-box').style.backgroundColor = th.accent;
+    document.getElementById('btn-export').style.backgroundColor = th.accent;
+    document.getElementById('canvas-frame').style.boxShadow = '0 0 50px -20px ' + th.accent;
+  }
+
+  function finishRender(ctx, w, h, th) {
+    // 7. Frame: dark overlay
+    if (state.frame.darkOverlay > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,' + (state.frame.darkOverlay / 100) + ')';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 8. Frame: inner glow
+    if (state.frame.innerGlow > 0) {
+      var cx = w / 2, cy = h / 2, r = Math.sqrt(cx * cx + cy * cy);
+      var g = ctx.createRadialGradient(cx, cy, r * 0.3, cx, cy, r);
+      g.addColorStop(0, colorAlpha(th.accent, state.frame.innerGlow / 200));
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 9. Frame: vignette
+    if (state.frame.vignette > 0) {
+      var cx = w / 2, cy = h / 2, r = Math.sqrt(cx * cx + cy * cy);
+      var g = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r);
+      g.addColorStop(0, 'transparent');
+      g.addColorStop(1, 'rgba(0,0,0,' + (state.frame.vignette / 100) + ')');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 10. Frame: border
+    if (state.frame.borderWidth > 0) {
+      if (state.frame.gradientBorder) {
+        var grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100));
+        grad.addColorStop(0.5, colorAlpha(state.frame.borderColor2 || state.frame.borderColor, state.frame.borderOpacity / 100));
+        grad.addColorStop(1, colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100));
+        ctx.strokeStyle = grad;
+      } else {
+        ctx.strokeStyle = colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100);
+      }
+      ctx.lineWidth = state.frame.borderWidth;
+      ctx.strokeRect(state.frame.borderWidth / 2, state.frame.borderWidth / 2, w - state.frame.borderWidth, h - state.frame.borderWidth);
+    }
+
+    // Update UI accents
+    document.getElementById('logo-box').style.backgroundColor = th.accent;
+    document.getElementById('btn-export').style.backgroundColor = th.accent;
+    document.getElementById('canvas-frame').style.boxShadow = '0 0 50px -20px ' + th.accent;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h - r);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.fill();
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // UI BUILDER
+  // ═══════════════════════════════════════════════════════════════
+  function makeSlider(container, label, key, min, max, desc) {
+    var val = getNested(state, key);
+    var id = key.replace(/\./g, '-');
+    var div = document.createElement('div');
+    div.className = 'slider-row';
+    div.innerHTML = `
+      <div class="slider-header"><span class="label">${label}</span><span class="slider-val" id="val-${id}">${val}</span></div>
+      <input type="range" id="slider-${id}" min="${min}" max="${max}" value="${val}">
+      <div class="slider-desc">${desc || ''}</div>
+    `;
+    container.appendChild(div);
+    div.querySelector('input').addEventListener('input', function(e) {
+      setNested(state, key, parseFloat(e.target.value));
+      document.getElementById('val-' + id).textContent = e.target.value;
+      render();
+    });
+  }
+
+  function getNested(obj, path) {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+  }
+  function setNested(obj, path, value) {
+    var parts = path.split('.');
+    var last = parts.pop();
+    var target = parts.reduce((acc, part) => (acc[part] = acc[part] || {}), obj);
+    target[last] = value;
+  }
+
+  function buildUI() {
+    var tabs = ['Gen', 'Palette', 'Tune', 'Adjust', 'Text', 'Frame', 'Export'];
+    var panels = {
+      Gen: 'panel-generator',
+      Palette: 'panel-palette',
+      Tune: 'panel-tune',
+      Adjust: 'panel-adjust',
+      Text: 'panel-content',
+      Frame: 'panel-frame',
+      Export: 'panel-export'
+    };
+    var bar = document.getElementById('tabs-bar');
+
+    tabs.forEach((t) => {
+      var btn = document.createElement('button');
+      btn.className = 'tab-btn' + (t === 'Gen' ? ' active' : '');
+      btn.textContent = t;
+      btn.onclick = function() {
+        document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(panels[t]).classList.add('active');
+      };
+      bar.appendChild(btn);
+    });
+
+    // Generator Panel
+    var gPanel = document.getElementById('panel-generator');
+    var grid = document.createElement('div');
+    grid.className = 'gen-grid';
+    Object.keys(generatorInfo).forEach((k) => {
+      var btn = document.createElement('button');
+      btn.className = 'gen-card' + (k === state.type ? ' active' : '');
+      btn.innerHTML = `<div class="name">${generatorInfo[k].name}</div><div class="desc">${generatorInfo[k].desc}</div>`;
+      btn.onclick = function() {
+        state.type = k;
+        updateGeneratorParams();
+        render();
+        updateActiveGenerator();
+      };
+      grid.appendChild(btn);
+    });
+    gPanel.appendChild(grid);
+
+    gPanel.appendChild(document.createElement('hr'));
+    gPanel.className = 'separator';
+
+    var seedRow = document.createElement('div');
+    seedRow.className = 'seed-row';
+    seedRow.innerHTML = `
+      <div class="seed-display" id="seed-display">${state.seed}</div>
+      <button class="seed-btn" id="btn-refresh" title="New seed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="seed-btn" id="btn-shuffle" title="Randomize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/></svg>
+      </button>
+    `;
+    gPanel.appendChild(seedRow);
+    document.getElementById('btn-refresh').onclick = function() {
+      state.seed = Math.floor(Math.random() * 999999);
+      document.getElementById('seed-display').textContent = state.seed;
+      render();
+    };
+    document.getElementById('btn-shuffle').onclick = function() {
+      state.seed = Math.floor(Math.random() * 999999);
+      state.complexity = Math.floor(Math.random() * 15) + 5;
+      state.density = Math.floor(Math.random() * 15) + 3;
+      state.scale = Math.floor(Math.random() * 15) + 3;
+      document.getElementById('seed-display').textContent = state.seed;
+      updateSliderValues();
+      render();
+    };
+
+    gPanel.appendChild(document.createElement('hr'));
+    gPanel.className = 'separator';
+    var randBtn = document.createElement('button');
+    randBtn.className = 'rand-btn';
+    randBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/></svg> Randomize Everything';
+    randBtn.onclick = function() {
+      var genKeys = Object.keys(generators);
+      state.type = genKeys[Math.floor(Math.random() * genKeys.length)];
+      var themeKeys = Object.keys(themes);
+      state.theme = themeKeys[Math.floor(Math.random() * themeKeys.length)];
+      state.seed = Math.floor(Math.random() * 999999);
+      state.complexity = Math.floor(Math.random() * 15) + 5;
+      state.density = Math.floor(Math.random() * 15) + 3;
+      state.scale = Math.floor(Math.random() * 15) + 3;
+      updateUI();
+      render();
+    };
+    gPanel.appendChild(randBtn);
+
+    // Palette Panel
+    var pPanel = document.getElementById('panel-palette');
+    var list = document.createElement('div');
+    list.style.cssText = 'display:flex; flex-direction:column; gap:6px;';
+    Object.keys(themes).forEach((k) => {
+      var btn = document.createElement('button');
+      btn.className = 'swatch-card' + (k === state.theme ? ' active' : '');
+      var th = themes[k];
+      var cols = th.colors.map((c) => '<div style="background:' + c + '"></div>').join('');
+      btn.innerHTML = `<div class="swatch-colors">${cols}</div><div class="dot"></div><div class="sw-name">${th.name}</div><div class="sw-desc">${th.description}</div>`;
+      btn.onclick = function() {
+        state.theme = k;
+        updateUI();
+        render();
+      };
+      list.appendChild(btn);
+    });
+    pPanel.appendChild(list);
+
+    // Tune Panel - Core parameters
+    var tPanel = document.getElementById('panel-tune');
+    makeSlider(tPanel, 'Complexity', 'complexity', 0, 20, 'Detail level across layers');
+    makeSlider(tPanel, 'Density', 'density', 0, 20, 'Element count/intensity');
+    makeSlider(tPanel, 'Scale', 'scale', 1, 20, 'Size multiplier');
+
+    // Adjust Panel - NEW: Missing parameters
+    var aPanel = document.getElementById('panel-adjust');
+    makeSlider(aPanel, 'Opacity', 'opacity', 10, 100, 'Global opacity multiplier');
+    makeSlider(aPanel, 'Disruption', 'disruptFactor', 0, 50, 'Glitch displacement (Glitch Art only)');
+    makeSlider(aPanel, 'Grain', 'grain', 0, 50, 'Film grain noise');
+    makeSlider(aPanel, 'BG Brightness', 'bgBrightness', -50, 50, 'Background brightness adjustment');
+    makeSlider(aPanel, 'Contrast', 'contrast', -50, 50, 'Contrast enhancement');
+    makeSlider(aPanel, 'Saturation', 'saturation', 0, 200, 'Color saturation (100 = native)');
+
+    // Content Panel
+    var cPanel = document.getElementById('panel-content');
+    var toggleDiv = document.createElement('div');
+    toggleDiv.className = 'toggle-row';
+    toggleDiv.innerHTML = `<span class="tl">Enable Text Overlay</span><label class="toggle"><input type="checkbox" id="content-toggle" ${state.content.enabled ? 'checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
+    cPanel.appendChild(toggleDiv);
+    document.getElementById('content-toggle').addEventListener('change', function(e) {
+      state.content.enabled = e.target.checked;
+      render();
+    });
+
+    var fieldsDiv = document.createElement('div');
+    fieldsDiv.style.cssText = 'margin-top:12px;';
+    fieldsDiv.innerHTML = `
+      <div class="field">
+        <div class="fl">Layout</div>
+        <select class="text-select" id="content-layout">
+          <option value="center-card">Center Card</option>
+          <option value="left-panel">Left Panel</option>
+          <option value="right-panel">Right Panel</option>
+          <option value="bottom-bar">Bottom Bar</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="fl">Math Toolbar</div>
+        <div id="math-toolbar" style="display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-bottom:8px;"></div>
+      </div>
+      <div class="field">
+        <div class="fl">Content (Markdown + LaTeX)</div>
+        <textarea class="text-area" id="content-text">${escHtml(state.content.text)}</textarea>
+        <div style="margin-top:0.5rem; font-size:0.65rem; color:rgba(255,255,255,0.4); line-height:1.4;">
+          <strong>LaTeX:</strong> Inline: \\(x^2\\) or $x^2$ | Display: \\[x^2\\] or $$x^2$$
+        </div>
+      </div>
+    `;
+    cPanel.appendChild(fieldsDiv);
+
+    // Build Math Toolbar
+    var mathToolbar = document.getElementById('math-toolbar');
+    var mathButtons = [
+      // Basic operations
+      { label: 'a/b', insert: '\\frac{a}{b}' },
+      { label: 'x²', insert: 'x^{2}' },
+      { label: 'xᵢ', insert: 'x_{i}' },
+      { label: '√', insert: '\\sqrt{x}' },
+      // Greek letters
+      { label: 'α', insert: '\\alpha' },
+      { label: 'β', insert: '\\beta' },
+      { label: 'π', insert: '\\pi' },
+      { label: 'θ', insert: '\\theta' },
+      { label: 'Σ', insert: '\\sum_{i=0}^{n}' },
+      { label: '∫', insert: '\\int_{a}^{b}' },
+      { label: '∞', insert: '\\infty' },
+      { label: '∂', insert: '\\partial' },
+      // Relations
+      { label: '≤', insert: '\\leq' },
+      { label: '≥', insert: '\\geq' },
+      { label: '≠', insert: '\\neq' },
+      { label: '≈', insert: '\\approx' },
+      // Advanced
+      { label: '(n/k)', insert: '\\binom{n}{k}' },
+      { label: 'lim', insert: '\\lim_{x \\to \\infty}' },
+      { label: '∀', insert: '\\forall' },
+      { label: '∃', insert: '\\exists' },
+      // Syntax helpers
+      { label: '\\(x\\)', insert: '\\(x\\)' },
+      { label: '\\[x\\]', insert: '\\[x\\]' },
+    ];
+
+    mathButtons.forEach(function(btn) {
+      var button = document.createElement('button');
+      button.className = 'btn btn-ghost';
+      button.style.cssText = 'font-size:11px; padding:4px 6px; border:1px solid rgba(255,255,255,0.1);';
+      button.textContent = btn.label;
+      button.title = btn.insert;
+      button.addEventListener('click', function() {
+        var textarea = document.getElementById('content-text');
+        var start = textarea.selectionStart;
+        var end = textarea.selectionEnd;
+        var text = textarea.value;
+        var insert = '$' + btn.insert + '$';
+        textarea.value = text.substring(0, start) + insert + text.substring(end);
+        textarea.selectionStart = textarea.selectionEnd = start + insert.length;
+        textarea.focus();
+        state.content.text = textarea.value;
+        render();
+      });
+      mathToolbar.appendChild(button);
+    });
+    document.getElementById('content-layout').value = state.content.layout;
+    document.getElementById('content-layout').addEventListener('change', function(e) {
+      state.content.layout = e.target.value;
+      render();
+    });
+    document.getElementById('content-text').addEventListener('input', function(e) {
+      state.content.text = e.target.value;
+      render();
+    });
+    makeSlider(cPanel, 'Font Size', 'content.fontSize', 6, 24, 'Text size');
+    makeSlider(cPanel, 'Padding', 'content.padding', 0, 20, 'Text area padding');
+    makeSlider(cPanel, 'BG Overlay', 'content.bgOverlay', 0, 100, 'Background transparency');
+
+    // Frame Panel
+    var fPanel = document.getElementById('panel-frame');
+    makeSlider(fPanel, 'Vignette', 'frame.vignette', 0, 100, 'Darken edges');
+    makeSlider(fPanel, 'Border Width', 'frame.borderWidth', 0, 50, 'Frame border thickness');
+
+    var borderToggle = document.createElement('div');
+    borderToggle.className = 'toggle-row';
+    borderToggle.innerHTML = `<span class="tl">Gradient Border</span><label class="toggle"><input type="checkbox" id="gradient-toggle"><span class="track"></span><span class="thumb"></span></label>`;
+    fPanel.appendChild(borderToggle);
+    document.getElementById('gradient-toggle').addEventListener('change', function(e) {
+      state.frame.gradientBorder = e.target.checked;
+      render();
+    });
+
+    makeSlider(fPanel, 'Border Opacity', 'frame.borderOpacity', 0, 100, 'Border transparency');
+    makeSlider(fPanel, 'Inner Glow', 'frame.innerGlow', 0, 100, 'Center glow effect');
+    makeSlider(fPanel, 'Dark Overlay', 'frame.darkOverlay', 0, 80, 'Global darkening');
+
+    // Export Panel
+    var ePanel = document.getElementById('panel-export');
+    var presetsDiv = document.createElement('div');
+    presetsDiv.style.cssText = 'margin-bottom:16px;';
+    var presetsLabel = document.createElement('div');
+    presetsLabel.className = 'label';
+    presetsLabel.textContent = 'Export Preset';
+    presetsDiv.appendChild(presetsLabel);
+
+    var presetsGrid = document.createElement('div');
+    presetsGrid.className = 'presets-grid';
+    state.exportPresets.forEach((p, i) => {
+      var btn = document.createElement('button');
+      btn.className = 'preset-btn' + (i === state.exportPreset ? ' active' : '');
+      btn.textContent = p.name;
+      btn.onclick = function() {
+        state.exportPreset = i;
+        document.querySelectorAll('.preset-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+      };
+      presetsGrid.appendChild(btn);
+    });
+    presetsDiv.appendChild(presetsGrid);
+    ePanel.appendChild(presetsDiv);
+
+    var exportBtn = document.createElement('button');
+    exportBtn.className = 'btn btn-primary';
+    exportBtn.style.cssText = 'width:100%; padding:16px 12px; display:flex; align-items:center; justify-content:center; gap:8px;';
+    exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export PNG';
+    exportBtn.onclick = function() {
+      var preset = state.exportPresets[state.exportPreset];
+      document.getElementById('preview').width = preset.width;
+      document.getElementById('preview').height = preset.height;
+      render();
+      var link = document.createElement('a');
+      link.download = 'sharepic-' + preset.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+      link.href = document.getElementById('preview').toDataURL();
+      link.click();
+      document.getElementById('preview').width = 1200;
+      document.getElementById('preview').height = 1200;
+      render();
+    };
+    ePanel.appendChild(exportBtn);
+  }
+
+  function updateUI() {
+    // Update generator selection
+    updateActiveGenerator();
+    // Update theme selection
+    document.querySelectorAll('.swatch-card').forEach((btn) => {
+      var th = themes[Object.keys(themes)[Array.from(btn.querySelectorAll('.sw-name')).findIndex((el) => el.textContent === themes[state.theme].name)]];
+      // Better: just rebuild palette panel
+    });
+    buildPalettePanel();
+    updateSliderValues();
+  }
+
+  function updateActiveGenerator() {
+    document.querySelectorAll('.gen-card').forEach((btn) => {
+      btn.classList.toggle('active', btn.querySelector('.name').textContent === generatorInfo[state.type].name);
+    });
+  }
+
+  function updateSliderValues() {
+    document.querySelectorAll('.slider-val').forEach((el) => {
+      var key = el.id.replace('val-', '').replace(/-/g, '.');
+      var val = getNested(state, key);
+      if (val !== undefined) el.textContent = val;
+    });
+    document.querySelectorAll('input[type="range"]').forEach((el) => {
+      var key = el.id.replace('slider-', '').replace(/-/g, '.');
+      var val = getNested(state, key);
+      if (val !== undefined) el.value = val;
+    });
+  }
+
+  function buildPalettePanel() {
+    var pPanel = document.getElementById('panel-palette');
+    pPanel.innerHTML = '';
+    var list = document.createElement('div');
+    list.style.cssText = 'display:flex; flex-direction:column; gap:6px;';
+    Object.keys(themes).forEach((k) => {
+      var btn = document.createElement('button');
+      btn.className = 'swatch-card' + (k === state.theme ? ' active' : '');
+      var th = themes[k];
+      var cols = th.colors.map((c) => '<div style="background:' + c + '"></div>').join('');
+      btn.innerHTML = `<div class="swatch-colors">${cols}</div><div class="dot"></div><div class="sw-name">${th.name}</div><div class="sw-desc">${th.description}</div>`;
+      btn.onclick = function() {
+        state.theme = k;
+        updateUI();
+        render();
+      };
+      list.appendChild(btn);
+    });
+    pPanel.appendChild(list);
+  }
+
+  function updateGeneratorParams() {
+    // Could update parameter descriptions based on selected generator
+    var info = generatorInfo[state.type];
+    if (info && info.params) {
+      // Update slider descriptions dynamically
+    }
+  }
+
+  // Initialize
+  buildUI();
+  render();
+
+  // Global buttons
+  document.getElementById('btn-randomize').onclick = function() {
+    var genKeys = Object.keys(generators);
+    state.type = genKeys[Math.floor(Math.random() * genKeys.length)];
+    var themeKeys = Object.keys(themes);
+    state.theme = themeKeys[Math.floor(Math.random() * themeKeys.length)];
+    state.seed = Math.floor(Math.random() * 999999);
+    state.complexity = Math.floor(Math.random() * 15) + 5;
+    state.density = Math.floor(Math.random() * 15) + 3;
+    state.scale = Math.floor(Math.random() * 15) + 3;
+    updateUI();
+    render();
+  };
+
+  document.getElementById('btn-export').onclick = function() {
+    var preset = state.exportPresets[state.exportPreset];
+    document.getElementById('preview').width = preset.width;
+    document.getElementById('preview').height = preset.height;
+    render();
+    var link = document.createElement('a');
+    link.download = 'sharepic-' + preset.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+    link.href = document.getElementById('preview').toDataURL();
+    link.click();
+    document.getElementById('preview').width = 1200;
+    document.getElementById('preview').height = 1200;
+    render();
+  };
+})();
+</script>
+</body>
+</html>

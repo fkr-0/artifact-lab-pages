@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bathroom Emergency Guide — Cover</title>
+<style>
+/* ── Cover Page Reset ───────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── WeasyPrint Page Rules ──────────────────────────────── */
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@page :first {
+    margin: 0;
+    @bottom-center { content: none; }
+    @top-right { content: none; }
+    @bottom-left { content: none; }
+    @top-left { content: none; }
+    @top-center { content: none; }
+    @bottom-right { content: none; }
+}
+
+/* ── Fonts ──────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── CSS Variables ──────────────────────────────────────── */
+:root {
+    --math-blue: #2563EB;
+    --math-blue-light: #3B82F6;
+    --cyan: #06B6D4;
+    --cyan-glow: rgba(6, 182, 212, 0.4);
+    --cyan-dim: rgba(6, 182, 212, 0.15);
+    --magenta: #EC4899;
+    --teal: #14B8A6;
+    --amber: #F59E0B;
+    --dark-bg: #0F172A;
+    --dark-surface: #1E293B;
+    --dark-surface-hover: #334155;
+    --text-light: #E2E8F0;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --font-heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── Body & Main Container ──────────────────────────────── */
+html, body {
+    width: 210mm;
+    height: 297mm;
+    overflow: hidden;
+}
+
+body {
+    background: linear-gradient(170deg, #0F172A 0%, #0B1120 40%, #0D1526 70%, #0F172A 100%);
+    color: var(--text-light);
+    font-family: var(--font-body);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Scanline Overlay ───────────────────────────────────── */
+/* Subtle scanline effect for retro/pixel-art aesthetic */
+body.scanline-overlay::before,
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(255, 255, 255, 0.015) 1px,
+        rgba(255, 255, 255, 0.015) 2px
+    );
+}
+
+/* ── Pixel-Art Decorative Border ────────────────────────── */
+body::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    pointer-events: none;
+    z-index: 2;
+    border: 3px solid var(--cyan);
+    box-shadow:
+        /* Outer pixel corners — top-left */
+        -4px -4px 0 -1px var(--math-blue),
+        -8px -4px 0 -1px var(--math-blue),
+        -4px -8px 0 -1px var(--math-blue),
+        -12px -4px 0 -1px var(--cyan),
+        -4px -12px 0 -1px var(--cyan),
+        /* Outer pixel corners — top-right */
+        4px -4px 0 -1px var(--math-blue),
+        8px -4px 0 -1px var(--math-blue),
+        4px -8px 0 -1px var(--math-blue),
+        12px -4px 0 -1px var(--cyan),
+        4px -12px 0 -1px var(--cyan),
+        /* Outer pixel corners — bottom-left */
+        -4px 4px 0 -1px var(--math-blue),
+        -8px 4px 0 -1px var(--math-blue),
+        -4px 8px 0 -1px var(--math-blue),
+        -12px 4px 0 -1px var(--cyan),
+        -4px 12px 0 -1px var(--cyan),
+        /* Outer pixel corners — bottom-right */
+        4px 4px 0 -1px var(--math-blue),
+        8px 4px 0 -1px var(--math-blue),
+        4px 8px 0 -1px var(--math-blue),
+        12px 4px 0 -1px var(--cyan),
+        4px 12px 0 -1px var(--cyan),
+        /* Inset glow */
+        inset 0 0 30px rgba(6, 182, 212, 0.05),
+        inset 0 0 60px rgba(37, 99, 235, 0.03);
+}
+
+/* ── Content Wrapper ────────────────────────────────────── */
+.cover-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: 2cm;
+    max-width: 85%;
+}
+
+/* ── Classification Badge ───────────────────────────────── */
+.classification-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0.35em 0.8em;
+    color: var(--text-light);
+    background-color: var(--math-blue);
+    border: 2px solid var(--cyan);
+    box-shadow:
+        2px 2px 0 0 rgba(0,0,0,0.4),
+        4px 4px 0 0 rgba(6, 182, 212, 0.25);
+    margin-bottom: 2.5cm;
+}
+
+/* ── Pixel Art Icon Frame ───────────────────────────────── */
+.icon-frame {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.2cm;
+}
+
+.icon-frame img {
+    width: 80px;
+    height: 80px;
+    image-rendering: pixelated;
+    border: 3px solid var(--cyan);
+    box-shadow:
+        /* Top-left pixel corner */
+        -4px -4px 0 -1px var(--math-blue),
+        -8px -4px 0 -1px var(--math-blue),
+        -4px -8px 0 -1px var(--math-blue),
+        /* Top-right pixel corner */
+        4px -4px 0 -1px var(--math-blue),
+        8px -4px 0 -1px var(--math-blue),
+        4px -8px 0 -1px var(--math-blue),
+        /* Bottom-left pixel corner */
+        -4px 4px 0 -1px var(--math-blue),
+        -8px 4px 0 -1px var(--math-blue),
+        -4px 8px 0 -1px var(--math-blue),
+        /* Bottom-right pixel corner */
+        4px 4px 0 -1px var(--math-blue),
+        8px 4px 0 -1px var(--math-blue),
+        4px 8px 0 -1px var(--math-blue),
+        /* Glow */
+        0 0 20px var(--cyan-glow),
+        0 0 40px rgba(6, 182, 212, 0.15);
+}
+
+/* Fallback icon if image not found */
+.icon-fallback {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    background: var(--dark-surface);
+    border: 3px solid var(--cyan);
+    box-shadow:
+        0 0 20px var(--cyan-glow),
+        0 0 40px rgba(6, 182, 212, 0.15);
+}
+
+/* ── Title ──────────────────────────────────────────────── */
+.cover-title {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--text-light);
+    text-shadow:
+        0 0 20px rgba(6, 182, 212, 0.4),
+        0 0 40px rgba(6, 182, 212, 0.2),
+        0 0 80px rgba(37, 99, 235, 0.15);
+    margin-bottom: 0.5cm;
+    /* Gradient text */
+    background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 40%, #06B6D4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Pixel Divider ──────────────────────────────────────── */
+.pixel-divider-cover {
+    border: none;
+    height: 4px;
+    margin: 0.6cm auto;
+    width: 200px;
+    background: none;
+    position: relative;
+}
+
+.pixel-divider-cover::before {
+    content: '';
+    display: block;
+    height: 4px;
+    background:
+        linear-gradient(90deg,
+            var(--math-blue) 0%, var(--math-blue) 4px,
+            transparent 4px, transparent 8px,
+            var(--cyan) 8px, var(--cyan) 12px,
+            transparent 12px, transparent 16px,
+            var(--math-blue) 16px, var(--math-blue) 20px,
+            transparent 20px, transparent 24px,
+            var(--cyan) 24px, var(--cyan) 28px,
+            transparent 28px, transparent 32px
+        );
+    background-size: 32px 4px;
+    background-repeat: repeat-x;
+}
+
+/* ── Subtitle ───────────────────────────────────────────── */
+.cover-subtitle {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5cm;
+}
+
+/* ── Quote ──────────────────────────────────────────────── */
+.cover-quote {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--text-dim);
+    margin-bottom: 2cm;
+    position: relative;
+    padding: 0.5em 0;
+}
+
+.cover-quote::before {
+    content: '"';
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--cyan);
+    position: absolute;
+    left: -0.8em;
+    top: -0.2em;
+    opacity: 0.6;
+}
+
+/* ── Version Info ───────────────────────────────────────── */
+.cover-version {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+}
+
+/* ── Bottom Pixel Bar ───────────────────────────────────── */
+.bottom-bar {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    gap: 4px;
+}
+
+.bottom-bar .pixel-block {
+    width: 4px;
+    height: 4px;
+    display: inline-block;
+}
+
+.bottom-bar .pixel-block.blue { background-color: var(--math-blue); }
+.bottom-bar .pixel-block.cyan { background-color: var(--cyan); }
+.bottom-bar .pixel-block.teal { background-color: var(--teal); }
+.bottom-bar .pixel-block.magenta { background-color: var(--magenta); }
+.bottom-bar .pixel-block.dark { background-color: var(--dark-surface-hover); }
+
+/* ── Decorative Corner Squares (inside border) ──────────── */
+.corner-decoration {
+    position: absolute;
+    z-index: 3;
+    width: 20px;
+    height: 20px;
+}
+
+.corner-decoration.tl {
+    top: 28px;
+    left: 28px;
+    box-shadow:
+        0 0 0 2px var(--cyan),
+        4px 0 0 var(--math-blue),
+        0 4px 0 var(--math-blue),
+        8px 0 0 var(--cyan),
+        0 8px 0 var(--cyan);
+}
+
+.corner-decoration.tr {
+    top: 28px;
+    right: 28px;
+    box-shadow:
+        0 0 0 2px var(--cyan),
+        -4px 0 0 var(--math-blue),
+        0 4px 0 var(--math-blue),
+        -8px 0 0 var(--cyan),
+        0 8px 0 var(--cyan);
+}
+
+.corner-decoration.bl {
+    bottom: 28px;
+    left: 28px;
+    box-shadow:
+        0 0 0 2px var(--cyan),
+        4px 0 0 var(--math-blue),
+        0 -4px 0 var(--math-blue),
+        8px 0 0 var(--cyan),
+        0 -8px 0 var(--cyan);
+}
+
+.corner-decoration.br {
+    bottom: 28px;
+    right: 28px;
+    box-shadow:
+        0 0 0 2px var(--cyan),
+        -4px 0 0 var(--math-blue),
+        0 -4px 0 var(--math-blue),
+        -8px 0 0 var(--cyan),
+        0 -8px 0 var(--cyan);
+}
+
+/* ── Ambient Glow Blobs ─────────────────────────────────── */
+.glow-blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(80px);
+}
+
+.glow-blob.cyan-blob {
+    width: 300px;
+    height: 300px;
+    background: rgba(6, 182, 212, 0.08);
+    top: 10%;
+    left: -5%;
+}
+
+.glow-blob.blue-blob {
+    width: 250px;
+    height: 250px;
+    background: rgba(37, 99, 235, 0.06);
+    bottom: 15%;
+    right: -3%;
+}
+
+.glow-blob.magenta-blob {
+    width: 150px;
+    height: 150px;
+    background: rgba(236, 72, 153, 0.04);
+    top: 50%;
+    right: 10%;
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient glow effects -->
+<div class="glow-blob cyan-blob"></div>
+<div class="glow-blob blue-blob"></div>
+<div class="glow-blob magenta-blob"></div>
+
+<!-- Corner decorations -->
+<div class="corner-decoration tl"></div>
+<div class="corner-decoration tr"></div>
+<div class="corner-decoration bl"></div>
+<div class="corner-decoration br"></div>
+
+<!-- Main cover content -->
+<div class="cover-content">
+
+    <!-- Classification badge -->
+    <div class="classification-badge">Personal — Bathroom Deployment</div>
+
+    <!-- Icon -->
+    <div class="icon-frame">
+        <img src="build/diagrams/bathroom_icon.png" alt="🚿"
+             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'icon-fallback\'>🚿</div>';">
+    </div>
+
+    <!-- Title -->
+    <h1 class="cover-title">BATHROOM<br>EMERGENCY<br>GUIDE</h1>
+
+    <!-- Pixel divider -->
+    <hr class="pixel-divider-cover">
+
+    <!-- Subtitle -->
+    <p class="cover-subtitle">A Decision-Support Tool for Bathroom Environments</p>
+
+    <!-- Quote -->
+    <p class="cover-quote">You're in a bathroom. That's already a good start.</p>
+
+    <!-- Version info -->
+    <p class="cover-version">v2.5.0 · 2026-04-29</p>
+
+</div>
+
+<!-- Bottom decorative pixel bar -->
+<div class="bottom-bar">
+    <span class="pixel-block blue"></span>
+    <span class="pixel-block cyan"></span>
+    <span class="pixel-block dark"></span>
+    <span class="pixel-block teal"></span>
+    <span class="pixel-block dark"></span>
+    <span class="pixel-block cyan"></span>
+    <span class="pixel-block blue"></span>
+    <span class="pixel-block dark"></span>
+    <span class="pixel-block magenta"></span>
+    <span class="pixel-block dark"></span>
+    <span class="pixel-block blue"></span>
+    <span class="pixel-block cyan"></span>
+    <span class="pixel-block dark"></span>
+    <span class="pixel-block teal"></span>
+    <span class="pixel-block dark"></span>
+    <span class="pixel-block cyan"></span>
+    <span class="pixel-block blue"></span>
+</div>
+
+</body>
+</html>

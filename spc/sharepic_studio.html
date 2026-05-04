@@ -1,0 +1,1532 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Procedural Sharepic Studio Pro</title>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --border: rgba(255, 255, 255, 0.06);
+        --text: #fff;
+        --text80: rgba(255, 255, 255, 0.8);
+        --text60: rgba(255, 255, 255, 0.6);
+        --text50: rgba(255, 255, 255, 0.5);
+        --text40: rgba(255, 255, 255, 0.4);
+        --text30: rgba(255, 255, 255, 0.3);
+        --accent: #ff2d7b;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      .header {
+        border-bottom: 1px solid var(--border);
+        background: rgba(10, 10, 15, 0.8);
+        backdrop-filter: blur(20px);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        max-width: 1800px;
+        margin: 0 auto;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .logo svg {
+        width: 16px;
+        height: 16px;
+        fill: #000;
+      }
+      .header-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+      .header-sub {
+        font-size: 10px;
+        color: var(--text30);
+        display: none;
+      }
+      @media (min-width: 640px) {
+        .header-sub {
+          display: block;
+        }
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn {
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 6px;
+        padding: 6px 12px;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .btn svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text50);
+      }
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+      }
+      .btn-primary {
+        font-weight: 500;
+        color: #000;
+      }
+      .btn-primary:hover {
+        filter: brightness(1.1);
+      }
+      .layout {
+        max-width: 1800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+      }
+      @media (min-width: 1024px) {
+        .layout {
+          flex-direction: row;
+        }
+      }
+      .sidebar {
+        width: 100%;
+        border-right: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      @media (min-width: 1024px) {
+        .sidebar {
+          width: 340px;
+          min-height: calc(100vh - 56px);
+        }
+      }
+      .tabs-bar {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        background: transparent;
+        height: 36px;
+        padding: 0;
+      }
+      .tab-btn {
+        flex: 1;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1px;
+        padding: 4px 0;
+        font-size: 10px;
+        color: var(--text40);
+        transition: all 0.15s;
+        position: relative;
+        font-family: inherit;
+      }
+      .tab-btn:hover {
+        color: var(--text60);
+      }
+      .tab-btn.active {
+        color: var(--text90);
+      }
+      .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+      .scroll-area {
+        height: 320px;
+        overflow-y: auto;
+      }
+      @media (min-width: 1024px) {
+        .scroll-area {
+          height: calc(100vh - 56px - 36px);
+        }
+      }
+      .tab-panel {
+        display: none;
+        padding: 16px;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      .separator {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 12px 0;
+      }
+      .label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text30);
+        font-weight: 500;
+        display: block;
+      }
+      .slider-row {
+        margin-bottom: 12px;
+      }
+      .slider-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      .slider-val {
+        font-size: 11px;
+        font-family: monospace;
+        color: var(--text50);
+      }
+      .slider-desc {
+        font-size: 10px;
+        color: var(--text20);
+        line-height: 1.5;
+        margin-top: 4px;
+      }
+      input[type='range'] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+      input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+      }
+      input[type='range']::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+      }
+      .gen-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .gen-card,
+      .swatch-card {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.02);
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+        color: var(--text80);
+      }
+      .gen-card:hover,
+      .swatch-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .gen-card.active,
+      .swatch-card.active {
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+      }
+      .gen-card .name {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .gen-card .desc {
+        font-size: 9px;
+        color: var(--text40);
+        margin-top: 2px;
+        line-height: 1.3;
+      }
+      .swatch-card {
+        position: relative;
+        padding: 12px;
+      }
+      .swatch-card.active {
+        border-color: var(--accent);
+      }
+      .swatch-colors {
+        display: flex;
+        gap: 2px;
+        margin-bottom: 8px;
+      }
+      .swatch-colors div {
+        flex: 1;
+        height: 12px;
+        border-radius: 2px;
+      }
+      .swatch-card .sw-name {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 0;
+      }
+      .toggle-row .tl {
+        font-size: 10px;
+        color: var(--text40);
+      }
+      .toggle {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        cursor: pointer;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle .track {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: background 0.2s;
+      }
+      .toggle input:checked + .track {
+        background: var(--accent);
+      }
+      .toggle .thumb {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform 0.2s;
+        pointer-events: none;
+      }
+      .toggle input:checked ~ .thumb {
+        transform: translateX(16px);
+      }
+      .text-input,
+      .text-area,
+      .text-select {
+        width: 100%;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text80);
+        font-size: 12px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .text-area {
+        min-height: 100px;
+        resize: vertical;
+        font-family: monospace;
+      }
+      .text-select {
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.5)' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        padding-right: 28px;
+      }
+      .text-select option {
+        background: #1a1a1a;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .field {
+        margin-bottom: 12px;
+      }
+      .field .fl {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text30);
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .main-area {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        min-height: 60vh;
+      }
+      @media (min-width: 1024px) {
+        .main-area {
+          padding: 32px 48px;
+          min-height: calc(100vh - 56px);
+        }
+      }
+      .canvas-wrap {
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+      }
+      .canvas-frame {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: box-shadow 0.5s;
+      }
+      #preview {
+        width: 100%;
+        aspect-ratio: 1;
+        display: block;
+        image-rendering: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <div class="logo" id="logo-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7L2 9.4h7.6z" />
+          </svg>
+        </div>
+        <div>
+          <div class="header-title">Sharepic Studio Pro</div>
+          <div class="header-sub">14 Generators · Layouts · Markdown</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-ghost" id="btn-surprise">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="8" height="8" rx="1" />
+            <rect x="14" y="14" width="8" height="8" rx="1" />
+          </svg>
+          <span>Surprise Me</span>
+        </button>
+        <button class="btn btn-primary" id="btn-export-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span>Export PNG</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="tabs-bar" id="tabs-bar"></div>
+        <div class="scroll-area">
+          <div class="tab-panel active" id="panel-generator"></div>
+          <div class="tab-panel" id="panel-palette"></div>
+          <div class="tab-panel" id="panel-tune"></div>
+          <div class="tab-panel" id="panel-content"></div>
+          <div class="tab-panel" id="panel-frame"></div>
+          <div class="tab-panel" id="panel-export"></div>
+        </div>
+      </aside>
+      <main class="main-area">
+        <div class="canvas-wrap">
+          <div class="canvas-frame" id="canvas-frame">
+            <canvas id="preview" width="1200" height="1200"></canvas>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ═══════════════════════════════════════════════════════════════
+      // 1. UTILS
+      // ═══════════════════════════════════════════════════════════════
+      function getNested(obj, path) {
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+      }
+      function setNested(obj, path, value) {
+        var parts = path.split('.')
+        var last = parts.pop()
+        var target = parts.reduce((acc, part) => (acc[part] = acc[part] || {}), obj)
+        target[last] = value
+      }
+
+      function hexToRgb(hex) {
+        var c = hex.substring(1)
+        return [
+          parseInt(c.substr(0, 2), 16),
+          parseInt(c.substr(2, 2), 16),
+          parseInt(c.substr(4, 2), 16),
+        ]
+      }
+      function rgba(r, g, b, a) {
+        return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'
+      }
+      function colorAlpha(hex, a) {
+        var c = hexToRgb(hex)
+        return rgba(c[0], c[1], c[2], a)
+      }
+      function clamp(v, mn, mx) {
+        return Math.max(mn, Math.min(mx, v))
+      }
+      function escHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+
+      function SeededRandom(seed) {
+        this.s = ((seed % 2147483647) + 2147483647) % 2147483647 || 1
+      }
+      SeededRandom.prototype.next = function () {
+        this.s = (this.s * 16807) % 2147483647
+        return (this.s - 1) / 2147483646
+      }
+      SeededRandom.prototype.nextFloat = function (min, max) {
+        return this.next() * (max - min) + min
+      }
+      SeededRandom.prototype.nextInt = function (min, max) {
+        return Math.floor(this.next() * (max - min + 1)) + min
+      }
+      SeededRandom.prototype.pick = function (arr) {
+        return arr[Math.floor(this.next() * arr.length)]
+      }
+
+      // Noise functions
+      function hash(x, y, s) {
+        var h = s
+        h ^= x * 374761393
+        h ^= y * 668265263
+        h = Math.imul(h ^ (h >>> 13), 1274126177)
+        return (h & 0x7fffffff) / 0x7fffffff
+      }
+      function smooth(x, y, s) {
+        var ix = Math.floor(x),
+          iy = Math.floor(y),
+          fx = x - ix,
+          fy = y - iy,
+          sx = fx * fx * (3 - 2 * fx),
+          sy = fy * fy * (3 - 2 * fy)
+        return hash(ix, iy, s) + (hash(ix + 1, iy, s) - hash(ix, iy, s)) * sx
+      }
+      function fbm(x, y, s, o) {
+        var v = 0,
+          a = 0.5,
+          f = 1,
+          m = 0
+        for (var i = 0; i < o; i++) {
+          v += (a * (smooth(x * f, y * f, s) + smooth(x * f, y * f, s + 100))) / 2
+          m += a
+          a *= 0.5
+          f *= 2
+        }
+        return v / m
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // 2. DATA
+      // ═══════════════════════════════════════════════════════════════
+      var themes = {
+        neonAlley: {
+          name: 'Neon Alley',
+          background: '#0a0a14',
+          colors: ['#ff2d7b', '#00f0ff', '#39ff14', '#ffe600', '#ff6b35'],
+          accent: '#ff2d7b',
+        },
+        arcadeCabinet: {
+          name: 'Arcade',
+          background: '#0c0c1e',
+          colors: ['#33ff00', '#ffb000', '#9933ff', '#00cccc', '#ff3366'],
+          accent: '#33ff00',
+        },
+        sprayCan: {
+          name: 'Spray Can',
+          background: '#1c1c1c',
+          colors: ['#dc143c', '#ffd700', '#00bfff', '#ff6600', '#00ff7f'],
+          accent: '#dc143c',
+        },
+        pixelSunset: {
+          name: 'Pixel Sunset',
+          background: '#141428',
+          colors: ['#ff6b6b', '#ffa07a', '#ffd93d', '#c44569', '#f8b500'],
+          accent: '#ff6b6b',
+        },
+        vaporTrail: {
+          name: 'Vapor Trail',
+          background: '#140828',
+          colors: ['#ff71ce', '#01cdfe', '#b967ff', '#fffb96', '#ff85a1'],
+          accent: '#ff71ce',
+        },
+        silverScreen: {
+          name: 'Silver',
+          background: '#0d0d0d',
+          colors: ['#ffffff', '#cccccc', '#999999', '#666666', '#444444'],
+          accent: '#ffffff',
+        },
+        moonlight: {
+          name: 'Moonlight',
+          background: '#0a0c12',
+          colors: ['#c8d0e0', '#98a4b8', '#707e94', '#505e74', '#384460'],
+          accent: '#c8d0e0',
+        },
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // 3. GENERATORS
+      // ═══════════════════════════════════════════════════════════════
+      var generators = {
+        kaleidoscope: {
+          name: 'Kaleidoscope',
+          desc: 'Rotational symmetry',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            var cx = w / 2,
+              cy = h / 2,
+              seg = rng.pick([6, 8, 12]),
+              maxR = Math.max(w, h) * 0.6
+            ctx.save()
+            ctx.translate(cx, cy)
+            for (var L = 0; L < cfg.complexity; L++) {
+              for (var s = 0; s < seg; s++) {
+                ctx.save()
+                ctx.rotate(((Math.PI * 2) / seg) * s)
+                if (s % 2) ctx.scale(1, -1)
+                for (var i = 0; i < cfg.density; i++) {
+                  var r = rng.nextFloat(20, maxR) * ((L + 1) / cfg.complexity),
+                    a = rng.nextFloat(-Math.PI / seg, Math.PI / seg)
+                  ctx.save()
+                  ctx.translate(Math.cos(a) * r, Math.sin(a) * r)
+                  ctx.rotate(rng.nextFloat(0, Math.PI * 2))
+                  ctx.globalAlpha = rng.nextFloat(0.3, 0.8)
+                  ctx.fillStyle = rng.pick(th.colors)
+                  ctx.beginPath()
+                  ctx.arc(0, 0, 5 + cfg.scale * rng.nextFloat(0.5, 2.5), 0, Math.PI * 2)
+                  ctx.fill()
+                  ctx.restore()
+                }
+                ctx.restore()
+              }
+            }
+            ctx.restore()
+          },
+        },
+        hardRects: {
+          name: 'Hard Rects',
+          desc: 'Bold shapes',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            for (var i = 0; i < cfg.complexity * 4; i++) {
+              var rw = rng.nextFloat(50, 400) * (cfg.scale / 10),
+                rh = rng.nextFloat(20, 200) * (cfg.scale / 10)
+              ctx.globalAlpha = rng.nextFloat(0.2, 0.8)
+              ctx.fillStyle = rng.pick(th.colors)
+              ctx.fillRect(rng.nextFloat(-rw, w), rng.nextFloat(-rh, h), rw, rh)
+            }
+          },
+        },
+        flowField: {
+          name: 'Flow Field',
+          desc: 'Organic lines',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            for (var i = 0; i < cfg.density * 20; i++) {
+              var x = rng.nextFloat(0, w),
+                y = rng.nextFloat(0, h)
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              ctx.strokeStyle = rng.pick(th.colors)
+              ctx.globalAlpha = rng.nextFloat(0.2, 0.6)
+              ctx.lineWidth = 1
+              for (var s = 0; s < 20 + cfg.scale * 2; s++) {
+                var angle = fbm(x * 0.003, y * 0.003, cfg.seed, 3) * Math.PI * 4
+                x += Math.cos(angle) * 3
+                y += Math.sin(angle) * 3
+                ctx.lineTo(x, y)
+              }
+              ctx.stroke()
+            }
+          },
+        },
+        pixelCity: {
+          name: 'Pixel City',
+          desc: 'Skylines',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            // Stars
+            ctx.fillStyle = '#fff'
+            for (var i = 0; i < 50; i++) {
+              ctx.globalAlpha = rng.nextFloat(0.3, 1)
+              ctx.fillRect(rng.nextInt(0, w), rng.nextInt(0, h * 0.6), 2, 2)
+            }
+
+            var horizon = h * 0.7
+            // Buildings
+            var bw = 40 + cfg.scale * 5
+            for (var x = 0; x < w; x += bw) {
+              var bh = rng.nextFloat(h * 0.2, h * 0.6) * (cfg.complexity / 10 + 0.5)
+              ctx.fillStyle = rng.pick(th.colors)
+              ctx.globalAlpha = 0.9
+              ctx.fillRect(x, horizon - bh, bw - 4, bh)
+              // Windows
+              ctx.fillStyle = th.background
+              for (var wy = horizon - bh + 10; wy < horizon - 10; wy += 15) {
+                for (var wx = x + 5; wx < x + bw - 7; wx += 12) {
+                  if (rng.next() > 0.3) ctx.fillRect(wx, wy, 6, 10)
+                }
+              }
+            }
+          },
+        },
+        sprayField: {
+          name: 'Spray Field',
+          desc: 'Graffiti',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            // Splatters
+            for (var i = 0; i < cfg.complexity * 3; i++) {
+              var x = rng.nextFloat(0, w),
+                y = rng.nextFloat(0, h)
+              var r = rng.nextFloat(50, 250) * (cfg.scale / 10)
+              var col = rng.pick(th.colors)
+              var g = ctx.createRadialGradient(x, y, 0, x, y, r)
+              g.addColorStop(0, colorAlpha(col, 0.4))
+              g.addColorStop(1, 'transparent')
+              ctx.fillStyle = g
+              ctx.beginPath()
+              ctx.arc(x, y, r, 0, Math.PI * 2)
+              ctx.fill()
+            }
+            // Grit
+            for (var i = 0; i < 20000 * (cfg.density / 10); i++) {
+              ctx.fillStyle = rng.pick(th.colors)
+              ctx.globalAlpha = rng.nextFloat(0.05, 0.3)
+              ctx.fillRect(
+                rng.nextFloat(0, w),
+                rng.nextFloat(0, h),
+                rng.nextFloat(1, 3),
+                rng.nextFloat(1, 3)
+              )
+            }
+            ctx.globalAlpha = 1
+          },
+        },
+        glitchArt: {
+          name: 'Glitch Art',
+          desc: 'Digital corrupt',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            // Base Gradient
+            var grd = ctx.createLinearGradient(0, 0, w, h)
+            grd.addColorStop(0, th.colors[0])
+            grd.addColorStop(1, th.colors[1])
+            ctx.globalAlpha = 0.2
+            ctx.fillStyle = grd
+            ctx.fillRect(0, 0, w, h)
+            ctx.globalAlpha = 1
+
+            // Bands
+            var bands = 20 + cfg.complexity * 2
+            for (var i = 0; i < bands; i++) {
+              ctx.fillStyle = rng.pick(th.colors)
+              ctx.globalAlpha = rng.nextFloat(0.1, 0.5)
+              var y = rng.nextInt(0, h)
+              var bh = rng.nextInt(5, 50)
+              ctx.fillRect(0, y, w, bh)
+            }
+            // Slice
+            if (cfg.disruptFactor > 0) {
+              var off = cfg.disruptFactor
+              ctx.globalCompositeOperation = 'screen'
+              ctx.globalAlpha = 0.8
+              ctx.drawImage(ctx.canvas, off, 0)
+              ctx.drawImage(ctx.canvas, -off, 0)
+              ctx.globalCompositeOperation = 'source-over'
+            }
+          },
+        },
+        retroGrid: {
+          name: 'Retro Grid',
+          desc: 'Synthwave',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            var horizon = h * 0.5
+            // Sun
+            var sunGrad = ctx.createLinearGradient(w / 2 - 100, horizon - 100, w / 2 + 100, horizon)
+            sunGrad.addColorStop(0, th.accent)
+            sunGrad.addColorStop(1, th.colors[1] || th.accent)
+            ctx.fillStyle = sunGrad
+            ctx.beginPath()
+            ctx.arc(w / 2, horizon - 50, 120, 0, Math.PI * 2)
+            ctx.fill()
+
+            // Grid
+            ctx.strokeStyle = th.accent
+            ctx.lineWidth = 1
+            // Vertical
+            var gridLines = 30
+            for (var i = -gridLines; i <= gridLines; i++) {
+              ctx.beginPath()
+              ctx.moveTo(w / 2, horizon)
+              ctx.lineTo(w / 2 + i * w * 2, h)
+              ctx.stroke()
+            }
+            // Horizontal
+            for (var i = 0; i < 15; i++) {
+              var t = i / 15
+              var y = horizon + (h - horizon) * (t * t * 2)
+              ctx.beginPath()
+              ctx.moveTo(0, y)
+              ctx.lineTo(w, y)
+              ctx.stroke()
+            }
+          },
+        },
+        geometricTiles: {
+          name: 'Geo Tiles',
+          desc: 'Patterns',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            var s = 40 + cfg.scale * 5
+            for (var x = 0; x < w; x += s) {
+              for (var y = 0; y < h; y += s) {
+                ctx.globalAlpha = 0.8
+                ctx.fillStyle = rng.pick(th.colors)
+                ctx.strokeStyle = th.background
+                ctx.lineWidth = 2
+                if (rng.next() > 0.5) {
+                  ctx.fillRect(x, y, s, s)
+                } else {
+                  ctx.beginPath()
+                  ctx.arc(x + s / 2, y + s / 2, s / 3, 0, Math.PI * 2)
+                  ctx.fill()
+                }
+              }
+            }
+          },
+        },
+        goldLeaf: {
+          name: 'Gold Leaf',
+          desc: 'Metallic',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            for (var i = 0; i < cfg.complexity * 4; i++) {
+              var x = rng.nextFloat(0, w),
+                y = rng.nextFloat(0, h)
+              var size = rng.nextFloat(20, 120) * (cfg.scale / 10)
+              ctx.globalAlpha = rng.nextFloat(0.3, 0.9)
+              ctx.fillStyle = rng.pick(th.colors)
+              ctx.save()
+              ctx.translate(x, y)
+              ctx.rotate(rng.nextFloat(0, Math.PI * 2))
+              // Draw abstract fragment
+              ctx.beginPath()
+              for (var p = 0; p < 3; p++)
+                ctx.lineTo(rng.nextFloat(-size, size), rng.nextFloat(-size, size))
+              ctx.fill()
+              ctx.restore()
+            }
+          },
+        },
+        gritNoise: {
+          name: 'Grit Noise',
+          desc: 'Granular',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            var id = ctx.getImageData(0, 0, w, h),
+              d = id.data
+            for (var i = 0; i < d.length; i += 4) {
+              var noise = (rng.next() * 2 - 1) * 50 * (cfg.density / 10)
+              d[i] = clamp(d[i] + noise, 0, 255)
+              d[i + 1] = clamp(d[i + 1] + noise, 0, 255)
+              d[i + 2] = clamp(d[i + 2] + noise, 0, 255)
+            }
+            ctx.putImageData(id, 0, 0)
+            // Overlay color blobs
+            for (var i = 0; i < cfg.complexity; i++) {
+              var x = rng.nextFloat(0, w),
+                y = rng.nextFloat(0, h),
+                r = rng.nextFloat(50, 250)
+              var g = ctx.createRadialGradient(x, y, 0, x, y, r)
+              g.addColorStop(0, colorAlpha(rng.pick(th.colors), 0.3))
+              g.addColorStop(1, 'transparent')
+              ctx.fillStyle = g
+              ctx.fillRect(0, 0, w, h)
+            }
+          },
+        },
+        rawGrids: {
+          name: 'Raw Grids',
+          desc: 'Lines',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            ctx.strokeStyle = colorAlpha(th.accent, 0.3)
+            ctx.lineWidth = 1
+            // Vertical
+            for (var i = 0; i < cfg.density * 3; i++) {
+              var x = rng.nextFloat(0, w)
+              ctx.beginPath()
+              ctx.moveTo(x, 0)
+              ctx.lineTo(x, h)
+              ctx.stroke()
+            }
+            // Horizontal
+            for (var i = 0; i < cfg.density * 3; i++) {
+              var y = rng.nextFloat(0, h)
+              ctx.beginPath()
+              ctx.moveTo(0, y)
+              ctx.lineTo(w, y)
+              ctx.stroke()
+            }
+            // Circles
+            for (var i = 0; i < cfg.complexity; i++) {
+              ctx.strokeStyle = rng.pick(th.colors)
+              ctx.beginPath()
+              ctx.arc(
+                rng.nextFloat(0, w),
+                rng.nextFloat(0, h),
+                rng.nextFloat(50, 300),
+                0,
+                Math.PI * 2
+              )
+              ctx.stroke()
+            }
+          },
+        },
+        halftone: {
+          name: 'Halftone',
+          desc: 'Dots',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            var spacing = 12 + cfg.scale
+            for (var y = 0; y < h; y += spacing) {
+              for (var x = 0; x < w; x += spacing) {
+                var r = rng.next() * spacing * 0.5 * (cfg.density / 10)
+                if (r > 0.5) {
+                  ctx.fillStyle = rng.pick(th.colors)
+                  ctx.beginPath()
+                  ctx.arc(x, y, r, 0, Math.PI * 2)
+                  ctx.fill()
+                }
+              }
+            }
+          },
+        },
+        dotMatrix: {
+          name: 'Dot Matrix',
+          desc: 'LED',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            var s = 10
+            for (var y = 0; y < h; y += s) {
+              for (var x = 0; x < w; x += s) {
+                var on = rng.next() > 1 - cfg.density / 15
+                if (on) {
+                  ctx.fillStyle = rng.pick(th.colors)
+                  ctx.beginPath()
+                  ctx.arc(x + s / 2, y + s / 2, s / 3, 0, Math.PI * 2)
+                  ctx.fill()
+                } else {
+                  ctx.fillStyle = colorAlpha(th.accent, 0.1)
+                  ctx.beginPath()
+                  ctx.arc(x + s / 2, y + s / 2, s / 6, 0, Math.PI * 2)
+                  ctx.fill()
+                }
+              }
+            }
+          },
+        },
+        circuitBoard: {
+          name: 'Circuit',
+          desc: 'Traces',
+          render: function (ctx, w, h, th, rng, cfg) {
+            ctx.fillStyle = th.background
+            ctx.fillRect(0, 0, w, h)
+            ctx.strokeStyle = th.accent
+            ctx.lineWidth = 2
+            var grid = 20
+            for (var i = 0; i < cfg.complexity * 10; i++) {
+              var x = rng.nextInt(0, w / grid) * grid
+              var y = rng.nextInt(0, h / grid) * grid
+              ctx.beginPath()
+              ctx.moveTo(x, y)
+              var len = cfg.density * 2
+              for (var k = 0; k < len; k++) {
+                var dir = rng.pick([
+                  [-1, 0],
+                  [1, 0],
+                  [0, -1],
+                  [0, 1],
+                ])
+                x += dir[0] * grid
+                y += dir[1] * grid
+                ctx.lineTo(x, y)
+              }
+              ctx.stroke()
+              ctx.fillStyle = th.accent
+              ctx.beginPath()
+              ctx.arc(x, y, 4, 0, Math.PI * 2)
+              ctx.fill()
+            }
+          },
+        },
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // 4. RICH TEXT ENGINE
+      // ═══════════════════════════════════════════════════════════════
+      var RichText = {
+        greek: {
+          alpha: 'α',
+          beta: 'β',
+          gamma: 'γ',
+          delta: 'δ',
+          epsilon: 'ε',
+          theta: 'θ',
+          lambda: 'λ',
+          pi: 'π',
+          sigma: 'σ',
+          omega: 'ω',
+          infty: '∞',
+        },
+        parse: function (text) {
+          var blocks = [],
+            lines = text.split('\n')
+          lines.forEach((line) => {
+            if (line.trim() === '') {
+              blocks.push({ type: 'space' })
+              return
+            }
+            if (line.match(/^#+\s/)) {
+              var level = line.match(/^(#+)/)[0].length
+              blocks.push({
+                type: 'h',
+                level: Math.min(level, 4),
+                text: this.parseInline(line.replace(/^#+\s*/, '')),
+              })
+            } else if (line.match(/^---/)) {
+              blocks.push({ type: 'hr' })
+            } else {
+              blocks.push({ type: 'p', text: this.parseInline(line) })
+            }
+          })
+          return blocks
+        },
+        parseInline: function (text) {
+          var tokens = []
+          var re = /(\*\*.*?\*\*|\*.*?\*|\$.*?\$|`.+?`)/g
+          var m,
+            idx = 0
+          while ((m = re.exec(text)) !== null) {
+            if (m.index > idx) tokens.push({ type: 'text', val: text.substring(idx, m.index) })
+            var str = m[0]
+            if (str.startsWith('**')) tokens.push({ type: 'bold', val: str.slice(2, -2) })
+            else if (str.startsWith('*')) tokens.push({ type: 'italic', val: str.slice(1, -1) })
+            else if (str.startsWith('`')) tokens.push({ type: 'code', val: str.slice(1, -1) })
+            else if (str.startsWith('$')) tokens.push({ type: 'math', val: str.slice(1, -1) })
+            idx = m.index + str.length
+          }
+          if (idx < text.length) tokens.push({ type: 'text', val: text.substring(idx) })
+          return tokens
+        },
+        render: function (ctx, blocks, box, styles) {
+          var y = box.y
+          ctx.textBaseline = 'top'
+
+          blocks.forEach((b) => {
+            if (y > box.y + box.h) return
+            if (b.type === 'space') {
+              y += styles.size * 0.5
+              return
+            }
+            if (b.type === 'hr') {
+              ctx.strokeStyle = colorAlpha(styles.color, 0.3)
+              ctx.lineWidth = 1
+              ctx.beginPath()
+              ctx.moveTo(box.x, y + styles.size / 2)
+              ctx.lineTo(box.x + box.w, y + styles.size / 2)
+              ctx.stroke()
+              y += styles.size
+              return
+            }
+
+            if (b.type === 'h') {
+              var s = styles.size * (2.5 - (b.level - 1) * 0.4)
+              ctx.font = `bold ${s}px ${styles.font}`
+              ctx.fillStyle = styles.accent
+              this.drawTokens(ctx, b.text, box.x, y, s, styles.font)
+              y += s * 1.4
+            } else if (b.type === 'p') {
+              ctx.font = `${styles.size}px ${styles.font}`
+              var words = b.text
+              var currentLine = []
+              var x = box.x
+              var lineHeight = styles.size * 1.4
+
+              words.forEach((tok) => {
+                ctx.font = `${tok.type === 'bold' ? 'bold ' : ' '}${styles.size}px ${styles.font}`
+                tok.w = ctx.measureText(tok.val).width
+              })
+              ctx.font = `${styles.size}px ${styles.font}`
+
+              words.forEach((tok) => {
+                if (x + tok.w > box.x + box.w && currentLine.length) {
+                  this.drawTokens(ctx, currentLine, box.x, y, styles.size, styles.font)
+                  y += lineHeight
+                  x = box.x
+                  currentLine = []
+                }
+                currentLine.push(tok)
+                x += tok.w
+              })
+              if (currentLine.length) {
+                this.drawTokens(ctx, currentLine, box.x, y, styles.size, styles.font)
+                y += lineHeight
+              }
+            }
+          })
+        },
+        drawTokens: function (ctx, tokens, x, y, size, font) {
+          var curX = x
+          tokens.forEach((t) => {
+            ctx.font = `${size}px ${font}`
+            if (t.type === 'italic') ctx.font = `italic ${size}px ${font}`
+            if (t.type === 'bold') ctx.font = `bold ${size}px ${font}`
+
+            ctx.fillStyle = '#ffffff'
+            if (t.type === 'code') ctx.fillStyle = colorAlpha('#ffffff', 0.7)
+
+            if (t.type === 'math') {
+              var str = t.val
+              Object.keys(this.greek).forEach(
+                (k) => (str = str.replace(new RegExp('\\\\' + k, 'g'), this.greek[k]))
+              )
+              ctx.fillText(str, curX, y)
+              curX += ctx.measureText(str).width
+            } else {
+              ctx.fillText(t.val, curX, y)
+              curX += ctx.measureText(t.val).width
+            }
+          })
+        },
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // 5. STATE
+      // ═══════════════════════════════════════════════════════════════
+      var state = {
+        type: 'kaleidoscope',
+        theme: 'neonAlley',
+        seed: Math.floor(Math.random() * 999999),
+        complexity: 6,
+        density: 5,
+        scale: 5,
+        content: {
+          enabled: false,
+          text: '# Header\n\nText paragraph with **bold** and $\\pi$.\n\n---\n\nEnd.',
+          layout: 'center-card',
+          fontSize: 12,
+          fontFamily: 'sans',
+          padding: 8,
+          bgOverlay: 80,
+        },
+        frame: { borderWidth: 0, borderColor: '#ffffff', borderOpacity: 100, vignette: 40 },
+        post: { grain: 0 },
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // 6. RENDER PIPELINE
+      // ═══════════════════════════════════════════════════════════════
+      function renderMain() {
+        var canvas = document.getElementById('preview')
+        var ctx = canvas.getContext('2d')
+        var w = canvas.width,
+          h = canvas.height
+        var th = themes[state.theme]
+        var rng = new SeededRandom(state.seed)
+
+        // 1. Background
+        ctx.fillStyle = th.background
+        ctx.fillRect(0, 0, w, h)
+
+        // 2. Generator
+        var gen = generators[state.type]
+        if (gen && gen.render) {
+          gen.render(ctx, w, h, th, rng, state)
+        }
+
+        // 3. Post FX
+        if (state.post.grain > 0) {
+          var imgData = ctx.getImageData(0, 0, w, h)
+          var d = imgData.data
+          for (var i = 0; i < d.length; i += 4) {
+            var n = (Math.random() - 0.5) * state.post.grain
+            d[i] += n
+            d[i + 1] += n
+            d[i + 2] += n
+          }
+          ctx.putImageData(imgData, 0, 0)
+        }
+
+        // 4. Layout & Text
+        if (state.content.enabled) {
+          var pad = w * (state.content.padding / 100)
+          var box = { x: pad, y: pad, w: w - pad * 2, h: h - pad * 2 }
+          var styles = {
+            font:
+              state.content.fontFamily === 'mono'
+                ? 'monospace'
+                : state.content.fontFamily === 'serif'
+                  ? 'serif'
+                  : 'sans-serif',
+            size: w * 0.02 * (state.content.fontSize / 10),
+            color: '#ffffff',
+            accent: th.accent,
+          }
+
+          if (state.content.layout === 'left-panel') {
+            box.w = w * 0.4
+            ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100)
+            ctx.fillRect(0, 0, box.w + pad * 2, h)
+          } else if (state.content.layout === 'right-panel') {
+            box.x = w * 0.55
+            box.w = w * 0.4
+            ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100)
+            ctx.fillRect(box.x - pad, 0, box.w + pad * 2, h)
+          } else if (state.content.layout === 'bottom-bar') {
+            box.y = h * 0.65
+            box.h = h * 0.35 - pad
+            ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100)
+            ctx.fillRect(0, box.y - pad, w, h - box.y + pad)
+          } else if (state.content.layout === 'center-card') {
+            box.w = w * 0.6
+            box.h = h * 0.6
+            box.x = (w - box.w) / 2
+            box.y = (h - box.h) / 2
+            ctx.fillStyle = colorAlpha(th.background, state.content.bgOverlay / 100)
+            // Round rect
+            ctx.beginPath()
+            var r = 20
+            ctx.moveTo(box.x + r, box.y)
+            ctx.lineTo(box.x + box.w - r, box.y)
+            ctx.quadraticCurveTo(box.x + box.w, box.y, box.x + box.w, box.y + r)
+            ctx.lineTo(box.x + box.w, box.y + box.h - r)
+            ctx.quadraticCurveTo(box.x + box.w, box.y + box.h, box.x + box.w - r, box.y + box.h)
+            ctx.lineTo(box.x + r, box.y + box.h)
+            ctx.quadraticCurveTo(box.x, box.y + box.h, box.x, box.y + box.h - r)
+            ctx.lineTo(box.x, box.y + r)
+            ctx.quadraticCurveTo(box.x, box.y, box.x + r, box.y)
+            ctx.fill()
+          }
+
+          var blocks = RichText.parse(state.content.text)
+          RichText.render(ctx, blocks, box, styles)
+        }
+
+        // 5. Frame
+        if (state.frame.vignette > 0) {
+          var cx = w / 2,
+            cy = h / 2,
+            r = Math.sqrt(cx * cx + cy * cy)
+          var g = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r)
+          g.addColorStop(0, 'transparent')
+          g.addColorStop(1, `rgba(0,0,0,${state.frame.vignette / 100})`)
+          ctx.fillStyle = g
+          ctx.fillRect(0, 0, w, h)
+        }
+
+        if (state.frame.borderWidth > 0) {
+          ctx.strokeStyle = colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100)
+          ctx.lineWidth = state.frame.borderWidth
+          ctx.strokeRect(
+            state.frame.borderWidth / 2,
+            state.frame.borderWidth / 2,
+            w - state.frame.borderWidth,
+            h - state.frame.borderWidth
+          )
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // 7. UI
+      // ═══════════════════════════════════════════════════════════════
+      function makeSlider(container, label, key, min, max, desc) {
+        var val = getNested(state, key)
+        var id = key.replace(/\./g, '-')
+        var div = document.createElement('div')
+        div.className = 'slider-row'
+        div.innerHTML = `
+    <div class="slider-header"><span class="label">${label}</span><span class="slider-val" id="val-${id}">${val}</span></div>
+    <input type="range" id="slider-${id}" min="${min}" max="${max}" value="${val}">
+    <div class="slider-desc">${desc || ''}</div>
+  `
+        container.appendChild(div)
+        div.querySelector('input').addEventListener('input', function (e) {
+          setNested(state, key, parseFloat(e.target.value))
+          document.getElementById('val-' + id).textContent = e.target.value
+          renderMain()
+        })
+      }
+
+      function buildUI() {
+        var tabs = ['Gen', 'Color', 'Tune', 'Text', 'Frame', 'Export']
+        var panels = {
+          Gen: 'panel-generator',
+          Color: 'panel-palette',
+          Tune: 'panel-tune',
+          Text: 'panel-content',
+          Frame: 'panel-frame',
+          Export: 'panel-export',
+        }
+        var bar = document.getElementById('tabs-bar')
+
+        tabs.forEach((t) => {
+          var btn = document.createElement('button')
+          btn.className = 'tab-btn' + (t === 'Gen' ? ' active' : '')
+          btn.innerHTML = t
+          btn.onclick = function () {
+            document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'))
+            document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'))
+            btn.classList.add('active')
+            document.getElementById(panels[t]).classList.add('active')
+          }
+          bar.appendChild(btn)
+        })
+
+        // Generator Panel
+        var gPanel = document.getElementById('panel-generator')
+        var grid = document.createElement('div')
+        grid.className = 'gen-grid'
+        Object.keys(generators).forEach((k) => {
+          var btn = document.createElement('button')
+          btn.className = 'gen-card' + (k === state.type ? ' active' : '')
+          btn.innerHTML = `<div class="name">${generators[k].name}</div><div class="desc">${generators[k].desc}</div>`
+          btn.onclick = function () {
+            state.type = k
+            render()
+          }
+          grid.appendChild(btn)
+        })
+        gPanel.appendChild(grid)
+
+        // Palette Panel
+        var pPanel = document.getElementById('panel-palette')
+        var list = document.createElement('div')
+        list.style.display = 'flex'
+        list.style.flexDirection = 'column'
+        list.style.gap = '6px'
+        Object.keys(themes).forEach((k) => {
+          var btn = document.createElement('button')
+          btn.className = 'swatch-card' + (k === state.theme ? ' active' : '')
+          var th = themes[k]
+          var cols = th.colors.map((c) => `<div style="background:${c}"></div>`).join('')
+          btn.innerHTML = `<div class="swatch-colors">${cols}</div><div class="sw-name">${th.name}</div>`
+          btn.onclick = function () {
+            state.theme = k
+            render()
+          }
+          list.appendChild(btn)
+        })
+        pPanel.appendChild(list)
+
+        // Tune Panel
+        var tPanel = document.getElementById('panel-tune')
+        makeSlider(tPanel, 'Complexity', 'complexity', 0, 20, 'Detail level')
+        makeSlider(tPanel, 'Density', 'density', 0, 20, 'Amount')
+        makeSlider(tPanel, 'Scale', 'scale', 1, 20, 'Size')
+        var sep = document.createElement('hr')
+        sep.className = 'separator'
+        tPanel.appendChild(sep)
+        makeSlider(tPanel, 'Grain', 'post.grain', 0, 100, 'Noise')
+
+        // Content Panel
+        var cPanel = document.getElementById('panel-content')
+        window.renderContentFields = function () {
+          cPanel.innerHTML = ''
+          var toggleDiv = document.createElement('div')
+          toggleDiv.className = 'toggle-row'
+          toggleDiv.innerHTML = `<span class="tl">Enable Text</span><label class="toggle"><input type="checkbox" id="content-toggle" ${state.content.enabled ? 'checked' : ''}><span class="track"></span><span class="thumb"></span></label>`
+          cPanel.appendChild(toggleDiv)
+
+          document.getElementById('content-toggle').addEventListener('change', function (e) {
+            state.content.enabled = e.target.checked
+            render()
+          })
+
+          if (!state.content.enabled) return
+
+          var fieldsDiv = document.createElement('div')
+          fieldsDiv.style.marginTop = '12px'
+          fieldsDiv.innerHTML = `
+      <div class="field"><div class="fl">Layout</div><select class="text-select" id="content-layout">
+        <option value="center">Center Overlay</option>
+        <option value="left-panel">Left Panel</option>
+        <option value="right-panel">Right Panel</option>
+        <option value="bottom-bar">Bottom Bar</option>
+        <option value="center-card">Floating Card</option>
+      </select></div>
+      <div class="field"><div class="fl">Content (Markdown/LaTeX)</div><textarea class="text-area" id="content-text">${escHtml(state.content.text)}</textarea></div>
+    `
+          cPanel.appendChild(fieldsDiv)
+
+          document.getElementById('content-layout').value = state.content.layout
+          document.getElementById('content-text').value = state.content.text
+
+          makeSlider(cPanel, 'Size', 'content.fontSize', 1, 30)
+          makeSlider(cPanel, 'Padding', 'content.padding', 0, 20)
+          makeSlider(cPanel, 'BG Overlay', 'content.bgOverlay', 0, 100, 'Background transparency')
+
+          document.getElementById('content-layout').addEventListener('change', function (e) {
+            state.content.layout = e.target.value
+            renderMain()
+          })
+          document.getElementById('content-text').addEventListener('input', function (e) {
+            state.content.text = e.target.value
+            renderMain()
+          })
+        }
+        renderContentFields()
+
+        // Frame Panel
+        var fPanel = document.getElementById('panel-frame')
+        makeSlider(fPanel, 'Vignette', 'frame.vignette', 0, 100, 'Darken edges')
+        makeSlider(fPanel, 'Border Width', 'frame.borderWidth', 0, 50)
+        makeSlider(fPanel, 'Border Opacity', 'frame.borderOpacity', 0, 100)
+
+        // Export Panel
+        var ePanel = document.getElementById('panel-export')
+        var expBtn = document.createElement('button')
+        expBtn.className = 'btn btn-primary'
+        expBtn.style.width = '100%'
+        expBtn.style.marginTop = '10px'
+        expBtn.textContent = 'Export PNG (1080x1080)'
+        expBtn.onclick = function () {
+          document.getElementById('preview').width = 1080
+          document.getElementById('preview').height = 1080
+          renderMain()
+          var link = document.createElement('a')
+          link.download = 'sharepic.png'
+          link.href = document.getElementById('preview').toDataURL()
+          link.click()
+          document.getElementById('preview').width = 1200
+          document.getElementById('preview').height = 1200
+          renderMain()
+        }
+        ePanel.appendChild(expBtn)
+      }
+
+      function render() {
+        renderMain()
+        document
+          .querySelectorAll('.gen-card')
+          .forEach((e) =>
+            e.classList.toggle(
+              'active',
+              e.querySelector('.name').textContent === generators[state.type].name
+            )
+          )
+        document
+          .querySelectorAll('.swatch-card')
+          .forEach((e) =>
+            e.classList.toggle(
+              'active',
+              e.querySelector('.sw-name').textContent === themes[state.theme].name
+            )
+          )
+        document.getElementById('logo-box').style.backgroundColor = themes[state.theme].accent
+        document.getElementById('btn-export-header').style.backgroundColor =
+          themes[state.theme].accent
+        document.getElementById('canvas-frame').style.boxShadow =
+          `0 0 50px -20px ${themes[state.theme].accent}`
+        if (typeof window.renderContentFields === 'function') window.renderContentFields()
+      }
+
+      // Init
+      buildUI()
+      render()
+
+      document.getElementById('btn-surprise').addEventListener('click', function () {
+        state.type =
+          Object.keys(generators)[Math.floor(Math.random() * Object.keys(generators).length)]
+        state.theme = Object.keys(themes)[Math.floor(Math.random() * Object.keys(themes).length)]
+        state.seed = Math.floor(Math.random() * 999999)
+        state.complexity = Math.floor(Math.random() * 15) + 5
+        render()
+      })
+      document.getElementById('btn-export-header').addEventListener('click', function () {
+        document.getElementById('preview').width = 1080
+        document.getElementById('preview').height = 1080
+        renderMain()
+        var link = document.createElement('a')
+        link.download = 'sharepic.png'
+        link.href = document.getElementById('preview').toDataURL()
+        link.click()
+        document.getElementById('preview').width = 1200
+        document.getElementById('preview').height = 1200
+        renderMain()
+      })
+    </script>
+  </body>
+</html>

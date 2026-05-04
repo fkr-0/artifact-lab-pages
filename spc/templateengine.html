@@ -1,0 +1,1653 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Escape Collective — Autonomous Street Template Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+      :root {
+        --bg: #08080d;
+        --bg2: #0f0d18;
+        --panel: #12101c;
+        --panel2: #1a1628;
+        --line: #2a2440;
+        --text: #f0edff;
+        --muted: #9a92b8;
+        --accent: #a78bfa;
+        --mint: #6ee7b7;
+        --warn: #fbbf24;
+        --coral: #fb7185;
+        --cyan: #22d3ee;
+        --shadow: 0 32px 64px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+        --glow: 0 0 60px rgba(167, 139, 250, 0.15);
+        --sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        --mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        font: 14px/1.5 var(--sans);
+        background: var(--bg);
+        color: var(--text);
+      }
+      body {
+        background:
+          radial-gradient(
+            ellipse 80% 50% at 20% 40%,
+            rgba(167, 139, 250, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 60%,
+            rgba(110, 231, 183, 0.05) 0%,
+            transparent 50%
+          ),
+          linear-gradient(180deg, #0a0812 0%, #08080d 50%, #0d0a14 100%);
+        background-attachment: fixed;
+      }
+
+      .wrap {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        min-height: 100vh;
+        gap: 0;
+      }
+      aside {
+        padding: 20px 18px 32px;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.15));
+        backdrop-filter: blur(40px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: #2a2440 transparent;
+      }
+      aside::-webkit-scrollbar {
+        width: 6px;
+      }
+      aside::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #3a3460, #2a2440);
+        border-radius: 999px;
+      }
+
+      main {
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+      }
+      .preview {
+        position: relative;
+        display: inline-block;
+        border-radius: 20px;
+        box-shadow: var(--shadow), var(--glow);
+      }
+      #holder {
+        position: relative;
+        z-index: 1;
+      }
+      canvas {
+        display: block;
+        max-width: min(92vw, 1280px) !important;
+        max-height: 88vh !important;
+        width: auto !important;
+        height: auto !important;
+        border-radius: 20px;
+      }
+      .overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .block-box {
+        position: absolute;
+        border: 2px solid rgba(167, 139, 250, 0.5);
+        border-radius: 12px;
+        background: rgba(167, 139, 250, 0.08);
+        pointer-events: auto;
+        cursor: move;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+      }
+      .block-box:hover {
+        border-color: rgba(167, 139, 250, 0.8);
+        background: rgba(167, 139, 250, 0.12);
+        box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
+      }
+      .block-box.active {
+        border-color: var(--mint);
+        background: rgba(110, 231, 183, 0.1);
+        box-shadow: 0 0 24px rgba(110, 231, 183, 0.25);
+      }
+      .block-box:after {
+        content: attr(data-name);
+        position: absolute;
+        top: -24px;
+        left: 0;
+        font: 10px/1 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        background: var(--bg);
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .block-box.active:after {
+        color: var(--mint);
+      }
+      .handle {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        right: -7px;
+        bottom: -7px;
+        background: linear-gradient(135deg, var(--mint), #34d399);
+        border: 2px solid var(--bg);
+        cursor: nwse-resize;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        transition: transform 0.15s;
+      }
+      .handle:hover {
+        transform: scale(1.2);
+      }
+
+      header {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .tagline {
+        font: 13px/1.4 var(--mono);
+        color: var(--muted);
+        letter-spacing: 0.02em;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin: 8px 0 6px;
+        background: linear-gradient(135deg, var(--text), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(110, 231, 183, 0.08);
+        border: 1px solid rgba(110, 231, 183, 0.2);
+        font: 11px var(--mono);
+        color: #a7f3d0;
+      }
+
+      .section {
+        margin: 16px 0;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(0, 0, 0, 0.08));
+        border-radius: 14px;
+      }
+      .section h2 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+      .section h2 span.value {
+        font-family: var(--mono);
+        color: var(--accent);
+        letter-spacing: 0;
+      }
+
+      .label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--text);
+      }
+      .label .value {
+        font-family: var(--mono);
+        color: var(--accent);
+        font-weight: 400;
+        font-size: 11px;
+      }
+      .small {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .mono {
+        font-family: var(--mono);
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+        margin-top: 8px;
+      }
+      .row > * {
+        flex: 1;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+      }
+
+      button,
+      select,
+      input[type='number'],
+      input[type='text'],
+      textarea {
+        background: linear-gradient(180deg, var(--panel2), var(--panel));
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 10px 12px;
+        border-radius: 10px;
+        min-height: 42px;
+        font: inherit;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s,
+          transform 0.1s;
+      }
+      textarea {
+        width: 100%;
+        min-height: 68px;
+        resize: vertical;
+        line-height: 1.4;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+      }
+      button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent);
+        pointer-events: none;
+      }
+      button:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      button.ghost {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      button.hot {
+        background: linear-gradient(180deg, #4c1d95, #2e1065);
+        border-color: rgba(167, 139, 250, 0.3);
+      }
+      button.hot:hover {
+        box-shadow: 0 4px 20px rgba(167, 139, 250, 0.25);
+      }
+      button.ice {
+        background: linear-gradient(180deg, #064e3b, #022c22);
+        border-color: rgba(110, 231, 183, 0.25);
+      }
+      button.ice:hover {
+        box-shadow: 0 4px 20px rgba(110, 231, 183, 0.2);
+      }
+      button.warn {
+        background: linear-gradient(180deg, #78350f, #451a03);
+        border-color: rgba(251, 191, 36, 0.25);
+      }
+      button.warn:hover {
+        box-shadow: 0 4px 20px rgba(251, 191, 36, 0.2);
+      }
+
+      select:focus,
+      input:focus,
+      textarea:focus,
+      button:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+      }
+      input[type='range'] {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        appearance: none;
+        background: linear-gradient(90deg, var(--panel2), var(--panel));
+        margin: 8px 0;
+      }
+      input[type='range']::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #8b5cf6);
+        border: 2px solid var(--bg);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: transform 0.15s;
+      }
+      input[type='range']::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+      }
+      input[type='range']::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #8b5cf6);
+        border: 2px solid var(--bg);
+        cursor: pointer;
+      }
+
+      .tok {
+        display: inline-block;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 6px;
+        font: 10px var(--mono);
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.02);
+        margin: 2px 4px 2px 0;
+        transition: all 0.15s;
+      }
+      .tok:hover {
+        border-color: rgba(167, 139, 250, 0.3);
+        background: rgba(167, 139, 250, 0.06);
+        color: var(--text);
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        margin: 14px 0;
+      }
+      .tip {
+        padding: 12px 14px;
+        border-left: 3px solid var(--accent);
+        background: rgba(167, 139, 250, 0.05);
+        border-radius: 0 10px 10px 0;
+        color: #ddd4ff;
+        font-size: 12px;
+      }
+
+      .notice {
+        position: absolute;
+        bottom: 20px;
+        right: 24px;
+        font: 11px var(--mono);
+        padding: 10px 14px;
+        background: rgba(8, 8, 13, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        color: var(--muted);
+        backdrop-filter: blur(12px);
+        transition:
+          opacity 0.3s,
+          transform 0.3s;
+      }
+      .notice.hidden {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      .shortcuts {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        display: flex;
+        gap: 8px;
+        z-index: 100;
+      }
+      .shortcut {
+        padding: 8px 12px;
+        background: rgba(8, 8, 13, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        font: 11px var(--mono);
+        color: var(--muted);
+        backdrop-filter: blur(12px);
+      }
+      .shortcut kbd {
+        display: inline-block;
+        padding: 2px 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        color: var(--text);
+        margin-right: 4px;
+      }
+
+      @media (max-width: 1200px) {
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+        main {
+          padding: 16px;
+        }
+        .shortcuts {
+          display: none;
+        }
+      }
+      @media (max-width: 480px) {
+        .section {
+          padding: 12px;
+        }
+        button {
+          padding: 8px 10px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <aside>
+        <header>
+          <div class="mono small">Escape Collective</div>
+          <h1>Template Engine</h1>
+          <p class="tagline">
+            Generative street poster system with civic clarity and technical restraint
+          </p>
+          <div class="badge mono">seed-driven / deterministic / export-ready</div>
+        </header>
+
+        <div class="section">
+          <h2>Seed <span class="value" id="seedv">1217</span></h2>
+          <div class="row">
+            <button onclick="shiftSeed(-1)" aria-label="Previous seed">Prev</button>
+            <button onclick="shiftSeed(1)" aria-label="Next seed">Next</button>
+            <button class="ghost" onclick="randomizeSeed()" aria-label="Random seed">Random</button>
+          </div>
+          <div class="row" style="margin-top: 8px">
+            <input
+              type="number"
+              id="seedInput"
+              value="1217"
+              min="1"
+              max="999999"
+              step="1"
+              aria-label="Seed value"
+            />
+            <button onclick="jumpSeed()">Apply</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Format</h2>
+          <div class="grid2">
+            <div>
+              <div class="label">
+                <span>Aspect</span> <span class="value" id="formatv">poster-a</span>
+              </div>
+              <select id="format" onchange="applyFormat()" aria-label="Format">
+                <option value="poster-a">Poster A</option>
+                <option value="square">Square</option>
+                <option value="story">Story</option>
+                <option value="leaflet">Leaflet</option>
+                <option value="wide">Wide</option>
+              </select>
+            </div>
+            <div>
+              <div class="label">
+                <span>Profile</span> <span class="value" id="presetv">field guide</span>
+              </div>
+              <select id="preset" onchange="applyPreset(this.value)" aria-label="Preset">
+                <option value="field guide">Field guide</option>
+                <option value="workshop">Workshop</option>
+                <option value="campaign">Campaign</option>
+                <option value="release note">Release note</option>
+                <option value="mutual aid">Mutual aid</option>
+              </select>
+            </div>
+          </div>
+          <div class="label" style="margin-top: 12px">
+            <span>Template</span> <span class="value" id="combov">knife ledger</span>
+          </div>
+          <select id="combo" onchange="applyCombo(this.value)" aria-label="Combinator preset">
+            <option value="knife ledger">Knife ledger</option>
+            <option value="yard signal">Yard signal</option>
+            <option value="relay square">Relay square</option>
+            <option value="story blade">Story blade</option>
+            <option value="civic banner">Civic banner</option>
+          </select>
+          <div style="margin-top: 10px">
+            <span class="tok">high contrast</span>
+            <span class="tok">grid snap</span>
+            <span class="tok">edge restraint</span>
+            <span class="tok">civic grade</span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Content</h2>
+          <div class="label">
+            <span>Headline</span> <span class="value" id="titleCount">16c</span>
+          </div>
+          <textarea
+            id="titleText"
+            oninput="updateMeta();scheduleRender(false)"
+            aria-label="Headline text"
+          >
+ESCAPE
+COLLECTIVE</textarea
+          >
+          <div class="label" style="margin-top: 10px">
+            <span>Subhead</span> <span class="value" id="subCount">31c</span>
+          </div>
+          <textarea
+            id="subtitleText"
+            oninput="updateMeta();scheduleRender(false)"
+            aria-label="Subtitle text"
+          >
+hands-on tech for self protection</textarea
+          >
+          <div class="label" style="margin-top: 10px">
+            <span>Footer</span> <span class="value" id="footCount">37c</span>
+          </div>
+          <textarea
+            id="footerText"
+            oninput="updateMeta();scheduleRender(false)"
+            aria-label="Footer text"
+          >
+education / privacy / repair / autonomy</textarea
+          >
+        </div>
+
+        <div class="section">
+          <h2>Controls</h2>
+          <div class="label"><span>Density</span> <span class="value" id="densityv">58</span></div>
+          <input
+            type="range"
+            id="density"
+            min="28"
+            max="88"
+            value="58"
+            oninput="updateUI();scheduleRender(true)"
+            aria-label="Signal density"
+          />
+          <div class="label"><span>Edge</span> <span class="value" id="edgev">24</span></div>
+          <input
+            type="range"
+            id="edge"
+            min="4"
+            max="56"
+            value="24"
+            oninput="updateUI();scheduleRender(true)"
+            aria-label="Street edge intensity"
+          />
+          <div class="label">
+            <span>Discipline</span> <span class="value" id="disciplinev">88</span>
+          </div>
+          <input
+            type="range"
+            id="discipline"
+            min="70"
+            max="98"
+            value="88"
+            oninput="updateUI();scheduleRender(true)"
+            aria-label="Layout discipline"
+          />
+          <div class="label" style="margin-top: 12px">
+            <span>Layout</span> <span class="value" id="intentv">balanced</span>
+          </div>
+          <select id="intent" onchange="applyIntent(this.value)" aria-label="Layout intent">
+            <option value="balanced">Balanced</option>
+            <option value="stacked">Stacked</option>
+            <option value="broadcast">Broadcast</option>
+          </select>
+          <div class="label" style="margin-top: 12px">
+            <span>Active block</span> <span class="value" id="blockv">headline</span>
+          </div>
+          <select
+            id="activeBlock"
+            onchange="updateUI();syncBlockControls()"
+            aria-label="Active text block"
+          >
+            <option value="title">headline</option>
+            <option value="subtitle">subhead</option>
+            <option value="footer">footer</option>
+          </select>
+          <div class="grid3" style="margin-top: 10px">
+            <div>
+              <div class="small">X</div>
+              <input
+                type="range"
+                id="bx"
+                min="3"
+                max="90"
+                value="14"
+                oninput="applyBlockSliders()"
+                aria-label="Block X position"
+              />
+            </div>
+            <div>
+              <div class="small">Y</div>
+              <input
+                type="range"
+                id="by"
+                min="3"
+                max="94"
+                value="14"
+                oninput="applyBlockSliders()"
+                aria-label="Block Y position"
+              />
+            </div>
+            <div>
+              <div class="small">Scale</div>
+              <input
+                type="range"
+                id="bs"
+                min="60"
+                max="160"
+                value="100"
+                oninput="applyBlockSliders()"
+                aria-label="Block scale"
+              />
+            </div>
+          </div>
+          <div class="small" style="margin-top: 10px">
+            Drag blocks on canvas to reposition. Style is opinionated and constrained by design.
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Export</h2>
+          <div class="row">
+            <button class="ice" onclick="downloadPNG()">PNG</button>
+            <button onclick="downloadJSON()">Config</button>
+            <button onclick="downloadCSS()">CSS</button>
+          </div>
+          <div class="row">
+            <button onclick="downloadLaTeX()">LaTeX</button>
+            <button onclick="downloadOnePager()">HTML</button>
+            <button class="ghost" onclick="copyShareState()">Copy</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>About</h2>
+          <div class="tip small">
+            Negative constraints are deliberate: no free palette editor, no arbitrary font swaps.
+            The engine modulates drips, tags, grid snap, and contrast from seed + profile +
+            discipline. Output remains legible, civic, and high-class by default.
+          </div>
+          <hr />
+          <div class="small">
+            Exports: template config, CSS tokens, LaTeX preset, standalone HTML.<br />
+            Keyboard: [ ] for seed, R for random.
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <button class="hot" onclick="redrawArt()">Regenerate</button>
+            <button class="warn" onclick="resetAll()">Reset</button>
+          </div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="preview" id="preview">
+          <div id="holder"></div>
+          <div class="overlay" id="overlay"></div>
+        </div>
+        <div class="notice mono" id="notice">seed 1217 / poster-a / field guide</div>
+      </main>
+
+      <div class="shortcuts">
+        <div class="shortcut"><kbd>[</kbd><kbd>]</kbd> seed</div>
+        <div class="shortcut"><kbd>R</kbd> random</div>
+      </div>
+    </div>
+
+    <script>
+      // State
+      let seed = 1217
+      let cnv = null
+      let activeDrag = null
+      let renderQueued = false
+      let renderFullQueued = false
+      let gBase = null,
+        gTexture = null,
+        gEdge = null,
+        gFrame = null
+      let lastStaticSig = '',
+        lastFrameSig = ''
+
+      // Config
+      const formats = {
+        'poster-a': [1200, 1600],
+        square: [1200, 1200],
+        story: [1080, 1920],
+        leaflet: [1400, 1000],
+        wide: [1600, 900],
+      }
+
+      const presetProfiles = {
+        'field guide': { density: 58, edge: 18, discipline: 92 },
+        workshop: { density: 62, edge: 22, discipline: 88 },
+        campaign: { density: 72, edge: 36, discipline: 82 },
+        'release note': { density: 46, edge: 12, discipline: 95 },
+        'mutual aid': { density: 66, edge: 28, discipline: 86 },
+      }
+
+      const comboProfiles = {
+        'knife ledger': {
+          preset: 'release note',
+          format: 'leaflet',
+          layout: {
+            title: { x: 12, y: 14, s: 104, w: 52, h: 18 },
+            subtitle: { x: 12, y: 36, s: 92, w: 42, h: 9 },
+            footer: { x: 12, y: 88, s: 92, w: 62, h: 5 },
+          },
+        },
+        'yard signal': {
+          preset: 'campaign',
+          format: 'poster-a',
+          layout: {
+            title: { x: 10, y: 12, s: 112, w: 58, h: 20 },
+            subtitle: { x: 10, y: 38, s: 98, w: 46, h: 10 },
+            footer: { x: 10, y: 89, s: 90, w: 68, h: 5 },
+          },
+        },
+        'relay square': {
+          preset: 'field guide',
+          format: 'square',
+          layout: {
+            title: { x: 12, y: 14, s: 106, w: 58, h: 19 },
+            subtitle: { x: 12, y: 42, s: 92, w: 44, h: 9 },
+            footer: { x: 12, y: 90, s: 86, w: 66, h: 5 },
+          },
+        },
+        'story blade': {
+          preset: 'workshop',
+          format: 'story',
+          layout: {
+            title: { x: 10, y: 12, s: 108, w: 66, h: 18 },
+            subtitle: { x: 10, y: 34, s: 92, w: 48, h: 10 },
+            footer: { x: 10, y: 90, s: 88, w: 70, h: 5 },
+          },
+        },
+        'civic banner': {
+          preset: 'mutual aid',
+          format: 'wide',
+          layout: {
+            title: { x: 9, y: 16, s: 98, w: 48, h: 18 },
+            subtitle: { x: 9, y: 44, s: 88, w: 34, h: 10 },
+            footer: { x: 9, y: 87, s: 84, w: 48, h: 5 },
+          },
+        },
+      }
+
+      const defaults = {
+        format: 'poster-a',
+        preset: 'field guide',
+        combo: 'knife ledger',
+        intent: 'balanced',
+        titleText: 'ESCAPE\nCOLLECTIVE',
+        subtitleText: 'hands-on tech for self protection',
+        footerText: 'education / privacy / repair / autonomy',
+        density: 58,
+        edge: 24,
+        discipline: 88,
+        blockLayout: {
+          title: { x: 14, y: 13, s: 100, w: 54, h: 19 },
+          subtitle: { x: 14, y: 36, s: 100, w: 48, h: 10 },
+          footer: { x: 14, y: 87, s: 100, w: 64, h: 6 },
+        },
+      }
+
+      let blockLayout = JSON.parse(JSON.stringify(defaults.blockLayout))
+
+      // DOM helpers
+      function $(id) {
+        return document.getElementById(id)
+      }
+      function num(id) {
+        return parseFloat($(id).value) || 0
+      }
+      function setVal(id, v) {
+        const el = $(id)
+        if (el) el.value = v
+      }
+
+      // Seeded random
+      function qrand(i, j = 0) {
+        const x = Math.sin(i * 127.1 + j * 311.7 + seed * 0.171) * 43758.5453
+        return x - Math.floor(x)
+      }
+
+      // Color helper
+      function H(hex, a = 255) {
+        const c = color(hex)
+        return color(red(c), green(c), blue(c), a)
+      }
+
+      // Style tokens
+      function styleTokens() {
+        const profile = currentProfile()
+        const d = num('discipline')
+        const e = num('edge')
+        return {
+          bg: d > 92 ? '#06060a' : d > 84 ? '#08080d' : '#0a0814',
+          panel: e > 32 ? '#14102a' : '#12101c',
+          indigo: profile.density > 65 ? '#6366f1' : '#4f46e5',
+          violet: e > 30 ? '#a78bfa' : '#8b5cf6',
+          silver: '#f1f5f9',
+          mint: d > 90 ? '#6ee7b7' : '#34d399',
+          rust: e > 32 ? '#fb923c' : '#f97316',
+          coral: '#fb7185',
+          cyan: '#22d3ee',
+        }
+      }
+
+      function currentProfile() {
+        return presetProfiles[$('preset').value] || presetProfiles['field guide']
+      }
+
+      function params() {
+        return {
+          seed,
+          format: $('format').value,
+          preset: $('preset').value,
+          combo: $('combo').value,
+          intent: $('intent').value,
+          title: $('titleText').value,
+          subtitle: $('subtitleText').value,
+          footer: $('footerText').value,
+          density: num('density'),
+          edge: num('edge'),
+          discipline: num('discipline'),
+          layout: blockLayout,
+          tokens: styleTokens(),
+          fonts: { headline: 'Arial Black', content: 'IBM Plex Mono' },
+        }
+      }
+
+      function staticSig(P) {
+        return [P.seed, P.format, P.preset, P.combo, P.density, P.edge, P.discipline].join('|')
+      }
+
+      function frameSig(P) {
+        return [P.seed, P.format, P.preset, P.combo].join('|')
+      }
+
+      // Buffer management
+      function ensureBuffers() {
+        const fmtKey = $('format')?.value || defaults.format
+        const [w, h] = formats[fmtKey]
+        const needs = !gBase || gBase.width !== w || gBase.height !== h
+        if (needs) {
+          gBase = createGraphics(w, h)
+          gTexture = createGraphics(w, h)
+          gEdge = createGraphics(w, h)
+          gFrame = createGraphics(w, h)
+          ;[gBase, gTexture, gEdge, gFrame].forEach((pg) => pg.pixelDensity(1))
+          lastStaticSig = ''
+          lastFrameSig = ''
+        }
+      }
+
+      // Render scheduling
+      function scheduleRender(full = true) {
+        renderFullQueued = renderFullQueued || !!full
+        if (renderQueued) return
+        renderQueued = true
+        requestAnimationFrame(() => {
+          renderQueued = false
+          const doFull = renderFullQueued
+          renderFullQueued = false
+          redrawArt(doFull)
+        })
+      }
+
+      function redrawArt(full = true) {
+        draw(full)
+        syncOverlay()
+      }
+
+      // UI updates
+      function updateMeta() {
+        $('titleCount').textContent = $('titleText').value.length + 'c'
+        $('subCount').textContent = $('subtitleText').value.length + 'c'
+        $('footCount').textContent = $('footerText').value.length + 'c'
+      }
+
+      function updateUI() {
+        $('densityv').textContent = $('density').value
+        $('edgev').textContent = $('edge').value
+        $('disciplinev').textContent = $('discipline').value
+        $('seedv').textContent = seed
+        $('seedInput').value = seed
+        $('formatv').textContent = $('format').value
+        $('presetv').textContent = $('preset').value
+        $('combov').textContent = $('combo').value
+        $('intentv').textContent = $('intent').value
+        $('blockv').textContent = $('activeBlock').selectedOptions[0].textContent
+        $('notice').textContent = `seed ${seed} / ${$('format').value} / ${$('preset').value}`
+        updateMeta()
+        syncOverlay()
+      }
+
+      function syncBlockControls() {
+        const b = blockLayout[$('activeBlock').value]
+        setVal('bx', Math.round(b.x))
+        setVal('by', Math.round(b.y))
+        setVal('bs', Math.round(b.s))
+        updateUI()
+      }
+
+      function applyBlockSliders() {
+        const key = $('activeBlock').value
+        const b = blockLayout[key]
+        b.x = num('bx')
+        b.y = num('by')
+        b.s = num('bs')
+        syncOverlay()
+        scheduleRender(false)
+      }
+
+      // Format and preset handlers
+      function applyFormat(redraw = true) {
+        const [w, h] = formats[$('format').value]
+        resizeCanvas(w, h)
+        ensureBuffers()
+        updateUI()
+        if (redraw) scheduleRender(true)
+      }
+
+      function applyPreset(name) {
+        $('preset').value = name
+        const p = currentProfile()
+        setVal('density', p.density)
+        setVal('edge', p.edge)
+        setVal('discipline', p.discipline)
+        updateUI()
+        scheduleRender(true)
+      }
+
+      function applyCombo(name) {
+        const c = comboProfiles[name]
+        if (!c) return
+        setVal('combo', name)
+        setVal('preset', c.preset)
+        setVal('format', c.format)
+        blockLayout = JSON.parse(JSON.stringify(c.layout))
+        applyPreset(c.preset)
+        applyFormat(false)
+        syncBlockControls()
+        updateUI()
+        scheduleRender(true)
+      }
+
+      function applyIntent(name) {
+        const tweaks = {
+          balanced: { title: [0, 0, 100], subtitle: [0, 0, 100], footer: [0, 0, 100] },
+          stacked: { title: [0, -2, 104], subtitle: [0, -1, 95], footer: [0, 1, 92] },
+          broadcast: { title: [-1, 0, 112], subtitle: [0, 2, 90], footer: [0, 0, 86] },
+        }[name]
+        if (!tweaks) return
+        for (const k of Object.keys(tweaks)) {
+          const [dx, dy, ss] = tweaks[k]
+          const base = defaults.blockLayout[k]
+          const b = blockLayout[k]
+          b.x = Math.max(5, Math.min(90, base.x + dx))
+          b.y = Math.max(5, Math.min(94, base.y + dy))
+          b.s = ss
+        }
+        syncBlockControls()
+        updateUI()
+        scheduleRender(false)
+      }
+
+      // Seed management
+      function shiftSeed(n) {
+        seed = Math.max(1, seed + n)
+        updateUI()
+        scheduleRender(true)
+      }
+
+      function randomizeSeed() {
+        seed = Math.floor(Math.random() * 999999) + 1
+        updateUI()
+        scheduleRender(true)
+      }
+
+      function jumpSeed() {
+        seed = Math.max(1, parseInt($('seedInput').value || seed, 10))
+        updateUI()
+        scheduleRender(true)
+      }
+
+      function resetAll() {
+        seed = 1217
+        setVal('format', defaults.format)
+        setVal('preset', defaults.preset)
+        setVal('combo', defaults.combo)
+        setVal('intent', defaults.intent)
+        setVal('titleText', defaults.titleText)
+        setVal('subtitleText', defaults.subtitleText)
+        setVal('footerText', defaults.footerText)
+        setVal('density', defaults.density)
+        setVal('edge', defaults.edge)
+        setVal('discipline', defaults.discipline)
+        blockLayout = JSON.parse(JSON.stringify(defaults.blockLayout))
+        applyFormat(false)
+        syncBlockControls()
+        updateUI()
+        scheduleRender(true)
+      }
+
+      // Overlay sync
+      function syncOverlay() {
+        const overlay = $('overlay')
+        if (!cnv || !overlay) return
+        const scaleX = cnv.elt.clientWidth / width
+        const scaleY = cnv.elt.clientHeight / height
+        overlay.style.width = cnv.elt.clientWidth + 'px'
+        overlay.style.height = cnv.elt.clientHeight + 'px'
+        overlay.innerHTML = ''
+        ;['title', 'subtitle', 'footer'].forEach((key) => {
+          const b = blockLayout[key]
+          const el = document.createElement('div')
+          el.className = 'block-box' + ($('activeBlock').value === key ? ' active' : '')
+          el.dataset.name = key === 'title' ? 'headline' : key === 'subtitle' ? 'subhead' : 'footer'
+          el.style.left = (b.x / 100) * width * scaleX + 'px'
+          el.style.top = (b.y / 100) * height * scaleY + 'px'
+          el.style.width = (b.w / 100) * width * scaleX + 'px'
+          el.style.height = (b.h / 100) * height * scaleY + 'px'
+          el.dataset.key = key
+          const handle = document.createElement('div')
+          handle.className = 'handle'
+          handle.dataset.key = key
+          handle.dataset.mode = 'resize'
+          el.appendChild(handle)
+          el.onpointerdown = (ev) =>
+            startDrag(ev, key, ev.target.dataset.mode === 'resize' ? 'resize' : 'move')
+          overlay.appendChild(el)
+        })
+      }
+
+      // Drag handling
+      function startDrag(ev, key, mode) {
+        ev.preventDefault()
+        $('activeBlock').value = key
+        syncBlockControls()
+        const rect = cnv.elt.getBoundingClientRect()
+        activeDrag = {
+          key,
+          mode,
+          startX: ev.clientX,
+          startY: ev.clientY,
+          rect,
+          start: JSON.parse(JSON.stringify(blockLayout[key])),
+        }
+        window.addEventListener('pointermove', onDrag)
+        window.addEventListener('pointerup', endDrag, { once: true })
+      }
+
+      function onDrag(ev) {
+        if (!activeDrag) return
+        const dx = ((ev.clientX - activeDrag.startX) / activeDrag.rect.width) * 100
+        const dy = ((ev.clientY - activeDrag.startY) / activeDrag.rect.height) * 100
+        const b = blockLayout[activeDrag.key]
+        if (activeDrag.mode === 'move') {
+          b.x = Math.max(3, Math.min(90, activeDrag.start.x + dx))
+          b.y = Math.max(3, Math.min(94, activeDrag.start.y + dy))
+        } else {
+          const delta = (dx + dy) * 0.9
+          b.s = Math.max(60, Math.min(170, activeDrag.start.s + delta))
+          if (activeDrag.key === 'title') {
+            b.h = Math.max(14, Math.min(30, activeDrag.start.h + delta * 0.08))
+          }
+        }
+        syncBlockControls()
+        scheduleRender(false)
+      }
+
+      function endDrag() {
+        activeDrag = null
+        window.removeEventListener('pointermove', onDrag)
+      }
+
+      // Export functions
+      function downloadText(name, text, type = 'text/plain') {
+        const blob = new Blob([text], { type })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = name
+        a.click()
+        setTimeout(() => URL.revokeObjectURL(a.href), 300)
+      }
+
+      function escapeHTML(s) {
+        return s.replace(
+          /[&<>"]/g,
+          (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]
+        )
+      }
+
+      function escapeLatex(s) {
+        return s
+          .replace(/\\/g, '\\textbackslash{}')
+          .replace(/[&%$#_{}]/g, '\\$&')
+          .replace(/\^/g, '\\textasciicircum{}')
+          .replace(/~/g, '\\textasciitilde{}')
+      }
+
+      function copyShareState() {
+        navigator.clipboard.writeText(JSON.stringify(params(), null, 2))
+        const notice = $('notice')
+        notice.textContent = 'state copied to clipboard'
+        setTimeout(updateUI, 1200)
+      }
+
+      function downloadJSON() {
+        downloadText(
+          'escape-collective-config.json',
+          JSON.stringify(params(), null, 2),
+          'application/json'
+        )
+      }
+
+      function exportCSSString() {
+        const P = params()
+        const t = P.tokens
+        return `:root {
+  --ec-bg: ${t.bg};
+  --ec-panel: ${t.panel};
+  --ec-indigo: ${t.indigo};
+  --ec-violet: ${t.violet};
+  --ec-silver: ${t.silver};
+  --ec-mint: ${t.mint};
+  --ec-rust: ${t.rust};
+  --ec-coral: ${t.coral};
+  --ec-cyan: ${t.cyan};
+  --ec-font-headline: 'Inter', Arial, sans-serif;
+  --ec-font-content: 'JetBrains Mono', monospace;
+  --ec-ratio: ${$('format').value};
+  --ec-density: ${P.density};
+  --ec-edge: ${P.edge};
+  --ec-discipline: ${P.discipline};
+}`
+      }
+
+      function downloadCSS() {
+        downloadText('escape-collective-tokens.css', exportCSSString(), 'text/css')
+      }
+
+      function exportLaTeXString() {
+        const P = params()
+        const t = P.tokens
+        return `\\documentclass[11pt]{article}
+\\usepackage[margin=16mm]{geometry}
+\\usepackage{xcolor}
+\\usepackage{hyperref}
+
+\\definecolor{ECBG}{HTML}{${t.bg.replace('#', '')}}
+\\definecolor{ECINDIGO}{HTML}{${t.indigo.replace('#', '')}}
+\\definecolor{ECVIOLET}{HTML}{${t.violet.replace('#', '')}}
+\\definecolor{ECSILVER}{HTML}{${t.silver.replace('#', '')}}
+\\definecolor{ECMINT}{HTML}{${t.mint.replace('#', '')}}
+
+\\pagecolor{ECBG}
+\\color{ECSILVER}
+\\setlength{\\parindent}{0pt}
+
+\\begin{document}
+{\\Huge\\bfseries ${escapeLatex(P.title.replace(/\n/g, ' \\\\ '))}}\\par
+\\vspace{4mm}
+{\\ttfamily\\color{ECMINT} ${escapeLatex(P.subtitle)}}\\par
+\\vspace{8mm}
+{\\color{ECVIOLET} ${escapeLatex(P.footer)}}\\par
+\\vfill
+{\\ttfamily\\small seed: ${P.seed} \\quad use: ${escapeLatex(P.preset)} \\quad ratio: ${escapeLatex(P.format)}}\\par
+\\end{document}`
+      }
+
+      function downloadLaTeX() {
+        downloadText('escape-collective.tex', exportLaTeXString(), 'application/x-tex')
+      }
+
+      function exportOnePagerHTML() {
+        const P = params()
+        const t = P.tokens
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(P.title.replace(/\n/g, ' '))}</title>
+<style>
+ ${exportCSSString()}
+html, body { margin: 0; background: var(--ec-bg); color: var(--ec-silver); font: 16px/1.5 var(--ec-font-content); }
+body { padding: 5vw; max-width: 1100px; }
+main {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 24px;
+  padding: 5vw;
+  background: linear-gradient(180deg, var(--ec-panel), var(--ec-bg));
+  box-shadow: 0 32px 64px rgba(0,0,0,.55);
+}
+h1 {
+  font: 900 clamp(2.4rem, 8vw, 6rem)/0.9 var(--ec-font-headline);
+  letter-spacing: -0.04em;
+  margin: 0 0 1rem;
+  white-space: pre-line;
+}
+p.kicker { color: var(--ec-mint); max-width: 54ch; }
+footer { margin-top: 3rem; color: var(--ec-violet); }
+small { opacity: 0.8; }
+</style>
+</head>
+<body>
+<main>
+<small>Escape Collective / ${escapeHTML(P.preset)} / seed ${P.seed}</small>
+<h1>${escapeHTML(P.title)}</h1>
+<p class="kicker">${escapeHTML(P.subtitle)}</p>
+<footer>${escapeHTML(P.footer)}</footer>
+</main>
+</body>
+</html>`
+      }
+
+      function downloadOnePager() {
+        downloadText('escape-collective.html', exportOnePagerHTML(), 'text/html')
+      }
+
+      function downloadPNG() {
+        saveCanvas(cnv, 'escape-collective-' + seed, 'png')
+      }
+
+      // Safe area helper
+      function safeArea() {
+        const m = min(width, height) * 0.062
+        return { x: m, y: m, w: width - 2 * m, h: height - 2 * m }
+      }
+
+      function getBlockRect(key) {
+        const b = blockLayout[key]
+        return {
+          x: (b.x / 100) * width,
+          y: (b.y / 100) * height,
+          w: (b.w / 100) * width,
+          h: (b.h / 100) * height,
+          s: b.s / 100,
+        }
+      }
+
+      function isInProtectedTextArea(x, y) {
+        return ['title', 'subtitle', 'footer'].some((key) => {
+          const r = getBlockRect(key)
+          return x > r.x - 24 && x < r.x + r.w + 24 && y > r.y - 24 && y < r.y + r.h + 24
+        })
+      }
+
+      // Drawing functions
+      function backgroundField(pg, P) {
+        const t = P.tokens
+        pg.background(t.bg)
+        pg.noStroke()
+
+        // Ambient blobs
+        for (let i = 0; i < 5; i++) {
+          const gx = width * (0.15 + 0.7 * qrand(i, 1))
+          const gy = height * (0.1 + 0.8 * qrand(i, 2))
+          const rr = min(width, height) * (0.2 + 0.2 * qrand(i, 3))
+          const c = i % 3 === 0 ? H(t.indigo, 20) : i % 3 === 1 ? H(t.violet, 16) : H(t.cyan, 12)
+          pg.fill(c)
+          for (let r = rr; r > 0; r -= max(18, rr / 12)) {
+            pg.circle(gx, gy, r)
+          }
+        }
+
+        // Horizontal bands with noise
+        const bandCount = 2 + Math.floor(P.density / 22)
+        pg.noiseSeed(seed)
+        for (let i = 0; i < bandCount; i++) {
+          for (let y = 0; y < height; y += 4) {
+            const yy = y / height
+            const wob = pg.noise(i * 0.5, yy * 2.5, seed * 0.001)
+            const a = map(wob, 0, 1, 2, 18) * (1 - Math.abs(yy - 0.5) * 0.6)
+            pg.stroke(i % 2 ? H(t.indigo, a) : H(t.violet, a * 0.8))
+            pg.strokeWeight(1.5)
+            pg.line(0, y, width * (0.25 + 0.75 * wob), y)
+          }
+        }
+      }
+
+      function pixelSyntax(pg, P) {
+        const t = P.tokens
+        const snap = Math.round(map(P.discipline, 70, 98, 14, 6))
+        const density = Math.floor(map(P.density, 28, 88, 80, 320))
+        pg.noStroke()
+
+        for (let i = 0; i < density; i++) {
+          const x = Math.round((qrand(i, 31) * width) / snap) * snap
+          const y = Math.round((qrand(i, 32) * height) / snap) * snap
+          const w = snap * (1 + Math.floor(qrand(i, 33) * 3))
+          const h = snap * (1 + Math.floor(qrand(i, 34) * 2))
+
+          const which = qrand(i, 35)
+          let c
+          if (which > 0.92) c = H(t.cyan, 28)
+          else if (which > 0.84) c = H(t.mint, 32)
+          else if (which > 0.65) c = H(t.silver, 16)
+          else if (which > 0.4) c = H(t.violet, 12)
+          else c = H(t.indigo, 10)
+
+          pg.fill(c)
+          pg.rect(x, y, w, h, 2)
+        }
+      }
+
+      function vectorThreads(pg, P) {
+        const t = P.tokens
+        pg.randomSeed(seed)
+        pg.noiseSeed(seed)
+
+        const count = Math.floor(map(P.density, 28, 88, 120, 640))
+        const steps = Math.floor(map(P.density, 28, 88, 28, 90))
+        const scale = map(P.discipline, 70, 98, 60, 160)
+
+        pg.blendMode(ADD)
+        for (let i = 0; i < count; i++) {
+          let x = pg.random(width)
+          let y = pg.random(height)
+          const speed = pg.random(0.6, 1.6) * map(P.discipline, 70, 98, 1.1, 0.85)
+
+          for (let s = 0; s < steps; s++) {
+            const a =
+              pg.noise(x / scale, y / scale, i * 0.011) * TAU * 2.2 +
+              pg.sin((x + y) * 0.0014) * 0.38
+            const px = x,
+              py = y
+            x += pg.cos(a) * speed * 2.2
+            y += pg.sin(a) * speed * 2.2
+
+            if (x < 0 || y < 0 || x > width || y > height) break
+            if (isInProtectedTextArea(px, py) && qrand(i, s) < map(P.discipline, 70, 98, 0.5, 0.88))
+              continue
+
+            const k = (Math.abs(pg.cos(a)) + Math.abs(pg.sin(a))) * 0.5
+            let col
+            if (k > 0.88) col = H(t.indigo, 24)
+            else if (k > 0.74) col = H(t.violet, 18)
+            else if (qrand(i, s) > 0.982) col = H(t.mint, 14)
+            else col = H(t.silver, 6)
+
+            pg.stroke(col)
+            pg.strokeWeight(k > 0.88 ? 1.3 : 0.9)
+            pg.line(px, py, x, y)
+          }
+        }
+        pg.blendMode(BLEND)
+      }
+
+      function edgeTagsAndDrips(pg, P) {
+        const t = P.tokens
+        const e = P.edge / 100
+        const d = P.discipline / 100
+        if (e < 0.02) return
+
+        pg.noFill()
+        const tagCount = Math.floor(1 + e * 6)
+
+        for (let i = 0; i < tagCount; i++) {
+          const side = i % 2
+          const cx = side
+            ? width * (0.86 - qrand(i, 44) * 0.05)
+            : width * (0.14 + qrand(i, 45) * 0.05)
+          const cy = height * (0.14 + 0.74 * qrand(i, 46))
+          const ww = min(width, height) * (0.24 + 0.14 * qrand(i, 47))
+          const hh = ww * (0.32 + 0.22 * qrand(i, 48))
+          const sw = map(P.edge, 4, 56, 1.6, 8) * (0.75 + qrand(i, 49))
+
+          pg.stroke(
+            i % 3 === 0
+              ? H(t.violet, 38 + 36 * e * (1 - d * 0.25))
+              : i % 3 === 1
+                ? H(t.silver, 20 + 26 * e)
+                : H(t.rust, 14 + 24 * e)
+          )
+          pg.strokeWeight(sw)
+          pg.arc(
+            cx,
+            cy,
+            ww,
+            hh,
+            PI * (0.96 + qrand(i, 50) * 0.14),
+            PI * (1.54 + qrand(i, 51) * 0.18)
+          )
+
+          if (e > 0.34) {
+            pg.stroke(H(t.coral, 18 + 28 * e))
+            pg.strokeWeight(sw * 0.6)
+            pg.beginShape()
+            for (let j = 0; j < 5; j++) {
+              const xx = cx + (j - 2) * ww * 0.1 + pg.sin(j + i + seed * 0.01) * 12
+              const yy = cy - hh * 0.02 + pg.cos(j * 1.6 + i) * 8 + j * hh * 0.018
+              pg.curveVertex(xx, yy)
+            }
+            pg.endShape()
+          }
+        }
+
+        if (e > 0.14) {
+          pg.noStroke()
+          const dripCount = Math.floor(1 + e * 10 * map(P.discipline, 70, 98, 1.05, 0.58))
+
+          for (let i = 0; i < dripCount; i++) {
+            let x = width * (0.08 + 0.84 * qrand(i, 61))
+            let y = height * (0.04 + 0.18 * qrand(i, 62))
+            if (isInProtectedTextArea(x, y)) y = height * (0.74 + qrand(i, 63) * 0.12)
+
+            const len = height * (0.018 + 0.12 * qrand(i, 64) * e)
+            const w = map(P.edge, 4, 56, 2, 9) * (0.5 + qrand(i, 65))
+
+            pg.fill(
+              i % 4 === 0
+                ? H(t.rust, 12 + 28 * e)
+                : i % 4 === 1
+                  ? H(t.violet, 16 + 30 * e)
+                  : i % 4 === 2
+                    ? H(t.cyan, 10 + 22 * e)
+                    : H(t.silver, 8 + 18 * e)
+            )
+            pg.rect(x, y, w, len, w / 2)
+            pg.ellipse(x + w / 2, y + len, w * 1.5, w * 1.1)
+          }
+        }
+      }
+
+      function framesAndMicrotype(pg, P) {
+        const t = P.tokens
+        const sa = safeArea()
+
+        pg.noFill()
+        pg.stroke(H(t.silver, 48))
+        pg.strokeWeight(2)
+        pg.rect(sa.x, sa.y, sa.w, sa.h, 26)
+
+        pg.stroke(H(t.indigo, 85))
+        pg.strokeWeight(0.8)
+        pg.rect(sa.x + 14, sa.y + 14, sa.w - 28, sa.h - 28, 20)
+
+        pg.fill(H(t.mint, 155))
+        pg.noStroke()
+        pg.textFont('JetBrains Mono, IBM Plex Mono, monospace')
+        pg.textSize(min(width, height) * 0.012)
+        pg.text(
+          `seed: ${seed}  |  use: ${P.preset}  |  density: ${P.density}  |  edge: ${P.edge}  |  discipline: ${P.discipline}`,
+          width * 0.07,
+          height * 0.088
+        )
+
+        pg.fill(H(t.violet, 145))
+        pg.text('escape collective / autonomous layout tool', width * 0.07, height * 0.925)
+      }
+
+      function drawWrappedMultiline(pg, str, x, y, w, leading) {
+        const rawLines = (str || '').split('\n')
+        let yy = y
+        for (const raw of rawLines) {
+          const words = raw.trim() ? raw.split(/\s+/) : ['']
+          let line = ''
+          for (const word of words) {
+            const test = (line ? line + ' ' : '') + word
+            if (pg.textWidth(test) > w && line) {
+              pg.text(line, x, yy)
+              line = word
+              yy += leading
+            } else {
+              line = test
+            }
+          }
+          pg.text(line, x, yy)
+          yy += leading
+        }
+      }
+
+      function textPanel(pg, P, key, fillColor) {
+        const t = P.tokens
+        const r = getBlockRect(key)
+
+        pg.noStroke()
+        pg.fill(H(t.bg, key === 'title' ? 165 : 145))
+        pg.rect(r.x - 12, r.y - 10, r.w, r.h, 16)
+
+        pg.fill(fillColor)
+
+        if (key === 'title') {
+          pg.textFont('Arial Black, Inter, sans-serif')
+          let size = min(width, height) * 0.08 * r.s
+          const lines = P.title.split('\n').length
+          if (P.title.replace(/\n/g, ' ').length > 18) size *= 0.82
+          if (lines > 2) size *= 0.78
+          pg.textSize(size)
+          pg.textLeading(size * 0.84)
+          drawWrappedMultiline(pg, P.title, r.x, r.y + size * 0.12, r.w - 20, size * 0.84)
+        } else if (key === 'subtitle') {
+          pg.textFont('JetBrains Mono, IBM Plex Mono, monospace')
+          pg.textSize(min(width, height) * 0.02 * r.s)
+          pg.textLeading(min(width, height) * 0.028 * r.s)
+          drawWrappedMultiline(
+            pg,
+            P.subtitle.toUpperCase(),
+            r.x,
+            r.y + 22,
+            r.w - 14,
+            min(width, height) * 0.028 * r.s
+          )
+        } else {
+          pg.textFont('JetBrains Mono, IBM Plex Mono, monospace')
+          pg.textSize(min(width, height) * 0.016 * r.s)
+          drawWrappedMultiline(
+            pg,
+            P.footer,
+            r.x,
+            r.y + 18,
+            r.w - 10,
+            min(width, height) * 0.022 * r.s
+          )
+        }
+      }
+
+      function draw(full = true) {
+        const P = params()
+        randomSeed(seed)
+        noiseSeed(seed)
+        ensureBuffers()
+
+        const sSig = staticSig(P)
+        const fSig = frameSig(P)
+
+        if (full || sSig !== lastStaticSig) {
+          gBase.clear()
+          gTexture.clear()
+          gEdge.clear()
+          backgroundField(gBase, P)
+          pixelSyntax(gTexture, P)
+          vectorThreads(gTexture, P)
+          edgeTagsAndDrips(gEdge, P)
+          lastStaticSig = sSig
+        }
+
+        if (full || fSig !== lastFrameSig) {
+          gFrame.clear()
+          framesAndMicrotype(gFrame, P)
+          lastFrameSig = fSig
+        }
+
+        clear()
+        image(gBase, 0, 0, width, height)
+        image(gTexture, 0, 0, width, height)
+        image(gEdge, 0, 0, width, height)
+        image(gFrame, 0, 0, width, height)
+
+        textPanel(window, P, 'title', H(P.tokens.silver, 248))
+        textPanel(window, P, 'subtitle', H(P.tokens.mint, 235))
+        textPanel(window, P, 'footer', H(P.tokens.violet, 192))
+      }
+
+      // p5 setup
+      function setup() {
+        const [w, h] = formats[defaults.format]
+        cnv = createCanvas(w, h)
+        cnv.parent('holder')
+        pixelDensity(2)
+        noLoop()
+        updateUI()
+        syncBlockControls()
+        scheduleRender(true)
+      }
+
+      // Event listeners
+      window.addEventListener('resize', () => setTimeout(syncOverlay, 40))
+
+      window.addEventListener('keydown', (ev) => {
+        if (ev.target && /input|textarea|select/i.test(ev.target.tagName)) return
+        if (ev.key === '[') shiftSeed(-1)
+        else if (ev.key === ']') shiftSeed(1)
+        else if (ev.key.toLowerCase() === 'r') randomizeSeed()
+      })
+    </script>
+  </body>
+</html>

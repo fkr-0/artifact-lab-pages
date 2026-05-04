@@ -1,0 +1,227 @@
+{
+  "README.md": {
+    "bytes": 1837
+  },
+  "assets/art/algorithmic_philosophy.md": {
+    "bytes": 1592
+  },
+  "assets/art/poster_prismatic_field.png": {
+    "bytes": 420601
+  },
+  "assets/art/poster_signal_mesh.png": {
+    "bytes": 182627
+  },
+  "assets/art/signal_field.html": {
+    "bytes": 8384
+  },
+  "assets/art/social_card.png": {
+    "bytes": 91337
+  },
+  "assets/art/visual_philosophy.md": {
+    "bytes": 1506
+  },
+  "assets/art/wallpaper_ultrawide.png": {
+    "bytes": 351230
+  },
+  "assets/icons/beacon.png": {
+    "bytes": 14232
+  },
+  "assets/icons/beacon.svg": {
+    "bytes": 395
+  },
+  "assets/icons/key.png": {
+    "bytes": 17990
+  },
+  "assets/icons/key.svg": {
+    "bytes": 458
+  },
+  "assets/icons/mesh.png": {
+    "bytes": 14556
+  },
+  "assets/icons/mesh.svg": {
+    "bytes": 536
+  },
+  "assets/icons/notebook.png": {
+    "bytes": 10597
+  },
+  "assets/icons/notebook.svg": {
+    "bytes": 449
+  },
+  "assets/icons/shield.png": {
+    "bytes": 19967
+  },
+  "assets/icons/shield.svg": {
+    "bytes": 479
+  },
+  "assets/icons/workshop.png": {
+    "bytes": 10031
+  },
+  "assets/icons/workshop.svg": {
+    "bytes": 474
+  },
+  "assets/logo/aster-relay-lockup-horizontal.png": {
+    "bytes": 12249
+  },
+  "assets/logo/aster-relay-lockup-horizontal.svg": {
+    "bytes": 1374
+  },
+  "assets/logo/aster-relay-lockup-stacked.png": {
+    "bytes": 12703
+  },
+  "assets/logo/aster-relay-lockup-stacked.svg": {
+    "bytes": 945
+  },
+  "assets/logo/aster-relay-mark.png": {
+    "bytes": 27690
+  },
+  "assets/logo/aster-relay-mark.svg": {
+    "bytes": 2817
+  },
+  "assets/previews/icon-sheet.png": {
+    "bytes": 64412
+  },
+  "assets/previews/logo-sheet.png": {
+    "bytes": 96830
+  },
+  "brand/Aster_Relay_Brand_Book.md": {
+    "bytes": 2857
+  },
+  "brand/Aster_Relay_Brand_Book.pdf": {
+    "bytes": 1291063
+  },
+  "brand/Aster_Relay_Quickstart.md": {
+    "bytes": 690
+  },
+  "brand/Configurable_Brand_System.md": {
+    "bytes": 512
+  },
+  "brand/Naming_and_Subjects.md": {
+    "bytes": 579
+  },
+  "brand/Writing_Guidelines.md": {
+    "bytes": 807
+  },
+  "brand/brand-book.html": {
+    "bytes": 12473
+  },
+  "config/brand.json": {
+    "bytes": 445
+  },
+  "generated/README.md": {
+    "bytes": 106
+  },
+  "generated/brand-book.md": {
+    "bytes": 332
+  },
+  "generated/brand_system.md": {
+    "bytes": 512
+  },
+  "generated/document_template.md": {
+    "bytes": 291
+  },
+  "generated/email_template.md": {
+    "bytes": 161
+  },
+  "generated/letterhead.html": {
+    "bytes": 3080
+  },
+  "generated/lockup-horizontal.png": {
+    "bytes": 12249
+  },
+  "generated/lockup-horizontal.svg": {
+    "bytes": 1374
+  },
+  "manifest.json": {
+    "bytes": 3381
+  },
+  "samples/letterhead-preview.pdf": {
+    "bytes": 41952
+  },
+  "scripts/apply_brand.py": {
+    "bytes": 1982
+  },
+  "templates/code/code_header_templates.md": {
+    "bytes": 404
+  },
+  "templates/code/comments_style.md": {
+    "bytes": 777
+  },
+  "templates/comms/email_template.md": {
+    "bytes": 170
+  },
+  "templates/comms/press_release_template.md": {
+    "bytes": 62
+  },
+  "templates/comms/workshop_one_pager.md": {
+    "bytes": 71
+  },
+  "templates/configurable/README.template.md": {
+    "bytes": 87
+  },
+  "templates/configurable/brand-book.template.md": {
+    "bytes": 279
+  },
+  "templates/configurable/lockup-horizontal.template.svg": {
+    "bytes": 1361
+  },
+  "templates/configurable/mark.svg": {
+    "bytes": 2817
+  },
+  "templates/docs/docs-theme.css": {
+    "bytes": 1776
+  },
+  "templates/docs/example.html": {
+    "bytes": 685
+  },
+  "templates/latex/asterrelay.sty": {
+    "bytes": 2148
+  },
+  "templates/latex/brand-meta.tex": {
+    "bytes": 203
+  },
+  "templates/latex/example_article.tex": {
+    "bytes": 550
+  },
+  "templates/latex/example_letter.tex": {
+    "bytes": 264
+  },
+  "templates/letterhead/letterhead-template.docx": {
+    "bytes": 65419
+  },
+  "templates/letterhead/letterhead.docx": {
+    "bytes": 65435
+  },
+  "templates/letterhead/letterhead.html": {
+    "bytes": 3080
+  },
+  "templates/letterhead/letterhead.template.html": {
+    "bytes": 3035
+  },
+  "templates/markdown/.editorconfig": {
+    "bytes": 209
+  },
+  "templates/markdown/.markdownlint.json": {
+    "bytes": 126
+  },
+  "templates/markdown/README_template.md": {
+    "bytes": 289
+  },
+  "templates/markdown/document_template.md": {
+    "bytes": 294
+  },
+  "templates/markdown/style.css": {
+    "bytes": 1776
+  },
+  "tokens/aster-relay.css": {
+    "bytes": 1584
+  },
+  "tokens/aster-relay.scss": {
+    "bytes": 1615
+  },
+  "tokens/aster-relay.tokens.json": {
+    "bytes": 2124
+  },
+  "tokens/vscode-color-theme.json": {
+    "bytes": 1625
+  }
+}

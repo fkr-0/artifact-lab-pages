@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Dot Scenes Viewer</title>
+<style>
+ body { margin:0; padding:0; font-family:Arial, sans-serif; background:#fafafa; }
+ #viewer { width:100%; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:20px; box-sizing:border-box; }
+ .slide { position:relative; width:90%; max-width:900px; margin:auto; border:1px solid #ccc; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); overflow:hidden; }
+ .slide img { width:100%; height:auto; display:block; }
+ .overlay { position:absolute; top:0; left:0; background:rgba(0,0,0,0.5); color:white; padding:4px 8px; font-size:14px; z-index:10; border-bottom-right-radius:4px; }
+ .textarea-move { position:absolute; top:10%; left:10%; width:30%; height:20%; resize:both; min-width:100px; min-height:50px; border:1px solid #888; background:rgba(255,255,255,0.8); padding:4px; z-index:5; cursor:move; font-family:Arial, sans-serif; }
+ #corrections-container { width:90%; max-width:900px; margin-top:10px; }
+ #corrections-container textarea { width:100%; height:100px; padding:6px; box-sizing:border-box; font-size:14px; border:1px solid #ccc; resize:vertical; }
+ .controls { margin-top:10px; }
+ .controls button { padding:6px 12px; margin:0 5px; font-size:14px; }
+</style>
+</head>
+<body>
+<div id="viewer">
+  <div class="slide" id="slide-container">
+    <img id="slide-image" src="" alt="Szene">
+    <div class="overlay" id="overlay"></div>
+    <textarea id="movable-text" class="textarea-move" placeholder="Text..."></textarea>
+  </div>
+  <div id="corrections-container">
+    <label for="corrections"><strong>Korrekturen:</strong></label>
+    <textarea id="corrections" placeholder="Notiere hier Korrekturen für diese Seite"></textarea>
+  </div>
+  <div class="controls">
+    <button id="prevBtn">Zurück</button>
+    <button id="nextBtn">Weiter</button>
+  </div>
+</div>
+<script>
+  // Slide data
+  const slides = [{"src": "comp/01-file-VN6ZfwlSu7rbE1UV.jpg", "ds": "DS01", "pages": "S01-S02"}, {"src": "comp/02-file-fzte2ujeUW7Sr45e.jpg", "ds": "DS02", "pages": "S03-S04"}, {"src": "comp/03-file-0vvwLKhfktrH1YCt.jpg", "ds": "DS03", "pages": "S05-S06"}, {"src": "comp/04-file-wCm52oBs5AZYEdao.jpg", "ds": "DS04", "pages": "S07-S08"}, {"src": "comp/05-file-TSJ1qTS-sPi3281A.jpg", "ds": "DS05", "pages": "S09-S10"}, {"src": "comp/06-file-6cQA6ytTNFg6iwPn.jpg", "ds": "DS06", "pages": "S11-S12"}, {"src": "comp/07-file-scvBYta8LCKCFm3T.jpg", "ds": "DS07", "pages": "S13-S14"}, {"src": "comp/08-file-3c7vK1sZbz0hanc1.jpg", "ds": "DS08", "pages": "S15-S16"}, {"src": "comp/09-file-NC1kfgKzCSXIfKu7.jpg", "ds": "DS09", "pages": "S17-S18"}, {"src": "comp/10-file-8pvfq_gmt-ZUIVvu.jpg", "ds": "DS10", "pages": "S19-S20"}, {"src": "comp/11-file-YlUkQ1R9h1M9O1KF.jpg", "ds": "DS11", "pages": "S21-S22"}, {"src": "comp/12-file-wFxNj4HqM5GoAdm1.jpg", "ds": "DS12", "pages": "S23-S24"}, {"src": "comp/13-file-HwURSwLeSlUC6uqn.jpg", "ds": "DS13", "pages": "S25-S26"}, {"src": "comp/14-file-DeEmkDXo2eiJClek.jpg", "ds": "DS14", "pages": "S27-S28"}, {"src": "comp/15-file-to09d6cYsUGcIUQz.jpg", "ds": "DS15", "pages": "S29-S30"}, {"src": "comp/16-file-iJBCVNoELx43tZvp.jpg", "ds": "DS16", "pages": "S31-S32"}, {"src": "comp/17-file-mkWRTpMKzOo_WwB5.jpg", "ds": "DS17", "pages": "S33-S34"}, {"src": "comp/18-file-6aXTQhuVIHEgvgJK.jpg", "ds": "DS18", "pages": "S35-S36"}, {"src": "comp/19-file-04xK7npi40A5f9SU.jpg", "ds": "DS19", "pages": "S37-S38"}, {"src": "comp/20-file-agMRFO3THwqnSmdn.jpg", "ds": "DS20", "pages": "S39-S40"}, {"src": "comp/21-file-YFJZ57mBfdIOjpsZ.jpg", "ds": "DS21", "pages": "S41-S42"}, {"src": "comp/22-file-2B-E6JsyTpsSqII8.jpg", "ds": "DS22", "pages": "S43-S44"}, {"src": "comp/23-file-M6XNP-xpSdzXRscu.jpg", "ds": "DS23", "pages": "S45-S46"}, {"src": "comp/24-file-BLX0-uYv_lKHJgxr.jpg", "ds": "DS24", "pages": "S47-S48"}, {"src": "comp/25-file-joTf0604uwJUzEM9.jpg", "ds": "DS25", "pages": "S49-S50"}, {"src": "comp/26-file-cqq3qWUG07Tn7vXA.jpg", "ds": "DS26", "pages": "S51-S52"}];
+  let current = 0;
+
+  function showSlide(index) {
+    const slide = slides[index];
+    document.getElementById('slide-image').src = slide.src;
+    document.getElementById('overlay').textContent = slide.ds + ' (' + slide.pages + ')';
+    // Reset movable text position and content
+    const movable = document.getElementById('movable-text');
+    movable.style.top = '10%';
+    movable.style.left = '10%';
+    movable.value = '';
+    document.getElementById('corrections').value = '';
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', function() {
+    current = (current - 1 + slides.length) % slides.length;
+    showSlide(current);
+  });
+  document.getElementById('nextBtn').addEventListener('click', function() {
+    current = (current + 1) % slides.length;
+    showSlide(current);
+  });
+
+  // Draggable text area
+  function makeDraggable(el) {
+    let offsetX=0, offsetY=0, dragging=false;
+    el.addEventListener('mousedown', function(e) {
+      dragging = true;
+      const rect = el.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (dragging) {
+        const container = document.getElementById('slide-container');
+        const containerRect = container.getBoundingClientRect();
+        let x = e.clientX - containerRect.left - offsetX;
+        let y = e.clientY - containerRect.top - offsetY;
+        // Constrain within container
+        const maxX = container.clientWidth - el.offsetWidth;
+        const maxY = container.clientHeight - el.offsetHeight;
+        x = Math.max(0, Math.min(x, maxX));
+        y = Math.max(0, Math.min(y, maxY));
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+      }
+    });
+    document.addEventListener('mouseup', function() { dragging = false; });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    showSlide(current);
+    makeDraggable(document.getElementById('movable-text'));
+  });
+</script>
+</body>
+</html>

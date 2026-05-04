@@ -1,0 +1,2177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS CONSOLE // HYPERSPACE TERMINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0a0a12;
+        --bg-secondary: #12121f;
+        --fg-primary: #00ffff;
+        --fg-secondary: #ff00ff;
+        --accent: #00ff88;
+        --accent-secondary: #ff3366;
+        --glow-primary: rgba(0, 255, 255, 0.5);
+        --glow-secondary: rgba(255, 0, 255, 0.5);
+        --grid-color: rgba(0, 255, 255, 0.08);
+        --scanline-opacity: 0.03;
+      }
+
+      [data-theme='synthwave'] {
+        --bg-primary: #1a0a2e;
+        --bg-secondary: #2d1b4e;
+        --fg-primary: #ff00ff;
+        --fg-secondary: #00ffff;
+        --accent: #ff6ec7;
+        --accent-secondary: #ffaa00;
+        --glow-primary: rgba(255, 0, 255, 0.6);
+        --glow-secondary: rgba(255, 170, 0, 0.5);
+        --grid-color: rgba(255, 0, 255, 0.12);
+      }
+
+      [data-theme='cyberpunk'] {
+        --bg-primary: #0d0d0d;
+        --bg-secondary: #1a1a1a;
+        --fg-primary: #f0e68c;
+        --fg-secondary: #ff0080;
+        --accent: #00ff41;
+        --accent-secondary: #ff073a;
+        --glow-primary: rgba(240, 230, 140, 0.6);
+        --glow-secondary: rgba(255, 0, 128, 0.5);
+        --grid-color: rgba(240, 230, 140, 0.06);
+      }
+
+      [data-theme='retro8bit'] {
+        --bg-primary: #0f0f0f;
+        --bg-secondary: #1a1a0a;
+        --fg-primary: #33ff00;
+        --fg-secondary: #ffb000;
+        --accent: #00ff88;
+        --accent-secondary: #ff4444;
+        --glow-primary: rgba(51, 255, 0, 0.5);
+        --glow-secondary: rgba(255, 176, 0, 0.5);
+        --grid-color: rgba(51, 255, 0, 0.1);
+      }
+
+      [data-theme='midnight'] {
+        --bg-primary: #0a1628;
+        --bg-secondary: #0f2140;
+        --fg-primary: #87ceeb;
+        --fg-secondary: #c0c0c0;
+        --accent: #4169e1;
+        --accent-secondary: #ffd700;
+        --glow-primary: rgba(135, 206, 235, 0.5);
+        --glow-secondary: rgba(192, 192, 192, 0.4);
+        --grid-color: rgba(135, 206, 235, 0.08);
+      }
+
+      [data-theme='vaporwave'] {
+        --bg-primary: #1a0a20;
+        --bg-secondary: #2d1536;
+        --fg-primary: #ff71ce;
+        --fg-secondary: #01cdfe;
+        --accent: #b967ff;
+        --accent-secondary: #05ffa1;
+        --glow-primary: rgba(255, 113, 206, 0.5);
+        --glow-secondary: rgba(1, 205, 254, 0.5);
+        --grid-color: rgba(185, 103, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Share Tech Mono', monospace;
+        background: var(--bg-primary);
+        color: var(--fg-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+        transition:
+          background 0.5s ease,
+          color 0.3s ease;
+      }
+
+      .font-display {
+        font-family: 'Orbitron', sans-serif;
+      }
+
+      .font-pixel {
+        font-family: 'Press Start 2P', cursive;
+      }
+
+      /* Animated Grid Background */
+      .grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        perspective: 500px;
+      }
+
+      .grid-floor {
+        position: absolute;
+        bottom: 0;
+        left: -50%;
+        width: 200%;
+        height: 60%;
+        background:
+          linear-gradient(var(--grid-color) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: rotateX(60deg);
+        transform-origin: center bottom;
+        animation: gridMove 4s linear infinite;
+      }
+
+      @keyframes gridMove {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 0 50px;
+        }
+      }
+
+      /* Scanlines */
+      .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 4px
+        );
+      }
+
+      /* Particles Canvas */
+      #particles-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* Main Container */
+      .console-container {
+        position: relative;
+        z-index: 10;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header */
+      .console-header {
+        background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
+        border-bottom: 1px solid var(--fg-primary);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        position: relative;
+      }
+
+      .console-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--fg-primary),
+          var(--fg-secondary),
+          var(--fg-primary),
+          transparent
+        );
+        animation: headerGlow 3s ease-in-out infinite;
+      }
+
+      @keyframes headerGlow {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .logo-text {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 1.5rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--fg-primary);
+        text-shadow:
+          0 0 10px var(--glow-primary),
+          0 0 30px var(--glow-primary);
+        animation: logoFlicker 4s infinite;
+      }
+
+      @keyframes logoFlicker {
+        0%,
+        97%,
+        99%,
+        100% {
+          opacity: 1;
+        }
+        98% {
+          opacity: 0.8;
+        }
+      }
+
+      .status-bar {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 10px var(--accent);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.6;
+          transform: scale(0.9);
+        }
+      }
+
+      /* Main Content Area */
+      .main-content {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 0;
+        padding: 1.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Sidebar Navigation */
+      .sidebar {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 31, 0.9) 100%);
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .sidebar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--fg-primary), var(--fg-secondary));
+      }
+
+      .sidebar-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.2em;
+        color: var(--fg-secondary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .nav-item {
+        margin-bottom: 0.25rem;
+      }
+
+      .nav-button {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        color: var(--fg-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+
+      .nav-button:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 15px var(--glow-primary);
+      }
+
+      .nav-button.active {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--fg-secondary);
+        color: var(--fg-secondary);
+        box-shadow:
+          inset 0 0 20px rgba(255, 0, 255, 0.1),
+          0 0 15px var(--glow-secondary);
+      }
+
+      .nav-arrow {
+        transition: transform 0.3s ease;
+        opacity: 0.5;
+      }
+
+      .nav-button.expanded .nav-arrow {
+        transform: rotate(90deg);
+        opacity: 1;
+      }
+
+      .submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding-left: 1rem;
+      }
+
+      .submenu.open {
+        max-height: 500px;
+      }
+
+      .submenu-item {
+        padding: 0.5rem 0.75rem;
+        border-left: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .submenu-item:hover {
+        color: var(--fg-primary);
+        border-left-color: var(--fg-primary);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .submenu-item.selected {
+        color: var(--accent);
+        border-left-color: var(--accent);
+      }
+
+      /* Content Panel */
+      .content-panel {
+        background: linear-gradient(135deg, rgba(18, 18, 31, 0.95) 0%, var(--bg-secondary) 100%);
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .content-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--fg-secondary), var(--fg-primary));
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .panel-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.25rem;
+        letter-spacing: 0.1em;
+        color: var(--fg-primary);
+      }
+
+      /* Artifact Cards Grid */
+      .artifacts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .artifact-card {
+        background: linear-gradient(145deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .artifact-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+      }
+
+      .artifact-card:hover::before {
+        left: 100%;
+      }
+
+      .artifact-card:hover {
+        border-color: var(--fg-primary);
+        transform: translateY(-4px);
+        box-shadow:
+          0 10px 40px rgba(0, 0, 0, 0.4),
+          0 0 20px var(--glow-primary);
+      }
+
+      .artifact-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--fg-primary), var(--fg-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .artifact-name {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--fg-primary);
+      }
+
+      .artifact-desc {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+
+      .artifact-meta {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .meta-tag {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+      }
+
+      /* Settings Panel */
+      .settings-panel {
+        display: none;
+      }
+
+      .settings-panel.active {
+        display: block;
+      }
+
+      .settings-section {
+        margin-bottom: 2rem;
+      }
+
+      .settings-section-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.15em;
+        color: var(--fg-secondary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .settings-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, var(--fg-secondary), transparent);
+      }
+
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .setting-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Theme Selector */
+      .theme-selector {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .theme-btn {
+        width: 48px;
+        height: 32px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .theme-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .theme-btn.active {
+        border-color: white;
+        box-shadow: 0 0 15px currentColor;
+      }
+
+      .theme-btn[data-theme='default'] {
+        background: linear-gradient(135deg, #0a0a12, #00ffff);
+      }
+
+      .theme-btn[data-theme='synthwave'] {
+        background: linear-gradient(135deg, #1a0a2e, #ff00ff);
+      }
+
+      .theme-btn[data-theme='cyberpunk'] {
+        background: linear-gradient(135deg, #0d0d0d, #f0e68c);
+      }
+
+      .theme-btn[data-theme='retro8bit'] {
+        background: linear-gradient(135deg, #0f0f0f, #33ff00);
+      }
+
+      .theme-btn[data-theme='midnight'] {
+        background: linear-gradient(135deg, #0a1628, #87ceeb);
+      }
+
+      .theme-btn[data-theme='vaporwave'] {
+        background: linear-gradient(135deg, #1a0a20, #ff71ce);
+      }
+
+      /* Toggle Switch */
+      .toggle-switch {
+        width: 52px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: var(--accent);
+      }
+
+      .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+
+      .toggle-switch.active::after {
+        transform: translateX(24px);
+      }
+
+      /* Slider */
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .slider {
+        width: 120px;
+        height: 6px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        outline: none;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: var(--fg-primary);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 10px var(--glow-primary);
+      }
+
+      .slider-value {
+        font-size: 0.8rem;
+        color: var(--accent);
+        min-width: 40px;
+      }
+
+      /* Select Dropdown */
+      .select-styled {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s ease;
+      }
+
+      .select-styled:focus {
+        border-color: var(--fg-primary);
+      }
+
+      .select-styled option {
+        background: var(--bg-secondary);
+        color: var(--fg-primary);
+      }
+
+      /* Log Panel */
+      .log-panel {
+        display: none;
+      }
+
+      .log-panel.active {
+        display: block;
+      }
+
+      .log-container {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1rem;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .log-container::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .log-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .log-container::-webkit-scrollbar-thumb {
+        background: var(--fg-primary);
+        border-radius: 3px;
+      }
+
+      .log-entry {
+        padding: 0.75rem;
+        border-left: 3px solid var(--accent);
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        animation: logSlideIn 0.3s ease;
+      }
+
+      @keyframes logSlideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .log-entry.info {
+        border-left-color: var(--fg-primary);
+      }
+
+      .log-entry.warning {
+        border-left-color: var(--accent-secondary);
+      }
+
+      .log-entry.success {
+        border-left-color: var(--accent);
+      }
+
+      .log-time {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 0.25rem;
+      }
+
+      .log-message {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Config Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-content {
+        background: var(--bg-secondary);
+        border: 1px solid var(--fg-primary);
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        animation: modalSlideIn 0.3s ease;
+      }
+
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        color: var(--fg-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .modal-close:hover {
+        background: var(--accent-secondary);
+        color: white;
+      }
+
+      .modal-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: var(--fg-primary);
+      }
+
+      .config-field {
+        margin-bottom: 1.25rem;
+      }
+
+      .config-label {
+        display: block;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.5rem;
+      }
+
+      .config-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+      }
+
+      .config-input:focus {
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 10px var(--glow-primary);
+      }
+
+      .btn-primary {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--fg-primary), var(--fg-secondary));
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px var(--glow-primary);
+      }
+
+      .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 6px;
+        color: var(--fg-primary);
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--fg-primary);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      /* Footer Status Bar */
+      .footer-status {
+        background: linear-gradient(0deg, var(--bg-secondary) 0%, transparent 100%);
+        border-top: 1px solid var(--fg-primary);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .ticker {
+        overflow: hidden;
+        flex: 1;
+        max-width: 500px;
+      }
+
+      .ticker-content {
+        display: inline-block;
+        animation: tickerScroll 30s linear infinite;
+        white-space: nowrap;
+        color: var(--accent);
+      }
+
+      @keyframes tickerScroll {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      /* Action Buttons in Header */
+      .header-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 15px var(--glow-primary);
+      }
+
+      .action-btn.active {
+        background: var(--fg-primary);
+        color: var(--bg-primary);
+      }
+
+      /* News Badge */
+      .news-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        background: var(--accent-secondary);
+        border-radius: 50%;
+        animation: newsPulse 1.5s infinite;
+      }
+
+      @keyframes newsPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.7;
+        }
+      }
+
+      /* Reduced Motion */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* Mobile Adjustments */
+      @media (max-width: 640px) {
+        .logo-text {
+          font-size: 1rem;
+        }
+
+        .status-bar {
+          gap: 0.75rem;
+        }
+
+        .sidebar {
+          order: 2;
+        }
+
+        .content-panel {
+          order: 1;
+        }
+
+        .artifacts-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="default">
+    <!-- Background Effects -->
+    <div class="grid-bg">
+      <div class="grid-floor"></div>
+    </div>
+    <canvas id="particles-canvas"></canvas>
+    <div class="scanlines" id="scanlines"></div>
+
+    <!-- Main Console -->
+    <div class="console-container">
+      <!-- Header -->
+      <header class="console-header">
+        <div class="logo-text">NEXUS Console</div>
+
+        <div class="header-actions">
+          <button class="action-btn" id="btn-artifacts" onclick="showPanel('artifacts')">
+            Artifacts
+          </button>
+          <button class="action-btn" id="btn-settings" onclick="showPanel('settings')">
+            Settings
+          </button>
+          <button
+            class="action-btn"
+            id="btn-log"
+            onclick="showPanel('log')"
+            style="position: relative"
+          >
+            Log
+            <span class="news-badge" id="newsBadge"></span>
+          </button>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-dot"></span>
+            <span>System Online</span>
+          </div>
+          <div class="status-item">
+            <span>Theme:</span>
+            <span id="currentThemeName">TRON</span>
+          </div>
+          <div class="status-item">
+            <span id="currentTime">--:--:--</span>
+          </div>
+          <div class="status-item">
+            <span>v2.4.7</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+          <h2 class="sidebar-title">// Navigation</h2>
+
+          <ul class="nav-menu" id="navMenu">
+            <li class="nav-item">
+              <button
+                class="nav-button expanded active"
+                data-category="visual"
+                onclick="toggleNav(this)"
+              >
+                <span>Visual Apps</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu open" id="submenu-visual">
+                <div class="submenu-item selected" onclick="filterArtifacts('all')">All Visual</div>
+                <div class="submenu-item" onclick="filterArtifacts('generative')">
+                  Generative Art
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('3d')">3D Experiments</div>
+                <div class="submenu-item" onclick="filterArtifacts('animation')">Animations</div>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <button class="nav-button" data-category="tools" onclick="toggleNav(this)">
+                <span>Tools</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-tools">
+                <div class="submenu-item" onclick="filterArtifacts('converter')">Converters</div>
+                <div class="submenu-item" onclick="filterArtifacts('generator')">Generators</div>
+                <div class="submenu-item" onclick="filterArtifacts('calculator')">Calculators</div>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <button class="nav-button" data-category="games" onclick="toggleNav(this)">
+                <span>Games</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-games">
+                <div class="submenu-item" onclick="filterArtifacts('arcade')">Arcade</div>
+                <div class="submenu-item" onclick="filterArtifacts('puzzle')">Puzzle</div>
+                <div class="submenu-item" onclick="filterArtifacts('simulation')">Simulation</div>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <button class="nav-button" data-category="audio" onclick="toggleNav(this)">
+                <span>Audio</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-audio">
+                <div class="submenu-item" onclick="filterArtifacts('synthesizer')">
+                  Synthesizers
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('sequencer')">Sequencers</div>
+                <div class="submenu-item" onclick="filterArtifacts('visualizer')">Visualizers</div>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <button class="nav-button" data-category="system" onclick="toggleNav(this)">
+                <span>System</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-system">
+                <div class="submenu-item" onclick="openConfig('diagnostics')">Diagnostics</div>
+                <div class="submenu-item" onclick="openConfig('terminal')">Terminal</div>
+                <div class="submenu-item" onclick="openConfig('network')">Network Monitor</div>
+              </div>
+            </li>
+          </ul>
+        </aside>
+
+        <!-- Content Panel -->
+        <section class="content-panel">
+          <!-- Artifacts View -->
+          <div class="artifacts-view panel-content active" id="panel-artifacts">
+            <div class="panel-header">
+              <h2 class="panel-title" id="panelTitle">All Artifacts</h2>
+              <div style="display: flex; gap: 0.5rem">
+                <button class="action-btn" onclick="refreshArtifacts()">Refresh</button>
+                <button class="action-btn" onclick="shuffleArtifacts()">Shuffle</button>
+              </div>
+            </div>
+
+            <div class="artifacts-grid" id="artifactsGrid">
+              <!-- Artifacts will be rendered here -->
+            </div>
+          </div>
+
+          <!-- Settings View -->
+          <div class="settings-panel panel-content" id="panel-settings">
+            <div class="panel-header">
+              <h2 class="panel-title">System Configuration</h2>
+            </div>
+
+            <div class="settings-section">
+              <h3 class="settings-section-title">Appearance</h3>
+
+              <div class="setting-row">
+                <span class="setting-label">Theme</span>
+                <div class="theme-selector">
+                  <button
+                    class="theme-btn active"
+                    data-theme="default"
+                    title="TRON Default"
+                    onclick="setTheme('default')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="synthwave"
+                    title="Synthwave"
+                    onclick="setTheme('synthwave')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="cyberpunk"
+                    title="Cyberpunk"
+                    onclick="setTheme('cyberpunk')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="retro8bit"
+                    title="8-Bit Retro"
+                    onclick="setTheme('retro8bit')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="midnight"
+                    title="Midnight Blue"
+                    onclick="setTheme('midnight')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="vaporwave"
+                    title="Vaporwave"
+                    onclick="setTheme('vaporwave')"
+                  ></button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <span class="setting-label">Scanlines Effect</span>
+                <div
+                  class="toggle-switch active"
+                  id="toggleScanlines"
+                  onclick="toggleSetting('scanlines')"
+                ></div>
+              </div>
+
+              <div class="setting-row">
+                <span class="setting-label">Particle Density</span>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    class="slider"
+                    id="particleSlider"
+                    min="0"
+                    max="100"
+                    value="50"
+                    oninput="updateParticles(this.value)"
+                  />
+                  <span class="slider-value" id="particleValue">50%</span>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <span class="setting-label">Grid Speed</span>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    class="slider"
+                    id="gridSpeedSlider"
+                    min="1"
+                    max="10"
+                    value="4"
+                    oninput="updateGridSpeed(this.value)"
+                  />
+                  <span class="slider-value" id="gridSpeedValue">4x</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3 class="settings-section-title">Audio</h3>
+
+              <div class="setting-row">
+                <span class="setting-label">Sound Effects</span>
+                <div
+                  class="toggle-switch active"
+                  id="toggleSound"
+                  onclick="toggleSetting('sound')"
+                ></div>
+              </div>
+
+              <div class="setting-row">
+                <span class="setting-label">Master Volume</span>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    class="slider"
+                    id="volumeSlider"
+                    min="0"
+                    max="100"
+                    value="70"
+                    oninput="updateVolume(this.value)"
+                  />
+                  <span class="slider-value" id="volumeValue">70%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3 class="settings-section-title">Localization</h3>
+
+              <div class="setting-row">
+                <span class="setting-label">Language</span>
+                <select
+                  class="select-styled"
+                  id="languageSelect"
+                  onchange="changeLanguage(this.value)"
+                >
+                  <option value="en">English</option>
+                  <option value="de">Deutsch</option>
+                  <option value="ja">日本語</option>
+                  <option value="ko">한국어</option>
+                  <option value="zh">中文</option>
+                  <option value="es">Español</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3 class="settings-section-title">Advanced</h3>
+
+              <div class="setting-row">
+                <span class="setting-label">Animation Quality</span>
+                <select
+                  class="select-styled"
+                  id="qualitySelect"
+                  onchange="changeQuality(this.value)"
+                >
+                  <option value="high">High (60fps)</option>
+                  <option value="medium">Medium (30fps)</option>
+                  <option value="low">Low (15fps)</option>
+                </select>
+              </div>
+
+              <div class="setting-row">
+                <span class="setting-label">Debug Mode</span>
+                <div class="toggle-switch" id="toggleDebug" onclick="toggleSetting('debug')"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Log View -->
+          <div class="log-panel panel-content" id="panel-log">
+            <div class="panel-header">
+              <h2 class="panel-title">System Log</h2>
+              <button class="action-btn" onclick="clearLog()">Clear Log</button>
+            </div>
+
+            <div class="log-container" id="logContainer">
+              <!-- Log entries will appear here -->
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer Status Bar -->
+      <footer class="footer-status">
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span style="color: var(--accent)">READY</span>
+          <span>|</span>
+          <span>CPU: <span id="cpuUsage">23%</span></span>
+          <span>|</span>
+          <span>MEM: <span id="memUsage">156MB</span></span>
+        </div>
+
+        <div class="ticker">
+          <span class="ticker-content" id="tickerContent">
+            WELCOME TO NEXUS CONSOLE // SYSTEM INITIALIZED // ALL SYSTEMS NOMINAL // PRESS F1 FOR
+            HELP // NEW ARTIFACTS AVAILABLE IN GALLERY
+          </span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span id="connectionStatus">CONNECTED</span>
+          <span>|</span>
+          <span>PING: <span id="pingValue">12ms</span></span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Config Modal -->
+    <div class="modal-overlay" id="configModal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 class="modal-title" id="modalTitle">Configuration</h2>
+        <div id="modalBody">
+          <!-- Dynamic content -->
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end">
+          <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn-primary" onclick="applyConfig()">Apply & Launch</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ============================================
+      // DATA & STATE
+      // ============================================
+
+      const artifacts = [
+        {
+          id: 1,
+          name: 'Plasma Field',
+          description: 'Interactive plasma simulation with real-time physics',
+          category: ['generative', 'animation'],
+          icon: '⚡',
+          url: '#plasma',
+          params: ['resolution', 'colorScheme', 'speed'],
+        },
+        {
+          id: 2,
+          name: 'Neural Network Viz',
+          description: '3D visualization of neural network architectures',
+          category: ['3d', 'generative'],
+          icon: '🧠',
+          url: '#neural',
+          params: ['layers', 'nodesPerLayer', 'activation'],
+        },
+        {
+          id: 3,
+          name: 'Audio Synthesizer',
+          description: 'WebAudio-based synthesizer with multiple waveforms',
+          category: ['audio', 'synthesizer'],
+          icon: '🎹',
+          url: '#synth',
+          params: ['waveform', 'attack', 'decay', 'sustain', 'release'],
+        },
+        {
+          id: 4,
+          name: 'Fractal Explorer',
+          description: 'Zoom into Mandelbrot and Julia set fractals',
+          category: ['generative', '3d'],
+          icon: '🌀',
+          url: '#fractal',
+          params: ['type', 'maxIterations', 'colorMap'],
+        },
+        {
+          id: 5,
+          name: 'Pixel Art Studio',
+          description: 'Create retro-style pixel art with animation tools',
+          category: ['tools', 'generator'],
+          icon: '🎨',
+          url: '#pixel',
+          params: ['canvasSize', 'palette', 'frameRate'],
+        },
+        {
+          id: 6,
+          name: 'Rhythm Game',
+          description: 'Beat-matching rhythm game with custom tracks',
+          category: ['games', 'arcade', 'audio'],
+          icon: '🎮',
+          url: '#rhythm',
+          params: ['difficulty', 'track', 'visualMode'],
+        },
+        {
+          id: 7,
+          name: 'Code Playground',
+          description: 'Live code editor with instant preview',
+          category: ['tools'],
+          icon: '💻',
+          url: '#playground',
+          params: ['language', 'template', 'autoRun'],
+        },
+        {
+          id: 8,
+          name: 'Starfield Navigator',
+          description: 'Warp through procedurally generated starfields',
+          category: ['3d', 'animation'],
+          icon: '✦',
+          url: '#starfield',
+          params: ['starDensity', 'warpSpeed', 'colorTemp'],
+        },
+        {
+          id: 9,
+          name: 'Data Visualizer',
+          description: 'Transform datasets into beautiful charts',
+          category: ['tools', 'generative'],
+          icon: '📊',
+          url: '#dataviz',
+          params: ['chartType', 'dataSource', 'animation'],
+        },
+        {
+          id: 10,
+          name: 'Circuit Simulator',
+          description: 'Build and simulate electronic circuits',
+          category: ['tools', 'simulation'],
+          icon: '🔌',
+          url: '#circuit',
+          params: ['components', 'timeStep', 'viewMode'],
+        },
+        {
+          id: 11,
+          name: 'Particle Fountain',
+          description: 'Physics-based particle system with gravity',
+          category: ['generative', 'animation'],
+          icon: '💫',
+          url: '#particles',
+          params: ['count', 'gravity', 'lifetime', 'colors'],
+        },
+        {
+          id: 12,
+          name: 'Maze Generator',
+          description: 'Procedurally generated mazes with solver',
+          category: ['games', 'puzzle', 'generative'],
+          icon: '🏁',
+          url: '#maze',
+          params: ['size', 'algorithm', 'difficulty'],
+        },
+      ]
+
+      const themeNames = {
+        default: 'TRON',
+        synthwave: 'Synthwave',
+        cyberpunk: 'Cyberpunk',
+        retro8bit: '8-Bit Retro',
+        midnight: 'Midnight Blue',
+        vaporwave: 'Vaporwave',
+      }
+
+      const translations = {
+        en: {
+          welcome: 'Welcome to NEXUS Console',
+          artifacts: 'Artifacts',
+          settings: 'Settings',
+          log: 'Log',
+          online: 'Online',
+        },
+        de: {
+          welcome: 'Willkommen bei NEXUS Konsole',
+          artifacts: 'Artefakte',
+          settings: 'Einstellungen',
+          log: 'Protokoll',
+          online: 'Online',
+        },
+        ja: {
+          welcome: 'NEXUSコンソールへようこそ',
+          artifacts: 'アーティファクト',
+          settings: '設定',
+          log: 'ログ',
+          online: 'オンライン',
+        },
+      }
+
+      let state = {
+        currentPanel: 'artifacts',
+        currentFilter: 'all',
+        soundEnabled: true,
+        volume: 0.7,
+        scanlinesEnabled: true,
+        particleDensity: 50,
+        language: 'en',
+        selectedArtifact: null,
+        configTarget: null,
+      }
+
+      // ============================================
+      // AUDIO SYSTEM
+      // ============================================
+
+      let audioContext = null
+
+      function initAudio() {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        }
+      }
+
+      function playSound(type) {
+        if (!state.soundEnabled || !audioContext) return
+
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        gainNode.gain.setValueAtTime(state.volume * 0.3, audioContext.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15)
+
+        switch (type) {
+          case 'click':
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
+            oscillator.type = 'square'
+            break
+          case 'hover':
+            oscillator.frequency.setValueAtTime(1200, audioContext.currentTime)
+            oscillator.type = 'sine'
+            break
+          case 'success':
+            oscillator.frequency.setValueAtTime(523, audioContext.currentTime)
+            oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1)
+            oscillator.type = 'triangle'
+            break
+          case 'error':
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime)
+            oscillator.type = 'sawtooth'
+            break
+          case 'navigate':
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime)
+            oscillator.frequency.setValueAtTime(550, audioContext.currentTime + 0.05)
+            oscillator.type = 'sine'
+            break
+        }
+
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.15)
+      }
+
+      // ============================================
+      // PARTICLE SYSTEM
+      // ============================================
+
+      const canvas = document.getElementById('particles-canvas')
+      const ctx = canvas.getContext('2d')
+      let particles = []
+      let animationId = null
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+      }
+
+      function createParticles() {
+        particles = []
+        const count = Math.floor((state.particleDensity / 100) * 80)
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.max(0.5, Math.random() * 2.5),
+            speedX: (Math.random() - 0.5) * 0.5,
+            speedY: (Math.random() - 0.5) * 0.5,
+            opacity: Math.random() * 0.5 + 0.2,
+          })
+        }
+      }
+
+      function getThemeColors() {
+        const style = getComputedStyle(document.body)
+        return {
+          primary: style.getPropertyValue('--fg-primary').trim() || '#00ffff',
+          secondary: style.getPropertyValue('--fg-secondary').trim() || '#ff00ff',
+        }
+      }
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        const colors = getThemeColors()
+
+        particles.forEach((p, i) => {
+          p.x += p.speedX
+          p.y += p.speedY
+
+          if (p.x < 0) p.x = canvas.width
+          if (p.x > canvas.width) p.x = 0
+          if (p.y < 0) p.y = canvas.height
+          if (p.y > canvas.height) p.y = 0
+
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, Math.max(0.5, p.size), 0, Math.PI * 2)
+          ctx.fillStyle = i % 2 === 0 ? colors.primary : colors.secondary
+          ctx.globalAlpha = p.opacity
+          ctx.fill()
+
+          // Draw connections
+          particles.slice(i + 1).forEach((p2) => {
+            const dx = p.x - p2.x
+            const dy = p.y - p2.y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+
+            if (dist < 100) {
+              ctx.beginPath()
+              ctx.moveTo(p.x, p.y)
+              ctx.lineTo(p2.x, p2.y)
+              ctx.strokeStyle = colors.primary
+              ctx.globalAlpha = (1 - dist / 100) * 0.15
+              ctx.stroke()
+            }
+          })
+        })
+
+        ctx.globalAlpha = 1
+        animationId = requestAnimationFrame(drawParticles)
+      }
+
+      function updateParticles(value) {
+        state.particleDensity = parseInt(value)
+        document.getElementById('particleValue').textContent = value + '%'
+        createParticles()
+        addLog('info', `Particle density updated to ${value}%`)
+      }
+
+      // ============================================
+      // THEME SYSTEM
+      // ============================================
+
+      function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme)
+
+        document.querySelectorAll('.theme-btn').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.theme === theme)
+        })
+
+        document.getElementById('currentThemeName').textContent = themeNames[theme] || theme
+        addLog('success', `Theme changed to ${themeNames[theme]}`)
+        playSound('navigate')
+      }
+
+      function toggleSetting(setting) {
+        const toggle = document.getElementById(
+          'toggle' + setting.charAt(0).toUpperCase() + setting.slice(1)
+        )
+
+        if (setting === 'scanlines') {
+          state.scanlinesEnabled = !state.scanlinesEnabled
+          document.getElementById('scanlines').style.display = state.scanlinesEnabled
+            ? 'block'
+            : 'none'
+          toggle.classList.toggle('active', state.scanlinesEnabled)
+          addLog('info', `Scanlines ${state.scanlinesEnabled ? 'enabled' : 'disabled'}`)
+        } else if (setting === 'sound') {
+          state.soundEnabled = !state.soundEnabled
+          toggle.classList.toggle('active', state.soundEnabled)
+          addLog('info', `Sound ${state.soundEnabled ? 'enabled' : 'disabled'}`)
+          if (state.soundEnabled) playSound('click')
+        } else if (setting === 'debug') {
+          toggle.classList.toggle('active')
+          addLog('warning', 'Debug mode toggled')
+        }
+      }
+
+      function updateVolume(value) {
+        state.volume = parseInt(value) / 100
+        document.getElementById('volumeValue').textContent = value + '%'
+      }
+
+      function updateGridSpeed(value) {
+        const gridFloor = document.querySelector('.grid-floor')
+        if (gridFloor) {
+          gridFloor.style.animationDuration = 11 - value + 's'
+        }
+        document.getElementById('gridSpeedValue').textContent = value + 'x'
+      }
+
+      function changeLanguage(lang) {
+        state.language = lang
+        addLog('info', `Language changed to ${lang.toUpperCase()}`)
+      }
+
+      function changeQuality(quality) {
+        addLog('info', `Animation quality set to ${quality}`)
+      }
+
+      // ============================================
+      // NAVIGATION & PANELS
+      // ============================================
+
+      function showPanel(panel) {
+        state.currentPanel = panel
+
+        document.querySelectorAll('.panel-content').forEach((p) => p.classList.remove('active'))
+        document.querySelectorAll('.action-btn').forEach((b) => b.classList.remove('active'))
+
+        document.getElementById('panel-' + panel).classList.add('active')
+        document.getElementById('btn-' + panel).classList.add('active')
+
+        playSound('click')
+        addLog('info', `Switched to ${panel} view`)
+      }
+
+      function toggleNav(button) {
+        const category = button.dataset.category
+        const submenu = document.getElementById('submenu-' + category)
+        const isOpen = submenu.classList.contains('open')
+
+        // Close all submenus first
+        document.querySelectorAll('.submenu').forEach((s) => s.classList.remove('open'))
+        document
+          .querySelectorAll('.nav-button')
+          .forEach((b) => b.classList.remove('expanded', 'active'))
+
+        if (!isOpen) {
+          submenu.classList.add('open')
+          button.classList.add('expanded', 'active')
+        } else {
+          button.classList.add('active')
+        }
+
+        playSound('click')
+      }
+
+      function filterArtifacts(filter) {
+        state.currentFilter = filter
+
+        document.querySelectorAll('.submenu-item').forEach((item) => {
+          item.classList.remove('selected')
+        })
+        event.target.classList.add('selected')
+
+        renderArtifacts(filter)
+        playSound('hover')
+
+        const filterNames = {
+          all: 'All Artifacts',
+          generative: 'Generative Art',
+          '3d': '3D Experiments',
+          animation: 'Animations',
+          converter: 'Converters',
+          generator: 'Generators',
+          calculator: 'Calculators',
+          arcade: 'Arcade Games',
+          puzzle: 'Puzzle Games',
+          simulation: 'Simulations',
+          synthesizer: 'Synthesizers',
+          sequencer: 'Sequencers',
+          visualizer: 'Visualizers',
+        }
+
+        document.getElementById('panelTitle').textContent = filterNames[filter] || filter
+        addLog('info', `Filtered by: ${filter}`)
+      }
+
+      // ============================================
+      // ARTIFACTS RENDERING
+      // ============================================
+
+      function renderArtifacts(filter = 'all') {
+        const grid = document.getElementById('artifactsGrid')
+        const filtered =
+          filter === 'all' ? artifacts : artifacts.filter((a) => a.category.includes(filter))
+
+        grid.innerHTML = filtered
+          .map(
+            (artifact) => `
+        <div class="artifact-card" onclick="openConfig(${artifact.id})" onmouseenter="playSound('hover')">
+          <div class="artifact-icon">${artifact.icon}</div>
+          <h3 class="artifact-name">${artifact.name}</h3>
+          <p class="artifact-desc">${artifact.description}</p>
+          <div class="artifact-meta">
+            ${artifact.category.map((cat) => `<span class="meta-tag">${cat}</span>`).join('')}
+          </div>
+        </div>
+      `
+          )
+          .join('')
+      }
+
+      function refreshArtifacts() {
+        renderArtifacts(state.currentFilter)
+        playSound('success')
+        addLog('success', 'Artifacts refreshed')
+      }
+
+      function shuffleArtifacts() {
+        const grid = document.getElementById('artifactsGrid')
+        const cards = Array.from(grid.children)
+
+        for (let i = cards.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          grid.appendChild(cards[j])
+        }
+
+        playSound('navigate')
+        addLog('info', 'Artifacts shuffled')
+      }
+
+      // ============================================
+      // CONFIG MODAL
+      // ============================================
+
+      function openConfig(artifactId) {
+        const artifact =
+          typeof artifactId === 'number'
+            ? artifacts.find((a) => a.id === artifactId)
+            : { name: artifactId, params: [] }
+
+        state.configTarget = artifact
+
+        const modalTitle = document.getElementById('modalTitle')
+        const modalBody = document.getElementById('modalBody')
+
+        modalTitle.textContent = `Configure: ${artifact.name}`
+
+        if (artifact.params && artifact.params.length > 0) {
+          modalBody.innerHTML = `
+          <p style="color:rgba(255,255,255,0.6);margin-bottom:1.5rem;font-size:0.9rem;">
+            Configure parameters before launching ${artifact.name}
+          </p>
+          ${artifact.params
+            .map(
+              (param) => `
+            <div class="config-field">
+              <label class="config-label">${formatParamName(param)}</label>
+              <input type="text" class="config-input" id="param-${param}" placeholder="Enter ${param}...">
+            </div>
+          `
+            )
+            .join('')}
+          <div class="config-field">
+            <label class="config-label">Custom URL Parameters</label>
+            <input type="text" class="config-input" id="customParams" placeholder="?key=value&foo=bar">
+          </div>
+        `
+        } else {
+          modalBody.innerHTML = `
+          <p style="color:rgba(255,255,255,0.6);margin-bottom:1.5rem;font-size:0.9rem;">
+            Launching ${artifact.name}...
+          </p>
+          <div class="config-field">
+            <label class="config-label">Additional Parameters</label>
+            <input type="text" class="config-input" id="customParams" placeholder="?key=value">
+          </div>
+        `
+        }
+
+        document.getElementById('configModal').classList.add('active')
+        playSound('click')
+      }
+
+      function formatParamName(param) {
+        return param.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())
+      }
+
+      function closeModal() {
+        document.getElementById('configModal').classList.remove('active')
+        state.configTarget = null
+        playSound('click')
+      }
+
+      function applyConfig() {
+        if (!state.configTarget) return
+
+        const params = []
+
+        if (state.configTarget.params) {
+          state.configTarget.params.forEach((param) => {
+            const input = document.getElementById(`param-${param}`)
+            if (input && input.value.trim()) {
+              params.push(`${param}=${encodeURIComponent(input.value.trim())}`)
+            }
+          })
+        }
+
+        const customParams = document.getElementById('customParams')
+        if (customParams && customParams.value.trim()) {
+          const custom = customParams.value.trim().replace(/^\?/, '')
+          params.push(custom)
+        }
+
+        const url = state.configTarget.url + (params.length > 0 ? '?' + params.join('&') : '')
+
+        closeModal()
+        playSound('success')
+        addLog('success', `Launching: ${state.configTarget.name}`)
+        addLog('info', `URL: ${url}`)
+
+        // Simulate launch
+        setTimeout(() => {
+          alert(
+            `Would navigate to:\n\n${url}\n\n(In a real implementation, this would load the actual page)`
+          )
+        }, 300)
+      }
+
+      // ============================================
+      // LOG SYSTEM
+      // ============================================
+
+      function addLog(type, message) {
+        const container = document.getElementById('logContainer')
+        const time = new Date().toLocaleTimeString('de-DE', { hour12: false })
+
+        const entry = document.createElement('div')
+        entry.className = `log-entry ${type}`
+        entry.innerHTML = `
+        <div class="log-time">${time}</div>
+        <div class="log-message">${message}</div>
+      `
+
+        container.insertBefore(entry, container.firstChild)
+
+        // Keep only last 50 entries
+        while (container.children.length > 50) {
+          container.removeChild(container.lastChild)
+        }
+
+        // Update badge
+        const badge = document.getElementById('newsBadge')
+        badge.style.display = 'block'
+      }
+
+      function clearLog() {
+        document.getElementById('logContainer').innerHTML = ''
+        document.getElementById('newsBadge').style.display = 'none'
+        addLog('info', 'Log cleared')
+      }
+
+      // ============================================
+      // TIME & STATUS UPDATES
+      // ============================================
+
+      function updateTime() {
+        const now = new Date()
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('de-DE', {
+          hour12: false,
+        })
+      }
+
+      function simulateStats() {
+        const cpu = Math.floor(Math.random() * 30) + 15
+        const mem = Math.floor(Math.random() * 50) + 130
+        const ping = Math.floor(Math.random() * 20) + 5
+
+        document.getElementById('cpuUsage').textContent = cpu + '%'
+        document.getElementById('memUsage').textContent = mem + 'MB'
+        document.getElementById('pingValue').textContent = ping + 'ms'
+      }
+
+      // ============================================
+      // KEYBOARD NAVIGATION
+      // ============================================
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal()
+        }
+        if (e.key === 'F1') {
+          e.preventDefault()
+          showPanel('log')
+        }
+        if (e.key >= '1' && e.key <= '6' && e.ctrlKey) {
+          e.preventDefault()
+          const themes = ['default', 'synthwave', 'cyberpunk', 'retro8bit', 'midnight', 'vaporwave']
+          setTheme(themes[parseInt(e.key) - 1])
+        }
+      })
+
+      // ============================================
+      // INITIALIZATION
+      // ============================================
+
+      function init() {
+        // Initialize audio on first interaction
+        document.addEventListener('click', initAudio, { once: true })
+
+        // Setup canvas
+        resizeCanvas()
+        createParticles()
+        drawParticles()
+
+        // Render initial artifacts
+        renderArtifacts()
+
+        // Start time updates
+        updateTime()
+        setInterval(updateTime, 1000)
+
+        // Simulate stats
+        setInterval(simulateStats, 3000)
+
+        // Initial logs
+        addLog('success', 'NEXUS Console initialized')
+        addLog('info', 'All systems nominal')
+        addLog('info', `${artifacts.length} artifacts loaded`)
+        addLog('warning', 'New updates available')
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+          resizeCanvas()
+          createParticles()
+        })
+
+        // Set initial panel
+        showPanel('artifacts')
+      }
+
+      // Start the application
+      init()
+    </script>
+  </body>
+</html>

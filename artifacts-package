@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+#
+# artifacts-package - Create distributable tgz package
+#
+# Usage: ./artifacts-package [output-dir]
+#
+
+set -e
+
+# Colors
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# Configuration
+ARTIFACTS_DIR="/home/user/work/code/artifacts"
+PACKAGE_NAME="artifacts-collection"
+VERSION=$(date +%Y.%m.%d)
+OUTPUT_DIR="${1:-$ARTIFACTS_DIR}"
+
+echo -e "${CYAN}📦 Artifacts Collection - Packaging Script${NC}"
+echo ""
+
+# Create temporary staging directory
+STAGING_DIR=$(mktemp -d)
+trap "rm -rf $STAGING_DIR" EXIT
+
+echo -e "${CYAN}Creating package structure...${NC}"
+
+# Create staging directory
+STAGE="$STAGING_DIR/$PACKAGE_NAME"
+mkdir -p "$STAGE"
+
+# Files to include (excluding temp/build files)
+INCLUDE_FILES=(
+    "index.html"
+    "ARTIFACTS_TOC.md"
+    "SERVER_GUIDE.md"
+    "SETUP_ALIASES.sh"
+    "artifacts-serve"
+    "artifacts-server.sh"
+)
+
+INCLUDE_DIRS=(
+    "app-hub"
+    "spc"
+    "brawl/ethic-brawl"
+    "peernet-orca"
+    "peer-music-groove"
+    "bathroom-emergency-guide"
+    "aster-relay-identity-nightline-configurable"
+)
+
+# Copy files
+for file in "${INCLUDE_FILES[@]}"; do
+    if [[ -f "$ARTIFACTS_DIR/$file" ]]; then
+        cp "$ARTIFACTS_DIR/$file" "$STAGE/"
+        echo -e "${GREEN}  ✓${NC} $file"
+    fi
+done
+
+# Copy directories
+for dir in "${INCLUDE_DIRS[@]}"; do
+    if [[ -d "$ARTIFACTS_DIR/$dir" ]]; then
+        cp -r "$ARTIFACTS_DIR/$dir" "$STAGE/"
+        echo -e "${GREEN}  ✓${NC} $dir/"
+    fi
+done
+
+# Create VERSION file
+echo "$VERSION" > "$STAGE/VERSION"
+echo "Packaged: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STAGE/VERSION"
+echo -e "${GREEN}  ✓${NC} VERSION"
+
+# Create README for the package
+cat > "$STAGE/README.md" << 'EOF'
+# Artifacts Collection
+
+A curated collection of generative art tools, games, collaborative editors, and cyberpunk interfaces.
+
+## Quick Start
+
+1. **Start the server:**
+   ```bash
+   ./artifacts-serve
+   ```
+   Or use Python:
+   ```bash
+   python3 -m http.server 8080
+   ```
+
+2. **Open in browser:**
+   - Main Portal: http://localhost:8080/app-hub/v9-portal.html
+   - Classic v8: http://localhost:8080/app-hub/v8-portal.html
+   - v4 Console: http://localhost:8080/app-hub/v4.html
+
+## Directory Structure
+
+```
+artifacts-collection/
+├── index.html              # Entry point (redirects to v9)
+├── app-hub/                # Portal launchers
+│   ├── v9-portal.html     # Main portal (embedded apps + P2P)
+│   ├── v8-portal.html     # Enhanced navigator
+│   ├── v4.html            # Classic console
+│   └── collab-*.html      # Collaborative editors
+├── spc/                    # Sharepic Creator Suite
+│   └── sharepic-studio-ultimate.html
+├── brawl/ethic-brawl/      # Philosophical brawler game
+├── peernet-orca/           # P2P music studio
+└── bathroom-emergency-guide/  # Scientific documentation
+```
+
+## Key Artifacts
+
+| Artifact | Description | Access |
+|----------|-------------|--------|
+| **NEXUS Portal v9** | Embedded apps + P2P + tag filtering | `app-hub/v9-portal.html` |
+| **Sharepic Studio ULTIMATE** | 9 themes, 14 generators, LaTeX math | `spc/sharepic-studio-ultimate.html` |
+| **Collab Code Editor** | Monaco + PeerJS collaborative editing | `app-hub/collab-editor.html` |
+| **Ethic Brawl** | 2.5D cyberpunk philosophical brawler | `brawl/ethic-brawl/` |
+| **Groove Station** | P2P collaborative music studio | `peernet-orca/` |
+
+## Server Options
+
+### Quick Start (Recommended)
+```bash
+./artifacts-serve
+```
+
+### Python HTTP Server
+```bash
+python3 -m http.server 8080
+```
+
+### nginx (Production)
+```nginx
+server {
+    listen 80;
+    server_name artifacts.example.com;
+    root /path/to/artifacts-collection;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+## Features
+
+- **No server required** for most artifacts (static HTML/JS)
+- **P2P collaboration** via WebRTC (PeerJS)
+- **Offline capable** - works without internet
+- **Cross-platform** - runs in any modern browser
+
+## Version
+
+See VERSION file for package version and date.
+
+## License
+
+Each artifact may have its own license. See individual directories for details.
+EOF
+echo -e "${GREEN}  ✓${NC} README.md"
+
+# Create the tar.gz package
+OUTPUT_FILE="$OUTPUT_DIR/${PACKAGE_NAME}-${VERSION}.tar.gz"
+echo ""
+echo -e "${CYAN}Creating package archive...${NC}"
+
+cd "$STAGING_DIR"
+tar -czf "$OUTPUT_FILE" "$PACKAGE_NAME"
+
+PACKAGE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
+echo -e "${GREEN}✓ Package created:${NC} $OUTPUT_FILE"
+echo -e "${GREEN}  Size:${NC} $PACKAGE_SIZE"
+
+# Create checksums
+echo ""
+echo -e "${CYAN}Creating checksums...${NC}"
+cd "$OUTPUT_DIR"
+sha256sum "${PACKAGE_NAME}-${VERSION}.tar.gz" > "${PACKAGE_NAME}-${VERSION}.tar.gz.sha256"
+echo -e "${GREEN}✓ Checksum:${NC} ${PACKAGE_NAME}-${VERSION}.tar.gz.sha256"
+
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${CYAN}Package complete!${NC}"
+echo ""
+echo -e "${YELLOW}To deploy:${NC}"
+echo -e "  1. Copy the archive to your server"
+echo -e "  2. Extract: tar -xzf ${PACKAGE_NAME}-${VERSION}.tar.gz"
+echo -e "  3. Serve: cd ${PACKAGE_NAME} && ./artifacts-serve"
+echo ""
+echo -e "${YELLOW}To test locally:${NC}"
+echo -e "  tar -xzf ${PACKAGE_NAME}-${VERSION}.tar.gz"
+echo -e "  cd ${PACKAGE_NAME}"
+echo -e "  ./artifacts-serve"
+echo ""
+echo -e "${GREEN}Package:${NC} $OUTPUT_FILE"
+echo -e "${GREEN}Size:${NC}   $PACKAGE_SIZE"
+echo -e "${GREEN}SHA256:${NC} $(cat ${PACKAGE_NAME}-${VERSION}.tar.gz.sha256 | cut -d' ' -f1)"
+echo ""

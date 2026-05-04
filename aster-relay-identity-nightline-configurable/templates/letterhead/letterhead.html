@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Aster Relay Letterhead</title>
+<style>
+body {
+  margin: 0;
+  font-family: Inter, FreeSans, Arial, sans-serif;
+  color: #101631;
+  background: #ffffff;
+}
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 24mm 20mm 22mm 22mm;
+  box-sizing: border-box;
+  position: relative;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18mm;
+  margin-bottom: 18mm;
+  padding-bottom: 7mm;
+  border-bottom: 1.4pt solid #6e58ff;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8mm;
+}
+.mark {
+  width: 17mm;
+  height: 17mm;
+  position: relative;
+}
+.mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #74efff, #6e58ff 60%, #ff69d6);
+  clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
+  box-shadow: 0 0 10px rgba(98,247,255,.18);
+}
+.mark::after {
+  content: "";
+  position: absolute;
+  left: 4.7mm; top: 4.7mm;
+  width: 7.4mm; height: 7.4mm;
+  border: 1.3pt solid rgba(255,255,255,.9);
+  border-radius: 99px;
+}
+.brand h1 {
+  margin: 0;
+  font-size: 14pt;
+  letter-spacing: .11em;
+}
+.brand p, .meta p {
+  margin: 2mm 0 0;
+  font-size: 9pt;
+  color: #4a5578;
+}
+.meta { text-align: right; }
+.subject {
+  margin: 8mm 0 6mm;
+  font-size: 10.5pt;
+}
+.content {
+  font-size: 11pt;
+  line-height: 1.62;
+  max-width: 138mm;
+}
+.signal {
+  display: inline-block;
+  width: 20mm;
+  height: 2.2mm;
+  background:
+    linear-gradient(90deg, #ff69d6 0 18%, transparent 18% 26%, #ff69d6 26% 52%, transparent 52% 60%, #ff69d6 60% 100%);
+  opacity: .72;
+  vertical-align: middle;
+  margin-left: 3mm;
+}
+.footer {
+  position: absolute;
+  left: 22mm;
+  right: 20mm;
+  bottom: 16mm;
+  padding-top: 5mm;
+  border-top: 1px solid #d7ddfb;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5pt;
+  color: #566082;
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <h1>ASTER RELAY</h1>
+        <p>practical privacy and mutual tech literacy</p>
+      </div>
+    </div>
+    <div class="meta">
+      <p>aster-relay.example</p>
+      <p>hello@aster-relay.example</p>
+      <p>document id: AR-LH-01</p>
+    </div>
+  </div>
+
+  <div class="subject"><strong>Subject:</strong> Device safety clinic — invitation and working note <span class="signal"></span></div>
+
+  <div class="content">
+    <p>Hello,</p>
+    <p>This letterhead keeps the formal surface intact while carrying a restrained version of the
+    Nightline edge: stepped geometry, a small signal accent, and clean indigo-violet emphasis.</p>
+    <p>Use it for invitations, statements, partnership letters, and workshop correspondence where
+    the collective needs to remain readable, credible, and distinctive without becoming loud.</p>
+  </div>
+
+  <div class="footer">
+    <div>Aster Relay — Learn quietly. Build carefully. Protect each other.</div>
+    <div>quiet signal / mutual craft</div>
+  </div>
+</div>
+</body>
+</html>

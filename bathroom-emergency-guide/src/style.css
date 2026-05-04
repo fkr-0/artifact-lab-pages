@@ -1,0 +1,1406 @@
+/*
+ * Bathroom Emergency Guide — Stylesheet v3.2
+ * Visual identity: math-blue + cyan/magenta accents + pixel-art retro feel
+ * Dark mode + print-optimized + scanline aesthetics
+ * Optimized for: screen reading, WeasyPrint PDF, print
+ */
+
+/* ── CSS Variables ──────────────────────────────────────── */
+:root {
+    /* Primary palette */
+    --math-blue: #2563EB;
+    --math-blue-light: #3B82F6;
+    --math-blue-pale: #DBEAFE;
+
+    /* Accent palette */
+    --cyan: #06B6D4;
+    --cyan-pale: #CFFAFE;
+    --magenta: #EC4899;
+    --magenta-pale: #FCE7F3;
+    --teal: #14B8A6;
+    --teal-pale: #CCFBF1;
+    --amber: #F59E0B;
+    --amber-pale: #FEF3C7;
+
+    /* Semantic palette */
+    --green: #22C55E;
+    --green-pale: #DCFCE7;
+    --red: #EF4444;
+    --red-pale: #FEE2E2;
+    --orange: #F97316;
+    --orange-pale: #FFF7ED;
+    --purple: #A855F7;
+    --purple-pale: #F3E8FF;
+
+    /* Neutral palette */
+    --gray: #64748B;
+    --gray-light: #94A3B8;
+    --gray-pale: #F1F5F9;
+    --dark: #1E293B;
+    --white: #FFFFFF;
+
+    /* Background */
+    --graph-paper: #F8FAFC;
+    --grid-line: #E2E8F0;
+    --grid-line-major: #CBD5E1;
+
+    /* Dark mode */
+    --dm-bg: #0F172A;
+    --dm-surface: #1E293B;
+    --dm-surface-hover: #334155;
+    --dm-text: #E2E8F0;
+    --dm-text-muted: #94A3B8;
+    --dm-border: #334155;
+    --dm-code-bg: #0F172A;
+
+    /* Typography */
+    --font-heading: 'Space Grotesk', 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+    /* Layout */
+    --max-width: 210mm;
+    --margin: 2cm 2.5cm;
+
+    /* Card styling */
+    --card-radius: 8px;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --card-shadow-hover: 0 4px 16px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06);
+}
+
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 11pt;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--dark);
+    background-color: var(--white);
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Scanline Overlay ───────────────────────────────────── */
+/* Subtle retro scanline effect on body (screen only) */
+.scanline-overlay,
+body.scanline-overlay {
+    position: relative;
+}
+
+.scanline-overlay::after,
+body.scanline-overlay::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(0, 0, 0, 0.03) 1px,
+        rgba(0, 0, 0, 0.03) 2px
+    );
+}
+
+/* ── Graph Paper Background (screen only) ──────────────── */
+@media screen {
+    body {
+        background-color: var(--graph-paper);
+        background-image:
+            linear-gradient(var(--grid-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+            linear-gradient(var(--grid-line-major) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-line-major) 1px, transparent 1px);
+        background-size: 10mm 10mm, 10mm 10mm, 20mm 20mm, 20mm 20mm;
+        background-position: center center;
+    }
+}
+
+/* ── Page Layout ────────────────────────────────────────── */
+@media print {
+    @page {
+        size: A4;
+        margin: 2cm 2.5cm;
+        @bottom-center {
+            content: "Page " counter(page);
+            font-size: 9pt;
+            color: var(--gray-light);
+        }
+        @top-right {
+            content: "Bathroom Emergency Guide v3.2.0";
+            font-size: 8pt;
+            color: var(--gray-light);
+        }
+    }
+
+    /* Cover page: no headers/footers, no margins (full-bleed) */
+    @page :first {
+        margin: 0;
+        @bottom-center { content: none; }
+        @top-right { content: none; }
+    }
+
+    body {
+        background: none;
+    }
+
+    h1, h2, h3 {
+        page-break-after: avoid;
+    }
+
+    table, figure, pre {
+        page-break-inside: avoid;
+    }
+
+    /* Better page break rules */
+    h1 {
+        page-break-before: auto;
+    }
+
+    /* Chapter openers always start on a new page */
+    .chapter-opener,
+    h1.chapter-title {
+        page-break-before: always;
+    }
+
+    /* Avoid orphaned headings */
+    h2, h3 {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+
+    /* Keep related content together */
+    .quickref, blockquote, .retro-badge {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
+
+/* ── Content Container ──────────────────────────────────── */
+@media screen {
+    .content, body > header, body > main {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 2cm 2.5cm;
+        background-color: var(--white);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+}
+
+h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--math-blue);
+    border-bottom: 2px solid var(--math-blue);
+    padding-bottom: 0.3em;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    /* Gradient text effect */
+    background: linear-gradient(135deg, var(--math-blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* Glow effect (visible when gradient is not) */
+    text-shadow: none;
+}
+
+/* Fallback border color when gradient is applied */
+h1::after {
+    content: '';
+    display: block;
+    position: relative;
+    top: 0.3em;
+    height: 2px;
+    background: linear-gradient(90deg, var(--math-blue), var(--cyan));
+    margin-top: -2px;
+}
+
+h1 {
+    border-bottom: none;
+}
+
+/* H1 glow for browsers that support it with gradient text */
+@supports (text-shadow: 0 0 20px rgba(37,99,235,0.3)) {
+    .cover h1,
+    h1.glow {
+        text-shadow: 0 0 30px rgba(37,99,235,0.25), 0 0 60px rgba(6,182,212,0.15);
+        -webkit-text-fill-color: initial;
+        color: var(--math-blue);
+    }
+}
+
+h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--math-blue);
+    margin-top: 1.5em;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid var(--math-blue-pale);
+    padding-bottom: 0.2em;
+    /* Subtle gradient text */
+    background: linear-gradient(135deg, var(--math-blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-image: linear-gradient(90deg, var(--math-blue), var(--cyan)) 1;
+    border-bottom: 1px solid;
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-top: 1.2em;
+    margin-bottom: 0.4em;
+}
+
+h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray);
+    margin-top: 1em;
+    margin-bottom: 0.3em;
+}
+
+p {
+    margin-bottom: 0.7em;
+}
+
+/* ── Card-Style Sections ────────────────────────────────── */
+.card,
+section > :is(h2 + p, h2 + ul, h2 + ol, h2 + div),
+.quickref,
+.fillable-group {
+    background-color: var(--white);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    padding: 1.2em 1.4em;
+    margin: 1em 0;
+    border: 1px solid var(--grid-line);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.card:hover,
+.quickref:hover {
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Cyan-accented card for water-related content */
+.card-cyan,
+.card-water {
+    border-left: 4px solid var(--cyan);
+    background: linear-gradient(135deg, var(--cyan-pale) 0%, var(--white) 30%);
+}
+
+/* Teal-accented card for calm/breathing sections */
+.card-teal,
+.card-calm {
+    border-left: 4px solid var(--teal);
+    background: linear-gradient(135deg, var(--teal-pale) 0%, var(--white) 30%);
+}
+
+/* Magenta-accented card for energy/urgency */
+.card-magenta,
+.card-urgent {
+    border-left: 4px solid var(--magenta);
+    background: linear-gradient(135deg, var(--magenta-pale) 0%, var(--white) 30%);
+}
+
+/* Amber-accented card for warnings/tips */
+.card-amber,
+.card-warning {
+    border-left: 4px solid var(--amber);
+    background: linear-gradient(135deg, var(--amber-pale) 0%, var(--white) 30%);
+}
+
+/* ── Links ──────────────────────────────────────────────── */
+a {
+    color: var(--math-blue);
+    text-decoration: none;
+    border-bottom: 1px solid var(--math-blue-pale);
+    background: linear-gradient(90deg, var(--math-blue), var(--cyan)) no-repeat right bottom / 0% 1px;
+    transition: background-size 0.3s ease;
+    padding-bottom: 1px;
+}
+
+a:hover {
+    background-size: 100% 1px;
+    border-bottom-color: transparent;
+}
+
+/* ── Code Blocks ────────────────────────────────────────── */
+code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background-color: #1E293B;
+    color: #E2E8F0;
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+}
+
+/* Syntax-highlighting-inspired inline code colors */
+code .keyword { color: #C084FC; }
+code .string { color: #34D399; }
+code .number { color: #FB923C; }
+code .comment { color: #64748B; font-style: italic; }
+code .function { color: #60A5FA; }
+
+pre {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    line-height: 1.5;
+    background-color: #1E293B;
+    color: #E2E8F0;
+    border: 1px solid #334155;
+    border-left: 3px solid var(--cyan);
+    padding: 1em 1.2em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1em 0;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* ── Blockquotes ────────────────────────────────────────── */
+blockquote {
+    border-left: 4px solid transparent;
+    border-image: linear-gradient(180deg, var(--math-blue), var(--cyan)) 1;
+    background-color: var(--math-blue-pale);
+    margin: 1em 0;
+    padding: 0.6em 1em;
+    font-style: italic;
+    color: var(--dark);
+    border-radius: 0 6px 6px 0;
+}
+
+blockquote p {
+    margin-bottom: 0.3em;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: 0.92em;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+thead {
+    border-bottom: 2px solid var(--math-blue);
+    background: linear-gradient(135deg, var(--math-blue) 0%, #1D4ED8 100%);
+}
+
+th {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--white);
+    text-align: left;
+    padding: 0.6em 0.7em;
+    letter-spacing: -0.01em;
+}
+
+td {
+    padding: 0.45em 0.7em;
+    border-bottom: 1px solid var(--grid-line);
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--graph-paper);
+}
+
+tbody tr:hover {
+    background-color: var(--cyan-pale);
+}
+
+/* ── Lists ──────────────────────────────────────────────── */
+ol, ul {
+    padding-left: 1.5em;
+    margin-bottom: 0.7em;
+}
+
+li {
+    margin-bottom: 0.25em;
+}
+
+/* ── Images & Figures ───────────────────────────────────── */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em auto;
+    border-radius: 4px;
+    border: 1px solid var(--grid-line);
+}
+
+figure {
+    margin: 1.5em 0;
+    text-align: center;
+    position: relative;
+}
+
+/* Pixel-art corner decorations on figures */
+figure::before,
+figure::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+}
+
+figure::before {
+    top: -4px;
+    left: -4px;
+    box-shadow:
+        4px 0 0 var(--cyan),
+        0 4px 0 var(--cyan),
+        8px 0 0 var(--math-blue),
+        0 8px 0 var(--math-blue),
+        12px 0 0 var(--cyan),
+        0 12px 0 var(--cyan);
+}
+
+figure::after {
+    bottom: -4px;
+    right: -4px;
+    box-shadow:
+        -4px 0 0 var(--cyan),
+        0 -4px 0 var(--cyan),
+        -8px 0 0 var(--math-blue),
+        0 -8px 0 var(--math-blue),
+        -12px 0 0 var(--cyan),
+        0 -12px 0 var(--cyan);
+}
+
+figcaption {
+    font-size: 0.88em;
+    color: var(--gray);
+    margin-top: 0.4em;
+    font-style: italic;
+}
+
+/* ── Horizontal Rule ────────────────────────────────────── */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--math-blue), var(--cyan), transparent);
+    margin: 2em 0;
+}
+
+/* ── Pixel Art Decorative Classes ───────────────────────── */
+
+/* .pixel-border: 8-bit style decorative border using box-shadow */
+.pixel-border {
+    position: relative;
+    border: 2px solid var(--math-blue);
+    padding: 1em;
+    /* Pixel-art corner accents */
+    box-shadow:
+        /* Top-left corner */
+        -4px -4px 0 -2px var(--cyan),
+        -8px -4px 0 -2px var(--cyan),
+        -4px -8px 0 -2px var(--cyan),
+        /* Top-right corner */
+        4px -4px 0 -2px var(--cyan),
+        8px -4px 0 -2px var(--cyan),
+        4px -8px 0 -2px var(--cyan),
+        /* Bottom-left corner */
+        -4px 4px 0 -2px var(--cyan),
+        -8px 4px 0 -2px var(--cyan),
+        -4px 8px 0 -2px var(--cyan),
+        /* Bottom-right corner */
+        4px 4px 0 -2px var(--cyan),
+        8px 4px 0 -2px var(--cyan),
+        4px 8px 0 -2px var(--cyan);
+}
+
+/* .pixel-corner: Single pixel-art corner decoration */
+.pixel-corner {
+    position: relative;
+}
+
+.pixel-corner::before,
+.pixel-corner::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    pointer-events: none;
+}
+
+.pixel-corner::before {
+    top: 0;
+    left: 0;
+    box-shadow:
+        4px 0 0 var(--cyan),
+        8px 0 0 var(--cyan),
+        0 4px 0 var(--cyan),
+        0 8px 0 var(--cyan),
+        12px 0 0 var(--math-blue),
+        0 12px 0 var(--math-blue);
+}
+
+.pixel-corner::after {
+    bottom: 0;
+    right: 0;
+    box-shadow:
+        -4px 0 0 var(--cyan),
+        -8px 0 0 var(--cyan),
+        0 -4px 0 var(--cyan),
+        0 -8px 0 var(--cyan),
+        -12px 0 0 var(--math-blue),
+        0 -12px 0 var(--math-blue);
+}
+
+/* .retro-badge: Pixel-art style badge/chip element */
+.retro-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25em 0.6em;
+    color: var(--white);
+    background-color: var(--math-blue);
+    border: 2px solid var(--cyan);
+    box-shadow:
+        2px 2px 0 0 var(--dark),
+        4px 4px 0 0 rgba(37,99,235,0.3);
+    position: relative;
+    /* Pixel notches at corners */
+    image-rendering: pixelated;
+}
+
+.retro-badge.badge-cyan {
+    background-color: var(--cyan);
+    border-color: var(--math-blue);
+    box-shadow:
+        2px 2px 0 0 var(--dark),
+        4px 4px 0 0 rgba(6,182,212,0.3);
+}
+
+.retro-badge.badge-magenta {
+    background-color: var(--magenta);
+    border-color: var(--math-blue);
+    box-shadow:
+        2px 2px 0 0 var(--dark),
+        4px 4px 0 0 rgba(236,72,153,0.3);
+}
+
+.retro-badge.badge-teal {
+    background-color: var(--teal);
+    border-color: var(--cyan);
+    box-shadow:
+        2px 2px 0 0 var(--dark),
+        4px 4px 0 0 rgba(20,184,166,0.3);
+}
+
+.retro-badge.badge-amber {
+    background-color: var(--amber);
+    border-color: var(--math-blue);
+    color: var(--dark);
+    box-shadow:
+        2px 2px 0 0 var(--dark),
+        4px 4px 0 0 rgba(245,158,11,0.3);
+}
+
+/* .pixel-divider: 8-bit style horizontal rule */
+.pixel-divider {
+    border: none;
+    height: 4px;
+    margin: 2em 0;
+    background: none;
+    position: relative;
+}
+
+.pixel-divider::before {
+    content: '';
+    display: block;
+    height: 4px;
+    background:
+        linear-gradient(90deg,
+            var(--math-blue) 0%, var(--math-blue) 4px,
+            transparent 4px, transparent 8px,
+            var(--cyan) 8px, var(--cyan) 12px,
+            transparent 12px, transparent 16px,
+            var(--math-blue) 16px, var(--math-blue) 20px,
+            transparent 20px, transparent 24px,
+            var(--cyan) 24px, var(--cyan) 28px,
+            transparent 28px, transparent 32px
+        );
+    background-size: 32px 4px;
+    background-repeat: repeat-x;
+    image-rendering: pixelated;
+}
+
+.pixel-divider.diamond::before {
+    background:
+        linear-gradient(90deg,
+            var(--math-blue) 0%, var(--math-blue) 4px,
+            transparent 4px, transparent 12px,
+            var(--cyan) 12px, var(--cyan) 16px,
+            transparent 16px, transparent 24px
+        );
+    background-size: 24px 4px;
+    background-repeat: repeat-x;
+}
+
+/* ── Destination Markers (emoji-based badges) ───────────── */
+/* These work in HTML; in print they render as plain text */
+
+/* ── Cover Page Styling ─────────────────────────────────── */
+.cover {
+    text-align: center;
+    padding-top: 25vh;
+}
+
+.cover h1 {
+    font-size: 2.5rem;
+    border: none;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 30px rgba(37,99,235,0.3), 0 0 60px rgba(6,182,212,0.15);
+    -webkit-text-fill-color: var(--math-blue);
+    color: var(--math-blue);
+}
+
+.cover h1::after {
+    display: none;
+}
+
+.cover .subtitle {
+    font-size: 1.1rem;
+    color: var(--gray);
+    font-style: italic;
+    margin: 1em 0;
+}
+
+.cover .version {
+    font-size: 0.9rem;
+    color: var(--gray-light);
+    margin-top: 2em;
+}
+
+/* ── Quick Reference Card ───────────────────────────────── */
+.quickref {
+    border: 2px solid var(--math-blue);
+    border-radius: var(--card-radius);
+    padding: 1em;
+    margin: 1.5em 0;
+    background-color: var(--math-blue-pale);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    box-shadow: var(--card-shadow);
+}
+
+/* ── Fillable Fields ────────────────────────────────────── */
+.fillable {
+    border-bottom: 1px dashed var(--gray-light);
+    min-width: 12em;
+    display: inline-block;
+    color: var(--gray-light);
+}
+
+/* ── Semantic accent classes ────────────────────────────── */
+.text-cyan { color: var(--cyan); }
+.text-magenta { color: var(--magenta); }
+.text-teal { color: var(--teal); }
+.text-amber { color: var(--amber); }
+.text-blue { color: var(--math-blue); }
+
+.bg-cyan { background-color: var(--cyan-pale); }
+.bg-magenta { background-color: var(--magenta-pale); }
+.bg-teal { background-color: var(--teal-pale); }
+.bg-amber { background-color: var(--amber-pale); }
+
+/* Water-related content styling */
+.water-section,
+.water {
+    border-left: 3px solid var(--cyan);
+    padding-left: 1em;
+}
+
+/* Calm/breathing section styling */
+.calm-section,
+.calm {
+    border-left: 3px solid var(--teal);
+    padding-left: 1em;
+    background: linear-gradient(135deg, var(--teal-pale) 0%, transparent 50%);
+    border-radius: 0 6px 6px 0;
+}
+
+/* Urgency/energy section styling */
+.urgent-section,
+.urgent {
+    border-left: 3px solid var(--magenta);
+    padding-left: 1em;
+}
+
+/* Warning/tip styling */
+.warning,
+.tip {
+    border-left: 3px solid var(--amber);
+    padding-left: 1em;
+    background: linear-gradient(135deg, var(--amber-pale) 0%, transparent 50%);
+    border-radius: 0 6px 6px 0;
+}
+
+/* ── Dark Mode (prefers-color-scheme) ───────────────────── */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dm-active: 1;
+    }
+
+    body {
+        background-color: var(--dm-bg);
+        color: var(--dm-text);
+    }
+
+    /* Graph paper dark mode */
+    @media screen {
+        body {
+            background-color: var(--dm-bg);
+            background-image:
+                linear-gradient(rgba(51,65,85,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51,65,85,0.3) 1px, transparent 1px),
+                linear-gradient(rgba(51,65,85,0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51,65,85,0.5) 1px, transparent 1px);
+            background-size: 10mm 10mm, 10mm 10mm, 20mm 20mm, 20mm 20mm;
+        }
+    }
+
+    .content, body > header, body > main {
+        background-color: var(--dm-surface);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Typography dark mode */
+    h1 {
+        background: linear-gradient(135deg, var(--math-blue-light), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    h1::after {
+        background: linear-gradient(90deg, var(--math-blue-light), var(--cyan));
+    }
+
+    h2 {
+        background: linear-gradient(135deg, var(--math-blue-light), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        border-image: linear-gradient(90deg, var(--math-blue-light), var(--cyan)) 1;
+    }
+
+    h3 {
+        color: var(--dm-text);
+    }
+
+    h4 {
+        color: var(--dm-text-muted);
+    }
+
+    /* Code dark mode */
+    code {
+        background-color: var(--dm-code-bg);
+        color: var(--dm-text);
+    }
+
+    pre {
+        background-color: var(--dm-code-bg);
+        border-color: var(--dm-border);
+    }
+
+    /* Blockquote dark mode */
+    blockquote {
+        background-color: rgba(37,99,235,0.15);
+        color: var(--dm-text);
+    }
+
+    /* Table dark mode */
+    thead {
+        background: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%);
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: var(--dm-surface);
+    }
+
+    tbody tr:hover {
+        background-color: var(--dm-surface-hover);
+    }
+
+    td {
+        border-bottom-color: var(--dm-border);
+    }
+
+    /* Card dark mode */
+    .card, .quickref {
+        background-color: var(--dm-surface);
+        border-color: var(--dm-border);
+    }
+
+    .card-cyan, .card-water {
+        background: linear-gradient(135deg, rgba(6,182,212,0.15) 0%, var(--dm-surface) 30%);
+    }
+
+    .card-teal, .card-calm {
+        background: linear-gradient(135deg, rgba(20,184,166,0.15) 0%, var(--dm-surface) 30%);
+    }
+
+    .card-magenta, .card-urgent {
+        background: linear-gradient(135deg, rgba(236,72,153,0.15) 0%, var(--dm-surface) 30%);
+    }
+
+    .card-amber, .card-warning {
+        background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, var(--dm-surface) 30%);
+    }
+
+    /* Links dark mode */
+    a {
+        color: var(--cyan);
+    }
+
+    /* Quickref dark mode */
+    .quickref {
+        background-color: rgba(37,99,235,0.15);
+        border-color: var(--math-blue-light);
+    }
+
+    /* HR dark mode */
+    hr {
+        background: linear-gradient(90deg, transparent, var(--math-blue-light), var(--cyan), transparent);
+    }
+
+    /* Image dark mode */
+    img {
+        border-color: var(--dm-border);
+    }
+
+    /* Semantic classes dark mode */
+    .calm-section, .calm {
+        background: linear-gradient(135deg, rgba(20,184,166,0.1) 0%, transparent 50%);
+    }
+
+    .warning, .tip {
+        background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, transparent 50%);
+    }
+
+    /* Fillable fields dark mode */
+    .fillable {
+        border-bottom-color: var(--dm-border);
+    }
+
+    /* Cover dark mode */
+    .cover .subtitle,
+    .cover .version {
+        color: var(--dm-text-muted);
+    }
+
+    /* Figure corner decorations dark mode */
+    figure::before {
+        box-shadow:
+            4px 0 0 var(--cyan),
+            0 4px 0 var(--cyan),
+            8px 0 0 var(--math-blue-light),
+            0 8px 0 var(--math-blue-light),
+            12px 0 0 var(--cyan),
+            0 12px 0 var(--cyan);
+    }
+
+    figure::after {
+        box-shadow:
+            -4px 0 0 var(--cyan),
+            0 -4px 0 var(--cyan),
+            -8px 0 0 var(--math-blue-light),
+            0 -8px 0 var(--math-blue-light),
+            -12px 0 0 var(--cyan),
+            0 -12px 0 var(--cyan);
+    }
+
+    /* Scanline dark mode (lighter lines) */
+    .scanline-overlay::after,
+    body.scanline-overlay::after {
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 1px,
+            rgba(255, 255, 255, 0.02) 1px,
+            rgba(255, 255, 255, 0.02) 2px
+        );
+    }
+
+    /* Pixel border dark mode */
+    .pixel-border {
+        border-color: var(--math-blue-light);
+        box-shadow:
+            -4px -4px 0 -2px var(--cyan),
+            -8px -4px 0 -2px var(--cyan),
+            -4px -8px 0 -2px var(--cyan),
+            4px -4px 0 -2px var(--cyan),
+            8px -4px 0 -2px var(--cyan),
+            4px -8px 0 -2px var(--cyan),
+            -4px 4px 0 -2px var(--cyan),
+            -8px 4px 0 -2px var(--cyan),
+            -4px 8px 0 -2px var(--cyan),
+            4px 4px 0 -2px var(--cyan),
+            8px 4px 0 -2px var(--cyan),
+            4px 8px 0 -2px var(--cyan);
+    }
+
+    /* Retro badge dark mode */
+    .retro-badge {
+        box-shadow:
+            2px 2px 0 0 rgba(0,0,0,0.5),
+            4px 4px 0 0 rgba(37,99,235,0.2);
+    }
+
+    /* Figcaption dark mode */
+    figcaption {
+        color: var(--dm-text-muted);
+    }
+}
+
+/* ── Dark Mode Class Toggle ─────────────────────────────── */
+/* .dark-mode class for manual dark mode override */
+.dark-mode {
+    background-color: var(--dm-bg) !important;
+    color: var(--dm-text) !important;
+}
+
+.dark-mode .content,
+.dark-mode body > header,
+.dark-mode body > main {
+    background-color: var(--dm-surface) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+.dark-mode h1 {
+    background: linear-gradient(135deg, var(--math-blue-light), var(--cyan)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.dark-mode h1::after {
+    background: linear-gradient(90deg, var(--math-blue-light), var(--cyan)) !important;
+}
+
+.dark-mode h2 {
+    background: linear-gradient(135deg, var(--math-blue-light), var(--cyan)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    border-image: linear-gradient(90deg, var(--math-blue-light), var(--cyan)) 1 !important;
+}
+
+.dark-mode h3 { color: var(--dm-text) !important; }
+.dark-mode h4 { color: var(--dm-text-muted) !important; }
+
+.dark-mode code {
+    background-color: var(--dm-code-bg) !important;
+    color: var(--dm-text) !important;
+}
+
+.dark-mode pre {
+    background-color: var(--dm-code-bg) !important;
+    border-color: var(--dm-border) !important;
+}
+
+.dark-mode blockquote {
+    background-color: rgba(37,99,235,0.15) !important;
+    color: var(--dm-text) !important;
+}
+
+.dark-mode thead {
+    background: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%) !important;
+}
+
+.dark-mode tbody tr:nth-child(even) {
+    background-color: var(--dm-surface) !important;
+}
+
+.dark-mode tbody tr:hover {
+    background-color: var(--dm-surface-hover) !important;
+}
+
+.dark-mode td {
+    border-bottom-color: var(--dm-border) !important;
+}
+
+.dark-mode .card,
+.dark-mode .quickref {
+    background-color: var(--dm-surface) !important;
+    border-color: var(--dm-border) !important;
+}
+
+.dark-mode .card-cyan,
+.dark-mode .card-water {
+    background: linear-gradient(135deg, rgba(6,182,212,0.15) 0%, var(--dm-surface) 30%) !important;
+}
+
+.dark-mode .card-teal,
+.dark-mode .card-calm {
+    background: linear-gradient(135deg, rgba(20,184,166,0.15) 0%, var(--dm-surface) 30%) !important;
+}
+
+.dark-mode .card-magenta,
+.dark-mode .card-urgent {
+    background: linear-gradient(135deg, rgba(236,72,153,0.15) 0%, var(--dm-surface) 30%) !important;
+}
+
+.dark-mode .card-amber,
+.dark-mode .card-warning {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, var(--dm-surface) 30%) !important;
+}
+
+.dark-mode a { color: var(--cyan) !important; }
+
+.dark-mode .quickref {
+    background-color: rgba(37,99,235,0.15) !important;
+    border-color: var(--math-blue-light) !important;
+}
+
+.dark-mode hr {
+    background: linear-gradient(90deg, transparent, var(--math-blue-light), var(--cyan), transparent) !important;
+}
+
+.dark-mode img {
+    border-color: var(--dm-border) !important;
+}
+
+.dark-mode .calm-section,
+.dark-mode .calm {
+    background: linear-gradient(135deg, rgba(20,184,166,0.1) 0%, transparent 50%) !important;
+}
+
+.dark-mode .warning,
+.dark-mode .tip {
+    background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, transparent 50%) !important;
+}
+
+.dark-mode .fillable {
+    border-bottom-color: var(--dm-border) !important;
+}
+
+.dark-mode .cover .subtitle,
+.dark-mode .cover .version {
+    color: var(--dm-text-muted) !important;
+}
+
+.dark-mode figcaption {
+    color: var(--dm-text-muted) !important;
+}
+
+/* ── Mathematical Notation ─────────────────────────────── */
+/* Inline math styling */
+.math.inline, .math {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 0.95em;
+    color: var(--math-blue);
+    background-color: var(--math-blue-pale);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+}
+
+/* Display math (block-level formulas) */
+.math.display, .math.block {
+    display: block;
+    text-align: center;
+    margin: 1em auto;
+    padding: 0.8em 1.2em;
+    background: linear-gradient(135deg, var(--math-blue-pale) 0%, var(--white) 100%);
+    border-left: 3px solid var(--math-blue);
+    border-radius: 0 6px 6px 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.92em;
+    overflow-x: auto;
+}
+
+/* Formula box — highlighted formula with description */
+.formula-box {
+    background: linear-gradient(135deg, var(--math-blue-pale) 0%, var(--cyan-pale) 100%);
+    border: 1px solid var(--math-blue);
+    border-left: 4px solid var(--math-blue);
+    border-radius: 0 8px 8px 0;
+    padding: 1em 1.2em;
+    margin: 1.5em 0;
+    position: relative;
+}
+
+.formula-box::before {
+    content: '\1F4D0';
+    position: absolute;
+    top: -0.5em;
+    right: 0.8em;
+    font-size: 1.2em;
+    background: var(--white);
+    padding: 0 0.3em;
+    border-radius: 4px;
+}
+
+.formula-box .formula-label {
+    font-family: var(--font-heading);
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--math-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4em;
+}
+
+.formula-box .formula-content {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1em;
+    color: var(--dark);
+    text-align: center;
+}
+
+.formula-box .formula-desc {
+    font-size: 0.88em;
+    color: var(--gray);
+    margin-top: 0.4em;
+    font-style: italic;
+}
+
+/* ── Footnotes ─────────────────────────────────────────── */
+/* Footnote reference in text */
+a.footnote-ref, sup a[href^="#fn"] {
+    color: var(--math-blue);
+    text-decoration: none;
+    font-size: 0.8em;
+    vertical-align: super;
+    border-bottom: none;
+    background: none;
+    font-weight: 600;
+}
+
+a.footnote-ref:hover, sup a[href^="#fn"]:hover {
+    color: var(--cyan);
+    text-decoration: underline;
+    background: none;
+}
+
+/* Footnotes section at end */
+.footnotes, section.footnotes {
+    margin-top: 3em;
+    padding-top: 1.5em;
+    border-top: 1px solid var(--grid-line-major);
+    font-size: 0.88em;
+    color: var(--gray);
+}
+
+.footnotes hr {
+    display: none;
+}
+
+.footnotes ol {
+    padding-left: 1.5em;
+    list-style-type: decimal;
+}
+
+.footnotes li {
+    margin-bottom: 0.5em;
+    padding-left: 0.3em;
+}
+
+.footnotes li p {
+    display: inline;
+    margin: 0;
+}
+
+/* Back-reference from footnote */
+a.footnote-back, .footnotes a[href^="#fnref"] {
+    color: var(--math-blue);
+    text-decoration: none;
+    font-size: 0.8em;
+    margin-left: 0.3em;
+    border-bottom: none;
+    background: none;
+}
+
+/* ── Pandoc Math Output ────────────────────────────────── */
+/* Pandoc renders $..$ as <span class="math inline"> or <span class="math display"> */
+span.math.inline {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.95em;
+    color: var(--math-blue);
+    background-color: var(--math-blue-pale);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+}
+
+span.math.display {
+    display: block;
+    text-align: center;
+    margin: 1em 0;
+    padding: 0.8em 1.2em;
+    background: linear-gradient(135deg, var(--math-blue-pale) 0%, var(--white) 100%);
+    border-left: 3px solid var(--math-blue);
+    border-radius: 0 6px 6px 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.92em;
+    overflow-x: auto;
+}
+
+/* MathJax overrides for consistency */
+mjx-container {
+    color: var(--math-blue) !important;
+}
+
+mjx-container[display="true"] {
+    display: block !important;
+    margin: 1em auto !important;
+    padding: 0.5em;
+    text-align: center;
+}
+
+/* ── Print-specific tweaks ──────────────────────────────── */
+@media print {
+    body {
+        font-size: 10pt;
+        line-height: 1.4;
+        background: none;
+    }
+
+    /* Reset gradient text for print (must be readable) */
+    h1 {
+        background: none !important;
+        -webkit-text-fill-color: var(--dark) !important;
+        color: var(--dark) !important;
+        border-bottom: 2px solid var(--dark);
+    }
+
+    h1::after {
+        display: none;
+    }
+
+    h2 {
+        background: none !important;
+        -webkit-text-fill-color: var(--dark) !important;
+        color: var(--dark) !important;
+        border-bottom: 1px solid var(--dark);
+    }
+
+    h3 { font-size: 1rem; }
+
+    /* URL expansion for print */
+    a {
+        color: var(--dark);
+        border-bottom: none;
+        background: none;
+    }
+
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.85em;
+        color: var(--gray);
+    }
+
+    /* Skip URL expansion for internal anchors */
+    a[href^="#"]::after {
+        content: none;
+    }
+
+    pre {
+        font-size: 0.82em;
+    }
+
+    img {
+        border: none;
+    }
+
+    /* Reset card shadows for print */
+    .card, .quickref {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    /* Reset pixel decorations for print */
+    .pixel-border {
+        box-shadow: none;
+        border: 2px solid var(--dark);
+    }
+
+    .retro-badge {
+        box-shadow: 1px 1px 0 0 #999;
+    }
+
+    /* Cover page: no headers/footers (reinforced) */
+    .cover,
+    .cover-page {
+        page-break-after: always;
+    }
+
+    /* Chapter openers get styled first page */
+    h1 {
+        page-break-before: always;
+    }
+
+    h1:first-of-type {
+        page-break-before: auto;
+    }
+
+    /* Keep TOC together if possible */
+    .toc {
+        page-break-inside: avoid;
+    }
+
+    /* Figure corner decorations: simplify for print */
+    figure::before,
+    figure::after {
+        display: none;
+    }
+
+    /* Blockquote gradient border: simplify for print */
+    blockquote {
+        border-left: 4px solid var(--dark);
+        border-image: none;
+    }
+
+    /* Scanline overlay: disable in print */
+    .scanline-overlay::after,
+    body.scanline-overlay::after {
+        display: none;
+    }
+
+    /* Pixel divider: simplify for print */
+    .pixel-divider::before {
+        background: repeating-linear-gradient(
+            90deg,
+            var(--dark) 0px, var(--dark) 4px,
+            transparent 4px, transparent 8px
+        );
+        background-size: 8px 4px;
+        background-repeat: repeat-x;
+    }
+}

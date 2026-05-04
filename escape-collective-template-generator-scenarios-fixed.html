@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Escape Collective — Autonomous Street Template Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+
+<style>
+:root{
+  --bg:#08070d;
+  --bg2:#0f0d17;
+  --panel:#13101d;
+  --panel2:#191427;
+  --panel3:#211a33;
+  --line:#342b4e;
+  --line-soft:rgba(255,255,255,.08);
+  --text:#f4f1ff;
+  --muted:#b8b0d6;
+  --muted2:#9189ac;
+  --accent:#b19bff;
+  --accent-2:#8af6d2;
+  --warn:#ffb783;
+  --shadow:0 28px 100px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+  --shadow-soft:0 10px 40px rgba(0,0,0,.24);
+  --sans: Inter, "Segoe UI Variable", "Segoe UI", Arial, sans-serif;
+  --mono:"IBM Plex Mono","PT Mono","DejaVu Sans Mono",monospace;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;height:100%;
+  background:
+    radial-gradient(1200px 700px at 18% -10%, rgba(99,79,161,.26), transparent 54%),
+    radial-gradient(900px 500px at 100% 0%, rgba(63,106,177,.16), transparent 55%),
+    linear-gradient(180deg,#0b0911 0%,#08070d 100%);
+  color:var(--text);
+  font:14px/1.5 var(--sans);
+}
+.wrap{display:grid;grid-template-columns:minmax(320px,400px) 1fr;min-height:100vh}
+aside{
+  padding:20px 18px 28px;
+  border-right:1px solid rgba(255,255,255,.07);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015)),
+    linear-gradient(180deg,rgba(181,159,255,.03),transparent 35%);
+  backdrop-filter:blur(20px);
+  overflow:auto;
+}
+main{
+  display:grid;
+  grid-template-rows:auto 1fr;
+  gap:14px;
+  padding:18px;
+  min-width:0;
+}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:10px 12px;
+  border:1px solid var(--line-soft);
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+  box-shadow:var(--shadow-soft);
+}
+.preview-shell{
+  display:grid;place-items:center;
+  min-height:0;
+  border:1px solid var(--line-soft);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(177,155,255,.06), transparent 40%),
+    linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+  padding:18px;
+  box-shadow:var(--shadow-soft);
+}
+.preview{position:relative;display:inline-block;max-width:100%}
+#holder{position:relative;z-index:1}
+canvas{
+  display:block;
+  max-width:min(95vw,1320px)!important;
+  max-height:82vh!important;
+  width:auto!important;height:auto!important;
+  border-radius:24px;
+  box-shadow:var(--shadow);
+}
+.overlay{position:absolute;inset:0;pointer-events:none;z-index:2}
+.block-box{
+  position:absolute;
+  border:1px dashed rgba(255,255,255,.34);
+  border-radius:14px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.16);
+  pointer-events:auto;cursor:grab;
+  background:rgba(177,155,255,.04);
+  transition:background .12s ease,border-color .12s ease;
+}
+.block-box.active{border-color:rgba(138,246,210,.92);background:rgba(138,246,210,.08)}
+.block-box:after{
+  content:attr(data-name);
+  position:absolute;top:-22px;left:0;
+  font:11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#ddd7f4
+}
+.handle{
+  position:absolute;width:12px;height:12px;border-radius:50%;
+  right:-6px;bottom:-6px;background:var(--accent-2);border:2px solid #0c1113
+}
+h1{margin:.15rem 0 0;font-size:30px;line-height:1.02;letter-spacing:-.04em}
+h2{margin:0 0 10px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+p{margin:.5rem 0;color:#d7d1ef}
+small,.small{font-size:12px;color:var(--muted)}
+.mono,.value,code,.tagline,.tinycaps{font-family:var(--mono)}
+.section{
+  margin:16px 0 18px;padding:14px;
+  border:1px solid rgba(255,255,255,.065);
+  background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.012));
+  border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+}
+.section.compact{padding:12px}
+.label{display:flex;justify-content:space-between;gap:10px;font-weight:700;margin-bottom:7px}
+.value{color:var(--accent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+button,select,input[type=number],input[type=text],textarea{
+  width:100%;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  color:var(--text);
+  border:1px solid rgba(255,255,255,.08);
+  padding:10px 11px;border-radius:12px;min-height:40px;
+  transition:border-color .14s ease, transform .14s ease, background .14s ease, box-shadow .14s ease;
+}
+textarea{min-height:76px;resize:vertical}
+button{
+  cursor:pointer;font-weight:700;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
+}
+button:hover,select:hover,input:hover,textarea:hover{border-color:rgba(255,255,255,.14)}
+button:hover{transform:translateY(-1px)}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{
+  outline:none;border-color:rgba(177,155,255,.6);box-shadow:0 0 0 3px rgba(177,155,255,.14)
+}
+button.ghost{background:transparent}
+button.hot{background:linear-gradient(180deg,#37245f,#241741);border-color:rgba(213,106,240,.35)}
+button.ice{background:linear-gradient(180deg,#183437,#102224);border-color:rgba(146,255,216,.28)}
+button.warn{background:linear-gradient(180deg,#35261b,#241810);border-color:rgba(255,185,125,.28)}
+input[type=range]{width:100%;padding:0;accent-color:var(--accent);background:transparent;border:none;min-height:26px}
+.range-note{display:flex;justify-content:space-between;color:var(--muted2);font-size:11px;margin-top:2px}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
+  background:rgba(146,255,216,.08);border:1px solid rgba(146,255,216,.18);
+  font-size:12px;color:#ddfff5
+}
+.tip{
+  padding:10px 11px;border-left:2px solid var(--accent);
+  background:rgba(177,155,255,.055);border-radius:0 10px 10px 0;color:#e3ddfb
+}
+.notice{
+  font-size:12px;padding:7px 10px;background:rgba(8,8,14,.48);
+  border:1px solid rgba(255,255,255,.08);border-radius:999px;color:var(--muted);backdrop-filter:blur(10px)
+}
+.topbar .notice{position:static}
+.tok{
+  display:inline-block;padding:3px 7px;border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;font:11px/1 var(--mono);color:#d7d1ee;background:rgba(255,255,255,.03);margin:0 4px 4px 0
+}
+.hr{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+.toolbar-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar-group > *{width:auto}
+.statline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.helper{color:var(--muted2);font-size:12px}
+aside::-webkit-scrollbar{width:10px}
+aside::-webkit-scrollbar-thumb{background:#2c2540;border-radius:999px}
+select,input,textarea,button{font:inherit}
+.section h2{display:flex;justify-content:space-between;align-items:center}
+@media (max-width:1180px){
+  .wrap{grid-template-columns:1fr}
+  main{padding:14px}
+  canvas{max-width:98vw!important;max-height:68vh!important}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<aside>
+  <div class="mono small">Escape Collective // autonomous street workflow tool</div>
+  <h1>Template Engine</h1>
+  <p class="tagline">Technical rigor with restrained street memory: drips at the edge, civic clarity at the center, monospaced discipline throughout.</p>
+  <div class="badge mono">1 headline voice / 1 content voice / fixed palette family / accessible by default</div>
+
+  <div class="section">
+    <h2>Seed</h2>
+    <div class="label"><span>Current seed</span><span class="value mono" id="seedv">1217</span></div>
+    <div class="row">
+      <button onclick="shiftSeed(-1)">Prev</button>
+      <button onclick="shiftSeed(1)">Next</button>
+      <button class="ghost" onclick="randomizeSeed()">Random</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input type="number" id="seedInput" value="1217" min="1" step="1" />
+      <button onclick="jumpSeed()">Go</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Format &amp; use</h2>
+    <div class="grid2">
+      <div>
+        <div class="label"><span>Aspect ratio</span><span class="value mono" id="formatv">poster-a</span></div>
+        <select id="format" onchange="applyFormat()">
+          <option value="poster-a">Poster A</option>
+          <option value="square">Square</option>
+          <option value="story">Story</option>
+          <option value="leaflet">Leaflet</option>
+          <option value="wide">Wide</option>
+        </select>
+      </div>
+      <div>
+        <div class="label"><span>Use case</span><span class="value mono" id="presetv">field guide</span></div>
+        <select id="preset" onchange="applyPreset(this.value)">
+          <option value="field guide">Field guide</option>
+          <option value="workshop">Workshop</option>
+          <option value="campaign">Campaign</option>
+          <option value="release note">Release note</option>
+          <option value="mutual aid">Mutual aid</option>
+        </select>
+      </div>
+    </div>
+    <div class="label" style="margin-top:12px"><span>Combinator</span><span class="value mono" id="combov">knife ledger</span></div>
+    <select id="combo" onchange="applyCombo(this.value)">
+      <option value="knife ledger">Knife ledger</option>
+      <option value="yard signal">Yard signal</option>
+      <option value="relay square">Relay square</option>
+      <option value="story blade">Story blade</option>
+      <option value="civic banner">Civic banner</option>
+    </select>
+    <div style="margin-top:10px">
+      <span class="tok">street restraint</span>
+      <span class="tok">high contrast</span>
+      <span class="tok">manual-grade spacing</span>
+      <span class="tok">tag gestures peripheral</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Scenario</h2>
+    <div class="label"><span>Workflow scenario</span><span class="value mono" id="scenariov">event flyer</span></div>
+    <select id="scenario" onchange="applyScenario(this.value)">
+      <option value="event flyer">Event flyer</option>
+      <option value="bulletin brief">Bulletin brief</option>
+      <option value="field note">Field note</option>
+      <option value="incident board">Incident board</option>
+      <option value="release card">Release card</option>
+      <option value="mutual aid notice">Mutual aid notice</option>
+    </select>
+    <div class="small" style="margin-top:8px">Scenarios tighten structure, copy rhythm, and layout density. They change composition more than style.</div>
+  </div>
+
+  <div class="section">
+    <h2>Copy</h2>
+    <div class="label"><span>Headline</span><span class="value mono" id="titleCount">16c</span></div>
+    <textarea id="titleText" oninput="updateMeta(); scheduleRender(false)">ESCAPE
+COLLECTIVE</textarea>
+    <div class="label" style="margin-top:10px"><span>Content line</span><span class="value mono" id="subCount">31c</span></div>
+    <textarea id="subtitleText" oninput="updateMeta(); scheduleRender(false)">hands-on tech for self protection</textarea>
+    <div class="label" style="margin-top:10px"><span>Footer / locator</span><span class="value mono" id="footCount">37c</span></div>
+    <textarea id="footerText" oninput="updateMeta(); scheduleRender(false)">education / privacy / repair / autonomy</textarea>
+  </div>
+
+  <div class="section">
+    <h2>Exposed controls</h2>
+    <div class="label"><span>Signal density</span><span class="value" id="densityv"></span></div>
+    <input type="range" id="density" min="28" max="88" step="1" value="58" oninput="updateUI(); scheduleRender(true)">
+    <div class="label"><span>Street edge</span><span class="value" id="edgev"></span></div>
+    <input type="range" id="edge" min="4" max="56" step="1" value="24" oninput="updateUI(); scheduleRender(true)">
+    <div class="label"><span>Discipline</span><span class="value" id="disciplinev"></span></div>
+    <input type="range" id="discipline" min="70" max="98" step="1" value="88" oninput="updateUI(); scheduleRender(true)">
+    <div class="label"><span>Layout intent</span><span class="value mono" id="intentv">balanced</span></div>
+    <select id="intent" onchange="applyIntent(this.value)">
+      <option value="balanced">Balanced</option>
+      <option value="stacked">Stacked</option>
+      <option value="broadcast">Broadcast</option>
+    </select>
+    <div class="label" style="margin-top:10px"><span>Render finish</span><span class="value mono" id="renderv">preview</span></div>
+    <select id="renderMode" onchange="updateUI(); scheduleRender(true)">
+      <option value="preview">Preview</option>
+      <option value="polish">Polish</option>
+    </select>
+    <div class="range-note"><span>preview = lighter interaction</span><span>polish = finer texture</span></div>
+    <div class="label" style="margin-top:10px"><span>Text block</span><span class="value mono" id="blockv">headline</span></div>
+    <select id="activeBlock" onchange="updateUI(); syncBlockControls()">
+      <option value="title">headline</option>
+      <option value="subtitle">content</option>
+      <option value="footer">footer</option>
+    </select>
+    <div class="grid3" style="margin-top:10px">
+      <div>
+        <div class="small">x</div>
+        <input type="range" id="bx" min="0" max="100" step="1" value="14" oninput="applyBlockSliders()">
+      </div>
+      <div>
+        <div class="small">y</div>
+        <input type="range" id="by" min="0" max="100" step="1" value="14" oninput="applyBlockSliders()">
+      </div>
+      <div>
+        <div class="small">scale</div>
+        <input type="range" id="bs" min="60" max="160" step="1" value="100" oninput="applyBlockSliders()">
+      </div>
+    </div>
+    <div class="small" style="margin-top:8px">Drag the active text block on-canvas, or resize from its mint handle. Position is precise; style stays opinionated.</div>
+  </div>
+
+  <div class="section">
+    <h2>Exports</h2>
+    <div class="row">
+      <button class="ice" onclick="downloadPNG()">PNG</button>
+      <button onclick="downloadJSON()">Template config</button>
+      <button onclick="downloadCSS()">CSS sponsor</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button onclick="downloadLaTeX()">LaTeX preset</button>
+      <button onclick="downloadOnePager()">One-pager HTML</button>
+      <button onclick="copyShareState()">Copy state</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Autonomy</h2>
+    <div class="tip small">
+      Negative constraints are deliberate. No free palette editor. No arbitrary font swaps. No style explosion. The engine modulates drips, tags, grid snap, and contrast internally from seed + use case + discipline so output remains legible, civic, and high-class by default.
+    </div>
+    <hr />
+    <div class="small">
+      Export surfaces included:
+      <br>• template config for regeneration
+      <br>• CSS sponsor tokens for docs / microsites
+      <br>• LaTeX preset for one-pagers and field notes
+      <br>• exposable one-page HTML artifact
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row">
+      <button class="hot" onclick="redrawArt()">Regenerate</button>
+      <button class="warn" onclick="resetAll()">Reset</button>
+    </div>
+  </div>
+</aside>
+
+
+<main>
+  <div class="topbar">
+    <div>
+      <div class="mono small">production preview</div>
+      <div class="helper">Strict street-manual rendering with scenario-aware structure, protected typography, and export-ready layout behavior.</div>
+    </div>
+    <div class="toolbar-group">
+      <span class="badge mono" id="modeBadge">preview mode</span>
+      <div class="notice mono" id="notice">seed=1217 / poster-a / field guide</div>
+    </div>
+  </div>
+  <div class="preview-shell">
+    <div class="preview" id="preview">
+      <div id="holder"></div>
+      <div class="overlay" id="overlay"></div>
+    </div>
+  </div>
+</main>
+
+</div>
+
+<script>
+let seed=1217, cnv, activeDrag=null, renderQueued=false, renderFullQueued=false;
+let gBase, gTexture, gEdge, gFrame, lastStaticSig="", lastFrameSig="";
+const DPR_PREVIEW = 1;
+const DPR_POLISH = 1.25;
+const formats={
+  "poster-a":[1200,1600],
+  "square":[1200,1200],
+  "story":[1080,1920],
+  "leaflet":[1400,1000],
+  "wide":[1600,900]
+};
+const presetProfiles={
+  "field guide":{density:58,edge:18,discipline:92},
+  "workshop":{density:62,edge:22,discipline:88},
+  "campaign":{density:72,edge:36,discipline:82},
+  "release note":{density:46,edge:12,discipline:95},
+  "mutual aid":{density:66,edge:28,discipline:86}
+};
+const comboProfiles={
+  "knife ledger":{preset:"release note",format:"leaflet",layout:{title:{x:12,y:14,s:104,w:52,h:18},subtitle:{x:12,y:36,s:92,w:42,h:9},footer:{x:12,y:88,s:92,w:62,h:5}}},
+  "yard signal":{preset:"campaign",format:"poster-a",layout:{title:{x:10,y:12,s:112,w:58,h:20},subtitle:{x:10,y:38,s:98,w:46,h:10},footer:{x:10,y:89,s:90,w:68,h:5}}},
+  "relay square":{preset:"field guide",format:"square",layout:{title:{x:12,y:14,s:106,w:58,h:19},subtitle:{x:12,y:42,s:92,w:44,h:9},footer:{x:12,y:90,s:86,w:66,h:5}}},
+  "story blade":{preset:"workshop",format:"story",layout:{title:{x:10,y:12,s:108,w:66,h:18},subtitle:{x:10,y:34,s:92,w:48,h:10},footer:{x:10,y:90,s:88,w:70,h:5}}},
+  "civic banner":{preset:"mutual aid",format:"wide",layout:{title:{x:9,y:16,s:98,w:48,h:18},subtitle:{x:9,y:44,s:88,w:34,h:10},footer:{x:9,y:87,s:84,w:48,h:5}}}
+};
+const scenarioProfiles={
+  "event flyer":{
+    combo:"yard signal", preset:"campaign", format:"poster-a", intent:"broadcast",
+    titleText:"ESCAPE\nCOLLECTIVE",
+    subtitleText:"workshop / field session / practical privacy",
+    footerText:"thu 19:30 / studio 3 / bring laptop / low-barrier access",
+    layout:{title:{x:10,y:12,s:114,w:60,h:20},subtitle:{x:10,y:39,s:96,w:52,h:10},footer:{x:10,y:89,s:88,w:72,h:5}}
+  },
+  "bulletin brief":{
+    combo:"knife ledger", preset:"release note", format:"leaflet", intent:"balanced",
+    titleText:"SYSTEM\nBULLETIN",
+    subtitleText:"concise operational update with clear next actions",
+    footerText:"issue 04 / verified source / public version / contact: hello@example.org",
+    layout:{title:{x:12,y:14,s:104,w:50,h:18},subtitle:{x:12,y:37,s:90,w:46,h:12},footer:{x:12,y:88,s:86,w:70,h:5}}
+  },
+  "field note":{
+    combo:"relay square", preset:"field guide", format:"square", intent:"stacked",
+    titleText:"FIELD\nNOTE",
+    subtitleText:"portable know-how / one method / one test / one safe outcome",
+    footerText:"v1.2 / print-safe / monochrome-friendly / escape collective",
+    layout:{title:{x:12,y:13,s:108,w:56,h:18},subtitle:{x:12,y:40,s:92,w:48,h:12},footer:{x:12,y:90,s:84,w:68,h:5}}
+  },
+  "incident board":{
+    combo:"civic banner", preset:"mutual aid", format:"wide", intent:"balanced",
+    titleText:"INCIDENT\nBOARD",
+    subtitleText:"situation / route / action / verification / support",
+    footerText:"status 21:10 / channel matrix / verify before forwarding",
+    layout:{title:{x:9,y:14,s:100,w:42,h:18},subtitle:{x:9,y:43,s:86,w:32,h:12},footer:{x:9,y:88,s:80,w:42,h:5}}
+  },
+  "release card":{
+    combo:"knife ledger", preset:"release note", format:"leaflet", intent:"stacked",
+    titleText:"TOOL\nRELEASE",
+    subtitleText:"ship the artifact / keep the language tight / note the delta",
+    footerText:"v0.7.3 / changelog / docs / signatures / reproducible build",
+    layout:{title:{x:12,y:15,s:106,w:46,h:18},subtitle:{x:12,y:39,s:90,w:42,h:12},footer:{x:12,y:88,s:84,w:72,h:5}}
+  },
+  "mutual aid notice":{
+    combo:"story blade", preset:"workshop", format:"story", intent:"broadcast",
+    titleText:"MUTUAL AID\nNOTICE",
+    subtitleText:"devices / access / translation / repair / quiet help on site",
+    footerText:"today 17:00–20:00 / no registration / masked welcome / wheelchair access",
+    layout:{title:{x:10,y:12,s:108,w:68,h:18},subtitle:{x:10,y:37,s:92,w:54,h:12},footer:{x:10,y:91,s:84,w:74,h:5}}
+  }
+};
+
+const defaults={
+  format:"poster-a", preset:"field guide", combo:"knife ledger", intent:"balanced", scenario:"event flyer",
+  titleText:"ESCAPE\nCOLLECTIVE",
+  subtitleText:"hands-on tech for self protection",
+  footerText:"education / privacy / repair / autonomy",
+  density:58, edge:24, discipline:88,
+  blockLayout:{
+    title:{x:14,y:13,s:100,w:54,h:19},
+    subtitle:{x:14,y:36,s:100,w:48,h:10},
+    footer:{x:14,y:87,s:100,w:64,h:6}
+  }
+};
+let blockLayout=JSON.parse(JSON.stringify(defaults.blockLayout));
+
+let exportScale = 2;
+function ensureBuffers(){
+  const w = width || formats[$('format')?.value || defaults.format][0];
+  const h = height || formats[$('format')?.value || defaults.format][1];
+  const needs = !gBase || gBase.width!==w || gBase.height!==h;
+  if(needs){
+    gBase = createGraphics(w,h);
+    gTexture = createGraphics(w,h);
+    gEdge = createGraphics(w,h);
+    gFrame = createGraphics(w,h);
+    [gBase,gTexture,gEdge,gFrame].forEach(pg=>pg.pixelDensity(1));
+    lastStaticSig = "";
+    lastFrameSig = "";
+  }
+}
+function redrawArt(full=true){
+  draw(full);
+  syncOverlay();
+}
+function scheduleRender(full=true){
+  renderFullQueued = renderFullQueued || !!full;
+  if(renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(()=>{
+    renderQueued = false;
+    const doFull = renderFullQueued;
+    renderFullQueued = false;
+    redrawArt(doFull);
+  });
+}
+function $(id){return document.getElementById(id)}
+function num(id){return +$(id).value}
+function setVal(id,v){ $(id).value=v; }
+function downloadText(name, text, type="text/plain"){ const blob=new Blob([text],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),300); }
+function currentProfile(){ return presetProfiles[$('preset').value] || presetProfiles["field guide"]; }
+function styleTokens(){
+  const profile=currentProfile(), d=num('discipline'), e=num('edge');
+  const bg = d>92 ? "#08070d" : d>84 ? "#0a0911" : "#0d0b15";
+  const panel = e>32 ? "#1a1430" : "#151121";
+  return {
+    bg, panel,
+    indigo: profile.density>65 ? "#6871d1" : "#5f63c1",
+    violet: e>30 ? "#c986f3" : "#b797f3",
+    silver: "#f5f1ff",
+    mint: d>90 ? "#abffe6" : "#97f6d7",
+    rust: e>32 ? "#f6ad81" : "#df9b73"
+  };
+}
+function params(){
+  return {
+    seed,
+    format:$('format').value,
+    preset:$('preset').value,
+    combo:$('combo').value,
+    intent:$('intent').value,
+    scenario:$('scenario').value,
+    title:$('titleText').value,
+    subtitle:$('subtitleText').value,
+    footer:$('footerText').value,
+    density:num('density'),
+    edge:num('edge'),
+    discipline:num('discipline'),
+    layout:blockLayout,
+    tokens:styleTokens(),
+    renderMode:$('renderMode') ? $('renderMode').value : 'preview',
+    fonts:{headline:'Arial Black', content:'IBM Plex Mono'}
+  };
+}
+function updateMeta(){
+  $('titleCount').textContent=$('titleText').value.length+'c';
+  $('subCount').textContent=$('subtitleText').value.length+'c';
+  $('footCount').textContent=$('footerText').value.length+'c';
+}
+function updateUI(){
+  ['density','edge','discipline'].forEach(id=>$(id+'v').textContent=$(id).value);
+  $('seedv').textContent=seed; $('seedInput').value=seed;
+  if($('renderv')) $('renderv').textContent=$('renderMode').value;
+  if($('modeBadge')) $('modeBadge').textContent=$('renderMode').value + ' mode';
+  $('formatv').textContent=$('format').value;
+  $('presetv').textContent=$('preset').value;
+  $('combov').textContent=$('combo').value;
+  $('intentv').textContent=$('intent').value;
+  $('scenariov').textContent=$('scenario').value;
+  $('blockv').textContent=$('activeBlock').selectedOptions[0].textContent;
+  $('notice').textContent=`seed=${seed} / ${$('scenario').value} / ${$('format').value}`;
+  updateMeta();
+  syncOverlay();
+}
+function resetAll(){
+  seed=1217;
+  setVal('format', defaults.format);
+  setVal('preset', defaults.preset);
+  setVal('combo', defaults.combo);
+  setVal('intent', defaults.intent);
+  setVal('scenario', defaults.scenario);
+  setVal('titleText', defaults.titleText);
+  setVal('subtitleText', defaults.subtitleText);
+  setVal('footerText', defaults.footerText);
+  setVal('density', defaults.density);
+  setVal('edge', defaults.edge);
+  setVal('discipline', defaults.discipline);
+  if($('renderMode')) setVal('renderMode', 'preview');
+  blockLayout=JSON.parse(JSON.stringify(defaults.blockLayout));
+  applyFormat(false);
+  syncBlockControls();
+  updateUI();
+  scheduleRender(true);
+}
+
+function cloneLayout(src){ return JSON.parse(JSON.stringify(src)); }
+function applyCombo(name){
+  const c=comboProfiles[name]; if(!c) return;
+  setVal('combo', name);
+  setVal('preset', c.preset);
+  setVal('format', c.format);
+  blockLayout=cloneLayout(c.layout);
+  applyPreset(c.preset);
+  applyFormat(false);
+  syncBlockControls();
+  updateUI();
+  scheduleRender(true);
+}
+function applyScenario(name){
+  const s=scenarioProfiles[name]; if(!s) return;
+  setVal('scenario', name);
+  setVal('combo', s.combo);
+  setVal('preset', s.preset);
+  setVal('format', s.format);
+  setVal('intent', s.intent);
+  setVal('titleText', s.titleText);
+  setVal('subtitleText', s.subtitleText);
+  setVal('footerText', s.footerText);
+  blockLayout=cloneLayout(s.layout);
+  applyPreset(s.preset);
+  applyFormat(false);
+  applyIntent(s.intent);
+  syncBlockControls();
+  updateUI();
+  scheduleRender(true);
+}
+
+function applyIntent(name){
+  const tweaks={
+    balanced:{title:[0,0,100],subtitle:[0,0,100],footer:[0,0,100]},
+    stacked:{title:[0,-2,104],subtitle:[0,-1,95],footer:[0,1,92]},
+    broadcast:{title:[-1,0,112],subtitle:[0,2,90],footer:[0,0,86]}
+  }[name];
+  if(!tweaks) return;
+  for (const k of Object.keys(tweaks)){
+    const [dx,dy,ss]=tweaks[k], base=defaults.blockLayout[k], b=blockLayout[k];
+    b.x=Math.max(5, Math.min(90, base.x+dx));
+    b.y=Math.max(5, Math.min(94, base.y+dy));
+    b.s=ss;
+  }
+  syncBlockControls(); updateUI(); scheduleRender(false);
+}
+function applyPreset(name){
+  $('preset').value=name;
+  const p=currentProfile();
+  setVal('density', p.density);
+  setVal('edge', p.edge);
+  setVal('discipline', p.discipline);
+  updateUI();
+  scheduleRender(true);
+}
+function shiftSeed(n){ seed=Math.max(1,seed+n); updateUI(); scheduleRender(true); }
+function randomizeSeed(){ seed=Math.floor(Math.random()*999999)+1; updateUI(); scheduleRender(true); }
+function jumpSeed(){ seed=Math.max(1,parseInt($('seedInput').value||seed,10)); updateUI(); scheduleRender(true); }
+function applyFormat(redraw=true){
+  const [w,h]=formats[$('format').value];
+  resizeCanvas(w,h);
+  ensureBuffers();
+  updateUI();
+  if(redraw) scheduleRender(true);
+}
+function syncBlockControls(){
+  const b=blockLayout[$('activeBlock').value];
+  setVal('bx', Math.round(b.x)); setVal('by', Math.round(b.y)); setVal('bs', Math.round(b.s));
+  updateUI();
+}
+function applyBlockSliders(){
+  const key=$('activeBlock').value, b=blockLayout[key];
+  b.x=num('bx'); b.y=num('by'); b.s=num('bs');
+  syncOverlay(); scheduleRender(false);
+}
+
+function syncOverlay(){
+  const overlay = $('overlay'), preview = $('preview');
+  if(!overlay || !preview || !cnv) return;
+  overlay.innerHTML = '';
+  const cw = cnv.elt.offsetWidth || width;
+  const ch = cnv.elt.offsetHeight || height;
+  overlay.style.width = cw + 'px';
+  overlay.style.height = ch + 'px';
+  const sx = cw / width;
+  const sy = ch / height;
+  ['title','subtitle','footer'].forEach(key=>{
+    const r = getBlockRect(key);
+    const box = document.createElement('div');
+    box.className = 'block-box' + ($('activeBlock') && $('activeBlock').value===key ? ' active' : '');
+    box.dataset.name = key === 'title' ? 'headline' : key;
+    box.style.left = (r.x * sx) + 'px';
+    box.style.top = (r.y * sy) + 'px';
+    box.style.width = Math.max(28, r.w * sx) + 'px';
+    box.style.height = Math.max(22, r.h * sy) + 'px';
+    box.addEventListener('pointerdown', (ev)=>startOverlayDrag(ev, key, false));
+    box.addEventListener('click', ()=>{
+      if($('activeBlock')){
+        $('activeBlock').value = key;
+        syncBlockControls();
+      }
+    });
+    const handle = document.createElement('div');
+    handle.className = 'handle';
+    handle.addEventListener('pointerdown', (ev)=>startOverlayDrag(ev, key, true));
+    box.appendChild(handle);
+    overlay.appendChild(box);
+  });
+}
+
+function startOverlayDrag(ev, key, resizing){
+  ev.preventDefault();
+  ev.stopPropagation();
+  if($('activeBlock')){
+    $('activeBlock').value = key;
+    syncBlockControls();
+  }
+  const overlay = $('overlay');
+  if(!overlay) return;
+  const b = blockLayout[key];
+  activeDrag = {
+    key,
+    resizing,
+    startX: ev.clientX,
+    startY: ev.clientY,
+    startBX: b.x,
+    startBY: b.y,
+    startBS: b.s,
+    canvasW: overlay.clientWidth || cnv.elt.offsetWidth || width,
+    canvasH: overlay.clientHeight || cnv.elt.offsetHeight || height
+  };
+}
+
+window.addEventListener('pointermove', (ev)=>{
+  if(!activeDrag) return;
+  const b = blockLayout[activeDrag.key];
+  const dxPct = ((ev.clientX - activeDrag.startX) / activeDrag.canvasW) * 100;
+  const dyPct = ((ev.clientY - activeDrag.startY) / activeDrag.canvasH) * 100;
+  if(activeDrag.resizing){
+    const delta = Math.max(dxPct, dyPct);
+    b.s = Math.max(60, Math.min(160, activeDrag.startBS + delta * 1.2));
+  } else {
+    b.x = Math.max(2, Math.min(96, activeDrag.startBX + dxPct));
+    b.y = Math.max(2, Math.min(96, activeDrag.startBY + dyPct));
+  }
+  if($('activeBlock') && $('activeBlock').value === activeDrag.key){
+    setVal('bx', Math.round(b.x));
+    setVal('by', Math.round(b.y));
+    setVal('bs', Math.round(b.s));
+  }
+  syncOverlay();
+  scheduleRender(false);
+});
+
+window.addEventListener('pointerup', ()=>{ activeDrag = null; });
+function H(hex,a=255){ const c=color(hex); return color(red(c),green(c),blue(c),a); }
+function fract(x){ return x-Math.floor(x); }
+function qrand(i,j=0){ return fract(Math.sin(i*127.1+j*311.7+seed*0.171)*43758.5453123); }
+function safeArea(){ const m=min(width,height)*0.062; return {x:m,y:m,w:width-2*m,h:height-2*m}; }
+function isPolishMode(P){ return (P.renderMode||'preview') === 'polish'; }
+function renderQuality(P){
+  return isPolishMode(P)
+    ? {threads:1.16,pixels:1.14,noise:1.08,dpi:DPR_POLISH,glow:1.15}
+    : {threads:0.84,pixels:0.88,noise:0.92,dpi:DPR_PREVIEW,glow:0.95};
+}
+
+function staticSig(P){ return [P.seed,P.format,P.preset,P.combo,P.scenario,P.density,P.edge,P.discipline].join("|"); }
+function frameSig(P){ return [P.seed,P.format,P.preset,P.combo,P.scenario].join("|"); }
+function backgroundField(pg,P){
+  const t=P.tokens, q=renderQuality(P);
+  pg.background(t.bg);
+  pg.noStroke();
+  const blooms = isPolishMode(P) ? 5 : 4;
+  for(let i=0;i<blooms;i++){
+    const gx = width*(0.14+0.72*qrand(i,1));
+    const gy = height*(0.06+0.84*qrand(i,2));
+    const rr = min(width,height)*(0.16+0.17*qrand(i,3));
+    const c = i%3===0?H(t.indigo,16*q.glow):i%3===1?H(t.violet,14*q.glow):H(t.mint,10*q.glow);
+    pg.fill(c);
+    for(let r=rr;r>0;r-=max(18,rr/15)) pg.circle(gx,gy,r);
+  }
+  const bandCount = Math.max(2, Math.floor((2 + P.density/26) * q.noise));
+  for(let i=0;i<bandCount;i++){
+    for(let y=0;y<height;y+=3){
+      const yy=y/height;
+      const wob=noise(i*0.6,yy*1.9,seed*0.0017);
+      const a=map(wob,0,1,1,12)*(1-Math.abs(yy-.5)*0.82);
+      pg.stroke(i%2?H(t.indigo,a):H(t.violet,a*.88));
+      pg.line(0,y,width*(0.24+0.76*wob),y);
+    }
+  }
+  pg.fill(H("#000000",40));
+  for(let i=0;i<24;i++){
+    const y = height*(i/24);
+    pg.rect(0,y,width,height/24+1);
+  }
+}
+function pixelSyntax(pg,P){
+  const t=P.tokens, q=renderQuality(P);
+  const snap = Math.round(map(P.discipline,70,98,12,5));
+  const density = Math.floor(map(P.density,28,88,100,300) * q.pixels);
+  pg.noStroke();
+  for(let i=0;i<density;i++){
+    const x=Math.round(qrand(i,31)*width/snap)*snap;
+    const y=Math.round(qrand(i,32)*height/snap)*snap;
+    const w=snap*(1+Math.floor(qrand(i,33)*3.6));
+    const h=snap*(1+Math.floor(qrand(i,34)*1.8));
+    const c = qrand(i,35)>.9?H(t.mint,20):qrand(i,36)>.68?H(t.silver,14):qrand(i,37)>.46?H(t.violet,12):H(t.indigo,10);
+    pg.fill(c); pg.rect(x,y,w,h,1.5);
+  }
+}
+function vectorThreads(pg,P){
+  const t=P.tokens, q=renderQuality(P);
+  randomSeed(seed); noiseSeed(seed);
+  const count=Math.floor(map(P.density,28,88,120,560) * q.threads);
+  const steps=Math.floor(map(P.density,28,88,28,84) * q.threads);
+  const scale=map(P.discipline,70,98,80,190);
+  pg.blendMode(ADD);
+  for(let i=0;i<count;i++){
+    let x=random(width), y=random(height);
+    const speed=random(0.8,1.7) * map(P.discipline,70,98,1.1,0.88);
+    for(let s=0;s<steps;s++){
+      const a=noise(x/scale,y/scale,i*0.013)*TAU*2.15 + sin((x+y)*0.0017)*0.36;
+      const px=x, py=y; x += cos(a)*speed*2.0; y += sin(a)*speed*2.0;
+      if(x<0||y<0||x>width||y>height) break;
+      if(isInProtectedTextArea(px,py) && qrand(i,s) < map(P.discipline,70,98,0.54,0.92)) continue;
+      const k=(Math.abs(cos(a))+Math.abs(sin(a)))*0.5;
+      pg.stroke(k>.9?H(t.indigo,18):k>.78?H(t.violet,13):qrand(i,s)>.992?H(t.mint,10):H(t.silver,6));
+      pg.strokeWeight(k>.9?1.15:0.9);
+      pg.line(px,py,x,y);
+    }
+  }
+  pg.blendMode(BLEND);
+}
+function edgeTagsAndDrips(pg,P){
+  const t=P.tokens, e=P.edge/100, d=P.discipline/100;
+  if(e<0.02) return;
+  pg.noFill();
+  const tagCount=Math.floor(1+e*6);
+  for(let i=0;i<tagCount;i++){
+    const side=i%2===0?0:1;
+    const cx=side?width*(0.88-qrand(i,44)*0.06):width*(0.12+qrand(i,45)*0.06);
+    const cy=height*(0.16+0.72*qrand(i,46));
+    const ww=min(width,height)*(0.24+0.14*qrand(i,47));
+    const hh=ww*(0.32+0.22*qrand(i,48));
+    const sw=map(P.edge,4,56,1.4,6.8)*(0.8+qrand(i,49));
+    pg.stroke(i%3===0?H(t.violet,28+24*e*(1-d*.2)):i%3===1?H(t.silver,12+18*e):H(t.rust,10+16*e));
+    pg.strokeWeight(sw);
+    pg.arc(cx,cy,ww,hh,PI*(0.99+qrand(i,50)*0.15),PI*(1.56+qrand(i,51)*0.18));
+    if(e>0.34){
+      pg.stroke(H(t.violet,14+18*e));
+      pg.beginShape();
+      for(let j=0;j<4;j++){
+        const xx = cx + (j-1.6)*ww*0.11 + sin(j+i+seed*0.01)*12;
+        const yy = cy - hh*0.03 + cos(j*1.7+i)*8 + j*hh*0.018;
+        pg.curveVertex(xx,yy);
+      }
+      pg.endShape();
+    }
+  }
+  if(e>0.14){
+    pg.noStroke();
+    const dripCount=Math.floor(1+e*8*map(P.discipline,70,98,1.0,0.52));
+    for(let i=0;i<dripCount;i++){
+      let x = width*(0.08+0.84*qrand(i,61));
+      let y = height*(0.06+0.14*qrand(i,62));
+      if(isInProtectedTextArea(x,y)) y = height*(0.78+qrand(i,63)*0.08);
+      const len = height*(0.02 + 0.10*qrand(i,64)*e);
+      const w = map(P.edge,4,56,2,8)*(0.55+qrand(i,65));
+      pg.fill(i%3===0?H(t.rust,8+18*e):i%3===1?H(t.violet,10+18*e):H(t.silver,7+12*e));
+      pg.rect(x,y,w,len,w/2); pg.ellipse(x+w/2,y+len,w*1.5,w*1.08);
+    }
+  }
+}
+function framesAndMicrotype(pg,P){
+  const t=P.tokens, sa=safeArea();
+  pg.noFill();
+  pg.stroke(H(t.silver,46)); pg.strokeWeight(2.1); pg.rect(sa.x,sa.y,sa.w,sa.h,28);
+  pg.stroke(H(t.indigo,80)); pg.strokeWeight(1); pg.rect(sa.x+16,sa.y+16,sa.w-32,sa.h-32,21);
+  pg.noStroke();
+  pg.fill(H(t.bg,115)); pg.rect(sa.x+10,sa.y+10,sa.w-20,44,14);
+  pg.fill(H(t.mint,155)); pg.textFont('IBM Plex Mono, PT Mono, monospace');
+  pg.textSize(min(width,height)*0.013);
+  pg.text(`seed:${seed}  scenario:${P.scenario}  use:${P.preset}  density:${P.density}  edge:${P.edge}  discipline:${P.discipline}  mode:${P.renderMode}`, width*0.084, height*0.092);
+  pg.fill(H(t.violet,142));
+  pg.text('escape collective / autonomous layout tool', width*0.084, height*0.928);
+}
+function getBlockRect(key){
+  const b=blockLayout[key];
+  return {x:b.x/100*width, y:b.y/100*height, w:b.w/100*width, h:b.h/100*height, s:b.s/100};
+}
+function isInProtectedTextArea(x,y){
+  return ['title','subtitle','footer'].some(key=>{
+    const r=getBlockRect(key);
+    return x>r.x-18 && x<r.x+r.w+18 && y>r.y-18 && y<r.y+r.h+18;
+  });
+}
+function textPanel(pg,P,key,fillColor){
+  const t=P.tokens, r=getBlockRect(key);
+  const panelAlpha = key==='title' ? 184 : 160;
+  pg.noStroke();
+  pg.fill(H(t.bg, panelAlpha));
+  pg.rect(r.x-18,r.y-14,r.w+6,r.h+8,20);
+  pg.stroke(key==='title' ? H(t.silver,34) : H(t.indigo,36));
+  pg.strokeWeight(1);
+  pg.noFill();
+  pg.rect(r.x-18,r.y-14,r.w+6,r.h+8,20);
+  pg.noStroke();
+  pg.fill(fillColor);
+  pg.textAlign(LEFT, TOP);
+  if(key==='title'){
+    pg.textFont('Arial Black, Inter, sans-serif');
+    let size=min(width,height)*0.08*r.s;
+    const lines=P.title.split('\n').length;
+    if(P.title.replace(/\n/g,' ').length>18) size*=0.86;
+    if(lines>2) size*=0.8;
+    if(P.scenario==='mutual aid notice' || P.scenario==='incident board') size*=0.92;
+    pg.textSize(size);
+    pg.textLeading(size*0.84);
+    drawWrappedMultiline(pg, P.title, r.x, r.y+4, r.w-18, size*0.84);
+  } else if(key==='subtitle'){
+    pg.textFont('IBM Plex Mono, PT Mono, monospace');
+    pg.textSize(min(width,height)*0.021*r.s);
+    pg.textLeading(min(width,height)*0.03*r.s);
+    drawWrappedMultiline(pg, P.subtitle.toUpperCase(), r.x, r.y+10, r.w-12, min(width,height)*0.03*r.s);
+  } else {
+    pg.textFont('IBM Plex Mono, PT Mono, monospace');
+    pg.textSize(min(width,height)*0.0165*r.s);
+    pg.textLeading(min(width,height)*0.022*r.s);
+    drawWrappedMultiline(pg, P.footer, r.x, r.y+10, r.w-10, min(width,height)*0.022*r.s);
+  }
+}
+function drawWrappedMultiline(pg, str, x, y, w, leading){
+  const rawLines=(str || '').split('\n');
+  let yy=y;
+  for(const raw of rawLines){
+    const words=raw.trim() ? raw.split(/\s+/) : [''];
+    let line='';
+    for(const word of words){
+      const test=(line?line+' ':'')+word;
+      if(pg.textWidth(test)>w && line){
+        pg.text(line,x,yy);
+        line=word;
+        yy+=leading;
+      } else {
+        line=test;
+      }
+    }
+    pg.text(line,x,yy);
+    yy+=leading;
+  }
+}
+
+function setup(){
+  const [w,h]=formats[$('format').value];
+  cnv = createCanvas(w,h);
+  cnv.parent('holder');
+  pixelDensity(1);
+  noLoop();
+  ensureBuffers();
+  updateUI();
+  syncBlockControls();
+  redrawArt(true);
+}
+
+function draw(full=true){
+  const P=params();
+  randomSeed(seed); noiseSeed(seed);
+  ensureBuffers();
+  const sSig=staticSig(P), fSig=frameSig(P);
+  if(full || sSig!==lastStaticSig){
+    gBase.clear(); gTexture.clear(); gEdge.clear();
+    backgroundField(gBase,P);
+    pixelSyntax(gTexture,P);
+    vectorThreads(gTexture,P);
+    edgeTagsAndDrips(gEdge,P);
+    lastStaticSig=sSig;
+  }
+  if(full || fSig!==lastFrameSig){
+    gFrame.clear();
+    framesAndMicrotype(gFrame,P);
+    lastFrameSig=fSig;
+  }
+  clear();
+  image(gBase,0,0,width,height);
+  image(gTexture,0,0,width,height);
+  image(gEdge,0,0,width,height);
+  image(gFrame,0,0,width,height);
+  textPanel(window,P,'title',H(P.tokens.silver,252));
+  textPanel(window,P,'subtitle',H(P.tokens.mint,240));
+  textPanel(window,P,'footer',H(P.tokens.violet,198));
+}
+window.addEventListener('resize', ()=>setTimeout(syncOverlay,30));
+window.addEventListener('keydown', (ev)=>{
+  if(ev.target && /input|textarea|select/i.test(ev.target.tagName)) return;
+  if(ev.key==='[') shiftSeed(-1);
+  else if(ev.key===']') shiftSeed(1);
+  else if(ev.key.toLowerCase()==='r') randomizeSeed();
+});
+</script>
+</body>
+</html>

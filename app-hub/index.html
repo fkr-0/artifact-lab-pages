@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Redirecting to NEXUS Portal...</title>
+  <script>
+    // Auto-redirect to the new NEXUS Portal
+    window.location.href = 'v8-portal.html';
+  </script>
+  <style>
+    body {
+      background: #0a0a12;
+      color: #00ffff;
+      font-family: 'Share Tech Mono', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .redirect-msg {
+      text-align: center;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    a { color: #00ff88; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="redirect-msg">
+    <h2>🚀 Redirecting to NEXUS Portal v8...</h2>
+    <p>If not redirected, <a href="v8-portal.html">click here</a>.</p>
+  </div>
+</body>
+</html>
