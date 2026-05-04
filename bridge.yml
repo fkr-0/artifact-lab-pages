@@ -82,10 +82,27 @@ commands:
     track: test
     timeoutMs: 10000
 
+  serve:peermodgroove:
+    description: Start the artifacts server for PeerModGroove and open the new modular sound machine.
+    run: bash -lc 'source ./artifacts-server.sh && artifacts-start && ${BROWSER:-xdg-open} http://localhost:${ARTIFACTS_PORT:-8080}/PeerModGroove/index.html >/dev/null 2>&1 || true'
+    track: dev
+    timeoutMs: 10000
+  lint:peermodgroove:
+    description: Syntax-check PeerModGroove ES module sources.
+    run: bash -lc 'node --check PeerModGroove/src/app.js && for f in PeerModGroove/src/core/*.js PeerModGroove/src/modules/*.js; do node --check "$f"; done'
+    track: test
+    timeoutMs: 10000
+  smoke:peermodgroove:
+    description: Check PeerModGroove artifact tree, copied vendor cargo, and source syntax.
+    run: bash -lc 'test -f PeerModGroove/index.html && test -f PeerModGroove/vendor/peernet-lib.js && test -f PeerModGroove/vendor/v9-portal.html && test -f PeerModGroove/vendor/peernet-orca-index.html && node --check PeerModGroove/src/app.js && for f in PeerModGroove/src/core/*.js PeerModGroove/src/modules/*.js; do node --check "$f"; done'
+    track: test
+    timeoutMs: 10000
+
 agent:
   notes:
     - Root shell scripts remain the source of truth for package/deploy/server behavior; bridge.yml exposes them as sane commands.
     - peer-music-groove is the current shared sound-centered app surface.
+    - PeerModGroove is the new sound-machine redesign subtree with copied vendor cargo and autonomous modules.
     - Sound modules implement a common getRigPort/connect/disconnect/playNote/stopNote contract and route through one mixer destination.
   tasks:
     - Split the shared sound module catalog into a reusable JS module if more audio apps become standalone folders.
@@ -94,3 +111,4 @@ agent:
     - 2026-05-05: Added bridge commands for serve/open/start/stop/restart/status/package/deploy and sound smoke checks.
     - 2026-05-05: Fixed lazy AudioContext initialization for modules and removed invalid connect(null) FM synth call.
     - 2026-05-05: Added a lightweight common peer/rig module catalog and mixer port interface for sound-producing modules.
+    - 2026-05-05: Created PeerModGroove artifact tree with v9-inspired shell, PeernetLobby cargo, modular contracts, patch bay, MIDI-like piano roll, synth, field recorder, peer bridge, and central mixer.

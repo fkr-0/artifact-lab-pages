@@ -103,6 +103,8 @@ rsync -avz --checksum $DRY_RUN \
   --include="peernet-orca/**" \
   --include="peer-music-groove/" \
   --include="peer-music-groove/**" \
+  --include="PeerModGroove/" \
+  --include="PeerModGroove/**" \
   --include="bathroom-emergency-guide/" \
   --include="bathroom-emergency-guide/**" \
   --include="aster-relay-identity-nightline-configurable/" \
