@@ -1434,6 +1434,7 @@
 <script src="../peernetjs/peernet-session-manager.js"></script>
 <script src="../peernetjs/peernet-storage-manager.js"></script>
 <script src="../peernetjs/peernet-app-loader.js"></script>
+<script src="../peernetjs/peernet-session-router.js"></script>
 
 <script>
 // ============================================
@@ -1973,6 +1974,21 @@ function createV9SaveState() {
   renderLocalSnapshots();
 
 // ============================================
+
+// ============================================
+// MULTI-APP SESSION ROUTER
+// ============================================
+const peernetSessionRouter = window.PeernetSessionRouter ? new PeernetSessionRouter() : null;
+
+if (peernetSessionRouter) {
+  peernetSessionRouter.register('nexus-v9', applyV9StoredState);
+
+  if (peernetSessionManager) {
+    peernetSessionManager.on('session:join', s => peernetSessionRouter.apply(s));
+    peernetSessionManager.on('session:remote-update', s => peernetSessionRouter.apply(s));
+  }
+}
+
 // SESSION-AWARE APP LOADER
 // ============================================
 const peernetAppLoader = window.PeernetAppLoader ? new PeernetAppLoader({
