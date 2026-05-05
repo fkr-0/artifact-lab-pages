@@ -1,6 +1,7 @@
 // PeerModGroove/src/modules/clean-synth.js
 
 import { ModuleBase, PortType, midiNoteToFrequency, uid } from '../core/contracts.js';
+import { packetAudioTime } from '../core/scheduler.js';
 
 export class CleanSynthModule extends ModuleBase {
   constructor(config = {}) {
@@ -33,8 +34,8 @@ export class CleanSynthModule extends ModuleBase {
 
   receive(packet) {
     if (packet.kind === PortType.MIDI) {
-      if (packet.type === 'note-on') this.noteOn(packet.note, packet.velocity ?? 0.75);
-      if (packet.type === 'note-off') this.noteOff(packet.note);
+      if (packet.type === 'note-on') this.noteOn(packet.note, packet.velocity ?? 0.75, packetAudioTime(this.ctx, packet));
+      if (packet.type === 'note-off') this.noteOff(packet.note, packetAudioTime(this.ctx, packet));
     }
     if (packet.kind === PortType.CONTROL && packet.type === 'param' && packet.target === 'cutoff') {
       this.cutoff = Number(packet.value) || this.cutoff;
@@ -42,28 +43,28 @@ export class CleanSynthModule extends ModuleBase {
     }
   }
 
-  noteOn(note, velocity) {
+  noteOn(note, velocity, when = this.ctx?.currentTime || 0) {
     if (!this.ctx || !this.output || !this.filter) return;
-    this.noteOff(note);
+    this.noteOff(note, when);
     const osc = this.ctx.createOscillator();
     const amp = this.ctx.createGain();
     osc.type = this.waveform;
     osc.frequency.value = midiNoteToFrequency(note);
-    amp.gain.setValueAtTime(0.0001, this.ctx.currentTime);
-    amp.gain.exponentialRampToValueAtTime(Math.max(0.001, velocity), this.ctx.currentTime + 0.012);
-    amp.gain.setTargetAtTime(velocity * 0.72, this.ctx.currentTime + 0.05, 0.08);
+    amp.gain.setValueAtTime(0.0001, when);
+    amp.gain.exponentialRampToValueAtTime(Math.max(0.001, velocity), when + 0.012);
+    amp.gain.setTargetAtTime(velocity * 0.72, when + 0.05, 0.08);
     osc.connect(amp);
     amp.connect(this.filter);
-    osc.start();
+    osc.start(when);
     this.voices.set(note, { osc, amp });
   }
 
-  noteOff(note) {
+  noteOff(note, when = this.ctx?.currentTime || 0) {
     const voice = this.voices.get(note);
     if (!voice || !this.ctx) return;
-    voice.amp.gain.cancelScheduledValues(this.ctx.currentTime);
-    voice.amp.gain.setTargetAtTime(0.0001, this.ctx.currentTime, this.release);
-    voice.osc.stop(this.ctx.currentTime + this.release + 0.05);
+    voice.amp.gain.cancelScheduledValues(when);
+    voice.amp.gain.setTargetAtTime(0.0001, when, this.release);
+    voice.osc.stop(when + this.release + 0.05);
     this.voices.delete(note);
   }
 

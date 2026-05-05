@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NEXUS v10 Portal — PeernetLobby Apps</title>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    :root{--bg:#050812;--panel:rgba(8,20,32,.88);--line:rgba(0,255,255,.25);--cyan:#00ffff;--fg:#d8fbff;--muted:#84a6ad;--accent:#ffd166;--danger:#ff5c7a;--ok:#5cffb1}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 10%,rgba(0,255,255,.16),transparent 30%),radial-gradient(circle at 90% 30%,rgba(255,209,102,.11),transparent 28%),var(--bg);color:var(--fg);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}
+    .shell{display:grid;grid-template-columns:280px 1fr;grid-template-rows:auto 1fr;height:100vh}.top{grid-column:1/-1;display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;border-bottom:1px solid var(--line);background:rgba(0,0,0,.32);backdrop-filter:blur(10px)}
+    h1{margin:0;font-size:1.05rem;letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}.pill{border:1px solid var(--line);border-radius:999px;padding:.2rem .55rem;color:var(--muted);font-size:.78rem}.pill.ok{color:var(--ok);border-color:rgba(92,255,177,.4)}.pill.warn{color:var(--accent)}
+    aside{border-right:1px solid var(--line);background:rgba(0,0,0,.24);padding:1rem;overflow:auto}.main{padding:1rem;overflow:auto}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 0 24px rgba(0,255,255,.08);padding:1rem;margin-bottom:1rem}
+    button,input,textarea,select{font:inherit}button{background:rgba(0,255,255,.1);border:1px solid var(--line);color:var(--fg);border-radius:9px;padding:.48rem .7rem;cursor:pointer}button:hover{border-color:var(--cyan);box-shadow:0 0 14px rgba(0,255,255,.18)}button.active{background:rgba(0,255,255,.22);color:white}input,textarea{width:100%;background:rgba(0,0,0,.36);border:1px solid rgba(0,255,255,.18);color:var(--fg);border-radius:10px;padding:.65rem;outline:none}textarea{min-height:42vh;resize:vertical}.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.stack{display:grid;gap:.75rem}.muted{color:var(--muted)}.small{font-size:.82rem}.apps button{display:block;width:100%;text-align:left;margin:.35rem 0}.peers{display:grid;gap:.35rem}.peer{display:flex;align-items:center;gap:.5rem;color:var(--muted)}.dot{width:.75rem;height:.75rem;border-radius:99px;background:var(--cyan)}.split{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.seq-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:.35rem}.seq-step{aspect-ratio:1;border-radius:8px;border:1px solid rgba(0,255,255,.2);background:rgba(0,0,0,.28)}.seq-step.on{background:rgba(0,255,255,.32);box-shadow:0 0 12px rgba(0,255,255,.18)}.seq-step.play{outline:2px solid var(--accent)}.log{max-height:180px;overflow:auto;font-size:.8rem;color:var(--muted);white-space:pre-wrap}.remote-flash{animation:flash .4s ease}@keyframes flash{from{box-shadow:0 0 0 2px rgba(255,209,102,.8)}to{box-shadow:none}}@media(max-width:760px){.shell{grid-template-columns:1fr}.top{grid-column:1}.main,aside{overflow:visible}.shell{height:auto;min-height:100vh}.split{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <h1>NEXUS v10</h1>
+      <span id="status" class="pill warn">booting</span>
+      <span id="identity" class="pill">anonymous</span>
+      <span class="pill">PeernetLobby single app-collab layer</span>
+    </header>
+    <aside>
+      <div class="card stack">
+        <strong>Lobby</strong>
+        <label class="small muted">Display name</label>
+        <input id="username" maxlength="32">
+        <div class="row"><button id="connectBtn">Connect</button><button id="broadcastPresenceBtn">Ping presence</button></div>
+        <div class="small muted">Lobby ID</div>
+        <code id="lobbyId">v10-app-hub-main</code>
+      </div>
+      <div class="card">
+        <strong>Apps</strong>
+        <div class="apps" id="apps"></div>
+      </div>
+      <div class="card stack">
+        <strong>Peers</strong>
+        <div id="peers" class="peers muted small">none</div>
+      </div>
+    </aside>
+    <main class="main">
+      <div id="view"></div>
+      <div class="card">
+        <strong>Event log</strong>
+        <div id="log" class="log"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { PeernetLobby } from '../peernetjs/peernet-lib.js';
+
+    const LOBBY_ID = 'v10-app-hub-main';
+    const state = {
+      app: 'notepad',
+      username: localStorage.getItem('v10-username') || `Pilot-${Math.floor(Math.random()*9000+1000)}`,
+      connected: false,
+      suppress: false,
+      lobby: new PeernetLobby(LOBBY_ID, { storageKey: 'v10-peernet', debug: false })
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const html = (s) => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const log = (...xs) => { const el=$('log'); el.textContent = `[${new Date().toLocaleTimeString()}] ${xs.join(' ')}\n` + el.textContent; };
+
+    const apps = [
+      { id:'notepad', title:'Local-first Notepad', render:renderNotepad },
+      { id:'collab', title:'Shared Text Pad', render:renderCollabPad },
+      { id:'sequencer', title:'Shared Step Sequencer', render:renderSequencer },
+      { id:'sprite-gif-creator', title:'Sprite GIF Creator', render:renderSpriteGifCreatorLauncher },
+      { id:'peermodgroove', title:'Launch PeerModGroove', render:renderPeerModGrooveLauncher },
+      { id:'peers', title:'Peer Console', render:renderPeerConsole },
+      { id:'about', title:'About v10', render:renderAbout }
+    ];
+
+    function init() {
+      $('username').value = state.username;
+      $('lobbyId').textContent = LOBBY_ID;
+      $('connectBtn').onclick = connect;
+      $('broadcastPresenceBtn').onclick = broadcastPresence;
+      $('username').onchange = () => {
+        state.username = $('username').value.trim() || state.username;
+        localStorage.setItem('v10-username', state.username);
+        state.lobby.setUsername(state.username);
+        updateIdentity();
+      };
+      $('apps').innerHTML = apps.map(a => `<button data-app="${a.id}">${a.title}</button>`).join('');
+      $('apps').onclick = (e) => { const b=e.target.closest('[data-app]'); if(b) openApp(b.dataset.app); };
+
+      state.lobby.addEventListener('status', e => { state.connected = !!e.detail.connected; updateStatus(e.detail.text); });
+      state.lobby.addEventListener('peers', e => renderPeers(e.detail));
+      state.lobby.addEventListener('data', e => handleLobbyData(e.detail));
+
+      updateIdentity();
+      openApp('notepad');
+      connect();
+    }
+
+    async function connect() {
+      try {
+        updateStatus('connecting');
+        const id = await state.lobby.connect(state.username);
+        log('connected', id);
+        updateIdentity();
+        broadcastPresence();
+      } catch (err) {
+        updateStatus(err?.message || 'connection failed');
+        log('connect failed', err?.message || err);
+      }
+    }
+
+    function updateStatus(text) {
+      const s=$('status');
+      s.textContent = text || (state.connected ? 'connected' : 'offline');
+      s.className = `pill ${state.connected ? 'ok' : 'warn'}`;
+    }
+
+    function updateIdentity() {
+      $('identity').textContent = `${state.username}${state.lobby.myId ? ` · ${state.lobby.myId.slice(0,8)}` : ''}`;
+    }
+
+    function renderPeers(peers) {
+      const entries = [...(peers || new Map()).entries()];
+      $('peers').innerHTML = entries.length ? entries.map(([id,p]) => `<div class="peer"><span class="dot" style="background:${p.color}"></span><span>${html(p.username)} · ${id.slice(0,8)}</span></div>`).join('') : 'none';
+    }
+
+    function openApp(id) {
+      state.app = id;
+      document.querySelectorAll('[data-app]').forEach(b => b.classList.toggle('active', b.dataset.app === id));
+      const app = apps.find(a => a.id === id) || apps[0];
+      $('view').innerHTML = '';
+      app.render($('view'));
+      log('open', app.title);
+    }
+
+    function broadcast(type, payload) {
+      state.lobby.broadcast({ type, payload, app: state.app, fromName: state.username, at: Date.now() });
+    }
+
+    function broadcastPresence() {
+      broadcast('presence', { username: state.username, app: state.app });
+    }
+
+    function handleLobbyData({ from, data }) {
+      if (!data || typeof data.type !== 'string') return;
+      log('rx', data.type, 'from', (from || '').slice(0,8));
+      window.dispatchEvent(new CustomEvent('v10:lobby-data', { detail: { from, data } }));
+    }
+
+    function renderNotepad(root) {
+      const saved = localStorage.getItem('v10-notepad') || '';
+      root.innerHTML = `<section class="card stack"><div class="row"><strong>Local-first Notepad</strong><span class="pill">localStorage + optional lobby mirror</span></div><textarea id="npArea" placeholder="Personal notes; mirrored to connected peers when online.">${html(saved)}</textarea><div class="row small muted"><span>key: v10-notepad</span><button id="npPush">Push now</button><button id="npPullAsk">Ask peers for note</button></div></section>`;
+      const area = $('npArea');
+      area.addEventListener('input', () => {
+        if (state.suppress) return;
+        localStorage.setItem('v10-notepad', area.value);
+        broadcast('notepad:update', { text: area.value });
+      });
+      $('npPush').onclick = () => broadcast('notepad:update', { text: area.value });
+      $('npPullAsk').onclick = () => broadcast('notepad:request', {});
+      const listener = (e) => {
+        const { data } = e.detail;
+        if (data.type === 'notepad:update') {
+          const text = data.payload?.text || '';
+          if (area.value !== text) {
+            state.suppress = true; area.value = text; localStorage.setItem('v10-notepad', text); state.suppress = false;
+            area.classList.add('remote-flash'); setTimeout(()=>area.classList.remove('remote-flash'), 450);
+          }
+        }
+        if (data.type === 'notepad:request') broadcast('notepad:update', { text: area.value });
+      };
+      window.addEventListener('v10:lobby-data', listener, { signal: appAbortSignal(root) });
+    }
+
+    function renderCollabPad(root) {
+      const docId = new URLSearchParams(location.search).get('doc') || 'main';
+      const key = `v10-collab:${docId}`;
+      const saved = localStorage.getItem(key) || '';
+      root.innerHTML = `<section class="card stack"><div class="row"><strong>Shared Text Pad</strong><span class="pill">PeernetLobby LWW</span><span class="pill">doc:${html(docId)}</span></div><textarea id="cpArea" placeholder="Shared lightweight pad. Last write wins; use for quick lobby notes, not source code.">${html(saved)}</textarea><div class="row small muted"><button id="cpPush">Push</button><button id="cpRequest">Request latest</button><span id="cpMeta">idle</span></div></section>`;
+      const area = $('cpArea');
+      let version = Number(localStorage.getItem(`${key}:version`) || 0);
+      const send = () => { version += 1; localStorage.setItem(`${key}:version`, String(version)); localStorage.setItem(key, area.value); broadcast('collab:update', { docId, text: area.value, version }); $('cpMeta').textContent = `sent v${version}`; };
+      area.addEventListener('input', () => { if (!state.suppress) send(); });
+      $('cpPush').onclick = send;
+      $('cpRequest').onclick = () => broadcast('collab:request', { docId });
+      const listener = (e) => {
+        const { data } = e.detail;
+        if (data.type === 'collab:request' && data.payload?.docId === docId) send();
+        if (data.type !== 'collab:update' || data.payload?.docId !== docId) return;
+        const remoteVersion = Number(data.payload.version || 0);
+        if (remoteVersion < version) return;
+        const text = data.payload.text || '';
+        if (area.value !== text) {
+          version = remoteVersion;
+          state.suppress = true; area.value = text; localStorage.setItem(key, text); localStorage.setItem(`${key}:version`, String(version)); state.suppress = false;
+          $('cpMeta').textContent = `received v${version} from ${html(data.fromName || 'peer')}`;
+          area.classList.add('remote-flash'); setTimeout(()=>area.classList.remove('remote-flash'), 450);
+        }
+      };
+      window.addEventListener('v10:lobby-data', listener, { signal: appAbortSignal(root) });
+    }
+
+
+    function makeSeqState() {
+      return {
+        docId: new URLSearchParams(location.search).get('seq') || 'main',
+        bpm: 120,
+        playing: false,
+        step: 0,
+        version: 0,
+        tracks: [
+          { id:'kick', name:'Kick', note:'C2', steps:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0] },
+          { id:'snare', name:'Snare', note:'D2', steps:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] },
+          { id:'hat', name:'Hat', note:'F#2', steps:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }
+        ]
+      };
+    }
+
+
+    function makeTransport(seq) {
+      return {
+        docId: seq.docId,
+        bpm: seq.bpm,
+        step: seq.step || 0,
+        running: false,
+        authority: state.lobby.myId || state.username,
+        epochMs: 0,
+        tickMs: Math.max(60, 60000 / Number(seq.bpm || 120) / 4)
+      };
+    }
+
+    function transportTickPayload(seq, transport) {
+      const active = seq.tracks.filter(t => t.steps[seq.step]).map(t => ({
+        id: t.id,
+        note: t.note,
+        name: t.name,
+        velocity: t.velocity ?? 0.85
+      }));
+      return {
+        docId: seq.docId,
+        step: seq.step,
+        bpm: seq.bpm,
+        tickMs: transport.tickMs,
+        authority: transport.authority,
+        startedAt: transport.epochMs,
+        dueAt: Date.now() + Math.min(transport.tickMs * 0.45, 120),
+        active
+      };
+    }
+
+    function renderSequencer(root) {
+      const key = 'v10-sequencer';
+      const seq = JSON.parse(localStorage.getItem(key) || 'null') || makeSeqState();
+      let timer = null;
+      const transport = makeTransport(seq);
+      root.innerHTML = `<section class="card stack"><div class="row"><strong>Shared Step Sequencer</strong><span class="pill">PeernetLobby shared transport</span><span class="pill">doc:${html(seq.docId)}</span></div><div class="row"><button id="seqPlay">Start shared clock</button><button id="seqStop">Stop shared clock</button><label class="small muted">BPM</label><input id="seqBpm" type="number" min="40" max="240" style="width:90px" value="${seq.bpm}"><button id="seqPush">Push state</button><button id="seqRequest">Request state</button><button id="seqLaunchPmg">Open in PeerModGroove</button></div><div id="seqTracks" class="stack"></div><div class="small muted" id="seqMeta">idle</div></section>`;
+      const save = () => localStorage.setItem(key, JSON.stringify(seq));
+      const render = () => {
+        $('seqTracks').innerHTML = seq.tracks.map(t => `<div><div class="row small"><strong style="width:70px">${html(t.name)}</strong><span class="muted">${html(t.note)}</span></div><div class="seq-grid">${t.steps.map((v,i)=>`<button class="seq-step ${v?'on':''} ${i===seq.step?'play':''}" data-track="${t.id}" data-step="${i}" title="${t.name} ${i+1}"></button>`).join('')}</div></div>`).join('');
+      };
+      const op = (kind, payload) => {
+        seq.version += 1;
+        applySeqOp(seq, { kind, payload, version: seq.version, site: state.lobby.myId || state.username });
+        save(); render();
+        broadcast('seq:op', { docId: seq.docId, op: { kind, payload, version: seq.version, site: state.lobby.myId || state.username } });
+        $('seqMeta').textContent = `sent ${kind} v${seq.version}`;
+      };
+      const tick = () => {
+        seq.step = (seq.step + 1) % 16;
+        transport.step = seq.step;
+        transport.tickMs = Math.max(60, 60000 / Number(seq.bpm || 120) / 4);
+        render();
+        broadcast('transport:tick', transportTickPayload(seq, transport));
+      };
+      const start = () => {
+        if (timer) return;
+        seq.playing = true;
+        transport.running = true;
+        transport.authority = state.lobby.myId || state.username;
+        transport.epochMs = Date.now();
+        transport.tickMs = Math.max(60, 60000 / Number(seq.bpm || 120) / 4);
+        $('seqPlay').textContent='Clock running';
+        broadcast('transport:start', { ...transport });
+        tick();
+        timer=setInterval(tick, transport.tickMs);
+      };
+      const stop = () => {
+        seq.playing = false;
+        transport.running = false;
+        $('seqPlay').textContent='Start shared clock';
+        if(timer) clearInterval(timer);
+        timer=null;
+        broadcast('transport:stop', { docId: seq.docId, authority: transport.authority, stoppedAt: Date.now() });
+      };
+      $('seqTracks').onclick = e => { const b=e.target.closest('[data-track]'); if(!b) return; op('toggle', { trackId:b.dataset.track, step:Number(b.dataset.step) }); };
+      $('seqBpm').onchange = () => { op('bpm', { bpm:Number($('seqBpm').value || 120) }); transport.bpm = seq.bpm; transport.tickMs = Math.max(60, 60000 / Number(seq.bpm || 120) / 4); if (timer) { clearInterval(timer); timer = setInterval(tick, transport.tickMs); broadcast('transport:start', { ...transport, bpm: seq.bpm }); } };
+      $('seqPlay').onclick = start; $('seqStop').onclick = stop;
+      $('seqPush').onclick = () => broadcast('seq:state', { docId: seq.docId, state: seq });
+      $('seqRequest').onclick = () => broadcast('seq:request', { docId: seq.docId });
+      $('seqLaunchPmg').onclick = () => window.open(`../PeerModGroove/index.html?seq=${encodeURIComponent(seq.docId)}`, '_blank');
+      const listener = (e) => {
+        const { data } = e.detail;
+        if (data.type === 'seq:request' && data.payload?.docId === seq.docId) broadcast('seq:state', { docId: seq.docId, state: seq });
+        if (data.type === 'seq:state' && data.payload?.docId === seq.docId && data.payload.state?.version >= seq.version) {
+          Object.assign(seq, data.payload.state); save(); render(); $('seqMeta').textContent = `received state v${seq.version}`;
+        }
+        if (data.type === 'transport:start' && data.payload?.docId === seq.docId) {
+          seq.bpm = data.payload.bpm || seq.bpm; transport.bpm = seq.bpm; transport.running = true; transport.authority = data.payload.authority; transport.epochMs = data.payload.epochMs || data.payload.startedAt || Date.now(); $('seqMeta').textContent = `following shared clock from ${(transport.authority || '').slice(0,8)}`;
+        }
+        if (data.type === 'transport:stop' && data.payload?.docId === seq.docId) {
+          transport.running = false; $('seqMeta').textContent = 'shared clock stopped';
+        }
+        if (data.type === 'transport:tick' && data.payload?.docId === seq.docId) {
+          seq.step = data.payload.step; render();
+        }
+        if (data.type === 'seq:op' && data.payload?.docId === seq.docId) {
+          const remote = data.payload.op;
+          if (!remote || remote.version < seq.version) return;
+          applySeqOp(seq, remote); seq.version = Math.max(seq.version, remote.version); save(); render(); $('seqMeta').textContent = `received ${remote.kind} v${seq.version}`;
+        }
+      };
+      window.addEventListener('v10:lobby-data', listener, { signal: appAbortSignal(root) });
+      render();
+    }
+
+    function applySeqOp(seq, op) {
+      if (op.kind === 'toggle') {
+        const track = seq.tracks.find(t => t.id === op.payload.trackId);
+        if (track) track.steps[op.payload.step] = track.steps[op.payload.step] ? 0 : 1;
+      }
+      if (op.kind === 'bpm') seq.bpm = Math.max(40, Math.min(240, Number(op.payload.bpm || seq.bpm || 120)));
+    }
+
+    function renderPeerModGrooveLauncher(root) {
+      root.innerHTML = `<section class="card stack"><strong>PeerModGroove</strong><p class="muted">PeerModGroove is a separate launchable app: the peer-synchronized modular audio machine. v10 is only the launcher/runtime shell for lightweight apps.</p><div class="row"><button id="pmgOpen">Open PeerModGroove</button><button id="pmgOpenSeq">Open with current sequencer doc</button></div><pre class="small">v10 portal          = app launcher + lightweight PeernetLobby apps
+PeerModGroove app   = modular audio graph / instruments / patch bay</pre></section>`;
+      $('pmgOpen').onclick = () => window.open('../PeerModGroove/index.html', '_blank');
+      $('pmgOpenSeq').onclick = () => window.open('../PeerModGroove/index.html?seq=main', '_blank');
+    }
+
+    function renderPeerConsole(root) {
+      root.innerHTML = `<section class="card stack"><strong>Peer Console</strong><div class="split"><div><label class="small muted">Message</label><textarea id="pcMsg" style="min-height:120px">hello from v10</textarea></div><div><label class="small muted">Received</label><div id="pcRx" class="log" style="min-height:120px"></div></div></div><button id="pcSend">Broadcast console message</button></section>`;
+      $('pcSend').onclick = () => broadcast('console:message', { text: $('pcMsg').value });
+      const listener = (e) => { const { data } = e.detail; if (data.type === 'console:message') $('pcRx').textContent = `${data.fromName || 'peer'}: ${data.payload?.text || ''}\n` + $('pcRx').textContent; };
+      window.addEventListener('v10:lobby-data', listener, { signal: appAbortSignal(root) });
+    }
+
+    function renderAbout(root) {
+      root.innerHTML = `<section class="card stack"><strong>About v10</strong><p class="muted">v10 is a clean rewrite of the portal app runtime. It intentionally uses <code>PeernetLobby</code> as the single collaboration layer for lightweight apps. PeerModGroove remains the modular audio system and should use structured Peernet/session state only where audio graph synchronization needs it.</p><pre class="small">v10 portal        → launcher + lightweight PeernetLobby apps
+PeerModGroove      → separate launchable modular audio app
+sequencer ops      → correct shared-state use-case for collaboration</pre></section>`;
+    }
+
+    function appAbortSignal(root) {
+      const ctrl = new AbortController();
+      const observer = new MutationObserver(() => { if (!document.body.contains(root)) { ctrl.abort(); observer.disconnect(); } });
+      observer.observe(document.body, { childList:true, subtree:true });
+      return ctrl.signal;
+    }
+
+    init();
+  </script>
+</body>
+</html>

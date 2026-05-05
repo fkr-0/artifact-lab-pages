@@ -96,7 +96,14 @@ export class CrdtEditorAdapter extends EventTarget {
   receiveOps(message = {}) {
     if (!message || message.docId !== this.docId || message.siteId === this.doc.siteId) return;
     const changed = this.doc.applyMany(message.ops || []);
-    if (!changed) return;
+    if (!changed) {
+      // Defensive sync: tests and editor integrations may hand us a CRDT that was
+      // mutated by a compatible adapter before the network envelope arrives. In
+      // that case no op key is newly applied, but the rendered editor can still
+      // be stale.
+      if (this.doc.value() !== this.text) this.renderRemote();
+      return;
+    }
     this.renderRemote();
     this.emit('remote-change', message);
   }

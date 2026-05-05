@@ -43,6 +43,18 @@
             <option value="ocra">OCRA Grid · clocked midi + submix</option>
             <option value="field">Field Recorder · emits audio</option>
             <option value="peer">Peer Bridge · broadcasts control</option>
+            <option value="basicseq">Basic Sequencer · clocked midi</option>
+            <option value="arranger">Arranger · scene control</option>
+            <option value="arp">ARP MIDI Generator · clocked arpeggio</option>
+            <option value="multisampler">Slicing MultiSampler · slices/multisample</option>
+            <option value="dubecho">Dub Echo · feedback delay</option>
+            <option value="reverb">Reverb · ambience</option>
+            <option value="flanger">Flanger · mod delay</option>
+            <option value="phaser">Phaser · allpass sweep</option>
+            <option value="tapeecho">Tape Echo · wow delay</option>
+            <option value="beatlooper">BPM Beat Looper · beat repeat</option>
+            <option value="channel">Channel Strip · gain/pan/mute</option>
+            <option value="mixerdesk">Mixer Desk · master bus</option>
           </select>
           <p class="microcopy">Modules advertise ports. The patch bay routes JSON-safe midi/control packets. Audio modules feed the central mixer by default.</p>
         </div>
@@ -75,6 +87,8 @@
       </aside>
 
       <section class="panel rack">
+        <h2>Visual Patch Canvas</h2>
+        <div class="patch-canvas-host" id="patchCanvas"></div>
         <h2>Rig Rack</h2>
         <div class="modules" id="modules"></div>
       </section>

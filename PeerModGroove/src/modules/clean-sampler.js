@@ -1,6 +1,7 @@
 // PeerModGroove/src/modules/clean-sampler.js
 
 import { ModuleBase, PortType, uid } from '../core/contracts.js';
+import { packetAudioTime } from '../core/scheduler.js';
 
 export class CleanSamplerModule extends ModuleBase {
   constructor(config = {}) {
@@ -34,11 +35,11 @@ export class CleanSamplerModule extends ModuleBase {
   }
 
   receive(packet) {
-    if (packet.kind === PortType.MIDI && packet.type === 'note-on') this.play(packet.note, packet.velocity ?? 0.8);
-    if (packet.kind === PortType.CONTROL && packet.type === 'trigger') this.play(packet.note || 'C4', packet.velocity ?? 0.8);
+    if (packet.kind === PortType.MIDI && packet.type === 'note-on') this.play(packet.note, packet.velocity ?? 0.8, packetAudioTime(this.ctx, packet));
+    if (packet.kind === PortType.CONTROL && packet.type === 'trigger') this.play(packet.note || 'C4', packet.velocity ?? 0.8, packetAudioTime(this.ctx, packet));
   }
 
-  play(note = 'C4', velocity = 0.8) {
+  play(note = 'C4', velocity = 0.8, when = this.ctx?.currentTime || 0) {
     if (!this.ctx || !this.output || !this.buffer) return;
     const src = this.ctx.createBufferSource();
     const amp = this.ctx.createGain();
@@ -47,7 +48,7 @@ export class CleanSamplerModule extends ModuleBase {
     amp.gain.value = velocity;
     src.connect(amp);
     amp.connect(this.output);
-    src.start();
+    src.start(when);
   }
 
   pitchRatio(note) {
