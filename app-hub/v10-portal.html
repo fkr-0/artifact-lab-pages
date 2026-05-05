@@ -21,6 +21,7 @@
       <span id="status" class="pill warn">booting</span>
       <span id="identity" class="pill">anonymous</span>
       <span class="pill">PeernetLobby single app-collab layer</span>
+      <button id="openV9Btn" type="button">v9 Portal</button>
     </header>
     <aside>
       <div class="card stack">
@@ -80,6 +81,7 @@
       $('lobbyId').textContent = LOBBY_ID;
       $('connectBtn').onclick = connect;
       $('broadcastPresenceBtn').onclick = broadcastPresence;
+      $('openV9Btn').onclick = () => window.open('v9-portal.html', '_blank');
       $('username').onchange = () => {
         state.username = $('username').value.trim() || state.username;
         localStorage.setItem('v10-username', state.username);
@@ -331,6 +333,14 @@
         if (track) track.steps[op.payload.step] = track.steps[op.payload.step] ? 0 : 1;
       }
       if (op.kind === 'bpm') seq.bpm = Math.max(40, Math.min(240, Number(op.payload.bpm || seq.bpm || 120)));
+    }
+
+    function renderSpriteGifCreatorLauncher(root) {
+      const href = '../spc/sprite-gif-creator.html';
+      root.innerHTML = `<section class="card stack"><div class="row"><strong>Sprite GIF Creator</strong><span class="pill ok">shared artifact</span></div><p class="muted">Browser-only sprite-sheet splitter, frame jitter adjuster, PNG exporter, and animated GIF assembler. This is the same GIF creation artifact exposed from v9.</p><div class="row"><button id="gifOpen">Open Sprite GIF Creator</button><button id="gifInline">Open inline</button></div><iframe id="gifFrame" title="Sprite GIF Creator" style="display:none;width:100%;min-height:70vh;border:1px solid rgba(0,255,255,.22);border-radius:12px;background:#000"></iframe><pre class="small">artifact path: spc/sprite-gif-creator.html
+v10 relative url: ${href}</pre></section>`;
+      $('gifOpen').onclick = () => window.open(href, '_blank');
+      $('gifInline').onclick = () => { const frame = $('gifFrame'); frame.src = href; frame.style.display = 'block'; };
     }
 
     function renderPeerModGrooveLauncher(root) {
