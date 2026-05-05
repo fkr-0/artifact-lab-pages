@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Classic Solitaire</title>
 <style>
-:root{--felt:#0f6b45;--felt2:#0a4f35;--line:rgba(255,255,255,.24);--card:#fffdf4;--red:#bd1e2d;--black:#151515;--gold:#ffd166;--shadow:rgba(0,0,0,.32);--w:88px;--h:124px}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 10%,rgba(255,255,255,.13),transparent 22rem),linear-gradient(135deg,var(--felt),var(--felt2));color:#fff;font:14px/1.4 system-ui,Segoe UI,Tahoma,sans-serif;padding:18px}.app{max-width:1120px;margin:0 auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.title{display:grid;gap:2px}.title h1{margin:0;font-size:1.35rem;letter-spacing:.08em;text-transform:uppercase}.title span,.hint{opacity:.78}.hud,.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:.35rem .65rem;background:rgba(0,0,0,.18)}button,select{font:inherit;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(255,255,255,.12);color:#fff;padding:.45rem .62rem;cursor:pointer}button:hover{background:rgba(255,255,255,.2)}select option{color:#111}.board{display:grid;gap:18px}.row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.zone{width:var(--w);height:var(--h);border:2px dashed rgba(255,255,255,.28);border-radius:12px;display:grid;place-items:center;color:rgba(255,255,255,.42);font-weight:800;box-shadow:inset 0 0 24px rgba(0,0,0,.12)}.zone.hot{outline:3px solid rgba(255,209,102,.75);outline-offset:2px}.spacer{flex:1;min-width:24px}.tableau{display:grid;grid-template-columns:repeat(7,var(--w));gap:14px;align-items:start;overflow-x:auto;padding-bottom:20px}.col{min-height:var(--h);border-radius:12px;position:relative}.card{width:var(--w);height:var(--h);border-radius:10px;border:1px solid rgba(0,0,0,.3);background:var(--card);color:var(--black);box-shadow:0 5px 12px var(--shadow);padding:7px;display:grid;grid-template-rows:auto 1fr auto;user-select:none;cursor:pointer;position:relative}.card.red{color:var(--red)}.card.face-down{background:repeating-linear-gradient(45deg,#173b8a 0 8px,#1e4fb8 8px 16px);border:2px solid rgba(255,255,255,.72);color:transparent}.card.selected{outline:3px solid var(--gold);outline-offset:2px}.rank{font-weight:900;font-size:1.05rem;line-height:1}.pip{font-size:2rem;place-self:center}.foot{font-weight:900;font-size:1.05rem;place-self:end;transform:rotate(180deg)}.stack .card{margin-bottom:-92px}.stack .card.face-down{margin-bottom:-96px}.stack .card:last-child{margin-bottom:0}.waste .card,.foundation .card{grid-area:1/1}.message{min-height:34px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18);padding:8px 10px}.win{position:fixed;inset:0;background:rgba(0,0,0,.58);display:none;place-items:center;padding:20px}.win.show{display:grid}.modal{max-width:420px;background:#10291f;border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center}.modal h2{margin-top:0;color:var(--gold)}@media(max-width:760px){:root{--w:70px;--h:100px}.tableau{gap:8px}.row{gap:8px}.stack .card{margin-bottom:-75px}.stack .card.face-down{margin-bottom:-78px}.pip{font-size:1.45rem}body{padding:10px}}
+:root{--felt:#0f6b45;--felt2:#0a4f35;--line:rgba(255,255,255,.24);--card:#fffdf4;--red:#bd1e2d;--black:#151515;--gold:#ffd166;--shadow:rgba(0,0,0,.32);--w:88px;--h:124px}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 10%,rgba(255,255,255,.13),transparent 22rem),linear-gradient(135deg,var(--felt),var(--felt2));color:#fff;font:14px/1.4 system-ui,Segoe UI,Tahoma,sans-serif;padding:18px}.app{max-width:1120px;margin:0 auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.title{display:grid;gap:2px}.title h1{margin:0;font-size:1.35rem;letter-spacing:.08em;text-transform:uppercase}.title span,.hint{opacity:.78}.hud,.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:.35rem .65rem;background:rgba(0,0,0,.18)}button,select{font:inherit;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(255,255,255,.12);color:#fff;padding:.45rem .62rem;cursor:pointer}button:hover{background:rgba(255,255,255,.2)}select option{color:#111}.board{display:grid;gap:18px}.row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.zone{width:var(--w);height:var(--h);border:2px dashed rgba(255,255,255,.28);border-radius:12px;display:grid;place-items:center;color:rgba(255,255,255,.42);font-weight:800;box-shadow:inset 0 0 24px rgba(0,0,0,.12)}.zone.hot{outline:3px solid rgba(255,209,102,.75);outline-offset:2px}.spacer{flex:1;min-width:24px}.tableau{display:grid;grid-template-columns:repeat(7,var(--w));gap:14px;align-items:start;overflow-x:auto;padding-bottom:20px}.col{min-height:var(--h);border-radius:12px;position:relative}.card{width:var(--w);height:var(--h);border-radius:10px;border:1px solid rgba(0,0,0,.3);background:var(--card);color:var(--black);box-shadow:0 5px 12px var(--shadow);padding:7px;display:grid;grid-template-rows:auto 1fr auto;user-select:none;cursor:pointer;position:relative}.card.red{color:var(--red)}.card.face-down{background:repeating-linear-gradient(45deg,#173b8a 0 8px,#1e4fb8 8px 16px);border:2px solid rgba(255,255,255,.72);color:transparent}.card.selected{outline:3px solid var(--gold);outline-offset:2px}.card[draggable="true"]{touch-action:none}.dragging{opacity:.45}.drop-ok{outline:4px solid rgba(255,209,102,.9)!important;outline-offset:3px}.drag-ghost{position:fixed;z-index:9999;pointer-events:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.45));transform:translate(-50%,-20%)}.rank{font-weight:900;font-size:1.05rem;line-height:1}.pip{font-size:2rem;place-self:center}.foot{font-weight:900;font-size:1.05rem;place-self:end;transform:rotate(180deg)}.stack .card{margin-bottom:-92px}.stack .card.face-down{margin-bottom:-96px}.stack .card:last-child{margin-bottom:0}.waste .card,.foundation .card{grid-area:1/1}.message{min-height:34px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18);padding:8px 10px}.win{position:fixed;inset:0;background:rgba(0,0,0,.58);display:none;place-items:center;padding:20px}.win.show{display:grid}.modal{max-width:420px;background:#10291f;border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center}.modal h2{margin-top:0;color:var(--gold)}@media(max-width:760px){:root{--w:70px;--h:100px}.tableau{gap:8px}.row{gap:8px}.stack .card{margin-bottom:-75px}.stack .card.face-down{margin-bottom:-78px}.pip{font-size:1.45rem}body{padding:10px}}
 </style>
 </head>
 <body>
@@ -39,7 +39,7 @@
   function moveScore(kind){const points={wasteToTableau:5,tableauReveal:5,toFoundation:10,foundationToTableau:-15,recycle:-100,tableauMove:0};game.score=Math.max(0,game.score+(points[kind]??0));}
   function drawStock(){if(game.won) return;snapshot();game.selected=null;if(game.stock.length){const count=Math.min(game.draw,game.stock.length);for(let i=0;i<count;i++){const c=game.stock.pop();c.up=true;game.waste.push(c);}game.moves++;render(`Drew ${count}.`);return;}if(game.waste.length){game.stock=game.waste.reverse().map(c=>({...c,up:false}));game.waste=[];game.moves++;moveScore('recycle');render('Recycled waste to stock.');}}
   function rankName(card){return `${names[card.rank]||card.rank}${symbols[card.suit]}`;}
-  function cardHtml(card, attrs=''){const cls=['card',red(card.suit)?'red':'black'];if(!card.up) cls.push('face-down');if(game.selected?.ids?.includes(card.id)) cls.push('selected');return `<div class="${cls.join(' ')}" data-card="${card.id}" ${attrs}>${card.up?`<div class="rank">${rankName(card)}</div><div class="pip">${symbols[card.suit]}</div><div class="foot">${rankName(card)}</div>`:''}</div>`;}
+  function cardHtml(card, attrs=''){const cls=['card',red(card.suit)?'red':'black'];if(!card.up) cls.push('face-down');if(game.selected?.ids?.includes(card.id)) cls.push('selected');const drag = card.up ? 'draggable="true"' : '';return `<div class="${cls.join(' ')}" data-card="${card.id}" ${drag} ${attrs}>${card.up?`<div class="rank">${rankName(card)}</div><div class="pip">${symbols[card.suit]}</div><div class="foot">${rankName(card)}</div>`:''}</div>`;}
   function render(msg){el('score').textContent=game.score;el('moves').textContent=game.moves;el('time').textContent=fmt(game.elapsed);el('best').textContent=localStorage.getItem(bestKey)||'---';el('stock').innerHTML=game.stock.length?`<div class="card face-down"></div><b>${game.stock.length}</b>`:'↻';const topWaste=game.waste[game.waste.length-1];el('waste').innerHTML=topWaste?cardHtml(topWaste,'data-source="waste"'):'';for(const node of document.querySelectorAll('.foundation')){const suit=node.dataset.foundation;const top=game.foundations[suit].at(-1);node.innerHTML=top?cardHtml(top,`data-source="foundation" data-suit="${suit}"`):symbols[suit];}el('tableau').innerHTML=game.tableau.map((col,i)=>`<div class="col stack zone" data-col="${i}">${col.map((c,idx)=>cardHtml(c,`data-source="tableau" data-col="${i}" data-idx="${idx}"`)).join('')}</div>`).join('');el('message').textContent=msg||'Ready.';highlightTargets();checkWin();}
   function fmt(s){const m=Math.floor(s/60);const r=s%60;return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;}
   function startTimer(){timer=setInterval(()=>{game.elapsed=Math.floor((Date.now()-game.started)/1000);el('time').textContent=fmt(game.elapsed);},1000);}function stopTimer(){clearInterval(timer);}
@@ -53,8 +53,83 @@
   function maybeReveal(sel){if(sel?.source==='tableau'){const top=game.tableau[sel.col].at(-1);if(top&&!top.up){top.up=true;moveScore('tableauReveal');}}}
   function autoFoundation(cardId){if(cardId){const node=document.querySelector(`[data-card="${cardId}"]`);if(node) selectFrom(node);}const s=game.selected;if(s&&(!s.stack||s.stack.length===1)&&canFoundation(s.card,s.card.suit)) return moveToFoundation(s.card.suit);render('No safe foundation move for that card.');}
   function autoAll(){let moved=false,guard=0;do{moved=false;guard++;const waste=game.waste.at(-1);if(waste&&canFoundation(waste)){game.selected={source:'waste',card:waste,ids:[waste.id]};moveToFoundation(waste.suit);moved=true;continue;}for(let col=0;col<7;col++){const c=game.tableau[col].at(-1);if(c?.up&&canFoundation(c)){game.selected={source:'tableau',col,idx:game.tableau[col].length-1,card:c,stack:[c],ids:[c.id]};moveToFoundation(c.suit);moved=true;break;}}}while(moved&&guard<200);if(!moved) render('No automatic foundation moves available.');}
+
+  function selectByCardId(cardId){
+    const node=document.querySelector(`[data-card="${cardId}"]`);
+    if(!node) return false;
+    selectFrom(node);
+    return !!game.selected;
+  }
+  function tryDropOnElement(target){
+    if(!game.selected) return false;
+    const foundation=target.closest?.('[data-foundation]');
+    const col=target.closest?.('[data-col]');
+    if(foundation){moveToFoundation(foundation.dataset.foundation);return true;}
+    if(col){moveToTableau(Number(col.dataset.col));return true;}
+    return false;
+  }
+  function clearDropHints(){document.querySelectorAll('.drop-ok').forEach(n=>n.classList.remove('drop-ok'));}
+  function markDropTarget(target){
+    clearDropHints();
+    if(!game.selected) return;
+    const foundation=target.closest?.('[data-foundation]');
+    const col=target.closest?.('[data-col]');
+    if(foundation&&(!game.selected.stack||game.selected.stack.length===1)&&canFoundation(game.selected.card,foundation.dataset.foundation)) foundation.classList.add('drop-ok');
+    if(col&&canTableau(game.selected.card,Number(col.dataset.col))) col.classList.add('drop-ok');
+  }
   function highlightTargets(){document.querySelectorAll('.hot').forEach(n=>n.classList.remove('hot'));const s=game.selected;if(!s) return;document.querySelectorAll('[data-col]').forEach(n=>{if(canTableau(s.card,Number(n.dataset.col))) n.classList.add('hot');});if((!s.stack||s.stack.length===1)&&canFoundation(s.card,s.card.suit)) document.querySelector(`[data-foundation="${s.card.suit}"]`)?.classList.add('hot');}
   function checkWin(){if(game.won) return;const total=Object.values(game.foundations).reduce((n,p)=>n+p.length,0);if(total!==52) return;game.won=true;stopTimer();const best=localStorage.getItem(bestKey);const label=`${game.score} pts · ${game.moves} moves · ${fmt(game.elapsed)}`;if(!best||game.score>Number(best.split(' ')[0])) localStorage.setItem(bestKey,label);el('winText').textContent=`Score ${game.score}, ${game.moves} moves, ${fmt(game.elapsed)}.`;el('win').classList.add('show');}
+
+  document.addEventListener('dragstart',e=>{
+    const card=e.target.closest('[data-card]');
+    if(!card||!selectByCardId(card.dataset.card)){e.preventDefault();return;}
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',card.dataset.card);
+  });
+  document.addEventListener('dragend',e=>{e.target.closest?.('[data-card]')?.classList.remove('dragging');clearDropHints();});
+  document.addEventListener('dragover',e=>{
+    if(!game.selected) return;
+    const target=e.target.closest('[data-col],[data-foundation]');
+    if(!target) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    markDropTarget(target);
+  });
+  document.addEventListener('dragleave',e=>{if(!e.relatedTarget||!e.currentTarget?.contains?.(e.relatedTarget)) clearDropHints();});
+  document.addEventListener('drop',e=>{
+    if(!game.selected) return;
+    const target=e.target.closest('[data-col],[data-foundation]');
+    if(!target) return;
+    e.preventDefault();
+    clearDropHints();
+    tryDropOnElement(target);
+  });
+  let pointerDrag=null;
+  document.addEventListener('pointerdown',e=>{
+    const card=e.target.closest('[data-card]');
+    if(!card||e.pointerType==='mouse') return;
+    pointerDrag={cardId:card.dataset.card,startX:e.clientX,startY:e.clientY,active:false,ghost:null};
+  });
+  document.addEventListener('pointermove',e=>{
+    if(!pointerDrag) return;
+    const dx=e.clientX-pointerDrag.startX,dy=e.clientY-pointerDrag.startY;
+    if(!pointerDrag.active&&Math.hypot(dx,dy)>10){
+      if(!selectByCardId(pointerDrag.cardId)){pointerDrag=null;return;}
+      const src=document.querySelector(`[data-card="${pointerDrag.cardId}"]`);
+      pointerDrag.ghost=src.cloneNode(true);pointerDrag.ghost.classList.add('drag-ghost');document.body.appendChild(pointerDrag.ghost);pointerDrag.active=true;
+    }
+    if(pointerDrag.active){e.preventDefault();pointerDrag.ghost.style.left=e.clientX+'px';pointerDrag.ghost.style.top=e.clientY+'px';const target=document.elementFromPoint(e.clientX,e.clientY);if(target) markDropTarget(target);}
+  },{passive:false});
+  document.addEventListener('pointerup',e=>{
+    if(!pointerDrag) return;
+    const wasActive=pointerDrag.active;
+    pointerDrag.ghost?.remove();
+    const target=document.elementFromPoint(e.clientX,e.clientY);
+    clearDropHints();
+    if(wasActive&&target) tryDropOnElement(target);
+    pointerDrag=null;
+  });
   document.addEventListener('click',e=>{const card=e.target.closest('[data-card]');const col=e.target.closest('[data-col]');const f=e.target.closest('[data-foundation]');if(e.target.closest('#stock')) return drawStock();if(card&&!game.selected) return selectFrom(card);if(card&&game.selected&&game.selected.ids.includes(card.dataset.card)){game.selected=null;return render('Selection cleared.');}if(f&&game.selected) return moveToFoundation(f.dataset.foundation);if(col&&game.selected) return moveToTableau(Number(col.dataset.col));if(card) return selectFrom(card);});
   document.addEventListener('dblclick',e=>{const card=e.target.closest('[data-card]');if(card) autoFoundation(card.dataset.card);});
   el('newBtn').onclick=newGame;el('undoBtn').onclick=undo;el('autoBtn').onclick=autoAll;el('winNew').onclick=()=>{el('win').classList.remove('show');newGame();};el('drawMode').onchange=()=>{if(game) game.draw=Number(el('drawMode').value);};
