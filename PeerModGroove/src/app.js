@@ -4,13 +4,9 @@ import { AudioRuntime } from './core/audio.js';
 import { PatchBay } from './core/patchbay.js';
 import { PortType } from './core/contracts.js';
 import { PeernetStack } from './core/peernet-stack.js';
-import { PeernetStack } from './core/peernet-stack.js';
 import { ClockModule } from './modules/clock.js';
 import { PianoRollModule } from './modules/piano-roll.js';
 import { BasicSynthModule } from './modules/basic-synth.js';
-import { CleanSynthModule } from './modules/clean-synth.js';
-import { CleanSamplerModule } from './modules/clean-sampler.js';
-import { OcraGridModule } from './modules/ocra-grid.js';
 import { CleanSynthModule } from './modules/clean-synth.js';
 import { CleanSamplerModule } from './modules/clean-sampler.js';
 import { OcraGridModule } from './modules/ocra-grid.js';
@@ -53,6 +49,7 @@ class PeerModGrooveApp {
     this.patchBay.addEventListener('packet', e => this.logPacket(e.detail));
     this.patchBay.addEventListener('route:add', () => this.renderRoutes());
     this.bindPeernetStack();
+    this.bindV10SequencerBridge();
     await this.bootstrapDefaultRig();
   }
 
@@ -82,21 +79,6 @@ class PeerModGrooveApp {
 
     document.querySelector('#btnStop').addEventListener('click', () => {
       this.clock?.stop();
-    });
-
-    document.querySelector('#btnConnectPeer').addEventListener('click', () => {
-      const username = document.querySelector('#pilotName').value || 'pilot';
-      this.peernet.start({ username });
-    });
-
-    document.querySelector('#btnSaveSnapshot').addEventListener('click', () => {
-      const snap = this.peernet.snapshot('Manual PeerModGroove Snapshot');
-      if (snap) this.logText(`storage snapshot: ${snap.title}`);
-    });
-
-    document.querySelector('#btnCreateSession').addEventListener('click', () => {
-      const session = this.peernet.createSession('PeerModGroove Rig Session');
-      if (session) this.logText(`session created: ${session.title}`);
     });
 
     document.querySelector('#btnConnectPeer').addEventListener('click', () => {
@@ -162,6 +144,66 @@ class PeerModGrooveApp {
       const packet = e.detail?.packet;
       if (packet) this.logText(`remote packet: ${packet.kind}/${packet.type}`);
     });
+  }
+
+  bindV10SequencerBridge() {
+    const params = new URLSearchParams(location.search);
+    this.externalSeqId = params.get('seq') || '';
+    if (!this.externalSeqId || !window.PeernetLobby) return;
+
+    import('../vendor/peernet-lib.js').then(({ PeernetLobby }) => {
+      this.v10SequencerLobby = new PeernetLobby('v10-app-hub-main', { storageKey: 'pmg-v10-seq', debug: false });
+      this.v10SequencerLobby.addEventListener('status', e => this.logText(`v10 sequencer lobby: ${e.detail.text}`));
+      this.v10SequencerLobby.addEventListener('data', e => this.handleV10SequencerData(e.detail?.data));
+      this.v10SequencerLobby.connect(`PMG-${Math.floor(Math.random() * 9000 + 1000)}`).then(() => {
+        this.logText(`listening for v10 sequencer: ${this.externalSeqId}`);
+        this.v10SequencerLobby.broadcast({ type: 'seq:request', payload: { docId: this.externalSeqId }, app: 'peermodgroove' });
+      });
+    }).catch(err => this.logText(`v10 sequencer bridge unavailable: ${err.message}`));
+  }
+
+  handleV10SequencerData(data) {
+    if (!data || !data.payload || data.payload.docId !== this.externalSeqId) return;
+    if (data.type === 'transport:start') this.handleTransportStart(data.payload);
+    if (data.type === 'transport:stop') this.handleTransportStop(data.payload);
+    if (data.type === 'transport:tick') this.consumeSequencerTick(data.payload);
+    if (data.type === 'seq:state') this.logText(`v10 sequencer state received: v${data.payload.state?.version ?? 0}`);
+    if (data.type === 'seq:op') this.logText(`v10 sequencer op: ${data.payload.op?.kind || 'unknown'}`);
+  }
+
+  handleTransportStart(payload) {
+    if (!payload || payload.docId !== this.externalSeqId) return;
+    this.externalTransport = payload;
+    this.logText(`v10 shared clock start: ${payload.bpm || 120} bpm`);
+  }
+
+  handleTransportStop(payload) {
+    if (!payload || payload.docId !== this.externalSeqId) return;
+    this.externalTransport = null;
+    this.logText('v10 shared clock stopped');
+  }
+
+  async consumeSequencerTick(payload) {
+    await this.runtime.init();
+    await this.startAudioModules();
+    const active = payload.active || [];
+    for (const hit of active) {
+      const packet = {
+        kind: 'midi',
+        type: 'note-on',
+        note: hit.note || 'C3',
+        velocity: hit.velocity ?? 0.85,
+        channel: 'v10-sequencer',
+        at: this.runtime.context?.currentTime || null,
+        dueAt: payload.dueAt || Date.now(),
+        transportStep: payload.step
+      };
+      this.patchBay.dispatchPacket('v10-sequencer', 'midi', packet);
+      window.setTimeout(() => {
+        this.patchBay.dispatchPacket('v10-sequencer', 'midi', { ...packet, type: 'note-off', velocity: 0 });
+      }, Math.max(40, Math.min(140, (payload.tickMs || 120) * 0.45)));
+    }
+    if (active.length) this.logText(`v10 seq step ${payload.step}: ${active.map(x => x.name || x.note).join(', ')}`);
   }
 
   async addModule(module, { autoConnectAudio = false } = {}) {
@@ -276,32 +318,3 @@ class PeerModGrooveApp {
     while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
   }
 
-  serializeRig() {
-    return {
-      version: 1,
-      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || { id: module.id, kind: module.kind, title: module.title }),
-      routes: this.patchBay.routes
-    };
-  }
-
-  applyRig(payload) {
-    this.logText(`restore requested: ${payload?.modules?.length || 0} modules`);
-  }
-
-  serializeRig() {
-    return {
-      version: 1,
-      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || { id: module.id, kind: module.kind, title: module.title }),
-      routes: this.patchBay.routes
-    };
-  }
-
-  applyRig(payload) {
-    this.logText(`restore requested: ${payload?.modules?.length || 0} modules`);
-  }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  window.peerModGroove = new PeerModGrooveApp();
-  window.peerModGroove.init();
-});
