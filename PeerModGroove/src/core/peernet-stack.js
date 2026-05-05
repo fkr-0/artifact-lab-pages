@@ -91,6 +91,22 @@ export class PeernetStack extends EventTarget {
     this.core?.broadcast({ type: 'pmg-patch', patch, at: Date.now() });
   }
 
+  broadcast(type, data = {}) {
+    this.core?.broadcast({ type: `artifact:${type}`, data, at: Date.now() });
+  }
+
+  onMessage(type, handler) {
+    this.core?.on?.(`message:artifact:${type}`, payload => handler(payload?.data || payload));
+    return this;
+  }
+
+  joinLobby(lobbyId) {
+    // SharedCore uses namespace/hubId at construction time. This compatibility hook
+    // allows shared editor adapters to request a logical room without owning transport.
+    this.emit('status', { text: `logical room:${lobbyId}`, connected: Boolean(this.started) });
+    return this;
+  }
+
   createSession(title = 'PeerModGroove Session') {
     return this.sessions?.createSession({ title, app: 'PeerModGroove' }, this.capture());
   }
