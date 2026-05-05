@@ -1,37 +1,37 @@
-# artifact-motion
+# artifact-motion (complete)
 
-Prototype library extracted from Solitaire interaction system.
+A small, dependency-free interaction engine for native-feel UI.
 
-## Goal
-Provide native-feeling drag + motion + feedback primitives for artifacts.
-
-## Scope
-- pointer + touch unification
-- spring physics
-- ghost rendering
+## Features
+- pointer + touch unified drag
+- spring physics + velocity
+- stacked ghost rendering
+- snap + snap-back
+- magnetic drop targets
+- edge auto-scroll
 - sound + haptics
+- reduced-motion support
 
-## Not included (yet)
-- app-specific rules
-- snapping logic
-- stacking logic
+## API
 
-## Usage
-
-```html
-<link rel="stylesheet" href="../lib/artifact-motion/artifact-motion.css">
-<script type="module">
-import { createArtifactMotion } from '../lib/artifact-motion/artifact-motion.js';
-
+```js
 createArtifactMotion({
-  root: document.body,
-  draggable: '.card'
-});
-</script>
+  root,
+  draggable,
+  dropTarget,
+  getItems,
+  canDrop,
+  onDrop,
+  getSnapPoint
+})
 ```
 
-## Next steps
-- extract full feature set from solitaire
-- add snapping API
-- add target detection hooks
-- integrate into v9/v10 hub
+## Philosophy
+Library owns feel.
+App owns rules.
+
+## Demo
+Open demo.html
+
+## Next step
+Integrate into solitaire + v10 hub

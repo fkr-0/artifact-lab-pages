@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>artifact-motion demo</title>
+<link rel="stylesheet" href="artifact-motion.css" />
+<style>
+body{font-family:sans-serif;background:#0b1c2a;color:#fff;margin:0;padding:20px}
+.board{display:flex;gap:16px}
+.col{width:120px;min-height:200px;padding:8px;border:2px dashed rgba(255,255,255,.2);border-radius:8px}
+.card{background:#fff;color:#111;padding:10px;border-radius:6px;margin-bottom:6px;cursor:pointer}
+</style>
+</head>
+<body>
+<h2>artifact-motion demo</h2>
+<div class="board">
+  <div class="col" data-am-drop-target>
+    <div class="card" data-am-draggable>A</div>
+    <div class="card" data-am-draggable>B</div>
+  </div>
+  <div class="col" data-am-drop-target></div>
+  <div class="col" data-am-drop-target></div>
+</div>
+
+<script type="module">
+import { createArtifactMotion } from './artifact-motion.js';
+
+createArtifactMotion({
+  root: document.body,
+  draggable: '[data-am-draggable]',
+  dropTarget: '[data-am-drop-target]',
+
+  getItems({sourceEl}){
+    return [sourceEl];
+  },
+
+  canDrop(){ return true; },
+
+  onDrop({items, targetEl}){
+    items.forEach(el=>targetEl.appendChild(el));
+  }
+});
+</script>
+</body>
+</html>
