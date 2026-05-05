@@ -53,6 +53,37 @@ INCLUDE_DIRS=(
     "aster-relay-identity-nightline-configurable"
 )
 
+EXCLUDE_PATTERNS=(
+    ".git/"
+    ".git/***"
+    "node_modules/"
+    "node_modules/***"
+    ".vite/"
+    ".vite/***"
+    "dist/.vite/"
+    "dist/.vite/***"
+    "coverage/"
+    "coverage/***"
+    ".cache/"
+    ".cache/***"
+    ".parcel-cache/"
+    ".parcel-cache/***"
+    ".turbo/"
+    ".turbo/***"
+    ".next/"
+    ".next/***"
+    "*.log"
+    "*.tmp"
+    "*.bak"
+    "*.swp"
+    ".DS_Store"
+)
+
+rsync_excludes=()
+for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+    rsync_excludes+=(--exclude="$pattern")
+done
+
 # Copy files
 for file in "${INCLUDE_FILES[@]}"; do
     if [[ -f "$ARTIFACTS_DIR/$file" ]]; then
@@ -61,10 +92,11 @@ for file in "${INCLUDE_FILES[@]}"; do
     fi
 done
 
-# Copy directories
+# Copy directories without nested VCS, dependencies, or local build/test caches
 for dir in "${INCLUDE_DIRS[@]}"; do
     if [[ -d "$ARTIFACTS_DIR/$dir" ]]; then
-        cp -r "$ARTIFACTS_DIR/$dir" "$STAGE/"
+        mkdir -p "$STAGE/$dir"
+        rsync -a "${rsync_excludes[@]}" "$ARTIFACTS_DIR/$dir/" "$STAGE/$dir/"
         echo -e "${GREEN}  ✓${NC} $dir/"
     fi
 done
