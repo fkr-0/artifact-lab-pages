@@ -72,6 +72,7 @@
       { id:'sequencer', title:'Shared Step Sequencer', render:renderSequencer },
       { id:'sprite-gif-creator', title:'Sprite GIF Creator', render:renderSpriteGifCreatorLauncher },
       { id:'peermodgroove', title:'Launch PeerModGroove', render:renderPeerModGrooveLauncher },
+      { id:'linked-artifacts', title:'Linked Artifacts', render:renderLinkedArtifacts },
       { id:'peers', title:'Peer Console', render:renderPeerConsole },
       { id:'about', title:'About v10', render:renderAbout }
     ];
@@ -348,6 +349,103 @@ v10 relative url: ${href}</pre></section>`;
 PeerModGroove app   = modular audio graph / instruments / patch bay</pre></section>`;
       $('pmgOpen').onclick = () => window.open('../PeerModGroove/index.html', '_blank');
       $('pmgOpenSeq').onclick = () => window.open('../PeerModGroove/index.html?seq=main', '_blank');
+    }
+
+    const LINKED_ARTIFACTS_KEY = 'v10-linked-artifacts';
+    const seedLinkedArtifacts = [
+      {
+        id: 'ring0-niebelungen',
+        kind: 'repo',
+        title: 'Ring0 / Niebelungen',
+        href: 'file:///home/user/work/docs/niebelungen',
+        note: 'Workspace root for the Nibelungen play/app project.'
+      },
+      {
+        id: 'historycasts',
+        kind: 'repo',
+        title: 'Historycasts',
+        href: 'file:///home/user/work/code/historycasts',
+        note: 'Workspace root for the podcast atlas/historycasts project.'
+      }
+    ];
+
+    function loadLinkedArtifacts() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(LINKED_ARTIFACTS_KEY) || 'null');
+        if (Array.isArray(parsed)) {
+          const byId = new Map([...seedLinkedArtifacts, ...parsed].map(item => [item.id || item.href, item]));
+          return [...byId.values()];
+        }
+      } catch (err) {
+        log('linked artifacts load failed', err?.message || err);
+      }
+      return seedLinkedArtifacts;
+    }
+
+    function saveLinkedArtifacts(items) {
+      localStorage.setItem(LINKED_ARTIFACTS_KEY, JSON.stringify(items, null, 2));
+    }
+
+    function normalizeArtifactLink(form) {
+      const title = form.title.value.trim();
+      const href = form.href.value.trim();
+      const kind = form.kind.value;
+      const note = form.note.value.trim();
+      if (!title || !href) throw new Error('title and url/path are required');
+      return {
+        id: `${kind}:${href}`.toLowerCase().replace(/[^a-z0-9:/._-]+/g, '-'),
+        kind,
+        title,
+        href,
+        note
+      };
+    }
+
+    function renderLinkedArtifacts(root) {
+      let links = loadLinkedArtifacts();
+      const draw = () => {
+        root.innerHTML = `<section class="card stack"><div class="row"><strong>Linked Artifacts</strong><span class="pill ok">subrepos · artifacts · urls</span></div><p class="muted">A small app-hub registry for arbitrary project references. Entries live in <code>localStorage</code>, seeded with the Ring0/Niebelungen and Historycasts workspace roots.</p><div id="linkedList" class="stack"></div><form id="linkedForm" class="stack"><div class="split"><label class="small muted">Title<input name="title" placeholder="Project or artifact name"></label><label class="small muted">Kind<select name="kind"><option value="repo">repo</option><option value="subrepo">subrepo</option><option value="artifact">artifact</option><option value="url">url</option></select></label></div><label class="small muted">URL or path<input name="href" placeholder="https://… or file:///… or ../artifact/index.html"></label><label class="small muted">Note<textarea name="note" style="min-height:84px" placeholder="Why this belongs in the hub"></textarea></label><div class="row"><button type="submit">Link artifact</button><button type="button" id="linkedExport">Export JSON</button><button type="button" id="linkedReset">Reset seeds</button></div></form><pre id="linkedJson" class="small" style="display:none;white-space:pre-wrap"></pre></section>`;
+        $('linkedList').innerHTML = links.map((item, index) => `<article class="card" style="margin-bottom:.5rem"><div class="row"><strong>${html(item.title)}</strong><span class="pill">${html(item.kind)}</span><button data-open-link="${index}">Open</button><button data-copy-link="${index}">Copy</button><button data-remove-link="${index}">Remove</button></div><div class="small muted">${html(item.href)}</div>${item.note ? `<p class="muted">${html(item.note)}</p>` : ''}</article>`).join('') || '<p class="muted">No linked artifacts yet.</p>';
+        $('linkedForm').onsubmit = (e) => {
+          e.preventDefault();
+          try {
+            const item = normalizeArtifactLink(e.currentTarget);
+            links = [item, ...links.filter(existing => existing.id !== item.id)];
+            saveLinkedArtifacts(links);
+            draw();
+            log('linked artifact', item.title);
+          } catch (err) {
+            log('link failed', err?.message || err);
+          }
+        };
+        $('linkedList').onclick = async (e) => {
+          const open = e.target.closest('[data-open-link]');
+          const copy = e.target.closest('[data-copy-link]');
+          const remove = e.target.closest('[data-remove-link]');
+          if (open) window.open(links[Number(open.dataset.openLink)].href, '_blank');
+          if (copy) {
+            const item = links[Number(copy.dataset.copyLink)];
+            await navigator.clipboard?.writeText(`${item.title}\n${item.href}`);
+            log('copied link', item.title);
+          }
+          if (remove) {
+            links.splice(Number(remove.dataset.removeLink), 1);
+            saveLinkedArtifacts(links);
+            draw();
+          }
+        };
+        $('linkedExport').onclick = () => {
+          const el = $('linkedJson');
+          el.style.display = el.style.display === 'none' ? 'block' : 'none';
+          el.textContent = JSON.stringify(links, null, 2);
+        };
+        $('linkedReset').onclick = () => {
+          links = seedLinkedArtifacts;
+          saveLinkedArtifacts(links);
+          draw();
+        };
+      };
+      draw();
     }
 
     function renderPeerConsole(root) {
