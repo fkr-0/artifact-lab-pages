@@ -6,7 +6,8 @@ const anchor = cursorToAnchor(a, 5);
 const ops = a.localInsert(0, 'X');
 const b = TextCrdt.fromText('hello', { siteId: 'b' });
 b.applyMany(ops);
-assert.equal(a.value(), b.value());
+assert.equal(a.value(), 'Xhello');
+assert.equal(b.value(), 'Xhello');
 assert.equal(anchorToCursor(a, anchor), 6);
 
 const c = new TextCrdt({ siteId: 'c' });

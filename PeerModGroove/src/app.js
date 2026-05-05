@@ -4,6 +4,7 @@ import { AudioRuntime } from './core/audio.js';
 import { PatchBay } from './core/patchbay.js';
 import { PortType } from './core/contracts.js';
 import { PeernetStack } from './core/peernet-stack.js';
+import { packetAudioTime } from './core/scheduler.js';
 import { ClockModule } from './modules/clock.js';
 import { PianoRollModule } from './modules/piano-roll.js';
 import { BasicSynthModule } from './modules/basic-synth.js';
@@ -13,6 +14,13 @@ import { OcraGridModule } from './modules/ocra-grid.js';
 import { FieldRecorderModule } from './modules/field-recorder.js';
 import { MixerModule } from './modules/mixer.js';
 import { PeerBridgeModule } from './modules/peer-bridge.js';
+import { BasicSequencerModule, ArrangerModule, ArpMidiGeneratorModule } from './modules/advanced-sequencer.js';
+import { MultiSamplerModule } from './modules/multisampler.js';
+import { DubEchoModule, ReverbModule, FlangerModule, PhaserModule, TapeEchoModule, BpmBeatLooperModule } from './modules/effects.js';
+import { ChannelStripModule, MixerDeskModule } from './modules/channel-strip.js';
+import { PatchCanvas } from './ui/patch-canvas.js';
+import { AudioGraphSync } from './core/audio-graph-sync.js';
+import { RoutingGraph } from './core/routing-graph.js';
 
 const moduleFactories = {
   clock: () => new ClockModule(),
@@ -22,7 +30,19 @@ const moduleFactories = {
   sampler: () => new CleanSamplerModule(),
   ocra: () => new OcraGridModule(),
   field: () => new FieldRecorderModule(),
-  peer: () => new PeerBridgeModule()
+  peer: () => new PeerBridgeModule(),
+  basicseq: () => new BasicSequencerModule(),
+  arranger: () => new ArrangerModule(),
+  arp: () => new ArpMidiGeneratorModule(),
+  multisampler: () => new MultiSamplerModule(),
+  dubecho: () => new DubEchoModule(),
+  reverb: () => new ReverbModule(),
+  flanger: () => new FlangerModule(),
+  phaser: () => new PhaserModule(),
+  tapeecho: () => new TapeEchoModule(),
+  beatlooper: () => new BpmBeatLooperModule(),
+  channel: () => new ChannelStripModule(),
+  mixerdesk: () => new MixerDeskModule(),
 };
 
 class PeerModGrooveApp {
@@ -34,6 +54,10 @@ class PeerModGrooveApp {
     this.logEl = document.querySelector('#eventLog');
     this.statusEl = document.querySelector('#audioStatus');
     this.mixerStripEl = document.querySelector('#mixerStrip');
+    this.patchCanvasEl = document.querySelector('#patchCanvas');
+    this.routingGraph = new RoutingGraph();
+    this.graphSync = null;
+    this.patchCanvas = null;
     this.clock = null;
     this.mixer = null;
     this.peernet = new PeernetStack({
@@ -48,6 +72,7 @@ class PeerModGrooveApp {
     this.bindChrome();
     this.patchBay.addEventListener('packet', e => this.logPacket(e.detail));
     this.patchBay.addEventListener('route:add', () => this.renderRoutes());
+    this.bindPatchCanvas();
     this.bindPeernetStack();
     this.bindV10SequencerBridge();
     await this.bootstrapDefaultRig();
@@ -162,11 +187,27 @@ class PeerModGrooveApp {
     }).catch(err => this.logText(`v10 sequencer bridge unavailable: ${err.message}`));
   }
 
+  startTransportFailoverWatch() {
+    if (this.transportFailoverTimer) return;
+    this.transportFailoverTimer = window.setInterval(() => {
+      if (authorityExpired(this.lastTransportTickAt, Date.now(), 1800)) {
+        this.logText('transport authority heartbeat expired; waiting for/electing next clock');
+        this.transportAuthority = '';
+        this.externalTransport = null;
+        this.renderTransportMetrics();
+      }
+    }, 600);
+  }
+
   handleV10SequencerData(data) {
     if (!data || !data.payload || data.payload.docId !== this.externalSeqId) return;
     if (data.type === 'transport:start') this.handleTransportStart(data.payload);
     if (data.type === 'transport:stop') this.handleTransportStop(data.payload);
-    if (data.type === 'transport:tick') this.consumeSequencerTick(data.payload);
+    if (data.type === 'transport:tick') {
+      this.lastTransportTickAt = Date.now();
+      this.transportJitter.push(this.transportJitter.normalizeDueAt(data.payload));
+      for (const tick of this.transportJitter.drain()) this.consumeSequencerTick(tick);
+    }
     if (data.type === 'seq:state') this.logText(`v10 sequencer state received: v${data.payload.state?.version ?? 0}`);
     if (data.type === 'seq:op') this.logText(`v10 sequencer op: ${data.payload.op?.kind || 'unknown'}`);
   }
@@ -188,19 +229,21 @@ class PeerModGrooveApp {
     await this.startAudioModules();
     const active = payload.active || [];
     for (const hit of active) {
+      const audioTime = packetAudioTime(this.runtime.context, payload);
       const packet = {
         kind: 'midi',
         type: 'note-on',
         note: hit.note || 'C3',
         velocity: hit.velocity ?? 0.85,
         channel: 'v10-sequencer',
-        at: this.runtime.context?.currentTime || null,
+        at: audioTime,
+        audioTime,
         dueAt: payload.dueAt || Date.now(),
         transportStep: payload.step
       };
       this.patchBay.dispatchPacket('v10-sequencer', 'midi', packet);
       window.setTimeout(() => {
-        this.patchBay.dispatchPacket('v10-sequencer', 'midi', { ...packet, type: 'note-off', velocity: 0 });
+        this.patchBay.dispatchPacket('v10-sequencer', 'midi', { ...packet, type: 'note-off', velocity: 0, audioTime: audioTime + Math.max(0.04, Math.min(0.14, (payload.tickMs || 120) * 0.00045)) });
       }, Math.max(40, Math.min(140, (payload.tickMs || 120) * 0.45)));
     }
     if (active.length) this.logText(`v10 seq step ${payload.step}: ${active.map(x => x.name || x.note).join(', ')}`);
@@ -208,6 +251,8 @@ class PeerModGrooveApp {
 
   async addModule(module, { autoConnectAudio = false } = {}) {
     this.patchBay.addModule(module);
+    this.routingGraph.addNode(module.id, { title: module.title, kind: module.kind });
+    this.renderPatchCanvas();
     const card = document.createElement('article');
     card.className = `module-card kind-${module.kind}`;
     card.dataset.moduleId = module.id;
@@ -219,6 +264,8 @@ class PeerModGrooveApp {
     if (this.runtime.context) await module.start(this.runtime.context);
     if (autoConnectAudio && module.outputs.some(p => p.type === PortType.AUDIO) && module !== this.mixer) {
       if (this.runtime.context) module.connectAudio(this.runtime.destination);
+      this.routingGraph.connect(module.id, 'destination', 'audio');
+      this.syncAudioGraph();
       this.addMixerStrip(module);
     }
   }
@@ -231,12 +278,16 @@ class PeerModGrooveApp {
         module.connectAudio(this.runtime.destination);
       }
     }
+    this.syncAudioGraph();
   }
 
   removeModule(moduleId) {
     document.querySelector(`[data-module-id="${moduleId}"]`)?.remove();
     document.querySelector(`[data-strip-id="${moduleId}"]`)?.remove();
     this.patchBay.removeModule(moduleId);
+    this.routingGraph.removeNode(moduleId);
+    this.syncAudioGraph();
+    this.renderPatchCanvas();
     this.renderRoutes();
   }
 
@@ -293,7 +344,11 @@ class PeerModGrooveApp {
   serializeRig() {
     return {
       version: 1,
-      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || { id: module.id, kind: module.kind, title: module.title }),
+      modules: [...this.patchBay.modules.values()].map(module => module.serialize?.() || {
+        id: module.id,
+        kind: module.kind,
+        title: module.title
+      }),
       routes: this.patchBay.routes
     };
   }
@@ -301,20 +356,9 @@ class PeerModGrooveApp {
   applyRig(payload) {
     this.logText(`restore requested: ${payload?.modules?.length || 0} modules`);
   }
+}
 
-  logText(text) {
-    const row = document.createElement('div');
-    row.className = 'packet control';
-    row.textContent = text;
-    this.logEl.prepend(row);
-    while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
-  }
-
-  logText(text) {
-    const row = document.createElement('div');
-    row.className = 'packet control';
-    row.textContent = text;
-    this.logEl.prepend(row);
-    while (this.logEl.children.length > 30) this.logEl.lastChild.remove();
-  }
-
+window.addEventListener('DOMContentLoaded', () => {
+  window.peerModGroove = new PeerModGrooveApp();
+  window.peerModGroove.init();
+});

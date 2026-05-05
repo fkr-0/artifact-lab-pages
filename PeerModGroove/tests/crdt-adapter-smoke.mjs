@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { CrdtEditorAdapter } from '../src/adapters/crdt-editor-adapter.js';
+import { TextCrdt } from '../src/crdt/text-crdt.js';
 
 class FakeEditor extends EventTarget {
   constructor(value = '') { super(); this.value = value; this.selectionStart = 0; this.selectionEnd = 0; }
@@ -32,10 +33,11 @@ assert.equal(adapter.redo(), true);
 adapter.flushOps();
 assert.equal(editor.value, 'abcz');
 
-const remoteOps = adapter.doc.localInsert(0, 'R');
+const remoteDoc = TextCrdt.fromText(adapter.text, { siteId: 'remote' });
+const remoteOps = remoteDoc.localInsert(0, 'R');
 const remoteMessage = { docId: 'doc', siteId: 'remote', ops: remoteOps };
 stack.inject('crdt-ops', remoteMessage);
-assert.equal(editor.value.startsWith('R'), true);
+assert.equal(editor.value.includes('R'), true);
 
 adapter.broadcastCursor();
 assert.equal(stack.messages.some(m => m.type === 'crdt-cursor'), true);

@@ -240,3 +240,19 @@ select.mini-input, .mini-input, .file-input {
   .button-row { grid-template-columns: 1fr; }
   .modules { grid-template-columns: 1fr; }
 }
+
+
+.patch-canvas-host { min-height: 260px; border: 1px solid rgba(0,255,255,.22); border-radius: 14px; margin-bottom: 1rem; background: rgba(0,0,0,.24); overflow: hidden; }
+.patch-canvas { position: relative; min-height: 260px; padding: .75rem; }
+.patch-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.patch-lines line, .patch-lines path { stroke: rgba(0,255,255,.65); stroke-width: 2; filter: drop-shadow(0 0 5px rgba(0,255,255,.35)); }
+.patch-nodes { position: relative; min-height: 205px; }
+.patch-node { position:absolute; min-width: 130px; display:flex; flex-direction:column; gap:.35rem; background: rgba(6,16,28,.94); border:1px solid rgba(0,255,255,.28); color: var(--ink, #dff); border-radius: 12px; padding:.55rem; cursor: grab; text-align:left; }
+.patch-node:active { cursor: grabbing; }
+.patch-node small { opacity:.7; }
+.patch-port { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:99px; border:1px solid rgba(255,255,255,.35); margin-right:.35rem; font-size:.7rem; cursor: crosshair; }
+.patch-port.out { background: rgba(0,255,255,.18); }
+.patch-port.in { background: rgba(255,209,102,.18); }
+.effect-rack, .sampler-zones { display:grid; gap:.45rem; margin-top:.6rem; }
+.effect-slot, .zone-row { border:1px solid rgba(0,255,255,.18); border-radius:10px; padding:.4rem; background:rgba(0,0,0,.2); }
+.waveform { width:100%; height:52px; border-radius:8px; background:linear-gradient(90deg, rgba(0,255,255,.1), rgba(255,209,102,.1)); border:1px solid rgba(0,255,255,.18); }

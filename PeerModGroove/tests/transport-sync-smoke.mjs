@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { tickMsFromBpm, makeTransportState, makeTickPayload, latencyFromPing, smoothCorrection, nextStep } from '../../app-hub/lib/transport-clock.js';
+import { makeDefaultSequencer, applySeqOp, makeSeqOp } from '../../app-hub/lib/sequencer-core.js';
+import { TransportSync } from '../src/core/transport-sync.js';
+
+assert.equal(Math.round(tickMsFromBpm(120)), 125);
+assert.equal(nextStep(15, 16), 0);
+const seq = makeDefaultSequencer('x');
+const transport = makeTransportState({ docId:'x', bpm:120, authority:'a', now:1000 });
+seq.step = 0;
+const tick = makeTickPayload(seq, transport, 2000);
+assert.equal(tick.active.length, 2);
+assert.ok(tick.dueAt > 2000);
+const ping = latencyFromPing({ sentAt: 1000, receivedAt: 1100, remoteNow: 1060 });
+assert.equal(ping.oneWayMs, 50);
+assert.equal(Math.round(smoothCorrection(0, 100, 0.1)), 10);
+const op = makeSeqOp(seq, 'velocity', { trackId:'kick', velocity:.33 }, 'test');
+applySeqOp(seq, op);
+assert.equal(seq.tracks[0].velocity, .33);
+const sync = new TransportSync();
+const obs = sync.observePing({ sentAt: 1000, receivedAt: 1100, remoteNow: 1050 });
+assert.ok(obs.oneWayMs > 0);
+assert.ok(Number.isFinite(sync.observeTick({ dueAt: Date.now() + 60 })));
+assert.ok(Number.isFinite(sync.correctedDueAt({ dueAt: Date.now() + 60 })));
+console.log('transport sync smoke ok');

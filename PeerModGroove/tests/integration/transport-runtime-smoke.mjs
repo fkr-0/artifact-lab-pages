@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { shouldAcceptAuthority, TransportSync, electAuthority, authorityExpired } from '../../src/core/transport-sync.js';
+import { JitterBuffer } from '../../src/core/jitter-buffer.js';
+
+assert.equal(shouldAcceptAuthority('', 'a'), true);
+assert.equal(shouldAcceptAuthority('b', 'a'), true);
+assert.equal(shouldAcceptAuthority('a', 'b'), false);
+assert.equal(electAuthority(['b', 'c'], 'a'), 'a');
+assert.equal(authorityExpired(1000, 3000, 1800), true);
+const sync = new TransportSync({ smoothing: 1 });
+sync.observePing({ sentAt: 1000, receivedAt: 1100, remoteNow: 1055 });
+assert.equal(sync.latencyMs, 50);
+assert.equal(sync.clockOffsetMs, 5);
+assert.equal(sync.correctedDueAt({ dueAt: 2000 }), 2055);
+const jitter = new JitterBuffer({ minLeadMs: 20, maxLeadMs: 100 });
+const normalized = jitter.normalizeDueAt({ dueAt: 1010 }, 1000);
+assert.equal(normalized.dueAt, 1020);
+jitter.push({ dueAt: 1050, id: 'x' });
+assert.equal(jitter.drain(1000, 60)[0].id, 'x');
+console.log('transport runtime smoke ok');
