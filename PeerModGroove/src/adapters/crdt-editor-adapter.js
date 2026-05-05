@@ -13,6 +13,11 @@ export class CrdtEditorAdapter extends EventTarget {
     this.silent = false;
     this.text = editor.value || '';
     this.remoteCursors = new Map();
+    this.undoStack = [];
+    this.redoStack = [];
+    this.pendingOps = [];
+    this.flushTimer = null;
+    this.batchMs = opts.batchMs ?? 50;
     this.doc = TextCrdt.fromText(this.text, { siteId: opts.siteId || persistedSiteId(this.docId) });
     this.stack = opts.stack || new PeernetStack({
       namespace: opts.namespace || `artifact-editor:${this.docId}`,
@@ -32,26 +37,60 @@ export class CrdtEditorAdapter extends EventTarget {
 
     const onOps = (payload) => this.receiveOps(payload?.data || payload);
     const onCursor = (payload) => this.receiveCursor(payload?.data || payload);
+    const onPresence = (payload) => this.receivePresence(payload?.data || payload);
     if (typeof this.stack.onMessage === 'function') {
       this.stack.onMessage('crdt-ops', onOps);
       this.stack.onMessage('crdt-cursor', onCursor);
+      this.stack.onMessage('presence', onPresence);
     } else {
       this.stack.core?.on?.('message:artifact:crdt-ops', onOps);
       this.stack.core?.on?.('message:artifact:crdt-cursor', onCursor);
+      this.stack.core?.on?.('message:artifact:presence', onPresence);
     }
 
     this.stack.addEventListener?.('presence', (event) => this.emit('presence', event.detail));
+    this.broadcastPresence();
     this.emit('ready', { docId: this.docId, siteId: this.doc.siteId });
     return this;
   }
 
   handleLocalInput() {
     if (this.silent) return;
+    const before = this.text;
     const next = this.editor.value;
-    const ops = diffToOps(this.doc, this.text, next);
+    const ops = diffToOps(this.doc, before, next);
     if (!ops.length) return;
     this.text = this.doc.value();
-    this.broadcastOps(ops);
+    this.undoStack.push({ before, after: this.text });
+    this.redoStack.length = 0;
+    this.queueOps(ops);
+  }
+
+  undo() {
+    const entry = this.undoStack.pop();
+    if (!entry) return false;
+    this.redoStack.push({ before: this.text, after: entry.after });
+    return this.replaceLocalText(entry.before, false);
+  }
+
+  redo() {
+    const entry = this.redoStack.pop();
+    if (!entry) return false;
+    this.undoStack.push({ before: this.text, after: entry.before });
+    return this.replaceLocalText(entry.after, false);
+  }
+
+  replaceLocalText(next, recordUndo = true) {
+    const before = this.text;
+    const ops = diffToOps(this.doc, before, next);
+    if (!ops.length) return false;
+    if (recordUndo) this.undoStack.push({ before, after: next });
+    this.text = this.doc.value();
+    this.silent = true;
+    this.editor.value = this.text;
+    this.silent = false;
+    this.queueOps(ops);
+    return true;
   }
 
   receiveOps(message = {}) {
@@ -62,10 +101,24 @@ export class CrdtEditorAdapter extends EventTarget {
     this.emit('remote-change', message);
   }
 
+  queueOps(ops) {
+    this.pendingOps.push(...ops);
+    if (this.flushTimer) return;
+    this.flushTimer = setTimeout(() => this.flushOps(), this.batchMs);
+  }
+
+  flushOps() {
+    if (this.flushTimer) clearTimeout(this.flushTimer);
+    this.flushTimer = null;
+    const ops = this.pendingOps.splice(0);
+    if (ops.length) this.broadcastOps(ops);
+  }
+
   broadcastCursor() {
     const message = {
       docId: this.docId,
       siteId: this.doc.siteId,
+      profile: this.profile,
       selection: selectionToAnchors(this.doc, this.editor.selectionStart || 0, this.editor.selectionEnd || this.editor.selectionStart || 0),
       at: Date.now()
     };
@@ -83,10 +136,27 @@ export class CrdtEditorAdapter extends EventTarget {
     this.emit('cursor', cursor);
   }
 
+  broadcastPresence() {
+    const message = {
+      docId: this.docId,
+      siteId: this.doc.siteId,
+      profile: this.profile,
+      at: Date.now()
+    };
+    if (typeof this.stack.broadcast === 'function') this.stack.broadcast('presence', message);
+    else this.stack.core?.broadcast?.({ type: 'artifact:presence', data: message });
+  }
+
+  receivePresence(message = {}) {
+    if (!message || message.docId !== this.docId || message.siteId === this.doc.siteId) return;
+    this.emit('peer-presence', message);
+  }
+
   broadcastOps(ops) {
     const message = {
       docId: this.docId,
       siteId: this.doc.siteId,
+      profile: this.profile,
       ops,
       textClock: this.doc.clock,
       at: Date.now()
@@ -94,6 +164,15 @@ export class CrdtEditorAdapter extends EventTarget {
     if (typeof this.stack.broadcast === 'function') this.stack.broadcast('crdt-ops', message);
     else this.stack.core?.broadcast?.({ type: 'artifact:crdt-ops', data: message });
     this.emit('local-change', message);
+  }
+
+  compact() {
+    this.doc.compact();
+    this.text = this.doc.value();
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.renderRemote();
+    this.emit('compact', this.snapshot());
   }
 
   renderRemote() {
