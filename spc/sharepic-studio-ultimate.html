@@ -183,7 +183,7 @@
     </div>
     <div>
       <div class="header-title">Sharepic Studio <span style="color:var(--accent)">ULTIMATE</span></div>
-      <div class="header-sub">19 generators · 14 themes · LaTeX math · rich text · config import/export</div>
+      <div class="header-sub">14 generators · 9 themes · LaTeX math · rich text · advanced post-processing</div>
     </div>
   </div>
   <div class="header-right">
@@ -246,6 +246,7 @@
     coralReef: { name:'Coral Reef', description:'Aquatic teal, coral, sand, and purple glow', background:'#061821', colors:['#00b4d8','#48cae4','#ff6b6b','#ffd6a5','#9d4edd','#f72585'], accent:'#48cae4' },
     desertDusk: { name:'Desert Dusk', description:'Terracotta, ochre, sage, and twilight violet', background:'#1a1114', colors:['#e76f51','#f4a261','#e9c46a','#8ab17d','#6d597a','#355070'], accent:'#f4a261' },
     arcticGlass: { name:'Arctic Glass', description:'Frosted cyan, slate, and pale violet', background:'#07131f', colors:['#e0fbfc','#98c1d9','#3d5a80','#cdb4db','#bde0fe','#ffffff'], accent:'#98c1d9' }
+    moonlight: { name:'Moonlight', description:'Cool silver-greys with faint blue tint', background:'#0a0c12', colors:['#c8d0e0','#98a4b8','#707e94','#505e74','#384460','#282e3c'], accent:'#c8d0e0' }
   };
 
   // ═══════════════════════════════════════════════════════════════
@@ -271,6 +272,7 @@
     ribbonWaves: { name:'Ribbon Waves', description:'Layered silk ribbons with soft translucency', params:{complexity:'Ribbons', density:'Segments', scale:'Amplitude', turbulence:'Wave Drift'} },
     barcodeRain: { name:'Barcode Rain', description:'Vertical data bars and sparse code ticks', params:{density:'Columns', complexity:'Ticks', scale:'Width', disruptFactor:'Offset'} },
     bauhausPoster: { name:'Bauhaus Poster', description:'Clean circles, blocks, diagonals, and poster geometry', params:{complexity:'Shapes', density:'Balance', scale:'Shape Size', rotation:'Angles'} }
+    circuitBoard: { name:'Circuit Board', description:'Technical circuit trace patterns', params:{complexity:'Traces', density:'Length', scale:'Grid'} }
   };
 
   // ═══════════════════════════════════════════════════════════════
@@ -1774,26 +1776,7 @@
     // 2. Generator
     var gen = generators[state.type];
     if (gen) {
-      if (state.rotation) {
-        ctx.save();
-        ctx.translate(w / 2, h / 2);
-        ctx.rotate((state.rotation || 0) * Math.PI / 180);
-        ctx.translate(-w / 2, -h / 2);
-        gen(ctx, w, h, th, rng, state);
-        ctx.restore();
-      } else {
-        gen(ctx, w, h, th, rng, state);
-      }
-    }
-    if (state.blur > 0) {
-      ctx.save();
-      ctx.globalAlpha = Math.min(0.55, state.blur / 100);
-      for (var bx = -state.blur; bx <= state.blur; bx += Math.max(1, state.blur)) {
-        for (var by = -state.blur; by <= state.blur; by += Math.max(1, state.blur)) {
-          if (bx || by) ctx.drawImage(ctx.canvas, bx, by);
-        }
-      }
-      ctx.restore();
+      gen(ctx, w, h, th, rng, state);
     }
 
     // 3. Post-processing: saturation
@@ -1839,9 +1822,9 @@
       var pad = w * (state.content.padding / 100);
       var box = { x: pad, y: pad, w: w - pad * 2, h: h - pad * 2 };
       var styles = {
-        font: resolveContentFont(),
+        font: state.content.fontFamily === 'mono' ? 'monospace' : state.content.fontFamily === 'serif' ? 'serif' : 'sans-serif',
         size: w * 0.02 * (state.content.fontSize / 10),
-        color: state.content.textColor || '#ffffff',
+        color: '#ffffff',
         accent: th.accent
       };
 
@@ -1881,6 +1864,52 @@
 
     // No content - finish render directly
     finishRender(ctx, w, h, th);
+
+    // 7. Frame: dark overlay
+    if (state.frame.darkOverlay > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,' + (state.frame.darkOverlay / 100) + ')';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 8. Frame: inner glow
+    if (state.frame.innerGlow > 0) {
+      var cx = w / 2, cy = h / 2, r = Math.sqrt(cx * cx + cy * cy);
+      var g = ctx.createRadialGradient(cx, cy, r * 0.3, cx, cy, r);
+      g.addColorStop(0, colorAlpha(th.accent, state.frame.innerGlow / 200));
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 9. Frame: vignette
+    if (state.frame.vignette > 0) {
+      var cx = w / 2, cy = h / 2, r = Math.sqrt(cx * cx + cy * cy);
+      var g = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r);
+      g.addColorStop(0, 'transparent');
+      g.addColorStop(1, 'rgba(0,0,0,' + (state.frame.vignette / 100) + ')');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // 10. Frame: border
+    if (state.frame.borderWidth > 0) {
+      if (state.frame.gradientBorder) {
+        var grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100));
+        grad.addColorStop(0.5, colorAlpha(state.frame.borderColor2 || state.frame.borderColor, state.frame.borderOpacity / 100));
+        grad.addColorStop(1, colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100));
+        ctx.strokeStyle = grad;
+      } else {
+        ctx.strokeStyle = colorAlpha(state.frame.borderColor, state.frame.borderOpacity / 100);
+      }
+      ctx.lineWidth = state.frame.borderWidth;
+      ctx.strokeRect(state.frame.borderWidth / 2, state.frame.borderWidth / 2, w - state.frame.borderWidth, h - state.frame.borderWidth);
+    }
+
+    // Update UI accents
+    document.getElementById('logo-box').style.backgroundColor = th.accent;
+    document.getElementById('btn-export').style.backgroundColor = th.accent;
+    document.getElementById('canvas-frame').style.boxShadow = '0 0 50px -20px ' + th.accent;
   }
 
   function finishRender(ctx, w, h, th) {
@@ -1938,7 +1967,7 @@
     ctx.quadraticCurveTo(x + w, y, x + w, y + r);
     ctx.lineTo(x + w, y + h - r);
     ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
+    ctx.lineTo(x + r, y + h - r);
     ctx.quadraticCurveTo(x, y + h, x, y + h - r);
     ctx.lineTo(x, y + r);
     ctx.quadraticCurveTo(x, y, x + r, y);
@@ -2009,7 +2038,7 @@
     Object.keys(generatorInfo).forEach((k) => {
       var btn = document.createElement('button');
       btn.className = 'gen-card' + (k === state.type ? ' active' : '');
-      btn.innerHTML = `<div class="name">${generatorInfo[k].name}</div><div class="desc">${generatorInfo[k].description}</div>`;
+      btn.innerHTML = `<div class="name">${generatorInfo[k].name}</div><div class="desc">${generatorInfo[k].desc}</div>`;
       btn.onclick = function() {
         state.type = k;
         updateGeneratorParams();
@@ -2020,9 +2049,8 @@
     });
     gPanel.appendChild(grid);
 
-    var genSep1 = document.createElement('hr');
-    genSep1.className = 'separator';
-    gPanel.appendChild(genSep1);
+    gPanel.appendChild(document.createElement('hr'));
+    gPanel.className = 'separator';
 
     var seedRow = document.createElement('div');
     seedRow.className = 'seed-row';
@@ -2051,9 +2079,8 @@
       render();
     };
 
-    var genSep2 = document.createElement('hr');
-    genSep2.className = 'separator';
-    gPanel.appendChild(genSep2);
+    gPanel.appendChild(document.createElement('hr'));
+    gPanel.className = 'separator';
     var randBtn = document.createElement('button');
     randBtn.className = 'rand-btn';
     randBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/></svg> Randomize Everything';
@@ -2095,9 +2122,6 @@
     makeSlider(tPanel, 'Complexity', 'complexity', 0, 20, 'Detail level across layers');
     makeSlider(tPanel, 'Density', 'density', 0, 20, 'Element count/intensity');
     makeSlider(tPanel, 'Scale', 'scale', 1, 20, 'Size multiplier');
-    makeSlider(tPanel, 'Turbulence', 'turbulence', 0, 20, 'Noise warp and flow variation');
-    makeSlider(tPanel, 'Line Weight', 'lineWeight', 1, 12, 'Stroke thickness for line-based generators');
-    makeSlider(tPanel, 'Rotation', 'rotation', -180, 180, 'Global composition rotation');
 
     // Adjust Panel - NEW: Missing parameters
     var aPanel = document.getElementById('panel-adjust');
@@ -2107,7 +2131,6 @@
     makeSlider(aPanel, 'BG Brightness', 'bgBrightness', -50, 50, 'Background brightness adjustment');
     makeSlider(aPanel, 'Contrast', 'contrast', -50, 50, 'Contrast enhancement');
     makeSlider(aPanel, 'Saturation', 'saturation', 0, 200, 'Color saturation (100 = native)');
-    makeSlider(aPanel, 'Soft Blur', 'blur', 0, 12, 'Subtle canvas echo blur');
 
     // Content Panel
     var cPanel = document.getElementById('panel-content');
@@ -2131,29 +2154,6 @@
           <option value="right-panel">Right Panel</option>
           <option value="bottom-bar">Bottom Bar</option>
         </select>
-      </div>
-      <div class="field">
-        <div class="fl">Font</div>
-        <select class="text-select" id="content-font">
-          <option value="sans">Sans / system</option>
-          <option value="serif">Serif / editorial</option>
-          <option value="mono">Monospace / code</option>
-          <option value="display">Display / poster</option>
-        </select>
-      </div>
-      <div class="field">
-        <div class="fl">Text Color</div>
-        <div style="display:grid; grid-template-columns:1fr 44px; gap:8px;">
-          <select class="text-select" id="content-color-preset">
-            <option value="custom">Custom</option>
-            <option value="white">White</option>
-            <option value="black">Black</option>
-            <option value="accent">Theme Accent</option>
-            <option value="warm">Warm Cream</option>
-            <option value="cool">Cool Mist</option>
-          </select>
-          <input class="text-input" id="content-color" type="color" value="${state.content.textColor}" style="height:32px; padding:2px;">
-        </div>
       </div>
       <div class="field">
         <div class="fl">Math Toolbar</div>
@@ -2222,30 +2222,8 @@
       mathToolbar.appendChild(button);
     });
     document.getElementById('content-layout').value = state.content.layout;
-    document.getElementById('content-font').value = state.content.fontFamily;
-    document.getElementById('content-color').value = state.content.textColor;
-    document.getElementById('content-color-preset').value = state.content.textPalette || 'custom';
     document.getElementById('content-layout').addEventListener('change', function(e) {
       state.content.layout = e.target.value;
-      render();
-    });
-    document.getElementById('content-font').addEventListener('change', function(e) {
-      state.content.fontFamily = e.target.value;
-      render();
-    });
-    document.getElementById('content-color').addEventListener('input', function(e) {
-      state.content.textColor = e.target.value;
-      state.content.textPalette = 'custom';
-      document.getElementById('content-color-preset').value = 'custom';
-      render();
-    });
-    document.getElementById('content-color-preset').addEventListener('change', function(e) {
-      state.content.textPalette = e.target.value;
-      var map = { white:'#ffffff', black:'#111111', accent:themes[state.theme].accent, warm:'#fff3d6', cool:'#e0fbfc' };
-      if (map[e.target.value]) {
-        state.content.textColor = map[e.target.value];
-        document.getElementById('content-color').value = state.content.textColor;
-      }
       render();
     });
     document.getElementById('content-text').addEventListener('input', function(e) {
@@ -2304,59 +2282,19 @@
     exportBtn.style.cssText = 'width:100%; padding:16px 12px; display:flex; align-items:center; justify-content:center; gap:8px;';
     exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export PNG';
     exportBtn.onclick = function() {
-      rerenderExportDownload(state.exportPresets[state.exportPreset]);
+      var preset = state.exportPresets[state.exportPreset];
+      document.getElementById('preview').width = preset.width;
+      document.getElementById('preview').height = preset.height;
+      render();
+      var link = document.createElement('a');
+      link.download = 'sharepic-' + preset.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+      link.href = document.getElementById('preview').toDataURL();
+      link.click();
+      document.getElementById('preview').width = 1200;
+      document.getElementById('preview').height = 1200;
+      render();
     };
     ePanel.appendChild(exportBtn);
-
-    var cfgTools = document.createElement('div');
-    cfgTools.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px;';
-    cfgTools.innerHTML = `
-      <button class="preset-btn" id="copy-json">Copy JSON</button>
-      <button class="preset-btn" id="download-json">Download JSON</button>
-      <button class="preset-btn" id="paste-json">Paste JSON</button>
-      <button class="preset-btn" id="load-json">Load JSON File</button>
-      <input type="file" id="json-file" accept="application/json,.json" style="display:none">
-    `;
-    ePanel.appendChild(cfgTools);
-    var status = document.createElement('div');
-    status.id = 'config-status';
-    status.style.cssText = 'margin-top:8px; min-height:16px; font-size:10px; color:rgba(255,255,255,0.45); line-height:1.4;';
-    ePanel.appendChild(status);
-    function setStatus(msg) { status.textContent = msg; }
-    document.getElementById('copy-json').onclick = function() {
-      var text = JSON.stringify(buildPublicState(), null, 2);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function(){ setStatus('Copied current studio config JSON.'); }).catch(function(){ setStatus('Clipboard blocked; use Download JSON instead.'); });
-      } else setStatus('Clipboard unavailable; use Download JSON instead.');
-    };
-    document.getElementById('download-json').onclick = function() {
-      downloadText('sharepic-studio-config.json', JSON.stringify(buildPublicState(), null, 2), 'application/json');
-      setStatus('Downloaded sharepic-studio-config.json.');
-    };
-    document.getElementById('paste-json').onclick = function() {
-      var text = prompt('Paste Sharepic Studio JSON config:');
-      if (!text) return;
-      try {
-        mergeStatePatch(JSON.parse(text));
-        updateUI(); syncContentControls(); render();
-        setStatus('Loaded JSON from pasted text.');
-      } catch (err) { setStatus('Invalid JSON: ' + err.message); }
-    };
-    document.getElementById('load-json').onclick = function() { document.getElementById('json-file').click(); };
-    document.getElementById('json-file').onchange = function(e) {
-      var file = e.target.files && e.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function() {
-        try {
-          mergeStatePatch(JSON.parse(String(reader.result)));
-          updateUI(); syncContentControls(); render();
-          setStatus('Loaded JSON file: ' + file.name);
-        } catch (err) { setStatus('Invalid JSON file: ' + err.message); }
-      };
-      reader.readAsText(file);
-      e.target.value = '';
-    };
   }
 
   function updateUI() {
@@ -2369,7 +2307,6 @@
     });
     buildPalettePanel();
     updateSliderValues();
-    syncContentControls();
   }
 
   function updateActiveGenerator() {
@@ -2439,7 +2376,17 @@
   };
 
   document.getElementById('btn-export').onclick = function() {
-    rerenderExportDownload(state.exportPresets[state.exportPreset]);
+    var preset = state.exportPresets[state.exportPreset];
+    document.getElementById('preview').width = preset.width;
+    document.getElementById('preview').height = preset.height;
+    render();
+    var link = document.createElement('a');
+    link.download = 'sharepic-' + preset.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+    link.href = document.getElementById('preview').toDataURL();
+    link.click();
+    document.getElementById('preview').width = 1200;
+    document.getElementById('preview').height = 1200;
+    render();
   };
 })();
 </script>
