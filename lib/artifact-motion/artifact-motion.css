@@ -1,0 +1,11 @@
+/* artifact-motion.css (see previous description) */
+
+:root { --am-drop-color: rgba(255, 209, 102, .92); --am-ghost-shadow: rgba(0, 0, 0, .36); --am-light-x: 35%; --am-light-y: 20%; --am-light-opacity: .32; }
+.am-drag-source-hidden{opacity:.42}
+.am-drop-ok{outline:4px solid var(--am-drop-color)!important;outline-offset:3px}
+.am-target-magnet{transform:scale(1.045);transition:transform .12s ease,outline-color .12s ease}
+.am-ghost-layer{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;will-change:transform;transform:translate3d(0,0,0)}
+.am-ghost-item{position:absolute;margin:0;overflow:hidden;transform-style:preserve-3d;box-shadow:0 26px 42px var(--am-ghost-shadow)}
+.am-ghost-item::before{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,rgba(0,0,0,.02) 0 2px,transparent 2px 4px);opacity:.18;pointer-events:none}
+.am-ghost-item::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at var(--am-light-x) var(--am-light-y),rgba(255,255,255,.42),transparent 38%),linear-gradient(115deg,rgba(255,255,255,.2),transparent 45%,rgba(0,0,0,.18));mix-blend-mode:screen;opacity:var(--am-light-opacity);pointer-events:none}
+@media (prefers-reduced-motion: reduce){.am-target-magnet,.am-ghost-layer,.am-ghost-item{transition:none!important}}
