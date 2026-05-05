@@ -1285,6 +1285,34 @@ body:has(#sourceCanvas) aside.panel.controls .density-toggle button[aria-pressed
   background: linear-gradient(180deg,#255c7f,#1a3a5d);
 }
 </style>
+
+<style id="sprite-gif-creator-collapse-mode-polish">
+body:has(#sourceCanvas) aside.panel.controls .grid > *::before {
+  cursor: pointer;
+  user-select: none;
+}
+body:has(#sourceCanvas) aside.panel.controls [data-spc-collapsed="true"] {
+  max-height: 24px !important;
+  overflow: hidden !important;
+  opacity: .78;
+}
+body:has(#sourceCanvas) aside.panel.controls [data-spc-group="grid"].spc-active-section,
+body:has(#sourceCanvas) aside.panel.controls [data-spc-group="cell"].spc-active-section,
+body:has(#sourceCanvas) aside.panel.controls [data-spc-group="actions"].spc-active-section {
+  outline: 1px solid rgba(125,211,252,.45);
+  border-radius: 10px;
+  background: rgba(125,211,252,.055);
+}
+body:has(#sourceCanvas) aside.panel.controls [data-spc-group="cell"].spc-active-section {
+  outline-color: rgba(134,239,172,.55);
+  background: rgba(134,239,172,.055);
+}
+body:has(#sourceCanvas) aside.panel.controls [data-spc-group="output"].spc-active-section {
+  outline: 1px solid rgba(251,191,36,.38);
+  border-radius: 10px;
+  background: rgba(251,191,36,.05);
+}
+</style>
 </head>
 <body data-theme="default">
 
@@ -4264,6 +4292,43 @@ window.addEventListener('beforeunload', () => {
       if (b) setDensity(b.dataset.density);
     });
     setDensity(localStorage.getItem('spcDensity') || 'comfortable');
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install); else install();
+})();
+</script>
+
+<script id="sprite-gif-creator-collapse-mode-polish-script">
+(() => {
+  const install = () => {
+    const panel = document.querySelector('aside.panel.controls');
+    const grid = panel?.querySelector('.grid');
+    if (!panel || !grid || panel.dataset.spcCollapseInstalled) return;
+    panel.dataset.spcCollapseInstalled = 'true';
+    const children = [...grid.children];
+    children.forEach((el, i) => {
+      if (el.matches('.legend,.tabbar,.cell-pick-grid')) el.dataset.spcGroup = i < 3 ? 'grid' : 'cell';
+      else if (el.matches('.toolbar')) el.dataset.spcGroup = 'actions';
+      else if (el.matches('.row')) el.dataset.spcGroup = i < 8 ? 'grid' : 'output';
+      else el.dataset.spcGroup = 'info';
+    });
+    const setMode = mode => {
+      children.forEach(el => el.classList.remove('spc-active-section'));
+      children.filter(el => el.dataset.spcGroup === mode || (mode === 'cell' && el.dataset.spcGroup === 'grid')).forEach(el => el.classList.add('spc-active-section'));
+    };
+    panel.addEventListener('click', e => {
+      const box = e.target.closest('.grid > *');
+      if (!box || e.target.closest('button,input,select,a')) return;
+      const r = box.getBoundingClientRect();
+      if (e.clientY - r.top <= 22) {
+        box.dataset.spcCollapsed = String(box.dataset.spcCollapsed !== 'true');
+      }
+    });
+    panel.querySelector('#gridTabBtn')?.addEventListener('click', () => setMode('grid'));
+    panel.querySelector('#cellTabBtn')?.addEventListener('click', () => setMode('cell'));
+    panel.addEventListener('pointerdown', e => {
+      if (e.target.closest('#sourceCanvas')) setMode(e.shiftKey || e.altKey || e.ctrlKey ? 'grid' : 'cell');
+    }, true);
+    setMode('grid');
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install); else install();
 })();
