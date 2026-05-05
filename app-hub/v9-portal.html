@@ -1126,6 +1126,94 @@
     .peer-profile-close { position:absolute; top:0.4rem; right:0.45rem; background:none; border:0; color:var(--accent-secondary); cursor:pointer; }
 
   </style>
+
+<style id="sprite-gif-creator-sidebar-polish">
+#sprite-gif-creator, .sprite-gif-creator, body:has(#sourceCanvas) {
+  --spc-control-h: 34px;
+  --spc-gap-xs: 4px;
+  --spc-gap-sm: 7px;
+  --spc-gap-md: 10px;
+}
+body:has(#sourceCanvas) .controls,
+body:has(#sourceCanvas) aside.panel.controls {
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  display: grid;
+  align-content: start;
+  gap: var(--spc-gap-md);
+}
+body:has(#sourceCanvas) aside.panel.controls > .grid {
+  gap: var(--spc-gap-md);
+}
+body:has(#sourceCanvas) aside.panel.controls h1 {
+  margin-bottom: 2px;
+  font-size: 20px;
+  line-height: 1.1;
+}
+body:has(#sourceCanvas) aside.panel.controls .note,
+body:has(#sourceCanvas) aside.panel.controls .pill,
+body:has(#sourceCanvas) aside.panel.controls .tiny {
+  line-height: 1.25;
+}
+body:has(#sourceCanvas) aside.panel.controls .row {
+  gap: var(--spc-gap-sm);
+}
+body:has(#sourceCanvas) aside.panel.controls .row.four,
+body:has(#sourceCanvas) aside.panel.controls .four {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+body:has(#sourceCanvas) aside.panel.controls .row.three,
+body:has(#sourceCanvas) aside.panel.controls .three {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+body:has(#sourceCanvas) aside.panel.controls label {
+  gap: var(--spc-gap-xs);
+  min-width: 0;
+  font-size: 12px;
+}
+body:has(#sourceCanvas) aside.panel.controls input,
+body:has(#sourceCanvas) aside.panel.controls select,
+body:has(#sourceCanvas) aside.panel.controls button {
+  min-height: var(--spc-control-h);
+  padding: 7px 9px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 12px;
+}
+body:has(#sourceCanvas) aside.panel.controls input[type="range"] {
+  min-height: 24px;
+  padding: 0;
+}
+body:has(#sourceCanvas) aside.panel.controls input[type="checkbox"] {
+  min-height: 0;
+}
+body:has(#sourceCanvas) aside.panel.controls .toolbar {
+  gap: var(--spc-gap-sm);
+  padding: 8px 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+body:has(#sourceCanvas) aside.panel.controls .toolbar > * {
+  flex: 1 1 105px;
+}
+body:has(#sourceCanvas) aside.panel.controls .legend {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+body:has(#sourceCanvas) aside.panel.controls .cell-pick-grid {
+  max-height: 120px;
+  overflow: auto;
+}
+body:has(#sourceCanvas) aside.panel.controls .slider-label {
+  grid-template-columns: minmax(0,1fr) 44px;
+}
+@media (max-width: 1100px) {
+  body:has(#sourceCanvas) aside.panel.controls {
+    max-height: none;
+  }
+}
+</style>
 </head>
 <body data-theme="default">
 
