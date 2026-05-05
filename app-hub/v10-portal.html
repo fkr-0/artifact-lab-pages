@@ -71,6 +71,8 @@
       { id:'collab', title:'Shared Text Pad', render:renderCollabPad },
       { id:'sequencer', title:'Shared Step Sequencer', render:renderSequencer },
       { id:'sprite-gif-creator', title:'Sprite GIF Creator', render:renderSpriteGifCreatorLauncher },
+      { id:'minesweeper', title:'Classic Minesweeper', render:renderMinesweeperLauncher },
+      { id:'solitaire', title:'Classic Solitaire', render:renderSolitaireLauncher },
       { id:'peermodgroove', title:'Launch PeerModGroove', render:renderPeerModGrooveLauncher },
       { id:'linked-artifacts', title:'Linked Artifacts', render:renderLinkedArtifacts },
       { id:'peers', title:'Peer Console', render:renderPeerConsole },
@@ -344,6 +346,20 @@ v10 relative url: ${href}</pre></section>`;
       $('gifInline').onclick = () => { const frame = $('gifFrame'); frame.src = href; frame.style.display = 'block'; };
     }
 
+    function renderMinesweeperLauncher(root) {
+      const href = '../minesweeper/index.html';
+      root.innerHTML = `<section class="card stack"><div class="row"><strong>Classic Minesweeper</strong><span class="pill ok">standalone game</span></div><p class="muted">Original-style Minesweeper with Beginner, Intermediate, Expert and custom boards, timer scoring, flags, chording, keyboard controls, and locally saved best times.</p><div class="row"><button id="mineOpen">Open Minesweeper</button><button id="mineInline">Open inline</button></div><iframe id="mineFrame" title="Classic Minesweeper" style="display:none;width:100%;min-height:78vh;border:1px solid rgba(0,255,255,.22);border-radius:12px;background:#008080"></iframe><pre class="small">artifact path: minesweeper/index.html\nv10 relative url: ${href}</pre></section>`;
+      $('mineOpen').onclick = () => window.open(href, '_blank');
+      $('mineInline').onclick = () => { const frame = $('mineFrame'); frame.src = href; frame.style.display = 'block'; };
+    }
+
+    function renderSolitaireLauncher(root) {
+      const href = '../solitaire/index.html';
+      root.innerHTML = `<section class="card stack"><div class="row"><strong>Classic Solitaire</strong><span class="pill ok">standalone game</span></div><p class="muted">Klondike Solitaire clone with draw-one/draw-three modes, stock and waste piles, foundations, tableau moves, scoring, undo, auto-foundation helper, timer, and persistent best score.</p><div class="row"><button id="solOpen">Open Solitaire</button><button id="solInline">Open inline</button></div><iframe id="solFrame" title="Classic Solitaire" style="display:none;width:100%;min-height:78vh;border:1px solid rgba(0,255,255,.22);border-radius:12px;background:#0f6b45"></iframe><pre class="small">artifact path: solitaire/index.html\nv10 relative url: ${href}</pre></section>`;
+      $('solOpen').onclick = () => window.open(href, '_blank');
+      $('solInline').onclick = () => { const frame = $('solFrame'); frame.src = href; frame.style.display = 'block'; };
+    }
+
     function renderPeerModGrooveLauncher(root) {
       root.innerHTML = `<section class="card stack"><strong>PeerModGroove</strong><p class="muted">PeerModGroove is a separate launchable app: the peer-synchronized modular audio machine. v10 is only the launcher/runtime shell for lightweight apps.</p><div class="row"><button id="pmgOpen">Open PeerModGroove</button><button id="pmgOpenSeq">Open with current sequencer doc</button></div><pre class="small">v10 portal          = app launcher + lightweight PeernetLobby apps
 PeerModGroove app   = modular audio graph / instruments / patch bay</pre></section>`;
@@ -353,6 +369,20 @@ PeerModGroove app   = modular audio graph / instruments / patch bay</pre></secti
 
     const LINKED_ARTIFACTS_KEY = 'v10-linked-artifacts';
     const seedLinkedArtifacts = [
+      {
+        id: 'classic-minesweeper',
+        kind: 'artifact',
+        title: 'Classic Minesweeper',
+        href: '../minesweeper/index.html',
+        note: 'Original-style Minesweeper artifact linked from v9 and v10.'
+      },
+      {
+        id: 'classic-solitaire',
+        kind: 'artifact',
+        title: 'Classic Solitaire',
+        href: '../solitaire/index.html',
+        note: 'Klondike Solitaire clone artifact linked from v9 and v10.'
+      },
       {
         id: 'ring0-niebelungen',
         kind: 'repo',

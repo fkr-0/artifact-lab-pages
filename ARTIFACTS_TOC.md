@@ -174,6 +174,9 @@ Sci-fi spaceship interface for indexing all artifacts.
   - Quick Notepad with localStorage persistence
   - Sci-Fi Calculator
   - Color Picker with palette history
+- **Standalone classic games exposed through v9/v10:**
+  - `minesweeper/index.html` - Original-style Minesweeper with Beginner, Intermediate, Expert, custom boards, timer scoring, flags, chording, and local best times
+  - `solitaire/index.html` - Klondike Solitaire clone with draw-one/draw-three, tableau/foundation moves, scoring, undo, timer, auto-foundation helper, and local best score
 - **Native P2P panel** (bottom left) showing all connected users
 - Username setting with random ID generation
 - Real-time connected users list with color-coded cursors
