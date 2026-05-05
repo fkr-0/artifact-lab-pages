@@ -24,6 +24,47 @@ ARTIFACTS_DIR="/home/user/work/code/artifacts"
 VPS_HOST="vps"
 VPS_PATH="/home/user/data/artifacts"
 
+EXCLUDE_PATTERNS=(
+  ".git/"
+  ".git/***"
+  "node_modules/"
+  "node_modules/***"
+  ".vite/"
+  ".vite/***"
+  "dist/.vite/"
+  "dist/.vite/***"
+  "coverage/"
+  "coverage/***"
+  ".cache/"
+  ".cache/***"
+  ".parcel-cache/"
+  ".parcel-cache/***"
+  ".turbo/"
+  ".turbo/***"
+  ".next/"
+  ".next/***"
+  "*.log"
+  "*.tmp"
+  "*.bak"
+  "*.swp"
+  ".DS_Store"
+)
+
+rsync_excludes=()
+for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+  rsync_excludes+=(--exclude="$pattern")
+done
+
+remote_cleanup() {
+  echo -e "${CYAN}Cleaning nested VCS/dependency/cache directories on VPS...${NC}"
+  ssh "$VPS_HOST" "
+    set -e
+    find '$VPS_PATH' \
+      \( -name .git -o -name node_modules -o -name .vite -o -name coverage -o -name .cache -o -name .parcel-cache -o -name .turbo -o -name .next \) \
+      -prune -exec rm -rf {} +
+  "
+}
+
 FULL_MODE=0
 DRY_RUN=""
 for arg in "$@"; do
@@ -72,6 +113,7 @@ if [[ $FULL_MODE -eq 1 ]]; then
     echo 'Extracted OK'
     ls '$VPS_PATH' | head -10
   "
+  remote_cleanup
   echo ""
   echo -e "${GREEN}Full deploy complete → $VPS_HOST:$VPS_PATH${NC}"
   exit 0
@@ -83,7 +125,7 @@ fi
 echo -e "${CYAN}Syncing to ${VPS_HOST}:${VPS_PATH} ...${NC}"
 echo ""
 
-rsync -avz --checksum $DRY_RUN \
+rsync -avz --checksum $DRY_RUN "${rsync_excludes[@]}" \
   --include="index.html" \
   --include="ARTIFACTS_TOC.md" \
   --include="SERVER_GUIDE.md" \
@@ -112,6 +154,10 @@ rsync -avz --checksum $DRY_RUN \
   --exclude="*" \
   "$ARTIFACTS_DIR/" \
   "$VPS_HOST:$VPS_PATH/"
+
+if [[ -z "$DRY_RUN" ]]; then
+  remote_cleanup
+fi
 
 echo ""
 echo -e "${GREEN}Sync complete → https://artifacts.fkr.dev${NC}"
