@@ -1,11 +1,12 @@
 // PeerModGroove/src/crdt/text-crdt.js
-// Small operation-based sequence CRDT for artifact text editors.
+// Operation-based sequence CRDT for artifact text editors.
 //
-// Model:
-// - Every character has a globally stable id: <siteId>:<counter>
-// - Inserts reference the visible character before them via afterId
-// - Deletes are tombstones, so late inserts referencing deleted chars still merge
-// - Siblings with the same afterId are sorted by character id for deterministic convergence
+// Design notes:
+// - Each character has a stable globally unique id: <siteId>:<counter>
+// - Inserts reference the visible/tombstoned character before them via afterId
+// - Deletes are tombstones so late operations can still resolve
+// - Local ordered insert runs are preserved by chaining each inserted char after the previous char
+// - Concurrent siblings under the same afterId are deterministically ordered by id
 
 export class TextCrdt {
   constructor({ siteId = randomSiteId(), clock = 0 } = {}) {
@@ -21,7 +22,7 @@ export class TextCrdt {
   static fromText(text, opts = {}) {
     const doc = new TextCrdt(opts);
     let afterId = doc.rootId;
-    for (const ch of text) {
+    for (const ch of String(text || '')) {
       const op = doc.localInsertAfter(afterId, ch);
       afterId = op.id;
     }
@@ -82,11 +83,13 @@ export class TextCrdt {
     if (!op || typeof op !== 'object') return false;
     const key = op.opId || `${op.kind}:${op.id}`;
     if (this.applied.has(key)) return false;
-    this.applied.add(key);
 
-    if (op.kind === 'insert') return this.applyInsert(op);
-    if (op.kind === 'delete') return this.applyDelete(op);
-    return false;
+    let changed = false;
+    if (op.kind === 'insert') changed = this.applyInsert(op);
+    else if (op.kind === 'delete') changed = this.applyDelete(op);
+
+    if (changed) this.applied.add(key);
+    return changed;
   }
 
   applyMany(ops = []) {
@@ -108,9 +111,14 @@ export class TextCrdt {
     this.nodes.set(node.id, node);
     if (!this.children.has(afterId)) this.children.set(afterId, []);
     if (!this.children.has(node.id)) this.children.set(node.id, []);
+
     const siblings = this.children.get(afterId);
-    siblings.push(node.id);
-    siblings.sort(compareIds);
+    if (!siblings.includes(node.id)) {
+      let i = 0;
+      while (i < siblings.length && compareIds(siblings[i], node.id) < 0) i += 1;
+      siblings.splice(i, 0, node.id);
+    }
+
     this.clock = Math.max(this.clock, parseClock(op.id));
     return true;
   }
@@ -150,10 +158,21 @@ export class TextCrdt {
     for (const siblings of this.children.values()) siblings.sort(compareIds);
   }
 
+  compact() {
+    const live = this.value();
+    const compacted = TextCrdt.fromText(live, { siteId: this.siteId, clock: this.clock });
+    this.clock = compacted.clock;
+    this.nodes = compacted.nodes;
+    this.children = compacted.children;
+    this.applied = compacted.applied;
+    return this.snapshot();
+  }
+
   afterIdForIndex(index) {
-    if (index <= 0) return this.rootId;
     const ids = this.visibleIds();
-    return ids[Math.min(index, ids.length) - 1] || this.rootId;
+    const clamped = Math.max(0, Math.min(Number(index || 0), ids.length));
+    if (clamped <= 0) return this.rootId;
+    return ids[clamped - 1] || this.rootId;
   }
 
   walkVisible(fn) {
@@ -189,31 +208,6 @@ export function diffToOps(doc, oldText, newText) {
   return ops;
 }
 
-function randomSiteId() {
-  return `site-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function parseSiteId(id) {
-  return String(id || '').split(':')[0] || 'unknown';
-}
-
-function parseClock(id) {
-  const n = Number(String(id || '').split(':')[1]);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function compareIds(a, b) {
-  const [as, ac] = String(a).split(':');
-  const [bs, bc] = String(b).split(':');
-  const an = Number(ac);
-  const bn = Number(bc);
-  if (an !== bn) return an - bn;
-  return as.localeCompare(bs);
-}
-
-
-
-
 export function cursorToAnchor(doc, index, bias = 'right') {
   const ids = doc.visibleIds();
   const clamped = Math.max(0, Math.min(Number(index || 0), ids.length));
@@ -236,13 +230,15 @@ export function anchorToCursor(doc, anchor = {}) {
     if (leftIndex !== -1) return leftIndex + 1;
   }
   if (anchor.leftId === doc.rootId) return 0;
-  return Math.max(0, Math.min(Number(anchor.offset || 0), ids.length));
+  return ids.length;
 }
 
 export function selectionToAnchors(doc, start, end = start) {
-  const anchor = cursorToAnchor(doc, start, 'right');
-  const focusAnchor = cursorToAnchor(doc, end, 'left');
-  return { anchor, focusAnchor, reversed: Number(start || 0) > Number(end || 0) };
+  return {
+    anchor: cursorToAnchor(doc, start, 'right'),
+    focusAnchor: cursorToAnchor(doc, end, 'right'),
+    reversed: Number(start || 0) > Number(end || 0)
+  };
 }
 
 export function anchorsToSelection(doc, selection = {}) {
@@ -255,4 +251,26 @@ export function anchorsToSelection(doc, selection = {}) {
     end: Math.max(anchorIndex, focusIndex),
     reversed: Boolean(selection.reversed)
   };
+}
+
+function randomSiteId() {
+  return `site-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function parseSiteId(id) {
+  return String(id || '').split(':')[0] || 'unknown';
+}
+
+function parseClock(id) {
+  const n = Number(String(id || '').split(':')[1]);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function compareIds(a, b) {
+  const [as, ac] = String(a).split(':');
+  const [bs, bc] = String(b).split(':');
+  const an = Number(ac);
+  const bn = Number(bc);
+  if (an !== bn) return an - bn;
+  return as.localeCompare(bs);
 }

@@ -21,25 +21,32 @@ export class MonacoCrdtEditorAdapter extends CrdtEditorAdapter {
 
     const onOps = (payload) => this.receiveOps(payload?.data || payload);
     const onCursor = (payload) => this.receiveCursor(payload?.data || payload);
+    const onPresence = (payload) => this.receivePresence(payload?.data || payload);
     if (typeof this.stack.onMessage === 'function') {
       this.stack.onMessage('crdt-ops', onOps);
       this.stack.onMessage('crdt-cursor', onCursor);
+      this.stack.onMessage('presence', onPresence);
     } else {
       this.stack.core?.on?.('message:artifact:crdt-ops', onOps);
       this.stack.core?.on?.('message:artifact:crdt-cursor', onCursor);
+      this.stack.core?.on?.('message:artifact:presence', onPresence);
     }
 
+    this.broadcastPresence();
     this.emit('ready', { docId: this.docId, siteId: this.doc.siteId });
     return this;
   }
 
   handleLocalInput() {
     if (this.silent) return;
+    const before = this.text;
     const next = this.monaco.getValue();
-    const ops = diffToOps(this.doc, this.text, next);
+    const ops = diffToOps(this.doc, before, next);
     if (!ops.length) return;
     this.text = this.doc.value();
-    this.broadcastOps(ops);
+    this.undoStack.push({ before, after: this.text });
+    this.redoStack.length = 0;
+    this.queueOps(ops);
   }
 
   broadcastCursor() {
@@ -51,6 +58,7 @@ export class MonacoCrdtEditorAdapter extends CrdtEditorAdapter {
     const message = {
       docId: this.docId,
       siteId: this.doc.siteId,
+      profile: this.profile,
       selection: selectionToAnchors(this.doc, start, end),
       at: Date.now()
     };
@@ -63,22 +71,21 @@ export class MonacoCrdtEditorAdapter extends CrdtEditorAdapter {
     if (next === this.text) return;
     const model = this.monaco.getModel();
     const selection = this.monaco.getSelection();
+    const offset = model && selection ? model.getOffsetAt(selection.getPosition()) : next.length;
     this.silent = true;
     this.monaco.setValue(next);
     this.text = next;
-    if (model && selection) {
-      const max = next.length;
-      const offset = Math.min(model.getOffsetAt(selection.getPosition()), max);
-      this.monaco.setPosition(model.getPositionAt(offset));
-    }
+    const updated = this.monaco.getModel();
+    if (updated) this.monaco.setPosition(updated.getPositionAt(Math.min(offset, next.length)));
     this.silent = false;
   }
 
   receiveCursor(message = {}) {
     if (!message || message.docId !== this.docId || message.siteId === this.doc.siteId) return;
-    const model = this.monaco.getModel();
-    if (!model) return;
-    const cursor = { ...message, ...anchorsToSelection(this.doc, message.selection || { anchor: message.anchor, focusAnchor: message.focusAnchor }) };
+    const cursor = {
+      ...message,
+      ...anchorsToSelection(this.doc, message.selection || { anchor: message.anchor, focusAnchor: message.focusAnchor })
+    };
     this.remoteCursors.set(message.siteId, cursor);
     this.renderCursorDecorations();
     this.emit('cursor', cursor);
@@ -94,10 +101,7 @@ export class MonacoCrdtEditorAdapter extends CrdtEditorAdapter {
       if ((cursor.end ?? 0) > (cursor.start ?? 0)) {
         decorations.push({
           range: new globalThis.monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
-          options: {
-            className: 'remote-crdt-selection',
-            hoverMessage: { value: cursor.siteId }
-          }
+          options: { className: 'remote-crdt-selection', hoverMessage: { value: cursor.profile?.username || cursor.siteId } }
         });
       }
       const caret = model.getPositionAt(cursor.focusIndex ?? cursor.index ?? 0);
@@ -105,7 +109,7 @@ export class MonacoCrdtEditorAdapter extends CrdtEditorAdapter {
         range: new globalThis.monaco.Range(caret.lineNumber, caret.column, caret.lineNumber, caret.column),
         options: {
           className: 'remote-crdt-cursor',
-          hoverMessage: { value: cursor.siteId },
+          hoverMessage: { value: cursor.profile?.username || cursor.siteId },
           stickiness: globalThis.monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
         }
       });
