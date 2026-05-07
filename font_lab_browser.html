@@ -43,6 +43,9 @@
     button:disabled { opacity: .55; cursor: not-allowed; }
     .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
     .toolbar > * { flex: 1 1 180px; }
+    .preset-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .preset-row button { padding: 8px 10px; font-size: 12px; }
+    .mini { font-size: 12px; color: var(--muted); }
     .canvas-wrap { display: grid; gap: 16px; }
     .canvas-card { display: grid; gap: 10px; }
     canvas, .svg-preview {
@@ -107,9 +110,20 @@ xyz0123456
           </label>
         </div>
 
+        <div class="row">
+          <label>
+            Ink mode
+            <select id="inkMode">
+              <option value="dark" selected>dark ink on light/white background</option>
+              <option value="light">light ink on dark/black background</option>
+              <option value="alpha">use source alpha as ink</option>
+            </select>
+          </label>
+        </div>
+
         <div class="row three">
           <label>
-            White threshold
+            Ink threshold
             <input id="whiteThreshold" type="number" min="0" max="255" step="1" value="245" />
           </label>
           <label>
@@ -120,6 +134,24 @@ xyz0123456
             Re-threshold
             <input id="alphaThreshold" type="number" min="0" max="255" step="1" value="64" />
           </label>
+        </div>
+
+        <div class="row two">
+          <label>
+            Cell inset %
+            <input id="cellInset" type="number" min="0" max="25" step="0.5" value="0" />
+          </label>
+          <label>
+            Space width
+            <input id="spaceWidth" type="number" min="100" max="1200" step="10" value="320" />
+          </label>
+        </div>
+
+        <div class="preset-row">
+          <button class="secondary" data-preset="cleanScan" type="button">Preset: clean scan</button>
+          <button class="secondary" data-preset="thickMarker" type="button">Preset: thick marker</button>
+          <button class="secondary" data-preset="thinPencil" type="button">Preset: thin pencil</button>
+          <button class="secondary" data-preset="darkBoard" type="button">Preset: dark board</button>
         </div>
 
         <div class="row three">
@@ -184,6 +216,7 @@ xyz0123456
 
         <div class="toolbar">
           <button id="processBtn">1. Process grid</button>
+          <button id="quickZipBtn" class="secondary">Process + ZIP</button>
           <button id="exportOtfBtn" class="secondary" disabled>2. Export OTF</button>
           <button id="exportZipBtn" class="secondary" disabled>3. Export ZIP</button>
         </div>
@@ -226,21 +259,25 @@ xyz0123456
       gridMap: $('gridMap'),
       familyName: $('familyName'),
       styleName: $('styleName'),
+      inkMode: $('inkMode'),
       whiteThreshold: $('whiteThreshold'),
       blurRadius: $('blurRadius'),
       alphaThreshold: $('alphaThreshold'),
       dilateIterations: $('dilateIterations'),
       erodeIterations: $('erodeIterations'),
       targetRasterSize: $('targetRasterSize'),
+      cellInset: $('cellInset'),
       glyphPadding: $('glyphPadding'),
       leftBearing: $('leftBearing'),
       rightBearing: $('rightBearing'),
+      spaceWidth: $('spaceWidth'),
       unitsPerEm: $('unitsPerEm'),
       ascender: $('ascender'),
       descender: $('descender'),
       baselineRatio: $('baselineRatio'),
       tracePreset: $('tracePreset'),
       processBtn: $('processBtn'),
+      quickZipBtn: $('quickZipBtn'),
       exportOtfBtn: $('exportOtfBtn'),
       exportZipBtn: $('exportZipBtn'),
       status: $('status'),
@@ -277,11 +314,20 @@ xyz0123456
       return { rows: cells.length, cols: width, cells };
     }
 
-    function binaryAlphaFromRgba(data, whiteThreshold = 245) {
+    function binaryAlphaFromRgba(data, whiteThreshold = 245, inkMode = 'dark') {
       const out = new Uint8ClampedArray(data.length / 4);
       for (let i = 0, j = 0; i < data.length; i += 4, j += 1) {
+        const sourceAlpha = data[i + 3];
         const luminance = Math.round((data[i] + data[i + 1] + data[i + 2]) / 3);
-        out[j] = luminance >= whiteThreshold ? 0 : 255;
+        if (inkMode === 'alpha') {
+          out[j] = sourceAlpha;
+        } else if (sourceAlpha < 12) {
+          out[j] = 0;
+        } else if (inkMode === 'light') {
+          out[j] = luminance >= whiteThreshold ? 255 : 0;
+        } else {
+          out[j] = luminance >= whiteThreshold ? 0 : 255;
+        }
       }
       return out;
     }
@@ -424,15 +470,18 @@ xyz0123456
         grid,
         familyName: refs.familyName.value.trim() || 'Grid Lab Font',
         styleName: refs.styleName.value.trim() || 'Regular',
+        inkMode: refs.inkMode.value,
         whiteThreshold: Number(refs.whiteThreshold.value),
         blurRadius: Number(refs.blurRadius.value),
         alphaThreshold: Number(refs.alphaThreshold.value),
         dilateIterations: Number(refs.dilateIterations.value),
         erodeIterations: Number(refs.erodeIterations.value),
         targetRasterSize: Number(refs.targetRasterSize.value),
+        cellInset: Number(refs.cellInset.value),
         glyphPadding: Number(refs.glyphPadding.value),
         leftBearing: Number(refs.leftBearing.value),
         rightBearing: Number(refs.rightBearing.value),
+        spaceWidth: Number(refs.spaceWidth.value),
         unitsPerEm: Number(refs.unitsPerEm.value),
         ascender: Number(refs.ascender.value),
         descender: Number(refs.descender.value),
@@ -486,13 +535,15 @@ xyz0123456
       return canvas;
     }
 
-    function extractCellCanvas(image, col, row, cols, rows) {
+    function extractCellCanvas(image, col, row, cols, rows, insetPercent = 0) {
       const srcCellW = image.width / cols;
       const srcCellH = image.height / rows;
-      const sx = Math.round(col * srcCellW);
-      const sy = Math.round(row * srcCellH);
-      const ex = Math.round((col + 1) * srcCellW);
-      const ey = Math.round((row + 1) * srcCellH);
+      const insetX = Math.min(srcCellW / 3, srcCellW * Math.max(0, insetPercent) / 100);
+      const insetY = Math.min(srcCellH / 3, srcCellH * Math.max(0, insetPercent) / 100);
+      const sx = Math.round(col * srcCellW + insetX);
+      const sy = Math.round(row * srcCellH + insetY);
+      const ex = Math.round((col + 1) * srcCellW - insetX);
+      const ey = Math.round((row + 1) * srcCellH - insetY);
       const width = Math.max(1, ex - sx);
       const height = Math.max(1, ey - sy);
       const canvas = makeCanvas(width, height);
@@ -548,7 +599,7 @@ xyz0123456
     function preprocessGlyphCanvas(cellCanvas, config) {
       const ctx = cellCanvas.getContext('2d', { willReadFrequently: true });
       const src = ctx.getImageData(0, 0, cellCanvas.width, cellCanvas.height);
-      let alpha = binaryAlphaFromRgba(src.data, config.whiteThreshold);
+      let alpha = binaryAlphaFromRgba(src.data, config.whiteThreshold, config.inkMode);
       alpha = blurBinaryAlpha(alpha, cellCanvas.width, cellCanvas.height, config.blurRadius);
       alpha = thresholdAlpha(alpha, config.alphaThreshold);
       alpha = dilate(alpha, cellCanvas.width, cellCanvas.height, config.dilateIterations);
@@ -636,6 +687,15 @@ xyz0123456
       return `uni${cp.toString(16).toUpperCase().padStart(4, '0')}`;
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function glyphToSvgString(glyph) {
       return glyph.svgString || '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>';
     }
@@ -668,7 +728,14 @@ xyz0123456
         path: new opentype.Path(),
       })];
 
-      const usedCodepoints = new Set();
+      glyphs.push(new opentype.Glyph({
+        name: 'space',
+        unicode: 32,
+        advanceWidth: config.spaceWidth,
+        path: new opentype.Path(),
+      }));
+
+      const usedCodepoints = new Set([32]);
 
       for (const glyph of state.processedGlyphs) {
         if (!glyph.char) continue;
@@ -753,12 +820,25 @@ xyz0123456
       const artifact = buildFontArtifacts();
       const zip = new JSZip();
       zip.file(`${artifact.filenameBase}.otf`, artifact.arrayBuffer);
+      const config = getConfig();
+      const codepoints = state.processedGlyphs
+        .filter((glyph) => glyph.char)
+        .map((glyph) => `U+${glyph.char.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`);
       zip.file('manifest.json', JSON.stringify({
-        familyName: getConfig().familyName,
-        styleName: getConfig().styleName,
+        familyName: config.familyName,
+        styleName: config.styleName,
+        fileBase: artifact.filenameBase,
         glyphCount: state.processedGlyphs.length,
+        exportedGlyphCount: new Set(codepoints).size,
+        codepoints,
+        sourceImage: state.imageName,
+        config,
         generatedAt: new Date().toISOString(),
+        generator: 'Font Lab Browser',
       }, null, 2));
+      zip.file('install-linux.sh', makeInstallScript(artifact.filenameBase));
+      zip.file('specimen.html', makeSpecimenHtml(artifact.filenameBase, config, codepoints));
+      zip.file('README.md', makeBundleReadme(artifact.filenameBase, config, codepoints));
 
       const glyphFolder = zip.folder('glyphs');
       for (const glyph of state.processedGlyphs) {
@@ -776,6 +856,56 @@ xyz0123456
       setStatus(`Exported ${artifact.filenameBase}-bundle.zip`, 'ok');
     }
 
+    function makeInstallScript(filenameBase) {
+      return `#!/usr/bin/env sh
+set -eu
+mkdir -p "$HOME/.local/share/fonts"
+cp "${filenameBase}.otf" "$HOME/.local/share/fonts/${filenameBase}.otf"
+fc-cache -f "$HOME/.local/share/fonts"
+echo "Installed ${filenameBase}.otf for the current user."
+`;
+    }
+
+    function makeSpecimenHtml(filenameBase, config, codepoints) {
+      const safeFamily = escapeHtml(config.familyName);
+      const sample = escapeHtml(makePreviewText(state.processedGlyphs));
+      return `<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>${safeFamily} specimen</title>
+<style>
+@font-face { font-family: "${safeFamily}"; src: url("./${filenameBase}.otf") format("opentype"); }
+body { margin: 32px; font: 16px system-ui, sans-serif; line-height: 1.5; }
+.specimen { font-family: "${safeFamily}", sans-serif; font-size: 64px; line-height: 1.2; border: 1px solid #ccc; padding: 24px; }
+.codepoints { max-width: 70ch; color: #555; }
+</style>
+<h1>${safeFamily}</h1>
+<p>Generated with Font Lab Browser. Open this file next to ${filenameBase}.otf.</p>
+<div class="specimen">${sample}</div>
+<p class="codepoints">${codepoints.join(' ')}</p>
+</html>
+`;
+    }
+
+    function makeBundleReadme(filenameBase, config, codepoints) {
+      return `# ${config.familyName} ${config.styleName}
+
+Generated with Font Lab Browser.
+
+## Files
+
+- ${filenameBase}.otf — installable OpenType font.
+- specimen.html — local preview that loads the OTF next to it.
+- manifest.json — exact generation settings and glyph coverage.
+- glyphs/ — per-glyph PNG and SVG debug assets.
+- install-linux.sh — optional current-user install helper for fontconfig systems.
+
+## Coverage
+
+${codepoints.join(' ')}
+`;
+    }
+
     async function processGrid() {
       const config = getConfig();
       if (!state.imageBitmap) throw new Error('Please upload a glyph grid image first.');
@@ -788,7 +918,7 @@ xyz0123456
         for (let col = 0; col < config.grid.cols; col += 1) {
           const char = config.grid.cells[row][col] || '';
           if (!char) continue;
-          const cellCanvas = extractCellCanvas(state.imageBitmap, col, row, config.grid.cols, config.grid.rows);
+          const cellCanvas = extractCellCanvas(state.imageBitmap, col, row, config.grid.cols, config.grid.rows, config.cellInset);
           const processed = preprocessGlyphCanvas(cellCanvas, config);
           const traceCanvas = paintAlphaOnWhite(processed.alpha, processed.rasterWidth, processed.rasterHeight);
           const traceImageData = traceCanvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, traceCanvas.width, traceCanvas.height);
@@ -871,6 +1001,34 @@ xyz0123456
         console.error(error);
         setStatus(error.message || String(error), 'bad');
       }
+    });
+
+    refs.quickZipBtn.addEventListener('click', async () => {
+      try {
+        setStatus('Processing and exporting ZIP bundle…');
+        await processGrid();
+        await exportZip();
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || String(error), 'bad');
+      }
+    });
+
+    document.querySelectorAll('[data-preset]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const preset = button.dataset.preset;
+        const presets = {
+          cleanScan: { inkMode: 'dark', whiteThreshold: 245, blurRadius: 1, alphaThreshold: 64, dilateIterations: 0, erodeIterations: 0, cellInset: 1, tracePreset: 'smoothed' },
+          thickMarker: { inkMode: 'dark', whiteThreshold: 235, blurRadius: 1, alphaThreshold: 80, dilateIterations: 0, erodeIterations: 1, cellInset: 2, tracePreset: 'smoothed' },
+          thinPencil: { inkMode: 'dark', whiteThreshold: 250, blurRadius: 1, alphaThreshold: 32, dilateIterations: 1, erodeIterations: 0, cellInset: 1, tracePreset: 'detailed' },
+          darkBoard: { inkMode: 'light', whiteThreshold: 180, blurRadius: 1, alphaThreshold: 48, dilateIterations: 0, erodeIterations: 0, cellInset: 1, tracePreset: 'smoothed' },
+        };
+        Object.entries(presets[preset] || {}).forEach(([key, value]) => {
+          if (refs[key]) refs[key].value = value;
+        });
+        if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+        setStatus(`Applied ${button.textContent.replace('Preset: ', '')} preset.`, 'ok');
+      });
     });
 
     refs.exportOtfBtn.addEventListener('click', async () => {

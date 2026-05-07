@@ -51,6 +51,8 @@ INCLUDE_DIRS=(
     "PeerModGroove"
     "bathroom-emergency-guide"
     "aster-relay-identity-nightline-configurable"
+    "minesweeper"
+    "solitaire"
 )
 
 EXCLUDE_PATTERNS=(

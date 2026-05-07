@@ -151,6 +151,10 @@ rsync -avz --checksum $DRY_RUN "${rsync_excludes[@]}" \
   --include="bathroom-emergency-guide/**" \
   --include="aster-relay-identity-nightline-configurable/" \
   --include="aster-relay-identity-nightline-configurable/**" \
+  --include="minesweeper/" \
+  --include="minesweeper/**" \
+  --include="solitaire/" \
+  --include="solitaire/**" \
   --exclude="*" \
   "$ARTIFACTS_DIR/" \
   "$VPS_HOST:$VPS_PATH/"

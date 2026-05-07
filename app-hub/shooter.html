@@ -165,8 +165,9 @@
     <div>Kills: <span id="stageKills">0</span>/<span id="stageGoal">8</span> | Boss: <span id="bossStatus">none</span></div>
     <div>Turrets: <span id="turretCount">0</span> | Drop cost: ¤<span id="turretCost">120</span></div>
     <div>Upgrade: <span id="weaponLevel">1</span> | Boost: <span id="boostLevel">1</span></div>
+    <div>Ship: <span id="shipModel">Interceptor</span> | Weapon: <span id="weaponType">bullet</span></div>
     <div style="font-size: 11px; opacity: 0.7; margin-top: 10px;">
-      WASD/Arrows: Move | Space: Shoot | T: Drop auto-laser turret
+      WASD/Arrows: Move | Space: Shoot | Q: Weapon | T: Drop auto-laser turret
     </div>
   </div>
 
@@ -179,6 +180,7 @@
     <button id="repairBtn">Repair +1: $60</button>
     <button id="upgradeBtn">Upgrade Gun: $120</button>
     <button id="boostBtn">Booster: $90</button>
+    <button id="shipyardBtn">Shipyard</button>
     <button id="multiplayerBtn">Multiplayer: OFF</button>
     <button id="restartBtn">Restart</button>
   </div>
@@ -190,6 +192,20 @@
 
   <div id="notification"></div>
 
+  <div id="shipyardPanel" style="position:absolute;right:18px;bottom:18px;width:340px;max-height:70vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(5,10,25,0.92);border:1px solid rgba(0,255,255,0.25);box-shadow:0 0 30px rgba(0,255,255,0.15);display:none;backdrop-filter:blur(10px);z-index:15;color:#dff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:18px;font-weight:bold;color:#0ff">SHIPYARD</div>
+      <button id="shipyardCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dff;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="shipyardMoney" style="margin-bottom:12px;color:#fc0"></div>
+    <div style="font-size:11px;color:#8ff;margin:8px 0">SHIPS</div>
+    <div id="shipyardShips" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#f8f;margin:12px 0 8px">BOOSTERS</div>
+    <div id="shipyardBoosters" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#fff;margin:12px 0 8px">WEAPONS</div>
+    <div id="shipyardWeapons" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
   <div id="gameOverScreen">
     <h1>GAME OVER</h1>
     <p>Final Score: <span id="finalScore">0</span></p>
@@ -199,9 +215,17 @@
   <script type="module">
     import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
     import {
+      BOOSTER_MODELS,
+      SHIP_MODELS,
       TURRET_COST,
+      WEAPON_TYPES,
+      buyBoosterModel,
+      buyShipModel,
+      buyWeaponUnlock,
       createEnemy,
       createInitialEconomy,
+      createPlayerShot,
+      cycleWeaponType,
       deployTurret as buyTurret,
       getSpawnBatchSize,
       getSpawnThreshold,
@@ -225,7 +249,10 @@
         const economy = createInitialEconomy();
         this.state = {
           local: {
-            player: { x: 50, y: 0, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1 },
+            player: { x: 50, y: 0, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
+            ownedShips: ['interceptor'],
+            ownedBoosters: ['ion'],
+            ownedWeapons: ['bullet'],
             bullets: [],
             enemies: [],
             particles: [],
@@ -317,6 +344,8 @@
         document.getElementById('repairBtn').onclick = () => this.buyRepair();
         document.getElementById('upgradeBtn').onclick = () => this.buyWeaponUpgrade();
         document.getElementById('boostBtn').onclick = () => this.buyBooster();
+        document.getElementById('shipyardBtn').onclick = () => this.toggleShipyard();
+        document.getElementById('shipyardCloseBtn').onclick = () => this.toggleShipyard(false);
         document.getElementById('multiplayerBtn').onclick = () => this.toggleMultiplayer();
         document.getElementById('restartBtn').onclick = () => this.restart();
         document.getElementById('turretCost').textContent = TURRET_COST;
@@ -345,8 +374,13 @@
           if (e.code === 'KeyT' && !e.repeat) {
             this.deployTurret();
           }
+          if (e.code === 'KeyQ' && !e.repeat) {
+            this.state.local.player.weaponType = cycleWeaponType(this.state.local.player.weaponType);
+            this.showNotification(`WEAPON: ${this.state.local.player.weaponType.toUpperCase()}`);
+            this.updateHUD();
+          }
 
-          if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyT'].includes(e.code)) {
+          if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyT', 'KeyQ'].includes(e.code)) {
             e.preventDefault();
             e.stopPropagation();
           }
@@ -370,7 +404,10 @@
 
         const economy = createInitialEconomy();
         this.state.local = {
-          player: { x: 50, y: this.canvas.height / 2, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1 },
+          player: { x: 50, y: this.canvas.height / 2, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
+          ownedShips: ['interceptor'],
+          ownedBoosters: ['ion'],
+          ownedWeapons: ['bullet'],
           bullets: [],
           enemies: [],
           particles: [],
@@ -592,6 +629,104 @@
         setTimeout(() => notif.classList.remove('visible'), 2000);
       }
 
+      toggleShipyard(forceOpen) {
+        const panel = document.getElementById('shipyardPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderShipyard();
+      }
+
+      loadoutState() {
+        const s = this.state.local;
+        return {
+          money: s.money,
+          ownedShips: s.ownedShips,
+          ownedBoosters: s.ownedBoosters,
+          ownedWeapons: s.ownedWeapons,
+          player: s.player,
+        };
+      }
+
+      applyLoadoutState(next) {
+        const s = this.state.local;
+        const changed = next !== this.loadoutState();
+        s.money = next.money;
+        s.ownedShips = next.ownedShips ?? s.ownedShips;
+        s.ownedBoosters = next.ownedBoosters ?? s.ownedBoosters;
+        s.ownedWeapons = next.ownedWeapons ?? s.ownedWeapons;
+        s.player = { ...s.player, ...next.player };
+        this.updateHUD();
+        this.renderShipyard();
+      }
+
+      renderShipyard() {
+        const panel = document.getElementById('shipyardPanel');
+        if (!panel || panel.style.display !== 'block') return;
+
+        const s = this.state.local;
+        document.getElementById('shipyardMoney').textContent = `Credits: ¤${Math.floor(s.money)}`;
+
+        document.getElementById('shipyardShips').innerHTML = Object.entries(SHIP_MODELS).map(([id, model]) => {
+          const owned = s.ownedShips.includes(id);
+          const equipped = s.player.shipModel === id;
+          const current = SHIP_MODELS[s.player.shipModel] || SHIP_MODELS.interceptor;
+          const hullDelta = model.hull - current.hull;
+          const speedDelta = model.speedBonus - current.speedBonus;
+          const action = owned ? (equipped ? 'EQUIPPED' : 'EQUIP') : `BUY ¤${model.cost}`;
+          return `
+            <button data-ship="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:${equipped ? 'rgba(0,255,255,0.18)' : 'rgba(255,255,255,0.04)'};color:#fff;cursor:pointer">
+              <div>
+                <div style="font-weight:bold;color:${model.color}">${model.label}</div>
+                <div style="font-size:11px;opacity:0.75">Hull ${model.hull} (${hullDelta >= 0 ? '+' : ''}${hullDelta}) • Speed ${model.speedBonus.toFixed(2)} (${speedDelta >= 0 ? '+' : ''}${speedDelta.toFixed(2)})</div>
+              </div>
+              <div>${action}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.getElementById('shipyardBoosters').innerHTML = Object.entries(BOOSTER_MODELS).map(([id, model]) => {
+          const owned = s.ownedBoosters.includes(id);
+          const equipped = s.player.boosterModel === id;
+          const current = BOOSTER_MODELS[s.player.boosterModel] || BOOSTER_MODELS.ion;
+          const thrustDelta = model.thrustBonus - current.thrustBonus;
+          const action = owned ? (equipped ? 'EQUIPPED' : 'EQUIP') : `BUY ¤${model.cost}`;
+          return `
+            <button data-booster="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:${equipped ? 'rgba(255,0,255,0.16)' : 'rgba(255,255,255,0.04)'};color:#fff;cursor:pointer">
+              <div>
+                <div style="font-weight:bold;color:${model.trail}">${model.label}</div>
+                <div style="font-size:11px;opacity:0.75">Thrust ${model.thrustBonus.toFixed(2)} (${thrustDelta >= 0 ? '+' : ''}${thrustDelta.toFixed(2)})</div>
+              </div>
+              <div>${action}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.getElementById('shipyardWeapons').innerHTML = WEAPON_TYPES.map(model => {
+          const owned = s.ownedWeapons.includes(model.id);
+          const equipped = s.player.weaponType === model.id;
+          const action = owned ? (equipped ? 'EQUIPPED' : 'EQUIP') : `UNLOCK ¤${model.cost}`;
+          return `
+            <button data-weapon="${model.id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:${equipped ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.04)'};color:#fff;cursor:pointer">
+              <div>
+                <div style="font-weight:bold;color:${model.color}">${model.label}</div>
+                <div style="font-size:11px;opacity:0.75">Damage ${model.damage} • ${model.id}</div>
+              </div>
+              <div>${action}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.querySelectorAll('[data-ship]').forEach(btn => {
+          btn.onclick = () => this.applyLoadoutState(buyShipModel(this.loadoutState(), btn.dataset.ship));
+        });
+        document.querySelectorAll('[data-booster]').forEach(btn => {
+          btn.onclick = () => this.applyLoadoutState(buyBoosterModel(this.loadoutState(), btn.dataset.booster));
+        });
+        document.querySelectorAll('[data-weapon]').forEach(btn => {
+          btn.onclick = () => this.applyLoadoutState(buyWeaponUnlock(this.loadoutState(), btn.dataset.weapon));
+        });
+      }
+
       updateHUD() {
         document.getElementById('score').textContent = this.state.local.score;
         document.getElementById('money').textContent = Math.floor(this.state.local.money);
@@ -604,8 +739,11 @@
         document.getElementById('bossStatus').textContent = this.state.local.bossActive ? 'ACTIVE' : 'none';
         document.getElementById('weaponLevel').textContent = this.state.local.player.weaponLevel;
         document.getElementById('boostLevel').textContent = this.state.local.player.boostLevel;
+        document.getElementById('shipModel').textContent = SHIP_MODELS[this.state.local.player.shipModel].label;
+        document.getElementById('weaponType').textContent = this.state.local.player.weaponType;
         document.getElementById('turretCount').textContent = this.state.local.turrets.length;
         document.getElementById('turretCost').textContent = TURRET_COST;
+        this.renderShipyard();
 
         // Notify parent window in embedded mode
         if (this.embedded && window.parent !== window) {
@@ -749,7 +887,12 @@
         const p = s.player;
 
         // Player movement
-        const thrust = 0.8 + (p.boostLevel - 1) * 0.18;
+        p.weaponType ||= 'bullet';
+        p.shipModel ||= 'interceptor';
+        p.boosterModel ||= 'ion';
+        const booster = BOOSTER_MODELS[p.boosterModel] || BOOSTER_MODELS.ion;
+        const ship = SHIP_MODELS[p.shipModel] || SHIP_MODELS.interceptor;
+        const thrust = 0.8 + (p.boostLevel - 1) * 0.18 + booster.thrustBonus + ship.speedBonus;
         if (s.keys['ArrowUp'] || s.keys['KeyW']) p.vy -= thrust;
         if (s.keys['ArrowDown'] || s.keys['KeyS']) p.vy += thrust;
         p.vy *= 0.9;
@@ -761,9 +904,15 @@
           const spread = Math.min(3, p.weaponLevel);
           for (let i = 0; i < spread; i++) {
             s.bullets.push({
-              x: p.x + 20,
-              y: p.y + (i - (spread - 1) / 2) * 8,
-              vx: 8 + p.weaponLevel * 0.7,
+              ...createPlayerShot({
+                weaponType: p.weaponType,
+                origin: {
+                  x: p.x + 20,
+                  y: p.y + (i - (spread - 1) / 2) * 8,
+                },
+                weaponLevel: p.weaponLevel,
+                target: { x: this.canvas.width, y: p.y },
+              }),
               time: Date.now()
             });
           }
