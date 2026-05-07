@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Gridblast Bomberman</title>
+  <script src="../lib/storage/local-storage-manager.js"></script>
+  <script src="../lib/secret-storage/secret-storage.js"></script>
+  <script src="../lib/ui/spaceship-ui.js"></script>
+  <link rel="stylesheet" href="../lib/artifact-motion/artifact-motion.css">
   <style>
     * { box-sizing: border-box; }
     body {
@@ -83,7 +87,8 @@
   <canvas id="board" width="780" height="780"></canvas>
   <aside>
     <h1>💣 Gridblast</h1>
-    <div class="muted">Classic 2–4 player local Bomberman: square grid, solid posts, breakable blocks, timed bombs, cross explosions, chain reactions, and two upgrade axes.</div>
+    <div class="muted">Classic 2–4 player Bomberman: square grid, breakable blocks, timed bombs, cross explosions, chain reactions, two upgrade axes, and v10 one-session multiplayer viewing/joining.</div>
+    <div id="netStatus" class="muted" style="margin-top:8px">Network: local</div>
     <label class="muted">Players
       <select id="playerCount">
         <option value="2">2 players</option>
@@ -106,6 +111,7 @@
   </aside>
 
   <script type="module">
+    import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
     import {
       BOMB_FUSE_TICKS,
       EXPLOSION_TICKS,
@@ -114,6 +120,19 @@
       movePlayer,
       tickGame,
     } from './lib/bomberman-core.mjs';
+
+    const params = new URLSearchParams(window.location.search);
+    const multiplayerEnabled = params.get('multiplayer') === 'true';
+    const targetPeerId = params.get('targetPeerId') || '';
+    const username = params.get('username') || localStorage.getItem('v10-username') || `Bomber-${Math.floor(Math.random() * 9000 + 1000)}`;
+    const sessionId = params.get('session') || 'v10-main';
+    const storagePrefix = `v10-bomberman:${sessionId}`;
+    const storageFacade = window.LocalStorageManager ? new window.LocalStorageManager({ namespace: 'v10-bomberman' }) : null;
+    const secretFacade = window.SecretStorage ? new window.SecretStorage({ namespace: 'v10-bomberman-secret' }) : null;
+    const uiFacade = window.SpaceshipUI ? { loaded: true } : null;
+    void storageFacade;
+    void secretFacade;
+    void uiFacade;
 
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
@@ -125,6 +144,12 @@
     let paused = false;
     let lastStep = 0;
     let game = createGame({ players: Number(playerCount.value) });
+    let lobby = null;
+    let myPeerId = null;
+    let hostPeerId = null;
+    let lastBroadcastAt = 0;
+    let applyingRemoteState = false;
+    const netStatus = document.getElementById('netStatus');
 
     const bindings = [
       { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', bomb: 'Space' },
@@ -133,6 +158,7 @@
       { up: 'Numpad8', down: 'Numpad5', left: 'Numpad4', right: 'Numpad6', bomb: 'Numpad0' },
     ];
 
+    document.body.dataset.mode = params.get('embedded') === 'true' ? 'embedded' : 'standalone';
     document.getElementById('newGameBtn').onclick = () => reset();
     document.getElementById('pauseBtn').onclick = () => {
       paused = !paused;
@@ -146,7 +172,11 @@
         event.preventDefault();
       }
       const playerId = bindings.findIndex((binding) => binding.bomb === event.code);
-      if (playerId >= 0 && !event.repeat) game = dropBomb(game, playerId);
+      if (playerId >= 0 && !event.repeat) {
+        game = dropBomb(game, playerId);
+        saveSnapshot();
+        broadcastBombermanState('bomb');
+      }
     });
     document.addEventListener('keyup', (event) => keys.delete(event.code));
 
@@ -154,6 +184,8 @@
       paused = false;
       document.getElementById('pauseBtn').textContent = 'Pause';
       game = createGame({ players: Number(playerCount.value) });
+      saveSnapshot();
+      broadcastBombermanState('reset');
       render();
     }
 
@@ -162,6 +194,8 @@
         lastStep = now;
         stepInput();
         game = tickGame(game);
+        saveSnapshot();
+        broadcastBombermanState('tick');
       }
       render();
       requestAnimationFrame(loop);
@@ -175,7 +209,10 @@
         else if (keys.has(binding.right)) dx = 1;
         else if (keys.has(binding.up)) dy = -1;
         else if (keys.has(binding.down)) dy = 1;
-        if (dx || dy) game = movePlayer(game, playerId, { dx, dy });
+        if (dx || dy) {
+          game = movePlayer(game, playerId, { dx, dy });
+          broadcastBombermanState('move');
+        }
       });
     }
 
@@ -280,6 +317,11 @@
         winnerEl.textContent = '';
       }
 
+      const networkLine = multiplayerEnabled
+        ? `Network: ${myPeerId ? 'connected' : 'connecting'}${hostPeerId ? ` · viewing ${hostPeerId.slice(0, 8)}` : ' · hosting/joinable'} · ${username}`
+        : 'Network: local';
+      netStatus.textContent = networkLine;
+
       playerStats.innerHTML = game.players.map((player) => `
         <div class="player-card">
           <strong style="color:${playerColors[player.id]}">Player ${player.id + 1}</strong>
@@ -289,6 +331,69 @@
       `).join('');
     }
 
+
+
+    function saveSnapshot() {
+      try {
+        localStorage.setItem(`${storagePrefix}:latest`, JSON.stringify({ game, username, savedAt: Date.now() }));
+      } catch {}
+    }
+
+    function loadSnapshot() {
+      try {
+        const raw = localStorage.getItem(`${storagePrefix}:latest`);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (saved?.game?.players && saved?.game?.blocks) game = saved.game;
+      } catch {}
+    }
+
+    async function startBombermanMultiplayer() {
+      if (!multiplayerEnabled) return;
+      lobby = new PeernetLobby('v10-bomberman-session', { storageKey: 'v10-bomberman', debug: false });
+      lobby.addEventListener('status', (event) => {
+        netStatus.textContent = `Network: ${event.detail?.text || 'connecting'}`;
+      });
+      lobby.addEventListener('data', ({ detail }) => {
+        const { from, data } = detail;
+        if (!data || from === myPeerId) return;
+        if (data.type === 'bomberman-state' && data.payload?.game) {
+          if (targetPeerId && from !== targetPeerId && from !== hostPeerId) return;
+          hostPeerId = from;
+          applyingRemoteState = true;
+          game = data.payload.game;
+          playerCount.value = String(game.players.length);
+          applyingRemoteState = false;
+          saveSnapshot();
+          render();
+        }
+        if (data.type === 'bomberman-request-state') {
+          broadcastBombermanState('request-reply', true);
+        }
+      });
+      myPeerId = await lobby.connect(username);
+      if (targetPeerId) {
+        lobby.send?.(targetPeerId, { type: 'bomberman-request-state', payload: { username, targetPeerId, at: Date.now() } });
+      }
+      broadcastBombermanState('join', true);
+    }
+
+    function broadcastBombermanState(reason = 'state', force = false) {
+      if (!lobby || applyingRemoteState) return;
+      const now = Date.now();
+      if (!force && now - lastBroadcastAt < 220) return;
+      lastBroadcastAt = now;
+      lobby.broadcast({
+        type: 'bomberman-state',
+        payload: { game, username, reason, sessionId, targetPeerId, at: now },
+      });
+    }
+
+
+    loadSnapshot();
+    startBombermanMultiplayer().catch((error) => {
+      netStatus.textContent = `Network error: ${error?.message || error}`;
+    });
     render();
     requestAnimationFrame(loop);
   </script>
