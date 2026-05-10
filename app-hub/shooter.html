@@ -192,6 +192,10 @@
 
   <div id="notification"></div>
 
+  <div id="storyPanel" style="position:absolute;left:18px;bottom:18px;max-width:440px;display:none;z-index:12;pointer-events:none">
+    <div id="storyMessages" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:rgba(205,245,255,.86);text-shadow:0 0 10px rgba(0,220,255,.35);background:rgba(0,8,16,.34);border-left:1px solid rgba(0,255,255,.22);padding:8px 10px;border-radius:0 10px 10px 0"></div>
+  </div>
+
   <div id="shipyardPanel" style="position:absolute;right:18px;bottom:18px;width:340px;max-height:70vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(5,10,25,0.92);border:1px solid rgba(0,255,255,0.25);box-shadow:0 0 30px rgba(0,255,255,0.15);display:none;backdrop-filter:blur(10px);z-index:15;color:#dff">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:18px;font-weight:bold;color:#0ff">SHIPYARD</div>
@@ -204,6 +208,10 @@
     <div id="shipyardBoosters" style="display:flex;flex-direction:column;gap:8px"></div>
     <div style="font-size:11px;color:#fff;margin:12px 0 8px">WEAPONS</div>
     <div id="shipyardWeapons" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#7ff;margin:12px 0 8px">BAR / ALLIES</div>
+    <div id="shipyardAllies" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#9cf;margin:12px 0 8px">DEFENSE</div>
+    <div id="shipyardShields" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
 
   <div id="gameOverScreen">
@@ -215,21 +223,29 @@
   <script type="module">
     import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
     import {
+      ALLY_MODELS,
       BOOSTER_MODELS,
+      SHIELD_MODELS,
       SHIP_MODELS,
       TURRET_COST,
       WEAPON_TYPES,
       buyBoosterModel,
       buyShipModel,
       buyWeaponUnlock,
+      deployShield,
+      hireAlly,
       createEnemy,
       createInitialEconomy,
+      createInitialStoryState,
       createPlayerShot,
       cycleWeaponType,
       deployTurret as buyTurret,
       getSpawnBatchSize,
       getSpawnThreshold,
       recordEnemyKill,
+      updateAllies,
+      updateShields,
+      updateStoryMode,
       updateTurrets,
     } from './lib/shooter-balance.mjs';
 
@@ -257,6 +273,12 @@
             enemies: [],
             particles: [],
             turrets: economy.turrets,
+          allies: [],
+          shields: [],
+          enemyProjectiles: [],
+            allies: [],
+            shields: [],
+            enemyProjectiles: [],
             score: economy.score,
             money: economy.money,
             enemyAmountMultiplier: 2,
@@ -269,6 +291,7 @@
             keys: {},
             spawnTimer: 0,
             lastFrameAt: performance.now(),
+            story: createInitialStoryState(performance.now()),
             gameOver: false
           },
           remote: new Map() // peerId -> { player, bullets, score, lastUpdate }
@@ -424,6 +447,7 @@
           keys: this.state.local.keys,
           spawnTimer: 0,
           lastFrameAt: performance.now(),
+          story: createInitialStoryState(performance.now()),
           gameOver: false
         };
 
@@ -725,6 +749,63 @@
         document.querySelectorAll('[data-weapon]').forEach(btn => {
           btn.onclick = () => this.applyLoadoutState(buyWeaponUnlock(this.loadoutState(), btn.dataset.weapon));
         });
+
+        document.getElementById('shipyardAllies').innerHTML = Object.entries(ALLY_MODELS).map(([id, model]) => `
+          <button data-ally="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,255,255,0.06);color:#fff;cursor:pointer">
+            <div>
+              <div style="font-weight:bold;color:#7ff">${model.label}</div>
+              <div style="font-size:11px;opacity:0.75">${model.role} • HP ${model.health} • catches shots</div>
+            </div>
+            <div>HIRE ¤${model.cost}</div>
+          </button>
+        `).join('');
+
+        document.getElementById('shipyardShields').innerHTML = Object.entries(SHIELD_MODELS).map(([id, model]) => `
+          <button data-shield="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(120,180,255,0.07);color:#fff;cursor:pointer">
+            <div>
+              <div style="font-weight:bold;color:#9cf">${model.label}</div>
+              <div style="font-size:11px;opacity:0.75">Radius ${model.radius} • HP ${model.health}</div>
+            </div>
+            <div>DEPLOY ¤${model.cost}</div>
+          </button>
+        `).join('');
+
+        document.querySelectorAll('[data-ally]').forEach(btn => {
+          btn.onclick = () => this.hireAlly(btn.dataset.ally);
+        });
+        document.querySelectorAll('[data-shield]').forEach(btn => {
+          btn.onclick = () => this.deployShield(btn.dataset.shield);
+        });
+      }
+
+      emitStoryMessages(messages) {
+        if (!messages.length) return;
+        const panel = document.getElementById('storyPanel');
+        const list = document.getElementById('storyMessages');
+        panel.style.display = 'block';
+        list.innerHTML = messages.map(m => `
+          <div style="opacity:.92;margin:2px 0">
+            <span style="opacity:.45">${m.speaker}&gt;</span> ${m.text}
+          </div>
+        `).join('') + list.innerHTML;
+        window.clearTimeout(this.storyHideTimer);
+        this.storyHideTimer = window.setTimeout(() => {
+          panel.style.display = 'none';
+        }, 5200);
+      }
+
+      updateStory(now) {
+        const s = this.state.local;
+        const result = updateStoryMode({
+          story: s.story,
+          now,
+          enemyCount: s.enemies.length,
+          enemyAmount: s.enemyAmountMultiplier,
+          stage: s.stage,
+          bossActive: s.bossActive,
+        });
+        s.story = result.story;
+        this.emitStoryMessages(result.messages);
       }
 
       updateHUD() {
@@ -848,6 +929,32 @@
         this.updateHUD();
       }
 
+      hireAlly(modelId) {
+        const s = this.state.local;
+        const next = hireAlly({ money: s.money, allies: s.allies }, modelId, { x: s.player.x - 35, y: s.player.y }, performance.now());
+        if (next === s || next.allies.length === s.allies.length) {
+          this.showNotification('NOT ENOUGH MONEY FOR ALLY');
+          return;
+        }
+        s.money = next.money;
+        s.allies = next.allies;
+        this.showNotification('ALLY HIRED');
+        this.updateHUD();
+      }
+
+      deployShield(modelId = 'bubble') {
+        const s = this.state.local;
+        const next = deployShield({ money: s.money, shields: s.shields }, modelId, { x: s.player.x + 38, y: s.player.y }, performance.now());
+        if (next === s || next.shields.length === s.shields.length) {
+          this.showNotification('NOT ENOUGH MONEY FOR SHIELD');
+          return;
+        }
+        s.money = next.money;
+        s.shields = next.shields;
+        this.showNotification('SHIELD DEPLOYED');
+        this.updateHUD();
+      }
+
       spawnBoss() {
         const s = this.state.local;
         const power = 2 + s.stage * 0.55;
@@ -950,10 +1057,23 @@
           return b.x > 0 && b.x < this.canvas.width + 50;
         });
 
+        s.enemyProjectiles = s.enemyProjectiles.filter(b => {
+          b.x += b.vx;
+          b.y += b.vy || 0;
+          if (Math.abs(b.x - p.x) < 18 && Math.abs(b.y - p.y) < 18) {
+            p.lives--;
+            this.updateHUD();
+            if (p.lives <= 0) this.gameOver();
+            return false;
+          }
+          return b.x > -40 && b.x < this.canvas.width + 80 && b.y > -40 && b.y < this.canvas.height + 40;
+        });
+
         // Turrets decay over time, lose health on collisions, and auto-aim precisely.
         const now = performance.now();
         const deltaMs = Math.min(50, Math.max(0, now - (s.lastFrameAt || now)));
         s.lastFrameAt = now;
+        this.updateStory(now);
         const turretUpdate = updateTurrets({
           turrets: s.turrets,
           enemies: s.enemies,
@@ -963,12 +1083,41 @@
         s.turrets = turretUpdate.turrets;
         s.bullets.push(...turretUpdate.bullets);
 
+        const shieldUpdate = updateShields({
+          shields: s.shields,
+          enemyProjectiles: s.enemyProjectiles,
+          now,
+          deltaMs,
+        });
+        s.shields = shieldUpdate.shields;
+        s.enemyProjectiles = shieldUpdate.enemyProjectiles;
+
+        const allyUpdate = updateAllies({
+          allies: s.allies,
+          player: s.player,
+          enemies: s.enemies,
+          enemyProjectiles: s.enemyProjectiles,
+          now,
+          deltaMs,
+        });
+        s.allies = allyUpdate.allies;
+        s.enemyProjectiles = allyUpdate.enemyProjectiles;
+        s.bullets.push(...allyUpdate.bullets);
+
         // Update enemies
         s.enemies = s.enemies.filter(e => {
           e.x += e.vx;
           if (e.boss) {
             e.y += e.vy;
             if (e.y < 60 || e.y > this.canvas.height - 60) e.vy *= -1;
+          }
+          if (!e.lastShotAt) e.lastShotAt = 0;
+          const enemyCooldown = e.boss ? 750 : 2200;
+          if (now - e.lastShotAt > enemyCooldown) {
+            const aim = { x: p.x - e.x, y: p.y - e.y };
+            const len = Math.hypot(aim.x, aim.y) || 1;
+            s.enemyProjectiles.push({ x: e.x, y: e.y, vx: (aim.x / len) * 3.5, vy: (aim.y / len) * 3.5, source: 'enemy' });
+            e.lastShotAt = now;
           }
 
           // Bullet collision
@@ -1106,6 +1255,45 @@
           ctx.fillRect(b.x - 4, b.y - 2, 8, 4);
         });
         ctx.shadowBlur = 0;
+
+        // Enemy projectiles
+        ctx.fillStyle = '#f8a';
+        ctx.shadowColor = '#f8a';
+        ctx.shadowBlur = 10;
+        s.enemyProjectiles.forEach(b => {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+
+        // Deployable shields
+        s.shields.forEach(sh => {
+          const model = SHIELD_MODELS[sh.modelId] || SHIELD_MODELS.bubble;
+          ctx.strokeStyle = 'rgba(120,180,255,0.65)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(sh.x, sh.y, model.radius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(120,180,255,0.08)';
+          ctx.fill();
+        });
+
+        // NPC allies
+        s.allies.forEach(a => {
+          const model = ALLY_MODELS[a.modelId] || ALLY_MODELS.wingman;
+          ctx.fillStyle = model.role === 'screen' ? '#9cf' : '#7ff';
+          ctx.shadowColor = ctx.fillStyle;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.moveTo(a.x + 12, a.y);
+          ctx.lineTo(a.x - 8, a.y - 7);
+          ctx.lineTo(a.x - 4, a.y);
+          ctx.lineTo(a.x - 8, a.y + 7);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
 
         // Enemies
         s.enemies.forEach(e => {

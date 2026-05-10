@@ -136,6 +136,8 @@ rsync -avz --checksum $DRY_RUN "${rsync_excludes[@]}" \
   --include="README.md" \
   --include="app-hub/" \
   --include="app-hub/**" \
+  --include="app-hub-v11/" \
+  --include="app-hub-v11/**" \
   --include="spc/" \
   --include="spc/**" \
   --include="brawl/" \

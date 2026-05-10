@@ -1,4 +1,184 @@
 export const STARTING_MONEY = 200;
+export const BOSS_ARCHETYPES = [
+  {
+    id: 'blockade-carrier',
+    label: 'Blockade Carrier',
+    role: 'suppression',
+    mechanics: ['fighter waves', 'slow beam sweep'],
+    difficultyWeight: 1.0,
+  },
+  {
+    id: 'harvester-dreadnought',
+    label: 'Harvester Dreadnought',
+    role: 'industrial siege',
+    mechanics: ['mine drops', 'ramming passes'],
+    difficultyWeight: 1.28,
+  },
+  {
+    id: 'prison-moon-core',
+    label: 'Prison Moon Core',
+    role: 'fortress',
+    mechanics: ['shield phases', 'projectile storms'],
+    difficultyWeight: 1.55,
+  },
+  {
+    id: 'logistics-oracle',
+    label: 'Logistics Oracle',
+    role: 'command intelligence',
+    mechanics: ['adaptive formations', 'hunter drones'],
+    difficultyWeight: 1.75,
+  },
+];
+
+export const ELITE_ARCHETYPES = [
+  {
+    id: 'scout-pack',
+    label: 'Scout Pack',
+    role: 'pressure spike',
+    hpMultiplier: 1.2,
+    rewardMultiplier: 1.2,
+  },
+  {
+    id: 'shieldbreaker',
+    label: 'Shieldbreaker',
+    role: 'anti-defense',
+    hpMultiplier: 1.55,
+    rewardMultiplier: 1.5,
+  },
+  {
+    id: 'interdictor',
+    label: 'Interdictor',
+    role: 'suppression hunter',
+    hpMultiplier: 1.85,
+    rewardMultiplier: 1.8,
+  },
+];
+
+export function getBossArchetypeForStage(stage = 1) {
+  return BOSS_ARCHETYPES[(Math.max(1, stage) - 1) % BOSS_ARCHETYPES.length];
+}
+
+export function getEliteArchetypeForStage(stage = 1) {
+  return ELITE_ARCHETYPES[(Math.max(1, stage) - 1) % ELITE_ARCHETYPES.length];
+}
+
+export function getStageDifficultyBudget(stage = 1) {
+  const normalizedStage = Math.max(1, stage);
+  const threat = Math.round(16 * Math.pow(normalizedStage, 0.72));
+  const reward = Math.round(70 + normalizedStage * 32 + threat * 1.4);
+  const recoveryPurchases = Math.max(1, Math.floor(reward / 210));
+  const reliefBudget = Math.max(1, Math.floor(normalizedStage / 2));
+
+  return {
+    stage: normalizedStage,
+    threat,
+    reward,
+    recoveryPurchases,
+    reliefBudget,
+  };
+}
+
+export function createEliteEnemy({ stage = 1, canvasWidth = 800, canvasHeight = 600, random = Math.random }) {
+  const archetype = getEliteArchetypeForStage(stage);
+  const difficulty = getStageDifficultyBudget(stage);
+  const health = Math.min(9, Math.round((2 + stage) * archetype.hpMultiplier));
+  return {
+    elite: true,
+    archetype: archetype.id,
+    x: canvasWidth + 40,
+    y: 80 + random() * Math.max(40, canvasHeight - 160),
+    vx: -(2.1 + stage * 0.14),
+    size: 26 + stage * 1.5,
+    health,
+    reward: Math.round((28 + stage * 10) * archetype.rewardMultiplier),
+  };
+}
+
+export function simulateDifficultyCurve({ stages = 8, startingMoney = STARTING_MONEY }) {
+  const results = [];
+  let bankroll = startingMoney;
+
+  for (let stage = 1; stage <= stages; stage++) {
+    const budget = getStageDifficultyBudget(stage);
+    bankroll += budget.reward;
+
+    const recoveryPurchases = Math.max(1, Math.floor(bankroll / 220));
+    const manageable = budget.threat <= (22 + recoveryPurchases * 18 + budget.reliefBudget * 10);
+
+    results.push({
+      stage,
+      threat: budget.threat,
+      reward: budget.reward,
+      recoveryPurchases,
+      manageable,
+      boss: getBossArchetypeForStage(stage).id,
+      elite: getEliteArchetypeForStage(stage).id,
+    });
+
+    bankroll -= Math.min(bankroll * 0.35, 180 + stage * 20);
+  }
+
+  return results;
+}
+
+export const STORY_EVENTS = [
+  {
+    id: 'intro-escape',
+    speaker: 'internal',
+    text: 'ok, lets get out of here..',
+    when: ({ elapsedMs }) => elapsedMs >= 3000,
+  },
+  {
+    id: 'pressure-spike',
+    speaker: 'internal',
+    text: 'man whats that?',
+    when: ({ enemyCount, enemyAmount }) => enemyCount >= 6 || enemyAmount >= 4,
+  },
+  {
+    id: 'first-boss',
+    speaker: 'internal',
+    text: 'that is not patrol hardware.',
+    when: ({ bossActive }) => bossActive === true,
+  },
+];
+
+export function createInitialStoryState(startedAt = Date.now()) {
+  return {
+    startedAt,
+    seen: [],
+    log: [],
+  };
+}
+
+export function updateStoryMode({ story, now = Date.now(), enemyCount = 0, enemyAmount = 1, stage = 1, bossActive = false }) {
+  const currentStory = story ?? createInitialStoryState(now);
+  const elapsedMs = now - currentStory.startedAt;
+  const messages = [];
+  const seen = [...(currentStory.seen ?? [])];
+
+  for (const event of STORY_EVENTS) {
+    if (seen.includes(event.id)) continue;
+    if (!event.when({ elapsedMs, enemyCount, enemyAmount, stage, bossActive })) continue;
+    const message = {
+      id: event.id,
+      speaker: event.speaker,
+      text: event.text,
+      at: now,
+    };
+    messages.push(message);
+    seen.push(event.id);
+  }
+
+  return {
+    story: {
+      ...currentStory,
+      seen,
+      log: [...(currentStory.log ?? []), ...messages].slice(-12),
+    },
+    messages,
+  };
+}
+
 export const TURRET_COST = 120;
 export const TURRET_LIFE_MS = 12000;
 export const TURRET_HEALTH = 3;
@@ -15,6 +195,16 @@ export const BOOSTER_MODELS = {
   ion: { label: 'Ion Bloom', thrustBonus: 0.12, trail: '#0ff', cost: 0 },
   afterburner: { label: 'Afterburner', thrustBonus: 0.3, trail: '#f60', cost: 140 },
   warp: { label: 'Warp Skimmer', thrustBonus: 0.2, trail: '#b0f', cost: 180 },
+};
+
+export const ALLY_MODELS = {
+  wingman: { label: 'Wingman', role: 'escort', cost: 180, health: 2, formationOffset: { x: -55, y: -34 }, fireCooldownMs: 650, bulletSpeed: 7, catchRadius: 42 },
+  guard: { label: 'Shield Guard', role: 'screen', cost: 260, health: 4, formationOffset: { x: -35, y: 38 }, fireCooldownMs: 900, bulletSpeed: 6, catchRadius: 56 },
+};
+
+export const SHIELD_MODELS = {
+  bubble: { label: 'Bubble Shield', cost: 150, health: 4, radius: 58, lifeMs: 9000 },
+  wall: { label: 'Forward Wall', cost: 220, health: 7, radius: 76, lifeMs: 7000 },
 };
 
 export const WEAPON_TYPES = [
@@ -233,6 +423,116 @@ export function recordEnemyKill(economy, enemy) {
     score: economy.score + Math.round(reward * 1.5),
     money: economy.money + reward,
   };
+}
+
+
+export function hireAlly(economy, modelId = 'wingman', position = { x: 0, y: 0 }, now = Date.now()) {
+  const model = ALLY_MODELS[modelId];
+  if (!model || economy.money < model.cost) return economy;
+  const ally = {
+    id: `ally-${now}-${Math.floor(Math.random() * 100000)}`,
+    modelId,
+    x: position.x,
+    y: position.y,
+    health: model.health,
+    lastShotAt: now - model.fireCooldownMs,
+  };
+  return {
+    ...economy,
+    money: economy.money - model.cost,
+    allies: [...(economy.allies ?? []), ally],
+  };
+}
+
+export function deployShield(economy, modelId = 'bubble', position = { x: 0, y: 0 }, now = Date.now()) {
+  const model = SHIELD_MODELS[modelId];
+  if (!model || economy.money < model.cost) return economy;
+  const shield = {
+    id: `shield-${now}-${Math.floor(Math.random() * 100000)}`,
+    modelId,
+    x: position.x,
+    y: position.y,
+    health: model.health,
+    lifeMs: model.lifeMs,
+    placedAt: now,
+  };
+  return {
+    ...economy,
+    money: economy.money - model.cost,
+    shields: [...(economy.shields ?? []), shield],
+  };
+}
+
+export function updateAllies({ allies = [], player, enemies = [], enemyProjectiles = [], now = Date.now(), deltaMs = 16 }) {
+  const bullets = [];
+  const remainingProjectiles = [...enemyProjectiles];
+  const updatedAllies = [];
+
+  allies.forEach((ally, index) => {
+    const model = ALLY_MODELS[ally.modelId] ?? ALLY_MODELS.wingman;
+    const targetSlot = {
+      x: player.x + model.formationOffset.x,
+      y: player.y + model.formationOffset.y + Math.sin(now / 450 + index) * 8,
+    };
+    const nextAlly = {
+      ...ally,
+      x: ally.x + (targetSlot.x - ally.x) * 0.08,
+      y: ally.y + (targetSlot.y - ally.y) * 0.08,
+    };
+
+    for (let i = remainingProjectiles.length - 1; i >= 0; i--) {
+      if (distance(nextAlly, remainingProjectiles[i]) <= model.catchRadius || distance(targetSlot, remainingProjectiles[i]) <= model.catchRadius) {
+        remainingProjectiles.splice(i, 1);
+        nextAlly.health -= 1;
+      }
+    }
+
+    if (nextAlly.health <= 0) return;
+
+    const target = findNearestEnemy(nextAlly, enemies);
+    if (target && now - (nextAlly.lastShotAt ?? 0) >= model.fireCooldownMs) {
+      const aim = normalizeVector(target.x - nextAlly.x, target.y - nextAlly.y);
+      bullets.push({
+        x: nextAlly.x,
+        y: nextAlly.y,
+        vx: aim.x * model.bulletSpeed,
+        vy: aim.y * model.bulletSpeed,
+        time: now,
+        source: 'ally',
+        color: '#7ff',
+        damage: 1,
+        kind: 'ally-bullet',
+      });
+      nextAlly.lastShotAt = now;
+    }
+
+    updatedAllies.push(nextAlly);
+  });
+
+  return { allies: updatedAllies, bullets, enemyProjectiles: remainingProjectiles };
+}
+
+export function updateShields({ shields = [], enemyProjectiles = [], now = Date.now(), deltaMs = 16 }) {
+  const remainingProjectiles = [...enemyProjectiles];
+  const updatedShields = [];
+
+  for (const shield of shields) {
+    const model = SHIELD_MODELS[shield.modelId] ?? SHIELD_MODELS.bubble;
+    const nextShield = { ...shield, lifeMs: (shield.lifeMs ?? model.lifeMs) - deltaMs };
+
+    for (let i = remainingProjectiles.length - 1; i >= 0; i--) {
+      if (distance(nextShield, remainingProjectiles[i]) <= model.radius) {
+        remainingProjectiles.splice(i, 1);
+        nextShield.health -= 1;
+      }
+    }
+
+    if (nextShield.lifeMs > 0 && nextShield.health > 0) {
+      updatedShields.push(nextShield);
+    }
+  }
+
+  return { shields: updatedShields, enemyProjectiles: remainingProjectiles };
 }
 
 export function deployTurret(economy, position, now = Date.now()) {

@@ -1,0 +1,119 @@
+{
+  "collection": {
+    "id": "app-hub-v11",
+    "title": "NEXUS App Hub v11",
+    "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
+  },
+  "deploy": {
+    "basePath": "app-hub-v11",
+    "copyRoot": "compiled"
+  },
+  "items": [
+    {
+      "id": "v10-classic",
+      "title": "NEXUS v10 Classic Portal",
+      "kind": "html-path",
+      "href": "../app-hub/v10-portal.html",
+      "description": "The clean PeernetLobby app runtime v11 is based on.",
+      "tags": ["hub", "v10", "peernet"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "fullscreen", "newWindow"] }
+    },
+    {
+      "id": "v10-enhanced",
+      "title": "NEXUS v10 Enhanced Portal",
+      "kind": "html-path",
+      "href": "../app-hub/v10-portal-enhanced.html",
+      "description": "The rich v10 portal containing themes, sound, floating panels, and storage management ideas externalized in v11 libs.",
+      "tags": ["hub", "v10", "themes", "sound", "floating"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "floating", "fullscreen", "newWindow"] }
+    },
+    {
+      "id": "peer-mod-groove",
+      "title": "PeerModGroove",
+      "kind": "html-path",
+      "href": "../PeerModGroove/index.html",
+      "description": "Peer-synchronized modular audio app launched from v10/v11 rather than embedded into the hub runtime.",
+      "tags": ["audio", "peernet", "modular"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "floating", "fullscreen", "newWindow"] }
+    },
+    {
+      "id": "sprite-gif-creator",
+      "title": "Sprite GIF Creator",
+      "kind": "html-path",
+      "href": "../spc/sprite-gif-creator.html",
+      "description": "Browser-only sprite-sheet splitter, frame editor, PNG exporter, and animated GIF assembler.",
+      "tags": ["tool", "graphics", "sprite"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "floating", "newWindow"] }
+    },
+    {
+      "id": "hyperblast-shooter",
+      "title": "Hyperblast Shooter",
+      "kind": "html-path",
+      "href": "../app-hub/shooter.html",
+      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
+      "tags": ["game", "shooter", "space", "multiplayer", "cyberpunk"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "floating", "newWindow"] }
+    },
+    {
+      "id": "minesweeper",
+      "title": "Classic Minesweeper",
+      "kind": "html-path",
+      "href": "../minesweeper/index.html",
+      "description": "Standalone Minesweeper artifact with local best times.",
+      "tags": ["game", "classic"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "fullscreen", "newWindow"] }
+    },
+    {
+      "id": "solitaire",
+      "title": "Classic Solitaire",
+      "kind": "html-path",
+      "href": "../solitaire/index.html",
+      "description": "Standalone Klondike Solitaire artifact with scoring, undo, and best score persistence.",
+      "tags": ["game", "classic"],
+      "operations": ["validate", "index"],
+      "launch": { "modes": ["inline", "fullscreen", "newWindow"] }
+    },
+    {
+      "id": "artifacts-toc",
+      "title": "Artifacts Table of Contents",
+      "kind": "info",
+      "href": "../ARTIFACTS_TOC.md",
+      "note": "Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes the machine-readable catalog.",
+      "tags": ["docs", "catalog"],
+      "operations": ["validate", "index"]
+    },
+    {
+      "id": "server-guide",
+      "title": "Server Guide",
+      "kind": "info",
+      "href": "../SERVER_GUIDE.md",
+      "note": "Local serving and deployment notes for the static artifact collection.",
+      "tags": ["docs", "server"],
+      "operations": ["validate", "index"]
+    },
+    {
+      "id": "external-openai-docs",
+      "title": "External Reference Example",
+      "kind": "external-link",
+      "href": "https://example.com/",
+      "description": "Demonstrates that catalog entries can be pure external links without deployment copying.",
+      "tags": ["external", "example"],
+      "operations": ["validate", "index"]
+    },
+    {
+      "id": "v11-roadmap",
+      "title": "v11 Modularization Roadmap",
+      "kind": "info",
+      "href": "docs/ROADMAP.md",
+      "note": "Specs and TODOs for feature areas intentionally not fully implemented in this slice.",
+      "tags": ["docs", "roadmap", "v11"],
+      "operations": ["validate", "index"]
+    }
+  ]
+}

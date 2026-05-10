@@ -11,6 +11,19 @@ env:
   ARTIFACTS_PORT: "8080"
 
 commands:
+
+  compile:app-hub-v11:
+    run: ["/bin/sh", "-lc", "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"]
+    description: "Compile the v11 app-hub artifact source list into a clean browser catalog."
+    timeoutMs: 10000
+    track: build
+    shellCommand: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
+  smoke:app-hub-v11:
+    run: ["/bin/sh", "-lc", "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node --test tests/app-hub-v11-catalog.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-deploy-inclusion.test.mjs && node --check app-hub-v11/server/artifact-catalog.mjs"]
+    description: "Compile and smoke-test the v11 app-hub catalog, libs, and deployment metadata."
+    timeoutMs: 20000
+    track: test
+    shellCommand: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node --test tests/app-hub-v11-catalog.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-deploy-inclusion.test.mjs && node --check app-hub-v11/server/artifact-catalog.mjs"
   serve:
     description: Start the local artifacts HTTP server and open the portal.
     run: ./artifacts-serve

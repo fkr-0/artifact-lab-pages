@@ -44,6 +44,7 @@ INCLUDE_FILES=(
 
 INCLUDE_DIRS=(
     "app-hub"
+    "app-hub-v11"
     "spc"
     "brawl/ethic-brawl"
     "peernet-orca"
@@ -127,6 +128,7 @@ A curated collection of generative art tools, games, collaborative editors, and 
 
 2. **Open in browser:**
    - Main Portal: http://localhost:8080/app-hub/v9-portal.html
+   - Modular v11: http://localhost:8080/app-hub-v11/index.html
    - Classic v8: http://localhost:8080/app-hub/v8-portal.html
    - v4 Console: http://localhost:8080/app-hub/v4.html
 
@@ -140,6 +142,7 @@ artifacts-collection/
 │   ├── v8-portal.html     # Enhanced navigator
 │   ├── v4.html            # Classic console
 │   └── collab-*.html      # Collaborative editors
+├── app-hub-v11/            # Data-driven modular v11 portal
 ├── spc/                    # Sharepic Creator Suite
 │   └── sharepic-studio-ultimate.html
 ├── brawl/ethic-brawl/      # Philosophical brawler game

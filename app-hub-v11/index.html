@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en" data-theme="nexus">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEXUS App Hub v11</title>
+  <style id="themeStyles"></style>
+  <style>
+    :root { --hub-accent:#00ffff; --hub-background:#060713; --hub-surface:rgba(5,16,28,.74); --hub-panel:rgba(0,0,0,.34); --hub-text:#e8fbff; --hub-muted:rgba(232,251,255,.68); --hub-glow:rgba(0,255,255,.22); color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; background: radial-gradient(circle at top left, var(--hub-glow), transparent 30rem), radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--hub-accent), transparent 88%), transparent 24rem), var(--hub-background); color: var(--hub-text); }
+    .shell { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; height: 100vh; }
+    aside { border-right: 1px solid color-mix(in srgb, var(--hub-accent), transparent 72%); background: var(--hub-panel); padding: 1rem; overflow: auto; backdrop-filter: blur(16px); }
+    main { padding: 1rem; overflow: auto; }
+    h1 { font-size: 1.1rem; margin: 0 0 .25rem; letter-spacing: .08em; text-transform: uppercase; }
+    h2, h3 { margin-block: .2rem; }
+    .muted { color: var(--hub-muted); }
+    .row { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+    .between { justify-content: space-between; }
+    .stack { display:grid; gap:.75rem; }
+    input, select, button, textarea { border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 55%); border-radius: .75rem; padding: .55rem .7rem; background: rgba(0,0,0,.38); color: inherit; }
+    input, textarea { width:100%; }
+    button { cursor: pointer; box-shadow: 0 0 1rem color-mix(in srgb, var(--hub-accent), transparent 88%); }
+    button:hover, .item:hover, .theme-card:hover { border-color: var(--hub-accent); transform: translateY(-1px); }
+    .item { width:100%; text-align:left; display:grid; gap:.2rem; margin:.35rem 0; border:1px solid transparent; border-radius:.85rem; padding:.7rem; background:rgba(255,255,255,.035); transition:.16s ease; }
+    .pill { display:inline-flex; align-items:center; border:1px solid color-mix(in srgb, var(--hub-accent), transparent 60%); border-radius:999px; padding:.15rem .45rem; font-size:.72rem; color:var(--hub-accent); }
+    .card { border:1px solid color-mix(in srgb, var(--hub-accent), transparent 70%); border-radius:1rem; padding:1rem; background:var(--hub-surface); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+    .hero { display:grid; grid-template-columns:1fr auto; gap:1rem; align-items:start; }
+    .profile-chip { display:flex; align-items:center; gap:.65rem; padding:.45rem .55rem; border-radius:999px; background:rgba(255,255,255,.055); border:1px solid color-mix(in srgb, var(--hub-accent), transparent 68%); }
+    .avatar { width:2.25rem; height:2.25rem; display:grid; place-items:center; border-radius:50%; color:#001018; background:var(--profile-color, var(--hub-accent)); font-weight:800; box-shadow:0 0 1.4rem var(--hub-glow); }
+    .drawer { position:fixed; top:1rem; right:1rem; width:min(720px, calc(100vw - 2rem)); max-height:calc(100vh - 2rem); overflow:auto; z-index:20; display:none; border:1px solid var(--hub-accent); border-radius:1.2rem; padding:1rem; background:color-mix(in srgb, var(--hub-background), black 16%); box-shadow:0 2rem 8rem rgba(0,0,0,.62); }
+    .drawer.open { display:grid; }
+    .theme-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:.55rem; }
+    .theme-card { text-align:left; border:1px solid color-mix(in srgb, var(--hub-accent), transparent 70%); border-radius:.9rem; padding:.75rem; background:linear-gradient(135deg, var(--swatch-bg), color-mix(in srgb, var(--swatch-accent), transparent 76%)); transition:.16s ease; }
+    .theme-card.active { outline:2px solid var(--hub-accent); }
+    .storage-meter { height:.7rem; border-radius:999px; background:rgba(255,255,255,.09); overflow:hidden; }
+    .storage-meter > span { display:block; height:100%; width:var(--storage-width,0%); background:var(--hub-accent); box-shadow:0 0 1rem var(--hub-glow); }
+    table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    th, td { text-align:left; padding:.45rem; border-bottom:1px solid color-mix(in srgb, var(--hub-accent), transparent 82%); vertical-align:top; }
+    iframe { width:100%; min-height:70vh; border:1px solid color-mix(in srgb, var(--hub-accent), transparent 60%); border-radius:1rem; background:#000; }
+    .floating { position:fixed; inset:7vh 5vw; z-index:10; display:grid; grid-template-rows:auto 1fr; background:var(--hub-background); border:1px solid var(--hub-accent); border-radius:1rem; box-shadow:0 2rem 8rem rgba(0,0,0,.6); }
+    .floating header { display:flex; justify-content:space-between; gap:1rem; padding:.6rem .8rem; border-bottom:1px solid color-mix(in srgb, var(--hub-accent), transparent 70%); }
+    .floating iframe { border:0; border-radius:0 0 1rem 1rem; min-height:0; height:100%; }
+    @media (max-width: 780px) { .shell { grid-template-columns:1fr; grid-template-rows:auto 1fr; } aside { max-height:50vh; border-right:0; border-bottom:1px solid color-mix(in srgb, var(--hub-accent), transparent 72%); } .hero { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="stack">
+      <div class="row between">
+        <div>
+          <h1>NEXUS v11</h1>
+          <div class="muted">modular artifact hub</div>
+        </div>
+        <button id="profileButton" class="profile-chip" type="button" title="Profile, themes, storage">
+          <span id="profileAvatar" class="avatar">P</span>
+          <span id="profileLabel">Profile</span>
+        </button>
+      </div>
+      <input id="search" placeholder="filter / autocomplete…" autocomplete="off" />
+      <div id="summary" class="muted"></div>
+      <nav id="menu"></nav>
+    </aside>
+    <main class="stack">
+      <section class="card hero">
+        <div>
+          <h2>Artifact cockpit</h2>
+          <p class="muted">v11 keeps the hub thin: catalog operations on the server, UI behavior in small libs, launch surfaces in the shell.</p>
+        </div>
+        <div class="row"><span id="activeTheme" class="pill">theme</span><span id="activeStorage" class="pill">storage</span></div>
+      </section>
+      <section id="details" class="card stack"></section>
+      <section id="stage" class="card stack"></section>
+    </main>
+  </div>
+
+  <aside id="profileMenu" class="drawer stack" aria-label="Profile settings">
+    <div class="row between"><h2>Profile / Settings</h2><button id="closeProfile" type="button">close</button></div>
+    <section class="card stack">
+      <div class="row"><span id="profileAvatarLarge" class="avatar">P</span><div><strong id="profileSummary">Pilot</strong><div class="muted">Local-only identity for this hub shell.</div></div></div>
+      <div class="row">
+        <label>Display name<input id="profileName" /></label>
+        <label>Handle<input id="profileHandle" /></label>
+        <label>Role<input id="profileRole" /></label>
+        <label>Color<input id="profileColor" type="color" /></label>
+      </div>
+      <div class="row"><button id="saveProfile" type="button">Save profile</button><button id="resetProfile" type="button">Reset profile</button></div>
+    </section>
+    <section class="card stack">
+      <div class="row between"><h3>Theme system</h3><button id="soundToggle" type="button">sound off</button></div>
+      <div id="themeGrid" class="theme-grid"></div>
+    </section>
+    <section class="card stack">
+      <div class="row between"><h3>Local storage visualization</h3><div id="storageStats" class="muted"></div></div>
+      <div class="storage-meter"><span id="storageMeter"></span></div>
+      <div class="row"><button id="refreshStorage" type="button">Refresh</button><button id="exportStorage" type="button">Export JSON</button><button id="clearStorage" type="button">Clear v11 keys</button></div>
+      <table id="storageTable"><thead><tr><th>Key</th><th>Bytes</th><th>Value</th></tr></thead><tbody></tbody></table>
+      <textarea id="storageExport" rows="5" placeholder="export appears here; paste then import"></textarea>
+      <div class="row"><button id="importStorage" type="button">Import from box</button></div>
+    </section>
+  </aside>
+
+  <script type="module">
+    import { buildMenuGroups, filterArtifacts } from './lib/menu.js';
+    import { launchArtifact } from './lib/launcher.js';
+    import { buildStorageSnapshot, clearHubSettings, exportHubSettings, importHubSettings, readHubSetting, writeHubSetting } from './lib/storage.js';
+    import { applyThemeTokens, buildThemeStyleText, themeById, themes } from './lib/themes.js';
+    import { createSoundEffects } from './lib/sound.js';
+    import { createNoopNetwork } from './lib/network.js';
+    import { avatarInitials, normalizeProfile, profileSummary } from './lib/profile.js';
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (value = '') => String(value).replace(/[&<>"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[char]));
+    $('themeStyles').textContent = buildThemeStyleText(themes);
+    const catalog = await fetch('./data/artifact-collection.json').then((r) => r.json()).catch(() => ({ items: [], summary: { total: 0 }, operations: {} }));
+    const network = createNoopNetwork();
+    const sounds = createSoundEffects({ audioContextFactory: () => new (window.AudioContext || window.webkitAudioContext)() });
+    let selected = catalog.items[0] || null;
+    let soundEnabled = readHubSetting('sound', false);
+    let profile = normalizeProfile(readHubSetting('profile', {}));
+
+    sounds.setEnabled(soundEnabled);
+    setTheme(readHubSetting('theme', 'nexus'), false);
+    renderProfile();
+    renderThemeGrid();
+    renderStorage();
+    $('soundToggle').textContent = soundEnabled ? 'sound on' : 'sound off';
+    $('summary').textContent = `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(', ')} operations`;
+
+    $('profileButton').addEventListener('click', () => $('profileMenu').classList.toggle('open'));
+    $('closeProfile').addEventListener('click', () => $('profileMenu').classList.remove('open'));
+    $('search').addEventListener('input', renderMenu);
+    $('soundToggle').addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      sounds.setEnabled(soundEnabled);
+      writeHubSetting('sound', soundEnabled);
+      $('soundToggle').textContent = soundEnabled ? 'sound on' : 'sound off';
+      sounds.play('success');
+      renderStorage();
+    });
+    $('saveProfile').addEventListener('click', () => {
+      profile = normalizeProfile({ displayName: $('profileName').value, handle: $('profileHandle').value, role: $('profileRole').value, color: $('profileColor').value });
+      writeHubSetting('profile', profile);
+      renderProfile();
+      renderStorage();
+      sounds.play('success');
+    });
+    $('resetProfile').addEventListener('click', () => {
+      profile = normalizeProfile({});
+      writeHubSetting('profile', profile);
+      renderProfile();
+      renderStorage();
+    });
+    $('refreshStorage').addEventListener('click', renderStorage);
+    $('exportStorage').addEventListener('click', () => { $('storageExport').value = exportHubSettings(); renderStorage(); });
+    $('importStorage').addEventListener('click', () => { importHubSettings($('storageExport').value); profile = normalizeProfile(readHubSetting('profile', profile)); setTheme(readHubSetting('theme', 'nexus'), false); renderProfile(); renderThemeGrid(); renderStorage(); });
+    $('clearStorage').addEventListener('click', () => { clearHubSettings(); renderStorage(); });
+
+    function setTheme(id, save = true) {
+      const theme = applyThemeTokens(id);
+      if (save) writeHubSetting('theme', theme.id);
+      $('activeTheme').textContent = `${theme.title} · ${theme.mood}`;
+      renderThemeGrid();
+      renderStorage();
+      return theme;
+    }
+
+    function renderProfile() {
+      profile = normalizeProfile(profile);
+      document.documentElement.style.setProperty('--profile-color', profile.color);
+      $('profileAvatar').textContent = avatarInitials(profile);
+      $('profileAvatarLarge').textContent = avatarInitials(profile);
+      $('profileLabel').textContent = profile.handle;
+      $('profileSummary').textContent = profileSummary(profile);
+      $('profileName').value = profile.displayName;
+      $('profileHandle').value = profile.handle;
+      $('profileRole').value = profile.role;
+      $('profileColor').value = profile.color;
+    }
+
+    function renderThemeGrid() {
+      const current = themeById(readHubSetting('theme', document.documentElement.getAttribute('data-theme') || 'nexus'));
+      $('themeGrid').innerHTML = themes.map((theme) => `<button type="button" class="theme-card ${theme.id === current.id ? 'active' : ''}" data-theme-id="${theme.id}" style="--swatch-bg:${theme.tokens.background};--swatch-accent:${theme.tokens.accent}"><strong>${esc(theme.title)}</strong><br><span class="muted">${esc(theme.mood)}</span></button>`).join('');
+      $('themeGrid').querySelectorAll('[data-theme-id]').forEach((button) => button.addEventListener('click', () => { setTheme(button.dataset.themeId); sounds.play('click'); }));
+    }
+
+    function renderStorage() {
+      const snapshot = buildStorageSnapshot();
+      const max = Math.max(128, snapshot.totalBytes);
+      $('storageMeter').style.setProperty('--storage-width', `${Math.min(100, Math.round((snapshot.totalBytes / max) * 100))}%`);
+      $('storageStats').textContent = `${snapshot.totalKeys} keys · ${snapshot.totalBytes} bytes`;
+      $('activeStorage').textContent = `${snapshot.totalKeys} v11 keys`;
+      $('storageTable').querySelector('tbody').innerHTML = snapshot.entries.map((entry) => `<tr><td>${esc(entry.shortKey)}</td><td>${entry.bytes}</td><td><code>${esc(JSON.stringify(entry.parsed)).slice(0, 220)}</code></td></tr>`).join('');
+    }
+
+    function renderMenu() {
+      const items = filterArtifacts(catalog.items, $('search').value);
+      const groups = buildMenuGroups(items);
+      $('menu').innerHTML = groups.map((group) => `
+        <section>
+          <h2 class="pill">${esc(group.title)}</h2>
+          ${group.items.map((item) => `<button class="item" data-id="${esc(item.id)}"><strong>${esc(item.title)}</strong><small class="muted">${esc(item.kind)} · ${(item.tags || []).map(esc).join(' ')}</small></button>`).join('')}
+        </section>`).join('');
+      $('menu').querySelectorAll('[data-id]').forEach((button) => button.addEventListener('click', () => {
+        selected = catalog.items.find((item) => item.id === button.dataset.id);
+        sounds.play('click');
+        renderDetails();
+      }));
+    }
+
+    function renderDetails() {
+      if (!selected) {
+        $('details').innerHTML = '<strong>No artifacts compiled yet</strong><p class="muted">Run the catalog compiler.</p>';
+        return;
+      }
+      const modes = selected.launch?.modes || ['inline', 'newWindow'];
+      $('details').innerHTML = `
+        <div class="row"><h2 style="margin:0">${esc(selected.title)}</h2><span class="pill">${esc(selected.kind)}</span></div>
+        <p class="muted">${esc(selected.description || selected.note || '')}</p>
+        <div class="row">${(selected.tags || []).map((tag) => `<span class="pill">${esc(tag)}</span>`).join('')}</div>
+        <div class="row">${modes.map((mode) => `<button data-launch="${esc(mode)}">${esc(mode)}</button>`).join('')}</div>
+        <pre class="muted" style="white-space:pre-wrap">${esc(JSON.stringify({ id: selected.id, href: selected.href, hubHref: selected.hubHref, operations: selected.operations }, null, 2))}</pre>`;
+      $('details').querySelectorAll('[data-launch]').forEach((button) => button.addEventListener('click', () => openSelected(button.dataset.launch)));
+    }
+
+    function openSelected(mode) {
+      const launch = launchArtifact(selected, mode, window);
+      sounds.play('success');
+      network.broadcast('artifact:launch', { id: selected.id, mode: launch.mode });
+      if (launch.handledByBrowser) return;
+      if (launch.mode === 'floating') return openFloating(selected.title, launch.url);
+      $('stage').innerHTML = launch.url === '#'
+        ? `<strong>${esc(selected.title)}</strong><p class="muted">Information-only item. ${esc(selected.note || '')}</p>`
+        : `<div class="row"><strong>${esc(selected.title)}</strong><span class="pill">${esc(launch.mode)}</span></div><iframe src="${esc(launch.url)}" title="${esc(selected.title)}"></iframe>`;
+    }
+
+    function openFloating(title, url) {
+      document.querySelector('.floating')?.remove();
+      const panel = document.createElement('section');
+      panel.className = 'floating';
+      panel.innerHTML = `<header><strong>${esc(title)}</strong><button type="button">close</button></header><iframe src="${esc(url)}" title="${esc(title)}"></iframe>`;
+      panel.querySelector('button').onclick = () => panel.remove();
+      document.body.append(panel);
+    }
+
+    renderMenu();
+    renderDetails();
+  </script>
+</body>
+</html>
