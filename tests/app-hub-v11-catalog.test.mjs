@@ -79,3 +79,19 @@ assert.deepEqual(
   'shooter should expose v10-style launcher actions'
 );
 assert.equal(shooter.launch.actions[2].multiplayer, true);
+
+const bomberman = shooterCatalog.items.find((item) => item.id === 'bomberman-v10');
+assert.ok(bomberman, 'expected Bomberman artifact in v11 catalog');
+assert.equal(bomberman.href, '../app-hub/bomberman.html');
+assert.deepEqual(
+  bomberman.launch.modes,
+  ['inline', 'floating', 'fullscreen', 'newWindow'],
+  'Bomberman should preserve v10 launch modes'
+);
+assert.deepEqual(
+  bomberman.launch.actions.map((action) => action.id),
+  ['play-inline', 'floating-panel', 'fullscreen', 'multiplayer', 'new-window'],
+  'Bomberman should expose v10-style launcher actions'
+);
+assert.equal(bomberman.launch.actions[3].mode, 'floating');
+assert.equal(bomberman.launch.actions[3].multiplayer, true);

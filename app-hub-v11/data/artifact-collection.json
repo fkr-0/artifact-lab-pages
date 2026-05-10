@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-10T18:55:19.695Z",
+  "generatedAt": "2026-05-10T19:26:25.876Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled"
@@ -21,16 +21,16 @@
     }
   },
   "summary": {
-    "total": 11,
+    "total": 12,
     "byKind": {
-      "html-path": 7,
+      "html-path": 8,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
       "hub": 2,
       "v10": 2,
-      "peernet": 2,
+      "peernet": 3,
       "themes": 1,
       "sound": 1,
       "floating": 1,
@@ -39,12 +39,13 @@
       "tool": 1,
       "graphics": 1,
       "sprite": 1,
-      "game": 3,
+      "game": 4,
       "shooter": 1,
       "space": 1,
-      "multiplayer": 1,
+      "multiplayer": 2,
       "cyberpunk": 1,
-      "classic": 2,
+      "classic": 3,
+      "bomberman": 1,
       "docs": 3,
       "catalog": 1,
       "server": 1,
@@ -205,6 +206,63 @@
       "title": "Hyperblast Shooter",
       "href": "../app-hub/shooter.html",
       "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "bomberman",
+        "multiplayer",
+        "peernet"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ]
+      },
+      "id": "bomberman-v10",
+      "title": "Gridblast Bomberman",
+      "href": "../app-hub/bomberman.html",
+      "description": "Legacy v10 Bomberman implementation with PeernetLobby one-session multiplayer, target-peer joins, and shared state snapshots.",
       "deploy": {
         "include": true
       }

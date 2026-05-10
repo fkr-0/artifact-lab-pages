@@ -80,6 +80,46 @@
       }
     },
     {
+      "id": "bomberman-v10",
+      "title": "Gridblast Bomberman",
+      "kind": "html-path",
+      "href": "../app-hub/bomberman.html",
+      "description": "Legacy v10 Bomberman implementation with PeernetLobby one-session multiplayer, target-peer joins, and shared state snapshots.",
+      "tags": ["game", "classic", "bomberman", "multiplayer", "peernet"],
+      "operations": ["validate", "index"],
+      "launch": {
+        "modes": ["inline", "floating", "fullscreen", "newWindow"],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ]
+      }
+    },
+    {
       "id": "minesweeper",
       "title": "Classic Minesweeper",
       "kind": "html-path",

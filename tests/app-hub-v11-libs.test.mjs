@@ -77,3 +77,11 @@ const multiplayerLaunch = launchArtifact(
 assert.equal(multiplayerLaunch.mode, 'floating');
 assert.equal(multiplayerLaunch.handledByBrowser, false);
 assert.equal(multiplayerLaunch.url, '../app-hub/shooter.html?embedded=true&multiplayer=true');
+
+const bombermanMultiplayerLaunch = launchArtifact(
+  { href: '../app-hub/bomberman.html' },
+  'floating',
+  { open() { throw new Error('floating launch should not open browser window'); } },
+  { id: 'multiplayer', multiplayer: true }
+);
+assert.equal(bombermanMultiplayerLaunch.url, '../app-hub/bomberman.html?embedded=true&multiplayer=true');
