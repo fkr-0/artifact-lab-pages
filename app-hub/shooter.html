@@ -273,9 +273,6 @@
             enemies: [],
             particles: [],
             turrets: economy.turrets,
-          allies: [],
-          shields: [],
-          enemyProjectiles: [],
             allies: [],
             shields: [],
             enemyProjectiles: [],
@@ -527,6 +524,7 @@
         // Disconnect from lobby
         if (this.lobby) {
           this.broadcastPresence(false); // Broadcast leaving
+          this.lobby.destroy?.();
           this.lobby = null;
         }
       }
@@ -850,15 +848,7 @@
           cancelAnimationFrame(this.gameLoop);
         }
 
-        // Stop network updates
-        if (this.networkUpdateInterval) {
-          clearInterval(this.networkUpdateInterval);
-        }
-
-        // Disconnect lobby
-        if (this.lobby) {
-          this.broadcastPresence(false);
-        }
+        this.stopMultiplayer();
       }
 
       loop() {
@@ -1363,6 +1353,8 @@
     // Initialize game
     const game = new ShooterGame();
     window.game = game; // Expose for restart button
+
+    window.addEventListener('beforeunload', () => game.destroy());
 
     // Auto-enable multiplayer if coming from hub with join parameter
     const urlParams = new URLSearchParams(window.location.search);
