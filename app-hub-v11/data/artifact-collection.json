@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-10T19:26:25.876Z",
+  "generatedAt": "2026-05-10T19:35:20.282Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled"
@@ -46,6 +46,10 @@
       "cyberpunk": 1,
       "classic": 3,
       "bomberman": 1,
+      "minesweeper": 1,
+      "puzzle": 1,
+      "solitaire": 1,
+      "cards": 1,
       "docs": 3,
       "catalog": 1,
       "server": 1,
@@ -271,7 +275,9 @@
       "kind": "html-path",
       "tags": [
         "game",
-        "classic"
+        "classic",
+        "minesweeper",
+        "puzzle"
       ],
       "operations": [
         "validate",
@@ -282,12 +288,29 @@
           "inline",
           "fullscreen",
           "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
         ]
       },
       "id": "minesweeper",
       "title": "Classic Minesweeper",
       "href": "../minesweeper/index.html",
-      "description": "Standalone Minesweeper artifact with local best times.",
+      "description": "Standalone Minesweeper artifact with original presets, custom boards, timer scoring, flags, chording, keyboard controls, and local best times.",
       "deploy": {
         "include": true
       }
@@ -296,7 +319,9 @@
       "kind": "html-path",
       "tags": [
         "game",
-        "classic"
+        "classic",
+        "solitaire",
+        "cards"
       ],
       "operations": [
         "validate",
@@ -307,12 +332,29 @@
           "inline",
           "fullscreen",
           "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
         ]
       },
       "id": "solitaire",
       "title": "Classic Solitaire",
       "href": "../solitaire/index.html",
-      "description": "Standalone Klondike Solitaire artifact with scoring, undo, and best score persistence.",
+      "description": "Standalone Klondike Solitaire artifact with draw-one/draw-three modes, stock and waste piles, foundations, tableau moves, scoring, undo, auto-foundation, timer, and best score persistence.",
       "deploy": {
         "include": true
       }

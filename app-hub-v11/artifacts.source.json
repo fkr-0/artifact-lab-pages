@@ -124,20 +124,58 @@
       "title": "Classic Minesweeper",
       "kind": "html-path",
       "href": "../minesweeper/index.html",
-      "description": "Standalone Minesweeper artifact with local best times.",
-      "tags": ["game", "classic"],
+      "description": "Standalone Minesweeper artifact with original presets, custom boards, timer scoring, flags, chording, keyboard controls, and local best times.",
+      "tags": ["game", "classic", "minesweeper", "puzzle"],
       "operations": ["validate", "index"],
-      "launch": { "modes": ["inline", "fullscreen", "newWindow"] }
+      "launch": {
+        "modes": ["inline", "fullscreen", "newWindow"],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ]
+      }
     },
     {
       "id": "solitaire",
       "title": "Classic Solitaire",
       "kind": "html-path",
       "href": "../solitaire/index.html",
-      "description": "Standalone Klondike Solitaire artifact with scoring, undo, and best score persistence.",
-      "tags": ["game", "classic"],
+      "description": "Standalone Klondike Solitaire artifact with draw-one/draw-three modes, stock and waste piles, foundations, tableau moves, scoring, undo, auto-foundation, timer, and best score persistence.",
+      "tags": ["game", "classic", "solitaire", "cards"],
       "operations": ["validate", "index"],
-      "launch": { "modes": ["inline", "fullscreen", "newWindow"] }
+      "launch": {
+        "modes": ["inline", "fullscreen", "newWindow"],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ]
+      }
     },
     {
       "id": "artifacts-toc",

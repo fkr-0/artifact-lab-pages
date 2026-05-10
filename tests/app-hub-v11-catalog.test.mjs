@@ -95,3 +95,21 @@ assert.deepEqual(
 );
 assert.equal(bomberman.launch.actions[3].mode, 'floating');
 assert.equal(bomberman.launch.actions[3].multiplayer, true);
+
+const minesweeper = shooterCatalog.items.find((item) => item.id === 'minesweeper');
+assert.ok(minesweeper, 'expected Minesweeper artifact in v11 catalog');
+assert.equal(minesweeper.href, '../minesweeper/index.html');
+assert.deepEqual(
+  minesweeper.launch.actions.map((action) => action.id),
+  ['play-inline', 'fullscreen', 'new-window'],
+  'Minesweeper should expose v10-style launcher actions'
+);
+
+const solitaire = shooterCatalog.items.find((item) => item.id === 'solitaire');
+assert.ok(solitaire, 'expected Solitaire artifact in v11 catalog');
+assert.equal(solitaire.href, '../solitaire/index.html');
+assert.deepEqual(
+  solitaire.launch.actions.map((action) => action.id),
+  ['play-inline', 'fullscreen', 'new-window'],
+  'Solitaire should expose v10-style launcher actions'
+);
