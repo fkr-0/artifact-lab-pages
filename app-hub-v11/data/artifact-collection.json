@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-10T18:42:16.615Z",
+  "generatedAt": "2026-05-10T18:55:19.695Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled"
@@ -181,6 +181,24 @@
           "inline",
           "floating",
           "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
         ]
       },
       "id": "hyperblast-shooter",

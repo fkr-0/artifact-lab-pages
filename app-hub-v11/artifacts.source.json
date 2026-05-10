@@ -57,7 +57,27 @@
       "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
       "tags": ["game", "shooter", "space", "multiplayer", "cyberpunk"],
       "operations": ["validate", "index"],
-      "launch": { "modes": ["inline", "floating", "newWindow"] }
+      "launch": {
+        "modes": ["inline", "floating", "newWindow"],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
+        ]
+      }
     },
     {
       "id": "minesweeper",

@@ -102,7 +102,7 @@
 
   <script type="module">
     import { buildMenuGroups, filterArtifacts } from './lib/menu.js';
-    import { launchArtifact } from './lib/launcher.js';
+    import { createFloatingPanel, launchArtifact } from './lib/launcher.js';
     import { buildStorageSnapshot, clearHubSettings, exportHubSettings, importHubSettings, readHubSetting, writeHubSetting } from './lib/storage.js';
     import { applyThemeTokens, buildThemeStyleText, themeById, themes } from './lib/themes.js';
     import { createSoundEffects } from './lib/sound.js';
@@ -214,33 +214,32 @@
         return;
       }
       const modes = selected.launch?.modes || ['inline', 'newWindow'];
+      const actions = selected.launch?.actions || modes.map((mode) => ({ id: mode, title: mode, mode }));
       $('details').innerHTML = `
         <div class="row"><h2 style="margin:0">${esc(selected.title)}</h2><span class="pill">${esc(selected.kind)}</span></div>
         <p class="muted">${esc(selected.description || selected.note || '')}</p>
         <div class="row">${(selected.tags || []).map((tag) => `<span class="pill">${esc(tag)}</span>`).join('')}</div>
-        <div class="row">${modes.map((mode) => `<button data-launch="${esc(mode)}">${esc(mode)}</button>`).join('')}</div>
+        <div class="row">${actions.map((action) => `<button data-launch="${esc(action.mode)}" data-action-id="${esc(action.id)}" data-multiplayer="${action.multiplayer ? 'true' : 'false'}">${esc(action.title)}</button>`).join('')}</div>
         <pre class="muted" style="white-space:pre-wrap">${esc(JSON.stringify({ id: selected.id, href: selected.href, hubHref: selected.hubHref, operations: selected.operations }, null, 2))}</pre>`;
-      $('details').querySelectorAll('[data-launch]').forEach((button) => button.addEventListener('click', () => openSelected(button.dataset.launch)));
+      $('details').querySelectorAll('[data-launch]').forEach((button) => button.addEventListener('click', () => openSelected(button.dataset.launch, {
+        id: button.dataset.actionId,
+        multiplayer: button.dataset.multiplayer === 'true',
+      })));
     }
 
-    function openSelected(mode) {
-      const launch = launchArtifact(selected, mode, window);
+    function openSelected(mode, action = null) {
+      const launch = launchArtifact(selected, mode, window, action);
       sounds.play('success');
-      network.broadcast('artifact:launch', { id: selected.id, mode: launch.mode });
+      network.broadcast('artifact:launch', {
+        id: selected.id,
+        mode: launch.mode,
+        action,
+      });
       if (launch.handledByBrowser) return;
-      if (launch.mode === 'floating') return openFloating(selected.title, launch.url);
+      if (launch.mode === 'floating') return createFloatingPanel({ title: selected.title, url: launch.url }, window);
       $('stage').innerHTML = launch.url === '#'
         ? `<strong>${esc(selected.title)}</strong><p class="muted">Information-only item. ${esc(selected.note || '')}</p>`
         : `<div class="row"><strong>${esc(selected.title)}</strong><span class="pill">${esc(launch.mode)}</span></div><iframe src="${esc(launch.url)}" title="${esc(selected.title)}"></iframe>`;
-    }
-
-    function openFloating(title, url) {
-      document.querySelector('.floating')?.remove();
-      const panel = document.createElement('section');
-      panel.className = 'floating';
-      panel.innerHTML = `<header><strong>${esc(title)}</strong><button type="button">close</button></header><iframe src="${esc(url)}" title="${esc(title)}"></iframe>`;
-      panel.querySelector('button').onclick = () => panel.remove();
-      document.body.append(panel);
     }
 
     renderMenu();

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { buildMenuGroups, filterArtifacts } from '../app-hub-v11/lib/menu.js';
-import { launchUrlForMode, normalizeLaunchMode } from '../app-hub-v11/lib/launcher.js';
+import { createFloatingPanel, launchArtifact, launchUrlForMode, normalizeLaunchMode } from '../app-hub-v11/lib/launcher.js';
 import { readHubSetting, writeHubSetting } from '../app-hub-v11/lib/storage.js';
 import { themes } from '../app-hub-v11/lib/themes.js';
 
@@ -25,3 +25,55 @@ const adapter = {
 };
 writeHubSetting('theme', 'matrix', adapter);
 assert.equal(readHubSetting('theme', 'default', adapter), 'matrix');
+
+
+const floatingRuntime = {
+  created: [],
+  body: {
+    appended: [],
+    append(node) { this.appended.push(node); },
+  },
+  document: {
+    createElement(tagName) {
+      const node = {
+        tagName,
+        className: '',
+        innerHTML: '',
+        removed: false,
+        events: {},
+        querySelector(selector) {
+          if (selector !== 'button') return null;
+          return {
+            set onclick(handler) { node.events.close = handler; },
+          };
+        },
+        remove() { this.removed = true; },
+      };
+      floatingRuntime.created.push(node);
+      return node;
+    },
+    querySelector(selector) {
+      return selector === '.floating' ? floatingRuntime.existingPanel : null;
+    },
+  },
+};
+floatingRuntime.existingPanel = { removed: false, remove() { this.removed = true; } };
+const panel = createFloatingPanel({ title: 'Hyperblast Shooter', url: '../app-hub/shooter.html?embedded=true' }, floatingRuntime);
+assert.equal(floatingRuntime.existingPanel.removed, true);
+assert.equal(panel.className, 'floating');
+assert.match(panel.innerHTML, /Hyperblast Shooter/);
+assert.match(panel.innerHTML, /..\/app-hub\/shooter.html\?embedded=true/);
+assert.equal(floatingRuntime.body.appended[0], panel);
+panel.events.close();
+assert.equal(panel.removed, true);
+
+
+const multiplayerLaunch = launchArtifact(
+  { href: '../app-hub/shooter.html' },
+  'floating',
+  { open() { throw new Error('floating launch should not open browser window'); } },
+  { multiplayer: true }
+);
+assert.equal(multiplayerLaunch.mode, 'floating');
+assert.equal(multiplayerLaunch.handledByBrowser, false);
+assert.equal(multiplayerLaunch.url, '../app-hub/shooter.html?embedded=true&multiplayer=true');

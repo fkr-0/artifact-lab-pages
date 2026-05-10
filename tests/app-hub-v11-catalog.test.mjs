@@ -73,3 +73,9 @@ assert.deepEqual(
   ['inline', 'floating', 'newWindow'],
   'shooter should preserve v10-enhanced launch modes'
 );
+assert.deepEqual(
+  shooter.launch.actions.map((action) => action.id),
+  ['play-inline', 'floating-panel', 'multiplayer'],
+  'shooter should expose v10-style launcher actions'
+);
+assert.equal(shooter.launch.actions[2].multiplayer, true);
