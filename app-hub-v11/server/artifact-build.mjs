@@ -76,7 +76,7 @@ export async function materializeArtifactBuild(options = {}) {
   }
 
   const rootIndex = source.deploy?.rootIndex?.source || 'app-hub-v11/index.html';
-  await copyIntoStage({ rootDir, outDir, sourcePath: rootIndex, targetPath: 'index.html' });
+  await writeRootRedirectIndex({ outDir, target: rootIndex });
   pushUnique(included, { id: 'deploy:root-index', path: 'index.html' });
 
   const catalog = await compileArtifactCollectionFile(sourcePath, { rootDir, outDir: catalogOutDir });
@@ -105,6 +105,23 @@ function topLevelDeployPath(path) {
   if (parts.length === 0) return path;
   if (parts.length === 1) return parts[0];
   return parts[0];
+}
+
+
+async function writeRootRedirectIndex({ outDir, target }) {
+  const safeTarget = String(target || 'app-hub-v11/index.html').replace(/["'<>]/g, '');
+  await writeFile(join(outDir, 'index.html'), `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="refresh" content="0; url=${safeTarget}" />
+  <title>NEXUS App Hub v11</title>
+  <script>location.replace(${JSON.stringify(safeTarget)});</script>
+</head>
+<body><p>Loading <a href="${safeTarget}">NEXUS App Hub v11</a>…</p></body>
+</html>
+`);
 }
 
 async function runBuild(item, { rootDir, runBuilds }) {

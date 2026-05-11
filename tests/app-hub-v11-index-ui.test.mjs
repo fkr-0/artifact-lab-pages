@@ -70,3 +70,5 @@ assert.match(html, /\.app-deck-panel[\s\S]*overflow:\s*auto/, 'inline app panels
 assert.match(html, /\.results-panel[\s\S]*overflow:\s*auto/, 'filtered results panel should remain scrollable');
 assert.match(html, /\.resize-handle[\s\S]*touch-action:\s*none/, 'drag handles should disable touch scrolling during resize');
 assert.match(html, /workspacePane\.style\.resize\s*=\s*'vertical'/, 'v11 should explicitly enable browser vertical resize on the workspace pane');
+
+assert.doesNotMatch(html, /drop-shadow\(/, 'badger runner should not use a drop shadow');

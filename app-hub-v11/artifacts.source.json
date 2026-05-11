@@ -18,7 +18,8 @@
       "artifacts-server.sh",
       "artifacts-package",
       "artifacts-deploy",
-      "bridge.yml"
+      "bridge.yml",
+      "bdg.gif"
     ],
     "includeDirs": [
       "app-hub-v11",
@@ -718,6 +719,31 @@
         "docs",
         "markdown",
         "viewer",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
+    },
+    {
+      "id": "font-lab-browser",
+      "title": "Font Lab Browser",
+      "kind": "html-path",
+      "href": "font_lab_browser.html",
+      "description": "Single-file, browser-only font builder. Upload a glyph grid image, remove white to transparency, smooth and trace, then export an OTF plus debug assets.",
+      "tags": [
+        "tool",
+        "font",
+        "graphics",
         "v11"
       ],
       "operations": [

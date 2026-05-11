@@ -213,9 +213,28 @@ xyz0123456
             </select>
           </label>
         </div>
+        
+        <div class="row two">
+          <label>
+            <span>Auto center outlines</span>
+            <select id="autoCenterGlyph">
+              <option value="on" selected>on</option>
+              <option value="off">off</option>
+            </select>
+          </label>
+          <label>
+            <span>Auto advance width</span>
+            <select id="autoAdvanceWidth">
+              <option value="on" selected>on</option>
+              <option value="off">off</option>
+            </select>
+          </label>
+        </div>
 
         <div class="toolbar">
           <button id="processBtn">1. Process grid</button>
+          <button id="autoDetectBtn" class="secondary">Auto-detect scan</button>
+          <button id="autoTuneBtn" class="secondary">Auto-tune metrics</button>
           <button id="quickZipBtn" class="secondary">Process + ZIP</button>
           <button id="exportOtfBtn" class="secondary" disabled>2. Export OTF</button>
           <button id="exportZipBtn" class="secondary" disabled>3. Export ZIP</button>
@@ -232,12 +251,71 @@ xyz0123456
     <main class="canvas-wrap">
       <section class="panel canvas-card">
         <h2>Source</h2>
+        <div class="row three">
+          <label>
+            Zoom %
+            <input id="sourceZoom" type="number" min="25" max="800" step="5" value="100" />
+          </label>
+          <label>
+            Pan X
+            <input id="sourcePanX" type="number" min="-2000" max="2000" step="1" value="0" />
+          </label>
+          <label>
+            Pan Y
+            <input id="sourcePanY" type="number" min="-2000" max="2000" step="1" value="0" />
+          </label>
+        </div>
         <canvas id="sourceCanvas" width="960" height="540"></canvas>
+        <div class="pill">Mouse: drag selected cell to move override. Shift+drag moves full grid. Alt+drag scales full grid. Drag corner handles for anchored resize. Ctrl = fine snap. Wheel zooms. Middle-drag pans.</div>
+        <div class="row three">
+          <label title="Selected cell column (1-based)">
+            Cell col
+            <input id="selectedCol" type="number" min="1" step="1" value="1" />
+          </label>
+          <label title="Selected cell row (1-based)">
+            Cell row
+            <input id="selectedRow" type="number" min="1" step="1" value="1" />
+          </label>
+          <label title="Enable or disable this cell from extraction/export">
+            Cell enabled
+            <select id="cellEnabled">
+              <option value="on" selected>on</option>
+              <option value="off">off</option>
+            </select>
+          </label>
+        </div>
+        <div class="row three">
+          <label title="Per-cell x shift in source pixels before extraction">
+            Shift X
+            <input id="cellShiftX" type="number" min="-128" max="128" step="1" value="0" />
+          </label>
+          <label title="Per-cell y shift in source pixels before extraction">
+            Shift Y
+            <input id="cellShiftY" type="number" min="-128" max="128" step="1" value="0" />
+          </label>
+          <label title="Extra inset percent for this cell on top of global cell inset">
+            Extra inset %
+            <input id="cellInsetDelta" type="number" min="-25" max="25" step="0.5" value="0" />
+          </label>
+        </div>
+        <div class="toolbar">
+          <button id="resetViewBtn" class="secondary">Reset view</button>
+          <button id="resetGridBtn" class="secondary">Reset grid transform</button>
+          <button id="applyCellAdjustBtn" class="secondary">Apply cell override</button>
+          <button id="clearCellAdjustBtn" class="secondary">Clear cell override</button>
+        </div>
+      </section>
+
+      <section class="panel canvas-card">
+        <h2>Effects Preview</h2>
+        <canvas id="effectPreviewCanvas" width="512" height="512"></canvas>
+        <div class="mini">Preview uses the selected cell and current threshold/morph/trace settings.</div>
       </section>
 
       <section class="panel canvas-card">
         <h2>Preview text</h2>
         <div id="previewSample" class="preview-sample">No exported font yet.</div>
+        <div id="resultSummary" class="mini">No processed glyphs yet.</div>
       </section>
 
       <section class="panel canvas-card">
@@ -249,7 +327,7 @@ xyz0123456
 
   <script type="module">
     import ImageTracer from 'https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/+esm';
-    import opentype from 'https://unpkg.com/opentype.js/dist/opentype.module.js';
+    import opentype from 'https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.module.js';
     import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm';
 
     const $ = (id) => document.getElementById(id);
@@ -276,14 +354,33 @@ xyz0123456
       descender: $('descender'),
       baselineRatio: $('baselineRatio'),
       tracePreset: $('tracePreset'),
+      autoCenterGlyph: $('autoCenterGlyph'),
+      autoAdvanceWidth: $('autoAdvanceWidth'),
       processBtn: $('processBtn'),
+      autoDetectBtn: $('autoDetectBtn'),
+      autoTuneBtn: $('autoTuneBtn'),
       quickZipBtn: $('quickZipBtn'),
       exportOtfBtn: $('exportOtfBtn'),
       exportZipBtn: $('exportZipBtn'),
+      sourceZoom: $('sourceZoom'),
+      sourcePanX: $('sourcePanX'),
+      sourcePanY: $('sourcePanY'),
+      selectedCol: $('selectedCol'),
+      selectedRow: $('selectedRow'),
+      cellEnabled: $('cellEnabled'),
+      cellShiftX: $('cellShiftX'),
+      cellShiftY: $('cellShiftY'),
+      cellInsetDelta: $('cellInsetDelta'),
+      applyCellAdjustBtn: $('applyCellAdjustBtn'),
+      clearCellAdjustBtn: $('clearCellAdjustBtn'),
+      resetViewBtn: $('resetViewBtn'),
+      resetGridBtn: $('resetGridBtn'),
       status: $('status'),
       sourceCanvas: $('sourceCanvas'),
+      effectPreviewCanvas: $('effectPreviewCanvas'),
       glyphGrid: $('glyphGrid'),
       previewSample: $('previewSample'),
+      resultSummary: $('resultSummary'),
     };
 
     const sourceCtx = refs.sourceCanvas.getContext('2d', { willReadFrequently: true });
@@ -294,6 +391,12 @@ xyz0123456
       processedGlyphs: [],
       exportedFont: null,
       previewFontUrl: null,
+      autoTune: null,
+      cellOverrides: {},
+      selectedCell: { col: 0, row: 0 },
+      view: { zoom: 1, panX: 0, panY: 0 },
+      gridTransform: { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1 },
+      drag: null,
     };
 
     function setStatus(text, tone = 'normal') {
@@ -463,6 +566,33 @@ xyz0123456
     function makePreviewText(glyphs) {
       return glyphs.filter((g) => g.char).map((g) => g.char).slice(0, 48).join('') || 'Preview text';
     }
+    
+    function cellKey(col, row) {
+      return `${col},${row}`;
+    }
+
+    function getCellOverride(col, row) {
+      return state.cellOverrides[cellKey(col, row)] || { enabled: true, shiftX: 0, shiftY: 0, insetDelta: 0 };
+    }
+
+    function clampCellSelection(config) {
+      const maxCol = Math.max(1, config.grid.cols);
+      const maxRow = Math.max(1, config.grid.rows);
+      const col = Math.min(maxCol, Math.max(1, Number(refs.selectedCol.value) || 1));
+      const row = Math.min(maxRow, Math.max(1, Number(refs.selectedRow.value) || 1));
+      refs.selectedCol.value = col;
+      refs.selectedRow.value = row;
+      state.selectedCell = { col: col - 1, row: row - 1 };
+    }
+
+    function syncCellControlsFromSelection() {
+      const { col, row } = state.selectedCell;
+      const ov = getCellOverride(col, row);
+      refs.cellEnabled.value = ov.enabled ? 'on' : 'off';
+      refs.cellShiftX.value = ov.shiftX;
+      refs.cellShiftY.value = ov.shiftY;
+      refs.cellInsetDelta.value = ov.insetDelta;
+    }
 
     function getConfig() {
       const grid = parseGridMap(refs.gridMap.value);
@@ -487,40 +617,209 @@ xyz0123456
         descender: Number(refs.descender.value),
         baselineRatio: Number(refs.baselineRatio.value),
         tracePreset: refs.tracePreset.value,
+        autoCenterGlyph: refs.autoCenterGlyph.value === 'on',
+        autoAdvanceWidth: refs.autoAdvanceWidth.value === 'on',
       };
     }
 
     function drawSourceGuides(image) {
       const canvas = refs.sourceCanvas;
-      const { width, height } = fitRect(image.width, image.height, canvas.width, canvas.height);
-      const x = Math.round((canvas.width - width) / 2);
-      const y = Math.round((canvas.height - height) / 2);
+      const viewZoom = Math.max(0.25, Number(refs.sourceZoom.value || 100) / 100);
+      state.view.zoom = viewZoom;
+      state.view.panX = Number(refs.sourcePanX.value || 0);
+      state.view.panY = Number(refs.sourcePanY.value || 0);
+      const baseFit = fitRect(image.width, image.height, canvas.width, canvas.height);
+      const width = Math.round(baseFit.width * viewZoom);
+      const height = Math.round(baseFit.height * viewZoom);
+      const x = Math.round((canvas.width - width) / 2 + state.view.panX);
+      const y = Math.round((canvas.height - height) / 2 + state.view.panY);
       sourceCtx.clearRect(0, 0, canvas.width, canvas.height);
       sourceCtx.drawImage(image, x, y, width, height);
 
       const { grid } = getConfig();
       if (!grid.cols || !grid.rows) return;
+      const layout = getGridLayout(image, grid);
 
       sourceCtx.save();
       sourceCtx.strokeStyle = 'rgba(125, 211, 252, 0.75)';
       sourceCtx.lineWidth = 1;
-      const cellW = width / grid.cols;
-      const cellH = height / grid.rows;
+      const cellW = (layout.cellW * width) / image.width;
+      const cellH = (layout.cellH * height) / image.height;
+      const originX = x + (layout.originX * width) / image.width;
+      const originY = y + (layout.originY * height) / image.height;
       for (let c = 0; c <= grid.cols; c += 1) {
-        const xx = x + c * cellW;
+        const xx = originX + c * cellW;
         sourceCtx.beginPath();
-        sourceCtx.moveTo(xx, y);
-        sourceCtx.lineTo(xx, y + height);
+        sourceCtx.moveTo(xx, originY);
+        sourceCtx.lineTo(xx, originY + cellH * grid.rows);
         sourceCtx.stroke();
       }
       for (let r = 0; r <= grid.rows; r += 1) {
-        const yy = y + r * cellH;
+        const yy = originY + r * cellH;
         sourceCtx.beginPath();
-        sourceCtx.moveTo(x, yy);
-        sourceCtx.lineTo(x + width, yy);
+        sourceCtx.moveTo(originX, yy);
+        sourceCtx.lineTo(originX + cellW * grid.cols, yy);
         sourceCtx.stroke();
       }
+      sourceCtx.strokeStyle = 'rgba(125, 211, 252, 0.30)';
+      for (let c = 0; c < grid.cols; c += 1) {
+        for (let r = 0; r < grid.rows; r += 1) {
+          const cx = originX + c * cellW;
+          const cy = originY + r * cellH;
+          sourceCtx.beginPath();
+          sourceCtx.moveTo(cx + cellW * 0.5, cy);
+          sourceCtx.lineTo(cx + cellW * 0.5, cy + cellH);
+          sourceCtx.moveTo(cx, cy + cellH * 0.5);
+          sourceCtx.lineTo(cx + cellW, cy + cellH * 0.5);
+          sourceCtx.stroke();
+        }
+      }
+      const sc = state.selectedCell.col;
+      const sr = state.selectedCell.row;
+      if (sc >= 0 && sc < grid.cols && sr >= 0 && sr < grid.rows) {
+        sourceCtx.fillStyle = 'rgba(125, 211, 252, 0.16)';
+        sourceCtx.strokeStyle = 'rgba(125, 211, 252, 0.95)';
+        sourceCtx.lineWidth = 2;
+        sourceCtx.fillRect(originX + sc * cellW, originY + sr * cellH, cellW, cellH);
+        sourceCtx.strokeRect(originX + sc * cellW, originY + sr * cellH, cellW, cellH);
+      }
+      sourceCtx.lineWidth = 1;
+      Object.entries(state.cellOverrides).forEach(([k, ov]) => {
+        if (!ov || ov.enabled !== false) return;
+        const [cStr, rStr] = k.split(',');
+        const c = Number(cStr);
+        const r = Number(rStr);
+        if (!(c >= 0 && c < grid.cols && r >= 0 && r < grid.rows)) return;
+        const px = originX + c * cellW;
+        const py = originY + r * cellH;
+        sourceCtx.strokeStyle = 'rgba(252, 165, 165, 0.95)';
+        sourceCtx.beginPath();
+        sourceCtx.moveTo(px + 4, py + 4);
+        sourceCtx.lineTo(px + cellW - 4, py + cellH - 4);
+        sourceCtx.moveTo(px + cellW - 4, py + 4);
+        sourceCtx.lineTo(px + 4, py + cellH - 4);
+        sourceCtx.stroke();
+      });
+      const baselineY = originY + cellH * grid.rows * Math.min(1, Math.max(0, Number(refs.baselineRatio.value)));
+      sourceCtx.strokeStyle = 'rgba(134, 239, 172, 0.9)';
+      sourceCtx.beginPath();
+      sourceCtx.moveTo(originX, baselineY);
+      sourceCtx.lineTo(originX + cellW * grid.cols, baselineY);
+      sourceCtx.stroke();
+
+      const ascender = Math.max(1, Number(refs.ascender.value));
+      const descender = Math.max(1, Number(refs.descender.value));
+      const xHeightY = baselineY - ((cellH * grid.rows) * (ascender / (ascender + descender)) * 0.7);
+      sourceCtx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+      sourceCtx.beginPath();
+      sourceCtx.moveTo(originX, xHeightY);
+      sourceCtx.lineTo(originX + cellW * grid.cols, xHeightY);
+      sourceCtx.stroke();
+
+      const gx = originX;
+      const gy = originY;
+      const gw = cellW * grid.cols;
+      const gh = cellH * grid.rows;
+      const hs = 8;
+      sourceCtx.fillStyle = 'rgba(11,16,32,0.95)';
+      sourceCtx.strokeStyle = 'rgba(125, 211, 252, 0.95)';
+      sourceCtx.lineWidth = 2;
+      [
+        [gx, gy], [gx + gw / 2, gy], [gx + gw, gy],
+        [gx + gw, gy + gh / 2], [gx + gw, gy + gh],
+        [gx + gw / 2, gy + gh], [gx, gy + gh], [gx, gy + gh / 2],
+      ].forEach(([hx, hy]) => {
+        sourceCtx.fillRect(hx - hs / 2, hy - hs / 2, hs, hs);
+        sourceCtx.strokeRect(hx - hs / 2, hy - hs / 2, hs, hs);
+      });
+      if (state.drag) {
+        const hudX = Math.max(8, Math.min(canvas.width - 260, gx + 8));
+        const hudY = Math.max(8, Math.min(canvas.height - 80, gy + 8));
+        sourceCtx.fillStyle = 'rgba(11,16,32,0.92)';
+        sourceCtx.fillRect(hudX, hudY, 252, 72);
+        sourceCtx.strokeStyle = 'rgba(125, 211, 252, 0.9)';
+        sourceCtx.lineWidth = 1;
+        sourceCtx.strokeRect(hudX, hudY, 252, 72);
+        sourceCtx.fillStyle = 'rgba(239, 244, 255, 0.95)';
+        sourceCtx.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
+        sourceCtx.fillText(`mode: ${state.drag.mode}`, hudX + 10, hudY + 18);
+        sourceCtx.fillText(`offsetX: ${Math.round(state.gridTransform.offsetX)}  offsetY: ${Math.round(state.gridTransform.offsetY)}`, hudX + 10, hudY + 38);
+        sourceCtx.fillText(`scaleX: ${state.gridTransform.scaleX.toFixed(3)}  scaleY: ${state.gridTransform.scaleY.toFixed(3)}`, hudX + 10, hudY + 58);
+      }
       sourceCtx.restore();
+    }
+
+    function getGridLayout(image, grid) {
+      const baseCellW = image.width / Math.max(1, grid.cols);
+      const baseCellH = image.height / Math.max(1, grid.rows);
+      const cellW = baseCellW * state.gridTransform.scaleX;
+      const cellH = baseCellH * state.gridTransform.scaleY;
+      const originX = state.gridTransform.offsetX;
+      const originY = state.gridTransform.offsetY;
+      return { originX, originY, cellW, cellH };
+    }
+
+    function getSourceDisplayRect(image) {
+      const canvas = refs.sourceCanvas;
+      const viewZoom = Math.max(0.25, Number(refs.sourceZoom.value || 100) / 100);
+      const panX = Number(refs.sourcePanX.value || 0);
+      const panY = Number(refs.sourcePanY.value || 0);
+      const baseFit = fitRect(image.width, image.height, canvas.width, canvas.height);
+      const width = Math.round(baseFit.width * viewZoom);
+      const height = Math.round(baseFit.height * viewZoom);
+      const x = Math.round((canvas.width - width) / 2 + panX);
+      const y = Math.round((canvas.height - height) / 2 + panY);
+      return { x, y, width, height };
+    }
+
+    function canvasPoint(event) {
+      const rect = refs.sourceCanvas.getBoundingClientRect();
+      return {
+        x: ((event.clientX - rect.left) / rect.width) * refs.sourceCanvas.width,
+        y: ((event.clientY - rect.top) / rect.height) * refs.sourceCanvas.height,
+      };
+    }
+
+    function cellFromCanvasPoint(px, py, image, grid) {
+      const disp = getSourceDisplayRect(image);
+      const layout = getGridLayout(image, grid);
+      const ox = disp.x + (layout.originX * disp.width) / image.width;
+      const oy = disp.y + (layout.originY * disp.height) / image.height;
+      const cw = (layout.cellW * disp.width) / image.width;
+      const ch = (layout.cellH * disp.height) / image.height;
+      const col = Math.floor((px - ox) / Math.max(1, cw));
+      const row = Math.floor((py - oy) / Math.max(1, ch));
+      if (col < 0 || row < 0 || col >= grid.cols || row >= grid.rows) return null;
+      return { col, row, ox, oy, cw, ch };
+    }
+
+    function getGridDisplayRect(image, grid) {
+      const disp = getSourceDisplayRect(image);
+      const layout = getGridLayout(image, grid);
+      const ox = disp.x + (layout.originX * disp.width) / image.width;
+      const oy = disp.y + (layout.originY * disp.height) / image.height;
+      const cw = (layout.cellW * disp.width) / image.width;
+      const ch = (layout.cellH * disp.height) / image.height;
+      return { x: ox, y: oy, width: cw * grid.cols, height: ch * grid.rows };
+    }
+
+    function hitGridHandle(px, py, image, grid) {
+      const rect = getGridDisplayRect(image, grid);
+      const s = 10;
+      const handles = [
+        { key: 'nw', x: rect.x, y: rect.y },
+        { key: 'n', x: rect.x + rect.width / 2, y: rect.y },
+        { key: 'ne', x: rect.x + rect.width, y: rect.y },
+        { key: 'e', x: rect.x + rect.width, y: rect.y + rect.height / 2 },
+        { key: 'se', x: rect.x + rect.width, y: rect.y + rect.height },
+        { key: 's', x: rect.x + rect.width / 2, y: rect.y + rect.height },
+        { key: 'sw', x: rect.x, y: rect.y + rect.height },
+        { key: 'w', x: rect.x, y: rect.y + rect.height / 2 },
+      ];
+      for (const h of handles) {
+        if (Math.abs(px - h.x) <= s && Math.abs(py - h.y) <= s) return h.key;
+      }
+      return null;
     }
 
     function fitRect(srcW, srcH, maxW, maxH) {
@@ -535,15 +834,19 @@ xyz0123456
       return canvas;
     }
 
-    function extractCellCanvas(image, col, row, cols, rows, insetPercent = 0) {
-      const srcCellW = image.width / cols;
-      const srcCellH = image.height / rows;
-      const insetX = Math.min(srcCellW / 3, srcCellW * Math.max(0, insetPercent) / 100);
-      const insetY = Math.min(srcCellH / 3, srcCellH * Math.max(0, insetPercent) / 100);
-      const sx = Math.round(col * srcCellW + insetX);
-      const sy = Math.round(row * srcCellH + insetY);
-      const ex = Math.round((col + 1) * srcCellW - insetX);
-      const ey = Math.round((row + 1) * srcCellH - insetY);
+    function extractCellCanvas(image, col, row, grid, insetPercent = 0, override = null) {
+      const layout = getGridLayout(image, grid);
+      const srcCellW = layout.cellW;
+      const srcCellH = layout.cellH;
+      const insetTotal = Math.max(-20, Math.min(40, insetPercent + Number(override?.insetDelta || 0)));
+      const insetX = Math.min(srcCellW / 3, srcCellW * Math.max(0, insetTotal) / 100);
+      const insetY = Math.min(srcCellH / 3, srcCellH * Math.max(0, insetTotal) / 100);
+      const shiftX = Number(override?.shiftX || 0);
+      const shiftY = Number(override?.shiftY || 0);
+      const sx = Math.round(layout.originX + col * srcCellW + insetX + shiftX);
+      const sy = Math.round(layout.originY + row * srcCellH + insetY + shiftY);
+      const ex = Math.round(layout.originX + (col + 1) * srcCellW - insetX + shiftX);
+      const ey = Math.round(layout.originY + (row + 1) * srcCellH - insetY + shiftY);
       const width = Math.max(1, ex - sx);
       const height = Math.max(1, ey - sy);
       const canvas = makeCanvas(width, height);
@@ -651,6 +954,71 @@ xyz0123456
       };
     }
 
+    function renderEffectsPreview() {
+      if (!state.imageBitmap) return;
+      const config = getConfig();
+      if (!config.grid.cols || !config.grid.rows) return;
+      clampCellSelection(config);
+      const { col, row } = state.selectedCell;
+      const override = getCellOverride(col, row);
+      const pCanvas = refs.effectPreviewCanvas;
+      const pctx = pCanvas.getContext('2d');
+      pctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      if (override.enabled === false) {
+        pctx.fillStyle = '#0f172a';
+        pctx.fillRect(0, 0, pCanvas.width, pCanvas.height);
+        pctx.fillStyle = '#fca5a5';
+        pctx.font = '16px sans-serif';
+        pctx.fillText('Selected cell is disabled', 16, 28);
+        return;
+      }
+      const cellCanvas = extractCellCanvas(state.imageBitmap, col, row, config.grid, config.cellInset, override);
+      const processed = preprocessGlyphCanvas(cellCanvas, config);
+      const fitLeft = fitRect(cellCanvas.width, cellCanvas.height, pCanvas.width / 2 - 16, pCanvas.height - 24);
+      pctx.drawImage(cellCanvas, 8, 12, fitLeft.width, fitLeft.height);
+      const fitRight = fitRect(processed.trimmedCanvas.width, processed.trimmedCanvas.height, pCanvas.width / 2 - 16, pCanvas.height - 24);
+      pctx.drawImage(processed.trimmedCanvas, pCanvas.width / 2 + 8, 12, fitRight.width, fitRight.height);
+      pctx.fillStyle = 'rgba(239, 244, 255, 0.8)';
+      pctx.font = '12px sans-serif';
+      pctx.fillText('raw', 10, pCanvas.height - 8);
+      pctx.fillText('processed', pCanvas.width / 2 + 10, pCanvas.height - 8);
+    }
+
+    function autoDetectScanSettings() {
+      if (!state.imageBitmap) throw new Error('Please upload a glyph grid image first.');
+      const sample = makeCanvas(Math.min(320, state.imageBitmap.width), Math.min(320, state.imageBitmap.height));
+      const sctx = sample.getContext('2d', { willReadFrequently: true });
+      sctx.drawImage(state.imageBitmap, 0, 0, sample.width, sample.height);
+      const data = sctx.getImageData(0, 0, sample.width, sample.height).data;
+      let lumSum = 0;
+      let alphaSum = 0;
+      const hist = new Uint32Array(256);
+      for (let i = 0; i < data.length; i += 4) {
+        const lum = Math.round((data[i] + data[i + 1] + data[i + 2]) / 3);
+        hist[lum] += 1;
+        lumSum += lum;
+        alphaSum += data[i + 3];
+      }
+      const n = data.length / 4;
+      const avgLum = lumSum / n;
+      const avgAlpha = alphaSum / n;
+      let p95 = 255;
+      let run = 0;
+      const target = Math.round(n * 0.95);
+      for (let i = 0; i < 256; i += 1) {
+        run += hist[i];
+        if (run >= target) { p95 = i; break; }
+      }
+      refs.inkMode.value = avgAlpha < 245 ? 'alpha' : (avgLum < 128 ? 'light' : 'dark');
+      refs.whiteThreshold.value = Math.min(252, Math.max(140, p95 - 6));
+      refs.blurRadius.value = avgLum > 175 ? 1 : 0;
+      refs.alphaThreshold.value = refs.inkMode.value === 'light' ? 56 : 64;
+      refs.tracePreset.value = avgLum > 180 ? 'smoothed' : 'detailed';
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+      setStatus(`Auto-detected scan settings (avg L ${avgLum.toFixed(0)}, p95 ${p95}).`, 'ok');
+    }
+
     function makeTraceOptions(preset) {
       return {
         colorsampling: 0,
@@ -685,6 +1053,74 @@ xyz0123456
     function glyphNameFromChar(char) {
       const cp = char.codePointAt(0);
       return `uni${cp.toString(16).toUpperCase().padStart(4, '0')}`;
+    }
+
+    function tokenizeSvgPath(pathData) {
+      const tokens = [];
+      const re = /([AaCcHhLlMmQqSsTtVvZz])|([-+]?(?:\d*\.\d+|\d+)(?:e[-+]?\d+)?)/g;
+      let m;
+      while ((m = re.exec(pathData)) !== null) {
+        tokens.push(m[1] || Number(m[2]));
+      }
+      return tokens;
+    }
+
+    function pathDataToOpenTypePath(pathData, options = {}) {
+      const {
+        flipY = false, flipYBase = 0, scale = 1, x = 0, y = 0,
+      } = options;
+      const tx = (px) => x + px * scale;
+      const ty = (py) => y + (flipY ? (flipYBase - py) : py) * scale;
+
+      const path = new opentype.Path();
+      const tokens = tokenizeSvgPath(pathData || '');
+      let i = 0;
+      let cmd = null;
+      let cx = 0;
+      let cy = 0;
+      let sx = 0;
+      let sy = 0;
+
+      while (i < tokens.length) {
+        if (typeof tokens[i] === 'string') cmd = tokens[i++];
+        if (!cmd) break;
+        const isRelative = cmd === cmd.toLowerCase();
+        const op = cmd.toUpperCase();
+        if (op === 'M') {
+          let x1 = Number(tokens[i++]); let y1 = Number(tokens[i++]);
+          if (isRelative) { x1 += cx; y1 += cy; }
+          path.moveTo(tx(x1), ty(y1));
+          cx = x1; cy = y1; sx = x1; sy = y1; cmd = isRelative ? 'l' : 'L';
+        } else if (op === 'L') {
+          let x1 = Number(tokens[i++]); let y1 = Number(tokens[i++]);
+          if (isRelative) { x1 += cx; y1 += cy; }
+          path.lineTo(tx(x1), ty(y1)); cx = x1; cy = y1;
+        } else if (op === 'H') {
+          let x1 = Number(tokens[i++]);
+          if (isRelative) x1 += cx;
+          path.lineTo(tx(x1), ty(cy)); cx = x1;
+        } else if (op === 'V') {
+          let y1 = Number(tokens[i++]);
+          if (isRelative) y1 += cy;
+          path.lineTo(tx(cx), ty(y1)); cy = y1;
+        } else if (op === 'Q') {
+          let x1 = Number(tokens[i++]); let y1 = Number(tokens[i++]);
+          let x2 = Number(tokens[i++]); let y2 = Number(tokens[i++]);
+          if (isRelative) { x1 += cx; y1 += cy; x2 += cx; y2 += cy; }
+          path.quadraticCurveTo(tx(x1), ty(y1), tx(x2), ty(y2)); cx = x2; cy = y2;
+        } else if (op === 'C') {
+          let x1 = Number(tokens[i++]); let y1 = Number(tokens[i++]);
+          let x2 = Number(tokens[i++]); let y2 = Number(tokens[i++]);
+          let x3 = Number(tokens[i++]); let y3 = Number(tokens[i++]);
+          if (isRelative) { x1 += cx; y1 += cy; x2 += cx; y2 += cy; x3 += cx; y3 += cy; }
+          path.curveTo(tx(x1), ty(y1), tx(x2), ty(y2), tx(x3), ty(y3)); cx = x3; cy = y3;
+        } else if (op === 'Z') {
+          path.close(); cx = sx; cy = sy;
+        } else {
+          break;
+        }
+      }
+      return path;
     }
 
     function escapeHtml(value) {
@@ -752,20 +1188,34 @@ xyz0123456
 
         let path = new opentype.Path();
         if (glyph.pathData) {
-          path = opentype.Path.fromSVG(glyph.pathData, {
-            flipY: true,
-            flipYBase: baselinePx,
-            scale,
-            x: config.leftBearing,
-            y: 0,
-            optimize: true,
-          });
+          const centerShift = config.autoCenterGlyph
+            ? Math.round((config.targetRasterSize - (glyph.sourceBounds?.width || config.targetRasterSize)) / 2)
+            : 0;
+          const offsetX = config.leftBearing + centerShift;
+          if (typeof opentype.Path.fromSVG === 'function') {
+            path = opentype.Path.fromSVG(glyph.pathData, {
+              flipY: true,
+              flipYBase: baselinePx,
+              scale,
+              x: offsetX,
+              y: 0,
+              optimize: true,
+            });
+          } else {
+            path = pathDataToOpenTypePath(glyph.pathData, {
+              flipY: true,
+              flipYBase: baselinePx,
+              scale,
+              x: offsetX,
+              y: 0,
+            });
+          }
         }
 
-        const advanceWidth = Math.max(
-          config.leftBearing + config.rightBearing + 120,
-          Math.round(config.leftBearing + config.rightBearing + glyph.rasterWidth * scale)
-        );
+        const coreWidth = (glyph.sourceBounds?.width || glyph.rasterWidth) * scale;
+        const advanceWidth = config.autoAdvanceWidth
+          ? Math.max(config.leftBearing + config.rightBearing + 120, Math.round(config.leftBearing + config.rightBearing + coreWidth))
+          : Math.max(config.leftBearing + config.rightBearing + 120, Math.round(config.leftBearing + config.rightBearing + glyph.rasterWidth * scale));
 
         glyphs.push(new opentype.Glyph({
           name: glyphNameFromChar(glyph.char),
@@ -918,7 +1368,9 @@ ${codepoints.join(' ')}
         for (let col = 0; col < config.grid.cols; col += 1) {
           const char = config.grid.cells[row][col] || '';
           if (!char) continue;
-          const cellCanvas = extractCellCanvas(state.imageBitmap, col, row, config.grid.cols, config.grid.rows, config.cellInset);
+          const override = getCellOverride(col, row);
+          if (override.enabled === false) continue;
+          const cellCanvas = extractCellCanvas(state.imageBitmap, col, row, config.grid, config.cellInset, override);
           const processed = preprocessGlyphCanvas(cellCanvas, config);
           const traceCanvas = paintAlphaOnWhite(processed.alpha, processed.rasterWidth, processed.rasterHeight);
           const traceImageData = traceCanvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, traceCanvas.width, traceCanvas.height);
@@ -932,6 +1384,7 @@ ${codepoints.join(' ')}
             canvas: processed.trimmedCanvas,
             rasterWidth: processed.rasterWidth,
             rasterHeight: processed.rasterHeight,
+            sourceBounds: processed.sourceBounds,
             svgString,
             pathData,
           };
@@ -945,7 +1398,22 @@ ${codepoints.join(' ')}
       refs.exportZipBtn.disabled = glyphs.length === 0;
       refs.previewSample.textContent = makePreviewText(glyphs);
       refs.previewSample.style.fontFamily = 'ui-sans-serif, system-ui, sans-serif';
+      const disabledCount = Object.values(state.cellOverrides).filter((ov) => ov && ov.enabled === false).length;
+      refs.resultSummary.textContent = `Glyphs: ${glyphs.length}. Disabled cells: ${disabledCount}. Raster: ${config.targetRasterSize}px.`;
       setStatus(`Processed ${glyphs.length} glyphs. Ready for export.`, 'ok');
+    }
+
+    function computeAutoTuneMetrics(glyphs, config) {
+      const solid = glyphs.filter((g) => g.sourceBounds && g.sourceBounds.width > 0 && g.sourceBounds.height > 0);
+      if (!solid.length) return null;
+      const avgWidth = solid.reduce((sum, g) => sum + g.sourceBounds.width, 0) / solid.length;
+      const avgHeight = solid.reduce((sum, g) => sum + g.sourceBounds.height, 0) / solid.length;
+      const avgBottom = solid.reduce((sum, g) => sum + (g.rasterHeight - (g.sourceBounds.y + g.sourceBounds.height)), 0) / solid.length;
+      const baselineRatio = Math.min(0.92, Math.max(0.55, 1 - (avgBottom / Math.max(1, config.targetRasterSize))));
+      const sideBearing = Math.max(10, Math.min(140, Math.round(avgWidth * 0.18)));
+      const spaceWidth = Math.max(180, Math.min(900, Math.round(avgWidth * 1.05 + sideBearing)));
+      const glyphPadding = Math.max(1, Math.min(20, Math.round(avgHeight * 0.06)));
+      return { baselineRatio, sideBearing, spaceWidth, glyphPadding };
     }
 
     function renderGlyphCard(glyph) {
@@ -973,7 +1441,10 @@ ${codepoints.join(' ')}
       const image = new Image();
       image.onload = () => {
         state.imageBitmap = image;
+        clampCellSelection(getConfig());
+        syncCellControlsFromSelection();
         drawSourceGuides(image);
+        renderEffectsPreview();
         setStatus(`Loaded ${file.name}.`, 'ok');
         URL.revokeObjectURL(url);
       };
@@ -990,13 +1461,30 @@ ${codepoints.join(' ')}
     });
 
     refs.gridMap.addEventListener('input', () => {
+      clampCellSelection(getConfig());
+      syncCellControlsFromSelection();
       if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+    });
+    ['baselineRatio', 'ascender', 'descender'].forEach((id) => {
+      refs[id].addEventListener('input', () => {
+        if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      });
     });
 
     refs.processBtn.addEventListener('click', async () => {
       try {
         setStatus('Processing glyph grid…');
         await processGrid();
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || String(error), 'bad');
+      }
+    });
+    
+    refs.autoDetectBtn.addEventListener('click', () => {
+      try {
+        autoDetectScanSettings();
       } catch (error) {
         console.error(error);
         setStatus(error.message || String(error), 'bad');
@@ -1013,6 +1501,219 @@ ${codepoints.join(' ')}
         setStatus(error.message || String(error), 'bad');
       }
     });
+    
+    refs.autoTuneBtn.addEventListener('click', () => {
+      if (!state.processedGlyphs.length) {
+        setStatus('Process the grid first, then run auto-tune.', 'warn');
+        return;
+      }
+      const tuned = computeAutoTuneMetrics(state.processedGlyphs, getConfig());
+      if (!tuned) {
+        setStatus('Auto-tune skipped: no non-empty glyphs found.', 'warn');
+        return;
+      }
+      refs.baselineRatio.value = tuned.baselineRatio.toFixed(2);
+      refs.leftBearing.value = tuned.sideBearing;
+      refs.rightBearing.value = tuned.sideBearing;
+      refs.spaceWidth.value = tuned.spaceWidth;
+      refs.glyphPadding.value = tuned.glyphPadding;
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      setStatus(`Auto-tuned metrics: baseline ${tuned.baselineRatio.toFixed(2)}, bearings ${tuned.sideBearing}, space ${tuned.spaceWidth}.`, 'ok');
+    });
+
+    refs.sourceCanvas.addEventListener('pointerdown', (event) => {
+      if (!state.imageBitmap) return;
+      const config = getConfig();
+      const p = canvasPoint(event);
+      const handle = hitGridHandle(p.x, p.y, state.imageBitmap, config.grid);
+      const hit = cellFromCanvasPoint(p.x, p.y, state.imageBitmap, config.grid);
+      if (event.button === 1) {
+        state.drag = { mode: 'pan', startX: p.x, startY: p.y, panX: Number(refs.sourcePanX.value || 0), panY: Number(refs.sourcePanY.value || 0) };
+        refs.sourceCanvas.setPointerCapture(event.pointerId);
+        return;
+      }
+      if (handle) {
+        state.drag = {
+          mode: 'handle-scale',
+          handle,
+          startX: p.x,
+          startY: p.y,
+          tx: { ...state.gridTransform },
+        };
+        refs.sourceCanvas.setPointerCapture(event.pointerId);
+        return;
+      }
+      if (!hit) return;
+      state.selectedCell = { col: hit.col, row: hit.row };
+      refs.selectedCol.value = hit.col + 1;
+      refs.selectedRow.value = hit.row + 1;
+      syncCellControlsFromSelection();
+      if (event.shiftKey) {
+        state.drag = { mode: 'grid-move', startX: p.x, startY: p.y, ox: state.gridTransform.offsetX, oy: state.gridTransform.offsetY };
+      } else if (event.altKey) {
+        state.drag = { mode: 'grid-scale', startX: p.x, startY: p.y, sx: state.gridTransform.scaleX, sy: state.gridTransform.scaleY };
+      } else {
+        const ov = getCellOverride(hit.col, hit.row);
+        state.drag = { mode: 'cell-move', startX: p.x, startY: p.y, col: hit.col, row: hit.row, shiftX: ov.shiftX, shiftY: ov.shiftY };
+      }
+      refs.sourceCanvas.setPointerCapture(event.pointerId);
+      drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+    });
+
+    refs.sourceCanvas.addEventListener('pointermove', (event) => {
+      if (!state.imageBitmap || !state.drag) return;
+      const p = canvasPoint(event);
+      const dx = p.x - state.drag.startX;
+      const dy = p.y - state.drag.startY;
+      const config = getConfig();
+      const disp = getSourceDisplayRect(state.imageBitmap);
+      const sx = state.imageBitmap.width / Math.max(1, disp.width);
+      const sy = state.imageBitmap.height / Math.max(1, disp.height);
+      const snap = event.ctrlKey ? 1 : 4;
+      if (state.drag.mode === 'pan') {
+        refs.sourcePanX.value = Math.round(state.drag.panX + dx);
+        refs.sourcePanY.value = Math.round(state.drag.panY + dy);
+      } else if (state.drag.mode === 'handle-scale') {
+        const baseCellW = state.imageBitmap.width / Math.max(1, config.grid.cols);
+        const baseCellH = state.imageBitmap.height / Math.max(1, config.grid.rows);
+        const deltaX = dx * sx;
+        const deltaY = dy * sy;
+        let scaleX = state.drag.tx.scaleX;
+        let scaleY = state.drag.tx.scaleY;
+        let offsetX = state.drag.tx.offsetX;
+        let offsetY = state.drag.tx.offsetY;
+        if (state.drag.handle.includes('e')) scaleX = Math.max(0.2, Math.min(3, state.drag.tx.scaleX + deltaX / Math.max(1, baseCellW * config.grid.cols)));
+        if (state.drag.handle.includes('s')) scaleY = Math.max(0.2, Math.min(3, state.drag.tx.scaleY + deltaY / Math.max(1, baseCellH * config.grid.rows)));
+        if (state.drag.handle.includes('w')) {
+          scaleX = Math.max(0.2, Math.min(3, state.drag.tx.scaleX - deltaX / Math.max(1, baseCellW * config.grid.cols)));
+          const totalW0 = baseCellW * config.grid.cols * state.drag.tx.scaleX;
+          const totalW1 = baseCellW * config.grid.cols * scaleX;
+          offsetX = state.drag.tx.offsetX + (totalW0 - totalW1);
+        }
+        if (state.drag.handle.includes('n')) {
+          scaleY = Math.max(0.2, Math.min(3, state.drag.tx.scaleY - deltaY / Math.max(1, baseCellH * config.grid.rows)));
+          const totalH0 = baseCellH * config.grid.rows * state.drag.tx.scaleY;
+          const totalH1 = baseCellH * config.grid.rows * scaleY;
+          offsetY = state.drag.tx.offsetY + (totalH0 - totalH1);
+        }
+        state.gridTransform.scaleX = scaleX;
+        state.gridTransform.scaleY = scaleY;
+        state.gridTransform.offsetX = Math.round(offsetX / snap) * snap;
+        state.gridTransform.offsetY = Math.round(offsetY / snap) * snap;
+      } else if (state.drag.mode === 'grid-move') {
+        state.gridTransform.offsetX = Math.round((state.drag.ox + dx * sx) / snap) * snap;
+        state.gridTransform.offsetY = Math.round((state.drag.oy + dy * sy) / snap) * snap;
+      } else if (state.drag.mode === 'grid-scale') {
+        state.gridTransform.scaleX = Math.max(0.2, Math.min(3, state.drag.sx + dx / Math.max(60, disp.width * 0.2)));
+        state.gridTransform.scaleY = Math.max(0.2, Math.min(3, state.drag.sy + dy / Math.max(60, disp.height * 0.2)));
+      } else if (state.drag.mode === 'cell-move') {
+        state.cellOverrides[cellKey(state.drag.col, state.drag.row)] = {
+          ...getCellOverride(state.drag.col, state.drag.row),
+          enabled: true,
+          shiftX: Math.round(state.drag.shiftX + dx * sx),
+          shiftY: Math.round(state.drag.shiftY + dy * sy),
+        };
+        syncCellControlsFromSelection();
+      }
+      drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+    });
+
+    refs.sourceCanvas.addEventListener('pointerup', () => {
+      state.drag = null;
+    });
+    refs.sourceCanvas.addEventListener('pointercancel', () => {
+      state.drag = null;
+    });
+
+    refs.sourceCanvas.addEventListener('wheel', (event) => {
+      if (!state.imageBitmap) return;
+      event.preventDefault();
+      const cur = Number(refs.sourceZoom.value || 100);
+      const next = Math.max(25, Math.min(800, cur + (event.deltaY < 0 ? 10 : -10)));
+      refs.sourceZoom.value = next;
+      drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+    }, { passive: false });
+    refs.sourceCanvas.addEventListener('mousemove', (event) => {
+      if (!state.imageBitmap || state.drag) return;
+      const config = getConfig();
+      const p = canvasPoint(event);
+      const handle = hitGridHandle(p.x, p.y, state.imageBitmap, config.grid);
+      if (handle === 'nw' || handle === 'se') {
+        refs.sourceCanvas.style.cursor = 'nwse-resize';
+      } else if (handle === 'ne' || handle === 'sw') {
+        refs.sourceCanvas.style.cursor = 'nesw-resize';
+      } else if (handle === 'n' || handle === 's') {
+        refs.sourceCanvas.style.cursor = 'ns-resize';
+      } else if (handle === 'e' || handle === 'w') {
+        refs.sourceCanvas.style.cursor = 'ew-resize';
+      } else {
+        const hit = cellFromCanvasPoint(p.x, p.y, state.imageBitmap, config.grid);
+        refs.sourceCanvas.style.cursor = hit ? 'move' : 'default';
+      }
+    });
+
+    [refs.selectedCol, refs.selectedRow].forEach((el) => {
+      el.addEventListener('input', () => {
+        const config = getConfig();
+        clampCellSelection(config);
+        syncCellControlsFromSelection();
+        if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+        renderEffectsPreview();
+      });
+    });
+    [refs.sourceZoom, refs.sourcePanX, refs.sourcePanY].forEach((el) => {
+      el.addEventListener('input', () => {
+        if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      });
+      el.addEventListener('change', () => {
+        if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      });
+    });
+
+    refs.resetViewBtn.addEventListener('click', () => {
+      refs.sourceZoom.value = 100;
+      refs.sourcePanX.value = 0;
+      refs.sourcePanY.value = 0;
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+      setStatus('Reset source view zoom/pan.', 'ok');
+    });
+
+    refs.resetGridBtn.addEventListener('click', () => {
+      state.gridTransform = { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1 };
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+      setStatus('Reset grid transform.', 'ok');
+    });
+
+    refs.applyCellAdjustBtn.addEventListener('click', () => {
+      const config = getConfig();
+      clampCellSelection(config);
+      const { col, row } = state.selectedCell;
+      state.cellOverrides[cellKey(col, row)] = {
+        enabled: refs.cellEnabled.value !== 'off',
+        shiftX: Number(refs.cellShiftX.value) || 0,
+        shiftY: Number(refs.cellShiftY.value) || 0,
+        insetDelta: Number(refs.cellInsetDelta.value) || 0,
+      };
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+      setStatus(`Saved override for cell ${col + 1},${row + 1}.`, 'ok');
+    });
+
+    refs.clearCellAdjustBtn.addEventListener('click', () => {
+      const config = getConfig();
+      clampCellSelection(config);
+      const { col, row } = state.selectedCell;
+      delete state.cellOverrides[cellKey(col, row)];
+      syncCellControlsFromSelection();
+      if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+      renderEffectsPreview();
+      setStatus(`Cleared override for cell ${col + 1},${row + 1}.`, 'ok');
+    });
 
     document.querySelectorAll('[data-preset]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -1027,6 +1728,7 @@ ${codepoints.join(' ')}
           if (refs[key]) refs[key].value = value;
         });
         if (state.imageBitmap) drawSourceGuides(state.imageBitmap);
+        renderEffectsPreview();
         setStatus(`Applied ${button.textContent.replace('Preset: ', '')} preset.`, 'ok');
       });
     });
@@ -1050,6 +1752,58 @@ ${codepoints.join(' ')}
         setStatus(error.message || String(error), 'bad');
       }
     });
+
+    ['inkMode', 'whiteThreshold', 'blurRadius', 'alphaThreshold', 'dilateIterations', 'erodeIterations', 'targetRasterSize', 'cellInset', 'glyphPadding', 'tracePreset'].forEach((id) => {
+      refs[id].addEventListener('input', () => renderEffectsPreview());
+      refs[id].addEventListener('change', () => renderEffectsPreview());
+    });
+
+    function applySettingTooltips() {
+      const tips = {
+        imageFile: 'Upload source glyph-grid image. Effect: defines all extraction input.',
+        gridMap: 'Glyph map text. Effect: rows/cols + Unicode mapping per cell.',
+        familyName: 'Font family name. Effect: exported font naming.',
+        styleName: 'Font style/subfamily name. Effect: exported font naming.',
+        inkMode: 'Ink detection mode. Effect: which pixels become foreground.',
+        whiteThreshold: 'Range 0..255. Higher removes more bright pixels in dark mode; lower keeps more.',
+        blurRadius: 'Range 0..4 px. Higher smooths noise but softens details.',
+        alphaThreshold: 'Range 0..255. Higher requires stronger alpha to keep ink.',
+        cellInset: 'Range 0..25%. Extra crop inside every cell; higher trims edges.',
+        dilateIterations: 'Range 0..6. Increases stroke thickness.',
+        erodeIterations: 'Range 0..6. Decreases stroke thickness.',
+        targetRasterSize: 'Range 48..512 px. Higher preserves detail but slower.',
+        glyphPadding: 'Range 0..32 px. Adds whitespace around trimmed ink before normalize.',
+        leftBearing: 'Range 0..300 units. Left side spacing.',
+        rightBearing: 'Range 0..300 units. Right side spacing.',
+        spaceWidth: 'Range 100..1200 units. Width of space character.',
+        unitsPerEm: 'Range 256..4096. Font coordinate resolution.',
+        ascender: 'Range 100..3000 units. Top metric line.',
+        descender: 'Range 0..1500 units. Bottom metric depth.',
+        baselineRatio: 'Range 0.10..0.95. Baseline Y inside raster: higher means lower baseline.',
+        tracePreset: 'Vectorization profile: sharp/smoothed/detailed.',
+        autoCenterGlyph: 'Toggle. Centers outline horizontally before final placement.',
+        autoAdvanceWidth: 'Toggle. Computes advance from outline width.',
+        sourceZoom: 'Range 25..800%. Source canvas zoom for precise grid edits.',
+        sourcePanX: 'Range -2000..2000 px. Horizontal pan of source view.',
+        sourcePanY: 'Range -2000..2000 px. Vertical pan of source view.',
+        selectedCol: 'Min 1. Selected grid column for override editing.',
+        selectedRow: 'Min 1. Selected grid row for override editing.',
+        cellEnabled: 'Toggle cell participation. Off skips this cell in processing/export.',
+        cellShiftX: 'Range -128..128 px. Per-cell horizontal extraction shift.',
+        cellShiftY: 'Range -128..128 px. Per-cell vertical extraction shift.',
+        cellInsetDelta: 'Range -25..25%. Per-cell inset adjustment added to global inset.',
+      };
+      Object.entries(tips).forEach(([id, tip]) => {
+        if (!refs[id]) return;
+        refs[id].title = tip;
+        const label = refs[id].closest('label');
+        if (label) label.title = tip;
+      });
+    }
+
+    applySettingTooltips();
+    clampCellSelection(getConfig());
+    syncCellControlsFromSelection();
 
     setStatus('Load an image and press “Process grid”.');
   </script>

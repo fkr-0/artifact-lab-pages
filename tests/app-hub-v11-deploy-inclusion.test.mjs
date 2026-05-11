@@ -17,3 +17,5 @@ assert.ok(source.items.some((item) => item.id === 'ethic-brawl' && item.deploy?.
 assert.ok(source.items.some((item) => item.id === 'v11-peer-daw' && item.deploy?.build && item.deploy?.includePath === 'v11-peer-daw/dist'));
 assert.match(bridge, /compile:app-hub-v11/);
 assert.match(bridge, /smoke:app-hub-v11/);
+
+assert.ok(source.deploy.includeFiles.includes('bdg.gif'), 'bdg.gif should be deployed for the v11 badger runner');
