@@ -37,6 +37,89 @@ export function launchArtifact(item, mode = 'inline', runtime = globalThis, acti
   return { mode: normalized, url, handledByBrowser: false, action };
 }
 
+export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, onChange = () => {} } = {}) {
+  if (!deck || !tabs || !body) throw new Error('createInlineTabDeck requires deck, tabs, and body elements');
+  const documentRef = runtime.document;
+  const openApps = new Map();
+  let activeAppId = null;
+  let nextAppId = 1;
+
+  const setActive = (appId) => {
+    const appData = openApps.get(appId);
+    if (!appData) return;
+    activeAppId = appId;
+    for (const [id, data] of openApps) {
+      data.tab.classList?.toggle('active', id === appId);
+      data.panel.classList?.toggle('active', id === appId);
+    }
+    deck.classList?.add('active');
+    onChange({ type: 'switch', activeAppId, openApps });
+  };
+
+  const close = (appId) => {
+    const appData = openApps.get(appId);
+    if (!appData) return;
+    appData.tab.remove?.();
+    appData.panel.remove?.();
+    openApps.delete(appId);
+    if (activeAppId === appId) {
+      const next = openApps.keys().next().value;
+      if (next) setActive(next);
+      else {
+        activeAppId = null;
+        deck.classList?.remove('active');
+        onChange({ type: 'empty', activeAppId, openApps });
+      }
+    } else {
+      onChange({ type: 'close', activeAppId, openApps });
+    }
+  };
+
+  const open = (artifact, launch = {}) => {
+    if (openApps.has(artifact.id)) {
+      setActive(artifact.id);
+      return openApps.get(artifact.id);
+    }
+    const instanceId = `${artifact.id}-${nextAppId++}`;
+    const tab = documentRef.createElement('button');
+    tab.className = 'app-deck-tab';
+    tab.dataset.appId = artifact.id;
+    tab.dataset.instanceId = instanceId;
+    const title = documentRef.createElement('span');
+    title.textContent = artifact.title || artifact.name || artifact.id;
+    const closeButton = documentRef.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'app-deck-tab-close';
+    closeButton.dataset.close = artifact.id;
+    closeButton.textContent = '✕';
+    closeButton.onclick = (event) => { event?.stopPropagation?.(); close(artifact.id); };
+    tab.closeButton = closeButton;
+    tab.append(title, closeButton);
+    tab.onclick = () => setActive(artifact.id);
+
+    const panel = documentRef.createElement('section');
+    panel.className = 'app-deck-panel';
+    panel.dataset.appId = artifact.id;
+    panel.dataset.instanceId = instanceId;
+    if (launch.url === '#') {
+      panel.innerHTML = `<div class="app-deck-empty">No launchable content for ${escapeHtml(artifact.title || artifact.id)}</div>`;
+    } else {
+      panel.innerHTML = `<iframe class="app-deck-inline-frame" src="${escapeHtml(launch.url || artifactHref(artifact))}" title="${escapeHtml(artifact.title || artifact.id)}" allow="autoplay; fullscreen"></iframe>`;
+    }
+
+    tabs.appendChild(tab);
+    body.appendChild(panel);
+    deck.classList?.add('active');
+    const appData = { artifact, instanceId, tab, panel, launch };
+    openApps.set(artifact.id, appData);
+    setActive(artifact.id);
+    onChange({ type: 'open', activeAppId, openApps });
+    return appData;
+  };
+
+  return { open, close, switchTo: setActive, activeId: () => activeAppId, openApps };
+}
+
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"]/g, (char) => ({
     '&': '&amp;',

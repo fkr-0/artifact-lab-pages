@@ -65,6 +65,12 @@ assert.ok(emitted.operations.copy.description.includes('deployment'));
 const shooterCatalog = JSON.parse(
   await readFile('app-hub-v11/data/artifact-collection.json', 'utf8')
 );
+assert.equal(
+  shooterCatalog.items.some((item) => item.id === 'root-multitext-viewer' || item.title === 'Multi-text Viewer'),
+  false,
+  'Multi-text Viewer should be removed from the v11 catalog'
+);
+
 const shooter = shooterCatalog.items.find((item) => item.id === 'hyperblast-shooter');
 assert.ok(shooter, 'expected Hyperblast Shooter artifact in v11 catalog');
 assert.equal(shooter.href, '../app-hub/shooter.html');

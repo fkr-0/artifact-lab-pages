@@ -298,30 +298,6 @@
       }
     },
     {
-      "id": "root-multitext-viewer",
-      "title": "Multi-text Viewer",
-      "kind": "html-path",
-      "href": "../index_multitext.html",
-      "description": "Root-level multi-text viewer/editor with save-load support, registered in the v11 catalog.",
-      "tags": [
-        "editor",
-        "viewer",
-        "multitext",
-        "tool"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
-      }
-    },
-    {
       "id": "peer-mod-groove",
       "title": "PeerModGroove",
       "kind": "html-path",
@@ -575,16 +551,27 @@
       "id": "artifacts-toc",
       "title": "Artifacts Table of Contents",
       "kind": "info",
-      "href": "../ARTIFACTS_TOC.md",
+      "href": "markdown-viewer.html?src=../ARTIFACTS_TOC.md",
       "note": "Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes the machine-readable catalog.",
       "tags": [
+        "catalog",
         "docs",
-        "catalog"
+        "markdown",
+        "viewer"
       ],
       "operations": [
         "validate",
         "index"
-      ]
+      ],
+      "rawHref": "../ARTIFACTS_TOC.md",
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
     },
     {
       "id": "ethic-brawl",
@@ -657,16 +644,27 @@
       "id": "server-guide",
       "title": "Server Guide",
       "kind": "info",
-      "href": "../SERVER_GUIDE.md",
+      "href": "markdown-viewer.html?src=../SERVER_GUIDE.md",
       "note": "Local serving and deployment notes for the static artifact collection.",
       "tags": [
         "docs",
-        "server"
+        "markdown",
+        "server",
+        "viewer"
       ],
       "operations": [
         "validate",
         "index"
-      ]
+      ],
+      "rawHref": "../SERVER_GUIDE.md",
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
     },
     {
       "id": "external-openai-docs",
@@ -687,17 +685,53 @@
       "id": "v11-roadmap",
       "title": "v11 Modularization Roadmap",
       "kind": "info",
-      "href": "docs/ROADMAP.md",
+      "href": "markdown-viewer.html?src=docs/ROADMAP.md",
       "note": "Specs and TODOs for feature areas intentionally not fully implemented in this slice.",
       "tags": [
         "docs",
+        "markdown",
         "roadmap",
+        "v11",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "rawHref": "docs/ROADMAP.md",
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
+    },
+    {
+      "id": "markdown-viewer",
+      "title": "Markdown Viewer",
+      "kind": "html-path",
+      "href": "markdown-viewer.html",
+      "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
+      "tags": [
+        "docs",
+        "markdown",
+        "viewer",
         "v11"
       ],
       "operations": [
         "validate",
         "index"
-      ]
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
     }
   ]
 }
