@@ -59,3 +59,14 @@ assert.match(html, /data-artifact-title/, 'artifact title should be its own defa
 assert.match(html, /openSelected\(defaultAction\)/, 'title clicks should trigger the configured default action');
 assert.doesNotMatch(html, /<section id="appDeck" class="card app-deck">/, 'app deck should not spawn as a standalone card below results');
 assert.doesNotMatch(html, /<section class="card stack"><div class="row between"><strong>Event log<\/strong>/, 'event log should not be a standalone section below results');
+
+assert.match(html, /class="badger-runner"/, 'v11 should show the bdg.gif badger runner at the bottom');
+assert.match(html, /src="\.\.\/bdg\.gif"/, 'badger runner should use bdg.gif from the artifacts root');
+assert.match(html, /@keyframes badger-run/, 'badger runner should animate across the bottom of the hub');
+assert.match(html, /\.workspace-pane[\s\S]*resize:\s*vertical/, 'workspace pane should be directly resizable by the browser too');
+assert.match(html, /\.workspace-pane[\s\S]*overflow:\s*auto/, 'workspace pane contents below results should be scrollable');
+assert.match(html, /\.workspace-panel[\s\S]*overflow:\s*auto/, 'workspace tab panels should scroll instead of clipping content');
+assert.match(html, /\.app-deck-panel[\s\S]*overflow:\s*auto/, 'inline app panels should scroll when embedded apps overflow');
+assert.match(html, /\.results-panel[\s\S]*overflow:\s*auto/, 'filtered results panel should remain scrollable');
+assert.match(html, /\.resize-handle[\s\S]*touch-action:\s*none/, 'drag handles should disable touch scrolling during resize');
+assert.match(html, /workspacePane\.style\.resize\s*=\s*'vertical'/, 'v11 should explicitly enable browser vertical resize on the workspace pane');
