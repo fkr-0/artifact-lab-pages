@@ -12,7 +12,7 @@ set -e
 PORT="${1:-8080}"
 HOST="localhost"
 DIR="/home/user/work/code/artifacts"
-URL="http://${HOST}:${PORT}/app-hub/v8-portal.html"
+URL="http://${HOST}:${PORT}/app-hub-v11/index.html"
 PID_FILE="${DIR}/.artifacts-server.pid"
 
 # Colors
@@ -83,7 +83,7 @@ else
     exit 0
 fi
 
-echo -e "${GREEN}✓ Done! NEXUS Portal v8 loading...${NC}"
+echo -e "${GREEN}✓ Done! NEXUS App Hub v11 loading...${NC}"
 echo ""
 echo -e "${CYAN}Press Ctrl+C to stop the server${NC}"
 

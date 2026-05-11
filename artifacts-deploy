@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
 #
-# artifacts-deploy - Deploy artifacts to VPS
-#
-# Default mode: rsync (only changed files, fast incremental update)
-# Full mode:    build tgz via artifacts-package, scp, extract (complete reset)
+# artifacts-deploy - Deploy manifest-materialized artifacts to VPS
 #
 # Usage:
-#   ./artifacts-deploy                  # rsync to default VPS target
-#   ./artifacts-deploy --dry-run        # show what would change, don't transfer
-#   ./artifacts-deploy --full           # full tgz package deploy (reset all files)
-#   ./artifacts-deploy --full --dry-run # show package, skip upload
+#   ./artifacts-deploy                  # materialize + rsync stage
+#   ./artifacts-deploy --dry-run        # materialize + show rsync changes only
+#   ./artifacts-deploy --full           # package + upload + extract
+#   ./artifacts-deploy --full --dry-run # build package, skip upload
 #
 
-set -e
+set -euo pipefail
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -20,39 +17,19 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-ARTIFACTS_DIR="/home/user/work/code/artifacts"
-VPS_HOST="vps"
-VPS_PATH="/home/user/data/artifacts"
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-/home/user/work/code/artifacts}"
+VPS_HOST="${ARTIFACTS_VPS_HOST:-vps}"
+VPS_PATH="${ARTIFACTS_VPS_PATH:-/home/user/data/artifacts}"
+STAGE_DIR="$ARTIFACTS_DIR/.artifacts-deploy-stage"
 
-EXCLUDE_PATTERNS=(
-  ".git/"
-  ".git/***"
-  "node_modules/"
-  "node_modules/***"
-  ".vite/"
-  ".vite/***"
-  "dist/.vite/"
-  "dist/.vite/***"
-  "coverage/"
-  "coverage/***"
-  ".cache/"
-  ".cache/***"
-  ".parcel-cache/"
-  ".parcel-cache/***"
-  ".turbo/"
-  ".turbo/***"
-  ".next/"
-  ".next/***"
-  "*.log"
-  "*.tmp"
-  "*.bak"
-  "*.swp"
-  ".DS_Store"
-)
-
-rsync_excludes=()
-for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-  rsync_excludes+=(--exclude="$pattern")
+FULL_MODE=0
+DRY_RUN=""
+for arg in "$@"; do
+  case "$arg" in
+    --full) FULL_MODE=1 ;;
+    --dry-run) DRY_RUN="--dry-run" ;;
+    *) echo -e "${RED}Unknown argument: $arg${NC}"; exit 2 ;;
+  esac
 done
 
 remote_cleanup() {
@@ -65,27 +42,15 @@ remote_cleanup() {
   "
 }
 
-FULL_MODE=0
-DRY_RUN=""
-for arg in "$@"; do
-  case "$arg" in
-    --full)     FULL_MODE=1 ;;
-    --dry-run)  DRY_RUN="--dry-run" ;;
-  esac
-done
-
 echo -e "${CYAN}=== Artifacts Deploy ===${NC}"
 [[ -n "$DRY_RUN" ]] && echo -e "${YELLOW}  [dry-run: no files will be transferred]${NC}"
 echo ""
 
-# ────────────────────────────────────────────────────────────
-# FULL MODE: build tgz, upload, extract on VPS
-# ────────────────────────────────────────────────────────────
 if [[ $FULL_MODE -eq 1 ]]; then
-  echo -e "${CYAN}Step 1: Building package...${NC}"
+  echo -e "${CYAN}Step 1: Building manifest package...${NC}"
   cd "$ARTIFACTS_DIR"
   PACKAGE_OUTPUT=$(./artifacts-package 2>&1)
-  PACKAGE_FILE=$(echo "$PACKAGE_OUTPUT" | grep "^Package:" | awk '{print $2}')
+  PACKAGE_FILE=$(echo "$PACKAGE_OUTPUT" | grep '^Package:' | awk '{print $2}')
   if [[ -z "$PACKAGE_FILE" || ! -f "$PACKAGE_FILE" ]]; then
     echo -e "${RED}ERROR: could not locate built package${NC}"
     echo "$PACKAGE_OUTPUT"
@@ -93,20 +58,20 @@ if [[ $FULL_MODE -eq 1 ]]; then
   fi
   PKG_SIZE=$(du -h "$PACKAGE_FILE" | cut -f1)
   echo -e "${GREEN}  Package: $PACKAGE_FILE ($PKG_SIZE)${NC}"
-  echo ""
 
   if [[ -n "$DRY_RUN" ]]; then
-    echo -e "${YELLOW}  [dry-run] would upload $(basename $PACKAGE_FILE) to $VPS_HOST:$VPS_PATH${NC}"
+    echo -e "${YELLOW}  [dry-run] would upload $(basename "$PACKAGE_FILE") to $VPS_HOST:$VPS_PATH${NC}"
     exit 0
   fi
 
   echo -e "${CYAN}Step 2: Uploading to VPS...${NC}"
   scp "$PACKAGE_FILE" "$VPS_HOST:/tmp/"
-  REMOTE_ARCHIVE="/tmp/$(basename $PACKAGE_FILE)"
+  REMOTE_ARCHIVE="/tmp/$(basename "$PACKAGE_FILE")"
 
   echo -e "${CYAN}Step 3: Extracting on VPS...${NC}"
   ssh "$VPS_HOST" "
     set -e
+    mkdir -p '$VPS_PATH'
     cd /tmp
     tar -xzf '$REMOTE_ARCHIVE' --strip-components=1 -C '$VPS_PATH'
     rm -f '$REMOTE_ARCHIVE'
@@ -114,52 +79,17 @@ if [[ $FULL_MODE -eq 1 ]]; then
     ls '$VPS_PATH' | head -10
   "
   remote_cleanup
-  echo ""
   echo -e "${GREEN}Full deploy complete → $VPS_HOST:$VPS_PATH${NC}"
   exit 0
 fi
 
-# ────────────────────────────────────────────────────────────
-# RSYNC MODE (default): incremental sync of changed files only
-# ────────────────────────────────────────────────────────────
-echo -e "${CYAN}Syncing to ${VPS_HOST}:${VPS_PATH} ...${NC}"
-echo ""
+echo -e "${CYAN}Materializing deploy stage from manifest...${NC}"
+cd "$ARTIFACTS_DIR"
+node app-hub-v11/server/artifact-build.mjs --out "$STAGE_DIR"
 
-rsync -avz --checksum $DRY_RUN "${rsync_excludes[@]}" \
-  --include="index.html" \
-  --include="ARTIFACTS_TOC.md" \
-  --include="SERVER_GUIDE.md" \
-  --include="SETUP_ALIASES.sh" \
-  --include="artifacts-serve" \
-  --include="artifacts-server.sh" \
-  --include="VERSION" \
-  --include="README.md" \
-  --include="app-hub/" \
-  --include="app-hub/**" \
-  --include="app-hub-v11/" \
-  --include="app-hub-v11/**" \
-  --include="spc/" \
-  --include="spc/**" \
-  --include="brawl/" \
-  --include="brawl/ethic-brawl/" \
-  --include="brawl/ethic-brawl/**" \
-  --include="peernet-orca/" \
-  --include="peernet-orca/**" \
-  --include="peer-music-groove/" \
-  --include="peer-music-groove/**" \
-  --include="PeerModGroove/" \
-  --include="PeerModGroove/**" \
-  --include="bathroom-emergency-guide/" \
-  --include="bathroom-emergency-guide/**" \
-  --include="aster-relay-identity-nightline-configurable/" \
-  --include="aster-relay-identity-nightline-configurable/**" \
-  --include="minesweeper/" \
-  --include="minesweeper/**" \
-  --include="solitaire/" \
-  --include="solitaire/**" \
-  --exclude="*" \
-  "$ARTIFACTS_DIR/" \
-  "$VPS_HOST:$VPS_PATH/"
+echo ""
+echo -e "${CYAN}Syncing stage to ${VPS_HOST}:${VPS_PATH} ...${NC}"
+rsync -avz --checksum --delete $DRY_RUN "$STAGE_DIR/" "$VPS_HOST:$VPS_PATH/"
 
 if [[ -z "$DRY_RUN" ]]; then
   remote_cleanup

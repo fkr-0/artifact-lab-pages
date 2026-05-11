@@ -1,5 +1,6 @@
 export const themes = [
   { id: 'nexus', title: 'NEXUS', mood: 'clean cyan control room', tokens: { accent: '#00ffff', background: '#060713', surface: 'rgba(5,16,28,.74)', panel: 'rgba(0,0,0,.34)', text: '#e8fbff', muted: 'rgba(232,251,255,.68)', glow: 'rgba(0,255,255,.22)' } },
+  { id: 'default', title: 'TRON', mood: 'v9 default cyan grid', tokens: { accent: '#00ffff', background: '#0a0a12', surface: 'rgba(0,28,44,.76)', panel: 'rgba(0,0,0,.42)', text: '#e8fbff', muted: 'rgba(232,251,255,.66)', glow: 'rgba(0,255,255,.24)' } },
   { id: 'synthwave', title: 'Synthwave', mood: 'hot magenta arcade dusk', tokens: { accent: '#ff4fd8', background: '#15051f', surface: 'rgba(40,5,56,.78)', panel: 'rgba(17,2,28,.62)', text: '#fff0fb', muted: 'rgba(255,240,251,.68)', glow: 'rgba(255,79,216,.26)' } },
   { id: 'cyberpunk', title: 'Cyberpunk', mood: 'yellow hazard terminal', tokens: { accent: '#ffee00', background: '#120f00', surface: 'rgba(36,30,0,.78)', panel: 'rgba(0,0,0,.48)', text: '#fffbd0', muted: 'rgba(255,251,208,.66)', glow: 'rgba(255,238,0,.22)' } },
   { id: 'retro8bit', title: 'Retro 8-Bit', mood: 'green phosphor pixel board', tokens: { accent: '#7cff00', background: '#080b05', surface: 'rgba(10,27,8,.78)', panel: 'rgba(0,0,0,.42)', text: '#efffe8', muted: 'rgba(239,255,232,.64)', glow: 'rgba(124,255,0,.20)' } },

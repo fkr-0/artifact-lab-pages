@@ -35,6 +35,10 @@
     .theme-card.active { outline:2px solid var(--hub-accent); }
     .storage-meter { height:.7rem; border-radius:999px; background:rgba(255,255,255,.09); overflow:hidden; }
     .storage-meter > span { display:block; height:100%; width:var(--storage-width,0%); background:var(--hub-accent); box-shadow:0 0 1rem var(--hub-glow); }
+    .link-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.5rem; margin-top:.75rem; }
+    .link-grid a { color:inherit; text-decoration:none; }
+    .link-grid a .pill { width:100%; justify-content:center; padding:.45rem .6rem; }
+    .chat-log { min-height:8rem; max-height:12rem; overflow:auto; white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
     table { width:100%; border-collapse:collapse; font-size:.82rem; }
     th, td { text-align:left; padding:.45rem; border-bottom:1px solid color-mix(in srgb, var(--hub-accent), transparent 82%); vertical-align:top; }
     iframe { width:100%; min-height:70vh; border:1px solid color-mix(in srgb, var(--hub-accent), transparent 60%); border-radius:1rem; background:#000; }
@@ -66,6 +70,12 @@
         <div>
           <h2>Artifact cockpit</h2>
           <p class="muted">v11 keeps the hub thin: catalog operations on the server, UI behavior in small libs, launch surfaces in the shell.</p>
+          <div class="link-grid" aria-label="Hub version links">
+            <a href="../app-hub/collab-editor.html"><span class="pill">v8 editor</span></a>
+            <a href="../app-hub/v9-portal.html"><span class="pill">v9 portal</span></a>
+            <a href="../app-hub/v10-portal.html"><span class="pill">v10 classic</span></a>
+            <a href="../app-hub/v10-portal-enhanced.html"><span class="pill">v10 enhanced</span></a>
+          </div>
         </div>
         <div class="row"><span id="activeTheme" class="pill">theme</span><span id="activeStorage" class="pill">storage</span></div>
       </section>
@@ -82,9 +92,20 @@
         <label>Display name<input id="profileName" /></label>
         <label>Handle<input id="profileHandle" /></label>
         <label>Role<input id="profileRole" /></label>
+        <label>Status<input id="profileStatus" /></label>
+        <label>Note<input id="profileNote" maxlength="80" /></label>
         <label>Color<input id="profileColor" type="color" /></label>
       </div>
+      <div class="row">
+        <label><input id="profileSharedLayer" type="checkbox" /> Shared Peernet layer</label>
+        <label><input id="profileAllowIncomingSaveStates" type="checkbox" /> Allow incoming save states</label>
+      </div>
       <div class="row"><button id="saveProfile" type="button">Save profile</button><button id="resetProfile" type="button">Reset profile</button></div>
+    </section>
+    <section class="card stack">
+      <div class="row between"><h3>Lobby chat</h3><span class="muted">v9/v10-style local mini-app</span></div>
+      <pre id="lobbyChatLog" class="card chat-log"></pre>
+      <div class="row"><input id="lobbyChatInput" placeholder="lobby message…" /><button id="sendLobbyChat" type="button">send chat</button><button id="clearLobbyChat" type="button">clear</button></div>
     </section>
     <section class="card stack">
       <div class="row between"><h3>Theme system</h3><button id="soundToggle" type="button">sound off</button></div>
@@ -118,11 +139,14 @@
     let selected = catalog.items[0] || null;
     let soundEnabled = readHubSetting('sound', false);
     let profile = normalizeProfile(readHubSetting('profile', {}));
+    let lobbyChat = readHubSetting('lobbyChat', []);
+    const lobbyChatChannel = 'BroadcastChannel' in window ? new BroadcastChannel('app-hub-v11:lobby-chat') : null;
 
     sounds.setEnabled(soundEnabled);
     setTheme(readHubSetting('theme', 'nexus'), false);
     renderProfile();
     renderThemeGrid();
+    renderLobbyChat();
     renderStorage();
     $('soundToggle').textContent = soundEnabled ? 'sound on' : 'sound off';
     $('summary').textContent = `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(', ')} operations`;
@@ -130,6 +154,10 @@
     $('profileButton').addEventListener('click', () => $('profileMenu').classList.toggle('open'));
     $('closeProfile').addEventListener('click', () => $('profileMenu').classList.remove('open'));
     $('search').addEventListener('input', renderMenu);
+    $('sendLobbyChat').addEventListener('click', sendLobbyChat);
+    $('lobbyChatInput').addEventListener('keydown', (event) => { if (event.key === 'Enter') sendLobbyChat(); });
+    $('clearLobbyChat').addEventListener('click', () => { lobbyChat = []; writeHubSetting('lobbyChat', lobbyChat); renderLobbyChat(); });
+    lobbyChatChannel?.addEventListener('message', (event) => { if (event.data?.type === 'chat') appendLobbyChat(event.data.message, false); });
     $('soundToggle').addEventListener('click', () => {
       soundEnabled = !soundEnabled;
       sounds.setEnabled(soundEnabled);
@@ -139,7 +167,7 @@
       renderStorage();
     });
     $('saveProfile').addEventListener('click', () => {
-      profile = normalizeProfile({ displayName: $('profileName').value, handle: $('profileHandle').value, role: $('profileRole').value, color: $('profileColor').value });
+      profile = normalizeProfile({ displayName: $('profileName').value, handle: $('profileHandle').value, role: $('profileRole').value, status: $('profileStatus').value, note: $('profileNote').value, color: $('profileColor').value, sharedLayer: $('profileSharedLayer').checked, allowIncomingSaveStates: $('profileAllowIncomingSaveStates').checked });
       writeHubSetting('profile', profile);
       renderProfile();
       renderStorage();
@@ -175,7 +203,32 @@
       $('profileName').value = profile.displayName;
       $('profileHandle').value = profile.handle;
       $('profileRole').value = profile.role;
+      $('profileStatus').value = profile.status;
+      $('profileNote').value = profile.note;
       $('profileColor').value = profile.color;
+      $('profileSharedLayer').checked = profile.sharedLayer;
+      $('profileAllowIncomingSaveStates').checked = profile.allowIncomingSaveStates;
+    }
+
+    function appendLobbyChat(message, broadcast = true) {
+      lobbyChat = [...lobbyChat, message].slice(-80);
+      writeHubSetting('lobbyChat', lobbyChat);
+      if (broadcast) lobbyChatChannel?.postMessage({ type: 'chat', message });
+      renderLobbyChat();
+    }
+
+    function sendLobbyChat() {
+      const input = $('lobbyChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      appendLobbyChat({ from: profile.displayName, text, at: new Date().toISOString() });
+      input.value = '';
+      sounds.play('click');
+    }
+
+    function renderLobbyChat() {
+      const lines = Array.isArray(lobbyChat) ? lobbyChat : [];
+      $('lobbyChatLog').textContent = lines.map((msg) => `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] ${msg.from || 'peer'}: ${msg.text || ''}`).join('\n');
     }
 
     function renderThemeGrid() {

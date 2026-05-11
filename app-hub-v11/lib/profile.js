@@ -1,12 +1,16 @@
 export function normalizeProfile(input = {}) {
   const fallbackNumber = Math.floor(Math.random() * 9000 + 1000);
-  const displayName = String(input.displayName || input.name || `Pilot-${fallbackNumber}`).trim();
+  const displayName = String(input.displayName || input.username || input.name || `Pilot-${fallbackNumber}`).trim();
   const handle = String(input.handle || `@${displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'pilot'}`).trim();
   return {
     displayName,
     handle: handle.startsWith('@') ? handle : `@${handle}`,
     role: String(input.role || 'artifact pilot').trim(),
     color: /^#[0-9a-f]{6}$/i.test(input.color || '') ? input.color : '#00ffff',
+    status: String(input.status || 'online').trim(),
+    note: String(input.note || '').trim(),
+    sharedLayer: Boolean(input.sharedLayer),
+    allowIncomingSaveStates: input.allowIncomingSaveStates !== false,
   };
 }
 

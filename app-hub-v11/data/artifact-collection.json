@@ -4,10 +4,28 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-10T19:35:20.282Z",
+  "generatedAt": "2026-05-11T05:43:22.122Z",
   "deploy": {
     "basePath": "app-hub-v11",
-    "copyRoot": "compiled"
+    "copyRoot": "compiled",
+    "rootIndex": {
+      "source": "app-hub-v11/index.html"
+    },
+    "includeFiles": [
+      "ARTIFACTS_TOC.md",
+      "SERVER_GUIDE.md",
+      "SETUP_ALIASES.sh",
+      "artifacts-serve",
+      "artifacts-server.sh",
+      "artifacts-package",
+      "artifacts-deploy",
+      "bridge.yml"
+    ],
+    "includeDirs": [
+      "app-hub-v11",
+      "peernetjs",
+      "lib"
+    ]
   },
   "operations": {
     "validate": {
@@ -21,29 +39,46 @@
     }
   },
   "summary": {
-    "total": 12,
+    "total": 22,
     "byKind": {
-      "html-path": 8,
+      "html-path": 18,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
       "hub": 2,
-      "v10": 2,
-      "peernet": 3,
+      "v10": 4,
+      "peernet": 4,
       "themes": 1,
       "sound": 1,
       "floating": 1,
-      "audio": 1,
+      "editor": 7,
+      "tool": 4,
+      "notepad": 2,
+      "local-first": 2,
+      "v9": 2,
+      "calculator": 1,
+      "math": 1,
+      "collaborative": 3,
+      "text": 1,
+      "notes": 1,
+      "v4": 1,
+      "console": 1,
+      "monaco": 1,
+      "code": 1,
+      "textarea": 1,
+      "p2p": 1,
+      "viewer": 1,
+      "multitext": 1,
+      "audio": 2,
       "modular": 1,
-      "tool": 1,
       "graphics": 1,
       "sprite": 1,
-      "game": 4,
+      "game": 5,
       "shooter": 1,
       "space": 1,
       "multiplayer": 2,
-      "cyberpunk": 1,
+      "cyberpunk": 2,
       "classic": 3,
       "bomberman": 1,
       "minesweeper": 1,
@@ -52,11 +87,14 @@
       "cards": 1,
       "docs": 3,
       "catalog": 1,
+      "brawler": 1,
+      "built": 2,
+      "daw": 1,
+      "v11": 2,
       "server": 1,
       "external": 1,
       "example": 1,
-      "roadmap": 1,
-      "v11": 1
+      "roadmap": 1
     }
   },
   "items": [
@@ -111,6 +149,224 @@
       "title": "NEXUS v10 Enhanced Portal",
       "href": "../app-hub/v10-portal-enhanced.html",
       "description": "The rich v10 portal containing themes, sound, floating panels, and storage management ideas externalized in v11 libs.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "tool",
+        "notepad",
+        "local-first",
+        "v9"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "v9-quick-notepad",
+      "title": "v9 Quick Notepad",
+      "href": "legacy-tools.html?tool=v9-notepad",
+      "description": "v9 embedded Quick Notepad ported to the v11 utility host with local-first autosave.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "calculator",
+        "math",
+        "tool",
+        "v9"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "v9-sci-fi-calculator",
+      "title": "v9 Sci-Fi Calculator",
+      "href": "legacy-tools.html?tool=v9-calculator",
+      "description": "Cyberpunk calculator from the v9 embedded utility deck, ported as a standalone v11 tool with history tape.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "notepad",
+        "local-first",
+        "v10"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "v10-local-first-notepad",
+      "title": "v10 Local-first Notepad",
+      "href": "legacy-tools.html?tool=v10-notepad",
+      "description": "v10 enhanced portal notepad concept extracted into the v11 utility host with hub-scoped persistence.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "text",
+        "v10"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "v10-shared-text-pad",
+      "title": "v10 Shared Text Pad",
+      "href": "legacy-tools.html?tool=v10-shared-pad",
+      "description": "v10 shared text pad ported to the v11 utility host, using BroadcastChannel for same-browser live sync and local fallback storage.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "notes",
+        "v4",
+        "console"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "v4-console-notes",
+      "title": "v4 Console Notes",
+      "href": "legacy-tools.html?tool=v4-console-notes",
+      "description": "Operator notes surface for the v4 console lineage, ported into the v11 legacy utility host.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "monaco",
+        "code"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      },
+      "id": "v8-collab-code-editor",
+      "title": "v8 Collab Code Editor",
+      "href": "../app-hub/collab-editor.html",
+      "description": "Full Monaco-based collaborative code editor from the earlier app hub line, exposed through the v11 catalog.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "textarea",
+        "p2p"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "v8-collab-pad-lite",
+      "title": "v8 Collab Pad Lite",
+      "href": "../app-hub/collab-editor-lite.html",
+      "description": "Textarea-based collaborative editor from the earlier app hub line, exposed through the v11 catalog.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "viewer",
+        "multitext",
+        "tool"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      },
+      "id": "root-multitext-viewer",
+      "title": "Multi-text Viewer",
+      "href": "../index_multitext.html",
+      "description": "Root-level multi-text viewer/editor with save-load support, registered in the v11 catalog.",
       "deploy": {
         "include": true
       }
@@ -380,6 +636,75 @@
       "href": "../ARTIFACTS_TOC.md",
       "note": "Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes the machine-readable catalog.",
       "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "brawler",
+        "cyberpunk",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ]
+      },
+      "id": "ethic-brawl",
+      "title": "Ethic Brawl",
+      "href": "../brawl/ethic-brawl/index.html",
+      "description": "Built Vite artifact for the cyberpunk philosophical arena-brawler; package/deploy copies dist output only.",
+      "deploy": {
+        "build": {
+          "cwd": "brawl/ethic-brawl",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "brawl/ethic-brawl/dist",
+        "targetPath": "brawl/ethic-brawl",
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "audio",
+        "daw",
+        "peernet",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ]
+      },
+      "id": "v11-peer-daw",
+      "title": "v11 Peer DAW",
+      "href": "../v11-peer-daw/index.html",
+      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
+      "deploy": {
+        "build": {
+          "cwd": "v11-peer-daw",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "v11-peer-daw/dist",
+        "targetPath": "v11-peer-daw",
         "include": true
       }
     },
