@@ -28,6 +28,57 @@
   },
   "items": [
     {
+      "id": "v9-full-portal",
+      "title": "NEXUS v9 Full Portal",
+      "kind": "html-path",
+      "href": "../app-hub/v9-portal.html",
+      "description": "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts, notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions, shooter game, and unified user settings.",
+      "tags": [
+        "hub",
+        "v9",
+        "legacy",
+        "compatibility",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
+    },
+    {
+      "id": "v10-full-portal",
+      "title": "NEXUS v10 Full Portal",
+      "kind": "html-path",
+      "href": "../app-hub/v10-portal.html",
+      "description": "Full v10 portal compatibility surface for PeernetLobby apps, notepad, shared text pad, sequencer, PeerModGroove launcher, peer console, linked artifacts, and sprite GIF launcher.",
+      "tags": [
+        "hub",
+        "v10",
+        "legacy",
+        "compatibility",
+        "peernet",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ]
+      }
+    },
+    {
       "id": "v10-classic",
       "title": "NEXUS v10 Classic Portal",
       "kind": "html-path",
@@ -304,6 +355,30 @@
         "tool",
         "graphics",
         "sprite"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ]
+      }
+    },
+    {
+      "id": "sprite-extractor",
+      "title": "Sprite Extractor",
+      "kind": "html-path",
+      "href": "../sprite_extractor.html",
+      "description": "Strict sprite extraction copy with alpha auto-detection, manual grid setup, default alpha trimming, per-sprite naming, and named PNG/ZIP export.",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "extraction"
       ],
       "operations": [
         "validate",
