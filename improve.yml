@@ -1,0 +1,91 @@
+version: 1
+updated: 2026-05-12
+scope: artifacts/app-hub-v11-clean-messaging-ui
+status: in_progress
+
+fixed:
+  - id: hub-ui-workspace-default-log
+    area: app-hub-v11/ui
+    severity: high
+    summary: Event log tab was not selected by default and inline app pane spawned too small.
+    cause: Hub implementation defaulted workspace to appDeck with 40vh height and 0-min-height iframes.
+    fix: Default workspace tab/panel to event log, increase workspace default height, enforce larger inline iframe minimum height.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+  - id: hub-presence-menu-actions
+    area: app-hub-v11/messaging
+    severity: high
+    summary: User context menu could not spawn personal chats or join/observe games.
+    cause: Presence menu only exposed copy/alias/status actions in the hub implementation.
+    fix: Add personal chat channel spawning, join game, observe game, and copy peer id actions.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+  - id: launch-url-peer-actions
+    area: app-hub-v11/lib/launcher
+    severity: high
+    summary: Inline/floating launches did not encode peer target, spectate/observe, mode, or session params.
+    cause: Launcher only added embedded=true and multiplayer=true.
+    fix: Encode targetPeerId, spectate/observe, mode, and session for inline/floating/fullscreen app starts.
+    tests:
+      - tests/app-hub-v11-libs.test.mjs
+  - id: shooter-join-observe
+    area: app-hub/shooter
+    severity: high
+    summary: Space shooter could not distinguish stage/vs/session joins or observe mode from hub URLs.
+    cause: Shooter read only username/embedded/multiplayer and always broadcasted playable state.
+    fix: Centralize URL params, consume targetPeerId/mode/spectate/observe, send join requests, and suppress state loops while observing.
+    tests:
+      - tests/shooter-multiplayer-smoke.mjs
+      - tests/shooter-impl-smoke.mjs
+  - id: daw-join-observe
+    area: v11-peer-daw
+    severity: high
+    summary: v11 DAW did not auto-join peer sessions launched from the hub.
+    cause: DAW connect flow ignored targetPeerId/session/spectate URL params.
+    fix: Read launch URL params, auto-start peer connection when params are present, and pass params into PeernetStack start.
+    tests:
+      - tests/v11-peer-daw-build-imports.test.mjs
+  - id: palette-scale-duplicate
+    area: app-hub-v11/ui
+    severity: medium
+    summary: Palette derivation script redeclared scale in the same scope.
+    cause: Duplicate const scale line in derivePaletteFromImage.
+    fix: Remove duplicate declaration and test for a single scale definition.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+
+classified:
+  - area: peernet
+    finding: Shared Peernet transport can carry peer/session packets; missing behavior was primarily in hub/app implementation glue.
+  - area: storage
+    finding: Storage was not root cause; selected chat channel persistence was missing in hub implementation and now uses existing hub storage helpers.
+  - area: ui
+    finding: Shared launcher needed URL parameter support; v11 hub UI needed default workspace/menu action rework.
+
+open:
+  - id: observe-gamestate-spec
+    area: future/spec
+    priority: high
+    summary: Full observer protocol should formalize read-only gamestate views per app.
+    notes:
+      - observer launches must set spectate=true and observe=true
+      - observed apps should never mutate host state
+      - host apps should reply to join/request-state messages with compact snapshots
+      - UI should expose observed peer, last snapshot age, and disconnect state
+  - id: full-messaging-system
+    area: future/messaging
+    priority: high
+    summary: Build a clean full-fledged messaging system beyond current lobby/personal channels.
+    notes:
+      - typed channels: lobby, dm, game, system
+      - unread counts and selected channel persistence
+      - message delivery ack/failure display
+      - peer identity aliases backed by profile storage
+  - id: app-side-observe-depth
+    area: future/apps
+    priority: medium
+    summary: Bomberman has target-peer joins; shooter and DAW now consume hub params, but deeper read-only state replay needs real browser/integration coverage.
+  - id: browser-harness
+    area: future/tests
+    priority: medium
+    summary: Add headless browser tests for actual context menu clicks, iframe sizing, and multi-peer message routing.
