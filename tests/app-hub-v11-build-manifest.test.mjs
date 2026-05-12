@@ -55,7 +55,7 @@ assert.ok(result.included.some((entry) => entry.path === 'static-tool'));
 assert.ok(result.included.some((entry) => entry.path === 'built-tool'));
 assert.ok(result.skipped.some((entry) => entry.id === 'external' && entry.reason === 'external-link'));
 
-assert.equal(await readFile(join(root, 'stage', 'index.html'), 'utf8'), '<!doctype html><title>v11</title>');
+assert.match(await readFile(join(root, 'stage', 'index.html'), 'utf8'), /app-hub-v11\/index\.html/, 'staged root index should redirect to v11');
 await stat(join(root, 'stage', 'app-hub-v11', 'index.html'));
 await stat(join(root, 'stage', 'static-tool', 'index.html'));
 assert.equal(await readFile(join(root, 'stage', 'built-tool', 'index.html'), 'utf8'), '<!doctype html><title>built</title>');

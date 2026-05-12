@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NEXUS App Hub v11</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style id="themeStyles"></style>
     <link rel="stylesheet" href="app-hub-v11/lib/v9-shell.css" />
     <style>
@@ -17,7 +18,7 @@
         --hub-glow: rgba(0, 255, 255, 0.18);
         --sidebar-width: 360px;
         --filter-panel-fr: 1.25fr;
-        --workspace-height: 40vh;
+        --workspace-height: 58vh;
         --generated-primary: #00ffff;
         --generated-secondary: #ff00ff;
         --generated-accent: #00ff88;
@@ -338,10 +339,31 @@
         display: grid;
         gap: 0.25rem;
       }
+      .online-user {
+        user-select: none;
+      }
+      .presence-menu {
+        position: fixed;
+        z-index: 30;
+        min-width: 11rem;
+        display: none;
+        padding: 0.25rem;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 40%);
+        background: color-mix(in srgb, var(--hub-panel), #000 25%);
+        box-shadow: 6px 6px 0 rgba(0, 255, 255, 0.18);
+      }
+      .presence-menu.open {
+        display: grid;
+        gap: 0.2rem;
+      }
+      .presence-menu button {
+        width: 100%;
+        text-align: left;
+      }
       .workspace-pane {
         display: none;
-        min-height: 160px;
-        max-height: calc(100vh - 120px);
+        min-height: min(520px, calc(100vh - 96px));
+        max-height: calc(100vh - 72px);
         overflow: auto;
         resize: vertical;
         grid-template-rows: auto minmax(0, 1fr);
@@ -410,7 +432,7 @@
       iframe {
         width: 100%;
         height: 100%;
-        min-height: 0;
+        min-height: 480px;
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 45%);
         border-radius: 0;
         background: #000;
@@ -596,7 +618,7 @@
           display: none;
         }
         .sidebar {
-          grid-template-rows: auto auto auto;
+          grid-template-rows: auto auto;
         }
         body {
           overflow: auto;
@@ -654,9 +676,11 @@
             <h2>Lobby</h2>
             <span id="activeStorage" class="pill">storage</span>
           </div>
-          <div id="onlineUsers" class="online-users muted">
-            local pilot only
+          <div class="row between">
+            <h3>Connected users</h3>
+            <span id="presenceCount" class="pill">0</span>
           </div>
+          <div id="onlineUsers" class="online-users muted"></div>
           <div class="row">
             <input
               id="chatChannelName"
@@ -720,24 +744,24 @@
         <section id="workspacePane" class="card workspace-pane">
           <div id="workspaceTabs" class="workspace-tabs">
             <button
-              class="workspace-tab active"
+              class="workspace-tab"
               type="button"
               data-workspace-tab="appDeck"
             >
               inline tabs</button
             ><button
-              class="workspace-tab"
+              class="workspace-tab active"
               type="button"
               data-workspace-tab="eventLog"
             >
               event log
             </button>
           </div>
-          <div id="appDeck" class="workspace-panel app-deck active">
+          <div id="appDeck" class="workspace-panel app-deck">
             <div id="appDeckTabs" class="app-deck-tabs"></div>
             <div id="appDeckBody"></div>
           </div>
-          <div id="eventLogPanel" class="workspace-panel stack">
+          <div id="eventLogPanel" class="workspace-panel stack active">
             <div class="row between">
               <strong>Event log</strong
               ><button id="clearEventLog" type="button">clear</button>
@@ -857,6 +881,12 @@
       alt="running badger"
       aria-hidden="true"
     />
+    <div id="presenceMenu" class="presence-menu" role="menu" aria-label="User options">
+      <button id="presencePrimaryAction" type="button" role="menuitem"></button>
+      <button id="presenceSecondaryAction" type="button" role="menuitem"></button>
+      <button id="presenceTertiaryAction" type="button" role="menuitem"></button>
+      <button id="presenceQuaternaryAction" type="button" role="menuitem"></button>
+    </div>
 
     <script type="module">
       import {
@@ -889,7 +919,7 @@
         themes,
       } from "./lib/themes.js";
       import { createSoundEffects } from "./lib/sound.js";
-      import { createNoopNetwork } from "./lib/network.js";
+      import { createLobbyNetwork } from "./lib/network.js";
       import {
         avatarInitials,
         normalizeProfile,
@@ -907,7 +937,6 @@
       const catalog = await fetch("./data/artifact-collection.json")
         .then((r) => r.json())
         .catch(() => ({ items: [], summary: { total: 0 }, operations: {} }));
-      const network = createNoopNetwork();
       const sounds = createSoundEffects({
         audioContextFactory: () =>
           new (window.AudioContext || window.webkitAudioContext)(),
@@ -918,15 +947,33 @@
       workspacePane.style.resize = "vertical";
       workspacePane.style.overflow = "auto";
       let selected = null,
-        viewMode = "cards",
+        viewMode = readHubSetting("viewMode", "cards"),
         defaultAction = readHubSetting("defaultAction", "newWindow"),
         soundEnabled = readHubSetting("sound", false),
         profile = normalizeProfile(readHubSetting("profile", {})),
         lobbyChat = readHubSetting("lobbyChat", []),
-        chatChannels = readHubSetting("chatChannels", ["general"]);
+        chatChannels = readHubSetting("chatChannels", ["general"]),
+        selectedChatChannel = readHubSetting("selectedChatChannel", "general");
+      let connectedPeers = new Map();
+      const seenPeerNames = new Map();
+      const peerLastActivity = new Map();
+      let activePresenceTarget = null;
+      let isLocalHub = false;
+      const network = createLobbyNetwork({
+        username: profile.displayName,
+        lobbyId: "nexus-v11-hub-main",
+        storageKey: "v11-peernet",
+      });
+      if (!Array.isArray(chatChannels)) chatChannels = ["general"];
+      if (!chatChannels.includes("general")) {
+        chatChannels = ["general", ...chatChannels];
+        writeHubSetting("chatChannels", chatChannels);
+      }
+      selectedChatChannel = chatChannels.includes(selectedChatChannel) ? selectedChatChannel : "general";
+      $("chatChannelName").value = selectedChatChannel;
       const lobbyChatChannel =
         "BroadcastChannel" in window
-          ? new BroadcastChannel("app-hub-v11:lobby-chat")
+          ? new BroadcastChannel('app-hub-v11:lobby-chat')
           : null;
       const inlineDeck = createInlineTabDeck({
         deck: $("appDeck"),
@@ -941,6 +988,17 @@
             `${openApps.size} open`,
           ),
       });
+      const joinableGameIds = new Set(["bomberman-v10", "hyperblast-shooter", "v11-peer-daw"]);
+      const defaultJoinGameByPeer = new Map();
+      const gameJoinSpecs = {
+        "bomberman-v10": { multiplayer: true, mode: "vs", session: "bomberman" },
+        "hyperblast-shooter": { multiplayer: true, mode: "vs", session: "shooter" },
+        "v11-peer-daw": { multiplayer: true, mode: "session", session: "daw" },
+      };
+      function selectedJoinableGame() {
+        if (selected && joinableGameIds.has(selected.id)) return selected;
+        return catalog.items.find((item) => item.id === "bomberman-v10") || catalog.items.find((item) => joinableGameIds.has(item.id));
+      }
       createResizablePanels({
         root: document.documentElement,
         runtime: window,
@@ -989,13 +1047,110 @@
       renderOnlineUsers();
       renderStorage();
       renderFilters();
-      renderResults();
+      setViewMode(viewMode, false);
+      network.on("status", (detail) => {
+        const online = Boolean(detail?.connected);
+        const raw = String(detail?.text || "").trim();
+        isLocalHub = /hub/i.test(raw);
+        const text = !online
+          ? (raw || "offline")
+          : /joining/i.test(raw)
+            ? "connected"
+            : raw || "connected";
+        $("activeStorage").textContent = text;
+        eventLog.info("network", text);
+      });
+      network.on("peers", (peers) => {
+        connectedPeers = peers || new Map();
+        for (const [peerId, peer] of connectedPeers.entries()) {
+          peerLastActivity.set(String(peerId), Date.now());
+          const name = String(peer?.username || "").trim();
+          if (name) seenPeerNames.set(String(peerId), name);
+        }
+        if (connectedPeers.size > 0) $("activeStorage").textContent = "connected";
+        renderOnlineUsers();
+      });
+      network.on("message:chat", ({ id, payload, raw }) => {
+        const from =
+          raw?.fromName ||
+          payload?.from ||
+          connectedPeers.get(id)?.username ||
+          `peer-${String(id || "").slice(0, 6)}`;
+        if (id) seenPeerNames.set(String(id), String(from));
+        if (id) peerLastActivity.set(String(id), Date.now());
+        appendLobbyChat(
+          {
+            from,
+            text: String(payload?.text || ""),
+            at: payload?.at || new Date().toISOString(),
+          },
+          false,
+        );
+      });
       $("summary").textContent =
         `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(", ")} operations`;
       $("profileButton").onclick = () =>
         $("profileMenu").classList.toggle("open");
       $("closeProfile").onclick = () =>
         $("profileMenu").classList.remove("open");
+      $("onlineUsers").addEventListener("contextmenu", (event) => {
+        const row = event.target.closest("[data-self]");
+        if (!row) return;
+        event.preventDefault();
+        activePresenceTarget = {
+          self: row.dataset.self === "true",
+          peerId: row.dataset.peerId || "",
+          label: row.dataset.label || "",
+        };
+        openPresenceMenu(event.clientX, event.clientY);
+      });
+      $("presencePrimaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          $("profileMenu").classList.add("open");
+          return closePresenceMenu();
+        }
+        openPersonalChat(activePresenceTarget);
+        closePresenceMenu();
+      };
+      $("presenceSecondaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          if (window.confirm("Exit this hub session?")) window.location.href = "about:blank";
+          return closePresenceMenu();
+        }
+        joinPeerGame(activePresenceTarget, { spectate: false });
+        closePresenceMenu();
+      };
+      $("presenceTertiaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          setWorkspaceTab("eventLog");
+          eventLog.info("self", "status", profile.sharedLayer ? "connected" : "offline");
+        } else {
+          joinPeerGame(activePresenceTarget, { spectate: true });
+        }
+        closePresenceMenu();
+      };
+      $("presenceQuaternaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          setWorkspaceTab("eventLog");
+          eventLog.info("self", "status", profile.sharedLayer ? "connected" : "offline");
+        } else {
+          navigator.clipboard?.writeText(activePresenceTarget.peerId || activePresenceTarget.label || "");
+          eventLog.info("peer", "copied id", activePresenceTarget.label || activePresenceTarget.peerId);
+        }
+        closePresenceMenu();
+      };
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("#presenceMenu")) return;
+        closePresenceMenu();
+      });
+      window.addEventListener("blur", closePresenceMenu);
+      lobbyChatChannel?.addEventListener("message", (event) => {
+        if (event.data?.type === "chat") appendLobbyChat(event.data.message, false);
+      });
       $("search").oninput = renderResults;
       $("modeAnd").onclick = () => setTagMode("AND");
       $("modeOr").onclick = () => setTagMode("OR");
@@ -1022,7 +1177,10 @@
       $("spawnChatChannel").onclick = () => {
         const name = $("chatChannelName").value.trim() || "general";
         if (!chatChannels.includes(name)) chatChannels.push(name);
+        selectedChatChannel = name;
         writeHubSetting("chatChannels", chatChannels);
+        writeHubSetting("selectedChatChannel", selectedChatChannel);
+        $("chatChannelName").value = selectedChatChannel;
         renderChatChannels();
         eventLog.success("chat channel", name);
       };
@@ -1035,10 +1193,6 @@
         writeHubSetting("lobbyChat", lobbyChat);
         renderLobbyChat();
       };
-      lobbyChatChannel?.addEventListener("message", (event) => {
-        if (event.data?.type === "chat")
-          appendLobbyChat(event.data.message, false);
-      });
       $("soundToggle").onclick = () => {
         soundEnabled = !soundEnabled;
         sounds.setEnabled(soundEnabled);
@@ -1059,6 +1213,7 @@
           allowIncomingSaveStates: $("profileAllowIncomingSaveStates").checked,
         });
         writeHubSetting("profile", profile);
+        network.setUsername(profile.displayName);
         renderProfile();
         renderOnlineUsers();
         renderStorage();
@@ -1067,6 +1222,7 @@
       $("resetProfile").onclick = () => {
         profile = normalizeProfile({});
         writeHubSetting("profile", profile);
+        network.setUsername(profile.displayName);
         renderProfile();
         renderOnlineUsers();
         renderStorage();
@@ -1104,11 +1260,12 @@
         renderResults();
         eventLog.info("tag mode", mode);
       }
-      function setViewMode(mode) {
-        viewMode = mode;
-        $("viewCards").classList.toggle("active", mode === "cards");
-        $("viewList").classList.toggle("active", mode === "list");
-        $("results").className = `results ${mode}`;
+      function setViewMode(mode, save = true) {
+        viewMode = mode === "list" ? "list" : "cards";
+        if (save) writeHubSetting("viewMode", viewMode);
+        $("viewCards").classList.toggle("active", viewMode === "cards");
+        $("viewList").classList.toggle("active", viewMode === "list");
+        $("results").className = `results ${viewMode}`;
         renderResults();
       }
       function setWorkspaceTab(tabId) {
@@ -1148,10 +1305,18 @@
           );
       }
       function filteredItems() {
-        return filterArtifactsAdvanced(catalog.items, {
+        return sortItemsByRecentlyChanged(filterArtifactsAdvanced(catalog.items, {
           query: $("search").value,
           tagState,
-        });
+        }));
+      }
+      function changedTimestamp(item) {
+        const raw = item.changedAt || item.updatedAt || item.modifiedAt || item.mtime || item.lastChanged || item.generatedAt || item.createdAt || "";
+        const parsed = raw ? Date.parse(raw) : 0;
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      function sortItemsByRecentlyChanged(items) {
+        return [...items].sort((a, b) => changedTimestamp(b) - changedTimestamp(a) || String(a.title || a.id).localeCompare(String(b.title || b.id)));
       }
       function renderResults() {
         const items = filteredItems();
@@ -1223,7 +1388,7 @@
           window,
         );
         panel.style.inset = "0";
-        panel.style.borderRadius = "0";
+        panel.style.setProperty?.("border-radius", "0");
       }
       function openDetails(item) {
         workspacePane.classList.add("active");
@@ -1256,14 +1421,127 @@
           profile.allowIncomingSaveStates;
       }
       function renderOnlineUsers() {
-        $("onlineUsers").innerHTML =
-          `<div class="row"><span class="avatar">${esc(avatarInitials(profile))}</span><span>${esc(profile.displayName)} · local</span></div>`;
+        const localStatus = profile.sharedLayer ? "connected" : "offline";
+        const remoteUsers = new Map();
+        for (const [peerId, peer] of connectedPeers.entries()) {
+          const id = String(peerId || "");
+          const rawName = String(peer?.username || "").trim();
+          const name = String(
+            (rawName.toLowerCase() === "hub" ? "" : rawName) ||
+              seenPeerNames.get(id) ||
+              "",
+          ).trim();
+          remoteUsers.set(
+            id,
+            name || `peer-${id.slice(0, 6) || "unknown"}`,
+          );
+        }
+        for (const [peerId, name] of seenPeerNames.entries()) {
+          const cleaned = String(name || "").trim();
+          if (!cleaned) continue;
+          if (!remoteUsers.has(String(peerId))) remoteUsers.set(String(peerId), cleaned);
+        }
+        const users = [
+          {
+            peerId: "self",
+            avatar: avatarInitials(profile),
+            label: profile.displayName,
+            status: localStatus,
+            self: true,
+            lastActivity: Date.now(),
+            hub: isLocalHub,
+          },
+          ...[...remoteUsers.entries()].map(([peerId, name]) => ({
+            peerId,
+            avatar: name.slice(0, 2).toUpperCase(),
+            label: name,
+            status: "connected",
+            self: false,
+            lastActivity: peerLastActivity.get(String(peerId)) || null,
+            hub: false,
+          })),
+        ];
+        $("presenceCount").textContent = String(users.length);
+        $("onlineUsers").innerHTML = users
+          .map(
+            (user) =>
+              `<div class="row online-user" data-self="${user.self ? "true" : "false"}" data-peer-id="${esc(user.peerId || "")}" data-label="${esc(user.label)}" title="${esc(`status: ${user.status}${user.lastActivity ? ` | last activity: ${new Date(user.lastActivity).toLocaleTimeString()}` : ""}`)}"><span class="avatar">${esc(user.avatar)}</span><span>${esc(user.label)} · ${esc(user.status)}${user.hub ? ' <span class="pill">hub</span>' : ''}</span></div>`,
+          )
+          .join("");
+      }
+      function openPresenceMenu(x, y) {
+        const menu = $("presenceMenu");
+        const primary = $("presencePrimaryAction");
+        const secondary = $("presenceSecondaryAction");
+        const tertiary = $("presenceTertiaryAction");
+        const quaternary = $("presenceQuaternaryAction");
+        if (activePresenceTarget?.self) {
+          primary.textContent = "open profile settings";
+          secondary.textContent = "exit hub";
+          tertiary.textContent = "show status in log";
+          quaternary.hidden = true;
+        } else {
+          primary.textContent = "spawn personal chat";
+          secondary.textContent = "join game";
+          tertiary.textContent = "observe game";
+          quaternary.hidden = false;
+          quaternary.textContent = "copy peer id";
+        }
+        menu.style.left = `${x}px`;
+        menu.style.top = `${y}px`;
+        menu.classList.add("open");
+      }
+      function openPersonalChat(target) {
+        const peerId = String(target?.peerId || "peer");
+        const label = String(target?.label || peerId);
+        const name = `dm-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || peerId.slice(0, 8)}`;
+        if (!chatChannels.includes(name)) chatChannels.push(name);
+        selectedChatChannel = name;
+        writeHubSetting("chatChannels", chatChannels);
+        writeHubSetting("selectedChatChannel", selectedChatChannel);
+        $("chatChannelName").value = name;
+        renderChatChannels();
+        appendLobbyChat({ from: "system", channel: name, text: `personal chat opened with ${label}`, at: new Date().toISOString() }, false);
+        setWorkspaceTab("eventLog");
+        eventLog.success("personal chat", name);
+      }
+      function joinPeerGame(target, { spectate = false } = {}) {
+        const game = selectedJoinableGame();
+        if (!game) {
+          eventLog.warn("join", "no joinable game selected");
+          return;
+        }
+        const peerId = String(target?.peerId || "");
+        const spec = gameJoinSpecs[game.id] || { multiplayer: true };
+        defaultJoinGameByPeer.set(peerId, game.id);
+        selected = game;
+        openSelected("inline", {
+          ...spec,
+          multiplayer: true,
+          targetPeerId: peerId,
+          spectate,
+          observe: spectate,
+        });
+        $("joinGamePrompt").textContent = `${spectate ? "Observing" : "Joining"} ${target?.label || peerId} in ${game.title}`;
+      }
+      function closePresenceMenu() {
+        $("presenceMenu").classList.remove("open");
+        activePresenceTarget = null;
       }
       function appendLobbyChat(message, broadcast = true) {
         lobbyChat = [...lobbyChat, message].slice(-80);
         writeHubSetting("lobbyChat", lobbyChat);
-        if (broadcast) lobbyChatChannel?.postMessage({ type: "chat", message });
+        if (broadcast) {
+          lobbyChatChannel?.postMessage({ type: "chat", message });
+          network.broadcast("chat", {
+            from: profile.displayName,
+            channel: message?.channel || selectedChatChannel,
+            text: String(message?.text || ""),
+            at: message?.at || new Date().toISOString(),
+          });
+        }
         renderLobbyChat();
+        renderOnlineUsers();
       }
       function sendLobbyChat() {
         const input = $("lobbyChatInput");
@@ -1271,6 +1549,7 @@
         if (!text) return;
         appendLobbyChat({
           from: profile.displayName,
+          channel: selectedChatChannel,
           text,
           at: new Date().toISOString(),
         });
@@ -1284,7 +1563,7 @@
         )
           .map(
             (msg) =>
-              `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] ${msg.from || "peer"}: ${msg.text || ""}`,
+              `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] #${msg.channel || "general"} ${msg.from || "peer"}: ${msg.text || ""}`,
           )
           .join("\n");
       }
@@ -1292,9 +1571,20 @@
         $("chatChannels").innerHTML = chatChannels
           .map(
             (name) =>
-              `<button type="button" class="pill"># ${esc(name)}</button>`,
+              `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}"># ${esc(name)}</button>`,
           )
           .join("");
+        $("chatChannels")
+          .querySelectorAll("[data-chat-channel]")
+          .forEach((button) => {
+            button.onclick = () => {
+              selectedChatChannel = button.dataset.chatChannel || "general";
+              writeHubSetting("selectedChatChannel", selectedChatChannel);
+              $("chatChannelName").value = selectedChatChannel;
+              renderChatChannels();
+              eventLog.info("chat channel", selectedChatChannel);
+            };
+          });
       }
       function basicPalette() {
         return ["#00ffff", "#ff00ff", "#00ff88", "#05070d", "#f7fbff"];

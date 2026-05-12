@@ -23,6 +23,10 @@ export function launchUrlForMode(item, mode = 'inline', action = null) {
   if (/^https?:\/\//.test(href)) return href;
   const params = ['embedded=true'];
   if (action?.multiplayer) params.push('multiplayer=true');
+  if (action?.targetPeerId) params.push(`targetPeerId=${encodeURIComponent(action.targetPeerId)}`);
+  if (action?.spectate || action?.observe) params.push('spectate=true', 'observe=true');
+  if (action?.mode) params.push(`mode=${encodeURIComponent(action.mode)}`);
+  if (action?.session) params.push(`session=${encodeURIComponent(action.session)}`);
   const glue = href.includes('?') ? '&' : '?';
   return `${href}${glue}${params.join('&')}`;
 }

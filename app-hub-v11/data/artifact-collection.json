@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-11T08:57:24.170Z",
+  "generatedAt": "2026-05-12T18:56:16.125Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -19,7 +19,8 @@
       "artifacts-server.sh",
       "artifacts-package",
       "artifacts-deploy",
-      "bridge.yml"
+      "bridge.yml",
+      "bdg.gif"
     ],
     "includeDirs": [
       "app-hub-v11",
@@ -39,9 +40,9 @@
     }
   },
   "summary": {
-    "total": 25,
+    "total": 26,
     "byKind": {
-      "html-path": 21,
+      "html-path": 22,
       "info": 3,
       "external-link": 1
     },
@@ -57,7 +58,7 @@
       "sound": 1,
       "floating": 1,
       "editor": 6,
-      "tool": 4,
+      "tool": 5,
       "notepad": 2,
       "local-first": 2,
       "calculator": 1,
@@ -73,7 +74,7 @@
       "p2p": 1,
       "audio": 2,
       "modular": 1,
-      "graphics": 2,
+      "graphics": 3,
       "sprite": 2,
       "extraction": 1,
       "game": 5,
@@ -94,11 +95,12 @@
       "brawler": 1,
       "built": 2,
       "daw": 1,
-      "v11": 3,
+      "v11": 4,
       "server": 1,
       "external": 1,
       "example": 1,
-      "roadmap": 1
+      "roadmap": 1,
+      "font": 1
     }
   },
   "items": [
@@ -881,6 +883,34 @@
       "title": "Markdown Viewer",
       "href": "markdown-viewer.html",
       "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "font",
+        "graphics",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ]
+      },
+      "id": "font-lab-browser",
+      "title": "Font Lab Browser",
+      "href": "font_lab_browser.html",
+      "description": "Single-file, browser-only font builder. Upload a glyph grid image, remove white to transparency, smooth and trace, then export an OTF plus debug assets.",
       "deploy": {
         "include": true
       }

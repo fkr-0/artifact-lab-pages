@@ -9,9 +9,16 @@ export function createResizablePanels({ root, handles = [], runtime = globalThis
     root.style.setProperty(variable, cssValue);
     if (storageKey && storage?.setItem) storage.setItem(storageKey, cssValue);
   };
-  const restore = ({ variable, storageKey }) => {
+  const restore = ({ variable, storageKey, unit = 'px', min = 0, max = 9999 }) => {
     const saved = storageKey && storage?.getItem?.(storageKey);
-    if (saved) root.style.setProperty(variable, saved);
+    if (!saved) return;
+    const pattern = new RegExp(`^(-?\\d+(?:\\.\\d+)?)${unit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+    const match = String(saved).trim().match(pattern);
+    if (!match) return;
+    const value = Number(match[1]);
+    if (!Number.isFinite(value)) return;
+    const clamped = Number(clamp(value, min, max).toFixed(3)).toString();
+    root.style.setProperty(variable, `${clamped}${unit}`);
   };
 
   for (const cfg of handles) {

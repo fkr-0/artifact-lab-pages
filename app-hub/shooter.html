@@ -257,40 +257,17 @@
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
 
+        this.urlParams = new URLSearchParams(window.location.search);
         this.multiplayer = false;
         this.lobby = null;
         this.username = this.getUsername();
+        this.targetPeerId = this.urlParams.get('targetPeerId') || '';
+        this.sessionMode = this.urlParams.get('mode') || 'stage';
+        this.spectateMode = this.urlParams.get('spectate') === 'true' || this.urlParams.get('observe') === 'true';
         this.playerColor = this.getRandomColor();
 
-        const economy = createInitialEconomy();
         this.state = {
-          local: {
-            player: { x: 50, y: 0, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
-            ownedShips: ['interceptor'],
-            ownedBoosters: ['ion'],
-            ownedWeapons: ['bullet'],
-            bullets: [],
-            enemies: [],
-            particles: [],
-            turrets: economy.turrets,
-            allies: [],
-            shields: [],
-            enemyProjectiles: [],
-            score: economy.score,
-            money: economy.money,
-            enemyAmountMultiplier: 2,
-            enemyPowerMultiplier: 2,
-            stage: 1,
-            stageKills: 0,
-            stageGoal: 8,
-            bossActive: false,
-            bossDefeated: 0,
-            keys: {},
-            spawnTimer: 0,
-            lastFrameAt: performance.now(),
-            story: createInitialStoryState(performance.now()),
-            gameOver: false
-          },
+          local: this.createInitialLocalState({ y: 0 }),
           remote: new Map() // peerId -> { player, bullets, score, lastUpdate }
         };
 
@@ -300,15 +277,45 @@
         this.init();
       }
 
+      createInitialLocalState({ y = 0, keys = {}, enemyAmount = 2, enemyPower = 2 } = {}) {
+        const economy = createInitialEconomy();
+        return {
+          player: { x: 50, y, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
+          ownedShips: ['interceptor'],
+          ownedBoosters: ['ion'],
+          ownedWeapons: ['bullet'],
+          bullets: [],
+          enemies: [],
+          particles: [],
+          turrets: economy.turrets,
+          allies: [],
+          shields: [],
+          enemyProjectiles: [],
+          score: economy.score,
+          money: economy.money,
+          enemyAmountMultiplier: Number(enemyAmount),
+          enemyPowerMultiplier: Number(enemyPower),
+          stage: 1,
+          stageKills: 0,
+          stageGoal: 8,
+          bossActive: false,
+          bossDefeated: 0,
+          keys: keys,
+          spawnTimer: 0,
+          lastFrameAt: performance.now(),
+          story: createInitialStoryState(performance.now()),
+          gameOver: false
+        };
+      }
+
       getUsername() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('username') ||
+        return this.urlParams.get('username') ||
                localStorage.getItem('v10-username') ||
                `Pilot-${Math.floor(Math.random() * 9000 + 1000)}`;
       }
 
       isEmbedded() {
-        return new URLSearchParams(window.location.search).get('embedded') === 'true';
+        return this.urlParams.get('embedded') === 'true';
       }
 
       getRandomColor() {
@@ -351,12 +358,12 @@
           // In embedded mode, use parent container size
           const container = this.canvas.parentElement;
           if (container) {
-            this.canvas.width = container.clientWidth;
+            this.canvas.width = Math.max(640, container.clientWidth);
             this.canvas.height = Math.max(400, container.clientHeight);
           }
         } else {
-          this.canvas.width = window.innerWidth;
-          this.canvas.height = window.innerHeight;
+          this.canvas.width = Math.max(640, window.innerWidth);
+          this.canvas.height = Math.max(400, window.innerHeight);
         }
       }
 
@@ -421,32 +428,14 @@
 
       start() {
         if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
+        this.resize();
 
-        const economy = createInitialEconomy();
-        this.state.local = {
-          player: { x: 50, y: this.canvas.height / 2, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
-          ownedShips: ['interceptor'],
-          ownedBoosters: ['ion'],
-          ownedWeapons: ['bullet'],
-          bullets: [],
-          enemies: [],
-          particles: [],
-          turrets: economy.turrets,
-          score: economy.score,
-          money: economy.money,
-          enemyAmountMultiplier: Number(document.getElementById('enemyAmount')?.value || 2),
-          enemyPowerMultiplier: Number(document.getElementById('enemyPower')?.value || 2),
-          stage: 1,
-          stageKills: 0,
-          stageGoal: 8,
-          bossActive: false,
-          bossDefeated: 0,
+        this.state.local = this.createInitialLocalState({
+          y: this.canvas.height / 2,
           keys: this.state.local.keys,
-          spawnTimer: 0,
-          lastFrameAt: performance.now(),
-          story: createInitialStoryState(performance.now()),
-          gameOver: false
-        };
+          enemyAmount: document.getElementById('enemyAmount')?.value || 2,
+          enemyPower: document.getElementById('enemyPower')?.value || 2,
+        });
 
         this.updateHUD();
         document.getElementById('gameOverScreen').classList.remove('visible');
@@ -494,10 +483,19 @@
 
           await this.lobby.connect(this.username);
 
-          // Start broadcasting game state
-          this.networkUpdateInterval = setInterval(() => {
-            this.broadcastGameState();
-          }, 50); // 20 updates per second
+          if (this.targetPeerId) {
+            this.lobby.send?.(this.targetPeerId, {
+              type: 'shooter-join-request',
+              payload: { username: this.username, targetPeerId: this.targetPeerId, mode: this.sessionMode, spectate: this.spectateMode, at: Date.now() }
+            });
+          }
+
+          // Start broadcasting game state unless this panel is observing a peer.
+          if (!this.spectateMode) {
+            this.networkUpdateInterval = setInterval(() => {
+              this.broadcastGameState();
+            }, 50); // 20 updates per second
+          }
 
           // Initial broadcast
           this.broadcastPresence();
@@ -541,6 +539,8 @@
             bullets: state.bullets.map(b => ({ x: b.x, y: b.y })),
             score: state.score,
             lives: state.player.lives,
+            stage: state.stage,
+            mode: this.sessionMode,
             gameOver: state.gameOver
           }
         });
@@ -553,6 +553,9 @@
           type: 'shooter-presence',
           payload: {
             playing: playing,
+            observing: this.spectateMode,
+            targetPeerId: this.targetPeerId,
+            mode: this.sessionMode,
             score: this.state.local.score,
             color: this.playerColor
           }
@@ -568,6 +571,9 @@
             break;
           case 'shooter-presence':
             this.updateRemotePresence(from, data.payload);
+            break;
+          case 'shooter-join-request':
+            if (!this.spectateMode) this.broadcastGameState();
             break;
         }
       }
@@ -590,6 +596,8 @@
           remote.bullets = payload.bullets;
           remote.score = payload.score;
           remote.lives = payload.lives;
+          remote.stage = payload.stage;
+          remote.mode = payload.mode;
           remote.lastUpdate = now;
         }
 
@@ -605,8 +613,10 @@
       }
 
       updateRemotePresence(peerId, payload) {
-        // Handle presence updates (player joined/left game)
-        // Could show notifications here
+        if (payload?.playing === false) {
+          this.state.remote.delete(peerId);
+          this.updateMultiplayerPanel();
+        }
       }
 
       renderPlayerList(peers) {
@@ -1356,10 +1366,13 @@
 
     window.addEventListener('beforeunload', () => game.destroy());
 
-    // Auto-enable multiplayer if coming from hub with join parameter
+    // Auto-enable multiplayer by default, while keeping explicit join links supported.
+    const DEFAULT_MULTIPLAYER = true;
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('multiplayer') === 'true') {
-      setTimeout(() => game.toggleMultiplayer(), 500);
+    if (DEFAULT_MULTIPLAYER || urlParams.get('multiplayer') === 'true') {
+      setTimeout(() => {
+        if (!game.multiplayer) game.toggleMultiplayer();
+      }, 500);
     }
   </script>
 </body>

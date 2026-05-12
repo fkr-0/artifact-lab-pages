@@ -9,7 +9,7 @@ export function normalizeProfile(input = {}) {
     color: /^#[0-9a-f]{6}$/i.test(input.color || '') ? input.color : '#00ffff',
     status: String(input.status || 'online').trim(),
     note: String(input.note || '').trim(),
-    sharedLayer: Boolean(input.sharedLayer),
+    sharedLayer: input.sharedLayer !== false,
     allowIncomingSaveStates: input.allowIncomingSaveStates !== false,
   };
 }

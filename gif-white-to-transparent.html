@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GIF white → alpha preprocessor</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #fff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --soft: #f1f5f9;
+      --dark: #0f172a;
+      --ok-bg: #ecfdf5;
+      --ok: #065f46;
+      --warn-bg: #fffbeb;
+      --warn-line: #fde68a;
+      --warn: #78350f;
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 30px rgb(15 23 42 / 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .subtitle { max-width: 720px; margin-top: 10px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .stack { display: grid; gap: 24px; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-inner { padding: 20px; }
+    .control-card .card-inner { display: grid; gap: 22px; }
+
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-xl);
+      background: #fff;
+      padding: 28px 18px;
+      text-align: center;
+      transition: border-color 150ms ease, background 150ms ease;
+    }
+
+    .dropzone.dragover, .dropzone:hover {
+      border-color: #475569;
+      background: #f8fafc;
+    }
+
+    .icon { font-size: 28px; margin-bottom: 10px; color: #64748b; }
+    .drop-title { font-size: 0.94rem; font-weight: 650; }
+    .drop-hint { margin-top: 4px; color: var(--muted); font-size: 0.78rem; }
+
+    .file-input {
+      width: 100%;
+      margin-top: 16px;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--soft);
+      padding: 10px;
+      font-size: 0.88rem;
+    }
+
+    .status-box {
+      border-radius: var(--radius-lg);
+      background: var(--soft);
+      padding: 14px;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+
+    .filename { color: var(--ink); font-weight: 650; overflow-wrap: anywhere; }
+    .status { margin-top: 5px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      border-radius: 12px;
+      background: #fff;
+      padding: 9px 6px;
+      text-align: center;
+      font-size: 0.75rem;
+    }
+
+    .stat strong { display: block; font-size: 0.82rem; }
+    .stat span { color: var(--muted); }
+
+    .error {
+      display: none;
+      gap: 9px;
+      border: 1px solid var(--warn-line);
+      border-radius: var(--radius-lg);
+      background: var(--warn-bg);
+      padding: 12px;
+      color: var(--warn);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .error.visible { display: flex; }
+    .section-title { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 750; }
+    .controls { display: grid; gap: 18px; }
+    .slider { display: grid; gap: 8px; }
+
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .slider-title { font-size: 0.88rem; font-weight: 650; }
+    .slider-hint { margin-top: 2px; color: var(--muted); font-size: 0.74rem; }
+
+    .value-pill {
+      border-radius: 10px;
+      background: var(--soft);
+      padding: 5px 8px;
+      color: #334155;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] { width: 100%; accent-color: var(--dark); }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: var(--radius-lg);
+      background: var(--soft);
+      padding: 12px;
+      font-size: 0.88rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--dark);
+      border-radius: var(--radius-lg);
+      background: var(--dark);
+      color: #fff;
+      min-height: 42px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 650;
+      text-decoration: none;
+      transition: opacity 150ms ease, transform 150ms ease;
+    }
+
+    .button:hover:not(:disabled) { transform: translateY(-1px); }
+    .button:disabled { cursor: not-allowed; opacity: 0.45; }
+    .button.secondary { background: #fff; color: var(--ink); border-color: var(--line); }
+    .button.full { width: 100%; }
+
+    .download-link {
+      display: none;
+      border-radius: var(--radius-lg);
+      background: var(--ok-bg);
+      color: var(--ok);
+      padding: 12px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .download-link.visible { display: block; }
+
+    .preview-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .canvas-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .canvas-label {
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .canvas-shell {
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: #fff;
+      padding: 12px;
+      overflow: auto;
+    }
+
+    canvas { max-width: 100%; max-height: 520px; border-radius: 12px; image-rendering: auto; }
+    .frame-control { display: none; margin-top: 18px; gap: 8px; }
+    .frame-control.visible { display: grid; }
+    .frame-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.76rem; }
+    .notes { background: var(--dark); color: #f8fafc; }
+    .notes p { color: #cbd5e1; font-size: 0.9rem; }
+    .notes-title { margin-bottom: 8px; font-weight: 750; }
+
+    @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 680px) {
+      .app { padding: 20px 12px; }
+      .hero, .preview-head { flex-direction: column; align-items: stretch; }
+      .canvas-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <h1>GIF white → alpha preprocessor</h1>
+        <p class="subtitle">Convert near-white GIF pixels into transparency, tune threshold/edge softness, preview frames, then export a processed GIF.</p>
+      </div>
+      <button id="resetButton" class="button secondary" type="button">↺ Reset</button>
+    </header>
+
+    <section class="layout">
+      <aside class="card control-card">
+        <div class="card-inner">
+          <div id="dropzone" class="dropzone">
+            <div class="icon">⇪</div>
+            <div class="drop-title">Drop a GIF here</div>
+            <div class="drop-hint">or choose a local file</div>
+            <input id="fileInput" class="file-input" type="file" accept="image/gif" />
+          </div>
+
+          <div class="status-box">
+            <div id="fileName" class="filename">No file loaded</div>
+            <div id="status" class="status">Drop or choose a GIF to begin.</div>
+            <div id="stats" class="stats" hidden>
+              <div class="stat"><strong id="statSize">—</strong><span>size</span></div>
+              <div class="stat"><strong id="statFrames">—</strong><span>frames</span></div>
+              <div class="stat"><strong id="statDuration">—</strong><span>duration</span></div>
+            </div>
+          </div>
+
+          <div id="errorBox" class="error"><span>⚠</span><span id="errorText"></span></div>
+
+          <div class="controls">
+            <div class="section-title">☷ Keying controls</div>
+
+            <label class="slider"><div class="slider-head"><div><div class="slider-title">Tolerance</div><div class="slider-hint">Higher removes more off-white pixels.</div></div><output id="toleranceOut" class="value-pill">28</output></div><input id="tolerance" type="range" min="0" max="180" step="1" value="28" /></label>
+            <label class="slider"><div class="slider-head"><div><div class="slider-title">Softness</div><div class="slider-hint">Feathers edges to reduce jaggies.</div></div><output id="softnessOut" class="value-pill">32</output></div><input id="softness" type="range" min="0" max="140" step="1" value="32" /></label>
+            <label class="slider"><div class="slider-head"><div><div class="slider-title">White-spill fix</div><div class="slider-hint">Reduces pale halos on semi-transparent edges.</div></div><output id="spillFixOut" class="value-pill">35</output></div><input id="spillFix" type="range" min="0" max="100" step="1" value="35" /></label>
+            <label class="slider"><div class="slider-head"><div><div class="slider-title">Export quality</div><div class="slider-hint">Lower is slower/better in gif.js.</div></div><output id="qualityOut" class="value-pill">10</output></div><input id="quality" type="range" min="1" max="30" step="1" value="10" /></label>
+            <label class="slider"><div class="slider-head"><div><div class="slider-title">Max export frames</div><div class="slider-hint">Useful for large GIFs while testing.</div></div><output id="maxFramesOut" class="value-pill">250</output></div><input id="maxFrames" type="range" min="1" max="500" step="1" value="250" /></label>
+
+            <label class="toggle"><span>Preserve original alpha</span><input id="preserveOriginalAlpha" type="checkbox" checked /></label>
+            <label class="toggle"><span>Invert key result</span><input id="invert" type="checkbox" /></label>
+          </div>
+
+          <button id="exportButton" class="button full" type="button" disabled>↓ Export processed GIF</button>
+          <a id="downloadLink" class="download-link" href="#" download="processed-alpha.gif">Download processed GIF</a>
+        </div>
+      </aside>
+
+      <section class="stack">
+        <article class="card">
+          <div class="card-inner">
+            <div class="preview-head">
+              <div class="section-title">▧ Preview</div>
+              <button id="playButton" class="button secondary" type="button" disabled>▶ Play</button>
+            </div>
+            <div class="canvas-grid">
+              <div><div class="canvas-label">Original frame</div><div class="canvas-shell"><canvas id="sourceCanvas"></canvas></div></div>
+              <div><div class="canvas-label">Processed alpha preview</div><div class="canvas-shell"><canvas id="previewCanvas"></canvas></div></div>
+            </div>
+            <div id="frameControl" class="frame-control">
+              <div class="frame-meta"><span id="frameLabel">Frame 0 / 0</span><span id="delayLabel">0 ms</span></div>
+              <input id="frameSlider" type="range" min="0" max="0" value="0" />
+            </div>
+          </div>
+        </article>
+
+        <article class="card notes">
+          <div class="card-inner">
+            <div class="notes-title">Notes</div>
+            <p>GIF transparency is palette/index based, so exported edges may be harder than the canvas preview. For best alpha quality, use PNG/APNG/WebM in a production pipeline; this page is for practical GIF cleanup and quick tuning.</p>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.js"></script>
+  <script type="module">
+    import { parseGIF, decompressFrames } from "https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/+esm";
+    "use strict";
+
+    const LIBS = {
+      gifWorker: "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js"
+    };
+
+    const DEFAULT_OPTS = {
+      tolerance: 28,
+      softness: 32,
+      spillFix: 35,
+      preserveOriginalAlpha: true,
+      invert: false,
+      quality: 10,
+      maxFrames: 250
+    };
+
+    const state = {
+      fileName: "",
+      gif: null,
+      frameIndex: 0,
+      playing: false,
+      exporting: false,
+      downloadUrl: "",
+      timer: null,
+      raf: 0,
+      opts: { ...DEFAULT_OPTS },
+      api: { parseGIF, decompressFrames, GIF: null }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      resetButton: $("resetButton"), dropzone: $("dropzone"), fileInput: $("fileInput"), fileName: $("fileName"),
+      status: $("status"), stats: $("stats"), statSize: $("statSize"), statFrames: $("statFrames"), statDuration: $("statDuration"),
+      errorBox: $("errorBox"), errorText: $("errorText"), tolerance: $("tolerance"), toleranceOut: $("toleranceOut"),
+      softness: $("softness"), softnessOut: $("softnessOut"), spillFix: $("spillFix"), spillFixOut: $("spillFixOut"),
+      quality: $("quality"), qualityOut: $("qualityOut"), maxFrames: $("maxFrames"), maxFramesOut: $("maxFramesOut"),
+      preserveOriginalAlpha: $("preserveOriginalAlpha"), invert: $("invert"), exportButton: $("exportButton"), downloadLink: $("downloadLink"),
+      playButton: $("playButton"), sourceCanvas: $("sourceCanvas"), previewCanvas: $("previewCanvas"), frameControl: $("frameControl"),
+      frameLabel: $("frameLabel"), delayLabel: $("delayLabel"), frameSlider: $("frameSlider")
+    };
+
+    function resolveGifApi() {
+      const GIF = window.GIF;
+      if (!parseGIF || !decompressFrames) throw new Error("GIF decoder did not load. Check network/CDN access or try opening this page from a normal browser tab.");
+      if (!GIF) throw new Error("GIF encoder did not load. Check network/CDN access or try opening this page from a normal browser tab.");
+      state.api = { parseGIF, decompressFrames, GIF };
+      return state.api;
+    }
+
+    function setStatus(message) { els.status.textContent = message; }
+    function setError(message) { els.errorText.textContent = message || ""; els.errorBox.classList.toggle("visible", Boolean(message)); }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function setDownloadUrl(url) {
+      if (state.downloadUrl) URL.revokeObjectURL(state.downloadUrl);
+      state.downloadUrl = url || "";
+      els.downloadLink.href = url || "#";
+      els.downloadLink.classList.toggle("visible", Boolean(url));
+      if (url) els.downloadLink.download = (state.fileName || "processed").replace(/\.gif$/i, "") + "-alpha.gif";
+    }
+
+    function alphaForPixel(r, g, b, opts) {
+      const dr = 255 - r, dg = 255 - g, db = 255 - b;
+      const d2 = dr * dr + dg * dg + db * db;
+      const t = opts.tolerance;
+      const s = opts.softness;
+      let a;
+      if (s <= 0) {
+        a = d2 <= t * t ? 0 : 255;
+      } else {
+        const d = Math.sqrt(d2);
+        a = clamp(((d - t) / s) * 255, 0, 255);
+      }
+      return opts.invert ? 255 - a : a;
+    }
+
+    function applyDisposal(canvas, previousFrame, previousImageData) {
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!previousFrame) return;
+      const dims = previousFrame.dims;
+      if (previousFrame.disposalType === 2) {
+        ctx.clearRect(dims.left, dims.top, dims.width, dims.height);
+      } else if (previousFrame.disposalType === 3 && previousImageData) {
+        ctx.putImageData(previousImageData, 0, 0);
+      }
+    }
+
+    function decodeToFullFrames(frames, width, height) {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const fullFrames = [];
+      let previousFrame = null;
+      let restoreImageData = null;
+
+      for (const frame of frames) {
+        applyDisposal(canvas, previousFrame, restoreImageData);
+        if (frame.disposalType === 3) restoreImageData = ctx.getImageData(0, 0, width, height);
+        else restoreImageData = null;
+
+        const patch = new ImageData(new Uint8ClampedArray(frame.patch), frame.dims.width, frame.dims.height);
+        ctx.putImageData(patch, frame.dims.left, frame.dims.top);
+        fullFrames.push({
+          rgba: ctx.getImageData(0, 0, width, height).data.slice(),
+          delay: Math.max(20, frame.delay || 100)
+        });
+        previousFrame = frame;
+      }
+      return fullFrames;
+    }
+
+    function processFramePixels(sourceRGBA, opts) {
+      const out = new Uint8ClampedArray(sourceRGBA.length);
+      for (let i = 0; i < sourceRGBA.length; i += 4) {
+        const r = sourceRGBA[i], g = sourceRGBA[i + 1], b = sourceRGBA[i + 2], srcA = sourceRGBA[i + 3];
+        const keyedA = alphaForPixel(r, g, b, opts);
+        const nextA = opts.preserveOriginalAlpha ? Math.min(srcA, keyedA) : keyedA;
+        const edge = nextA > 0 && nextA < 255 ? 1 - nextA / 255 : 0;
+        const spill = edge * (opts.spillFix / 100);
+        out[i] = clamp(Math.round(r - (255 - r) * spill), 0, 255);
+        out[i + 1] = clamp(Math.round(g - (255 - g) * spill), 0, 255);
+        out[i + 2] = clamp(Math.round(b - (255 - b) * spill), 0, 255);
+        out[i + 3] = nextA;
+      }
+      return out;
+    }
+
+    function drawChecker(ctx, width, height, size = 16) {
+      ctx.clearRect(0, 0, width, height);
+      for (let y = 0; y < height; y += size) {
+        for (let x = 0; x < width; x += size) {
+          ctx.fillStyle = ((x / size) + (y / size)) % 2 === 0 ? "#ddd" : "#aaa";
+          ctx.fillRect(x, y, size, size);
+        }
+      }
+    }
+
+    function drawCurrentFrameNow() {
+      const gif = state.gif;
+      const frame = gif && gif.frames[state.frameIndex];
+      if (!gif || !frame) return;
+
+      els.sourceCanvas.width = gif.width;
+      els.sourceCanvas.height = gif.height;
+      els.previewCanvas.width = gif.width;
+      els.previewCanvas.height = gif.height;
+
+      const sourceCtx = els.sourceCanvas.getContext("2d", { willReadFrequently: true });
+      const previewCtx = els.previewCanvas.getContext("2d", { willReadFrequently: true });
+      sourceCtx.putImageData(new ImageData(new Uint8ClampedArray(frame.rgba), gif.width, gif.height), 0, 0);
+      drawChecker(previewCtx, gif.width, gif.height);
+      previewCtx.putImageData(new ImageData(processFramePixels(frame.rgba, state.opts), gif.width, gif.height), 0, 0);
+
+      els.frameLabel.textContent = `Frame ${state.frameIndex + 1} / ${gif.frames.length}`;
+      els.delayLabel.textContent = `${frame.delay || 100} ms`;
+      els.frameSlider.value = String(state.frameIndex);
+    }
+
+    function requestDraw() {
+      cancelAnimationFrame(state.raf);
+      state.raf = requestAnimationFrame(drawCurrentFrameNow);
+    }
+
+    function updateStats() {
+      const gif = state.gif;
+      if (!gif) { els.stats.hidden = true; return; }
+      const duration = gif.frames.reduce((sum, frame) => sum + (frame.delay || 100), 0) / 1000;
+      els.statSize.textContent = `${gif.width} × ${gif.height}`;
+      els.statFrames.textContent = String(gif.frames.length);
+      els.statDuration.textContent = `${duration.toFixed(2)}s`;
+      els.stats.hidden = false;
+    }
+
+    function updateButtons() {
+      const hasGif = Boolean(state.gif);
+      els.exportButton.disabled = !hasGif || state.exporting;
+      els.playButton.disabled = !hasGif;
+      els.playButton.textContent = state.playing ? "Ⅱ Pause" : "▶ Play";
+      els.exportButton.textContent = state.exporting ? "Encoding…" : "↓ Export processed GIF";
+      els.frameControl.classList.toggle("visible", hasGif);
+    }
+
+    function syncControlsFromState() {
+      for (const id of ["tolerance", "softness", "spillFix", "quality", "maxFrames"]) {
+        els[id].value = String(state.opts[id]);
+        els[id + "Out"].textContent = String(state.opts[id]);
+      }
+      els.preserveOriginalAlpha.checked = state.opts.preserveOriginalAlpha;
+      els.invert.checked = state.opts.invert;
+    }
+
+    function stopPlayback() {
+      state.playing = false;
+      if (state.timer) clearTimeout(state.timer);
+      state.timer = null;
+      updateButtons();
+    }
+
+    function scheduleNextFrame() {
+      if (!state.playing || !state.gif || !state.gif.frames.length) return;
+      const delay = Math.max(20, state.gif.frames[state.frameIndex].delay || 100);
+      state.timer = setTimeout(() => {
+        state.frameIndex = (state.frameIndex + 1) % state.gif.frames.length;
+        drawCurrentFrameNow();
+        scheduleNextFrame();
+      }, delay);
+    }
+
+    async function loadGif(file) {
+      setError("");
+      setDownloadUrl("");
+      stopPlayback();
+      state.fileName = file.name;
+      els.fileName.textContent = file.name;
+      setStatus("Reading GIF…");
+
+      try {
+        const api = resolveGifApi();
+        const buffer = await file.arrayBuffer();
+        const parsed = api.parseGIF(buffer);
+        const frames = api.decompressFrames(parsed, true);
+        const width = parsed.lsd.width;
+        const height = parsed.lsd.height;
+        const pixels = width * height * frames.length;
+        if (pixels > 90_000_000) setStatus("Large GIF detected. Decoding may take a moment…");
+
+        const fullFrames = decodeToFullFrames(frames, width, height);
+        state.gif = { width, height, frames: fullFrames };
+        state.frameIndex = 0;
+        els.frameSlider.min = "0";
+        els.frameSlider.max = String(Math.max(0, fullFrames.length - 1));
+        els.frameSlider.value = "0";
+
+        updateStats();
+        updateButtons();
+        drawCurrentFrameNow();
+        setStatus(`Loaded ${fullFrames.length} frames.`);
+      } catch (error) {
+        state.gif = null;
+        updateStats();
+        updateButtons();
+        setError(error.message || String(error));
+        setStatus("Could not load the GIF.");
+      }
+    }
+
+    async function exportGif() {
+      if (!state.gif) return;
+      state.exporting = true;
+      setError("");
+      setDownloadUrl("");
+      updateButtons();
+
+      try {
+        const api = resolveGifApi();
+        const gif = state.gif;
+        const encoder = new api.GIF({
+          workers: 2,
+          quality: state.opts.quality,
+          workerScript: LIBS.gifWorker,
+          width: gif.width,
+          height: gif.height
+        });
+
+        const limit = Math.min(gif.frames.length, state.opts.maxFrames);
+        const canvas = document.createElement("canvas");
+        canvas.width = gif.width;
+        canvas.height = gif.height;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+        setStatus(`Encoding ${limit} processed frames…`);
+        for (let i = 0; i < limit; i++) {
+          ctx.clearRect(0, 0, gif.width, gif.height);
+          ctx.putImageData(new ImageData(processFramePixels(gif.frames[i].rgba, state.opts), gif.width, gif.height), 0, 0);
+          encoder.addFrame(ctx, { copy: true, delay: gif.frames[i].delay || 100 });
+        }
+
+        const blob = await new Promise((resolve, reject) => {
+          encoder.on("finished", resolve);
+          encoder.on("abort", () => reject(new Error("GIF encoding aborted.")));
+          encoder.render();
+        });
+
+        setDownloadUrl(URL.createObjectURL(blob));
+        setStatus("Export complete.");
+      } catch (error) {
+        setError(error.message || String(error));
+        setStatus("Export failed.");
+      } finally {
+        state.exporting = false;
+        updateButtons();
+      }
+    }
+
+    function reset() {
+      stopPlayback();
+      state.opts = { ...DEFAULT_OPTS };
+      state.frameIndex = 0;
+      setDownloadUrl("");
+      syncControlsFromState();
+      if (state.gif) drawCurrentFrameNow();
+      setStatus(state.gif ? "Settings reset." : "Drop or choose a GIF to begin.");
+    }
+
+    function wireEvents() {
+      els.fileInput.addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) loadGif(file);
+      });
+
+      els.dropzone.addEventListener("dragenter", () => els.dropzone.classList.add("dragover"));
+      els.dropzone.addEventListener("dragover", (event) => { event.preventDefault(); els.dropzone.classList.add("dragover"); });
+      els.dropzone.addEventListener("dragleave", () => els.dropzone.classList.remove("dragover"));
+      els.dropzone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        els.dropzone.classList.remove("dragover");
+        const file = event.dataTransfer.files && event.dataTransfer.files[0];
+        if (file) loadGif(file);
+      });
+
+      for (const id of ["tolerance", "softness", "spillFix", "quality", "maxFrames"]) {
+        els[id].addEventListener("input", () => {
+          state.opts[id] = Number(els[id].value);
+          els[id + "Out"].textContent = String(state.opts[id]);
+          if (["tolerance", "softness", "spillFix"].includes(id)) requestDraw();
+        });
+      }
+
+      els.preserveOriginalAlpha.addEventListener("change", () => { state.opts.preserveOriginalAlpha = els.preserveOriginalAlpha.checked; requestDraw(); });
+      els.invert.addEventListener("change", () => { state.opts.invert = els.invert.checked; requestDraw(); });
+      els.frameSlider.addEventListener("input", () => { stopPlayback(); state.frameIndex = Number(els.frameSlider.value); drawCurrentFrameNow(); });
+      els.playButton.addEventListener("click", () => {
+        if (!state.gif) return;
+        state.playing = !state.playing;
+        updateButtons();
+        if (state.playing) scheduleNextFrame();
+        else stopPlayback();
+      });
+      els.exportButton.addEventListener("click", exportGif);
+      els.resetButton.addEventListener("click", reset);
+    }
+
+    try { resolveGifApi(); } catch (_) {}
+    syncControlsFromState();
+    updateButtons();
+    wireEvents();
+  </script>
+</body>
+</html>

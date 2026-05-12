@@ -20,3 +20,7 @@ Thumbs.db
 
 # Nested repo snapshot (excluded from initial baseline)
 brawl/ethic-brawl/
+
+.artifacts-deploy-stage/
+
+*.sha256

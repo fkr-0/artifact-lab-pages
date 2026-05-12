@@ -98,6 +98,22 @@ const bombermanMultiplayerLaunch = launchArtifact(
 );
 assert.equal(bombermanMultiplayerLaunch.url, '../app-hub/bomberman.html?embedded=true&multiplayer=true');
 
+const observedBombermanLaunch = launchArtifact(
+  { href: '../app-hub/bomberman.html' },
+  'inline',
+  { open() { throw new Error('inline launch should not open browser window'); } },
+  { multiplayer: true, targetPeerId: 'peer 1/2', spectate: true, observe: true, mode: 'vs', session: 'bomberman' }
+);
+assert.equal(observedBombermanLaunch.url, '../app-hub/bomberman.html?embedded=true&multiplayer=true&targetPeerId=peer%201%2F2&spectate=true&observe=true&mode=vs&session=bomberman');
+
+const dawSessionLaunch = launchArtifact(
+  { href: '../v11-peer-daw/index.html' },
+  'inline',
+  { open() { throw new Error('inline launch should not open browser window'); } },
+  { multiplayer: true, targetPeerId: 'peer-a', mode: 'session', session: 'daw' }
+);
+assert.equal(dawSessionLaunch.url, '../v11-peer-daw/index.html?embedded=true&multiplayer=true&targetPeerId=peer-a&mode=session&session=daw');
+
 function makeNode(tagName = 'div') {
   const node = {
     tagName,
