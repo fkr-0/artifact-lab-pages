@@ -13,6 +13,7 @@
 ```
 
 This will:
+
 1. Start the Python HTTP server
 2. Open Firefox in private mode to NEXUS Portal v8
 3. Keep running until you press Ctrl+C
@@ -50,6 +51,7 @@ alias nexus-stop='artifacts-stop'
 ```
 
 Then just type:
+
 ```bash
 nexus        # Opens NEXUS Portal
 nexus-stop   # Stops server
@@ -64,11 +66,11 @@ export ARTIFACTS_DIR=/path/to   # Custom directory
 
 ## Files Created
 
-| File | Description |
-|------|-------------|
-| `artifacts-serve` | Standalone script (runs & opens Firefox) |
+| File                  | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `artifacts-serve`     | Standalone script (runs & opens Firefox)    |
 | `artifacts-server.sh` | Shell functions (start, stop, status, etc.) |
-| `SETUP_ALIASES.sh` | Alias config for ~/.bashrc |
+| `SETUP_ALIASES.sh`    | Alias config for ~/.bashrc                  |
 
 ## Usage Examples
 
@@ -94,6 +96,7 @@ artifacts-restart 9000
 ## Troubleshooting
 
 **Port already in use:**
+
 ```bash
 # Use a different port
 ./artifacts-serve 3000
@@ -103,6 +106,7 @@ artifacts-restart 9000
 The script will show the URL to open manually.
 
 **Server won't stop:**
+
 ```bash
 # Force stop
 kill $(cat .artifacts-server.pid)
@@ -111,7 +115,7 @@ rm .artifacts-server.pid
 
 ## URLs
 
-- **NEXUS Portal:** http://localhost:8080/app-hub/v8-portal.html
-- **Field Recorder:** http://localhost:8080/app-hub/v7.html
-- **Ethic Brawl:** http://localhost:8080/brawl/ethic-brawl/
-- **Groove Station:** http://localhost:8080/peernet-orca/
+- **NEXUS Portal:** <http://localhost:8080/app-hub/v8-portal.html>
+- **Field Recorder:** <http://localhost:8080/app-hub/v7.html>
+- **Ethic Brawl:** <http://localhost:8080/ethic-brawl/>
+- **Groove Station:** <http://localhost:8080/peernet-orca/>

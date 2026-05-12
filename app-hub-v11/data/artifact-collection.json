@@ -22,11 +22,7 @@
       "bridge.yml",
       "bdg.gif"
     ],
-    "includeDirs": [
-      "app-hub-v11",
-      "peernetjs",
-      "lib"
-    ]
+    "includeDirs": ["app-hub-v11", "peernetjs", "lib"]
   },
   "operations": {
     "validate": {
@@ -106,23 +102,10 @@
   "items": [
     {
       "kind": "html-path",
-      "tags": [
-        "hub",
-        "v9",
-        "legacy",
-        "compatibility",
-        "tooling"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["hub", "v9", "legacy", "compatibility", "tooling"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "fullscreen", "newWindow"]
       },
       "id": "v9-full-portal",
       "title": "NEXUS v9 Full Portal",
@@ -134,24 +117,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "hub",
-        "v10",
-        "legacy",
-        "compatibility",
-        "peernet",
-        "tooling"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["hub", "v10", "legacy", "compatibility", "peernet", "tooling"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "fullscreen", "newWindow"]
       },
       "id": "v10-full-portal",
       "title": "NEXUS v10 Full Portal",
@@ -163,21 +132,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "hub",
-        "v10",
-        "peernet"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["hub", "v10", "peernet"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "fullscreen", "newWindow"]
       },
       "id": "v10-classic",
       "title": "NEXUS v10 Classic Portal",
@@ -189,24 +147,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "hub",
-        "v10",
-        "themes",
-        "sound",
-        "floating"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["hub", "v10", "themes", "sound", "floating"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "v10-enhanced",
       "title": "NEXUS v10 Enhanced Portal",
@@ -218,23 +162,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "editor",
-        "tool",
-        "notepad",
-        "local-first",
-        "v9"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["editor", "tool", "notepad", "local-first", "v9"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "v9-quick-notepad",
       "title": "v9 Quick Notepad",
@@ -246,22 +177,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "calculator",
-        "math",
-        "tool",
-        "v9"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["calculator", "math", "tool", "v9"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "v9-sci-fi-calculator",
       "title": "v9 Sci-Fi Calculator",
@@ -273,22 +192,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "editor",
-        "notepad",
-        "local-first",
-        "v10"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["editor", "notepad", "local-first", "v10"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "v10-local-first-notepad",
       "title": "v10 Local-first Notepad",
@@ -300,22 +207,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "editor",
-        "collaborative",
-        "text",
-        "v10"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["editor", "collaborative", "text", "v10"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "v10-shared-text-pad",
       "title": "v10 Shared Text Pad",
@@ -327,22 +222,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "editor",
-        "notes",
-        "v4",
-        "console"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["editor", "notes", "v4", "console"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "v4-console-notes",
       "title": "v4 Console Notes",
@@ -354,23 +237,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "editor",
-        "collaborative",
-        "monaco",
-        "code"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["editor", "collaborative", "monaco", "code"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "v8-collab-code-editor",
       "title": "v8 Collab Code Editor",
@@ -382,22 +252,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "editor",
-        "collaborative",
-        "textarea",
-        "p2p"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["editor", "collaborative", "textarea", "p2p"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "v8-collab-pad-lite",
       "title": "v8 Collab Pad Lite",
@@ -409,22 +267,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "audio",
-        "peernet",
-        "modular"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["audio", "peernet", "modular"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "peer-mod-groove",
       "title": "PeerModGroove",
@@ -436,21 +282,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["tool", "graphics", "sprite"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "sprite-gif-creator",
       "title": "Sprite GIF Creator",
@@ -462,22 +297,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite",
-        "extraction"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["tool", "graphics", "sprite", "extraction"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "newWindow"]
       },
       "id": "sprite-extractor",
       "title": "Sprite Extractor",
@@ -489,23 +312,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "game",
-        "shooter",
-        "space",
-        "multiplayer",
-        "cyberpunk"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["game", "shooter", "space", "multiplayer", "cyberpunk"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
+        "modes": ["inline", "floating", "newWindow"],
         "actions": [
           {
             "id": "play-inline",
@@ -535,24 +345,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "game",
-        "classic",
-        "bomberman",
-        "multiplayer",
-        "peernet"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["game", "classic", "bomberman", "multiplayer", "peernet"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
+        "modes": ["inline", "floating", "fullscreen", "newWindow"],
         "actions": [
           {
             "id": "play-inline",
@@ -592,22 +388,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "game",
-        "classic",
-        "minesweeper",
-        "puzzle"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["game", "classic", "minesweeper", "puzzle"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
+        "modes": ["inline", "fullscreen", "newWindow"],
         "actions": [
           {
             "id": "play-inline",
@@ -636,22 +420,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "game",
-        "classic",
-        "solitaire",
-        "cards"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["game", "classic", "solitaire", "cards"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
+        "modes": ["inline", "fullscreen", "newWindow"],
         "actions": [
           {
             "id": "play-inline",
@@ -680,23 +452,10 @@
     },
     {
       "kind": "info",
-      "tags": [
-        "catalog",
-        "docs",
-        "markdown",
-        "viewer"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["catalog", "docs", "markdown", "viewer"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "artifacts-toc",
       "title": "Artifacts Table of Contents",
@@ -709,57 +468,32 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "game",
-        "brawler",
-        "cyberpunk",
-        "built"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["game", "brawler", "cyberpunk", "built"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "fullscreen", "newWindow"]
       },
       "id": "ethic-brawl",
       "title": "Ethic Brawl",
-      "href": "../brawl/ethic-brawl/index.html",
+      "href": "../ethic-brawl/index.html",
       "description": "Built Vite artifact for the cyberpunk philosophical arena-brawler; package/deploy copies dist output only.",
       "deploy": {
         "build": {
-          "cwd": "brawl/ethic-brawl",
+          "cwd": "ethic-brawl",
           "command": "npm run build",
           "dist": "dist"
         },
-        "includePath": "brawl/ethic-brawl/dist",
-        "targetPath": "brawl/ethic-brawl",
+        "includePath": "ethic-brawl/dist",
+        "targetPath": "ethic-brawl",
         "include": true
       }
     },
     {
       "kind": "html-path",
-      "tags": [
-        "audio",
-        "daw",
-        "peernet",
-        "built",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["audio", "daw", "peernet", "built", "v11"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "fullscreen", "newWindow"]
       },
       "id": "v11-peer-daw",
       "title": "v11 Peer DAW",
@@ -778,23 +512,10 @@
     },
     {
       "kind": "info",
-      "tags": [
-        "docs",
-        "markdown",
-        "server",
-        "viewer"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["docs", "markdown", "server", "viewer"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "server-guide",
       "title": "Server Guide",
@@ -807,19 +528,10 @@
     },
     {
       "kind": "external-link",
-      "tags": [
-        "external",
-        "example"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["external", "example"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "newWindow"
-        ]
+        "modes": ["inline", "newWindow"]
       },
       "id": "external-openai-docs",
       "title": "External Reference Example",
@@ -831,24 +543,10 @@
     },
     {
       "kind": "info",
-      "tags": [
-        "docs",
-        "markdown",
-        "roadmap",
-        "v11",
-        "viewer"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["docs", "markdown", "roadmap", "v11", "viewer"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "v11-roadmap",
       "title": "v11 Modularization Roadmap",
@@ -861,23 +559,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "docs",
-        "markdown",
-        "viewer",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["docs", "markdown", "viewer", "v11"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "markdown-viewer",
       "title": "Markdown Viewer",
@@ -889,23 +574,10 @@
     },
     {
       "kind": "html-path",
-      "tags": [
-        "tool",
-        "font",
-        "graphics",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
+      "tags": ["tool", "font", "graphics", "v11"],
+      "operations": ["validate", "index"],
       "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ]
+        "modes": ["inline", "floating", "fullscreen", "newWindow"]
       },
       "id": "font-lab-browser",
       "title": "Font Lab Browser",

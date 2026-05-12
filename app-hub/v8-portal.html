@@ -1,1519 +1,1823 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <title>NEXUS PORTAL v8 // Artifact Navigator</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg-primary: #0a0a12;
-      --bg-secondary: #12121f;
-      --fg-primary: #00ffff;
-      --fg-secondary: #ff00ff;
-      --accent: #00ff88;
-      --accent-secondary: #ff3366;
-      --glow-primary: rgba(0, 255, 255, 0.5);
-      --glow-secondary: rgba(255, 0, 255, 0.5);
-      --grid-color: rgba(0, 255, 255, 0.08);
-      --scanline-opacity: 0.03;
-      --warn: #ffaa00;
-    }
-
-    [data-theme='synthwave'] {
-      --bg-primary: #1a0a2e;
-      --bg-secondary: #2d1b4e;
-      --fg-primary: #ff00ff;
-      --fg-secondary: #00ffff;
-      --accent: #ff6ec7;
-      --accent-secondary: #ffaa00;
-      --glow-primary: rgba(255, 0, 255, 0.6);
-      --glow-secondary: rgba(255, 170, 0, 0.5);
-      --grid-color: rgba(255, 0, 255, 0.12);
-    }
-
-    [data-theme='cyberpunk'] {
-      --bg-primary: #0d0d0d;
-      --bg-secondary: #1a1a1a;
-      --fg-primary: #f0e68c;
-      --fg-secondary: #ff0080;
-      --accent: #00ff41;
-      --accent-secondary: #ff073a;
-      --glow-primary: rgba(240, 230, 140, 0.6);
-      --glow-secondary: rgba(255, 0, 128, 0.5);
-      --grid-color: rgba(240, 230, 140, 0.06);
-    }
-
-    [data-theme='retro8bit'] {
-      --bg-primary: #0f0f0f;
-      --bg-secondary: #1a1a0a;
-      --fg-primary: #33ff00;
-      --fg-secondary: #ffb000;
-      --accent: #00ff88;
-      --accent-secondary: #ff4444;
-      --glow-primary: rgba(51, 255, 0, 0.5);
-      --glow-secondary: rgba(255, 176, 0, 0.5);
-      --grid-color: rgba(51, 255, 0, 0.1);
-    }
-
-    [data-theme='midnight'] {
-      --bg-primary: #0a1628;
-      --bg-secondary: #0f2140;
-      --fg-primary: #87ceeb;
-      --fg-secondary: #c0c0c0;
-      --accent: #4169e1;
-      --accent-secondary: #ffd700;
-      --glow-primary: rgba(135, 206, 235, 0.5);
-      --glow-secondary: rgba(192, 192, 192, 0.4);
-      --grid-color: rgba(135, 206, 235, 0.08);
-    }
-
-    [data-theme='vaporwave'] {
-      --bg-primary: #1a0a20;
-      --bg-secondary: #2d1536;
-      --fg-primary: #ff71ce;
-      --fg-secondary: #01cdfe;
-      --accent: #b967ff;
-      --accent-secondary: #05ffa1;
-      --glow-primary: rgba(255, 113, 206, 0.5);
-      --glow-secondary: rgba(1, 205, 254, 0.5);
-      --grid-color: rgba(185, 103, 255, 0.1);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Share Tech Mono', monospace;
-      background: var(--bg-primary);
-      color: var(--fg-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      transition: background 0.5s ease, color 0.3s ease;
-    }
-
-    .font-orb { font-family: 'Orbitron', sans-serif; }
-    .font-pixel { font-family: 'Press Start 2P', cursive; }
-
-    /* STARFIELD BACKGROUND */
-    .starfield {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      animation: twinkle 3s infinite;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* WARP EFFECT */
-    .warp-lines {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.3;
-    }
-
-    .warp-line {
-      position: absolute;
-      width: 2px;
-      height: 100px;
-      background: linear-gradient(to bottom, transparent, var(--fg-primary), transparent);
-      animation: warp 2s linear infinite;
-    }
-
-    @keyframes warp {
-      0% { transform: translateY(-100px) scaleY(0.5); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translateY(100vh) scaleY(2); opacity: 0; }
-    }
-
-    /* GRID FLOOR */
-    .grid-bg {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      perspective: 500px;
-    }
-
-    .grid-floor {
-      position: absolute;
-      bottom: -50%;
-      left: -50%;
-      width: 200%;
-      height: 60%;
-      background:
-        linear-gradient(var(--grid-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-      background-size: 50px 50px;
-      transform: rotateX(60deg);
-      transform-origin: center bottom;
-      animation: gridMove 4s linear infinite;
-    }
-
-    @keyframes gridMove {
-      0% { background-position: 0 0; }
-      100% { background-position: 0 50px; }
-    }
-
-    /* SCANLINES */
-    .scanlines {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1000;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, var(--scanline-opacity)) 2px,
-        rgba(0, 0, 0, var(--scanline-opacity)) 4px
-      );
-    }
-
-    /* PARTICLES CANVAS */
-    #particles-canvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* MAIN CONTAINER */
-    .console-container {
-      position: relative;
-      z-index: 10;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* HEADER */
-    .console-header {
-      background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
-      border-bottom: 1px solid var(--fg-primary);
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      position: relative;
-    }
-
-    .console-header::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        var(--fg-primary),
-        var(--fg-secondary),
-        var(--fg-primary),
-        transparent
-      );
-      animation: headerGlow 3s ease-in-out infinite;
-    }
-
-    @keyframes headerGlow {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .ship-icon {
-      font-size: 2rem;
-      animation: shipHover 3s ease-in-out infinite;
-    }
-
-    @keyframes shipHover {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-5px) rotate(2deg); }
-    }
-
-    .logo-text {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      font-size: 1.5rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--fg-primary);
-      text-shadow:
-        0 0 10px var(--glow-primary),
-        0 0 30px var(--glow-primary);
-      animation: logoFlicker 4s infinite;
-    }
-
-    @keyframes logoFlicker {
-      0%, 97%, 99%, 100% { opacity: 1; }
-      98% { opacity: 0.8; }
-    }
-
-    .version-badge {
-      font-size: 0.65rem;
-      padding: 0.2rem 0.5rem;
-      background: var(--accent);
-      color: var(--bg-primary);
-      border-radius: 3px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-    }
-
-    .status-bar {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(0.9); }
-    }
-
-    .coord-display {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.65rem;
-      color: var(--fg-secondary);
-      letter-spacing: 0.1em;
-    }
-
-    /* MAIN CONTENT */
-    .main-content {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 1rem;
-      padding: 1.5rem;
-    }
-
-    @media (max-width: 768px) {
-      .main-content { grid-template-columns: 1fr; }
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 31, 0.9) 100%);
-      border: 1px solid var(--fg-primary);
-      border-radius: 8px;
-      padding: 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .sidebar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--fg-primary), var(--fg-secondary));
-    }
-
-    .sidebar-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 0.2em;
-      color: var(--fg-secondary);
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .nav-menu { list-style: none; padding: 0; margin: 0; }
-
-    .nav-item { margin-bottom: 0.25rem; }
-
-    .nav-button {
-      width: 100%;
-      text-align: left;
-      padding: 0.75rem 1rem;
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 4px;
-      color: var(--fg-primary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: inherit;
-      font-size: 0.9rem;
-    }
-
-    .nav-button:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--fg-primary);
-      box-shadow: 0 0 15px var(--glow-primary);
-    }
-
-    .nav-button.active {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--fg-secondary);
-      color: var(--fg-secondary);
-      box-shadow:
-        inset 0 0 20px rgba(255, 0, 255, 0.1),
-        0 0 15px var(--glow-secondary);
-    }
-
-    .nav-arrow {
-      transition: transform 0.3s ease;
-      opacity: 0.5;
-    }
-
-    .nav-button.expanded .nav-arrow { transform: rotate(90deg); opacity: 1; }
-
-    .submenu {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-      padding-left: 1rem;
-    }
-
-    .submenu.open { max-height: 500px; }
-
-    .submenu-item {
-      padding: 0.5rem 0.75rem;
-      border-left: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.7);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .submenu-item:hover {
-      color: var(--fg-primary);
-      border-left-color: var(--fg-primary);
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .submenu-item.selected {
-      color: var(--accent);
-      border-left-color: var(--accent);
-      background: rgba(0, 255, 136, 0.05);
-    }
-
-    .status-indicator {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    .status-indicator.wip { background: var(--warn); }
-    .status-indicator.dev { background: var(--fg-secondary); }
-
-    /* CONTENT PANEL */
-    .content-panel {
-      background: linear-gradient(135deg, rgba(18, 18, 31, 0.95) 0%, var(--bg-secondary) 100%);
-      border: 1px solid var(--fg-primary);
-      border-radius: 8px;
-      padding: 1.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .content-panel::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--fg-secondary), var(--fg-primary));
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .panel-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.25rem;
-      letter-spacing: 0.1em;
-      color: var(--fg-primary);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .panel-icon { font-size: 1.5rem; }
-
-    /* ARTIFACT CARDS GRID */
-    .artifacts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
-    }
-
-    .artifact-card {
-      background: linear-gradient(145deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 1.25rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .artifact-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .artifact-card:hover::before { left: 100%; }
-
-    .artifact-card:hover {
-      border-color: var(--fg-primary);
-      transform: translateY(-4px);
-      box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.4),
-        0 0 20px var(--glow-primary);
-    }
-
-    .artifact-card.external:hover {
-      border-color: var(--fg-secondary);
-      box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.4),
-        0 0 20px var(--glow-secondary);
-    }
-
-    .artifact-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .artifact-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--fg-primary), var(--fg-secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-
-    .artifact-info { flex: 1; }
-
-    .artifact-name {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-      color: var(--fg-primary);
-    }
-
-    .artifact-path {
-      font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.4);
-      font-family: 'Share Tech Mono', monospace;
-    }
-
-    .artifact-desc {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.6);
-      line-height: 1.5;
-      margin-bottom: 1rem;
-    }
-
-    .artifact-meta {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .meta-tag {
-      font-size: 0.65rem;
-      padding: 0.25rem 0.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--accent);
-    }
-
-    .status-tag {
-      font-size: 0.6rem;
-      padding: 0.2rem 0.4rem;
-      border-radius: 3px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-left: auto;
-    }
-
-    .status-tag.complete { background: rgba(0, 255, 136, 0.2); color: var(--accent); }
-    .status-tag.wip { background: rgba(255, 170, 0, 0.2); color: var(--warn); }
-    .status-tag.mature { background: rgba(0, 255, 255, 0.2); color: var(--fg-primary); }
-
-    .launch-btn {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.75rem;
-      background: transparent;
-      border: 1px solid var(--fg-primary);
-      border-radius: 4px;
-      color: var(--fg-primary);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .launch-btn:hover {
-      background: var(--fg-primary);
-      color: var(--bg-primary);
-    }
-
-    /* SETTINGS PANEL */
-    .settings-panel { display: none; }
-    .settings-panel.active { display: block; }
-
-    .settings-section { margin-bottom: 2rem; }
-
-    .settings-section-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.9rem;
-      letter-spacing: 0.15em;
-      color: var(--fg-secondary);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .settings-section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, var(--fg-secondary), transparent);
-    }
-
-    .setting-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .setting-label { font-size: 0.9rem; color: rgba(255, 255, 255, 0.8); }
-
-    .theme-selector {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .theme-btn {
-      width: 48px;
-      height: 32px;
-      border-radius: 4px;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .theme-btn:hover { transform: scale(1.1); }
-
-    .theme-btn.active {
-      border-color: white;
-      box-shadow: 0 0 15px currentColor;
-    }
-
-    .theme-btn[data-theme='default'] { background: linear-gradient(135deg, #0a0a12, #00ffff); }
-    .theme-btn[data-theme='synthwave'] { background: linear-gradient(135deg, #1a0a2e, #ff00ff); }
-    .theme-btn[data-theme='cyberpunk'] { background: linear-gradient(135deg, #0d0d0d, #f0e68c); }
-    .theme-btn[data-theme='retro8bit'] { background: linear-gradient(135deg, #0f0f0f, #33ff00); }
-    .theme-btn[data-theme='midnight'] { background: linear-gradient(135deg, #0a1628, #87ceeb); }
-    .theme-btn[data-theme='vaporwave'] { background: linear-gradient(135deg, #1a0a20, #ff71ce); }
-
-    .toggle-switch {
-      width: 52px;
-      height: 28px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .toggle-switch.active { background: var(--accent); }
-
-    .toggle-switch::after {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 22px;
-      height: 22px;
-      background: white;
-      border-radius: 50%;
-      transition: transform 0.3s ease;
-    }
-
-    .toggle-switch.active::after { transform: translateX(24px); }
-
-    /* FOOTER */
-    .footer-status {
-      background: linear-gradient(0deg, var(--bg-secondary) 0%, transparent 100%);
-      border-top: 1px solid var(--fg-primary);
-      padding: 0.75rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .ticker {
-      overflow: hidden;
-      flex: 1;
-      max-width: 500px;
-    }
-
-    .ticker-content {
-      display: inline-block;
-      animation: tickerScroll 30s linear infinite;
-      white-space: nowrap;
-      color: var(--accent);
-    }
-
-    @keyframes tickerScroll {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    .action-btns { display: flex; gap: 0.5rem; }
-
-    .action-btn {
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      color: var(--fg-primary);
-      font-family: inherit;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--fg-primary);
-      box-shadow: 0 0 15px var(--glow-primary);
-    }
-
-    .action-btn.active {
-      background: var(--fg-primary);
-      color: var(--bg-primary);
-    }
-
-    /* MOBILE */
-    @media (max-width: 640px) {
-      .logo-text { font-size: 1rem; }
-      .sidebar { order: 2; }
-      .content-panel { order: 1; }
-      .artifacts-grid { grid-template-columns: 1fr; }
-      .ship-icon { font-size: 1.5rem; }
-    }
-
-    /* REDUCED MOTION */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+  <head>
+    <meta charset="UTF-8" />
+    <title>NEXUS PORTAL v8 // Artifact Navigator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0a0a12;
+        --bg-secondary: #12121f;
+        --fg-primary: #00ffff;
+        --fg-secondary: #ff00ff;
+        --accent: #00ff88;
+        --accent-secondary: #ff3366;
+        --glow-primary: rgba(0, 255, 255, 0.5);
+        --glow-secondary: rgba(255, 0, 255, 0.5);
+        --grid-color: rgba(0, 255, 255, 0.08);
+        --scanline-opacity: 0.03;
+        --warn: #ffaa00;
       }
-    }
-  </style>
-</head>
-<body data-theme="default">
-  <!-- BACKGROUND EFFECTS -->
-  <div class="starfield" id="starfield"></div>
-  <div class="warp-lines" id="warpLines"></div>
-  <div class="grid-bg">
-    <div class="grid-floor"></div>
-  </div>
-  <canvas id="particles-canvas"></canvas>
-  <div class="scanlines"></div>
 
-  <!-- MAIN CONSOLE -->
-  <div class="console-container">
-    <!-- HEADER -->
-    <header class="console-header">
-      <div class="logo-container">
-        <span class="ship-icon">🚀</span>
-        <div>
-          <div class="logo-text">NEXUS PORTAL</div>
-          <span class="version-badge">v8.0</span>
-        </div>
-      </div>
+      [data-theme="synthwave"] {
+        --bg-primary: #1a0a2e;
+        --bg-secondary: #2d1b4e;
+        --fg-primary: #ff00ff;
+        --fg-secondary: #00ffff;
+        --accent: #ff6ec7;
+        --accent-secondary: #ffaa00;
+        --glow-primary: rgba(255, 0, 255, 0.6);
+        --glow-secondary: rgba(255, 170, 0, 0.5);
+        --grid-color: rgba(255, 0, 255, 0.12);
+      }
 
-      <div class="action-btns">
-        <a href="v9-portal.html" class="action-btn">v9 →</a>
-        <button class="action-btn active" id="btn-artifacts" onclick="showPanel('artifacts')">Artifacts</button>
-        <button class="action-btn" id="btn-settings" onclick="showPanel('settings')">Settings</button>
-        <button class="action-btn" id="btn-toc" onclick="window.open('../ARTIFACTS_TOC.md', '_blank')">TOC</button>
-      </div>
+      [data-theme="cyberpunk"] {
+        --bg-primary: #0d0d0d;
+        --bg-secondary: #1a1a1a;
+        --fg-primary: #f0e68c;
+        --fg-secondary: #ff0080;
+        --accent: #00ff41;
+        --accent-secondary: #ff073a;
+        --glow-primary: rgba(240, 230, 140, 0.6);
+        --glow-secondary: rgba(255, 0, 128, 0.5);
+        --grid-color: rgba(240, 230, 140, 0.06);
+      }
 
-      <div class="status-bar">
-        <div class="status-item">
-          <span class="status-dot"></span>
-          <span>Online</span>
-        </div>
-        <div class="status-item">
-          <span>Theme:</span>
-          <span id="currentThemeName">TRON</span>
-        </div>
-        <div class="coord-display">
-          <span id="coords">X:42.7 Y:-13.2 Z:8.1</span>
-        </div>
-        <div class="status-item">
-          <span id="currentTime">--:--:--</span>
-        </div>
-      </div>
-    </header>
+      [data-theme="retro8bit"] {
+        --bg-primary: #0f0f0f;
+        --bg-secondary: #1a1a0a;
+        --fg-primary: #33ff00;
+        --fg-secondary: #ffb000;
+        --accent: #00ff88;
+        --accent-secondary: #ff4444;
+        --glow-primary: rgba(51, 255, 0, 0.5);
+        --glow-secondary: rgba(255, 176, 0, 0.5);
+        --grid-color: rgba(51, 255, 0, 0.1);
+      }
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <h2 class="sidebar-title">
-          <span>✦</span>
-          <span>// SECTORS</span>
-        </h2>
+      [data-theme="midnight"] {
+        --bg-primary: #0a1628;
+        --bg-secondary: #0f2140;
+        --fg-primary: #87ceeb;
+        --fg-secondary: #c0c0c0;
+        --accent: #4169e1;
+        --accent-secondary: #ffd700;
+        --glow-primary: rgba(135, 206, 235, 0.5);
+        --glow-secondary: rgba(192, 192, 192, 0.4);
+        --grid-color: rgba(135, 206, 235, 0.08);
+      }
 
-        <ul class="nav-menu" id="navMenu">
-          <li class="nav-item">
-            <button class="nav-button expanded active" data-category="projects" onclick="toggleNav(this)">
-              <span>Projects</span>
-              <svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </button>
-            <div class="submenu open" id="submenu-projects">
-              <div class="submenu-item selected" onclick="filterArtifacts('all')">
-                <span class="status-indicator"></span>All Projects
+      [data-theme="vaporwave"] {
+        --bg-primary: #1a0a20;
+        --bg-secondary: #2d1536;
+        --fg-primary: #ff71ce;
+        --fg-secondary: #01cdfe;
+        --accent: #b967ff;
+        --accent-secondary: #05ffa1;
+        --glow-primary: rgba(255, 113, 206, 0.5);
+        --glow-secondary: rgba(1, 205, 254, 0.5);
+        --grid-color: rgba(185, 103, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Share Tech Mono", monospace;
+        background: var(--bg-primary);
+        color: var(--fg-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+        transition:
+          background 0.5s ease,
+          color 0.3s ease;
+      }
+
+      .font-orb {
+        font-family: "Orbitron", sans-serif;
+      }
+      .font-pixel {
+        font-family: "Press Start 2P", cursive;
+      }
+
+      /* STARFIELD BACKGROUND */
+      .starfield {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2);
+        }
+      }
+
+      /* WARP EFFECT */
+      .warp-lines {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.3;
+      }
+
+      .warp-line {
+        position: absolute;
+        width: 2px;
+        height: 100px;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          var(--fg-primary),
+          transparent
+        );
+        animation: warp 2s linear infinite;
+      }
+
+      @keyframes warp {
+        0% {
+          transform: translateY(-100px) scaleY(0.5);
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) scaleY(2);
+          opacity: 0;
+        }
+      }
+
+      /* GRID FLOOR */
+      .grid-bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        perspective: 500px;
+      }
+
+      .grid-floor {
+        position: absolute;
+        bottom: -50%;
+        left: -50%;
+        width: 200%;
+        height: 60%;
+        background:
+          linear-gradient(var(--grid-color) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: rotateX(60deg);
+        transform-origin: center bottom;
+        animation: gridMove 4s linear infinite;
+      }
+
+      @keyframes gridMove {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 0 50px;
+        }
+      }
+
+      /* SCANLINES */
+      .scanlines {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1000;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 4px
+        );
+      }
+
+      /* PARTICLES CANVAS */
+      #particles-canvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* MAIN CONTAINER */
+      .console-container {
+        position: relative;
+        z-index: 10;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER */
+      .console-header {
+        background: linear-gradient(
+          180deg,
+          var(--bg-secondary) 0%,
+          transparent 100%
+        );
+        border-bottom: 1px solid var(--fg-primary);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        position: relative;
+      }
+
+      .console-header::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--fg-primary),
+          var(--fg-secondary),
+          var(--fg-primary),
+          transparent
+        );
+        animation: headerGlow 3s ease-in-out infinite;
+      }
+
+      @keyframes headerGlow {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .ship-icon {
+        font-size: 2rem;
+        animation: shipHover 3s ease-in-out infinite;
+      }
+
+      @keyframes shipHover {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-5px) rotate(2deg);
+        }
+      }
+
+      .logo-text {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 900;
+        font-size: 1.5rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--fg-primary);
+        text-shadow:
+          0 0 10px var(--glow-primary),
+          0 0 30px var(--glow-primary);
+        animation: logoFlicker 4s infinite;
+      }
+
+      @keyframes logoFlicker {
+        0%,
+        97%,
+        99%,
+        100% {
+          opacity: 1;
+        }
+        98% {
+          opacity: 0.8;
+        }
+      }
+
+      .version-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+        background: var(--accent);
+        color: var(--bg-primary);
+        border-radius: 3px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .status-bar {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 10px var(--accent);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.6;
+          transform: scale(0.9);
+        }
+      }
+
+      .coord-display {
+        font-family: "Orbitron", monospace;
+        font-size: 0.65rem;
+        color: var(--fg-secondary);
+        letter-spacing: 0.1em;
+      }
+
+      /* MAIN CONTENT */
+      .main-content {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1rem;
+        padding: 1.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* SIDEBAR */
+      .sidebar {
+        background: linear-gradient(
+          135deg,
+          var(--bg-secondary) 0%,
+          rgba(18, 18, 31, 0.9) 100%
+        );
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .sidebar::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--fg-primary),
+          var(--fg-secondary)
+        );
+      }
+
+      .sidebar-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.2em;
+        color: var(--fg-secondary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .nav-item {
+        margin-bottom: 0.25rem;
+      }
+
+      .nav-button {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        color: var(--fg-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+
+      .nav-button:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 15px var(--glow-primary);
+      }
+
+      .nav-button.active {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--fg-secondary);
+        color: var(--fg-secondary);
+        box-shadow:
+          inset 0 0 20px rgba(255, 0, 255, 0.1),
+          0 0 15px var(--glow-secondary);
+      }
+
+      .nav-arrow {
+        transition: transform 0.3s ease;
+        opacity: 0.5;
+      }
+
+      .nav-button.expanded .nav-arrow {
+        transform: rotate(90deg);
+        opacity: 1;
+      }
+
+      .submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding-left: 1rem;
+      }
+
+      .submenu.open {
+        max-height: 500px;
+      }
+
+      .submenu-item {
+        padding: 0.5rem 0.75rem;
+        border-left: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .submenu-item:hover {
+        color: var(--fg-primary);
+        border-left-color: var(--fg-primary);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .submenu-item.selected {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: rgba(0, 255, 136, 0.05);
+      }
+
+      .status-indicator {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .status-indicator.wip {
+        background: var(--warn);
+      }
+      .status-indicator.dev {
+        background: var(--fg-secondary);
+      }
+
+      /* CONTENT PANEL */
+      .content-panel {
+        background: linear-gradient(
+          135deg,
+          rgba(18, 18, 31, 0.95) 0%,
+          var(--bg-secondary) 100%
+        );
+        border: 1px solid var(--fg-primary);
+        border-radius: 8px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .content-panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--fg-secondary),
+          var(--fg-primary)
+        );
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .panel-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.25rem;
+        letter-spacing: 0.1em;
+        color: var(--fg-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .panel-icon {
+        font-size: 1.5rem;
+      }
+
+      /* ARTIFACT CARDS GRID */
+      .artifacts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+      }
+
+      .artifact-card {
+        background: linear-gradient(
+          145deg,
+          rgba(0, 0, 0, 0.4) 0%,
+          rgba(0, 0, 0, 0.2) 100%
+        );
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .artifact-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .artifact-card:hover::before {
+        left: 100%;
+      }
+
+      .artifact-card:hover {
+        border-color: var(--fg-primary);
+        transform: translateY(-4px);
+        box-shadow:
+          0 10px 40px rgba(0, 0, 0, 0.4),
+          0 0 20px var(--glow-primary);
+      }
+
+      .artifact-card.external:hover {
+        border-color: var(--fg-secondary);
+        box-shadow:
+          0 10px 40px rgba(0, 0, 0, 0.4),
+          0 0 20px var(--glow-secondary);
+      }
+
+      .artifact-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .artifact-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: linear-gradient(
+          135deg,
+          var(--fg-primary),
+          var(--fg-secondary)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .artifact-info {
+        flex: 1;
+      }
+
+      .artifact-name {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: var(--fg-primary);
+      }
+
+      .artifact-path {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.4);
+        font-family: "Share Tech Mono", monospace;
+      }
+
+      .artifact-desc {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+
+      .artifact-meta {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .meta-tag {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+      }
+
+      .status-tag {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-left: auto;
+      }
+
+      .status-tag.complete {
+        background: rgba(0, 255, 136, 0.2);
+        color: var(--accent);
+      }
+      .status-tag.wip {
+        background: rgba(255, 170, 0, 0.2);
+        color: var(--warn);
+      }
+      .status-tag.mature {
+        background: rgba(0, 255, 255, 0.2);
+        color: var(--fg-primary);
+      }
+
+      .launch-btn {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.75rem;
+        background: transparent;
+        border: 1px solid var(--fg-primary);
+        border-radius: 4px;
+        color: var(--fg-primary);
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .launch-btn:hover {
+        background: var(--fg-primary);
+        color: var(--bg-primary);
+      }
+
+      /* SETTINGS PANEL */
+      .settings-panel {
+        display: none;
+      }
+      .settings-panel.active {
+        display: block;
+      }
+
+      .settings-section {
+        margin-bottom: 2rem;
+      }
+
+      .settings-section-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.15em;
+        color: var(--fg-secondary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .settings-section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, var(--fg-secondary), transparent);
+      }
+
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .setting-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .theme-selector {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .theme-btn {
+        width: 48px;
+        height: 32px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .theme-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .theme-btn.active {
+        border-color: white;
+        box-shadow: 0 0 15px currentColor;
+      }
+
+      .theme-btn[data-theme="default"] {
+        background: linear-gradient(135deg, #0a0a12, #00ffff);
+      }
+      .theme-btn[data-theme="synthwave"] {
+        background: linear-gradient(135deg, #1a0a2e, #ff00ff);
+      }
+      .theme-btn[data-theme="cyberpunk"] {
+        background: linear-gradient(135deg, #0d0d0d, #f0e68c);
+      }
+      .theme-btn[data-theme="retro8bit"] {
+        background: linear-gradient(135deg, #0f0f0f, #33ff00);
+      }
+      .theme-btn[data-theme="midnight"] {
+        background: linear-gradient(135deg, #0a1628, #87ceeb);
+      }
+      .theme-btn[data-theme="vaporwave"] {
+        background: linear-gradient(135deg, #1a0a20, #ff71ce);
+      }
+
+      .toggle-switch {
+        width: 52px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: var(--accent);
+      }
+
+      .toggle-switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+
+      .toggle-switch.active::after {
+        transform: translateX(24px);
+      }
+
+      /* FOOTER */
+      .footer-status {
+        background: linear-gradient(
+          0deg,
+          var(--bg-secondary) 0%,
+          transparent 100%
+        );
+        border-top: 1px solid var(--fg-primary);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .ticker {
+        overflow: hidden;
+        flex: 1;
+        max-width: 500px;
+      }
+
+      .ticker-content {
+        display: inline-block;
+        animation: tickerScroll 30s linear infinite;
+        white-space: nowrap;
+        color: var(--accent);
+      }
+
+      @keyframes tickerScroll {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      .action-btns {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: var(--fg-primary);
+        font-family: inherit;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--fg-primary);
+        box-shadow: 0 0 15px var(--glow-primary);
+      }
+
+      .action-btn.active {
+        background: var(--fg-primary);
+        color: var(--bg-primary);
+      }
+
+      /* MOBILE */
+      @media (max-width: 640px) {
+        .logo-text {
+          font-size: 1rem;
+        }
+        .sidebar {
+          order: 2;
+        }
+        .content-panel {
+          order: 1;
+        }
+        .artifacts-grid {
+          grid-template-columns: 1fr;
+        }
+        .ship-icon {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* REDUCED MOTION */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="default">
+    <!-- BACKGROUND EFFECTS -->
+    <div class="starfield" id="starfield"></div>
+    <div class="warp-lines" id="warpLines"></div>
+    <div class="grid-bg">
+      <div class="grid-floor"></div>
+    </div>
+    <canvas id="particles-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <!-- MAIN CONSOLE -->
+    <div class="console-container">
+      <!-- HEADER -->
+      <header class="console-header">
+        <div class="logo-container">
+          <span class="ship-icon">🚀</span>
+          <div>
+            <div class="logo-text">NEXUS PORTAL</div>
+            <span class="version-badge">v8.0</span>
+          </div>
+        </div>
+
+        <div class="action-btns">
+          <a href="v9-portal.html" class="action-btn">v9 →</a>
+          <button
+            class="action-btn active"
+            id="btn-artifacts"
+            onclick="showPanel('artifacts')"
+          >
+            Artifacts
+          </button>
+          <button
+            class="action-btn"
+            id="btn-settings"
+            onclick="showPanel('settings')"
+          >
+            Settings
+          </button>
+          <button
+            class="action-btn"
+            id="btn-toc"
+            onclick="window.open('../ARTIFACTS_TOC.md', '_blank')"
+          >
+            TOC
+          </button>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-dot"></span>
+            <span>Online</span>
+          </div>
+          <div class="status-item">
+            <span>Theme:</span>
+            <span id="currentThemeName">TRON</span>
+          </div>
+          <div class="coord-display">
+            <span id="coords">X:42.7 Y:-13.2 Z:8.1</span>
+          </div>
+          <div class="status-item">
+            <span id="currentTime">--:--:--</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+          <h2 class="sidebar-title">
+            <span>✦</span>
+            <span>// SECTORS</span>
+          </h2>
+
+          <ul class="nav-menu" id="navMenu">
+            <li class="nav-item">
+              <button
+                class="nav-button expanded active"
+                data-category="projects"
+                onclick="toggleNav(this)"
+              >
+                <span>Projects</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu open" id="submenu-projects">
+                <div
+                  class="submenu-item selected"
+                  onclick="filterArtifacts('all')"
+                >
+                  <span class="status-indicator"></span>All Projects
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('spc')">
+                  <span class="status-indicator wip"></span>SPC - Sharepic
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('brawl')">
+                  <span class="status-indicator dev"></span>Brawl - Ethic Brawl
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('peernet')">
+                  <span class="status-indicator"></span>PeerNet Tools
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('bathroom')">
+                  <span class="status-indicator"></span>Emergency Guide
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('aster')">
+                  <span class="status-indicator"></span>Aster Relay
+                </div>
               </div>
-              <div class="submenu-item" onclick="filterArtifacts('spc')">
-                <span class="status-indicator wip"></span>SPC - Sharepic
+            </li>
+
+            <li class="nav-item">
+              <button
+                class="nav-button"
+                data-category="apps"
+                onclick="toggleNav(this)"
+              >
+                <span>Console Apps</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-apps">
+                <div class="submenu-item" onclick="filterArtifacts('app-v4')">
+                  <span class="status-indicator"></span>NEXUS v4
+                </div>
+                <div
+                  class="submenu-item"
+                  onclick="filterArtifacts('app-fieldrec')"
+                >
+                  <span class="status-indicator"></span>Field Recorder
+                </div>
               </div>
-              <div class="submenu-item" onclick="filterArtifacts('brawl')">
-                <span class="status-indicator dev"></span>Brawl - Ethic Brawl
+            </li>
+
+            <li class="nav-item">
+              <button
+                class="nav-button"
+                data-category="root"
+                onclick="toggleNav(this)"
+              >
+                <span>Root Artifacts</span>
+                <svg
+                  class="nav-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <div class="submenu" id="submenu-root">
+                <div class="submenu-item" onclick="filterArtifacts('escape')">
+                  <span class="status-indicator wip"></span>Escape Collective
+                </div>
+                <div class="submenu-item" onclick="filterArtifacts('viewer')">
+                  <span class="status-indicator"></span>Viewers & Tools
+                </div>
               </div>
-              <div class="submenu-item" onclick="filterArtifacts('peernet')">
-                <span class="status-indicator"></span>PeerNet Tools
-              </div>
-              <div class="submenu-item" onclick="filterArtifacts('bathroom')">
-                <span class="status-indicator"></span>Emergency Guide
-              </div>
-              <div class="submenu-item" onclick="filterArtifacts('aster')">
-                <span class="status-indicator"></span>Aster Relay
+            </li>
+          </ul>
+        </aside>
+
+        <!-- CONTENT PANEL -->
+        <section class="content-panel">
+          <!-- ARTIFACTS VIEW -->
+          <div id="panel-artifacts" class="artifacts-view panel-content active">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <span class="panel-icon">🌌</span>
+                <span id="panelTitle">All Artifacts</span>
+              </h2>
+              <div style="display: flex; gap: 0.5rem">
+                <button class="action-btn" onclick="shuffleArtifacts()">
+                  Shuffle
+                </button>
               </div>
             </div>
-          </li>
 
-          <li class="nav-item">
-            <button class="nav-button" data-category="apps" onclick="toggleNav(this)">
-              <span>Console Apps</span>
-              <svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </button>
-            <div class="submenu" id="submenu-apps">
-              <div class="submenu-item" onclick="filterArtifacts('app-v4')">
-                <span class="status-indicator"></span>NEXUS v4
-              </div>
-              <div class="submenu-item" onclick="filterArtifacts('app-fieldrec')">
-                <span class="status-indicator"></span>Field Recorder
-              </div>
-            </div>
-          </li>
-
-          <li class="nav-item">
-            <button class="nav-button" data-category="root" onclick="toggleNav(this)">
-              <span>Root Artifacts</span>
-              <svg class="nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </button>
-            <div class="submenu" id="submenu-root">
-              <div class="submenu-item" onclick="filterArtifacts('escape')">
-                <span class="status-indicator wip"></span>Escape Collective
-              </div>
-              <div class="submenu-item" onclick="filterArtifacts('viewer')">
-                <span class="status-indicator"></span>Viewers & Tools
-              </div>
-            </div>
-          </li>
-        </ul>
-      </aside>
-
-      <!-- CONTENT PANEL -->
-      <section class="content-panel">
-        <!-- ARTIFACTS VIEW -->
-        <div id="panel-artifacts" class="artifacts-view panel-content active">
-          <div class="panel-header">
-            <h2 class="panel-title">
-              <span class="panel-icon">🌌</span>
-              <span id="panelTitle">All Artifacts</span>
-            </h2>
-            <div style="display: flex; gap: 0.5rem">
-              <button class="action-btn" onclick="shuffleArtifacts()">Shuffle</button>
+            <div class="artifacts-grid" id="artifactsGrid">
+              <!-- Artifacts rendered here -->
             </div>
           </div>
 
-          <div class="artifacts-grid" id="artifactsGrid">
-            <!-- Artifacts rendered here -->
-          </div>
-        </div>
+          <!-- SETTINGS VIEW -->
+          <div id="panel-settings" class="settings-panel panel-content">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <span class="panel-icon">⚙</span>
+                <span>System Configuration</span>
+              </h2>
+            </div>
 
-        <!-- SETTINGS VIEW -->
-        <div id="panel-settings" class="settings-panel panel-content">
-          <div class="panel-header">
-            <h2 class="panel-title">
-              <span class="panel-icon">⚙</span>
-              <span>System Configuration</span>
-            </h2>
-          </div>
+            <div class="settings-section">
+              <h3 class="settings-section-title">Theme Selection</h3>
+              <div class="setting-row">
+                <span class="setting-label">Interface Theme</span>
+                <div class="theme-selector">
+                  <button
+                    class="theme-btn active"
+                    data-theme="default"
+                    title="TRON Default"
+                    onclick="setTheme('default')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="synthwave"
+                    title="Synthwave"
+                    onclick="setTheme('synthwave')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="cyberpunk"
+                    title="Cyberpunk"
+                    onclick="setTheme('cyberpunk')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="retro8bit"
+                    title="8-Bit Retro"
+                    onclick="setTheme('retro8bit')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="midnight"
+                    title="Midnight Blue"
+                    onclick="setTheme('midnight')"
+                  ></button>
+                  <button
+                    class="theme-btn"
+                    data-theme="vaporwave"
+                    title="Vaporwave"
+                    onclick="setTheme('vaporwave')"
+                  ></button>
+                </div>
+              </div>
 
-          <div class="settings-section">
-            <h3 class="settings-section-title">Theme Selection</h3>
-            <div class="setting-row">
-              <span class="setting-label">Interface Theme</span>
-              <div class="theme-selector">
-                <button class="theme-btn active" data-theme="default" title="TRON Default" onclick="setTheme('default')"></button>
-                <button class="theme-btn" data-theme="synthwave" title="Synthwave" onclick="setTheme('synthwave')"></button>
-                <button class="theme-btn" data-theme="cyberpunk" title="Cyberpunk" onclick="setTheme('cyberpunk')"></button>
-                <button class="theme-btn" data-theme="retro8bit" title="8-Bit Retro" onclick="setTheme('retro8bit')"></button>
-                <button class="theme-btn" data-theme="midnight" title="Midnight Blue" onclick="setTheme('midnight')"></button>
-                <button class="theme-btn" data-theme="vaporwave" title="Vaporwave" onclick="setTheme('vaporwave')"></button>
+              <div class="setting-row">
+                <span class="setting-label">Scanlines Effect</span>
+                <div
+                  class="toggle-switch active"
+                  id="toggleScanlines"
+                  onclick="toggleSetting('scanlines')"
+                ></div>
+              </div>
+
+              <div class="setting-row">
+                <span class="setting-label">Warp Speed</span>
+                <div
+                  class="toggle-switch active"
+                  id="toggleWarp"
+                  onclick="toggleSetting('warp')"
+                ></div>
               </div>
             </div>
-
-            <div class="setting-row">
-              <span class="setting-label">Scanlines Effect</span>
-              <div class="toggle-switch active" id="toggleScanlines" onclick="toggleSetting('scanlines')"></div>
-            </div>
-
-            <div class="setting-row">
-              <span class="setting-label">Warp Speed</span>
-              <div class="toggle-switch active" id="toggleWarp" onclick="toggleSetting('warp')"></div>
-            </div>
           </div>
+        </section>
+      </main>
+
+      <!-- FOOTER STATUS -->
+      <footer class="footer-status">
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span style="color: var(--accent)">READY</span>
+          <span>|</span>
+          <span>CPU: <span id="cpuUsage">23%</span></span>
+          <span>|</span>
+          <span>MEM: <span id="memUsage">156MB</span></span>
         </div>
-      </section>
-    </main>
 
-    <!-- FOOTER STATUS -->
-    <footer class="footer-status">
-      <div style="display: flex; align-items: center; gap: 0.5rem">
-        <span style="color: var(--accent)">READY</span>
-        <span>|</span>
-        <span>CPU: <span id="cpuUsage">23%</span></span>
-        <span>|</span>
-        <span>MEM: <span id="memUsage">156MB</span></span>
-      </div>
+        <div class="ticker">
+          <span class="ticker-content">
+            NEXUS PORTAL v8.0 ONLINE // ALL ARTIFACTS ACCESSIBLE // WELCOME TO
+            THE COLLECTION // SPC SHAREPIC TOOLS // ETHIC BRAWL v1.0 // PEERNET
+            ORCA // BATHROOM EMERGENCY GUIDE v3.2 // EXPLORE THE UNIVERSE OF
+            CODE
+          </span>
+        </div>
 
-      <div class="ticker">
-        <span class="ticker-content">
-          NEXUS PORTAL v8.0 ONLINE // ALL ARTIFACTS ACCESSIBLE // WELCOME TO THE COLLECTION //
-          SPC SHAREPIC TOOLS // ETHIC BRAWL v1.0 // PEERNET ORCA // BATHROOM EMERGENCY GUIDE v3.2 //
-          EXPLORE THE UNIVERSE OF CODE
-        </span>
-      </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span>SECTOR: <span id="sectorDisplay">ALPHA-7</span></span>
+        </div>
+      </footer>
+    </div>
 
-      <div style="display: flex; align-items: center; gap: 0.5rem">
-        <span>SECTOR: <span id="sectorDisplay">ALPHA-7</span></span>
-      </div>
-    </footer>
-  </div>
+    <script>
+      // ============================================
+      // ARTIFACT DATA - REAL PROJECTS
+      // ============================================
 
-  <script>
-    // ============================================
-    // ARTIFACT DATA - REAL PROJECTS
-    // ============================================
+      const artifacts = [
+        // SPC - Sharepic Creator Suite
+        {
+          id: "spc-aether",
+          name: "Aether Node",
+          description: "Aether node visualizer for procedural art",
+          category: ["spc", "generative"],
+          icon: "✧",
+          url: "../spc/aether_node.html",
+          path: "spc/aether_node.html",
+          status: "complete",
+        },
+        {
+          id: "spc-sharepic",
+          name: "Sharepic Studio",
+          description: "Sharepic creation studio with templates",
+          category: ["spc", "tools"],
+          icon: "🖼",
+          url: "../spc/sharepic_studio.html",
+          path: "spc/sharepic_studio.html",
+          status: "complete",
+        },
+        {
+          id: "spc-procedural",
+          name: "Procedural Sharepic",
+          description: "Procedural sharepic generation studio",
+          category: ["spc", "generative"],
+          icon: "🎨",
+          url: "../spc/procedural_sharepic_studio.html",
+          path: "spc/procedural_sharepic_studio.html",
+          status: "complete",
+        },
+        {
+          id: "spc-template",
+          name: "Template Engine",
+          description: "Template rendering engine for sharepics",
+          category: ["spc", "tools"],
+          icon: "⚙",
+          url: "../spc/template_engine.html",
+          path: "spc/template_engine.html",
+          status: "complete",
+        },
+        {
+          id: "spc-ultimate",
+          name: "Sharepic Studio ULTIMATE",
+          description:
+            "⭐ Merged version with 9 themes, 14 generators, LaTeX math, export presets. The definitive sharepic creation tool.",
+          category: ["spc", "generative"],
+          icon: "🌟",
+          url: "../spc/sharepic-studio-ultimate.html",
+          path: "spc/sharepic-studio-ultimate.html",
+          status: "ultimate",
+          tags: ["Canvas", "LaTeX", "MathJax", "Generative"],
+        },
 
-    const artifacts = [
-      // SPC - Sharepic Creator Suite
-      {
-        id: 'spc-aether',
-        name: 'Aether Node',
-        description: 'Aether node visualizer for procedural art',
-        category: ['spc', 'generative'],
-        icon: '✧',
-        url: '../spc/aether_node.html',
-        path: 'spc/aether_node.html',
-        status: 'complete'
-      },
-      {
-        id: 'spc-sharepic',
-        name: 'Sharepic Studio',
-        description: 'Sharepic creation studio with templates',
-        category: ['spc', 'tools'],
-        icon: '🖼',
-        url: '../spc/sharepic_studio.html',
-        path: 'spc/sharepic_studio.html',
-        status: 'complete'
-      },
-      {
-        id: 'spc-procedural',
-        name: 'Procedural Sharepic',
-        description: 'Procedural sharepic generation studio',
-        category: ['spc', 'generative'],
-        icon: '🎨',
-        url: '../spc/procedural_sharepic_studio.html',
-        path: 'spc/procedural_sharepic_studio.html',
-        status: 'complete'
-      },
-      {
-        id: 'spc-template',
-        name: 'Template Engine',
-        description: 'Template rendering engine for sharepics',
-        category: ['spc', 'tools'],
-        icon: '⚙',
-        url: '../spc/template_engine.html',
-        path: 'spc/template_engine.html',
-        status: 'complete'
-      },
-      {
-        id: 'spc-ultimate',
-        name: 'Sharepic Studio ULTIMATE',
-        description: '⭐ Merged version with 9 themes, 14 generators, LaTeX math, export presets. The definitive sharepic creation tool.',
-        category: ['spc', 'generative'],
-        icon: '🌟',
-        url: '../spc/sharepic-studio-ultimate.html',
-        path: 'spc/sharepic-studio-ultimate.html',
-        status: 'ultimate',
-        tags: ['Canvas', 'LaTeX', 'MathJax', 'Generative']
-      },
+        // BRAWL - Ethic Brawl
+        {
+          id: "brawl-game",
+          name: "Ethic Brawl",
+          description:
+            "2.5D cyberpunk philosophical arena-brawler with absurdist humor. Battle as neon-cyberpunk versions of historical philosophers.",
+          category: ["brawl", "game"],
+          icon: "🥊",
+          url: "../ethic-brawl/index.html",
+          path: "brawl/ethic-brawl/",
+          status: "dev",
+          tags: ["TypeScript", "Canvas", "Web Audio"],
+        },
 
-      // BRAWL - Ethic Brawl
-      {
-        id: 'brawl-game',
-        name: 'Ethic Brawl',
-        description: '2.5D cyberpunk philosophical arena-brawler with absurdist humor. Battle as neon-cyberpunk versions of historical philosophers.',
-        category: ['brawl', 'game'],
-        icon: '🥊',
-        url: '../brawl/ethic-brawl/index.html',
-        path: 'brawl/ethic-brawl/',
-        status: 'dev',
-        tags: ['TypeScript', 'Canvas', 'Web Audio']
-      },
+        // PEERNET TOOLS
+        {
+          id: "peernet-orca",
+          name: "Groove Station",
+          description:
+            "P2P Collaborative Music Studio - browser-based peer-to-peer music production with no server required.",
+          category: ["peernet", "audio"],
+          icon: "🎵",
+          url: "../peernet-orca/index.html",
+          path: "peernet-orca/",
+          status: "complete",
+          tags: ["PeerJS", "WebRTC", "Web Audio"],
+        },
+        {
+          id: "peernet-groove",
+          name: "Peer Music Groove",
+          description: "Alternative P2P music collaboration interface",
+          category: ["peernet", "audio"],
+          icon: "🎶",
+          url: "../peer-music-groove/index.html",
+          path: "peer-music-groove/",
+          status: "complete",
+        },
 
-      // PEERNET TOOLS
-      {
-        id: 'peernet-orca',
-        name: 'Groove Station',
-        description: 'P2P Collaborative Music Studio - browser-based peer-to-peer music production with no server required.',
-        category: ['peernet', 'audio'],
-        icon: '🎵',
-        url: '../peernet-orca/index.html',
-        path: 'peernet-orca/',
-        status: 'complete',
-        tags: ['PeerJS', 'WebRTC', 'Web Audio']
-      },
-      {
-        id: 'peernet-groove',
-        name: 'Peer Music Groove',
-        description: 'Alternative P2P music collaboration interface',
-        category: ['peernet', 'audio'],
-        icon: '🎶',
-        url: '../peer-music-groove/index.html',
-        path: 'peer-music-groove/',
-        status: 'complete'
-      },
+        // BATHROOM EMERGENCY GUIDE
+        {
+          id: "bathroom-guide",
+          name: "Bathroom Emergency Guide",
+          description:
+            "v3.2 - Modular decision-support document with 21 scientific formulas, LaTeX math, and 14 diagrams.",
+          category: ["bathroom", "docs"],
+          icon: "🚽",
+          url: "../bathroom-emergency-guide/build/html/guide.html",
+          path: "bathroom-emergency-guide/build/html/guide.html",
+          status: "mature",
+          tags: ["Pandoc", "LaTeX", "Python"],
+        },
 
-      // BATHROOM EMERGENCY GUIDE
-      {
-        id: 'bathroom-guide',
-        name: 'Bathroom Emergency Guide',
-        description: 'v3.2 - Modular decision-support document with 21 scientific formulas, LaTeX math, and 14 diagrams.',
-        category: ['bathroom', 'docs'],
-        icon: '🚽',
-        url: '../bathroom-emergency-guide/build/html/guide.html',
-        path: 'bathroom-emergency-guide/build/html/guide.html',
-        status: 'mature',
-        tags: ['Pandoc', 'LaTeX', 'Python']
-      },
+        // ASTER RELAY
+        {
+          id: "aster-relay",
+          name: "Aster Relay Identity",
+          description: "Nightline configurable identity and branding system",
+          category: ["aster", "tools"],
+          icon: "⚡",
+          url: "../aster-relay-identity-nightline-configurable/README.md",
+          path: "aster-relay-identity-nightline-configurable/",
+          status: "complete",
+        },
 
-      // ASTER RELAY
-      {
-        id: 'aster-relay',
-        name: 'Aster Relay Identity',
-        description: 'Nightline configurable identity and branding system',
-        category: ['aster', 'tools'],
-        icon: '⚡',
-        url: '../aster-relay-identity-nightline-configurable/README.md',
-        path: 'aster-relay-identity-nightline-configurable/',
-        status: 'complete'
-      },
+        // CONSOLE APPS - v4 Collection
+        {
+          id: "app-nexus-v4",
+          name: "NEXUS CONSOLE v4",
+          description:
+            "Full-featured spaceship console interface with shooter, synth, and field recorder apps",
+          category: ["app-v4", "console"],
+          icon: "🚀",
+          url: "v4.html",
+          path: "app-hub/v4.html",
+          status: "complete",
+          external: false,
+        },
+        {
+          id: "app-shooter",
+          name: "Hyperblast Shooter",
+          description:
+            "Classic space shooter game with particle effects and score tracking",
+          category: ["app-v4", "game"],
+          icon: "🚀",
+          url: "v4.html#app:shooter",
+          path: "app-hub/v4.html",
+          status: "complete",
+          external: false,
+        },
+        {
+          id: "app-synth",
+          name: "WaveSynth Modular",
+          description:
+            "Modular synthesizer with oscillators, filters, and effects",
+          category: ["app-v4", "audio"],
+          icon: "🎛",
+          url: "v4.html#app:synth",
+          path: "app-hub/v4.html",
+          status: "complete",
+          external: false,
+        },
+        {
+          id: "app-fieldrec",
+          name: "Field Recorder v7",
+          description:
+            "Lo-fi MPC sampler with Dilla swing, required layers and procedural sounds",
+          category: ["app-fieldrec", "audio"],
+          icon: "📼",
+          url: "v7.html",
+          path: "app-hub/v7.html",
+          status: "complete",
+          external: false,
+        },
+        {
+          id: "app-collab-editor",
+          name: "Collab Code Editor",
+          description:
+            "Real-time collaborative text editor with Monaco + PeerNet. Set username, see connected users, edit together.",
+          category: ["app-v8", "collaboration"],
+          icon: "👥",
+          url: "collab-editor.html",
+          path: "app-hub/collab-editor.html",
+          status: "new",
+          external: false,
+          tags: ["Monaco", "PeerJS", "WebRTC", "Collaboration"],
+        },
+        {
+          id: "app-collab-lite",
+          name: "Collab Pad Lite",
+          description:
+            "Lightweight collaborative text editor. Simple textarea with P2P sync. No dependencies, maximum compatibility.",
+          category: ["app-v8", "collaboration"],
+          icon: "✎",
+          url: "collab-editor-lite.html",
+          path: "app-hub/collab-editor-lite.html",
+          status: "new",
+          external: false,
+          tags: ["PeerJS", "WebRTC", "Collaboration"],
+        },
 
-      // CONSOLE APPS - v4 Collection
-      {
-        id: 'app-nexus-v4',
-        name: 'NEXUS CONSOLE v4',
-        description: 'Full-featured spaceship console interface with shooter, synth, and field recorder apps',
-        category: ['app-v4', 'console'],
-        icon: '🚀',
-        url: 'v4.html',
-        path: 'app-hub/v4.html',
-        status: 'complete',
-        external: false
-      },
-      {
-        id: 'app-shooter',
-        name: 'Hyperblast Shooter',
-        description: 'Classic space shooter game with particle effects and score tracking',
-        category: ['app-v4', 'game'],
-        icon: '🚀',
-        url: 'v4.html#app:shooter',
-        path: 'app-hub/v4.html',
-        status: 'complete',
-        external: false
-      },
-      {
-        id: 'app-synth',
-        name: 'WaveSynth Modular',
-        description: 'Modular synthesizer with oscillators, filters, and effects',
-        category: ['app-v4', 'audio'],
-        icon: '🎛',
-        url: 'v4.html#app:synth',
-        path: 'app-hub/v4.html',
-        status: 'complete',
-        external: false
-      },
-      {
-        id: 'app-fieldrec',
-        name: 'Field Recorder v7',
-        description: 'Lo-fi MPC sampler with Dilla swing, required layers and procedural sounds',
-        category: ['app-fieldrec', 'audio'],
-        icon: '📼',
-        url: 'v7.html',
-        path: 'app-hub/v7.html',
-        status: 'complete',
-        external: false
-      },
-      {
-        id: 'app-collab-editor',
-        name: 'Collab Code Editor',
-        description: 'Real-time collaborative text editor with Monaco + PeerNet. Set username, see connected users, edit together.',
-        category: ['app-v8', 'collaboration'],
-        icon: '👥',
-        url: 'collab-editor.html',
-        path: 'app-hub/collab-editor.html',
-        status: 'new',
-        external: false,
-        tags: ['Monaco', 'PeerJS', 'WebRTC', 'Collaboration']
-      },
-      {
-        id: 'app-collab-lite',
-        name: 'Collab Pad Lite',
-        description: 'Lightweight collaborative text editor. Simple textarea with P2P sync. No dependencies, maximum compatibility.',
-        category: ['app-v8', 'collaboration'],
-        icon: '✎',
-        url: 'collab-editor-lite.html',
-        path: 'app-hub/collab-editor-lite.html',
-        status: 'new',
-        external: false,
-        tags: ['PeerJS', 'WebRTC', 'Collaboration']
-      },
+        // ROOT ARTIFACTS - Escape Collective
+        {
+          id: "escape-template",
+          name: "Escape Collective Generator",
+          description:
+            "Template generator for Escape Collective museum experiences",
+          category: ["escape", "tools"],
+          icon: "🏛",
+          url: "../escape-collective-template-generator-scenarios-fixed.html",
+          path: "escape-collective-template-generator-scenarios-fixed.html",
+          status: "complete",
+        },
+        {
+          id: "escape-onepager",
+          name: "Escape Collective One-Pager",
+          description: "Single-page promotional template",
+          category: ["escape", "docs"],
+          icon: "📄",
+          url: "../escape-collective-onepager.html",
+          path: "escape-collective-onepager.html",
+          status: "complete",
+        },
 
-      // ROOT ARTIFACTS - Escape Collective
-      {
-        id: 'escape-template',
-        name: 'Escape Collective Generator',
-        description: 'Template generator for Escape Collective museum experiences',
-        category: ['escape', 'tools'],
-        icon: '🏛',
-        url: '../escape-collective-template-generator-scenarios-fixed.html',
-        path: 'escape-collective-template-generator-scenarios-fixed.html',
-        status: 'complete'
-      },
-      {
-        id: 'escape-onepager',
-        name: 'Escape Collective One-Pager',
-        description: 'Single-page promotional template',
-        category: ['escape', 'docs'],
-        icon: '📄',
-        url: '../escape-collective-onepager.html',
-        path: 'escape-collective-onepager.html',
-        status: 'complete'
-      },
+        // ROOT ARTIFACTS - Viewers & Tools
+        {
+          id: "tool-fontlab",
+          name: "Font Lab Browser",
+          description: "Interactive font laboratory and browser",
+          category: ["viewer", "tools"],
+          icon: "🔤",
+          url: "../font_lab_browser.html",
+          path: "font_lab_browser.html",
+          status: "complete",
+        },
+        {
+          id: "tool-viewer",
+          name: "Advanced Viewer",
+          description: "Advanced file and content viewer",
+          category: ["viewer", "tools"],
+          icon: "👁",
+          url: "../viewer_advanced.html",
+          path: "viewer_advanced.html",
+          status: "complete",
+        },
+        {
+          id: "tool-procedural",
+          name: "Procedural Sharepic Studio",
+          description: "Root-level procedural sharepic generation tool",
+          category: ["viewer", "generative"],
+          icon: "🎨",
+          url: "../procedural-sharepic-studio.html",
+          path: "procedural-sharepic-studio.html",
+          status: "complete",
+        },
+      ];
 
-      // ROOT ARTIFACTS - Viewers & Tools
-      {
-        id: 'tool-fontlab',
-        name: 'Font Lab Browser',
-        description: 'Interactive font laboratory and browser',
-        category: ['viewer', 'tools'],
-        icon: '🔤',
-        url: '../font_lab_browser.html',
-        path: 'font_lab_browser.html',
-        status: 'complete'
-      },
-      {
-        id: 'tool-viewer',
-        name: 'Advanced Viewer',
-        description: 'Advanced file and content viewer',
-        category: ['viewer', 'tools'],
-        icon: '👁',
-        url: '../viewer_advanced.html',
-        path: 'viewer_advanced.html',
-        status: 'complete'
-      },
-      {
-        id: 'tool-procedural',
-        name: 'Procedural Sharepic Studio',
-        description: 'Root-level procedural sharepic generation tool',
-        category: ['viewer', 'generative'],
-        icon: '🎨',
-        url: '../procedural-sharepic-studio.html',
-        path: 'procedural-sharepic-studio.html',
-        status: 'complete'
-      }
-    ]
+      // ============================================
+      // STATE
+      // ============================================
 
-    // ============================================
-    // STATE
-    // ============================================
+      const state = {
+        currentPanel: "artifacts",
+        currentFilter: "all",
+        soundEnabled: true,
+        scanlinesEnabled: true,
+        warpEnabled: true,
+        audioContext: null,
+      };
 
-    const state = {
-      currentPanel: 'artifacts',
-      currentFilter: 'all',
-      soundEnabled: true,
-      scanlinesEnabled: true,
-      warpEnabled: true,
-      audioContext: null
-    }
+      const themeNames = {
+        default: "TRON",
+        synthwave: "Synthwave",
+        cyberpunk: "Cyberpunk",
+        retro8bit: "8-Bit Retro",
+        midnight: "Midnight Blue",
+        vaporwave: "Vaporwave",
+      };
 
-    const themeNames = {
-      default: 'TRON',
-      synthwave: 'Synthwave',
-      cyberpunk: 'Cyberpunk',
-      retro8bit: '8-Bit Retro',
-      midnight: 'Midnight Blue',
-      vaporwave: 'Vaporwave'
-    }
+      // ============================================
+      // INITIALIZATION
+      // ============================================
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
+      function init() {
+        createStarfield();
+        createWarpLines();
+        initParticles();
+        renderArtifacts();
+        startClock();
+        updateCoords();
 
-    function init() {
-      createStarfield()
-      createWarpLines()
-      initParticles()
-      renderArtifacts()
-      startClock()
-      updateCoords()
+        // Audio on first click
+        document.addEventListener("click", initAudio, { once: true });
 
-      // Audio on first click
-      document.addEventListener('click', initAudio, { once: true })
-
-      // Window resize
-      window.addEventListener('resize', () => {
-        resizeCanvas()
-        createParticles()
-      })
-    }
-
-    function initAudio() {
-      if (!state.audioContext) {
-        state.audioContext = new (window.AudioContext || window.webkitAudioContext)()
-      }
-    }
-
-    function playSound(type) {
-      if (!state.soundEnabled || !state.audioContext) return
-
-      const osc = state.audioContext.createOscillator()
-      const gain = state.audioContext.createGain()
-
-      osc.connect(gain)
-      gain.connect(state.audioContext.destination)
-
-      gain.gain.setValueAtTime(0.3, state.audioContext.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, state.audioContext.currentTime + 0.12)
-
-      const sounds = {
-        click: [800, 'square'],
-        hover: [1200, 'sine'],
-        success: [523, 'triangle']
+        // Window resize
+        window.addEventListener("resize", () => {
+          resizeCanvas();
+          createParticles();
+        });
       }
 
-      if (sounds[type]) {
-        osc.frequency.value = sounds[type][0]
-        osc.type = sounds[type][1]
+      function initAudio() {
+        if (!state.audioContext) {
+          state.audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+        }
       }
 
-      osc.start()
-      osc.stop(state.audioContext.currentTime + 0.13)
-    }
+      function playSound(type) {
+        if (!state.soundEnabled || !state.audioContext) return;
 
-    // ============================================
-    // STARFIELD
-    // ============================================
+        const osc = state.audioContext.createOscillator();
+        const gain = state.audioContext.createGain();
 
-    function createStarfield() {
-      const container = document.getElementById('starfield')
-      container.innerHTML = ''
+        osc.connect(gain);
+        gain.connect(state.audioContext.destination);
 
-      for (let i = 0; i < 100; i++) {
-        const star = document.createElement('div')
-        star.className = 'star'
-        star.style.left = Math.random() * 100 + '%'
-        star.style.top = Math.random() * 100 + '%'
-        star.style.width = Math.random() * 2 + 1 + 'px'
-        star.style.height = star.style.width
-        star.style.animationDelay = Math.random() * 3 + 's'
-        container.appendChild(star)
-      }
-    }
+        gain.gain.setValueAtTime(0.3, state.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          state.audioContext.currentTime + 0.12,
+        );
 
-    // ============================================
-    // WARP LINES
-    // ============================================
+        const sounds = {
+          click: [800, "square"],
+          hover: [1200, "sine"],
+          success: [523, "triangle"],
+        };
 
-    function createWarpLines() {
-      const container = document.getElementById('warpLines')
-      container.innerHTML = ''
+        if (sounds[type]) {
+          osc.frequency.value = sounds[type][0];
+          osc.type = sounds[type][1];
+        }
 
-      for (let i = 0; i < 20; i++) {
-        const line = document.createElement('div')
-        line.className = 'warp-line'
-        line.style.left = Math.random() * 100 + '%'
-        line.style.animationDelay = Math.random() * 2 + 's'
-        line.style.height = Math.random() * 150 + 50 + 'px'
-        line.style.opacity = Math.random() * 0.3 + 0.1
-        container.appendChild(line)
-      }
-    }
-
-    // ============================================
-    // PARTICLES
-    // ============================================
-
-    const canvas = document.getElementById('particles-canvas')
-    const ctx = canvas.getContext('2d')
-    let particles = []
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-
-    function initParticles() {
-      resizeCanvas()
-      createParticles()
-      drawParticles()
-    }
-
-    function createParticles() {
-      particles = []
-      for (let i = 0; i < 60; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 2 + 0.5,
-          speedX: (Math.random() - 0.5) * 0.5,
-          speedY: (Math.random() - 0.5) * 0.5,
-          opacity: Math.random() * 0.5 + 0.2
-        })
-      }
-    }
-
-    function drawParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      const colors = getThemeColors()
-
-      particles.forEach((p, i) => {
-        p.x += p.speedX
-        p.y += p.speedY
-
-        if (p.x < 0) p.x = canvas.width
-        if (p.x > canvas.width) p.x = 0
-        if (p.y < 0) p.y = canvas.height
-        if (p.y > canvas.height) p.y = 0
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = i % 2 ? colors.primary : colors.secondary
-        ctx.globalAlpha = p.opacity
-        ctx.fill()
-
-        // Connections
-        particles.slice(i + 1).forEach(q => {
-          const dist = Math.hypot(p.x - q.x, p.y - q.y)
-          if (dist < 100) {
-            ctx.beginPath()
-            ctx.moveTo(p.x, p.y)
-            ctx.lineTo(q.x, q.y)
-            ctx.strokeStyle = colors.primary
-            ctx.globalAlpha = (1 - dist / 100) * 0.15
-            ctx.stroke()
-          }
-        })
-      })
-
-      ctx.globalAlpha = 1
-      requestAnimationFrame(drawParticles)
-    }
-
-    function getThemeColors() {
-      const style = getComputedStyle(document.body)
-      return {
-        primary: style.getPropertyValue('--fg-primary').trim() || '#00ffff',
-        secondary: style.getPropertyValue('--fg-secondary').trim() || '#ff00ff'
-      }
-    }
-
-    // ============================================
-    // NAVIGATION
-    // ============================================
-
-    function showPanel(panel) {
-      state.currentPanel = panel
-
-      document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'))
-      document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('active'))
-
-      document.getElementById('panel-' + panel).classList.add('active')
-      document.getElementById('btn-' + panel)?.classList.add('active')
-
-      playSound('click')
-    }
-
-    function toggleNav(button) {
-      const category = button.dataset.category
-      const submenu = document.getElementById('submenu-' + category)
-      const isOpen = submenu.classList.contains('open')
-
-      document.querySelectorAll('.submenu').forEach(s => s.classList.remove('open'))
-      document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('expanded', 'active'))
-
-      if (!isOpen) {
-        submenu.classList.add('open')
-        button.classList.add('expanded', 'active')
-      } else {
-        button.classList.add('active')
+        osc.start();
+        osc.stop(state.audioContext.currentTime + 0.13);
       }
 
-      playSound('click')
-    }
+      // ============================================
+      // STARFIELD
+      // ============================================
 
-    function filterArtifacts(filter) {
-      state.currentFilter = filter
+      function createStarfield() {
+        const container = document.getElementById("starfield");
+        container.innerHTML = "";
 
-      document.querySelectorAll('.submenu-item').forEach(item => {
-        item.classList.remove('selected')
-      })
-      event.target.closest('.submenu-item').classList.add('selected')
-
-      renderArtifacts(filter)
-      playSound('success')
-
-      const titles = {
-        all: 'All Artifacts',
-        spc: 'SPC - Sharepic Creators',
-        brawl: 'Ethic Brawl',
-        peernet: 'PeerNet Tools',
-        bathroom: 'Bathroom Emergency Guide',
-        aster: 'Aster Relay Identity',
-        'app-v4': 'NEXUS Console v4',
-        'app-fieldrec': 'Field Recorder',
-        escape: 'Escape Collective',
-        viewer: 'Viewers & Tools'
+        for (let i = 0; i < 100; i++) {
+          const star = document.createElement("div");
+          star.className = "star";
+          star.style.left = Math.random() * 100 + "%";
+          star.style.top = Math.random() * 100 + "%";
+          star.style.width = Math.random() * 2 + 1 + "px";
+          star.style.height = star.style.width;
+          star.style.animationDelay = Math.random() * 3 + "s";
+          container.appendChild(star);
+        }
       }
 
-      document.getElementById('panelTitle').textContent = titles[filter] || filter
-    }
+      // ============================================
+      // WARP LINES
+      // ============================================
 
-    // ============================================
-    // ARTIFACTS RENDERING
-    // ============================================
+      function createWarpLines() {
+        const container = document.getElementById("warpLines");
+        container.innerHTML = "";
 
-    function renderArtifacts(filter = 'all') {
-      const grid = document.getElementById('artifactsGrid')
-      let filtered = artifacts
-
-      if (filter !== 'all') {
-        filtered = artifacts.filter(a => a.category.includes(filter))
+        for (let i = 0; i < 20; i++) {
+          const line = document.createElement("div");
+          line.className = "warp-line";
+          line.style.left = Math.random() * 100 + "%";
+          line.style.animationDelay = Math.random() * 2 + "s";
+          line.style.height = Math.random() * 150 + 50 + "px";
+          line.style.opacity = Math.random() * 0.3 + 0.1;
+          container.appendChild(line);
+        }
       }
 
-      grid.innerHTML = filtered.map(artifact => `
-        <div class="artifact-card ${artifact.external === false ? '' : 'external'}"
+      // ============================================
+      // PARTICLES
+      // ============================================
+
+      const canvas = document.getElementById("particles-canvas");
+      const ctx = canvas.getContext("2d");
+      let particles = [];
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initParticles() {
+        resizeCanvas();
+        createParticles();
+        drawParticles();
+      }
+
+      function createParticles() {
+        particles = [];
+        for (let i = 0; i < 60; i++) {
+          particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2 + 0.5,
+            speedX: (Math.random() - 0.5) * 0.5,
+            speedY: (Math.random() - 0.5) * 0.5,
+            opacity: Math.random() * 0.5 + 0.2,
+          });
+        }
+      }
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const colors = getThemeColors();
+
+        particles.forEach((p, i) => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+
+          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0;
+          if (p.y < 0) p.y = canvas.height;
+          if (p.y > canvas.height) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = i % 2 ? colors.primary : colors.secondary;
+          ctx.globalAlpha = p.opacity;
+          ctx.fill();
+
+          // Connections
+          particles.slice(i + 1).forEach((q) => {
+            const dist = Math.hypot(p.x - q.x, p.y - q.y);
+            if (dist < 100) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = colors.primary;
+              ctx.globalAlpha = (1 - dist / 100) * 0.15;
+              ctx.stroke();
+            }
+          });
+        });
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(drawParticles);
+      }
+
+      function getThemeColors() {
+        const style = getComputedStyle(document.body);
+        return {
+          primary: style.getPropertyValue("--fg-primary").trim() || "#00ffff",
+          secondary:
+            style.getPropertyValue("--fg-secondary").trim() || "#ff00ff",
+        };
+      }
+
+      // ============================================
+      // NAVIGATION
+      // ============================================
+
+      function showPanel(panel) {
+        state.currentPanel = panel;
+
+        document
+          .querySelectorAll(".panel-content")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".action-btn")
+          .forEach((b) => b.classList.remove("active"));
+
+        document.getElementById("panel-" + panel).classList.add("active");
+        document.getElementById("btn-" + panel)?.classList.add("active");
+
+        playSound("click");
+      }
+
+      function toggleNav(button) {
+        const category = button.dataset.category;
+        const submenu = document.getElementById("submenu-" + category);
+        const isOpen = submenu.classList.contains("open");
+
+        document
+          .querySelectorAll(".submenu")
+          .forEach((s) => s.classList.remove("open"));
+        document
+          .querySelectorAll(".nav-button")
+          .forEach((b) => b.classList.remove("expanded", "active"));
+
+        if (!isOpen) {
+          submenu.classList.add("open");
+          button.classList.add("expanded", "active");
+        } else {
+          button.classList.add("active");
+        }
+
+        playSound("click");
+      }
+
+      function filterArtifacts(filter) {
+        state.currentFilter = filter;
+
+        document.querySelectorAll(".submenu-item").forEach((item) => {
+          item.classList.remove("selected");
+        });
+        event.target.closest(".submenu-item").classList.add("selected");
+
+        renderArtifacts(filter);
+        playSound("success");
+
+        const titles = {
+          all: "All Artifacts",
+          spc: "SPC - Sharepic Creators",
+          brawl: "Ethic Brawl",
+          peernet: "PeerNet Tools",
+          bathroom: "Bathroom Emergency Guide",
+          aster: "Aster Relay Identity",
+          "app-v4": "NEXUS Console v4",
+          "app-fieldrec": "Field Recorder",
+          escape: "Escape Collective",
+          viewer: "Viewers & Tools",
+        };
+
+        document.getElementById("panelTitle").textContent =
+          titles[filter] || filter;
+      }
+
+      // ============================================
+      // ARTIFACTS RENDERING
+      // ============================================
+
+      function renderArtifacts(filter = "all") {
+        const grid = document.getElementById("artifactsGrid");
+        let filtered = artifacts;
+
+        if (filter !== "all") {
+          filtered = artifacts.filter((a) => a.category.includes(filter));
+        }
+
+        grid.innerHTML = filtered
+          .map(
+            (artifact) => `
+        <div class="artifact-card ${artifact.external === false ? "" : "external"}"
              onclick="launchArtifact('${artifact.id}')"
              onmouseenter="playSound('hover')">
           <div class="artifact-header">
@@ -1525,8 +1829,8 @@
           </div>
           <div class="artifact-desc">${artifact.description}</div>
           <div class="artifact-meta">
-            ${artifact.tags ? artifact.tags.map(tag => `<span class="meta-tag">${tag}</span>`).join('') : ''}
-            ${artifact.category.map(cat => `<span class="meta-tag">${cat}</span>`).join('')}
+            ${artifact.tags ? artifact.tags.map((tag) => `<span class="meta-tag">${tag}</span>`).join("") : ""}
+            ${artifact.category.map((cat) => `<span class="meta-tag">${cat}</span>`).join("")}
             <span class="status-tag ${artifact.status}">${artifact.status}</span>
           </div>
           <button class="launch-btn">
@@ -1534,101 +1838,126 @@
             <span>LAUNCH</span>
           </button>
         </div>
-      `).join('')
-    }
-
-    function launchArtifact(id) {
-      const artifact = artifacts.find(a => a.id === id)
-      if (artifact && artifact.url) {
-        playSound('success')
-        window.open(artifact.url, '_blank')
-      }
-    }
-
-    function shuffleArtifacts() {
-      const grid = document.getElementById('artifactsGrid')
-      const cards = Array.from(grid.children)
-
-      for (let i = cards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        grid.appendChild(cards[j])
+      `,
+          )
+          .join("");
       }
 
-      playSound('success')
-    }
-
-    // ============================================
-    // SETTINGS
-    // ============================================
-
-    function setTheme(theme) {
-      document.body.dataset.theme = theme
-
-      document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.theme === theme)
-      })
-
-      document.getElementById('currentThemeName').textContent = themeNames[theme]
-      playSound('success')
-    }
-
-    function toggleSetting(setting) {
-      const toggle = document.getElementById('toggle' + setting.charAt(0).toUpperCase() + setting.slice(1))
-
-      if (setting === 'scanlines') {
-        state.scanlinesEnabled = !state.scanlinesEnabled
-        document.querySelector('.scanlines').style.display = state.scanlinesEnabled ? 'block' : 'none'
-        toggle.classList.toggle('active', state.scanlinesEnabled)
-      } else if (setting === 'warp') {
-        state.warpEnabled = !state.warpEnabled
-        document.getElementById('warpLines').style.display = state.warpEnabled ? 'block' : 'none'
-        toggle.classList.toggle('active', state.warpEnabled)
+      function launchArtifact(id) {
+        const artifact = artifacts.find((a) => a.id === id);
+        if (artifact && artifact.url) {
+          playSound("success");
+          window.open(artifact.url, "_blank");
+        }
       }
 
-      playSound('click')
-    }
+      function shuffleArtifacts() {
+        const grid = document.getElementById("artifactsGrid");
+        const cards = Array.from(grid.children);
 
-    // ============================================
-    // CLOCK & COORDINATES
-    // ============================================
+        for (let i = cards.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          grid.appendChild(cards[j]);
+        }
 
-    function startClock() {
-      updateTime()
-      setInterval(updateTime, 1000)
-    }
-
-    function updateTime() {
-      const now = new Date()
-      document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', { hour12: false })
-    }
-
-    function updateCoords() {
-      setInterval(() => {
-        const x = (Math.random() * 100 - 50).toFixed(1)
-        const y = (Math.random() * 100 - 50).toFixed(1)
-        const z = (Math.random() * 20).toFixed(1)
-        document.getElementById('coords').textContent = `X:${x} Y:${y} Z:${z}`
-      }, 3000)
-
-      // Random sector
-      const sectors = ['ALPHA-7', 'BETA-3', 'GAMMA-9', 'DELTA-1', 'EPSILON-4', 'ZETA-8']
-      document.getElementById('sectorDisplay').textContent = sectors[Math.floor(Math.random() * sectors.length)]
-    }
-
-    // ============================================
-    // KEYBOARD SHORTCUTS
-    // ============================================
-
-    document.addEventListener('keydown', e => {
-      if (e.key >= '1' && e.key <= '6' && e.ctrlKey) {
-        e.preventDefault()
-        const themes = ['default', 'synthwave', 'cyberpunk', 'retro8bit', 'midnight', 'vaporwave']
-        setTheme(themes[parseInt(e.key) - 1])
+        playSound("success");
       }
-    })
 
-    // START
-    init()
-  </script>
-</body>
+      // ============================================
+      // SETTINGS
+      // ============================================
+
+      function setTheme(theme) {
+        document.body.dataset.theme = theme;
+
+        document.querySelectorAll(".theme-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.theme === theme);
+        });
+
+        document.getElementById("currentThemeName").textContent =
+          themeNames[theme];
+        playSound("success");
+      }
+
+      function toggleSetting(setting) {
+        const toggle = document.getElementById(
+          "toggle" + setting.charAt(0).toUpperCase() + setting.slice(1),
+        );
+
+        if (setting === "scanlines") {
+          state.scanlinesEnabled = !state.scanlinesEnabled;
+          document.querySelector(".scanlines").style.display =
+            state.scanlinesEnabled ? "block" : "none";
+          toggle.classList.toggle("active", state.scanlinesEnabled);
+        } else if (setting === "warp") {
+          state.warpEnabled = !state.warpEnabled;
+          document.getElementById("warpLines").style.display = state.warpEnabled
+            ? "block"
+            : "none";
+          toggle.classList.toggle("active", state.warpEnabled);
+        }
+
+        playSound("click");
+      }
+
+      // ============================================
+      // CLOCK & COORDINATES
+      // ============================================
+
+      function startClock() {
+        updateTime();
+        setInterval(updateTime, 1000);
+      }
+
+      function updateTime() {
+        const now = new Date();
+        document.getElementById("currentTime").textContent =
+          now.toLocaleTimeString("en-US", { hour12: false });
+      }
+
+      function updateCoords() {
+        setInterval(() => {
+          const x = (Math.random() * 100 - 50).toFixed(1);
+          const y = (Math.random() * 100 - 50).toFixed(1);
+          const z = (Math.random() * 20).toFixed(1);
+          document.getElementById("coords").textContent =
+            `X:${x} Y:${y} Z:${z}`;
+        }, 3000);
+
+        // Random sector
+        const sectors = [
+          "ALPHA-7",
+          "BETA-3",
+          "GAMMA-9",
+          "DELTA-1",
+          "EPSILON-4",
+          "ZETA-8",
+        ];
+        document.getElementById("sectorDisplay").textContent =
+          sectors[Math.floor(Math.random() * sectors.length)];
+      }
+
+      // ============================================
+      // KEYBOARD SHORTCUTS
+      // ============================================
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key >= "1" && e.key <= "6" && e.ctrlKey) {
+          e.preventDefault();
+          const themes = [
+            "default",
+            "synthwave",
+            "cyberpunk",
+            "retro8bit",
+            "midnight",
+            "vaporwave",
+          ];
+          setTheme(themes[parseInt(e.key) - 1]);
+        }
+      });
+
+      // START
+      init();
+    </script>
+  </body>
 </html>
