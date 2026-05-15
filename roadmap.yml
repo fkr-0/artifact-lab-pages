@@ -101,15 +101,16 @@ tracks:
       floating_inline_toggle:
         status: planned
         details:
-          - Add runtimeInstanceId and AppRuntimeRegistry.
+          - AppRuntimeRegistry primitive is available in launcher.js.
           - Move same-owned iframe nodes between inline and floating containers when safe.
+          - Add visible float/dock controls to runtime tabs and floating headers.
           - Fall back to relaunch plus event-log warning for unsupported cross-origin cases.
       state_transfer_registry_design:
-        status: todo
+        status: done
         details:
-          - Define descriptor schema for app instance, iframe node, launch url, artifact metadata, and current container mode.
-          - Add tests for dock inline, float, close, unsupported cross-origin fallback, and event-log warnings.
-          - Keep Event Log as a permanent non-closable tab outside transferable runtime instances.
+          - Defined descriptor schema for app instance, live nodes, launch url, artifact metadata, and current container mode.
+          - Added launcher tests for register, attach, move, remove, id uniqueness, missing metadata, and unknown-instance errors.
+          - Event Log remains a permanent non-closable tab outside transferable runtime instances.
       browser_coverage:
         status: todo
         details:

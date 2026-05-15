@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { buildMenuGroups, collectTagStats, createTagFilterState, filterArtifacts, filterArtifactsWithTags, renderTagFilterControls, tagColorStyle, toggleTagFilter } from '../app-hub-v11/lib/menu.js';
-import { createFloatingPanel, createInlineTabDeck, launchArtifact, launchUrlForMode, normalizeLaunchMode } from '../app-hub-v11/lib/launcher.js';
+import { createAppRuntimeRegistry, createFloatingPanel, createInlineTabDeck, launchArtifact, launchUrlForMode, normalizeLaunchMode } from '../app-hub-v11/lib/launcher.js';
 import { createEventLog } from '../app-hub-v11/lib/event-log.js';
 import { clamp, createResizablePanels } from '../app-hub-v11/lib/resizable-panels.js';
 import { readHubSetting, writeHubSetting } from '../app-hub-v11/lib/storage.js';

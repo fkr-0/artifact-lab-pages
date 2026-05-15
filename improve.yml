@@ -5,6 +5,15 @@ status: in_progress
 
 fixed:
 
+  - id: launcher-runtime-registry
+    area: app-hub-v11/lib/launcher
+    severity: high
+    summary: Floating/inline state transfer needed a tested runtime descriptor registry before UI controls could safely move live apps.
+    cause: Running app instances were implicit DOM nodes in the inline deck or floating panel, with no stable runtimeInstanceId or container-mode descriptor.
+    fix: Add createAppRuntimeRegistry with stable instance ids, artifact/launch metadata, containerMode tracking, live node attachment, move/remove operations, and explicit unknown-instance errors.
+    tests:
+      - tests/app-hub-v11-libs.test.mjs
+
   - id: hub-single-level-inline-tabs
     area: app-hub-v11/runtime-ui
     severity: high

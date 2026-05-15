@@ -41,6 +41,72 @@ export function launchArtifact(item, mode = 'inline', runtime = globalThis, acti
   return { mode: normalized, url, handledByBrowser: false, action };
 }
 
+export function createAppRuntimeRegistry() {
+  const instances = new Map();
+  const counters = new Map();
+
+  const nextInstanceId = (artifactId) => {
+    const next = Number(counters.get(artifactId) || 0) + 1;
+    counters.set(artifactId, next);
+    return `${artifactId}-${next}`;
+  };
+
+  const requireDescriptor = (instanceId) => {
+    const descriptor = instances.get(instanceId);
+    if (!descriptor) throw new Error(`unknown runtime instance: ${instanceId}`);
+    return descriptor;
+  };
+
+  const register = ({ artifact, launch = {}, containerMode = 'inline', ...nodes } = {}) => {
+    if (!artifact?.id) throw new Error('createAppRuntimeRegistry.register requires artifact metadata with an id');
+    const artifactId = String(artifact.id);
+    const descriptor = {
+      instanceId: nextInstanceId(artifactId),
+      artifactId,
+      artifact,
+      launch,
+      containerMode: normalizeLaunchMode(containerMode),
+      iframeNode: null,
+      tabNode: null,
+      panelNode: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...nodes,
+    };
+    instances.set(descriptor.instanceId, descriptor);
+    return descriptor;
+  };
+
+  const attach = (instanceId, nodes = {}) => {
+    const descriptor = requireDescriptor(instanceId);
+    Object.assign(descriptor, nodes, { updatedAt: new Date().toISOString() });
+    return descriptor;
+  };
+
+  const move = (instanceId, containerMode, nodes = {}) => {
+    const descriptor = requireDescriptor(instanceId);
+    descriptor.containerMode = normalizeLaunchMode(containerMode);
+    Object.assign(descriptor, nodes, { updatedAt: new Date().toISOString() });
+    return descriptor;
+  };
+
+  const remove = (instanceId) => {
+    const descriptor = requireDescriptor(instanceId);
+    instances.delete(instanceId);
+    return descriptor;
+  };
+
+  return {
+    register,
+    attach,
+    move,
+    remove,
+    get: (instanceId) => instances.get(instanceId) || null,
+    list: () => [...instances.values()],
+    size: () => instances.size,
+  };
+}
+
 export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, onChange = () => {} } = {}) {
   if (!deck || !tabs || !body) throw new Error('createInlineTabDeck requires deck, tabs, and body elements');
   const documentRef = runtime.document;
