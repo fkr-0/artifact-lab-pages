@@ -57,11 +57,11 @@ export function createAppRuntimeRegistry() {
     return descriptor;
   };
 
-  const register = ({ artifact, launch = {}, containerMode = 'inline', ...nodes } = {}) => {
+  const register = ({ artifact, launch = {}, containerMode = 'inline', instanceId = null, ...nodes } = {}) => {
     if (!artifact?.id) throw new Error('createAppRuntimeRegistry.register requires artifact metadata with an id');
     const artifactId = String(artifact.id);
     const descriptor = {
-      instanceId: nextInstanceId(artifactId),
+      instanceId: instanceId || nextInstanceId(artifactId),
       artifactId,
       artifact,
       launch,
@@ -73,6 +73,7 @@ export function createAppRuntimeRegistry() {
       updatedAt: new Date().toISOString(),
       ...nodes,
     };
+    if (instances.has(descriptor.instanceId)) throw new Error(`runtime instance already exists: ${descriptor.instanceId}`);
     instances.set(descriptor.instanceId, descriptor);
     return descriptor;
   };
@@ -145,49 +146,117 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     }
   };
 
-  const open = (artifact, launch = {}) => {
-    if (openApps.has(artifact.id)) {
-      setActive(artifact.id);
-      return openApps.get(artifact.id);
-    }
-    const instanceId = `${artifact.id}-${nextAppId++}`;
+  const createTab = (artifact, instanceId) => {
     const tab = documentRef.createElement('button');
     tab.className = 'app-deck-tab';
     tab.dataset.appId = artifact.id;
     tab.dataset.instanceId = instanceId;
     const title = documentRef.createElement('span');
     title.textContent = artifact.title || artifact.name || artifact.id;
+    const floatButton = documentRef.createElement('button');
+    floatButton.type = 'button';
+    floatButton.className = 'app-deck-tab-float';
+    floatButton.dataset.float = artifact.id;
+    floatButton.title = 'float app';
+    floatButton.textContent = '▣';
+    floatButton.onclick = (event) => { event?.stopPropagation?.(); float(artifact.id); };
     const closeButton = documentRef.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'app-deck-tab-close';
     closeButton.dataset.close = artifact.id;
     closeButton.textContent = '✕';
     closeButton.onclick = (event) => { event?.stopPropagation?.(); close(artifact.id); };
+    tab.floatButton = floatButton;
     tab.closeButton = closeButton;
-    tab.append(title, closeButton);
+    tab.append(title, floatButton, closeButton);
     tab.onclick = () => setActive(artifact.id);
+    return tab;
+  };
 
+  const createPanel = (artifact, instanceId, launch = {}, iframeNode = null) => {
     const panel = documentRef.createElement('section');
     panel.className = 'app-deck-panel';
     panel.dataset.appId = artifact.id;
     panel.dataset.instanceId = instanceId;
-    if (launch.url === '#') {
+    if (iframeNode) {
+      panel.appendChild(iframeNode);
+    } else if (launch.url === '#') {
       panel.innerHTML = `<div class="app-deck-empty">No launchable content for ${escapeHtml(artifact.title || artifact.id)}</div>`;
     } else {
-      panel.innerHTML = `<iframe class="app-deck-inline-frame" src="${escapeHtml(launch.url || artifactHref(artifact))}" title="${escapeHtml(artifact.title || artifact.id)}" allow="autoplay; fullscreen"></iframe>`;
+      const iframe = documentRef.createElement('iframe');
+      iframe.className = 'app-deck-inline-frame';
+      iframe.src = launch.url || artifactHref(artifact);
+      iframe.title = artifact.title || artifact.id;
+      iframe.setAttribute?.('allow', 'autoplay; fullscreen');
+      panel.appendChild(iframe);
     }
+    return panel;
+  };
+
+  const open = (artifact, launch = {}) => {
+    if (openApps.has(artifact.id)) {
+      setActive(artifact.id);
+      return openApps.get(artifact.id);
+    }
+    const instanceId = `${artifact.id}-${nextAppId++}`;
+    const tab = createTab(artifact, instanceId);
+    const panel = createPanel(artifact, instanceId, launch);
 
     tabs.appendChild(tab);
     body.appendChild(panel);
     deck.classList?.add('active');
-    const appData = { artifact, instanceId, tab, panel, launch };
+    const appData = { artifact, instanceId, tab, panel, iframeNode: panel.querySelector?.('iframe') || null, launch, containerMode: 'inline' };
     openApps.set(artifact.id, appData);
     setActive(artifact.id);
-    onChange({ type: 'open', activeAppId, openApps });
+    onChange({ type: 'open', activeAppId, openApps, appData });
     return appData;
   };
 
-  return { open, close, switchTo: setActive, activeId: () => activeAppId, openApps };
+  const float = (appId) => {
+    const appData = openApps.get(appId);
+    if (!appData) return null;
+    appData.tab.remove?.();
+    appData.panel.remove?.();
+    openApps.delete(appId);
+    appData.containerMode = 'floating';
+    appData.tab = null;
+    appData.panel = null;
+    if (activeAppId === appId) {
+      const next = openApps.keys().next().value;
+      activeAppId = next || null;
+      if (next) setActive(next);
+      else {
+        deck.classList?.remove('active');
+        onChange({ type: 'empty', activeAppId, openApps });
+      }
+    }
+    onChange({ type: 'float', activeAppId, openApps, appData });
+    return appData;
+  };
+
+  const dock = (appData) => {
+    if (!appData?.artifact?.id) return null;
+    const artifact = appData.artifact;
+    if (openApps.has(artifact.id)) {
+      setActive(artifact.id);
+      return openApps.get(artifact.id);
+    }
+    const tab = createTab(artifact, appData.instanceId || `${artifact.id}-${nextAppId++}`);
+    const panel = createPanel(artifact, appData.instanceId || tab.dataset.instanceId, appData.launch || {}, appData.iframeNode || null);
+    appData.tab = tab;
+    appData.panel = panel;
+    appData.iframeNode = appData.iframeNode || panel.querySelector?.('iframe') || null;
+    appData.containerMode = 'inline';
+    tabs.appendChild(tab);
+    body.appendChild(panel);
+    deck.classList?.add('active');
+    openApps.set(artifact.id, appData);
+    setActive(artifact.id);
+    onChange({ type: 'dock', activeAppId, openApps, appData });
+    return appData;
+  };
+
+  return { open, close, float, dock, switchTo: setActive, activeId: () => activeAppId, openApps };
 }
 
 function escapeHtml(value = '') {
@@ -199,7 +268,7 @@ function escapeHtml(value = '') {
   })[char]);
 }
 
-export function createFloatingPanel({ title, url }, runtime = globalThis) {
+export function createFloatingPanel({ title, url, iframeNode = null, dockLabel = '', onDock = null } = {}, runtime = globalThis) {
   const documentRef = runtime.document;
   if (!documentRef) throw new Error('createFloatingPanel requires a document runtime');
 
@@ -213,8 +282,16 @@ export function createFloatingPanel({ title, url }, runtime = globalThis) {
   panel.style.top = panel.style.top || '10vh';
   panel.style.width = panel.style.width || 'min(900px, 82vw)';
   panel.style.height = panel.style.height || 'min(680px, 76vh)';
-  panel.innerHTML = `<header data-floating-drag-handle><strong>${escapeHtml(title)}</strong><span data-floating-resize-handle aria-hidden="true">↘</span><button type="button">close</button></header><iframe src="${escapeHtml(url)}" title="${escapeHtml(title)}"></iframe>`;
-  const closeButton = panel.querySelector('button');
+  const dockButton = onDock ? `<button type="button" data-dock>${escapeHtml(dockLabel || 'dock inline')}</button>` : '';
+  panel.innerHTML = `<header data-floating-drag-handle><strong>${escapeHtml(title)}</strong><span data-floating-resize-handle aria-hidden="true">↘</span>${dockButton}<button type="button" data-close-floating>close</button></header>`;
+  if (iframeNode) {
+    panel.appendChild(iframeNode);
+  } else {
+    panel.innerHTML += `<iframe src="${escapeHtml(url)}" title="${escapeHtml(title)}"></iframe>`;
+  }
+  const dockControl = panel.querySelector('button[data-dock]');
+  if (dockControl) dockControl.onclick = () => onDock?.(panel);
+  const closeButton = panel.querySelector('button[data-close-floating]') || panel.querySelector('button');
   if (closeButton) closeButton.onclick = () => panel.remove();
   makeFloatingPanelMovable(panel, runtime);
   (runtime.body || documentRef.body)?.append(panel);

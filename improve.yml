@@ -5,6 +5,16 @@ status: in_progress
 
 fixed:
 
+  - id: hub-floating-inline-toggle
+    area: app-hub-v11/runtime-ui
+    severity: high
+    summary: Running apps could be launched inline or floating, but could not toggle between those container states.
+    cause: Inline deck and floating panels were separate one-way launch paths with no shared iframe/node transfer or dock controls.
+    fix: Add float controls to inline app tabs, dock controls to floating panels, preserve iframe nodes during inline/floating transfers, and keep runtimeRegistry containerMode in sync for direct and toggled floating apps.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+      - tests/app-hub-v11-libs.test.mjs
+
   - id: launcher-runtime-registry
     area: app-hub-v11/lib/launcher
     severity: high

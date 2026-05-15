@@ -30,6 +30,18 @@ assert.doesNotMatch(html, /id="appDeckTabs"/, 'inline app deck should not have a
 assert.match(html, /id="appDeckBody"/, 'inline app deck should include body panels');
 assert.match(html, /id="eventLog"/, 'v11 should include a reusable event log panel');
 assert.match(html, /createInlineTabDeck/, 'v11 should wire inline tabs through lib/launcher.js');
+
+assert.match(html, /createAppRuntimeRegistry/, 'v11 should import the runtime registry for inline/floating transfer');
+assert.match(html, /const runtimeRegistry = createAppRuntimeRegistry\(\)/, 'v11 should create a runtime registry instance');
+assert.match(html, /if \(type === "open" \|\| type === "dock"\)/, 'v11 should register inline and docked app descriptors');
+assert.match(html, /if \(type === "float" && appData\)/, 'v11 should react to inline deck float events');
+assert.match(html, /createFloatingPanel\([\s\S]*iframeNode: appData\.iframeNode[\s\S]*onDock:/, 'floating inline apps should move the existing iframe into a dockable floating panel');
+assert.match(html, /inlineDeck\.dock\(appData\)/, 'floating panel dock control should restore the app to inline tabs');
+assert.match(html, /runtimeRegistry\.move\(appData\.instanceId, "floating"/, 'float operation should mark registry entries floating');
+assert.match(html, /runtimeRegistry\.move\(appData\.instanceId, "inline"/, 'dock operation should mark registry entries inline');
+assert.match(html, /floatingAppData/, 'direct floating launches should register a floating runtime descriptor');
+assert.match(html, /inlineDeck\.dock\(floatingAppData\)/, 'direct floating panels should dock into inline tabs');
+assert.match(html, /runtimeRegistry\.move\(floatingAppData\.instanceId, "inline"/, 'direct floating dock should mark registry entries inline');
 assert.match(html, /createEventLog/, 'v11 should wire event log through lib/event-log.js');
 assert.match(html, /filterArtifactsAdvanced/, 'v11 should wire filtering through lib/menu.js');
 const nonZeroRadii = [...html.matchAll(/border-radius\s*:\s*([^;]+);/g)]

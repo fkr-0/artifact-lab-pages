@@ -914,7 +914,7 @@
         tagColorStyle,
         toggleTagFilter,
       } = menuModule;
-      const { createFloatingPanel, createInlineTabDeck, launchArtifact } = launcherModule;
+      const { createAppRuntimeRegistry, createFloatingPanel, createInlineTabDeck, launchArtifact } = launcherModule;
       const { createEventLog } = eventLogModule;
       const { createResizablePanels } = panelsModule;
       const {
@@ -981,14 +981,48 @@
         "BroadcastChannel" in window
           ? new BroadcastChannel('app-hub-v11:lobby-chat')
           : null;
+      const runtimeRegistry = createAppRuntimeRegistry();
       const inlineDeck = createInlineTabDeck({
         deck: $("appDeck"),
         tabs: $("workspaceTabs"),
         body: $("appDeckBody"),
         runtime: window,
-        onChange: ({ type, activeAppId, openApps }) => {
+        onChange: ({ type, activeAppId, openApps, appData }) => {
           if (type === "empty") setWorkspaceTab("eventLog");
           if (activeAppId) setWorkspaceTab(activeAppId);
+          if (type === "open" || type === "dock") {
+            if (appData && !runtimeRegistry.get(appData.instanceId)) {
+              runtimeRegistry.register({
+                artifact: appData.artifact,
+                launch: appData.launch,
+                containerMode: "inline",
+                instanceId: appData.instanceId,
+                iframeNode: appData.iframeNode,
+                tabNode: appData.tab,
+                panelNode: appData.panel,
+              });
+            }
+            if (appData) runtimeRegistry.move(appData.instanceId, "inline", { iframeNode: appData.iframeNode, tabNode: appData.tab, panelNode: appData.panel });
+          }
+          if (type === "float" && appData) {
+            runtimeRegistry.move(appData.instanceId, "floating", { iframeNode: appData.iframeNode, tabNode: null, panelNode: null });
+            createFloatingPanel(
+              {
+                title: appData.artifact.title || appData.artifact.id,
+                url: appData.launch.url,
+                iframeNode: appData.iframeNode,
+                dockLabel: "dock inline",
+                onDock: (panel) => {
+                  panel.remove?.();
+                  inlineDeck.dock(appData);
+                  runtimeRegistry.move(appData.instanceId, "inline", { iframeNode: appData.iframeNode, tabNode: appData.tab, panelNode: appData.panel });
+                  eventLog.info("dock", appData.artifact.title || appData.artifact.id);
+                },
+              },
+              window,
+            );
+            eventLog.info("float", appData.artifact.title || appData.artifact.id);
+          }
           eventLog.info(
             "deck",
             type,
@@ -1392,11 +1426,32 @@
           action,
         });
         if (launch.handledByBrowser) return;
-        if (launch.mode === "floating")
-          return createFloatingPanel(
-            { title: selected.title, url: launch.url },
+        if (launch.mode === "floating") {
+          const floatingAppData = runtimeRegistry.register({
+            artifact: selected,
+            launch,
+            containerMode: "floating",
+          });
+          const panel = createFloatingPanel(
+            {
+              title: selected.title,
+              url: launch.url,
+              dockLabel: "dock inline",
+              onDock: (panelNode) => {
+                panelNode.remove?.();
+                inlineDeck.dock(floatingAppData);
+                runtimeRegistry.move(floatingAppData.instanceId, "inline", { iframeNode: floatingAppData.iframeNode, tabNode: floatingAppData.tab, panelNode: floatingAppData.panel });
+                eventLog.info("dock", selected.title);
+              },
+            },
             window,
           );
+          const iframeNode = panel.querySelector?.("iframe") || null;
+          runtimeRegistry.attach(floatingAppData.instanceId, { iframeNode, panelNode: panel });
+          floatingAppData.iframeNode = iframeNode;
+          floatingAppData.panelNode = panel;
+          return panel;
+        }
         if (launch.mode === "fullscreen")
           return openFullscreen(selected, launch.url);
         workspacePane.classList.add("active");

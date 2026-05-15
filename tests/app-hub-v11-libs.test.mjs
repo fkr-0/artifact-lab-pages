@@ -55,10 +55,13 @@ const floatingRuntime = {
         events: {},
         style: {},
         querySelector(selector) {
-          if (selector !== 'button') return null;
-          return {
+          if (selector === 'button[data-dock]') return {
+            set onclick(handler) { node.events.dock = handler; },
+          };
+          if (selector === 'button[data-close-floating]' || selector === 'button') return {
             set onclick(handler) { node.events.close = handler; },
           };
+          return null;
         },
         getBoundingClientRect() { return { left: 10, top: 20 }; },
         set onpointerdown(handler) { this.events.pointerdown = handler; },
@@ -80,6 +83,11 @@ assert.match(panel.innerHTML, /Hyperblast Shooter/);
 assert.match(panel.innerHTML, /..\/app-hub\/shooter.html\?embedded=true/);
 assert.match(panel.innerHTML, /data-floating-drag-handle/, 'floating panel should expose a drag handle');
 assert.match(panel.innerHTML, /data-floating-resize-handle/, 'floating panel should expose a resize handle');
+const docked = [];
+const dockPanel = createFloatingPanel({ title: 'Dockable', url: 'dock.html', dockLabel: 'dock inline', onDock: () => docked.push('dock') }, floatingRuntime);
+assert.match(dockPanel.innerHTML, /data-dock/, 'dockable floating panels should expose a dock control');
+dockPanel.events.dock();
+assert.deepEqual(docked, ['dock'], 'dock control should call the provided dock callback');
 assert.equal(panel.style.position, 'fixed');
 assert.equal(panel.style.resize, 'both', 'floating panel should be browser-resizable');
 assert.equal(floatingRuntime.body.appended[0], panel);
@@ -131,6 +139,9 @@ function makeNode(tagName = 'div') {
     removed: false,
     textContent: '',
     innerHTML: '',
+    src: '',
+    title: '',
+    attributes: {},
     events: {},
     classList: {
       values: new Set(),
@@ -142,7 +153,14 @@ function makeNode(tagName = 'div') {
     append(...children) { this.children.push(...children); children.forEach((child) => { child.parentNode = this; }); },
     appendChild(child) { this.append(child); return child; },
     remove() { this.removed = true; if (this.parentNode) this.parentNode.children = this.parentNode.children.filter((child) => child !== this); },
-    querySelector(selector) { return selector === 'button[data-close]' ? this.closeButton : null; },
+    setAttribute(name, value) { this.attributes[name] = value; this[name] = value; },
+    querySelector(selector) {
+      if (selector === 'button[data-close]') return this.closeButton || null;
+      if (selector === 'button[data-float]') return this.floatButton || null;
+      if (selector === 'button[data-dock]') return this.dockButton || null;
+      if (selector === 'iframe') return this.children.find((child) => child.tagName === 'iframe') || null;
+      return null;
+    },
     set onclick(handler) { this.events.click = handler; },
   };
   return node;
@@ -164,6 +182,21 @@ assert.equal(inlineDeck.activeId(), 'beta');
 inlineDeck.open(alphaArtifact, { url: 'alpha.html?embedded=true' });
 assert.equal(tabsNode.children.length, 2, 'opening an existing app should switch instead of duplicating');
 assert.equal(inlineDeck.activeId(), 'alpha');
+
+assert.equal(tabsNode.children[0].floatButton?.dataset.float, 'alpha', 'inline app tabs should expose a float control');
+const alphaData = inlineDeck.openApps.get('alpha');
+assert.equal(alphaData.containerMode, 'inline');
+const alphaIframe = alphaData.iframeNode;
+const floatedAlpha = inlineDeck.float('alpha');
+assert.equal(floatedAlpha.containerMode, 'floating', 'inline deck float() should mark the app as floating');
+assert.equal(tabsNode.children.some((child) => child.dataset.appId === 'alpha'), false, 'floating an app should remove its inline tab');
+assert.equal(bodyNode.children.some((child) => child.dataset.appId === 'alpha'), false, 'floating an app should remove its inline panel');
+assert.equal(floatedAlpha.iframeNode, alphaIframe, 'floating an app should preserve the iframe node for state transfer');
+inlineDeck.dock(floatedAlpha);
+assert.equal(inlineDeck.openApps.get('alpha').containerMode, 'inline', 'docking should restore the app to inline mode');
+assert.equal(inlineDeck.openApps.get('alpha').iframeNode, alphaIframe, 'docking should preserve the same iframe node');
+assert.equal(tabsNode.children.some((child) => child.dataset.appId === 'alpha'), true, 'docking should recreate the inline tab');
+assert.equal(bodyNode.children.some((child) => child.dataset.appId === 'alpha'), true, 'docking should recreate the inline panel');
 inlineDeck.close('alpha');
 assert.equal(tabsNode.children.length, 1, 'closing a tab should remove its tab node');
 assert.equal(bodyNode.children.length, 1, 'closing a tab should remove its panel node');

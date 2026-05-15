@@ -99,12 +99,13 @@ tracks:
           - App tabs share the same tab row; nested workspace/app tab bars were removed.
           - Closing the final app returns selection to Event Log.
       floating_inline_toggle:
-        status: planned
+        status: done
         details:
           - AppRuntimeRegistry primitive is available in launcher.js.
-          - Move same-owned iframe nodes between inline and floating containers when safe.
-          - Add visible float/dock controls to runtime tabs and floating headers.
-          - Fall back to relaunch plus event-log warning for unsupported cross-origin cases.
+          - Same-owned iframe nodes move between inline and floating containers without reload.
+          - Visible float controls are available on inline app tabs.
+          - Visible dock controls are available on dockable floating headers.
+          - Direct floating launches can dock into inline tabs.
       state_transfer_registry_design:
         status: done
         details:
@@ -114,7 +115,8 @@ tracks:
       browser_coverage:
         status: todo
         details:
-          - Headless test for drag, resize, float, dock, close, and event-log fallback states.
+          - Add headless browser test for drag, resize, float, dock, close, and event-log fallback states.
+          - Add unsupported cross-origin fallback coverage once a browser harness is available.
 
 known_notes:
   agent_browser_cli:
