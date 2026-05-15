@@ -123,7 +123,8 @@ assert.match(html, /presenceQuaternaryAction/, 'presence menu should include a f
 assert.match(html, /spawn personal chat/, 'user context menu should allow spawning a personal chat');
 assert.match(html, /function openPersonalChat\(target\)/, 'personal chat spawning should be implemented');
 assert.match(html, /function joinPeerGame\(target, \{ spectate = false \} = \{\}\)/, 'user context menu should join or observe another peer game');
-assert.match(html, /joinableGameIds = new Set\(\["bomberman-v10", "hyperblast-shooter", "v11-peer-daw"\]\)/, 'join flow should cover bomberman, shooter, and v11 DAW');
+assert.match(html, /joinableGameIds = new Set\(\["bomberman-v10", "hyperblast-shooter", "v11-peer-daw", "minesweeper", "solitaire", "sprite-gif-creator"\]\)/, 'join/observe flow should cover peernet games plus generic observable non-peernet apps');
+assert.match(html, /genericObservableAppIds = new Set\(\["minesweeper", "solitaire", "sprite-gif-creator"\]\)/, 'hub should mark solitaire, minesweeper, and sprite gif creator as generic observable apps');
 assert.match(html, /targetPeerId:\s*peerId/, 'join flow should pass target peer ids into launched apps');
 assert.match(html, /observe:\s*spectate/, 'observe flow should mark launched apps as observe mode');
 assert.match(html, /selectedChatChannel/, 'chat channels should track the active/personal channel');

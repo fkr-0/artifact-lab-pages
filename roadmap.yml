@@ -138,6 +138,25 @@ tracks:
         details:
           - Add headless browser coverage for switching Event Log/Lobby/App tabs and sending chat from the larger chat surface.
 
+
+  observer_system:
+    priority: high
+    goal: Let hub users observe standalone and peer-enabled artifacts without requiring every app to embed Peernet directly.
+    tasks:
+      non_peer_observer_bridge:
+        status: done
+        details:
+          - Added app-hub-v11/lib/artifact-observer-bridge.js generic snapshot bridge.
+          - Minesweeper, Solitaire, and Sprite GIF Creator publish DOM snapshots when run normally.
+          - Observer launches run read-only, subscribe for snapshots, and disable controls after applying snapshots.
+          - Hub relays iframe snapshots over existing network packets and forwards peer/local snapshots into observer iframes.
+      semantic_observer_protocol:
+        status: todo
+        details:
+          - Replace DOM HTML snapshots with app-specific compact state diffs for games that can expose clean state.
+          - Add last-snapshot-age and observed-peer status UI.
+          - Add browser coverage with two hub sessions and one observer iframe.
+
 known_notes:
   agent_browser_cli:
     severity: low

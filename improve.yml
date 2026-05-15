@@ -5,6 +5,19 @@ status: in_progress
 
 fixed:
 
+  - id: generic-non-peer-observer-bridge
+    area: app-hub-v11/observer
+    severity: high
+    summary: Non-Peernet artifacts such as Solitaire, Minesweeper, and Sprite GIF Creator could not be observed through the hub presence menu.
+    cause: Existing observe/join support assumed app-specific peer integration and did not provide a generic snapshot relay for simple standalone artifacts.
+    fix: Add a generic artifact observer bridge, opt Minesweeper/Solitaire/Sprite GIF Creator into read-only snapshot publishing, relay iframe snapshots through the hub network, and forward peer/local snapshots into observer iframes.
+    limitations:
+      - First implementation mirrors DOM snapshots and disables controls in observer windows.
+      - Semantic per-game replay/state-diff protocols remain future work.
+    tests:
+      - tests/non-peer-observer-bridge.test.mjs
+      - tests/app-hub-v11-index-ui.test.mjs
+
   - id: bridge-static-app-hub-v11-command
     area: bridge/static-analysis
     severity: medium
@@ -193,7 +206,8 @@ open:
     notes:
       - observer launches must set spectate=true and observe=true
       - observed apps should never mutate host state
-      - host apps should reply to join/request-state messages with compact snapshots
+      - generic DOM snapshot bridge is implemented for non-Peernet standalone apps
+      - future host apps should reply to join/request-state messages with compact semantic snapshots
       - UI should expose observed peer, last snapshot age, and disconnect state
   - id: full-messaging-system
     area: future/messaging

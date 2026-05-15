@@ -226,5 +226,10 @@
   window.addEventListener('beforeunload',stopTimer);newGame();
 })();
 </script>
+
+<script type="module">
+  import { createArtifactObserverBridge } from '../app-hub-v11/lib/artifact-observer-bridge.js';
+  createArtifactObserverBridge({ artifactId: 'solitaire', snapshotSelector: 'main.app' }).start();
+</script>
 </body>
 </html>

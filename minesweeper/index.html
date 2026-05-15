@@ -391,5 +391,10 @@
       createGame(PRESETS.beginner, "beginner");
     })();
   </script>
+
+  <script type="module">
+    import { createArtifactObserverBridge } from '../app-hub-v11/lib/artifact-observer-bridge.js';
+    createArtifactObserverBridge({ artifactId: 'minesweeper', snapshotSelector: 'main.window' }).start();
+  </script>
 </body>
 </html>

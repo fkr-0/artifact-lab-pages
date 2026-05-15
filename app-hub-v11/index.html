@@ -1026,6 +1026,7 @@
         selectedChatChannel = readHubSetting("selectedChatChannel", "general"),
         channelUnreadCounts = readHubSetting("channelUnreadCounts", {});
       let connectedPeers = new Map();
+      const latestArtifactObserverSnapshots = new Map();
       const chatDeliveryTimers = new Map();
       const seenPeerNames = new Map();
       const peerLastActivity = new Map();
@@ -1098,12 +1099,16 @@
           );
         },
       });
-      const joinableGameIds = new Set(["bomberman-v10", "hyperblast-shooter", "v11-peer-daw"]);
+      const joinableGameIds = new Set(["bomberman-v10", "hyperblast-shooter", "v11-peer-daw", "minesweeper", "solitaire", "sprite-gif-creator"]);
+      const genericObservableAppIds = new Set(["minesweeper", "solitaire", "sprite-gif-creator"]);
       const defaultJoinGameByPeer = new Map();
       const gameJoinSpecs = {
         "bomberman-v10": { multiplayer: true, mode: "vs", session: "bomberman" },
         "hyperblast-shooter": { multiplayer: true, mode: "vs", session: "shooter" },
         "v11-peer-daw": { multiplayer: true, mode: "session", session: "daw" },
+        "minesweeper": { multiplayer: false, mode: "observe", session: "minesweeper", genericObserve: true },
+        "solitaire": { multiplayer: false, mode: "observe", session: "solitaire", genericObserve: true },
+        "sprite-gif-creator": { multiplayer: false, mode: "observe", session: "sprite-gif-creator", genericObserve: true },
       };
       function selectedJoinableGame() {
         if (selected && joinableGameIds.has(selected.id)) return selected;
@@ -1216,6 +1221,25 @@
       });
       network.on("message:chat-ack", ({ payload }) => {
         markLobbyChatDelivered(payload?.messageId, "acked");
+      });
+      network.on("message:artifact-observer-snapshot", ({ id, payload }) => {
+        const snapshot = { ...(payload || {}), fromPeerId: id || payload?.fromPeerId || "peer" };
+        rememberArtifactObserverSnapshot(snapshot);
+        forwardArtifactObserverSnapshot(snapshot);
+      });
+      window.addEventListener("message", (event) => {
+        const data = event.data || {};
+        if (data.type === "artifact-observer-snapshot") {
+          const snapshot = { ...(data.snapshot || {}), fromPeerId: profile.displayName || "local" };
+          rememberArtifactObserverSnapshot(snapshot);
+          network.broadcast("artifact-observer-snapshot", snapshot);
+          forwardArtifactObserverSnapshot(snapshot);
+        }
+        if (data.type === "artifact-observer-subscribe") {
+          const key = artifactObserverSnapshotKey(data.artifactId, data.targetPeerId || "");
+          const snapshot = latestArtifactObserverSnapshots.get(key) || latestArtifactObserverSnapshots.get(artifactObserverSnapshotKey(data.artifactId, ""));
+          if (snapshot) forwardArtifactObserverSnapshot(snapshot);
+        }
       });
       $("summary").textContent =
         `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(", ")} operations`;
@@ -1579,6 +1603,23 @@
         $("profileSharedLayer").checked = profile.sharedLayer;
         $("profileAllowIncomingSaveStates").checked =
           profile.allowIncomingSaveStates;
+      }
+      function artifactObserverSnapshotKey(artifactId, peerId = "") {
+        return `${artifactId || "unknown"}:${peerId || ""}`;
+      }
+      function rememberArtifactObserverSnapshot(snapshot) {
+        if (!snapshot?.artifactId) return;
+        latestArtifactObserverSnapshots.set(artifactObserverSnapshotKey(snapshot.artifactId, snapshot.fromPeerId || snapshot.targetPeerId || ""), snapshot);
+        latestArtifactObserverSnapshots.set(artifactObserverSnapshotKey(snapshot.artifactId, ""), snapshot);
+        eventLog.info("observe", snapshot.artifactId, snapshot.fromPeerId || "local");
+      }
+      function forwardArtifactObserverSnapshot(snapshot) {
+        if (!snapshot?.artifactId) return;
+        for (const runtime of runtimeRegistry.list()) {
+          if (runtime.artifactId !== snapshot.artifactId) continue;
+          if (!runtime.launch?.action?.observe && !runtime.launch?.action?.spectate) continue;
+          runtime.iframeNode?.contentWindow?.postMessage?.({ type: "artifact-observer-snapshot", snapshot }, "*");
+        }
       }
       function renderLobbySummary() {
         const count = Array.isArray(lobbyChat) ? lobbyChat.length : 0;
