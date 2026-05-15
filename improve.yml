@@ -5,6 +5,16 @@ status: in_progress
 
 fixed:
 
+  - id: bridge-static-app-hub-v11-command
+    area: bridge/static-analysis
+    severity: medium
+    summary: Repeated v11 static checks were ad-hoc shell snippets instead of a reusable bridge command.
+    cause: bridge.yml had compile/smoke commands but no focused static verification command covering HTML module extraction, JS syntax checks, and root-safe UI contracts.
+    fix: Add static:app-hub-v11 bridge command, add scripts/extract-html-module.mjs for robust module extraction, and add bridge command contract coverage.
+    tests:
+      - tests/bridge-commands.test.mjs
+      - static:app-hub-v11 command steps run in focused chunks
+
   - id: hub-bottom-lobby-chat-tab
     area: app-hub-v11/runtime-ui
     severity: high

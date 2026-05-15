@@ -34,10 +34,11 @@ tracks:
     goal: Make bug hunting repeatable beyond ad-hoc node --check and unit tests.
     tasks:
       root_static_command:
-        status: todo
+        status: done
         details:
-          - Add a bridge command that runs app-hub-v11 UI tests plus node --check over app-hub-v11 JS/MJS sources.
-          - Consider including HTML module-script extraction in a future parser-based lint.
+          - Added static:app-hub-v11 bridge command for catalog compilation, HTML module extraction, core JS syntax checks, and focused UI/root-safe tests.
+          - Added scripts/extract-html-module.mjs to avoid fragile inline shell quoting for module-script checks.
+          - Added tests/bridge-commands.test.mjs contract coverage.
       test_contract_cleanup:
         status: todo
         details:
