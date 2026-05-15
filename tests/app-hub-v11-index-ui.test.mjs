@@ -123,8 +123,12 @@ assert.match(html, /function incrementChannelUnread\(channel\)/, 'chat should in
 assert.match(html, /function clearChannelUnread\(channel\)/, 'chat should clear unread counts when a channel is selected');
 assert.match(html, /data-unread-count/, 'chat channel buttons should expose unread count metadata');
 assert.match(html, /aria-label="chat channel \$\{esc\(name\)\}/, 'chat channel buttons should announce channel names and unread state');
-assert.match(html, /delivery:\s*"sending"/, 'local chat sends should start with a visible sending delivery state');
-assert.match(html, /markLobbyChatDelivered\(message\.id, "sent"\)/, 'same-browser broadcast should mark local messages sent');
 assert.match(html, /function markLobbyChatDelivered\(messageId, delivery\)/, 'chat should update delivery state after send attempts');
 assert.match(html, /deliveryLabel\(msg\.delivery\)/, 'chat log should render delivery labels for local messages');
+assert.match(html, /network\.on\("message:chat-ack"/, 'chat should listen for peer acknowledgement packets');
+assert.match(html, /network\.broadcast\("chat-ack"/, 'chat receivers should acknowledge peer messages by id');
+assert.match(html, /scheduleLobbyChatAckTimeout\(message\.id\)/, 'local chat sends should schedule ack timeout handling');
+assert.match(html, /function scheduleLobbyChatAckTimeout\(messageId\)/, 'chat should fail pending peer deliveries after timeout');
+assert.match(html, /markLobbyChatDelivered\(payload\?\.messageId, "acked"\)/, 'chat acknowledgements should mark local messages acked');
+assert.match(html, /delivery:\s*connectedPeers\.size > 0 \? "pending" : "sent"/, 'local sends should show pending when peers are connected');
 assert.equal((html.match(/const scale = Math\.min\(1, 128 \/ Math\.max\(bitmap\.width, bitmap\.height\)\);/g) || []).length, 1, 'palette extraction should define scale only once');

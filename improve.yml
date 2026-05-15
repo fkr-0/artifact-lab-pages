@@ -5,6 +5,15 @@ status: in_progress
 
 fixed:
 
+  - id: hub-chat-peer-acknowledgements
+    area: app-hub-v11/messaging
+    severity: medium
+    summary: Chat delivery only had local sent labels and no peer acknowledgement/failure feedback.
+    cause: The hub sent chat messages without an explicit acknowledgement protocol or timeout path.
+    fix: Add chat-ack packets keyed by message id, mark matching local messages acked, show pending when peers are connected, keep local-only sends as sent, and fail pending sends after timeout.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+
   - id: hub-floating-inline-toggle
     area: app-hub-v11/runtime-ui
     severity: high

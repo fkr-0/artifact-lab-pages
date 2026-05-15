@@ -960,6 +960,7 @@
         selectedChatChannel = readHubSetting("selectedChatChannel", "general"),
         channelUnreadCounts = readHubSetting("channelUnreadCounts", {});
       let connectedPeers = new Map();
+      const chatDeliveryTimers = new Map();
       const seenPeerNames = new Map();
       const peerLastActivity = new Map();
       let activePresenceTarget = null;
@@ -1122,9 +1123,10 @@
         if (id) seenPeerNames.set(String(id), String(from));
         if (id) peerLastActivity.set(String(id), Date.now());
         const channel = payload?.channel || "general";
+        const messageId = payload?.id || raw?.id || `${id || "peer"}-${Date.now()}`;
         appendLobbyChat(
           {
-            id: payload?.id || raw?.id || `${id || "peer"}-${Date.now()}`,
+            id: messageId,
             from,
             channel,
             text: String(payload?.text || ""),
@@ -1133,7 +1135,17 @@
           },
           false,
         );
+        if (messageId) {
+          network.broadcast("chat-ack", {
+            messageId,
+            from: profile.displayName,
+            at: new Date().toISOString(),
+          });
+        }
         if (channel !== selectedChatChannel) incrementChannelUnread(channel);
+      });
+      network.on("message:chat-ack", ({ payload }) => {
+        markLobbyChatDelivered(payload?.messageId, "acked");
       });
       $("summary").textContent =
         `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(", ")} operations`;
@@ -1609,7 +1621,6 @@
         writeHubSetting("lobbyChat", lobbyChat);
         if (broadcast) {
           lobbyChatChannel?.postMessage({ type: "chat", message });
-          markLobbyChatDelivered(message.id, "sent");
           network.broadcast("chat", {
             id: message?.id,
             from: profile.displayName,
@@ -1617,15 +1628,28 @@
             text: String(message?.text || ""),
             at: message?.at || new Date().toISOString(),
           });
+          if (message.delivery === "pending") scheduleLobbyChatAckTimeout(message.id);
         }
         renderLobbyChat();
         renderOnlineUsers();
       }
       function markLobbyChatDelivered(messageId, delivery) {
         if (!messageId) return;
+        if (delivery === "acked" || delivery === "sent") {
+          clearTimeout(chatDeliveryTimers.get(messageId));
+          chatDeliveryTimers.delete(messageId);
+        }
         lobbyChat = lobbyChat.map((msg) => msg.id === messageId ? { ...msg, delivery } : msg);
         writeHubSetting("lobbyChat", lobbyChat);
         renderLobbyChat();
+      }
+      function scheduleLobbyChatAckTimeout(messageId) {
+        if (!messageId) return;
+        clearTimeout(chatDeliveryTimers.get(messageId));
+        chatDeliveryTimers.set(messageId, setTimeout(() => {
+          const message = lobbyChat.find((msg) => msg.id === messageId);
+          if (message?.delivery === "pending") markLobbyChatDelivered(messageId, "failed");
+        }, 4500));
       }
       function deliveryLabel(delivery) {
         if (!delivery || delivery === "received") return "";
@@ -1653,7 +1677,7 @@
           channel: selectedChatChannel,
           text,
           at: new Date().toISOString(),
-          delivery: "sending",
+          delivery: connectedPeers.size > 0 ? "pending" : "sent",
         });
         input.value = "";
         sounds.play("click");

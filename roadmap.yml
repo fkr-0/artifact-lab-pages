@@ -82,11 +82,14 @@ tracks:
           - app-hub-v11/index.html
           - tests/app-hub-v11-index-ui.test.mjs
       peer_acknowledgements:
-        status: todo
+        status: done
         details:
-          - Add explicit message ids to peer protocol receipts.
-          - Mark delivery failed when network broadcast rejects or peer receipt times out.
-          - Keep same-browser BroadcastChannel sync as a local fast path.
+          - Added explicit chat message ids to peer receipts.
+          - Receivers broadcast chat-ack packets keyed by message id.
+          - Local sends show pending when peers are connected and sent when local-only.
+          - Matching acknowledgements mark local messages acked.
+          - Pending sends mark failed after timeout.
+          - Same-browser BroadcastChannel sync remains as a local fast path.
 
   runtime_container_state:
     priority: high
