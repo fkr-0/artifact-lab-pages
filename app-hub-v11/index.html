@@ -742,23 +742,17 @@
           aria-orientation="horizontal"
         ></div>
         <section id="workspacePane" class="card workspace-pane">
-          <div id="workspaceTabs" class="workspace-tabs">
+          <div id="workspaceTabs" class="workspace-tabs app-deck-tabs">
             <button
-              class="workspace-tab"
-              type="button"
-              data-workspace-tab="appDeck"
-            >
-              inline tabs</button
-            ><button
               class="workspace-tab active"
               type="button"
               data-workspace-tab="eventLog"
+              data-permanent-tab="eventLog"
             >
               event log
             </button>
           </div>
           <div id="appDeck" class="workspace-panel app-deck">
-            <div id="appDeckTabs" class="app-deck-tabs"></div>
             <div id="appDeckBody"></div>
           </div>
           <div id="eventLogPanel" class="workspace-panel stack active">
@@ -989,16 +983,19 @@
           : null;
       const inlineDeck = createInlineTabDeck({
         deck: $("appDeck"),
-        tabs: $("appDeckTabs"),
+        tabs: $("workspaceTabs"),
         body: $("appDeckBody"),
         runtime: window,
-        onChange: ({ type, activeAppId, openApps }) =>
+        onChange: ({ type, activeAppId, openApps }) => {
+          if (type === "empty") setWorkspaceTab("eventLog");
+          if (activeAppId) setWorkspaceTab(activeAppId);
           eventLog.info(
             "deck",
             type,
             activeAppId || "none",
             `${openApps.size} open`,
-          ),
+          );
+        },
       });
       const joinableGameIds = new Set(["bomberman-v10", "hyperblast-shooter", "v11-peer-daw"]);
       const defaultJoinGameByPeer = new Map();
@@ -1292,11 +1289,11 @@
       function setWorkspaceTab(tabId) {
         workspacePane.classList.add("active");
         $("workspaceTabs")
-          .querySelectorAll("[data-workspace-tab]")
+          .querySelectorAll("[data-workspace-tab], [data-app-id]")
           .forEach((button) =>
             button.classList.toggle(
               "active",
-              button.dataset.workspaceTab === tabId,
+              button.dataset.workspaceTab === tabId || button.dataset.appId === tabId,
             ),
           );
         workspacePane
@@ -1305,6 +1302,7 @@
             panel.classList.toggle(
               "active",
               panel.id === tabId ||
+                panel.dataset.appId === tabId ||
                 (tabId === "eventLog" && panel.id === "eventLogPanel"),
             ),
           );
@@ -1402,7 +1400,6 @@
         if (launch.mode === "fullscreen")
           return openFullscreen(selected, launch.url);
         workspacePane.classList.add("active");
-        setWorkspaceTab("appDeck");
         inlineDeck.open(selected, launch);
         $("joinGamePrompt").textContent = `Active: ${selected.title}`;
       }

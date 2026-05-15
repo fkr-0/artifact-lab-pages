@@ -93,17 +93,23 @@ tracks:
     goal: Let running programs move between inline tabs and floating panels without losing state where feasible.
     tasks:
       single_level_tabs:
-        status: planned
+        status: done
         details:
-          - Event Log becomes first permanent tab in the inline runtime tab strip.
-          - App tabs share the same tab row; no nested workspace/app tab bars.
-          - Closing apps keeps Event Log available and selected.
+          - Event Log is now the first permanent tab in the inline runtime tab strip.
+          - App tabs share the same tab row; nested workspace/app tab bars were removed.
+          - Closing the final app returns selection to Event Log.
       floating_inline_toggle:
         status: planned
         details:
           - Add runtimeInstanceId and AppRuntimeRegistry.
           - Move same-owned iframe nodes between inline and floating containers when safe.
           - Fall back to relaunch plus event-log warning for unsupported cross-origin cases.
+      state_transfer_registry_design:
+        status: todo
+        details:
+          - Define descriptor schema for app instance, iframe node, launch url, artifact metadata, and current container mode.
+          - Add tests for dock inline, float, close, unsupported cross-origin fallback, and event-log warnings.
+          - Keep Event Log as a permanent non-closable tab outside transferable runtime instances.
       browser_coverage:
         status: todo
         details:

@@ -5,6 +5,16 @@ status: in_progress
 
 fixed:
 
+  - id: hub-single-level-inline-tabs
+    area: app-hub-v11/runtime-ui
+    severity: high
+    summary: Inline apps used a nested second-level tab strip separate from the Event Log workspace tab.
+    cause: The workspace had wrapper tabs for inline tabs/event log and then a separate appDeckTabs row for running apps.
+    fix: Remove nested appDeckTabs, make Event Log the permanent first tab in workspaceTabs, append inline app tabs into the same tab strip, and return to Event Log when the last app closes.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+      - tests/app-hub-v11-libs.test.mjs
+
   - id: hub-catalog-modified-default-actions
     area: app-hub-v11/catalog-ui
     severity: high
@@ -186,7 +196,7 @@ open:
       - accessibility labels and keyboard shortcuts for dock/float controls
       - failure telemetry in event log
   - id: single-level-inline-tabs-spec
-    area: future/ui
+    area: completed/ui
     priority: high
     summary: Collapse workspace and app tabs into one inline tab strip with Event Log as the first tab.
     behavior:
@@ -206,7 +216,7 @@ open:
       - closing the last app returns selection to Event Log
       - event log clear button remains available inside the Event Log tab panel
     implementation_approach:
-      - replace workspaceTabs/appDeckTabs split with a single runtimeTabs node
-      - teach createInlineTabDeck to accept permanent tabs
-      - move eventLogPanel into the same panel registry as app iframes
-      - remove workspace tab switching layer after migration tests are green
+      - replace workspaceTabs/appDeckTabs split with a single runtimeTabs node (done)
+      - keep Event Log as the permanent first tab while app panels remain managed by createInlineTabDeck (done)
+      - select app tabs from createInlineTabDeck onChange and return to Event Log on empty (done)
+      - future: move eventLogPanel into a full AppRuntimeRegistry when inline/floating transfer lands
