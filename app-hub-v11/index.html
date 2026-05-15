@@ -784,7 +784,9 @@
               <span class="pill">users: <span id="presenceCountDetail">0</span></span>
               <span class="pill">channel: <span id="activeChatChannelDetail"># general</span></span>
               <span class="pill">messages: <span id="lobbyMessageCountDetail">0</span></span>
+              <span class="pill">last snapshot: <span id="observerLastSnapshotAge">never</span></span>
             </div>
+            <div id="observerStatusPanel" class="card muted">Observer status: no snapshots yet.</div>
             <div class="lobby-grid">
               <section class="lobby-roster card stack">
                 <div class="row between">
@@ -1611,7 +1613,8 @@
         if (!snapshot?.artifactId) return;
         latestArtifactObserverSnapshots.set(artifactObserverSnapshotKey(snapshot.artifactId, snapshot.fromPeerId || snapshot.targetPeerId || ""), snapshot);
         latestArtifactObserverSnapshots.set(artifactObserverSnapshotKey(snapshot.artifactId, ""), snapshot);
-        eventLog.info("observe", snapshot.artifactId, snapshot.fromPeerId || "local");
+        renderObserverStatus();
+        eventLog.info("observe", snapshot.artifactId, snapshot.fromPeerId || "local", `#${snapshot.sequence || "?"}`);
       }
       function forwardArtifactObserverSnapshot(snapshot) {
         if (!snapshot?.artifactId) return;
@@ -1620,6 +1623,21 @@
           if (!runtime.launch?.action?.observe && !runtime.launch?.action?.spectate) continue;
           runtime.iframeNode?.contentWindow?.postMessage?.({ type: "artifact-observer-snapshot", snapshot }, "*");
         }
+      }
+      function renderObserverStatus() {
+        const snapshots = [...latestArtifactObserverSnapshots.values()]
+          .filter((snapshot, index, all) => all.findIndex((other) => other === snapshot) === index)
+          .sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
+        if (!snapshots.length) {
+          $("observerStatusPanel").textContent = "Observer status: no snapshots yet.";
+          $("observerLastSnapshotAge").textContent = "never";
+          return;
+        }
+        const snapshot = snapshots[0];
+        const ageMs = Math.max(0, Date.now() - Number(snapshot.at || Date.now()));
+        const ageLabel = ageMs < 1000 ? "now" : `${Math.round(ageMs / 1000)}s ago`;
+        $("observerLastSnapshotAge").textContent = ageLabel;
+        $("observerStatusPanel").textContent = `Observer status: ${snapshot.artifactId} from ${snapshot.fromPeerId || "local"} · sequence #${snapshot.sequence || "?"} · last snapshot ${ageLabel}`;
       }
       function renderLobbySummary() {
         const count = Array.isArray(lobbyChat) ? lobbyChat.length : 0;

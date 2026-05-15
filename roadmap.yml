@@ -150,11 +150,17 @@ tracks:
           - Minesweeper, Solitaire, and Sprite GIF Creator publish DOM snapshots when run normally.
           - Observer launches run read-only, subscribe for snapshots, and disable controls after applying snapshots.
           - Hub relays iframe snapshots over existing network packets and forwards peer/local snapshots into observer iframes.
+      observer_status_metadata:
+        status: done
+        details:
+          - Generic observer snapshots now carry sequence numbers and snapshotAgeMs metadata.
+          - Observer frames display current artifact/sequence/last-snapshot age.
+          - Hub Lobby / Chat shows latest observer source, sequence, and last snapshot age.
       semantic_observer_protocol:
         status: todo
         details:
           - Replace DOM HTML snapshots with app-specific compact state diffs for games that can expose clean state.
-          - Add last-snapshot-age and observed-peer status UI.
+          - Add observed-peer disconnect/stale-state warnings beyond last-snapshot age.
           - Add browser coverage with two hub sessions and one observer iframe.
 
 known_notes:

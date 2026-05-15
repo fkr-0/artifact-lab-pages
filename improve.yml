@@ -5,6 +5,16 @@ status: in_progress
 
 fixed:
 
+  - id: observer-snapshot-status-metadata
+    area: app-hub-v11/observer
+    severity: medium
+    summary: Generic observer snapshots lacked visible freshness/source metadata for users watching remote or local artifact sessions.
+    cause: The initial observer bridge relayed DOM snapshots but did not sequence snapshots or expose last-snapshot status in observer frames and the hub lobby.
+    fix: Add sequence numbers, snapshot age metadata, observer-frame status badge updates, and a hub Lobby / Chat observer status panel showing source, sequence, and last snapshot age.
+    tests:
+      - tests/non-peer-observer-bridge.test.mjs
+      - tests/app-hub-v11-index-ui.test.mjs
+
   - id: generic-non-peer-observer-bridge
     area: app-hub-v11/observer
     severity: high

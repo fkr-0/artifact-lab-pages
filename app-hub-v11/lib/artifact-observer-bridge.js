@@ -13,6 +13,8 @@ export function createArtifactObserverBridge({
     ? new BroadcastChannel(`artifact-observer:${artifactId}`)
     : null;
   let lastHash = '';
+  let lastSnapshotAt = 0;
+  let sequence = 0;
   let timer = null;
 
   function snapshotRoot() {
@@ -29,6 +31,8 @@ export function createArtifactObserverBridge({
       text: root?.innerText || root?.textContent || '',
       selector: snapshotSelector,
       title: documentRef.title || artifactId,
+      sequence: ++sequence,
+      snapshotAgeMs: 0,
       at: Date.now(),
     };
   }
@@ -57,6 +61,8 @@ export function createArtifactObserverBridge({
     documentRef.head?.appendChild(style);
     const badge = documentRef.createElement('div');
     badge.id = 'artifactObserverReadOnly';
+    badge.dataset.observerStatus = 'true';
+    badge.id = 'artifactObserverStatus';
     badge.textContent = targetPeerId ? `observing ${targetPeerId}` : 'observing read-only';
     documentRef.body?.appendChild(badge);
     documentRef.documentElement?.setAttribute('data-observer-readonly', 'true');
@@ -73,8 +79,21 @@ export function createArtifactObserverBridge({
       node.setAttribute('aria-disabled', 'true');
       node.setAttribute('draggable', 'false');
     });
+    lastSnapshotAt = snapshot.at || Date.now();
+    snapshot.snapshotAgeMs = Date.now() - lastSnapshotAt;
+    updateObserverStatus(snapshot);
     readOnlyOverlay();
     return true;
+  }
+
+  function updateObserverStatus(snapshot = null) {
+    if (!observeMode) return;
+    const badge = documentRef.getElementById('artifactObserverStatus') || documentRef.getElementById('artifactObserverReadOnly');
+    if (!badge) return;
+    const age = lastSnapshotAt ? Math.max(0, Date.now() - lastSnapshotAt) : 0;
+    badge.textContent = snapshot
+      ? `observing ${snapshot.artifactId} #${snapshot.sequence || '?'} · last snapshot ${Math.round(age / 1000)}s ago`
+      : (targetPeerId ? `observing ${targetPeerId}` : 'observing read-only');
   }
 
   function handleMessage(event) {
@@ -102,5 +121,5 @@ export function createArtifactObserverBridge({
     channel?.close?.();
   }
 
-  return { artifactId, observeMode, targetPeerId, start, stop, publishSnapshot, applySnapshot, readOnlyOverlay };
+  return { artifactId, observeMode, targetPeerId, start, stop, publishSnapshot, applySnapshot, readOnlyOverlay, updateObserverStatus };
 }

@@ -13,6 +13,17 @@ assert.match(bridge, /runtime\.parent\.postMessage\(\{[\s\S]*type: ["\']artifact
 assert.match(bridge, /readOnlyOverlay/, 'observer bridge should mark observer windows read-only');
 assert.match(bridge, /applySnapshot\(snapshot\)/, 'observer bridge should apply incoming snapshots');
 
+assert.match(bridge, /let sequence = 0/, 'observer snapshots should carry a monotonically increasing sequence');
+assert.match(bridge, /sequence: \+\+sequence/, 'published snapshots should increment sequence numbers');
+assert.match(bridge, /snapshotAgeMs/, 'observer bridge should expose last snapshot age metadata');
+assert.match(bridge, /artifactObserverStatus/, 'observer bridge should render visible observer status metadata');
+assert.match(bridge, /lastSnapshotAt/, 'observer bridge should track the last applied snapshot timestamp');
+
+assert.match(hub, /id="observerStatusPanel"/, 'hub should show observer status metadata in the Lobby / Chat panel');
+assert.match(hub, /renderObserverStatus\(\)/, 'hub should render observer status after snapshot updates');
+assert.match(hub, /last snapshot/, 'hub observer status should include last snapshot age copy');
+assert.match(hub, /snapshot\.sequence/, 'hub should display observer snapshot sequence metadata');
+
 for (const [name, html, id, selector] of [
   ['minesweeper', minesweeper, 'minesweeper', 'main.window'],
   ['solitaire', solitaire, 'solitaire', 'main.app'],
