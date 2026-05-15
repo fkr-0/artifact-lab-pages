@@ -5,6 +5,16 @@ status: in_progress
 
 fixed:
 
+  - id: hub-bottom-lobby-chat-tab
+    area: app-hub-v11/runtime-ui
+    severity: high
+    summary: Lobby/chat was cramped in the sidebar and not available as a distinct bottom-pane tab next to Event Log.
+    cause: The original lobby panel combined roster, channels, join status, and chat inside the left sidebar.
+    fix: Keep a compact lobby summary in the sidebar, add a dedicated Lobby / Chat permanent bottom-pane tab next to Event Log, move detailed roster/channel/chat controls into that tab, and enlarge the chat log.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+      - tests/app-hub-v11-links-settings.test.mjs
+
   - id: hub-chat-peer-acknowledgements
     area: app-hub-v11/messaging
     severity: medium

@@ -121,6 +121,22 @@ tracks:
           - Add headless browser test for drag, resize, float, dock, close, and event-log fallback states.
           - Add unsupported cross-origin fallback coverage once a browser harness is available.
 
+
+  lobby_chat_surface:
+    priority: high
+    goal: Make lobby presence and chat a first-class bottom-pane workspace surface.
+    tasks:
+      bottom_lobby_chat_tab:
+        status: done
+        details:
+          - Event Log and Lobby / Chat are permanent bottom-pane tabs.
+          - Sidebar lobby panel is now a compact summary with users, active channel, and message count.
+          - Detailed roster, join prompt, channels, and large chat log live in the Lobby / Chat tab.
+      future_browser_coverage:
+        status: todo
+        details:
+          - Add headless browser coverage for switching Event Log/Lobby/App tabs and sending chat from the larger chat surface.
+
 known_notes:
   agent_browser_cli:
     severity: low

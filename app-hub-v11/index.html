@@ -334,6 +334,33 @@
         white-space: pre-wrap;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       }
+      .lobby-chat-panel {
+        min-height: 0;
+        overflow: auto;
+      }
+      .lobby-grid {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.9fr) minmax(360px, 1.6fr);
+        gap: 0.6rem;
+        min-height: 0;
+      }
+      .lobby-chat-main,
+      .lobby-roster {
+        min-height: 0;
+        overflow: auto;
+      }
+      .lobby-chat-log {
+        min-height: 18rem;
+      }
+      .lobby-summary-compact {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .lobby-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+        gap: 0.35rem;
+      }
       .online-users,
       .chat-channels {
         display: grid;
@@ -676,31 +703,12 @@
             <h2>Lobby</h2>
             <span id="activeStorage" class="pill">storage</span>
           </div>
-          <div class="row between">
-            <h3>Connected users</h3>
-            <span id="presenceCount" class="pill">0</span>
+          <div id="lobbySummaryCompact" class="lobby-summary-compact muted">
+            <div class="row between"><span>users</span><span id="presenceCount" class="pill">0</span></div>
+            <div class="row between"><span>channel</span><span id="activeChatChannel" class="pill"># general</span></div>
+            <div class="row between"><span>messages</span><span id="lobbyMessageCount" class="pill">0</span></div>
           </div>
-          <div id="onlineUsers" class="online-users muted"></div>
-          <div class="row">
-            <input
-              id="chatChannelName"
-              placeholder="chat channel…"
-              value="general"
-            /><button id="spawnChatChannel" type="button">spawn</button>
-          </div>
-          <div id="chatChannels" class="chat-channels"></div>
-          <div id="joinGamePrompt" class="muted">
-            Select a game and use ▶ inline or ⛶ fullscreen to join/spawn.
-          </div>
-          <pre id="lobbyChatLog" class="card chat-log"></pre>
-          <div class="row">
-            <input id="lobbyChatInput" placeholder="lobby message…" /><button
-              id="sendLobbyChat"
-              type="button"
-            >
-              send chat</button
-            ><button id="clearLobbyChat" type="button">clear</button>
-          </div>
+          <button id="openLobbyChatTab" type="button">open Lobby / Chat tab</button>
         </section>
       </aside>
       <div
@@ -751,9 +759,67 @@
             >
               event log
             </button>
+            <button
+              class="workspace-tab"
+              type="button"
+              data-workspace-tab="lobbyChat"
+              data-permanent-tab="lobbyChat"
+            >
+              lobby / chat
+            </button>
           </div>
           <div id="appDeck" class="workspace-panel app-deck">
             <div id="appDeckBody"></div>
+          </div>
+          <div id="lobbyChatPanel" class="workspace-panel stack lobby-chat-panel">
+            <div class="row between">
+              <strong>Lobby / Chat</strong>
+              <div class="row">
+                <span id="lobbyTabStatus" class="pill">ready</span>
+                <button id="clearLobbyChat" type="button">clear chat</button>
+              </div>
+            </div>
+            <div class="lobby-meta-grid">
+              <span class="pill">network: <span id="lobbyNetworkStatus">storage</span></span>
+              <span class="pill">users: <span id="presenceCountDetail">0</span></span>
+              <span class="pill">channel: <span id="activeChatChannelDetail"># general</span></span>
+              <span class="pill">messages: <span id="lobbyMessageCountDetail">0</span></span>
+            </div>
+            <div class="lobby-grid">
+              <section class="lobby-roster card stack">
+                <div class="row between">
+                  <h3>Connected users</h3>
+                  <span id="presenceCountDetailHeader" class="pill">0</span>
+                </div>
+                <div id="onlineUsers" class="online-users muted"></div>
+                <div id="joinGamePrompt" class="muted">
+                  Select a game and use ▶ inline or ⛶ fullscreen to join/spawn.
+                </div>
+              </section>
+              <section class="lobby-chat-main card stack">
+                <div class="row between">
+                  <h3>Channels + chat</h3>
+                  <span class="pill">larger chat window</span>
+                </div>
+                <div class="row">
+                  <input
+                    id="chatChannelName"
+                    placeholder="chat channel…"
+                    value="general"
+                  /><button id="spawnChatChannel" type="button">spawn</button>
+                </div>
+                <div id="chatChannels" class="chat-channels"></div>
+                <pre id="lobbyChatLog" class="card chat-log lobby-chat-log"></pre>
+                <div class="row">
+                  <input id="lobbyChatInput" placeholder="lobby message…" /><button
+                    id="sendLobbyChat"
+                    type="button"
+                  >
+                    send chat</button
+                  >
+                </div>
+              </section>
+            </div>
           </div>
           <div id="eventLogPanel" class="workspace-panel stack active">
             <div class="row between">
@@ -1089,6 +1155,7 @@
       renderLobbyChat();
       renderChatChannels();
       renderOnlineUsers();
+      renderLobbySummary();
       renderStorage();
       renderFilters();
       setViewMode(viewMode, false);
@@ -1102,6 +1169,9 @@
             ? "connected"
             : raw || "connected";
         $("activeStorage").textContent = text;
+        $("lobbyNetworkStatus").textContent = text;
+        $("lobbyTabStatus").textContent = text;
+        renderLobbySummary();
         eventLog.info("network", text);
       });
       network.on("peers", (peers) => {
@@ -1230,6 +1300,7 @@
         eventLog.info("default action", defaultAction);
       };
       $("clearEventLog").onclick = () => eventLog.clear();
+      $("openLobbyChatTab").onclick = () => setWorkspaceTab("lobbyChat");
       $("workspaceTabs")
         .querySelectorAll("[data-workspace-tab]")
         .forEach(
@@ -1349,7 +1420,8 @@
               "active",
               panel.id === tabId ||
                 panel.dataset.appId === tabId ||
-                (tabId === "eventLog" && panel.id === "eventLogPanel"),
+                (tabId === "eventLog" && panel.id === "eventLogPanel") ||
+                (tabId === "lobbyChat" && panel.id === "lobbyChatPanel"),
             ),
           );
       }
@@ -1508,6 +1580,13 @@
         $("profileAllowIncomingSaveStates").checked =
           profile.allowIncomingSaveStates;
       }
+      function renderLobbySummary() {
+        const count = Array.isArray(lobbyChat) ? lobbyChat.length : 0;
+        $("lobbyMessageCount").textContent = String(count);
+        $("lobbyMessageCountDetail").textContent = String(count);
+        $("activeChatChannel").textContent = `# ${selectedChatChannel}`;
+        $("activeChatChannelDetail").textContent = `# ${selectedChatChannel}`;
+      }
       function renderOnlineUsers() {
         const localStatus = profile.sharedLayer ? "connected" : "offline";
         const remoteUsers = new Map();
@@ -1550,12 +1629,15 @@
           })),
         ];
         $("presenceCount").textContent = String(users.length);
+        $("presenceCountDetail").textContent = String(users.length);
+        $("presenceCountDetailHeader").textContent = String(users.length);
         $("onlineUsers").innerHTML = users
           .map(
             (user) =>
               `<div class="row online-user" data-self="${user.self ? "true" : "false"}" data-peer-id="${esc(user.peerId || "")}" data-label="${esc(user.label)}" title="${esc(`status: ${user.status}${user.lastActivity ? ` | last activity: ${new Date(user.lastActivity).toLocaleTimeString()}` : ""}`)}"><span class="avatar">${esc(user.avatar)}</span><span>${esc(user.label)} · ${esc(user.status)}${user.hub ? ' <span class="pill">hub</span>' : ''}</span></div>`,
           )
           .join("");
+        renderLobbySummary();
       }
       function openPresenceMenu(x, y) {
         const menu = $("presenceMenu");
@@ -1692,6 +1774,7 @@
               `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] #${msg.channel || "general"} ${msg.from || "peer"}: ${msg.text || ""}${deliveryLabel(msg.delivery)}`,
           )
           .join("\n");
+        renderLobbySummary();
       }
       function renderChatChannels() {
         $("chatChannels").innerHTML = chatChannels
@@ -1701,6 +1784,9 @@
             return `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}" data-unread-count="${unread}" aria-label="chat channel ${esc(name)}${unread ? `, ${unread} unread` : ""}">${label}</button>`;
           })
           .join("");
+        $("activeChatChannel").textContent = `# ${selectedChatChannel}`;
+        $("activeChatChannelDetail").textContent = `# ${selectedChatChannel}`;
+        renderLobbySummary();
         $("chatChannels")
           .querySelectorAll("[data-chat-channel]")
           .forEach((button) => {
