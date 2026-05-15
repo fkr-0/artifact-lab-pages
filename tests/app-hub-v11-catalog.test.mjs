@@ -18,6 +18,7 @@ const source = {
       kind: 'external-link',
       href: 'https://example.invalid/docs',
       tags: ['docs'],
+      modifiedAt: '2026-01-02T00:00:00.000Z',
       operations: ['validate', 'index'],
     },
     {
@@ -25,7 +26,8 @@ const source = {
       title: 'Local HTML App',
       kind: 'html-path',
       source: 'source-app/index.html',
-      launch: { modes: ['inline', 'newWindow'] },
+      modifiedAt: '2026-01-03T00:00:00.000Z',
+      launch: { modes: ['inline', 'newWindow'], defaultAction: 'inline' },
       operations: ['validate', 'copy', 'index'],
     },
     {
@@ -33,6 +35,7 @@ const source = {
       title: 'Note Only',
       kind: 'info',
       note: 'Documentation-only item that should not require an href.',
+      modifiedAt: '2026-01-01T00:00:00.000Z',
       operations: ['validate', 'index'],
     },
   ],
@@ -46,6 +49,9 @@ const result = await compileArtifactCollection(source, {
 
 assert.equal(result.collection.id, 'test-hub');
 assert.equal(result.items.length, 3);
+assert.deepEqual(result.items.map((item) => item.id), ['local-html', 'external-doc', 'note-only'], 'compiled catalog should sort artifacts by most recently modified first');
+assert.equal(result.items.find((item) => item.id === 'external-doc').launch.defaultAction, 'newWindow', 'external links should default to new-window launch');
+assert.equal(result.items.find((item) => item.id === 'note-only').launch.defaultAction, 'inline', 'info entries should default to inline launch');
 assert.deepEqual(result.summary.byKind, {
   'external-link': 1,
   'html-path': 1,
@@ -58,8 +64,8 @@ assert.equal(copied.deploy.include, true);
 await stat(join(root, 'dist', 'compiled', 'local-html', 'index.html'));
 
 const emitted = JSON.parse(await readFile(join(root, 'dist', 'artifact-collection.json'), 'utf8'));
-assert.equal(emitted.items[0].id, 'external-doc');
-assert.equal(emitted.items[1].hubHref, 'compiled/local-html/index.html');
+assert.equal(emitted.items[0].id, 'local-html');
+assert.equal(emitted.items[0].hubHref, 'compiled/local-html/index.html');
 assert.ok(emitted.operations.copy.description.includes('deployment'));
 
 const shooterCatalog = JSON.parse(
@@ -119,3 +125,19 @@ assert.deepEqual(
   ['play-inline', 'fullscreen', 'new-window'],
   'Solitaire should expose v10-style launcher actions'
 );
+
+
+assert.ok(
+  shooterCatalog.items.every((item) => item.launch?.defaultAction || item.kind === 'external-link'),
+  'all launchable manifest artifacts should define launch.defaultAction'
+);
+const catalogModifiedTimes = shooterCatalog.items.map((item) => Date.parse(item.modifiedAt || item.updatedAt || item.changedAt || item.generatedAt || item.createdAt || 0));
+assert.deepEqual(
+  catalogModifiedTimes,
+  [...catalogModifiedTimes].sort((a, b) => b - a),
+  'compiled v11 catalog should be ordered by most recently modified metadata'
+);
+const v8NativeNotes = shooterCatalog.items.find((item) => item.id === 'v8-native-scratchpad');
+assert.ok(v8NativeNotes, 'v8 native scratchpad should be ported into legacy utilities');
+assert.equal(v8NativeNotes.href, 'legacy-tools.html?tool=v8-native-scratchpad');
+assert.equal(v8NativeNotes.launch.defaultAction, 'inline');

@@ -88,6 +88,27 @@ tracks:
           - Mark delivery failed when network broadcast rejects or peer receipt times out.
           - Keep same-browser BroadcastChannel sync as a local fast path.
 
+  runtime_container_state:
+    priority: high
+    goal: Let running programs move between inline tabs and floating panels without losing state where feasible.
+    tasks:
+      single_level_tabs:
+        status: planned
+        details:
+          - Event Log becomes first permanent tab in the inline runtime tab strip.
+          - App tabs share the same tab row; no nested workspace/app tab bars.
+          - Closing apps keeps Event Log available and selected.
+      floating_inline_toggle:
+        status: planned
+        details:
+          - Add runtimeInstanceId and AppRuntimeRegistry.
+          - Move same-owned iframe nodes between inline and floating containers when safe.
+          - Fall back to relaunch plus event-log warning for unsupported cross-origin cases.
+      browser_coverage:
+        status: todo
+        details:
+          - Headless test for drag, resize, float, dock, close, and event-log fallback states.
+
 known_notes:
   agent_browser_cli:
     severity: low

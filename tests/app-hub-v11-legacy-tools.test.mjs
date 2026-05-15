@@ -12,6 +12,7 @@ const expectedTextTools = [
   'v10-notepad',
   'v10-shared-pad',
   'v4-console-notes',
+  'v8-native-scratchpad',
   'v8-collab-code-editor',
   'v8-collab-pad-lite',
 ];
@@ -50,6 +51,7 @@ for (const id of [
   'v10-local-first-notepad',
   'v10-shared-text-pad',
   'v4-console-notes',
+  'v8-native-scratchpad',
   'v8-collab-code-editor',
   'v8-collab-pad-lite',
 ]) {
@@ -59,3 +61,10 @@ for (const id of [
 const legacyHost = await readFile('app-hub-v11/legacy-tools.html', 'utf8');
 assert.match(legacyHost, /\.\/lib\/legacy-tools\.mjs/, 'legacy host should use the shared legacy tool module');
 assert.match(legacyHost, /data-external-href/, 'legacy host should render external editor launch cards');
+
+assert.ok(LEGACY_TOOLS.some((tool) => tool.id === 'v8-native-scratchpad' && tool.kind === 'notepad'), 'legacy utility host should include a native v8 scratchpad/notepad');
+assert.deepEqual(
+  ['v4', 'v8', 'v9', 'v10'].filter((lineage) => LEGACY_TOOLS.some((tool) => tool.lineage === lineage && ['notepad', 'shared-pad', 'external-editor'].includes(tool.kind))),
+  ['v4', 'v8', 'v9', 'v10'],
+  'legacy utility host should cover useful text/editor tools across v4/v8/v9/v10'
+);

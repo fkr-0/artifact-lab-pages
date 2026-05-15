@@ -70,7 +70,10 @@ assert.match(html, /\.app-deck-inline-frame,[\s\S]*min-height:\s*480px/, 'inline
 assert.match(html, /id="defaultAction"/, 'v11 should expose a default artifact action selector');
 assert.match(html, /readHubSetting\(["']defaultAction["'], ["']newWindow["']\)/, 'default artifact action should be new window');
 assert.match(html, /data-artifact-title/, 'artifact title should be its own default-action trigger');
-assert.match(html, /openSelected\(defaultAction\)/, 'title clicks should trigger the configured default action');
+
+assert.match(html, /function artifactDefaultAction\(item\)/, 'title/default launches should resolve per-artifact manifest defaults');
+assert.match(html, /item\?\.launch\?\.defaultAction/, 'artifact default action should come from manifest launch.defaultAction');
+assert.match(html, /openSelected\(artifactDefaultAction\(selected\)\)/, 'artifact title clicks should use the selected artifact default action');
 assert.doesNotMatch(html, /<section id="appDeck" class="card app-deck">/, 'app deck should not spawn as a standalone card below results');
 assert.doesNotMatch(html, /<section class="card stack"><div class="row between"><strong>Event log<\/strong>/, 'event log should not be a standalone section below results');
 

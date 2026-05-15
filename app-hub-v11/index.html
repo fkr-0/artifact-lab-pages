@@ -1339,6 +1339,9 @@
       function sortItemsByRecentlyChanged(items) {
         return [...items].sort((a, b) => changedTimestamp(b) - changedTimestamp(a) || String(a.title || a.id).localeCompare(String(b.title || b.id)));
       }
+      function artifactDefaultAction(item) {
+        return item?.launch?.defaultAction || defaultAction || "newWindow";
+      }
       function renderResults() {
         const items = filteredItems();
         const groups = buildMenuGroups(items);
@@ -1362,7 +1365,7 @@
                 selected = catalog.items.find(
                   (item) => item.id === node.dataset.id,
                 );
-                if (title) return openSelected(defaultAction);
+                if (title) return openSelected(artifactDefaultAction(selected));
                 openSelected(b.dataset.launch);
               }),
           );

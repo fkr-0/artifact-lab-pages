@@ -40,6 +40,15 @@ export const LEGACY_TOOLS = [
     lineage: 'v4',
     storageKey: 'v11:legacy:v4-console-notes',
   },
+
+  {
+    id: 'v8-native-scratchpad',
+    title: 'v8 Native Scratchpad',
+    desc: 'Native lightweight scratchpad inspired by the v8 editor flow, with hub-scoped local autosave.',
+    kind: 'notepad',
+    lineage: 'v8',
+    storageKey: 'v11:legacy:v8-native-scratchpad',
+  },
   {
     id: 'v8-collab-code-editor',
     title: 'v8 Collab Code Editor',

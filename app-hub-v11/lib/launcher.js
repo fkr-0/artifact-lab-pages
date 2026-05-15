@@ -140,9 +140,49 @@ export function createFloatingPanel({ title, url }, runtime = globalThis) {
   documentRef.querySelector?.('.floating')?.remove();
   const panel = documentRef.createElement('section');
   panel.className = 'floating';
-  panel.innerHTML = `<header><strong>${escapeHtml(title)}</strong><button type="button">close</button></header><iframe src="${escapeHtml(url)}" title="${escapeHtml(title)}"></iframe>`;
+  panel.style.position = 'fixed';
+  panel.style.resize = 'both';
+  panel.style.overflow = 'auto';
+  panel.style.left = panel.style.left || '10vw';
+  panel.style.top = panel.style.top || '10vh';
+  panel.style.width = panel.style.width || 'min(900px, 82vw)';
+  panel.style.height = panel.style.height || 'min(680px, 76vh)';
+  panel.innerHTML = `<header data-floating-drag-handle><strong>${escapeHtml(title)}</strong><span data-floating-resize-handle aria-hidden="true">↘</span><button type="button">close</button></header><iframe src="${escapeHtml(url)}" title="${escapeHtml(title)}"></iframe>`;
   const closeButton = panel.querySelector('button');
   if (closeButton) closeButton.onclick = () => panel.remove();
+  makeFloatingPanelMovable(panel, runtime);
   (runtime.body || documentRef.body)?.append(panel);
   return panel;
+}
+
+
+function makeFloatingPanelMovable(panel, runtime = globalThis) {
+  let drag = null;
+  const onPointerMove = (event) => {
+    if (!drag) return;
+    const nextLeft = Math.max(0, event.clientX - drag.offsetX);
+    const nextTop = Math.max(0, event.clientY - drag.offsetY);
+    panel.style.left = `${nextLeft}px`;
+    panel.style.top = `${nextTop}px`;
+  };
+  const onPointerUp = () => {
+    drag = null;
+    runtime.removeEventListener?.('pointermove', onPointerMove);
+    runtime.removeEventListener?.('pointerup', onPointerUp);
+  };
+  panel.onpointerdown = (event) => {
+    const target = event.target;
+    if (target?.closest && !target.closest('[data-floating-drag-handle]')) return;
+    if (target?.closest && target.closest('button')) return;
+    const rect = panel.getBoundingClientRect?.() || { left: 0, top: 0 };
+    drag = {
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+    };
+    panel.style.position = 'fixed';
+    panel.style.margin = '0';
+    runtime.addEventListener?.('pointermove', onPointerMove);
+    runtime.addEventListener?.('pointerup', onPointerUp, { once: true });
+    event.preventDefault?.();
+  };
 }

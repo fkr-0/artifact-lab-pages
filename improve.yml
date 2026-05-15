@@ -5,6 +5,33 @@ status: in_progress
 
 fixed:
 
+  - id: hub-catalog-modified-default-actions
+    area: app-hub-v11/catalog-ui
+    severity: high
+    summary: Artifacts needed manifest-backed recently-modified ordering and per-artifact default launch actions.
+    cause: Sorting was only client-side/fallback and title clicks used a global default action instead of artifact metadata.
+    fix: Compiler sorts catalog items by modified metadata, normalizes launch.defaultAction, source manifest declares defaults, and title clicks use artifact launch.defaultAction with global fallback.
+    tests:
+      - tests/app-hub-v11-catalog.test.mjs
+      - tests/app-hub-v11-index-ui.test.mjs
+  - id: hub-legacy-v8-native-scratchpad
+    area: app-hub-v11/legacy-utilities
+    severity: medium
+    summary: v8 had only external editor links, not a native local-first notes/editor utility.
+    cause: Legacy utilities covered v4/v9/v10 native text surfaces but v8 only linked out to collaborative editors.
+    fix: Add v8 Native Scratchpad to legacy tool module and v11 artifact catalog.
+    tests:
+      - tests/app-hub-v11-legacy-tools.test.mjs
+      - tests/app-hub-v11-catalog.test.mjs
+  - id: ui-lib-floating-move-resize
+    area: app-hub-v11/lib/launcher
+    severity: high
+    summary: Floating panels were fixed overlays that could not be moved or resized.
+    cause: createFloatingPanel produced a static single floating section with no pointer handling or resize styling.
+    fix: Add drag handle, pointer-based movement, browser resize styling, and resize affordance markup.
+    tests:
+      - tests/app-hub-v11-libs.test.mjs
+
   - id: hub-chat-unread-delivery
     area: app-hub-v11/messaging
     severity: medium
@@ -127,3 +154,59 @@ open:
     area: future/tests
     priority: medium
     summary: Add headless browser tests for actual context menu clicks, iframe sizing, and multi-peer message routing.
+
+  - id: inline-floating-state-toggle-spec
+    area: future/spec
+    priority: high
+    summary: Allow running programs to toggle between inline tab state and floating panel state.
+    behavior:
+      - each running app instance receives a stable runtimeInstanceId separate from artifact id
+      - inline and floating containers are views over the same runtime descriptor when browser security permits
+      - iframe-backed apps should move DOM nodes between containers instead of reloading when same-document ownership permits
+      - cross-origin/new-window apps fall back to relaunch with preserved launch URL and visible warning
+      - toggling from floating to inline creates or selects one app tab in the single inline tab strip
+      - toggling from inline to floating closes/hides the tab view and places the same iframe in a movable/resizable panel
+    affected_files:
+      - app-hub-v11/lib/launcher.js
+      - app-hub-v11/index.html
+      - tests/app-hub-v11-libs.test.mjs
+      - tests/app-hub-v11-index-ui.test.mjs
+    test_cases:
+      - open inline app, toggle floating, iframe src and instance id are preserved
+      - open floating app, toggle inline, exactly one tab appears and is selected
+      - close toggled app cleans both tab and floating metadata
+      - unsupported cross-origin toggle logs fallback and relaunches safely
+    implementation_approach:
+      - introduce AppRuntimeRegistry with descriptors: instanceId, artifact, launch, containerMode, iframeNode, tabNode, panelNode
+      - refactor createInlineTabDeck and createFloatingPanel around registry operations
+      - add toolbar controls: float, dock inline, close
+      - persist optional last containerMode per artifact only after runtime registry is stable
+    follow_up_tasks:
+      - browser harness for drag/dock behavior
+      - accessibility labels and keyboard shortcuts for dock/float controls
+      - failure telemetry in event log
+  - id: single-level-inline-tabs-spec
+    area: future/ui
+    priority: high
+    summary: Collapse workspace and app tabs into one inline tab strip with Event Log as the first tab.
+    behavior:
+      - Event Log is tab 0 in the same strip as running apps
+      - no separate workspace tab bar above app tabs
+      - opening an inline app appends/selects one tab in this unified strip
+      - closing app tabs never closes Event Log
+      - empty runtime state still shows Event Log selected by default
+    affected_files:
+      - app-hub-v11/index.html
+      - app-hub-v11/lib/launcher.js
+      - tests/app-hub-v11-index-ui.test.mjs
+      - tests/app-hub-v11-libs.test.mjs
+    test_cases:
+      - initial hub renders one active Event Log tab
+      - opening an app yields Event Log + app tab only, no nested tab bar
+      - closing the last app returns selection to Event Log
+      - event log clear button remains available inside the Event Log tab panel
+    implementation_approach:
+      - replace workspaceTabs/appDeckTabs split with a single runtimeTabs node
+      - teach createInlineTabDeck to accept permanent tabs
+      - move eventLogPanel into the same panel registry as app iframes
+      - remove workspace tab switching layer after migration tests are green

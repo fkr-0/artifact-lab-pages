@@ -35,6 +35,7 @@ export async function compileArtifactCollection(source, options = {}) {
     }
     compiled.push(item);
   }
+  compiled.sort((a, b) => artifactModifiedTimestamp(b) - artifactModifiedTimestamp(a) || String(a.title || a.id).localeCompare(String(b.title || b.id)));
 
   const output = {
     collection: source.collection || { id: 'app-hub-v11', title: 'App Hub v11' },
@@ -59,13 +60,36 @@ export async function compileArtifactCollectionFile(sourcePath, options = {}) {
 
 function normalizeArtifact(item) {
   if (!item?.id || !item?.title) throw new Error('Artifact item requires id and title');
-  return {
+  const merged = {
     kind: 'info',
     tags: [],
     operations: ['validate', 'index'],
     launch: { modes: ['inline', 'newWindow'] },
     ...item,
   };
+  const modes = Array.isArray(merged.launch?.modes) && merged.launch.modes.length > 0 ? merged.launch.modes : ['inline', 'newWindow'];
+  const defaultAction = merged.launch?.defaultAction || defaultLaunchActionFor(merged, modes);
+  return {
+    ...merged,
+    launch: {
+      ...merged.launch,
+      modes,
+      defaultAction: modes.includes(defaultAction) ? defaultAction : modes[0],
+    },
+  };
+}
+
+function defaultLaunchActionFor(item, modes) {
+  if (item.kind === 'external-link') return 'newWindow';
+  if (modes.includes('inline')) return 'inline';
+  if (modes.includes('newWindow')) return 'newWindow';
+  return modes[0] || 'inline';
+}
+
+function artifactModifiedTimestamp(item) {
+  const raw = item.modifiedAt || item.updatedAt || item.changedAt || item.mtime || item.lastChanged || item.generatedAt || item.createdAt || '';
+  const parsed = raw ? Date.parse(raw) : 0;
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 async function validateArtifact(item, { rootDir }) {

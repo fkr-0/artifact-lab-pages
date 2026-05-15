@@ -53,12 +53,15 @@ const floatingRuntime = {
         innerHTML: '',
         removed: false,
         events: {},
+        style: {},
         querySelector(selector) {
           if (selector !== 'button') return null;
           return {
             set onclick(handler) { node.events.close = handler; },
           };
         },
+        getBoundingClientRect() { return { left: 10, top: 20 }; },
+        set onpointerdown(handler) { this.events.pointerdown = handler; },
         remove() { this.removed = true; },
       };
       floatingRuntime.created.push(node);
@@ -75,7 +78,12 @@ assert.equal(floatingRuntime.existingPanel.removed, true);
 assert.equal(panel.className, 'floating');
 assert.match(panel.innerHTML, /Hyperblast Shooter/);
 assert.match(panel.innerHTML, /..\/app-hub\/shooter.html\?embedded=true/);
+assert.match(panel.innerHTML, /data-floating-drag-handle/, 'floating panel should expose a drag handle');
+assert.match(panel.innerHTML, /data-floating-resize-handle/, 'floating panel should expose a resize handle');
+assert.equal(panel.style.position, 'fixed');
+assert.equal(panel.style.resize, 'both', 'floating panel should be browser-resizable');
 assert.equal(floatingRuntime.body.appended[0], panel);
+assert.equal(typeof panel.events.pointerdown, 'function', 'floating panel should register pointer drag handlers');
 panel.events.close();
 assert.equal(panel.removed, true);
 
