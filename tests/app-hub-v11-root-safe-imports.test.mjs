@@ -13,11 +13,11 @@ for (const needle of [
   "import(hubUrl('lib/sound.js'))",
   "import(hubUrl('lib/network.js'))",
   "import(hubUrl('lib/profile.js'))",
-  'href="app-hub-v11/lib/v9-shell.css"'
+  'href="lib/v9-shell.css"'
 ]) {
   assert.ok(html.includes(needle), `missing deploy-safe marker: ${needle}`);
 }
 assert.ok(!html.includes("from './lib/"), 'v11 should not statically import ./lib modules when root-promoted');
-assert.ok(!html.includes('href="lib/v9-shell.css"'), 'v11 should not link root /lib stylesheet path');
+assert.ok(!html.includes('href="app-hub-v11/app-hub-v11/'), 'v11 should not double-prefix app-hub-v11 assets');
 
 console.log('app-hub v11 root-safe imports contract OK');

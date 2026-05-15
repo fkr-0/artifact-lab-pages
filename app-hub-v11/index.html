@@ -6,7 +6,7 @@
     <title>NEXUS App Hub v11</title>
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style id="themeStyles"></style>
-    <link rel="stylesheet" href="app-hub-v11/lib/v9-shell.css" />
+    <link rel="stylesheet" href="lib/v9-shell.css">
     <style>
       :root {
         --hub-accent: #00ffff;
@@ -889,42 +889,52 @@
     </div>
 
     <script type="module">
-      import {
+      const HUB_BASE = document.baseURI.includes('app-hub-v11/') ? './' : 'app-hub-v11/';
+      const hubUrl = (path) => `${HUB_BASE}${path}`;
+      const [
+        menuModule,
+        launcherModule,
+        eventLogModule,
+        panelsModule,
+        storageModule,
+        themesModule,
+        soundModule,
+        networkModule,
+        profileModule,
+      ] = await Promise.all([
+        import(hubUrl('lib/menu.js')),
+        import(hubUrl('lib/launcher.js')),
+        import(hubUrl('lib/event-log.js')),
+        import(hubUrl('lib/resizable-panels.js')),
+        import(hubUrl('lib/storage.js')),
+        import(hubUrl('lib/themes.js')),
+        import(hubUrl('lib/sound.js')),
+        import(hubUrl('lib/network.js')),
+        import(hubUrl('lib/profile.js')),
+      ]);
+      const {
         buildMenuGroups,
         createTagFilterState,
         filterArtifactsAdvanced,
         renderTagFilterControls,
         tagColorStyle,
         toggleTagFilter,
-      } from "./lib/menu.js";
-      import {
-        createFloatingPanel,
-        createInlineTabDeck,
-        launchArtifact,
-      } from "./lib/launcher.js";
-      import { createEventLog } from "./lib/event-log.js";
-      import { createResizablePanels } from "./lib/resizable-panels.js";
-      import {
+      } = menuModule;
+      const { createFloatingPanel, createInlineTabDeck, launchArtifact } = launcherModule;
+      const { createEventLog } = eventLogModule;
+      const { createResizablePanels } = panelsModule;
+      const {
         buildStorageSnapshot,
         clearHubSettings,
         exportHubSettings,
         importHubSettings,
         readHubSetting,
         writeHubSetting,
-      } from "./lib/storage.js";
-      import {
-        applyThemeTokens,
-        buildThemeStyleText,
-        themeById,
-        themes,
-      } from "./lib/themes.js";
-      import { createSoundEffects } from "./lib/sound.js";
-      import { createLobbyNetwork } from "./lib/network.js";
-      import {
-        avatarInitials,
-        normalizeProfile,
-        profileSummary,
-      } from "./lib/profile.js";
+      } = storageModule;
+      const { applyThemeTokens, buildThemeStyleText, themeById, themes } = themesModule;
+      const { createSoundEffects } = soundModule;
+      const { createLobbyNetwork } = networkModule;
+      const { avatarInitials, normalizeProfile, profileSummary } = profileModule;
 
       const $ = (id) => document.getElementById(id);
       const esc = (value = "") =>
@@ -953,7 +963,8 @@
         profile = normalizeProfile(readHubSetting("profile", {})),
         lobbyChat = readHubSetting("lobbyChat", []),
         chatChannels = readHubSetting("chatChannels", ["general"]),
-        selectedChatChannel = readHubSetting("selectedChatChannel", "general");
+        selectedChatChannel = readHubSetting("selectedChatChannel", "general"),
+        channelUnreadCounts = readHubSetting("channelUnreadCounts", {});
       let connectedPeers = new Map();
       const seenPeerNames = new Map();
       const peerLastActivity = new Map();
@@ -965,6 +976,7 @@
         storageKey: "v11-peernet",
       });
       if (!Array.isArray(chatChannels)) chatChannels = ["general"];
+      if (!channelUnreadCounts || typeof channelUnreadCounts !== "object" || Array.isArray(channelUnreadCounts)) channelUnreadCounts = {};
       if (!chatChannels.includes("general")) {
         chatChannels = ["general", ...chatChannels];
         writeHubSetting("chatChannels", chatChannels);
@@ -1078,14 +1090,19 @@
           `peer-${String(id || "").slice(0, 6)}`;
         if (id) seenPeerNames.set(String(id), String(from));
         if (id) peerLastActivity.set(String(id), Date.now());
+        const channel = payload?.channel || "general";
         appendLobbyChat(
           {
+            id: payload?.id || raw?.id || `${id || "peer"}-${Date.now()}`,
             from,
+            channel,
             text: String(payload?.text || ""),
             at: payload?.at || new Date().toISOString(),
+            delivery: "received",
           },
           false,
         );
+        if (channel !== selectedChatChannel) incrementChannelUnread(channel);
       });
       $("summary").textContent =
         `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(", ")} operations`;
@@ -1149,7 +1166,10 @@
       });
       window.addEventListener("blur", closePresenceMenu);
       lobbyChatChannel?.addEventListener("message", (event) => {
-        if (event.data?.type === "chat") appendLobbyChat(event.data.message, false);
+        if (event.data?.type !== "chat") return;
+        const channel = event.data.message?.channel || "general";
+        appendLobbyChat({ ...event.data.message, delivery: event.data.message?.delivery || "received" }, false);
+        if (channel !== selectedChatChannel) incrementChannelUnread(channel);
       });
       $("search").oninput = renderResults;
       $("modeAnd").onclick = () => setTagMode("AND");
@@ -1181,6 +1201,7 @@
         writeHubSetting("chatChannels", chatChannels);
         writeHubSetting("selectedChatChannel", selectedChatChannel);
         $("chatChannelName").value = selectedChatChannel;
+        clearChannelUnread(name);
         renderChatChannels();
         eventLog.success("chat channel", name);
       };
@@ -1533,7 +1554,9 @@
         writeHubSetting("lobbyChat", lobbyChat);
         if (broadcast) {
           lobbyChatChannel?.postMessage({ type: "chat", message });
+          markLobbyChatDelivered(message.id, "sent");
           network.broadcast("chat", {
+            id: message?.id,
             from: profile.displayName,
             channel: message?.channel || selectedChatChannel,
             text: String(message?.text || ""),
@@ -1543,15 +1566,39 @@
         renderLobbyChat();
         renderOnlineUsers();
       }
+      function markLobbyChatDelivered(messageId, delivery) {
+        if (!messageId) return;
+        lobbyChat = lobbyChat.map((msg) => msg.id === messageId ? { ...msg, delivery } : msg);
+        writeHubSetting("lobbyChat", lobbyChat);
+        renderLobbyChat();
+      }
+      function deliveryLabel(delivery) {
+        if (!delivery || delivery === "received") return "";
+        return ` · ${delivery}`;
+      }
+      function incrementChannelUnread(channel) {
+        const name = String(channel || "general");
+        channelUnreadCounts[name] = Number(channelUnreadCounts[name] || 0) + 1;
+        writeHubSetting("channelUnreadCounts", channelUnreadCounts);
+        renderChatChannels();
+      }
+      function clearChannelUnread(channel) {
+        const name = String(channel || "general");
+        if (!channelUnreadCounts[name]) return;
+        delete channelUnreadCounts[name];
+        writeHubSetting("channelUnreadCounts", channelUnreadCounts);
+      }
       function sendLobbyChat() {
         const input = $("lobbyChatInput");
         const text = input.value.trim();
         if (!text) return;
         appendLobbyChat({
+          id: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
           from: profile.displayName,
           channel: selectedChatChannel,
           text,
           at: new Date().toISOString(),
+          delivery: "sending",
         });
         input.value = "";
         sounds.play("click");
@@ -1563,22 +1610,24 @@
         )
           .map(
             (msg) =>
-              `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] #${msg.channel || "general"} ${msg.from || "peer"}: ${msg.text || ""}`,
+              `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] #${msg.channel || "general"} ${msg.from || "peer"}: ${msg.text || ""}${deliveryLabel(msg.delivery)}`,
           )
           .join("\n");
       }
       function renderChatChannels() {
         $("chatChannels").innerHTML = chatChannels
-          .map(
-            (name) =>
-              `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}"># ${esc(name)}</button>`,
-          )
+          .map((name) => {
+            const unread = Number(channelUnreadCounts[name] || 0);
+            const label = unread > 0 ? `# ${esc(name)} (${unread})` : `# ${esc(name)}`;
+            return `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}" data-unread-count="${unread}" aria-label="chat channel ${esc(name)}${unread ? `, ${unread} unread` : ""}">${label}</button>`;
+          })
           .join("");
         $("chatChannels")
           .querySelectorAll("[data-chat-channel]")
           .forEach((button) => {
             button.onclick = () => {
               selectedChatChannel = button.dataset.chatChannel || "general";
+              clearChannelUnread(selectedChatChannel);
               writeHubSetting("selectedChatChannel", selectedChatChannel);
               $("chatChannelName").value = selectedChatChannel;
               renderChatChannels();

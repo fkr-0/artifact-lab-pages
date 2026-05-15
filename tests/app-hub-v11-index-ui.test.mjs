@@ -97,4 +97,14 @@ assert.match(html, /targetPeerId:\s*peerId/, 'join flow should pass target peer 
 assert.match(html, /observe:\s*spectate/, 'observe flow should mark launched apps as observe mode');
 assert.match(html, /selectedChatChannel/, 'chat channels should track the active/personal channel');
 assert.match(html, /#\$\{msg\.channel \|\| "general"\}/, 'lobby chat log should show per-channel messages');
+
+assert.match(html, /channelUnreadCounts = readHubSetting\(["']channelUnreadCounts["'], \{\}\)/, 'chat should persist unread counts per channel');
+assert.match(html, /function incrementChannelUnread\(channel\)/, 'chat should increment unread counts for background channels');
+assert.match(html, /function clearChannelUnread\(channel\)/, 'chat should clear unread counts when a channel is selected');
+assert.match(html, /data-unread-count/, 'chat channel buttons should expose unread count metadata');
+assert.match(html, /aria-label="chat channel \$\{esc\(name\)\}/, 'chat channel buttons should announce channel names and unread state');
+assert.match(html, /delivery:\s*"sending"/, 'local chat sends should start with a visible sending delivery state');
+assert.match(html, /markLobbyChatDelivered\(message\.id, "sent"\)/, 'same-browser broadcast should mark local messages sent');
+assert.match(html, /function markLobbyChatDelivered\(messageId, delivery\)/, 'chat should update delivery state after send attempts');
+assert.match(html, /deliveryLabel\(msg\.delivery\)/, 'chat log should render delivery labels for local messages');
 assert.equal((html.match(/const scale = Math\.min\(1, 128 \/ Math\.max\(bitmap\.width, bitmap\.height\)\);/g) || []).length, 1, 'palette extraction should define scale only once');

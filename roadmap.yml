@@ -1,0 +1,97 @@
+version: 1
+updated: 2026-05-13
+scope: artifacts/base-ui-and-devtools
+status: active
+
+tracks:
+  base_hub_ui:
+    priority: high
+    goal: Keep app-hub-v11 usable from both nested and root-promoted deployment paths.
+    tasks:
+      deploy_safe_asset_resolution:
+        status: in_progress
+        details:
+          - app-hub-v11/index.html must keep HUB_BASE/hubUrl dynamic imports for JS modules.
+          - Shared CSS should use the local nested hub path unless the root redirect strategy changes.
+          - Tests should avoid contradictory assertions around root-promoted and nested stylesheet paths.
+        files:
+          - app-hub-v11/index.html
+          - tests/app-hub-v11-root-safe-imports.test.mjs
+          - tests/app-hub-v11-shared-v9-shell-css.test.mjs
+      browser_regression_harness:
+        status: todo
+        details:
+          - Add agent-browser smoke command that opens the hub and checks console/errors.
+          - Add a snapshot command for the hub sidebar, artifact cards, and workspace pane.
+          - Capture screenshots into a predictable tmp/report directory.
+        files:
+          - artifacts-browse
+          - bridge.yml
+          - tests/browser/app-hub-v11-smoke.*
+
+  static_analysis:
+    priority: medium
+    goal: Make bug hunting repeatable beyond ad-hoc node --check and unit tests.
+    tasks:
+      root_static_command:
+        status: todo
+        details:
+          - Add a bridge command that runs app-hub-v11 UI tests plus node --check over app-hub-v11 JS/MJS sources.
+          - Consider including HTML module-script extraction in a future parser-based lint.
+      test_contract_cleanup:
+        status: todo
+        details:
+          - Normalize deploy-safe import tests around one documented serving model.
+          - Keep one separate test for nested hub paths and one separate test for root redirect paths.
+
+  agent_browser_workflow:
+    priority: medium
+    goal: Support fast local browser inspection from bridge commands.
+    tasks:
+      commands:
+        status: done
+        details:
+          - browse:start starts the artifacts server and opens the v11 hub.
+          - browse:stop closes agent-browser if possible and stops the artifacts server.
+          - browse:open opens the v11 hub after ensuring the server is running.
+          - browse:list maps to agent-browser tab list because this installed CLI has no top-level list command.
+          - browse:session:list maps to agent-browser session list.
+          - browse:pass forwards AGENT_BROWSER_ARGS to raw agent-browser for custom commands.
+        files:
+          - bridge.yml
+          - artifacts-browse
+      future_browser_checks:
+        status: todo
+        details:
+          - Add bridge command for agent-browser console/errors after opening hub.
+          - Add bridge command for screenshot capture and accessibility snapshot.
+          - Add optional headed mode via env var without making CI/headless flows noisy.
+
+  messaging_system:
+    priority: high
+    goal: Grow hub chat from lobby text into a lightweight, reliable multi-channel messaging surface.
+    tasks:
+      unread_and_delivery:
+        status: done
+        details:
+          - Persist per-channel unread counts in hub settings.
+          - Clear unread counts when channels are selected or spawned.
+          - Render unread badges and accessible labels on channel buttons.
+          - Show local sending/sent delivery labels in the chat log.
+        files:
+          - app-hub-v11/index.html
+          - tests/app-hub-v11-index-ui.test.mjs
+      peer_acknowledgements:
+        status: todo
+        details:
+          - Add explicit message ids to peer protocol receipts.
+          - Mark delivery failed when network broadcast rejects or peer receipt times out.
+          - Keep same-browser BroadcastChannel sync as a local fast path.
+
+known_notes:
+  agent_browser_cli:
+    severity: low
+    note: The local agent-browser supports tab list and session list, but not a top-level list command despite the user example; artifacts-browse list maps to tab list.
+  artifacts_serve:
+    severity: low
+    note: artifacts-serve is a foreground Firefox-private-window helper. New bridge browser commands use artifacts-server.sh background functions to avoid hanging bridge execution.

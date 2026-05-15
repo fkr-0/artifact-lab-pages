@@ -4,6 +4,44 @@ scope: artifacts/app-hub-v11-clean-messaging-ui
 status: in_progress
 
 fixed:
+
+  - id: hub-chat-unread-delivery
+    area: app-hub-v11/messaging
+    severity: medium
+    summary: Lobby/personal chat had no unread indicators or local delivery state.
+    cause: Chat rendering stored only raw messages and selected channel, so background-channel activity and send progress were invisible.
+    fix: Persist per-channel unread counts, clear counts on channel selection, render unread badges and accessible labels, and show sending/sent delivery labels for local messages.
+    tests:
+      - tests/app-hub-v11-index-ui.test.mjs
+  - id: hub-v11-deploy-safe-module-paths
+    area: app-hub-v11/base-ui
+    severity: high
+    summary: Base hub regressed from deploy-safe dynamic module URLs to static ./lib imports, breaking root-promoted and nested deployment assumptions.
+    cause: app-hub-v11/index.html directly imported ./lib modules instead of resolving through HUB_BASE/hubUrl.
+    fix: Restore HUB_BASE/hubUrl dynamic imports for menu, launcher, event-log, resizable panels, storage, themes, sound, network, and profile modules.
+    tests:
+      - tests/app-hub-v11-root-safe-imports.test.mjs
+      - tests/app-hub-v11-index-ui.test.mjs
+  - id: hub-v11-shared-shell-css-contract
+    area: app-hub-v11/base-ui
+    severity: medium
+    summary: Static sweep exposed contradictory stylesheet path expectations between root-safe import and shared-shell tests.
+    cause: The hub is currently served from app-hub-v11/index.html, so the correct shared shell path is lib/v9-shell.css; app-hub-v11/lib/v9-shell.css would double-prefix when nested.
+    fix: Keep the hub stylesheet link local and update the root-safe test to assert against non-double-prefixed stylesheet loading.
+    tests:
+      - tests/app-hub-v11-root-safe-imports.test.mjs
+      - tests/app-hub-v11-shared-v9-shell-css.test.mjs
+  - id: artifacts-agent-browser-bridge
+    area: root/bridge-devtools
+    severity: medium
+    summary: Bridge lacked direct agent-browser workflows for local artifact browser inspection.
+    cause: Existing serve/open commands were Firefox-oriented and did not expose agent-browser session/tab operations.
+    fix: Add artifacts-browse helper and bridge commands for browser start, stop, open, tab list, session list, and raw pass-through via AGENT_BROWSER_ARGS.
+    tests:
+      - bash -n artifacts-browse
+      - ./artifacts-browse list
+      - ./artifacts-browse session list
+      - bridge command discovery
   - id: hub-ui-workspace-default-log
     area: app-hub-v11/ui
     severity: high
@@ -78,8 +116,8 @@ open:
     summary: Build a clean full-fledged messaging system beyond current lobby/personal channels.
     notes:
       - typed channels: lobby, dm, game, system
-      - unread counts and selected channel persistence
-      - message delivery ack/failure display
+      - unread counts and selected channel persistence (partially implemented for hub chat)
+      - message delivery ack/failure display (local sending/sent labels implemented; peer acknowledgements remain open)
       - peer identity aliases backed by profile storage
   - id: app-side-observe-depth
     area: future/apps

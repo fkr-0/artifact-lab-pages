@@ -16,4 +16,4 @@ assert.match(app, /this\.urlParams = new URLSearchParams\(window\.location\.sear
 assert.match(app, /this\.targetPeerId = this\.urlParams\.get\('targetPeerId'\)/, 'v11 DAW should consume targetPeerId for hub joins');
 assert.match(app, /this\.spectateMode = this\.urlParams\.get\('spectate'\) === 'true' \|\| this\.urlParams\.get\('observe'\) === 'true'/, 'v11 DAW should support observe mode');
 assert.match(app, /autoJoinFromUrl\(\)/, 'v11 DAW should auto-join peer sessions from URL params');
-assert.match(app, /this\.peernet\.start\(\{ username, targetPeerId: this\.targetPeerId, spectate: this\.spectateMode, sessionCode: this\.sessionCode \}\)/, 'v11 DAW should pass hub join params into peernet stack');
+assert.match(app, /this\.peernet\.start\(\{[\s\S]*?username,[\s\S]*?targetPeerId: this\.targetPeerId,[\s\S]*?spectate: this\.spectateMode,[\s\S]*?sessionCode: this\.sessionCode,?[\s\S]*?\}\)/, 'v11 DAW should pass hub join params into peernet stack');

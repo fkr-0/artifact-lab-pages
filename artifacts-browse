@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#
+# artifacts-browse
+# Start/stop the local artifacts server and control agent-browser against it.
+#
+# Examples:
+#   ./artifacts-browse start
+#   ./artifacts-browse open "http://localhost:8080/app-hub-v11/index.html"
+#   ./artifacts-browse list
+#   ./artifacts-browse session list
+#   ./artifacts-browse stop
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export ARTIFACTS_DIR="${ARTIFACTS_DIR:-$ROOT_DIR}"
+export ARTIFACTS_HOST="${ARTIFACTS_HOST:-localhost}"
+export ARTIFACTS_PORT="${ARTIFACTS_PORT:-8080}"
+DEFAULT_URL="http://${ARTIFACTS_HOST}:${ARTIFACTS_PORT}/app-hub-v11/index.html"
+SERVER_LIB="${ARTIFACTS_DIR}/artifacts-server.sh"
+
+if [[ ! -f "$SERVER_LIB" ]]; then
+  echo "artifacts-browse: missing server helper: $SERVER_LIB" >&2
+  exit 1
+fi
+
+# artifacts-server.sh prints a welcome message when sourced; keep CLI output focused.
+# shellcheck source=/dev/null
+source "$SERVER_LIB" >/dev/null
+
+require_agent_browser() {
+  if ! command -v agent-browser >/dev/null 2>&1; then
+    echo "artifacts-browse: agent-browser not found on PATH" >&2
+    echo "server url: $DEFAULT_URL" >&2
+    exit 127
+  fi
+}
+
+ensure_server() {
+  artifacts-start "$ARTIFACTS_PORT" "$ARTIFACTS_DIR" >/dev/null
+}
+
+cmd="${1:-open}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+case "$cmd" in
+  start|serve)
+    ensure_server
+    require_agent_browser
+    agent-browser open "${1:-$DEFAULT_URL}"
+    ;;
+  stop)
+    if command -v agent-browser >/dev/null 2>&1; then
+      agent-browser close >/dev/null 2>&1 || true
+    fi
+    artifacts-stop
+    ;;
+  restart)
+    artifacts-stop >/dev/null || true
+    ensure_server
+    require_agent_browser
+    agent-browser open "${1:-$DEFAULT_URL}"
+    ;;
+  status)
+    artifacts-status
+    if command -v agent-browser >/dev/null 2>&1; then
+      agent-browser list || true
+    fi
+    ;;
+  open)
+    ensure_server
+    require_agent_browser
+    agent-browser open "${1:-$DEFAULT_URL}"
+    ;;
+  list)
+    require_agent_browser
+    agent-browser tab list "$@"
+    ;;
+  session)
+    require_agent_browser
+    agent-browser session "$@"
+    ;;
+  pass|agent-browser|exec)
+    require_agent_browser
+    agent-browser "$@"
+    ;;
+  help|--help|-h)
+    cat <<EOF
+Usage: ./artifacts-browse <command> [args]
+
+Commands:
+  start|serve [url]       Start artifacts server and open URL in agent-browser
+  stop                    Close agent-browser session if possible and stop server
+  restart [url]           Restart server and open URL
+  status                  Show server status and agent-browser list
+  open [url]              Start server if needed and agent-browser open URL
+  list [args...]          Run: agent-browser tab list [args...]
+  session [args...]       Run: agent-browser session [args...]
+  pass [args...]          Run arbitrary raw agent-browser command
+
+Default URL:
+  $DEFAULT_URL
+EOF
+    ;;
+  *)
+    ensure_server
+    require_agent_browser
+    agent-browser "$cmd" "$@"
+    ;;
+esac

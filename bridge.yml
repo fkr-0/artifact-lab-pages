@@ -54,6 +54,36 @@ commands:
     run: bash -lc 'source ./artifacts-server.sh && artifacts-status'
     track: dev
     timeoutMs: 5000
+  browse:start:
+    description: Start the artifacts server and open the v11 hub with agent-browser.
+    run: ./artifacts-browse start
+    track: dev
+    timeoutMs: 30000
+  browse:stop:
+    description: Close agent-browser if possible and stop the artifacts server.
+    run: ./artifacts-browse stop
+    track: dev
+    timeoutMs: 15000
+  browse:open:
+    description: Start the server if needed and open the v11 hub with agent-browser.
+    run: ./artifacts-browse open
+    track: dev
+    timeoutMs: 30000
+  browse:list:
+    description: List agent-browser tabs/pages.
+    run: ./artifacts-browse list
+    track: dev
+    timeoutMs: 10000
+  browse:session:list:
+    description: List agent-browser sessions.
+    run: ./artifacts-browse session list
+    track: dev
+    timeoutMs: 10000
+  browse:pass:
+    description: Pass AGENT_BROWSER_ARGS through to agent-browser after starting the server when needed.
+    run: bash -lc './artifacts-browse pass ${AGENT_BROWSER_ARGS:-list}'
+    track: dev
+    timeoutMs: 30000
   package:
     description: Build a dated tar.gz release package plus sha256 checksum.
     run: ./artifacts-package
