@@ -163,6 +163,7 @@ export class PeernetLobby extends EventTarget {
         const list = [];
         this._peers.forEach((e, id) => { if (id !== peerId) list.push({ id, username: e.username }); });
         entry.conn.send({ type: 'peer-list', peers: list });
+        entry.conn.send({ type: 'hello', username: this._username });
         this._broadcastAll({ type: 'new-peer', id: peerId, username: entry.username }, peerId);
         this._emitPeers();
         break;
@@ -212,7 +213,7 @@ export class PeernetLobby extends EventTarget {
     conn.on('open', () => {
       this._tryingHub = false;
       this._isHub = false;
-      this._registerConn(conn, 'Hub');
+      this._registerConn(conn, '');
       conn.send({ type: 'join', username: this._username });
       this._emitStatus(true, 'In Lobby');
       this._emitPeers();
@@ -235,7 +236,7 @@ export class PeernetLobby extends EventTarget {
     const conn = this._peer.connect(this.lobbyId, { reliable: true });
     conn.on('open', () => {
       this._tryingHub = false;
-      this._registerConn(conn, 'Hub');
+      this._registerConn(conn, '');
       conn.send({ type: 'join', username: this._username });
       this._emitStatus(true, 'In Lobby');
       this._emitPeers();
