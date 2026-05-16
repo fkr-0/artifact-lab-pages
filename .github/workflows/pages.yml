@@ -23,13 +23,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Fetch external artifact repos
+        run: |
+          set -euo pipefail
+          [ -d ethic-brawl ] || git clone --depth 1 https://github.com/fkr-0/ethic-brawl.git ethic-brawl
+          [ -d v11-peer-daw ] || git clone --depth 1 https://github.com/fkr-0/v11-peer-daw.git v11-peer-daw
+          [ -d badger-sprawl-runner ] || git clone --depth 1 https://github.com/fkr-0/badger-sprawl-runner.git badger-sprawl-runner
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install dependencies (ethic-brawl)
-        run: npm ci
+        run: npm ci || npm install
         working-directory: ethic-brawl
 
       - name: Install dependencies (v11-peer-daw)
