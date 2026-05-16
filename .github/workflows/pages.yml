@@ -1,0 +1,59 @@
+name: Build and Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            ethic-brawl/package-lock.json
+
+      - name: Install dependencies (ethic-brawl)
+        run: npm ci
+        working-directory: ethic-brawl
+
+      - name: Install dependencies (v11-peer-daw)
+        run: npm install
+        working-directory: v11-peer-daw
+
+      - name: Materialize deploy stage
+        run: node app-hub-v11/server/artifact-build.mjs --out .artifacts-pages-stage
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .artifacts-pages-stage
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
