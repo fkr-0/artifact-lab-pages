@@ -1,0 +1,2076 @@
+<!doctype html>
+<html lang="en" data-theme="nexus">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NEXUS App Hub v11</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style id="themeStyles"></style>
+    <link rel="stylesheet" href="lib/v9-shell.css">
+    <style>
+      :root {
+        --hub-accent: #00ffff;
+        --hub-background: #05070d;
+        --hub-surface: rgba(5, 16, 28, 0.82);
+        --hub-panel: rgba(0, 0, 0, 0.44);
+        --hub-text: #e8fbff;
+        --hub-muted: rgba(232, 251, 255, 0.62);
+        --hub-glow: rgba(0, 255, 255, 0.18);
+        --sidebar-width: 360px;
+        --filter-panel-fr: 1.25fr;
+        --workspace-height: 58vh;
+        --generated-primary: #00ffff;
+        --generated-secondary: #ff00ff;
+        --generated-accent: #00ff88;
+        --generated-dark-font: #05070d;
+        --generated-light-font: #f7fbff;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        background:
+          radial-gradient(circle at 12% 0, var(--hub-glow), transparent 28rem),
+          linear-gradient(135deg, #05070d, #090d18 55%, #030407);
+        color: var(--hub-text);
+        image-rendering: pixelated;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.035) 0 1px,
+            transparent 1px 3px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(0, 255, 255, 0.025) 0 1px,
+            transparent 1px 5px
+          );
+        mix-blend-mode: screen;
+        opacity: 0.32;
+      }
+      .pixel-noise {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        background-image: radial-gradient(#fff2 1px, transparent 1px);
+        background-size: 7px 7px;
+        opacity: 0.16;
+      }
+      .shell {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 12px 1fr;
+        height: 100vh;
+        min-height: 0;
+      }
+      .sidebar {
+        display: grid;
+        grid-template-rows: minmax(0, var(--filter-panel-fr)) 12px minmax(
+            220px,
+            1fr
+          );
+        gap: 0.6rem;
+        border-right: 1px solid var(--hub-accent);
+        background: var(--hub-panel);
+        padding: 0.5rem;
+        overflow: hidden;
+      }
+      main {
+        padding: 0.5rem;
+        overflow: hidden;
+        display: grid;
+        gap: 0.6rem;
+        grid-template-rows: minmax(160px, 1fr) 12px minmax(
+            180px,
+            var(--workspace-height)
+          );
+        min-height: 0;
+      }
+      .card {
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 50%);
+        border-radius: 0;
+        padding: 0.55rem;
+        background: var(--hub-surface);
+        box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.12);
+      }
+      .stack {
+        display: grid;
+        gap: 0.6rem;
+        min-height: 0;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .between {
+        justify-content: space-between;
+      }
+      .muted {
+        color: var(--hub-muted);
+      }
+      h1 {
+        font-size: 1rem;
+        margin: 0;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      h2,
+      h3 {
+        margin: 0.05rem 0;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 60%);
+        border-radius: 0;
+        padding: 0.1rem 0.35rem;
+        font-size: 0.65rem;
+        color: var(--hub-accent);
+        background: rgba(0, 0, 0, 0.22);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 48%);
+        border-radius: 0;
+        padding: 0.4rem 0.5rem;
+        background: rgba(0, 0, 0, 0.45);
+        color: inherit;
+        font: inherit;
+      }
+      input,
+      textarea {
+        width: 100%;
+      }
+      button {
+        cursor: pointer;
+        box-shadow: 2px 2px 0 rgba(0, 255, 255, 0.1);
+      }
+      button:hover,
+      .artifact-card:hover,
+      .artifact-row:hover,
+      .theme-card:hover {
+        border-color: var(--hub-accent);
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.18);
+      }
+      .sidebar-scroll {
+        overflow: auto;
+        min-height: 0;
+      }
+      .tag-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+      .tag-button,
+      .tag-pill {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.35rem;
+        border-radius: 0;
+        border-color: var(--tag-border);
+        background: var(--tag-bg);
+        color: hsl(var(--tag-hue) 100% 78%);
+      }
+      .tag-button.active,
+      .mode-btn.active,
+      .view-toggle.active {
+        background: var(--tag-border, var(--hub-accent));
+        color: #001018;
+      }
+      .results-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.6rem;
+        align-items: center;
+      }
+      .results-panel {
+        min-height: 0;
+        overflow: auto;
+      }
+      .results.cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.35rem;
+      }
+      .results.list {
+        display: grid;
+        gap: 0.25rem;
+      }
+      .artifact-title {
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        text-underline-offset: 3px;
+      }
+      .artifact-title:hover {
+        color: var(--hub-accent);
+      }
+      .artifact-card,
+      .artifact-row {
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 68%);
+        border-radius: 0;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.035);
+        display: grid;
+        gap: 0.3rem;
+        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.42);
+      }
+      .artifact-row {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+      }
+      .launch-icons {
+        display: flex;
+        gap: 0.25rem;
+      }
+      .icon-btn {
+        width: 1.85rem;
+        height: 1.85rem;
+        display: grid;
+        place-items: center;
+        padding: 0;
+      }
+      .drawer {
+        position: fixed;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: min(720px, calc(100vw - 1rem));
+        max-height: calc(100vh - 1rem);
+        overflow: auto;
+        z-index: 20;
+        display: none;
+        border: 1px solid var(--hub-accent);
+        border-radius: 0;
+        padding: 0.5rem;
+        background: color-mix(in srgb, var(--hub-background), black 16%);
+        box-shadow: 6px 6px 0 rgba(0, 255, 255, 0.18);
+      }
+      .drawer.open {
+        display: grid;
+      }
+      .avatar {
+        width: 2rem;
+        height: 2rem;
+        display: grid;
+        place-items: center;
+        border-radius: 0;
+        color: #001018;
+        background: var(--profile-color, var(--hub-accent));
+        font-weight: 800;
+      }
+      .profile-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 0;
+      }
+      .theme-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+        gap: 0.35rem;
+      }
+      .theme-card {
+        text-align: left;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 70%);
+        border-radius: 0;
+        padding: 0.5rem;
+        background: linear-gradient(
+          135deg,
+          var(--swatch-bg),
+          color-mix(in srgb, var(--swatch-accent), transparent 76%)
+        );
+      }
+      .theme-card.active {
+        outline: 2px solid var(--hub-accent);
+      }
+      .storage-meter {
+        height: 0.65rem;
+        border-radius: 0;
+        background: rgba(255, 255, 255, 0.09);
+        overflow: hidden;
+      }
+      .storage-meter > span {
+        display: block;
+        height: 100%;
+        width: var(--storage-width, 0%);
+        background: var(--hub-accent);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.35rem;
+        border-bottom: 1px solid
+          color-mix(in srgb, var(--hub-accent), transparent 82%);
+        vertical-align: top;
+      }
+      .chat-log,
+      .event-log {
+        min-height: 7rem;
+        max-height: 100%;
+        overflow: auto;
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      .lobby-chat-panel {
+        min-height: 0;
+        overflow: auto;
+      }
+      .lobby-grid {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.9fr) minmax(360px, 1.6fr);
+        gap: 0.6rem;
+        min-height: 0;
+      }
+      .lobby-chat-main,
+      .lobby-roster {
+        min-height: 0;
+        overflow: auto;
+      }
+      .lobby-chat-log {
+        min-height: 18rem;
+      }
+      .lobby-summary-compact {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .lobby-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+        gap: 0.35rem;
+      }
+      .observer-stale {
+        border-color: #f59e0b;
+        color: #fbbf24;
+      }
+      .online-users,
+      .chat-channels {
+        display: grid;
+        gap: 0.25rem;
+      }
+      .online-user {
+        user-select: none;
+      }
+      .presence-menu {
+        position: fixed;
+        z-index: 30;
+        min-width: 11rem;
+        display: none;
+        padding: 0.25rem;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 40%);
+        background: color-mix(in srgb, var(--hub-panel), #000 25%);
+        box-shadow: 6px 6px 0 rgba(0, 255, 255, 0.18);
+      }
+      .presence-menu.open {
+        display: grid;
+        gap: 0.2rem;
+      }
+      .presence-menu button {
+        width: 100%;
+        text-align: left;
+      }
+      .workspace-pane {
+        display: none;
+        min-height: min(520px, calc(100vh - 96px));
+        max-height: calc(100vh - 72px);
+        overflow: auto;
+        resize: vertical;
+        grid-template-rows: auto minmax(0, 1fr);
+        padding-bottom: 2.4rem;
+      }
+      .workspace-pane.active {
+        display: grid;
+      }
+      .workspace-tabs {
+        display: flex;
+        gap: 0.25rem;
+        overflow: auto;
+        border-bottom: 1px solid
+          color-mix(in srgb, var(--hub-accent), transparent 55%);
+        padding-bottom: 0.35rem;
+      }
+      .workspace-tab.active {
+        background: var(--hub-accent);
+        color: #001018;
+      }
+      .workspace-panel {
+        display: none;
+        min-height: 0;
+        overflow: auto;
+      }
+      .workspace-panel.active {
+        display: grid;
+      }
+      .app-deck {
+        grid-template-rows: minmax(0, 1fr);
+        min-height: 0;
+        overflow: auto;
+      }
+      /* All workspace content panels share row 2 of the pane grid, stacked; only active is visible */
+      #appDeck, #lobbyChatPanel, #eventLogPanel {
+        grid-row: 2;
+      }
+      .app-deck-tabs {
+        display: flex;
+        gap: 0.25rem;
+        overflow: auto;
+        border-bottom: 1px solid
+          color-mix(in srgb, var(--hub-accent), transparent 55%);
+        padding-bottom: 0.35rem;
+      }
+      .app-deck-tab {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+      }
+      .app-deck-tab.active {
+        background: var(--hub-accent);
+        color: #001018;
+      }
+      .app-deck-tab-close,
+      .app-deck-tab-float {
+        padding: 0.05rem 0.25rem;
+      }
+      .app-deck-panel {
+        display: none;
+        min-height: 0;
+        overflow: auto;
+      }
+      .app-deck-panel.active {
+        display: block;
+        overflow: auto;
+      }
+      .app-deck-inline-frame,
+      iframe {
+        width: 100%;
+        height: 100%;
+        min-height: 480px;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 45%);
+        border-radius: 0;
+        background: #000;
+      }
+      .floating {
+        position: fixed;
+        inset: 7vh 5vw;
+        z-index: 10;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        background: var(--hub-background);
+        border: 1px solid var(--hub-accent);
+        border-radius: 0;
+        box-shadow: 6px 6px 0 rgba(0, 255, 255, 0.18);
+      }
+      .floating header {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.35rem;
+        padding: 0.45rem 0.55rem;
+        border-bottom: 1px solid
+          color-mix(in srgb, var(--hub-accent), transparent 55%);
+      }
+      .floating iframe {
+        border: 0;
+        border-radius: 0;
+        min-height: 0;
+        height: 100%;
+      }
+      .link-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.35rem;
+      }
+      .link-grid a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .link-grid a .pill {
+        width: 100%;
+        justify-content: center;
+        padding: 0.35rem 0.45rem;
+      }
+      .resize-handle {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          color-mix(in srgb, var(--hub-accent), transparent 30%),
+          transparent
+        );
+        cursor: col-resize;
+        position: relative;
+        touch-action: none;
+        z-index: 4;
+        min-width: 12px;
+        min-height: 12px;
+      }
+      .resize-handle.horizontal {
+        cursor: row-resize;
+        background: linear-gradient(
+          0deg,
+          transparent,
+          color-mix(in srgb, var(--hub-accent), transparent 30%),
+          transparent
+        );
+      }
+      .resize-handle::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent 0 4px,
+          rgba(0, 255, 255, 0.28) 4px 6px
+        );
+      }
+      .pixel-muse {
+        width: 40px;
+        height: 40px;
+        image-rendering: pixelated;
+        border: 1px solid var(--hub-accent);
+        box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.18);
+        background:
+          linear-gradient(
+            90deg,
+            transparent 0 7px,
+            #0ff 7px 14px,
+            transparent 14px
+          ),
+          linear-gradient(
+            transparent 0 7px,
+            #f0f 7px 14px,
+            #ff0 14px 21px,
+            transparent 21px
+          ),
+          #05070d;
+      }
+      .pixel-muse::before {
+        content: "✶";
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        color: #001018;
+        background: linear-gradient(135deg, #00ffff, #ff00aa);
+        clip-path: polygon(
+          50% 0,
+          62% 35%,
+          100% 35%,
+          70% 56%,
+          82% 100%,
+          50% 72%,
+          18% 100%,
+          30% 56%,
+          0 35%,
+          38% 35%
+        );
+      }
+      .palette-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        min-height: 2rem;
+      }
+      .palette-swatch {
+        width: 2rem;
+        height: 2rem;
+        border: 1px solid var(--hub-accent);
+        background: var(--swatch);
+        cursor: pointer;
+      }
+      .role-palette {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .role-row {
+        display: grid;
+        grid-template-columns: 6rem 2.2rem 1fr;
+        gap: 0.35rem;
+        align-items: center;
+      }
+      .palette-css {
+        min-height: 6rem;
+        font-size: 0.72rem;
+      }
+      .badger-runner {
+        position: fixed;
+        left: 0;
+        bottom: 0.15rem;
+        z-index: 30;
+        pointer-events: none;
+        width: 96px;
+        height: auto;
+        image-rendering: pixelated;
+        animation: badger-run 11s linear infinite;
+        filter: brightness(135%) saturate(120.5%);
+        mix-blend-mode: lighten;
+      }
+      @keyframes badger-run {
+        from {
+          transform: translateX(-90px) scaleX(1);
+        }
+        49% {
+          transform: translateX(calc(100vw + 20px)) scaleX(1);
+        }
+        50% {
+          transform: translateX(calc(100vw + 20px)) scaleX(-1);
+        }
+        99% {
+          transform: translateX(-90px) scaleX(-1);
+        }
+        to {
+          transform: translateX(-90px) scaleX(1);
+        }
+      }
+      @media (max-width: 860px) {
+        .shell {
+          grid-template-columns: 1fr;
+          height: auto;
+          min-height: 100vh;
+        }
+        .resize-handle {
+          display: none;
+        }
+        .sidebar {
+          grid-template-rows: auto auto;
+        }
+        body {
+          overflow: auto;
+        }
+        .badger-runner {
+          width: 54px;
+        }
+      }
+    </style>
+  </head>
+  <body class="hub-app-shell">
+    <div class="pixel-noise" aria-hidden="true"></div>
+    <div class="shell">
+      <aside class="sidebar">
+        <section id="filterPanel" class="card stack sidebar-scroll">
+          <div class="row between">
+            <div class="row">
+              <div
+                class="pixel-muse"
+                aria-label="artistic endeavour sprite"
+              ></div>
+              <div>
+                <h1>NEXUS v11</h1>
+                <div class="muted">filter artifacts</div>
+              </div>
+            </div>
+            <button id="profileButton" class="profile-chip" type="button">
+              <span id="profileAvatar" class="avatar">P</span
+              ><span id="profileLabel">Profile</span>
+            </button>
+          </div>
+          <input
+            id="search"
+            placeholder="search apps, tags, descriptions…"
+            autocomplete="off"
+          />
+          <div class="row">
+            <button id="modeAnd" class="mode-btn" type="button">AND</button
+            ><button id="modeOr" class="mode-btn active" type="button">
+              OR</button
+            ><button id="clearTags" type="button">clear tags</button>
+          </div>
+          <div id="tagFilter" class="tag-filter"></div>
+          <div id="summary" class="muted"></div>
+          <nav id="menu" hidden></nav>
+        </section>
+        <div
+          id="sidebarSplitResizeHandle"
+          class="resize-handle horizontal"
+          role="separator"
+          aria-orientation="horizontal"
+        ></div>
+        <section id="lobbyPanel" class="card stack sidebar-scroll">
+          <div class="row between">
+            <h2>Lobby</h2>
+            <span id="activeStorage" class="pill">storage</span>
+          </div>
+          <div id="lobbySummaryCompact" class="lobby-summary-compact muted">
+            <div class="row between"><span>users</span><span id="presenceCount" class="pill">0</span></div>
+            <div class="row between"><span>channel</span><span id="activeChatChannel" class="pill"># general</span></div>
+            <div class="row between"><span>messages</span><span id="lobbyMessageCount" class="pill">0</span></div>
+          </div>
+          <button id="openLobbyChatTab" type="button">open Lobby / Chat tab</button>
+        </section>
+      </aside>
+      <div
+        id="sidebarResizeHandle"
+        class="resize-handle"
+        role="separator"
+        aria-orientation="vertical"
+      ></div>
+      <main>
+        <section id="resultsPanel" class="card stack results-panel">
+          <div class="results-head">
+            <div>
+              <h2>Filtered results</h2>
+              <div id="activeTheme" class="pill">theme</div>
+            </div>
+            <div class="row">
+              <label class="row"
+                >default
+                <select id="defaultAction">
+                  <option value="newWindow">new window</option>
+                  <option value="details">details</option>
+                  <option value="inline">inline</option>
+                  <option value="floating">floating</option>
+                  <option value="fullscreen">fullscreen</option>
+                </select></label
+              ><button id="viewCards" class="view-toggle active" type="button">
+                cards</button
+              ><button id="viewList" class="view-toggle" type="button">
+                list
+              </button>
+            </div>
+          </div>
+          <div id="results" class="results cards"></div>
+        </section>
+        <div
+          id="workspaceResizeHandle"
+          class="resize-handle horizontal"
+          role="separator"
+          aria-orientation="horizontal"
+        ></div>
+        <section id="workspacePane" class="card workspace-pane">
+          <div id="workspaceTabs" class="workspace-tabs app-deck-tabs">
+            <button
+              class="workspace-tab active"
+              type="button"
+              data-workspace-tab="eventLog"
+              data-permanent-tab="eventLog"
+            >
+              event log
+            </button>
+            <button
+              class="workspace-tab"
+              type="button"
+              data-workspace-tab="lobbyChat"
+              data-permanent-tab="lobbyChat"
+            >
+              lobby / chat
+            </button>
+          </div>
+          <div id="appDeck" class="workspace-panel app-deck">
+            <div id="appDeckBody"></div>
+          </div>
+          <div id="lobbyChatPanel" class="workspace-panel stack lobby-chat-panel">
+            <div class="row between">
+              <strong>Lobby / Chat</strong>
+              <div class="row">
+                <span id="lobbyTabStatus" class="pill">ready</span>
+                <button id="clearLobbyChat" type="button">clear chat</button>
+              </div>
+            </div>
+            <div class="lobby-meta-grid">
+              <span class="pill">network: <span id="lobbyNetworkStatus">storage</span></span>
+              <span class="pill">users: <span id="presenceCountDetail">0</span></span>
+              <span class="pill">channel: <span id="activeChatChannelDetail"># general</span></span>
+              <span class="pill">messages: <span id="lobbyMessageCountDetail">0</span></span>
+              <span class="pill">last snapshot: <span id="observerLastSnapshotAge">never</span></span>
+            </div>
+            <div id="observerStatusPanel" class="card muted">Observer status: no snapshots yet.</div>
+            <div class="lobby-grid">
+              <section class="lobby-roster card stack">
+                <div class="row between">
+                  <h3>Connected users</h3>
+                  <span id="presenceCountDetailHeader" class="pill">0</span>
+                </div>
+                <div id="onlineUsers" class="online-users muted"></div>
+                <div id="joinGamePrompt" class="muted">
+                  Select a game and use ▶ inline or ⛶ fullscreen to join/spawn.
+                </div>
+              </section>
+              <section class="lobby-chat-main card stack">
+                <div class="row between">
+                  <h3>Channels + chat</h3>
+                  <span class="pill">larger chat window</span>
+                </div>
+                <div class="row">
+                  <input
+                    id="chatChannelName"
+                    placeholder="chat channel…"
+                    value="general"
+                  /><button id="spawnChatChannel" type="button">spawn</button>
+                </div>
+                <div id="chatChannels" class="chat-channels"></div>
+                <pre id="lobbyChatLog" class="card chat-log lobby-chat-log"></pre>
+                <div class="row">
+                  <input id="lobbyChatInput" placeholder="lobby message…" /><button
+                    id="sendLobbyChat"
+                    type="button"
+                  >
+                    send chat</button
+                  >
+                </div>
+              </section>
+            </div>
+          </div>
+          <div id="eventLogPanel" class="workspace-panel stack active">
+            <div class="row between">
+              <strong>Event log</strong
+              ><button id="clearEventLog" type="button">clear</button>
+            </div>
+            <div id="eventLog" class="event-log muted"></div>
+          </div>
+        </section>
+        <section id="stage" class="card stack" hidden></section>
+      </main>
+    </div>
+
+    <aside id="profileMenu" class="drawer stack" aria-label="Profile settings">
+      <div class="row between">
+        <h2>Profile / Settings</h2>
+        <button id="closeProfile" type="button">close</button>
+      </div>
+      <section class="card stack">
+        <div class="row">
+          <span id="profileAvatarLarge" class="avatar">P</span>
+          <div>
+            <strong id="profileSummary">Pilot</strong>
+            <div class="muted">Local-only identity for this hub shell.</div>
+          </div>
+        </div>
+        <div class="row">
+          <label>Display name<input id="profileName" /></label
+          ><label>Handle<input id="profileHandle" /></label
+          ><label>Role<input id="profileRole" /></label
+          ><label>Status<input id="profileStatus" /></label
+          ><label>Note<input id="profileNote" maxlength="80" /></label
+          ><label>Color<input id="profileColor" type="color" /></label>
+        </div>
+        <div class="row">
+          <label
+            ><input id="profileSharedLayer" type="checkbox" /> Shared Peernet
+            layer</label
+          ><label
+            ><input id="profileAllowIncomingSaveStates" type="checkbox" /> Allow
+            incoming save states</label
+          >
+        </div>
+        <div class="row">
+          <button id="saveProfile" type="button">Save profile</button
+          ><button id="resetProfile" type="button">Reset profile</button>
+        </div>
+        <div class="link-grid" aria-label="Hub version links">
+          <a href="../app-hub/collab-editor.html"
+            ><span class="pill">v8 editor</span></a
+          ><a href="../app-hub/v9-portal.html"
+            ><span class="pill">v9 portal</span></a
+          ><a href="../app-hub/v10-portal.html"
+            ><span class="pill">v10 classic</span></a
+          ><a href="../app-hub/v10-portal-enhanced.html"
+            ><span class="pill">v10 enhanced</span></a
+          >
+        </div>
+      </section>
+      <section class="card stack">
+        <div class="row between">
+          <h3>Theme system</h3>
+          <button id="soundToggle" type="button">sound off</button>
+        </div>
+        <div id="themeGrid" class="theme-grid"></div>
+      </section>
+      <section id="paletteGenerator" class="card stack">
+        <div class="row between">
+          <h3>Palette Generator</h3>
+          <button id="applyRolePalette" type="button">preview/apply</button>
+        </div>
+        <label
+          >Image source
+          <input id="paletteImageInput" type="file" accept="image/*"
+        /></label>
+        <div id="derivedPalette" class="palette-swatches"></div>
+        <div id="rolePalette" class="role-palette"></div>
+        <div class="row">
+          <button id="pickRolePalette" type="button">pick tasteful roles</button
+          ><button id="copyRolePalette" type="button">copy CSS vars</button>
+        </div>
+        <textarea id="rolePaletteCss" class="palette-css" readonly></textarea>
+      </section>
+      <section class="card stack">
+        <div class="row between">
+          <h3>Local storage visualization</h3>
+          <div id="storageStats" class="muted"></div>
+        </div>
+        <div class="storage-meter"><span id="storageMeter"></span></div>
+        <div class="row">
+          <button id="refreshStorage" type="button">Refresh</button
+          ><button id="exportStorage" type="button">Export JSON</button
+          ><button id="clearStorage" type="button">Clear v11 keys</button>
+        </div>
+        <table id="storageTable">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Bytes</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <textarea
+          id="storageExport"
+          rows="5"
+          placeholder="export appears here; paste then import"
+        ></textarea>
+        <div class="row">
+          <button id="importStorage" type="button">Import from box</button>
+        </div>
+      </section>
+    </aside>
+
+    <img
+      class="badger-runner"
+      src="../bdg.gif"
+      alt="running badger"
+      aria-hidden="true"
+    />
+    <div id="presenceMenu" class="presence-menu" role="menu" aria-label="User options">
+      <button id="presencePrimaryAction" type="button" role="menuitem"></button>
+      <button id="presenceSecondaryAction" type="button" role="menuitem"></button>
+      <button id="presenceTertiaryAction" type="button" role="menuitem"></button>
+      <button id="presenceQuaternaryAction" type="button" role="menuitem"></button>
+    </div>
+
+    <script type="module">
+      const HUB_BASE = document.baseURI.includes('app-hub-v11/') ? './' : 'app-hub-v11/';
+      const hubUrl = (path) => `${HUB_BASE}${path}`;
+      const [
+        menuModule,
+        launcherModule,
+        eventLogModule,
+        panelsModule,
+        storageModule,
+        themesModule,
+        soundModule,
+        networkModule,
+        profileModule,
+      ] = await Promise.all([
+        import(hubUrl('lib/menu.js')),
+        import(hubUrl('lib/launcher.js')),
+        import(hubUrl('lib/event-log.js')),
+        import(hubUrl('lib/resizable-panels.js')),
+        import(hubUrl('lib/storage.js')),
+        import(hubUrl('lib/themes.js')),
+        import(hubUrl('lib/sound.js')),
+        import(hubUrl('lib/network.js')),
+        import(hubUrl('lib/profile.js')),
+      ]);
+      const {
+        buildMenuGroups,
+        createTagFilterState,
+        filterArtifactsAdvanced,
+        renderTagFilterControls,
+        tagColorStyle,
+        toggleTagFilter,
+      } = menuModule;
+      const { createAppRuntimeRegistry, createFloatingPanel, createInlineTabDeck, launchArtifact } = launcherModule;
+      const { createEventLog } = eventLogModule;
+      const { createResizablePanels } = panelsModule;
+      const {
+        buildStorageSnapshot,
+        clearHubSettings,
+        exportHubSettings,
+        importHubSettings,
+        readHubSetting,
+        writeHubSetting,
+      } = storageModule;
+      const { applyThemeTokens, buildThemeStyleText, themeById, themes } = themesModule;
+      const { createSoundEffects } = soundModule;
+      const { createLobbyNetwork } = networkModule;
+      const { avatarInitials, normalizeProfile, profileSummary } = profileModule;
+
+      const $ = (id) => document.getElementById(id);
+      const esc = (value = "") =>
+        String(value).replace(
+          /[&<>"]/g,
+          (char) =>
+            ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char],
+        );
+      $("themeStyles").textContent = buildThemeStyleText(themes);
+      const catalog = await fetch("./data/artifact-collection.json")
+        .then((r) => r.json())
+        .catch(() => ({ items: [], summary: { total: 0 }, operations: {} }));
+      const sounds = createSoundEffects({
+        audioContextFactory: () =>
+          new (window.AudioContext || window.webkitAudioContext)(),
+      });
+      const eventLog = createEventLog({ target: $("eventLog") });
+      const tagState = createTagFilterState([], "OR");
+      const workspacePane = $("workspacePane");
+      workspacePane.style.resize = "vertical";
+      workspacePane.style.overflow = "auto";
+      let selected = null,
+        viewMode = readHubSetting("viewMode", "cards"),
+        defaultAction = readHubSetting("defaultAction", "newWindow"),
+        soundEnabled = readHubSetting("sound", false),
+        profile = normalizeProfile(readHubSetting("profile", {})),
+        lobbyChat = readHubSetting("lobbyChat", []),
+        chatChannels = readHubSetting("chatChannels", ["general"]),
+        selectedChatChannel = readHubSetting("selectedChatChannel", "general"),
+        channelUnreadCounts = readHubSetting("channelUnreadCounts", {});
+      let connectedPeers = new Map();
+      const latestArtifactObserverSnapshots = new Map();
+      const OBSERVER_STALE_AFTER_MS = 10000;
+      const observerStatusTimer = setInterval(renderObserverStatus, 1000);
+      window.addEventListener("beforeunload", () => clearInterval(observerStatusTimer));
+      const chatDeliveryTimers = new Map();
+      const seenPeerNames = new Map();
+      const peerLastActivity = new Map();
+      let activePresenceTarget = null;
+      let isLocalHub = false;
+      const network = createLobbyNetwork({
+        username: profile.displayName,
+        lobbyId: "nexus-v11-hub-main",
+        storageKey: "v11-peernet",
+      });
+      if (!Array.isArray(chatChannels)) chatChannels = ["general"];
+      if (!channelUnreadCounts || typeof channelUnreadCounts !== "object" || Array.isArray(channelUnreadCounts)) channelUnreadCounts = {};
+      if (!chatChannels.includes("general")) {
+        chatChannels = ["general", ...chatChannels];
+        writeHubSetting("chatChannels", chatChannels);
+      }
+      selectedChatChannel = chatChannels.includes(selectedChatChannel) ? selectedChatChannel : "general";
+      $("chatChannelName").value = selectedChatChannel;
+      const lobbyChatChannel =
+        "BroadcastChannel" in window
+          ? new BroadcastChannel('app-hub-v11:lobby-chat')
+          : null;
+      const runtimeRegistry = createAppRuntimeRegistry();
+      const inlineDeck = createInlineTabDeck({
+        deck: $("appDeck"),
+        tabs: $("workspaceTabs"),
+        body: $("appDeckBody"),
+        runtime: window,
+        onChange: ({ type, activeAppId, openApps, appData }) => {
+          if (type === "empty") setWorkspaceTab("eventLog");
+          if (activeAppId) setWorkspaceTab(activeAppId);
+          if (type === "open" || type === "dock") {
+            if (appData && !runtimeRegistry.get(appData.instanceId)) {
+              runtimeRegistry.register({
+                artifact: appData.artifact,
+                launch: appData.launch,
+                containerMode: "inline",
+                instanceId: appData.instanceId,
+                iframeNode: appData.iframeNode,
+                tabNode: appData.tab,
+                panelNode: appData.panel,
+              });
+            }
+            if (appData) runtimeRegistry.move(appData.instanceId, "inline", { iframeNode: appData.iframeNode, tabNode: appData.tab, panelNode: appData.panel });
+          }
+          if (type === "float" && appData) {
+            runtimeRegistry.move(appData.instanceId, "floating", { iframeNode: appData.iframeNode, tabNode: null, panelNode: null });
+            createFloatingPanel(
+              {
+                title: appData.artifact.title || appData.artifact.id,
+                url: appData.launch.url,
+                iframeNode: appData.iframeNode,
+                dockLabel: "dock inline",
+                onDock: (panel) => {
+                  panel.remove?.();
+                  inlineDeck.dock(appData);
+                  runtimeRegistry.move(appData.instanceId, "inline", { iframeNode: appData.iframeNode, tabNode: appData.tab, panelNode: appData.panel });
+                  eventLog.info("dock", appData.artifact.title || appData.artifact.id);
+                },
+              },
+              window,
+            );
+            eventLog.info("float", appData.artifact.title || appData.artifact.id);
+          }
+          eventLog.info(
+            "deck",
+            type,
+            activeAppId || "none",
+            `${openApps.size} open`,
+          );
+        },
+      });
+      const joinableGameIds = new Set(["bomberman-v10", "hyperblast-shooter", "v11-peer-daw", "minesweeper", "solitaire", "sprite-gif-creator"]);
+      const genericObservableAppIds = new Set(["minesweeper", "solitaire", "sprite-gif-creator"]);
+      const defaultJoinGameByPeer = new Map();
+      const gameJoinSpecs = {
+        "bomberman-v10": { multiplayer: true, mode: "vs", session: "bomberman" },
+        "hyperblast-shooter": { multiplayer: true, mode: "vs", session: "shooter" },
+        "v11-peer-daw": { multiplayer: true, mode: "session", session: "daw" },
+        "minesweeper": { multiplayer: false, mode: "observe", session: "minesweeper", genericObserve: true },
+        "solitaire": { multiplayer: false, mode: "observe", session: "solitaire", genericObserve: true },
+        "sprite-gif-creator": { multiplayer: false, mode: "observe", session: "sprite-gif-creator", genericObserve: true },
+      };
+      function selectedJoinableGame() {
+        if (selected && joinableGameIds.has(selected.id)) return selected;
+        return catalog.items.find((item) => item.id === "bomberman-v10") || catalog.items.find((item) => joinableGameIds.has(item.id));
+      }
+      createResizablePanels({
+        root: document.documentElement,
+        runtime: window,
+        handles: [
+          {
+            handle: $("sidebarResizeHandle"),
+            axis: "x",
+            variable: "--sidebar-width",
+            min: 260,
+            max: 680,
+            unit: "px",
+            storageKey: "app-hub-v11:sidebar-width",
+          },
+          {
+            handle: $("sidebarSplitResizeHandle"),
+            axis: "y",
+            variable: "--filter-panel-fr",
+            min: 0.35,
+            max: 2.8,
+            unit: "fr",
+            storageKey: "app-hub-v11:filter-panel-fr",
+            toValue: (event) =>
+              event.clientY / Math.max(180, window.innerHeight - event.clientY),
+          },
+          {
+            handle: $("workspaceResizeHandle"),
+            axis: "y",
+            variable: "--workspace-height",
+            min: 180,
+            max: Math.max(260, window.innerHeight - 220),
+            unit: "px",
+            storageKey: "app-hub-v11:workspace-height",
+            toValue: (event) => window.innerHeight - event.clientY,
+          },
+        ],
+      });
+
+      sounds.setEnabled(soundEnabled);
+      $("defaultAction").value = defaultAction;
+      setTheme(readHubSetting("theme", "nexus"), false);
+      renderProfile();
+      renderThemeGrid();
+      renderPaletteGenerator();
+      renderLobbyChat();
+      renderChatChannels();
+      renderOnlineUsers();
+      renderLobbySummary();
+      renderStorage();
+      renderFilters();
+      setViewMode(viewMode, false);
+      setWorkspaceTab("eventLog");
+      network.on("status", (detail) => {
+        const online = Boolean(detail?.connected);
+        const raw = String(detail?.text || "").trim();
+        isLocalHub = /hub/i.test(raw);
+        const text = !online
+          ? (raw || "offline")
+          : /joining/i.test(raw)
+            ? "connected"
+            : raw || "connected";
+        $("activeStorage").textContent = text;
+        $("lobbyNetworkStatus").textContent = text;
+        $("lobbyTabStatus").textContent = text;
+        renderLobbySummary();
+        eventLog.info("network", text);
+      });
+      network.on("peers", (peers) => {
+        connectedPeers = peers || new Map();
+        for (const [peerId, peer] of connectedPeers.entries()) {
+          peerLastActivity.set(String(peerId), Date.now());
+          const name = String(peer?.username || "").trim();
+          if (name) seenPeerNames.set(String(peerId), name);
+        }
+        if (connectedPeers.size > 0) $("activeStorage").textContent = "connected";
+        renderOnlineUsers();
+      });
+      network.on("message:chat", ({ id, payload, raw }) => {
+        const from =
+          raw?.fromName ||
+          payload?.from ||
+          connectedPeers.get(id)?.username ||
+          `peer-${String(id || "").slice(0, 6)}`;
+        if (id) seenPeerNames.set(String(id), String(from));
+        if (id) peerLastActivity.set(String(id), Date.now());
+        const channel = payload?.channel || "general";
+        const messageId = payload?.id || raw?.id || `${id || "peer"}-${Date.now()}`;
+        appendLobbyChat(
+          {
+            id: messageId,
+            from,
+            channel,
+            text: String(payload?.text || ""),
+            at: payload?.at || new Date().toISOString(),
+            delivery: "received",
+          },
+          false,
+        );
+        if (messageId) {
+          network.broadcast("chat-ack", {
+            messageId,
+            from: profile.displayName,
+            at: new Date().toISOString(),
+          });
+        }
+        if (channel !== selectedChatChannel) incrementChannelUnread(channel);
+      });
+      network.on("message:chat-ack", ({ payload }) => {
+        markLobbyChatDelivered(payload?.messageId, "acked");
+      });
+      network.on("message:artifact-observer-snapshot", ({ id, payload }) => {
+        const snapshot = { ...(payload || {}), fromPeerId: id || payload?.fromPeerId || "peer" };
+        rememberArtifactObserverSnapshot(snapshot);
+        forwardArtifactObserverSnapshot(snapshot);
+      });
+      window.addEventListener("message", (event) => {
+        const data = event.data || {};
+        if (data.type === "artifact-observer-snapshot") {
+          const snapshot = { ...(data.snapshot || {}), fromPeerId: profile.displayName || "local" };
+          rememberArtifactObserverSnapshot(snapshot);
+          network.broadcast("artifact-observer-snapshot", snapshot);
+          forwardArtifactObserverSnapshot(snapshot);
+        }
+        if (data.type === "artifact-observer-subscribe") {
+          const key = artifactObserverSnapshotKey(data.artifactId, data.targetPeerId || "");
+          const snapshot = latestArtifactObserverSnapshots.get(key) || latestArtifactObserverSnapshots.get(artifactObserverSnapshotKey(data.artifactId, ""));
+          if (snapshot) forwardArtifactObserverSnapshot(snapshot);
+        }
+      });
+      $("summary").textContent =
+        `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(", ")} operations`;
+      $("profileButton").onclick = () =>
+        $("profileMenu").classList.toggle("open");
+      $("closeProfile").onclick = () =>
+        $("profileMenu").classList.remove("open");
+      $("onlineUsers").addEventListener("contextmenu", (event) => {
+        const row = event.target.closest("[data-self]");
+        if (!row) return;
+        event.preventDefault();
+        activePresenceTarget = {
+          self: row.dataset.self === "true",
+          peerId: row.dataset.peerId || "",
+          label: row.dataset.label || "",
+        };
+        openPresenceMenu(event.clientX, event.clientY);
+      });
+      $("presencePrimaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          $("profileMenu").classList.add("open");
+          return closePresenceMenu();
+        }
+        openPersonalChat(activePresenceTarget);
+        closePresenceMenu();
+      };
+      $("presenceSecondaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          if (window.confirm("Exit this hub session?")) window.location.href = "about:blank";
+          return closePresenceMenu();
+        }
+        joinPeerGame(activePresenceTarget, { spectate: false });
+        closePresenceMenu();
+      };
+      $("presenceTertiaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          setWorkspaceTab("eventLog");
+          eventLog.info("self", "status", profile.sharedLayer ? "connected" : "offline");
+        } else {
+          joinPeerGame(activePresenceTarget, { spectate: true });
+        }
+        closePresenceMenu();
+      };
+      $("presenceQuaternaryAction").onclick = () => {
+        if (!activePresenceTarget) return closePresenceMenu();
+        if (activePresenceTarget.self) {
+          setWorkspaceTab("eventLog");
+          eventLog.info("self", "status", profile.sharedLayer ? "connected" : "offline");
+        } else {
+          navigator.clipboard?.writeText(activePresenceTarget.peerId || activePresenceTarget.label || "");
+          eventLog.info("peer", "copied id", activePresenceTarget.label || activePresenceTarget.peerId);
+        }
+        closePresenceMenu();
+      };
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("#presenceMenu")) return;
+        closePresenceMenu();
+      });
+      window.addEventListener("blur", closePresenceMenu);
+      lobbyChatChannel?.addEventListener("message", (event) => {
+        if (event.data?.type !== "chat") return;
+        const channel = event.data.message?.channel || "general";
+        appendLobbyChat({ ...event.data.message, delivery: event.data.message?.delivery || "received" }, false);
+        if (channel !== selectedChatChannel) incrementChannelUnread(channel);
+      });
+      $("search").oninput = renderResults;
+      $("modeAnd").onclick = () => setTagMode("AND");
+      $("modeOr").onclick = () => setTagMode("OR");
+      $("clearTags").onclick = () => {
+        tagState.activeTags.clear();
+        renderFilters();
+        renderResults();
+      };
+      $("viewCards").onclick = () => setViewMode("cards");
+      $("viewList").onclick = () => setViewMode("list");
+      $("defaultAction").onchange = () => {
+        defaultAction = $("defaultAction").value;
+        writeHubSetting("defaultAction", defaultAction);
+        eventLog.info("default action", defaultAction);
+      };
+      $("clearEventLog").onclick = () => eventLog.clear();
+      $("openLobbyChatTab").onclick = () => setWorkspaceTab("lobbyChat");
+      $("workspaceTabs")
+        .querySelectorAll("[data-workspace-tab]")
+        .forEach(
+          (button) =>
+            (button.onclick = () =>
+              setWorkspaceTab(button.dataset.workspaceTab)),
+        );
+      $("spawnChatChannel").onclick = () => {
+        const name = $("chatChannelName").value.trim() || "general";
+        if (!chatChannels.includes(name)) chatChannels.push(name);
+        selectedChatChannel = name;
+        writeHubSetting("chatChannels", chatChannels);
+        writeHubSetting("selectedChatChannel", selectedChatChannel);
+        $("chatChannelName").value = selectedChatChannel;
+        clearChannelUnread(name);
+        renderChatChannels();
+        eventLog.success("chat channel", name);
+      };
+      $("sendLobbyChat").onclick = sendLobbyChat;
+      $("lobbyChatInput").onkeydown = (event) => {
+        if (event.key === "Enter") sendLobbyChat();
+      };
+      $("clearLobbyChat").onclick = () => {
+        lobbyChat = [];
+        writeHubSetting("lobbyChat", lobbyChat);
+        renderLobbyChat();
+      };
+      $("soundToggle").onclick = () => {
+        soundEnabled = !soundEnabled;
+        sounds.setEnabled(soundEnabled);
+        writeHubSetting("sound", soundEnabled);
+        $("soundToggle").textContent = soundEnabled ? "sound on" : "sound off";
+        sounds.play("success");
+        renderStorage();
+      };
+      $("saveProfile").onclick = () => {
+        profile = normalizeProfile({
+          displayName: $("profileName").value,
+          handle: $("profileHandle").value,
+          role: $("profileRole").value,
+          status: $("profileStatus").value,
+          note: $("profileNote").value,
+          color: $("profileColor").value,
+          sharedLayer: $("profileSharedLayer").checked,
+          allowIncomingSaveStates: $("profileAllowIncomingSaveStates").checked,
+        });
+        writeHubSetting("profile", profile);
+        network.setUsername(profile.displayName);
+        renderProfile();
+        renderOnlineUsers();
+        renderStorage();
+        sounds.play("success");
+      };
+      $("resetProfile").onclick = () => {
+        profile = normalizeProfile({});
+        writeHubSetting("profile", profile);
+        network.setUsername(profile.displayName);
+        renderProfile();
+        renderOnlineUsers();
+        renderStorage();
+      };
+      $("refreshStorage").onclick = renderStorage;
+      $("exportStorage").onclick = () => {
+        $("storageExport").value = exportHubSettings();
+        renderStorage();
+      };
+      $("importStorage").onclick = () => {
+        importHubSettings($("storageExport").value);
+        profile = normalizeProfile(readHubSetting("profile", profile));
+        setTheme(readHubSetting("theme", "nexus"), false);
+        renderProfile();
+        renderThemeGrid();
+        renderStorage();
+      };
+      $("clearStorage").onclick = () => {
+        clearHubSettings();
+        renderStorage();
+      };
+
+      function setTheme(id, save = true) {
+        const theme = applyThemeTokens(id);
+        if (save) writeHubSetting("theme", theme.id);
+        $("activeTheme").textContent = `${theme.title} · ${theme.mood}`;
+        renderThemeGrid();
+        renderStorage();
+        return theme;
+      }
+      function setTagMode(mode) {
+        tagState.mode = mode;
+        $("modeAnd").classList.toggle("active", mode === "AND");
+        $("modeOr").classList.toggle("active", mode === "OR");
+        renderResults();
+        eventLog.info("tag mode", mode);
+      }
+      function setViewMode(mode, save = true) {
+        viewMode = mode === "list" ? "list" : "cards";
+        if (save) writeHubSetting("viewMode", viewMode);
+        $("viewCards").classList.toggle("active", viewMode === "cards");
+        $("viewList").classList.toggle("active", viewMode === "list");
+        $("results").className = `results ${viewMode}`;
+        renderResults();
+      }
+      function setWorkspaceTab(tabId) {
+        workspacePane.classList.add("active");
+        const permanentTabs = new Set(["eventLog", "lobbyChat"]);
+        const isAppTab = Boolean(tabId) && !permanentTabs.has(tabId);
+        $("workspaceTabs")
+          .querySelectorAll("[data-workspace-tab], [data-app-id]")
+          .forEach((button) =>
+            button.classList.toggle(
+              "active",
+              button.dataset.workspaceTab === tabId || button.dataset.appId === tabId,
+            ),
+          );
+        workspacePane
+          .querySelectorAll(".workspace-panel")
+          .forEach((panel) =>
+            panel.classList.toggle(
+              "active",
+              panel.id === tabId ||
+                panel.dataset.appId === tabId ||
+                (tabId === "eventLog" && panel.id === "eventLogPanel") ||
+                (tabId === "lobbyChat" && panel.id === "lobbyChatPanel") ||
+                (isAppTab && panel.id === "appDeck"),
+            ),
+          );
+      }
+      function renderFilters() {
+        $("tagFilter").innerHTML = renderTagFilterControls(
+          catalog.items,
+          tagState,
+        );
+        $("tagFilter")
+          .querySelectorAll("[data-tag]")
+          .forEach(
+            (button) =>
+              (button.onclick = () => {
+                toggleTagFilter(tagState, button.dataset.tag);
+                renderFilters();
+                renderResults();
+              }),
+          );
+      }
+      function filteredItems() {
+        return sortItemsByRecentlyChanged(filterArtifactsAdvanced(catalog.items, {
+          query: $("search").value,
+          tagState,
+        }));
+      }
+      function changedTimestamp(item) {
+        const raw = item.changedAt || item.updatedAt || item.modifiedAt || item.mtime || item.lastChanged || item.generatedAt || item.createdAt || "";
+        const parsed = raw ? Date.parse(raw) : 0;
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      function sortItemsByRecentlyChanged(items) {
+        return [...items].sort((a, b) => changedTimestamp(b) - changedTimestamp(a) || String(a.title || a.id).localeCompare(String(b.title || b.id)));
+      }
+      function artifactDefaultAction(item) {
+        return item?.launch?.defaultAction || defaultAction || "newWindow";
+      }
+      function renderResults() {
+        const items = filteredItems();
+        const groups = buildMenuGroups(items);
+        $("summary").textContent =
+          `${items.length}/${catalog.items.length} shown · ${[...tagState.activeTags].join(tagState.mode === "AND" ? " + " : " / ") || "all tags"}`;
+        $("menu").innerHTML = groups
+          .map((g) => `<section><h2>${esc(g.title)}</h2></section>`)
+          .join("");
+        $("results").innerHTML =
+          items.map((item) => renderArtifactItem(item)).join("") ||
+          '<p class="muted">No matching artifacts.</p>';
+        $("results")
+          .querySelectorAll("[data-id]")
+          .forEach(
+            (node) =>
+              (node.onclick = (event) => {
+                const title = event.target.closest("[data-artifact-title]");
+                const b = event.target.closest("[data-launch]");
+                if (!b && !title) return;
+                event.stopPropagation();
+                selected = catalog.items.find(
+                  (item) => item.id === node.dataset.id,
+                );
+                if (title) return openSelected(artifactDefaultAction(selected));
+                openSelected(b.dataset.launch);
+              }),
+          );
+      }
+      function renderArtifactItem(item) {
+        const tags = (item.tags || [])
+          .map(
+            (tag) =>
+              `<span class="pill tag-pill" style="${tagColorStyle(tag)}">${esc(tag)}</span>`,
+          )
+          .join("");
+        const icons = `<div class="launch-icons"><button class="icon-btn" title="inline" data-launch="inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow">↗</button></div>`;
+        return viewMode === "list"
+          ? `<article class="artifact-row" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
+          : `<article class="artifact-card" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div><p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
+      }
+      function openSelected(mode, action = null) {
+        if (!selected) return;
+        if (mode === "details") return openDetails(selected);
+        const launch = launchArtifact(selected, mode, window, action);
+        sounds.play("success");
+        eventLog.success("launch", selected.title, launch.mode);
+        network.broadcast("artifact:launch", {
+          id: selected.id,
+          mode: launch.mode,
+          action,
+        });
+        if (launch.handledByBrowser) return;
+        if (launch.mode === "floating") {
+          const floatingAppData = runtimeRegistry.register({
+            artifact: selected,
+            launch,
+            containerMode: "floating",
+          });
+          const panel = createFloatingPanel(
+            {
+              title: selected.title,
+              url: launch.url,
+              dockLabel: "dock inline",
+              onDock: (panelNode) => {
+                panelNode.remove?.();
+                inlineDeck.dock(floatingAppData);
+                runtimeRegistry.move(floatingAppData.instanceId, "inline", { iframeNode: floatingAppData.iframeNode, tabNode: floatingAppData.tab, panelNode: floatingAppData.panel });
+                eventLog.info("dock", selected.title);
+              },
+            },
+            window,
+          );
+          const iframeNode = panel.querySelector?.("iframe") || null;
+          runtimeRegistry.attach(floatingAppData.instanceId, { iframeNode, panelNode: panel });
+          floatingAppData.iframeNode = iframeNode;
+          floatingAppData.panelNode = panel;
+          return panel;
+        }
+        if (launch.mode === "fullscreen")
+          return openFullscreen(selected, launch.url);
+        workspacePane.classList.add("active");
+        inlineDeck.open(selected, launch);
+        $("joinGamePrompt").textContent = `Active: ${selected.title}`;
+      }
+      function openFullscreen(item, url) {
+        const panel = createFloatingPanel(
+          { title: `${item.title} · fullscreen`, url },
+          window,
+        );
+        panel.style.inset = "0";
+        panel.style.setProperty?.("border-radius", "0");
+      }
+      function openDetails(item) {
+        workspacePane.classList.add("active");
+        setWorkspaceTab("eventLog");
+        eventLog.info(
+          "details",
+          item.title,
+          item.description || item.note || item.href || item.id,
+        );
+        $("joinGamePrompt").textContent = `Details: ${item.title}`;
+      }
+      function renderProfile() {
+        profile = normalizeProfile(profile);
+        document.documentElement.style.setProperty(
+          "--profile-color",
+          profile.color,
+        );
+        $("profileAvatar").textContent = avatarInitials(profile);
+        $("profileAvatarLarge").textContent = avatarInitials(profile);
+        $("profileLabel").textContent = profile.handle;
+        $("profileSummary").textContent = profileSummary(profile);
+        $("profileName").value = profile.displayName;
+        $("profileHandle").value = profile.handle;
+        $("profileRole").value = profile.role;
+        $("profileStatus").value = profile.status;
+        $("profileNote").value = profile.note;
+        $("profileColor").value = profile.color;
+        $("profileSharedLayer").checked = profile.sharedLayer;
+        $("profileAllowIncomingSaveStates").checked =
+          profile.allowIncomingSaveStates;
+      }
+      function artifactObserverSnapshotKey(artifactId, peerId = "") {
+        return `${artifactId || "unknown"}:${peerId || ""}`;
+      }
+      function rememberArtifactObserverSnapshot(snapshot) {
+        if (!snapshot?.artifactId) return;
+        latestArtifactObserverSnapshots.set(artifactObserverSnapshotKey(snapshot.artifactId, snapshot.fromPeerId || snapshot.targetPeerId || ""), snapshot);
+        latestArtifactObserverSnapshots.set(artifactObserverSnapshotKey(snapshot.artifactId, ""), snapshot);
+        renderObserverStatus();
+        eventLog.info("observe", snapshot.artifactId, snapshot.fromPeerId || "local", `#${snapshot.sequence || "?"}`);
+      }
+      function forwardArtifactObserverSnapshot(snapshot) {
+        if (!snapshot?.artifactId) return;
+        for (const runtime of runtimeRegistry.list()) {
+          if (runtime.artifactId !== snapshot.artifactId) continue;
+          if (!runtime.launch?.action?.observe && !runtime.launch?.action?.spectate) continue;
+          runtime.iframeNode?.contentWindow?.postMessage?.({ type: "artifact-observer-snapshot", snapshot }, "*");
+        }
+      }
+      function renderObserverStatus() {
+        const panel = $("observerStatusPanel");
+        const snapshots = [...latestArtifactObserverSnapshots.values()]
+          .filter((snapshot, index, all) => all.findIndex((other) => other === snapshot) === index)
+          .sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
+        if (!snapshots.length) {
+          panel.classList.remove("observer-stale");
+          panel.textContent = "Observer status: no snapshots yet.";
+          $("observerLastSnapshotAge").textContent = "never";
+          return;
+        }
+        const snapshot = snapshots[0];
+        const ageMs = Math.max(0, Date.now() - Number(snapshot.at || Date.now()));
+        const isStale = ageMs > OBSERVER_STALE_AFTER_MS;
+        const ageLabel = ageMs < 1000 ? "now" : `${Math.round(ageMs / 1000)}s ago`;
+        $("observerLastSnapshotAge").textContent = ageLabel;
+        panel.classList.toggle("observer-stale", isStale);
+        panel.textContent = `${isStale ? "stale snapshot" : "Observer status"}: ${snapshot.artifactId} from ${snapshot.fromPeerId || "local"} · sequence #${snapshot.sequence || "?"} · last snapshot ${ageLabel}`;
+      }
+      function renderLobbySummary() {
+        const count = Array.isArray(lobbyChat) ? lobbyChat.length : 0;
+        $("lobbyMessageCount").textContent = String(count);
+        $("lobbyMessageCountDetail").textContent = String(count);
+        $("activeChatChannel").textContent = `# ${selectedChatChannel}`;
+        $("activeChatChannelDetail").textContent = `# ${selectedChatChannel}`;
+      }
+      function renderOnlineUsers() {
+        const localStatus = profile.sharedLayer ? "connected" : "offline";
+        const remoteUsers = new Map();
+        for (const [peerId, peer] of connectedPeers.entries()) {
+          const id = String(peerId || "");
+          const rawName = String(peer?.username || "").trim();
+          const name = String(
+            (rawName.toLowerCase() === "hub" ? "" : rawName) ||
+              seenPeerNames.get(id) ||
+              "",
+          ).trim();
+          remoteUsers.set(
+            id,
+            name || `peer-${id.slice(0, 6) || "unknown"}`,
+          );
+        }
+        for (const [peerId, name] of seenPeerNames.entries()) {
+          const cleaned = String(name || "").trim();
+          if (!cleaned) continue;
+          if (!remoteUsers.has(String(peerId))) remoteUsers.set(String(peerId), cleaned);
+        }
+        const users = [
+          {
+            peerId: "self",
+            avatar: avatarInitials(profile),
+            label: profile.displayName,
+            status: localStatus,
+            self: true,
+            lastActivity: Date.now(),
+            hub: isLocalHub,
+          },
+          ...[...remoteUsers.entries()].map(([peerId, name]) => ({
+            peerId,
+            avatar: name.slice(0, 2).toUpperCase(),
+            label: name,
+            status: "connected",
+            self: false,
+            lastActivity: peerLastActivity.get(String(peerId)) || null,
+            hub: false,
+          })),
+        ];
+        $("presenceCount").textContent = String(users.length);
+        $("presenceCountDetail").textContent = String(users.length);
+        $("presenceCountDetailHeader").textContent = String(users.length);
+        $("onlineUsers").innerHTML = users
+          .map(
+            (user) =>
+              `<div class="row online-user" data-self="${user.self ? "true" : "false"}" data-peer-id="${esc(user.peerId || "")}" data-label="${esc(user.label)}" title="${esc(`status: ${user.status}${user.lastActivity ? ` | last activity: ${new Date(user.lastActivity).toLocaleTimeString()}` : ""}`)}"><span class="avatar">${esc(user.avatar)}</span><span>${esc(user.label)} · ${esc(user.status)}${user.hub ? ' <span class="pill">hub</span>' : ''}</span></div>`,
+          )
+          .join("");
+        renderLobbySummary();
+      }
+      function openPresenceMenu(x, y) {
+        const menu = $("presenceMenu");
+        const primary = $("presencePrimaryAction");
+        const secondary = $("presenceSecondaryAction");
+        const tertiary = $("presenceTertiaryAction");
+        const quaternary = $("presenceQuaternaryAction");
+        if (activePresenceTarget?.self) {
+          primary.textContent = "open profile settings";
+          secondary.textContent = "exit hub";
+          tertiary.textContent = "show status in log";
+          quaternary.hidden = true;
+        } else {
+          primary.textContent = "spawn personal chat";
+          secondary.textContent = "join game";
+          tertiary.textContent = "observe game";
+          quaternary.hidden = false;
+          quaternary.textContent = "copy peer id";
+        }
+        menu.style.left = `${x}px`;
+        menu.style.top = `${y}px`;
+        menu.classList.add("open");
+      }
+      function openPersonalChat(target) {
+        const peerId = String(target?.peerId || "peer");
+        const label = String(target?.label || peerId);
+        const name = `dm-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || peerId.slice(0, 8)}`;
+        if (!chatChannels.includes(name)) chatChannels.push(name);
+        selectedChatChannel = name;
+        writeHubSetting("chatChannels", chatChannels);
+        writeHubSetting("selectedChatChannel", selectedChatChannel);
+        $("chatChannelName").value = name;
+        renderChatChannels();
+        appendLobbyChat({ from: "system", channel: name, text: `personal chat opened with ${label}`, at: new Date().toISOString() }, false);
+        setWorkspaceTab("eventLog");
+        eventLog.success("personal chat", name);
+      }
+      function joinPeerGame(target, { spectate = false } = {}) {
+        const game = selectedJoinableGame();
+        if (!game) {
+          eventLog.warn("join", "no joinable game selected");
+          return;
+        }
+        const peerId = String(target?.peerId || "");
+        const spec = gameJoinSpecs[game.id] || { multiplayer: true };
+        defaultJoinGameByPeer.set(peerId, game.id);
+        selected = game;
+        openSelected("inline", {
+          ...spec,
+          multiplayer: true,
+          targetPeerId: peerId,
+          spectate,
+          observe: spectate,
+        });
+        $("joinGamePrompt").textContent = `${spectate ? "Observing" : "Joining"} ${target?.label || peerId} in ${game.title}`;
+      }
+      function closePresenceMenu() {
+        $("presenceMenu").classList.remove("open");
+        activePresenceTarget = null;
+      }
+      function appendLobbyChat(message, broadcast = true) {
+        lobbyChat = [...lobbyChat, message].slice(-80);
+        writeHubSetting("lobbyChat", lobbyChat);
+        if (broadcast) {
+          lobbyChatChannel?.postMessage({ type: "chat", message });
+          network.broadcast("chat", {
+            id: message?.id,
+            from: profile.displayName,
+            channel: message?.channel || selectedChatChannel,
+            text: String(message?.text || ""),
+            at: message?.at || new Date().toISOString(),
+          });
+          if (message.delivery === "pending") scheduleLobbyChatAckTimeout(message.id);
+        }
+        renderLobbyChat();
+        renderOnlineUsers();
+      }
+      function markLobbyChatDelivered(messageId, delivery) {
+        if (!messageId) return;
+        if (delivery === "acked" || delivery === "sent") {
+          clearTimeout(chatDeliveryTimers.get(messageId));
+          chatDeliveryTimers.delete(messageId);
+        }
+        lobbyChat = lobbyChat.map((msg) => msg.id === messageId ? { ...msg, delivery } : msg);
+        writeHubSetting("lobbyChat", lobbyChat);
+        renderLobbyChat();
+      }
+      function scheduleLobbyChatAckTimeout(messageId) {
+        if (!messageId) return;
+        clearTimeout(chatDeliveryTimers.get(messageId));
+        chatDeliveryTimers.set(messageId, setTimeout(() => {
+          const message = lobbyChat.find((msg) => msg.id === messageId);
+          if (message?.delivery === "pending") markLobbyChatDelivered(messageId, "failed");
+        }, 4500));
+      }
+      function deliveryLabel(delivery) {
+        if (!delivery || delivery === "received") return "";
+        return ` · ${delivery}`;
+      }
+      function incrementChannelUnread(channel) {
+        const name = String(channel || "general");
+        channelUnreadCounts[name] = Number(channelUnreadCounts[name] || 0) + 1;
+        writeHubSetting("channelUnreadCounts", channelUnreadCounts);
+        renderChatChannels();
+      }
+      function clearChannelUnread(channel) {
+        const name = String(channel || "general");
+        if (!channelUnreadCounts[name]) return;
+        delete channelUnreadCounts[name];
+        writeHubSetting("channelUnreadCounts", channelUnreadCounts);
+      }
+      function sendLobbyChat() {
+        const input = $("lobbyChatInput");
+        const text = input.value.trim();
+        if (!text) return;
+        appendLobbyChat({
+          id: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          from: profile.displayName,
+          channel: selectedChatChannel,
+          text,
+          at: new Date().toISOString(),
+          delivery: connectedPeers.size > 0 ? "pending" : "sent",
+        });
+        input.value = "";
+        sounds.play("click");
+        eventLog.info("chat", text);
+      }
+      function renderLobbyChat() {
+        $("lobbyChatLog").textContent = (
+          Array.isArray(lobbyChat) ? lobbyChat : []
+        )
+          .map(
+            (msg) =>
+              `[${new Date(msg.at || Date.now()).toLocaleTimeString()}] #${msg.channel || "general"} ${msg.from || "peer"}: ${msg.text || ""}${deliveryLabel(msg.delivery)}`,
+          )
+          .join("\n");
+        renderLobbySummary();
+      }
+      function renderChatChannels() {
+        $("chatChannels").innerHTML = chatChannels
+          .map((name) => {
+            const unread = Number(channelUnreadCounts[name] || 0);
+            const label = unread > 0 ? `# ${esc(name)} (${unread})` : `# ${esc(name)}`;
+            return `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}" data-unread-count="${unread}" aria-label="chat channel ${esc(name)}${unread ? `, ${unread} unread` : ""}">${label}</button>`;
+          })
+          .join("");
+        $("activeChatChannel").textContent = `# ${selectedChatChannel}`;
+        $("activeChatChannelDetail").textContent = `# ${selectedChatChannel}`;
+        renderLobbySummary();
+        $("chatChannels")
+          .querySelectorAll("[data-chat-channel]")
+          .forEach((button) => {
+            button.onclick = () => {
+              selectedChatChannel = button.dataset.chatChannel || "general";
+              clearChannelUnread(selectedChatChannel);
+              writeHubSetting("selectedChatChannel", selectedChatChannel);
+              $("chatChannelName").value = selectedChatChannel;
+              renderChatChannels();
+              eventLog.info("chat channel", selectedChatChannel);
+            };
+          });
+      }
+      function basicPalette() {
+        return ["#00ffff", "#ff00ff", "#00ff88", "#05070d", "#f7fbff"];
+      }
+      function rgbToHex(r, g, b) {
+        return (
+          "#" +
+          [r, g, b]
+            .map((v) =>
+              Math.max(0, Math.min(255, Math.round(v)))
+                .toString(16)
+                .padStart(2, "0"),
+            )
+            .join("")
+        );
+      }
+      function hexObj(hex) {
+        return {
+          r: parseInt(hex.slice(1, 3), 16),
+          g: parseInt(hex.slice(3, 5), 16),
+          b: parseInt(hex.slice(5, 7), 16),
+        };
+      }
+      function lum(hex) {
+        const c = hexObj(hex);
+        return (c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722) / 255;
+      }
+      function sat(hex) {
+        const c = hexObj(hex),
+          max = Math.max(c.r, c.g, c.b),
+          min = Math.min(c.r, c.g, c.b);
+        return max ? (max - min) / max : 0;
+      }
+      async function derivePaletteFromImage(file) {
+        const bitmap = await createImageBitmap(file);
+        const canvas = document.createElement("canvas");
+        const scale = Math.min(1, 128 / Math.max(bitmap.width, bitmap.height));
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const map = new Map();
+        for (let i = 0; i < data.length; i += 20) {
+          if (data[i + 3] < 160) continue;
+          const key = `${Math.round(data[i] / 32) * 32},${Math.round(data[i + 1] / 32) * 32},${Math.round(data[i + 2] / 32) * 32}`;
+          const item = map.get(key) || { r: 0, g: 0, b: 0, n: 0 };
+          item.r += data[i];
+          item.g += data[i + 1];
+          item.b += data[i + 2];
+          item.n += 1;
+          map.set(key, item);
+        }
+        return [...map.values()]
+          .sort((a, b) => b.n - a.n)
+          .slice(0, 12)
+          .map((c) => rgbToHex(c.r / c.n, c.g / c.n, c.b / c.n))
+          .concat(basicPalette())
+          .slice(0, 12);
+      }
+      function pickTastefulRoles(colors = []) {
+        const pool = colors.length ? colors : basicPalette();
+        const byLight = [...pool].sort((a, b) => lum(b) - lum(a));
+        const byDark = [...pool].sort((a, b) => lum(a) - lum(b));
+        const vivid = [...pool].sort((a, b) => sat(b) - sat(a));
+        return {
+          primary: vivid[0] || "#00ffff",
+          secondary: vivid[1] || "#ff00ff",
+          accent: vivid[2] || "#00ff88",
+          "dark-font": byDark[0] || "#05070d",
+          "light-font": byLight[0] || "#f7fbff",
+        };
+      }
+      function renderDerivedPalette(
+        colors = readHubSetting("derivedPalette", basicPalette()),
+      ) {
+        $("derivedPalette").innerHTML = colors
+          .map(
+            (color) =>
+              `<button type="button" class="palette-swatch" data-palette-color="${esc(color)}" style="--swatch:${esc(color)}" title="${esc(color)}"></button>`,
+          )
+          .join("");
+      }
+      function renderRolePalette(
+        roles = readHubSetting("rolePalette", pickTastefulRoles()),
+      ) {
+        writeHubSetting("rolePalette", roles);
+        $("rolePalette").innerHTML = Object.entries(roles)
+          .map(
+            ([role, color]) =>
+              `<label class="role-row"><span>${esc(role)}</span><input type="color" data-role="${esc(role)}" value="${esc(color)}"><code>${esc(color)}</code></label>`,
+          )
+          .join("");
+        $("rolePalette")
+          .querySelectorAll("[data-role]")
+          .forEach(
+            (input) => (input.oninput = () => copyRolePaletteCss(false)),
+          );
+        copyRolePaletteCss(false);
+      }
+      function currentRolePalette() {
+        const roles = {};
+        $("rolePalette")
+          .querySelectorAll("[data-role]")
+          .forEach((input) => {
+            roles[input.dataset.role] = input.value;
+          });
+        return roles;
+      }
+      function copyRolePaletteCss(copy = true) {
+        const r = currentRolePalette();
+        const css = `:root {\n  --generated-primary: ${r.primary};\n  --generated-secondary: ${r.secondary};\n  --generated-accent: ${r.accent};\n  --generated-dark-font: ${r["dark-font"]};\n  --generated-light-font: ${r["light-font"]};\n}`;
+        $("rolePaletteCss").value = css;
+        if (copy) navigator.clipboard?.writeText(css);
+        return css;
+      }
+      function applyRolePaletteToTheme() {
+        const r = currentRolePalette();
+        document.documentElement.style.setProperty(
+          "--hub-accent",
+          r.accent || r.primary,
+        );
+        document.documentElement.style.setProperty(
+          "--hub-text",
+          r["light-font"] || "#f7fbff",
+        );
+        document.documentElement.style.setProperty(
+          "--hub-background",
+          r["dark-font"] || "#05070d",
+        );
+        Object.entries(r).forEach(([k, v]) =>
+          document.documentElement.style.setProperty(`--generated-${k}`, v),
+        );
+        eventLog.success("palette applied", r.primary, r.secondary, r.accent);
+      }
+      function renderPaletteGenerator() {
+        renderDerivedPalette();
+        renderRolePalette();
+        $("paletteImageInput").onchange = async () => {
+          const file = $("paletteImageInput").files?.[0];
+          if (!file) return;
+          const colors = await derivePaletteFromImage(file);
+          writeHubSetting("derivedPalette", colors);
+          renderDerivedPalette(colors);
+          renderRolePalette(pickTastefulRoles(colors));
+        };
+        $("pickRolePalette").onclick = () =>
+          renderRolePalette(
+            pickTastefulRoles(readHubSetting("derivedPalette", basicPalette())),
+          );
+        $("copyRolePalette").onclick = () => copyRolePaletteCss(true);
+        $("applyRolePalette").onclick = applyRolePaletteToTheme;
+      }
+      function renderThemeGrid() {
+        const current = themeById(
+          readHubSetting(
+            "theme",
+            document.documentElement.getAttribute("data-theme") || "nexus",
+          ),
+        );
+        $("themeGrid").innerHTML = themes
+          .map(
+            (theme) =>
+              `<button type="button" class="theme-card ${theme.id === current.id ? "active" : ""}" data-theme-id="${theme.id}" style="--swatch-bg:${theme.tokens.background};--swatch-accent:${theme.tokens.accent}"><strong>${esc(theme.title)}</strong><br><span class="muted">${esc(theme.mood)}</span></button>`,
+          )
+          .join("");
+        $("themeGrid")
+          .querySelectorAll("[data-theme-id]")
+          .forEach(
+            (button) =>
+              (button.onclick = () => {
+                setTheme(button.dataset.themeId);
+                sounds.play("click");
+              }),
+          );
+      }
+      function renderStorage() {
+        const snapshot = buildStorageSnapshot();
+        const max = Math.max(128, snapshot.totalBytes);
+        $("storageMeter").style.setProperty(
+          "--storage-width",
+          `${Math.min(100, Math.round((snapshot.totalBytes / max) * 100))}%`,
+        );
+        $("storageStats").textContent =
+          `${snapshot.totalKeys} keys · ${snapshot.totalBytes} bytes`;
+        $("activeStorage").textContent = `${snapshot.totalKeys} v11 keys`;
+        $("storageTable").querySelector("tbody").innerHTML = snapshot.entries
+          .map(
+            (entry) =>
+              `<tr><td>${esc(entry.shortKey)}</td><td>${entry.bytes}</td><td><code>${esc(JSON.stringify(entry.parsed)).slice(0, 220)}</code></td></tr>`,
+          )
+          .join("");
+      }
+      eventLog.success("v11 hub ready");
+    </script>
+  </body>
+</html>
