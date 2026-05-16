@@ -1,0 +1,9 @@
+[submodule "ethic-brawl"]
+	path = ethic-brawl
+	url = git@github.com:fkr-0/ethic-brawl.git
+[submodule "badger-sprawl-runner"]
+	path = badger-sprawl-runner
+	url = git@github.com:fkr-0/badger-sprawl-runner.git
+[submodule "v11-peer-daw"]
+	path = v11-peer-daw
+	url = git@github.com:fkr-0/v11-peer-daw.git
