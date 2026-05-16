@@ -35,16 +35,26 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies (ethic-brawl)
-        run: npm ci || npm install
-        working-directory: ethic-brawl
-
-      - name: Install dependencies (v11-peer-daw)
-        run: npm install
-        working-directory: v11-peer-daw
+      - name: Prepare CI source catalog
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const sourcePath = path.resolve('app-hub-v11/artifacts.source.json');
+          const outPath = path.resolve('.artifacts.source.ci.json');
+          const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+          source.items = (source.items || []).filter((item) => {
+            const includePath = item?.deploy?.includePath;
+            const buildCwd = item?.deploy?.build?.cwd;
+            if (includePath && !fs.existsSync(path.resolve(includePath))) return false;
+            if (buildCwd && !fs.existsSync(path.resolve(buildCwd))) return false;
+            return true;
+          });
+          fs.writeFileSync(outPath, JSON.stringify(source, null, 2));
+          NODE
 
       - name: Materialize deploy stage
-        run: node app-hub-v11/server/artifact-build.mjs --out .artifacts-pages-stage
+        run: node app-hub-v11/server/artifact-build.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
