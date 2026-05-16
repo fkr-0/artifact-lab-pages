@@ -1,6 +1,7 @@
 export function createArtifactObserverBridge({
   artifactId,
   snapshotSelector = 'body',
+  getSemanticSnapshot = null,
   runtime = globalThis,
   documentRef = runtime.document,
   intervalMs = 750,
@@ -31,6 +32,7 @@ export function createArtifactObserverBridge({
       text: root?.innerText || root?.textContent || '',
       selector: snapshotSelector,
       title: documentRef.title || artifactId,
+      semantic: getSemanticSnapshot?.(),
       sequence: ++sequence,
       snapshotAgeMs: 0,
       at: Date.now(),
@@ -91,8 +93,9 @@ export function createArtifactObserverBridge({
     const badge = documentRef.getElementById('artifactObserverStatus') || documentRef.getElementById('artifactObserverReadOnly');
     if (!badge) return;
     const age = lastSnapshotAt ? Math.max(0, Date.now() - lastSnapshotAt) : 0;
+    const semanticLabel = snapshot?.semantic?.kind ? ` · ${snapshot.semantic.kind}` : '';
     badge.textContent = snapshot
-      ? `observing ${snapshot.artifactId} #${snapshot.sequence || '?'} · last snapshot ${Math.round(age / 1000)}s ago`
+      ? `observing ${snapshot.artifactId} #${snapshot.sequence || '?'}${semanticLabel} · last snapshot ${Math.round(age / 1000)}s ago`
       : (targetPeerId ? `observing ${targetPeerId}` : 'observing read-only');
   }
 

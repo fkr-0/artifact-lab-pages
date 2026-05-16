@@ -5,6 +5,15 @@ status: in_progress
 
 fixed:
 
+  - id: observer-semantic-minesweeper-state
+    area: app-hub-v11/observer
+    severity: medium
+    summary: Generic observer snapshots only carried DOM HTML, so future consumers could not use compact app-specific state.
+    cause: The artifact observer bridge did not accept semantic snapshot hooks, and Minesweeper had no compact board/HUD state export.
+    fix: Add getSemanticSnapshot support to the generic observer bridge and publish Minesweeper semantic state including board dimensions, mine/flag/reveal counts, elapsed/status, focus, and compact cell state.
+    tests:
+      - tests/non-peer-observer-bridge.test.mjs
+
   - id: observer-stale-snapshot-warning
     area: app-hub-v11/observer
     severity: medium
@@ -226,6 +235,7 @@ open:
       - observer launches must set spectate=true and observe=true
       - observed apps should never mutate host state
       - generic DOM snapshot bridge is implemented for non-Peernet standalone apps
+      - Minesweeper now publishes compact semantic observer snapshots
       - future host apps should reply to join/request-state messages with compact semantic snapshots
       - UI exposes observed peer/source, last snapshot age, sequence, and stale snapshot warnings
       - future UI should add explicit disconnect reason when the transport reports peer disconnect

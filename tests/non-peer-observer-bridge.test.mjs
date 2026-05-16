@@ -13,6 +13,13 @@ assert.match(bridge, /runtime\.parent\.postMessage\(\{[\s\S]*type: ["\']artifact
 assert.match(bridge, /readOnlyOverlay/, 'observer bridge should mark observer windows read-only');
 assert.match(bridge, /applySnapshot\(snapshot\)/, 'observer bridge should apply incoming snapshots');
 
+assert.match(bridge, /getSemanticSnapshot/, 'observer bridge should accept optional semantic snapshot hooks');
+assert.match(bridge, /semantic:\s*getSemanticSnapshot\?\.\(\)/, 'published snapshots should include compact semantic state when available');
+assert.match(bridge, /snapshot\.semantic/, 'observer status/render path should preserve semantic snapshot payloads');
+assert.match(minesweeper, /function getMinesweeperObserverState\(\)/, 'Minesweeper should expose a semantic observer state function');
+assert.match(minesweeper, /cells:\s*game\.cells\.map/, 'Minesweeper semantic observer state should include compact cell state');
+assert.match(minesweeper, /getSemanticSnapshot:\s*getMinesweeperObserverState/, 'Minesweeper should pass semantic state hook into the generic observer bridge');
+
 assert.match(bridge, /let sequence = 0/, 'observer snapshots should carry a monotonically increasing sequence');
 assert.match(bridge, /sequence: \+\+sequence/, 'published snapshots should increment sequence numbers');
 assert.match(bridge, /snapshotAgeMs/, 'observer bridge should expose last snapshot age metadata');

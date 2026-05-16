@@ -162,10 +162,16 @@ tracks:
           - Hub observer status refreshes every second without waiting for new snapshots.
           - Snapshots older than OBSERVER_STALE_AFTER_MS render stale snapshot copy and observer-stale styling.
           - Observer status timer is cleaned up on page unload.
+      semantic_minesweeper_state:
+        status: done
+        details:
+          - Generic observer bridge accepts getSemanticSnapshot hooks.
+          - Minesweeper publishes compact board/HUD/cell state alongside the DOM fallback.
+          - Hidden mines remain hidden unless the game is lost or the cell is revealed.
       semantic_observer_protocol:
         status: todo
         details:
-          - Replace DOM HTML snapshots with app-specific compact state diffs for games that can expose clean state.
+          - Replace DOM HTML snapshots with app-specific compact state diffs for more games that can expose clean state.
           - Add explicit transport disconnect reasons for observed peers.
           - Add browser coverage with two hub sessions and one observer iframe.
 
