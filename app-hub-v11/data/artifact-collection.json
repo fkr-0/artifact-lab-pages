@@ -1,0 +1,1003 @@
+{
+  "collection": {
+    "id": "app-hub-v11",
+    "title": "NEXUS App Hub v11",
+    "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
+  },
+  "generatedAt": "2026-05-16T17:34:39.011Z",
+  "deploy": {
+    "basePath": "app-hub-v11",
+    "copyRoot": "compiled",
+    "rootIndex": {
+      "source": "app-hub-v11/index.html"
+    },
+    "includeFiles": [
+      "ARTIFACTS_TOC.md",
+      "SERVER_GUIDE.md",
+      "SETUP_ALIASES.sh",
+      "artifacts-serve",
+      "artifacts-server.sh",
+      "artifacts-package",
+      "artifacts-deploy",
+      "bridge.yml",
+      "bdg.gif"
+    ],
+    "includeDirs": [
+      "app-hub-v11",
+      "peernetjs",
+      "lib"
+    ]
+  },
+  "operations": {
+    "validate": {
+      "description": "Validate required fields and source availability before indexing."
+    },
+    "copy": {
+      "description": "Copy local artifact files into the hub deployment tree so they become hub-based."
+    },
+    "index": {
+      "description": "Keep item in the clean compiled artifact list for menu/search/launch use."
+    }
+  },
+  "summary": {
+    "total": 27,
+    "byKind": {
+      "html-path": 23,
+      "info": 3,
+      "external-link": 1
+    },
+    "byTag": {
+      "editor": 7,
+      "notepad": 3,
+      "native": 1,
+      "v8": 1,
+      "local-first": 3,
+      "game": 5,
+      "classic": 3,
+      "minesweeper": 1,
+      "puzzle": 1,
+      "tool": 5,
+      "graphics": 3,
+      "sprite": 2,
+      "solitaire": 1,
+      "cards": 1,
+      "audio": 2,
+      "daw": 1,
+      "peernet": 5,
+      "built": 2,
+      "v11": 4,
+      "hub": 4,
+      "v9": 3,
+      "legacy": 2,
+      "compatibility": 2,
+      "tooling": 2,
+      "shooter": 1,
+      "space": 1,
+      "multiplayer": 2,
+      "cyberpunk": 2,
+      "extraction": 1,
+      "v10": 5,
+      "themes": 1,
+      "sound": 1,
+      "floating": 1,
+      "collaborative": 3,
+      "monaco": 1,
+      "code": 1,
+      "calculator": 1,
+      "math": 1,
+      "text": 1,
+      "bomberman": 1,
+      "notes": 1,
+      "v4": 1,
+      "console": 1,
+      "modular": 1,
+      "textarea": 1,
+      "p2p": 1,
+      "catalog": 1,
+      "docs": 4,
+      "markdown": 4,
+      "viewer": 4,
+      "external": 1,
+      "example": 1,
+      "font": 1,
+      "server": 1,
+      "roadmap": 1,
+      "brawler": 1
+    }
+  },
+  "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "notepad",
+        "native",
+        "v8",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v8-native-scratchpad",
+      "title": "v8 Native Scratchpad",
+      "href": "legacy-tools.html?tool=v8-native-scratchpad",
+      "description": "Native textarea-based v8 scratchpad port in the v11 legacy utility host with local-first autosave.",
+      "modifiedAt": "2026-05-16T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "minesweeper",
+        "puzzle"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "minesweeper",
+      "title": "Classic Minesweeper",
+      "href": "../minesweeper/index.html",
+      "description": "Standalone Minesweeper artifact with original presets, custom boards, timer scoring, flags, chording, keyboard controls, and local best times.",
+      "modifiedAt": "2026-05-16T00:11:00.187Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sprite-gif-creator",
+      "title": "Sprite GIF Creator",
+      "href": "../spc/sprite-gif-creator.html",
+      "description": "Browser-only sprite-sheet splitter, frame editor, PNG exporter, and animated GIF assembler.",
+      "modifiedAt": "2026-05-15T23:40:04.597Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "solitaire",
+        "cards"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "solitaire",
+      "title": "Classic Solitaire",
+      "href": "../solitaire/index.html",
+      "description": "Standalone Klondike Solitaire artifact with draw-one/draw-three modes, stock and waste piles, foundations, tableau moves, scoring, undo, auto-foundation, timer, and best score persistence.",
+      "modifiedAt": "2026-05-15T23:39:32.296Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "audio",
+        "daw",
+        "peernet",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v11-peer-daw",
+      "title": "v11 Peer DAW",
+      "href": "../v11-peer-daw/index.html",
+      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
+      "deploy": {
+        "build": {
+          "cwd": "v11-peer-daw",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "v11-peer-daw/dist",
+        "targetPath": "v11-peer-daw",
+        "include": true
+      },
+      "modifiedAt": "2026-05-14T17:26:55.759Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v9",
+        "legacy",
+        "compatibility",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v9-full-portal",
+      "title": "NEXUS v9 Full Portal",
+      "href": "../app-hub/v9-portal.html",
+      "description": "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts, notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions, shooter game, and unified user settings.",
+      "modifiedAt": "2026-05-12T19:07:56.928Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "shooter",
+        "space",
+        "multiplayer",
+        "cyberpunk"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "hyperblast-shooter",
+      "title": "Hyperblast Shooter",
+      "href": "../app-hub/shooter.html",
+      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
+      "modifiedAt": "2026-05-12T18:32:13.528Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "tool",
+        "notepad",
+        "local-first",
+        "v9"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v9-quick-notepad",
+      "title": "v9 Quick Notepad",
+      "href": "legacy-tools.html?tool=v9-notepad",
+      "description": "v9 embedded Quick Notepad ported to the v11 utility host with local-first autosave.",
+      "modifiedAt": "2026-05-11T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "extraction"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sprite-extractor",
+      "title": "Sprite Extractor",
+      "href": "../sprite_extractor.html",
+      "description": "Strict sprite extraction copy with alpha auto-detection, manual grid setup, default alpha trimming, per-sprite naming, and named PNG/ZIP export.",
+      "modifiedAt": "2026-05-11T08:03:16.525Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v10",
+        "peernet"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-classic",
+      "title": "NEXUS v10 Classic Portal",
+      "href": "../app-hub/v10-portal.html",
+      "description": "The clean PeernetLobby app runtime v11 is based on.",
+      "modifiedAt": "2026-05-11T05:08:18.990Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v10",
+        "themes",
+        "sound",
+        "floating"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-enhanced",
+      "title": "NEXUS v10 Enhanced Portal",
+      "href": "../app-hub/v10-portal-enhanced.html",
+      "description": "The rich v10 portal containing themes, sound, floating panels, and storage management ideas externalized in v11 libs.",
+      "modifiedAt": "2026-05-11T05:08:18.990Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v10",
+        "legacy",
+        "compatibility",
+        "peernet",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-full-portal",
+      "title": "NEXUS v10 Full Portal",
+      "href": "../app-hub/v10-portal.html",
+      "description": "Full v10 portal compatibility surface for PeernetLobby apps, notepad, shared text pad, sequencer, PeerModGroove launcher, peer console, linked artifacts, and sprite GIF launcher.",
+      "modifiedAt": "2026-05-11T05:08:18.990Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "monaco",
+        "code"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v8-collab-code-editor",
+      "title": "v8 Collab Code Editor",
+      "href": "../app-hub/collab-editor.html",
+      "description": "Full Monaco-based collaborative code editor from the earlier app hub line, exposed through the v11 catalog.",
+      "modifiedAt": "2026-05-11T05:08:18.989Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "calculator",
+        "math",
+        "tool",
+        "v9"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v9-sci-fi-calculator",
+      "title": "v9 Sci-Fi Calculator",
+      "href": "legacy-tools.html?tool=v9-calculator",
+      "description": "Cyberpunk calculator from the v9 embedded utility deck, ported as a standalone v11 tool with history tape.",
+      "modifiedAt": "2026-05-10T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "notepad",
+        "local-first",
+        "v10"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-local-first-notepad",
+      "title": "v10 Local-first Notepad",
+      "href": "legacy-tools.html?tool=v10-notepad",
+      "description": "v10 enhanced portal notepad concept extracted into the v11 utility host with hub-scoped persistence.",
+      "modifiedAt": "2026-05-09T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "text",
+        "v10"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-shared-text-pad",
+      "title": "v10 Shared Text Pad",
+      "href": "legacy-tools.html?tool=v10-shared-pad",
+      "description": "v10 shared text pad ported to the v11 utility host, using BroadcastChannel for same-browser live sync and local fallback storage.",
+      "modifiedAt": "2026-05-08T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "bomberman",
+        "multiplayer",
+        "peernet"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "bomberman-v10",
+      "title": "Gridblast Bomberman",
+      "href": "../app-hub/bomberman.html",
+      "description": "Legacy v10 Bomberman implementation with PeernetLobby one-session multiplayer, target-peer joins, and shared state snapshots.",
+      "modifiedAt": "2026-05-07T20:32:11.062Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "notes",
+        "v4",
+        "console"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v4-console-notes",
+      "title": "v4 Console Notes",
+      "href": "legacy-tools.html?tool=v4-console-notes",
+      "description": "Operator notes surface for the v4 console lineage, ported into the v11 legacy utility host.",
+      "modifiedAt": "2026-05-07T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "audio",
+        "peernet",
+        "modular"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "peer-mod-groove",
+      "title": "PeerModGroove",
+      "href": "../PeerModGroove/index.html",
+      "description": "Peer-synchronized modular audio app launched from v10/v11 rather than embedded into the hub runtime.",
+      "modifiedAt": "2026-05-05T01:57:37.539Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "textarea",
+        "p2p"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v8-collab-pad-lite",
+      "title": "v8 Collab Pad Lite",
+      "href": "../app-hub/collab-editor-lite.html",
+      "description": "Textarea-based collaborative editor from the earlier app hub line, exposed through the v11 catalog.",
+      "modifiedAt": "2026-05-04T20:42:28.289Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "info",
+      "tags": [
+        "catalog",
+        "docs",
+        "markdown",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "artifacts-toc",
+      "title": "Artifacts Table of Contents",
+      "href": "markdown-viewer.html?src=../ARTIFACTS_TOC.md",
+      "note": "Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes the machine-readable catalog.",
+      "rawHref": "../ARTIFACTS_TOC.md",
+      "modifiedAt": "2026-05-01T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "external-link",
+      "tags": [
+        "external",
+        "example"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "id": "external-openai-docs",
+      "title": "External Reference Example",
+      "href": "https://example.com/",
+      "description": "Demonstrates that catalog entries can be pure external links without deployment copying.",
+      "modifiedAt": "2026-05-01T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "font",
+        "graphics",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "font-lab-browser",
+      "title": "Font Lab Browser",
+      "href": "font_lab_browser.html",
+      "description": "Single-file, browser-only font builder. Upload a glyph grid image, remove white to transparency, smooth and trace, then export an OTF plus debug assets.",
+      "modifiedAt": "2026-05-01T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "docs",
+        "markdown",
+        "viewer",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "markdown-viewer",
+      "title": "Markdown Viewer",
+      "href": "markdown-viewer.html",
+      "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
+      "modifiedAt": "2026-05-01T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "info",
+      "tags": [
+        "docs",
+        "markdown",
+        "server",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "server-guide",
+      "title": "Server Guide",
+      "href": "markdown-viewer.html?src=../SERVER_GUIDE.md",
+      "note": "Local serving and deployment notes for the static artifact collection.",
+      "rawHref": "../SERVER_GUIDE.md",
+      "modifiedAt": "2026-05-01T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "info",
+      "tags": [
+        "docs",
+        "markdown",
+        "roadmap",
+        "v11",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v11-roadmap",
+      "title": "v11 Modularization Roadmap",
+      "href": "markdown-viewer.html?src=docs/ROADMAP.md",
+      "note": "Specs and TODOs for feature areas intentionally not fully implemented in this slice.",
+      "rawHref": "docs/ROADMAP.md",
+      "modifiedAt": "2026-05-01T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "brawler",
+        "cyberpunk",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "ethic-brawl",
+      "title": "Ethic Brawl",
+      "href": "../ethic-brawl/index.html",
+      "description": "Built Vite artifact for the cyberpunk philosophical arena-brawler; package/deploy copies dist output only.",
+      "deploy": {
+        "build": {
+          "cwd": "ethic-brawl",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "ethic-brawl/dist",
+        "targetPath": "ethic-brawl",
+        "include": true
+      },
+      "modifiedAt": "2026-03-20T05:00:43.000Z"
+    }
+  ]
+}
