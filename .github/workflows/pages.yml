@@ -15,59 +15,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Fetch external artifact repos
-        run: |
-          set -euo pipefail
-          [ -d ethic-brawl ] || git clone --depth 1 https://github.com/fkr-0/ethic-brawl.git ethic-brawl
-          [ -d v11-peer-daw ] || git clone --depth 1 https://github.com/fkr-0/v11-peer-daw.git v11-peer-daw
-          [ -d badger-sprawl-runner ] || git clone --depth 1 https://github.com/fkr-0/badger-sprawl-runner.git badger-sprawl-runner
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Prepare CI source catalog
-        run: |
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const sourcePath = path.resolve('app-hub-v11/artifacts.source.json');
-          const outPath = path.resolve('.artifacts.source.ci.json');
-          const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
-          source.items = (source.items || []).filter((item) => {
-            const includePath = item?.deploy?.includePath;
-            const buildCwd = item?.deploy?.build?.cwd;
-            if (includePath && !fs.existsSync(path.resolve(includePath))) return false;
-            if (buildCwd && !fs.existsSync(path.resolve(buildCwd))) return false;
-            return true;
-          });
-          fs.writeFileSync(outPath, JSON.stringify(source, null, 2));
-          NODE
-
-      - name: Materialize deploy stage
-        run: node app-hub-v11/server/artifact-build.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .artifacts-pages-stage
-
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
