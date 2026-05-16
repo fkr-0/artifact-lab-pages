@@ -5,6 +5,15 @@ status: in_progress
 
 fixed:
 
+  - id: observer-stale-snapshot-warning
+    area: app-hub-v11/observer
+    severity: medium
+    summary: Observer status showed snapshot age but did not warn when the observed app stopped sending updates.
+    cause: The hub rendered observer age only on snapshot receipt and had no stale threshold or refresh timer.
+    fix: Add OBSERVER_STALE_AFTER_MS, refresh observer status every second, mark stale snapshots with observer-stale styling, and clean up the timer on unload.
+    tests:
+      - tests/non-peer-observer-bridge.test.mjs
+
   - id: observer-snapshot-status-metadata
     area: app-hub-v11/observer
     severity: medium
@@ -218,7 +227,8 @@ open:
       - observed apps should never mutate host state
       - generic DOM snapshot bridge is implemented for non-Peernet standalone apps
       - future host apps should reply to join/request-state messages with compact semantic snapshots
-      - UI should expose observed peer, last snapshot age, and disconnect state
+      - UI exposes observed peer/source, last snapshot age, sequence, and stale snapshot warnings
+      - future UI should add explicit disconnect reason when the transport reports peer disconnect
   - id: full-messaging-system
     area: future/messaging
     priority: high

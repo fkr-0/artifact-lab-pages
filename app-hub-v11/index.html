@@ -361,6 +361,10 @@
         grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
         gap: 0.35rem;
       }
+      .observer-stale {
+        border-color: #f59e0b;
+        color: #fbbf24;
+      }
       .online-users,
       .chat-channels {
         display: grid;
@@ -1029,6 +1033,9 @@
         channelUnreadCounts = readHubSetting("channelUnreadCounts", {});
       let connectedPeers = new Map();
       const latestArtifactObserverSnapshots = new Map();
+      const OBSERVER_STALE_AFTER_MS = 10000;
+      const observerStatusTimer = setInterval(renderObserverStatus, 1000);
+      window.addEventListener("beforeunload", () => clearInterval(observerStatusTimer));
       const chatDeliveryTimers = new Map();
       const seenPeerNames = new Map();
       const peerLastActivity = new Map();
@@ -1625,19 +1632,23 @@
         }
       }
       function renderObserverStatus() {
+        const panel = $("observerStatusPanel");
         const snapshots = [...latestArtifactObserverSnapshots.values()]
           .filter((snapshot, index, all) => all.findIndex((other) => other === snapshot) === index)
           .sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
         if (!snapshots.length) {
-          $("observerStatusPanel").textContent = "Observer status: no snapshots yet.";
+          panel.classList.remove("observer-stale");
+          panel.textContent = "Observer status: no snapshots yet.";
           $("observerLastSnapshotAge").textContent = "never";
           return;
         }
         const snapshot = snapshots[0];
         const ageMs = Math.max(0, Date.now() - Number(snapshot.at || Date.now()));
+        const isStale = ageMs > OBSERVER_STALE_AFTER_MS;
         const ageLabel = ageMs < 1000 ? "now" : `${Math.round(ageMs / 1000)}s ago`;
         $("observerLastSnapshotAge").textContent = ageLabel;
-        $("observerStatusPanel").textContent = `Observer status: ${snapshot.artifactId} from ${snapshot.fromPeerId || "local"} · sequence #${snapshot.sequence || "?"} · last snapshot ${ageLabel}`;
+        panel.classList.toggle("observer-stale", isStale);
+        panel.textContent = `${isStale ? "stale snapshot" : "Observer status"}: ${snapshot.artifactId} from ${snapshot.fromPeerId || "local"} · sequence #${snapshot.sequence || "?"} · last snapshot ${ageLabel}`;
       }
       function renderLobbySummary() {
         const count = Array.isArray(lobbyChat) ? lobbyChat.length : 0;

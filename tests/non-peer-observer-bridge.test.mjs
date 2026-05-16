@@ -24,6 +24,12 @@ assert.match(hub, /renderObserverStatus\(\)/, 'hub should render observer status
 assert.match(hub, /last snapshot/, 'hub observer status should include last snapshot age copy');
 assert.match(hub, /snapshot\.sequence/, 'hub should display observer snapshot sequence metadata');
 
+assert.match(hub, /const OBSERVER_STALE_AFTER_MS = 10000/, 'hub should define a stale observer threshold');
+assert.match(hub, /observer-stale/, 'hub should render a stale observer status class');
+assert.match(hub, /stale snapshot/, 'hub observer status should warn when the latest snapshot is stale');
+assert.match(hub, /setInterval\(renderObserverStatus, 1000\)/, 'hub should refresh observer status age even when no new snapshots arrive');
+assert.match(hub, /clearInterval\(observerStatusTimer\)/, 'hub should clean up observer status interval on page unload');
+
 for (const [name, html, id, selector] of [
   ['minesweeper', minesweeper, 'minesweeper', 'main.window'],
   ['solitaire', solitaire, 'solitaire', 'main.app'],
