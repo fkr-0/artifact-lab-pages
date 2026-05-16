@@ -27,9 +27,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: |
-            ethic-brawl/package-lock.json
 
       - name: Install dependencies (ethic-brawl)
         run: npm ci
