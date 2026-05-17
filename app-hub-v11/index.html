@@ -36,7 +36,13 @@
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         background:
           radial-gradient(circle at 12% 0, var(--hub-glow), transparent 28rem),
-          linear-gradient(135deg, #05070d, #090d18 55%, #030407);
+          radial-gradient(circle at 88% 100%, color-mix(in srgb, var(--hub-accent), transparent 85%), transparent 30rem),
+          linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--hub-background), #000 18%),
+            color-mix(in srgb, var(--hub-background), var(--hub-accent) 12%) 55%,
+            color-mix(in srgb, var(--hub-background), #000 28%)
+          );
         color: var(--hub-text);
         image-rendering: pixelated;
       }
@@ -393,12 +399,10 @@
       }
       .workspace-pane {
         display: none;
-        min-height: min(520px, calc(100vh - 96px));
-        max-height: calc(100vh - 72px);
-        overflow: auto;
-        resize: vertical;
+        min-height: 220px;
+        max-height: 100%;
+        overflow: hidden;
         grid-template-rows: auto minmax(0, 1fr);
-        padding-bottom: 2.4rem;
       }
       .workspace-pane.active {
         display: grid;
@@ -427,7 +431,11 @@
         display: grid;
         grid-template-rows: auto minmax(0, 1fr);
         min-height: 0;
-        overflow: auto;
+        overflow: hidden;
+      }
+      #appDeckBody {
+        display: grid;
+        min-height: 0;
       }
       .app-deck-tabs {
         display: flex;
@@ -453,17 +461,20 @@
       .app-deck-panel {
         display: none;
         min-height: 0;
-        overflow: auto;
+        overflow: hidden;
       }
       .app-deck-panel.active {
-        display: block;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr);
         overflow: auto;
+        min-height: 220px;
+        resize: vertical;
       }
       .app-deck-inline-frame,
       iframe {
         width: 100%;
         height: 100%;
-        min-height: 480px;
+        min-height: 220px;
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 45%);
         border-radius: 0;
         background: #000;
@@ -518,8 +529,8 @@
         position: relative;
         touch-action: none;
         z-index: 4;
-        min-width: 12px;
-        min-height: 12px;
+        min-width: 7px;
+        min-height: 7px;
       }
       .resize-handle.horizontal {
         cursor: row-resize;
@@ -536,8 +547,8 @@
         inset: 0;
         background: repeating-linear-gradient(
           45deg,
-          transparent 0 4px,
-          rgba(0, 255, 255, 0.28) 4px 6px
+          transparent 0 5px,
+          rgba(0, 255, 255, 0.22) 5px 6px
         );
       }
       .pixel-muse {
@@ -582,63 +593,6 @@
           38% 35%
         );
       }
-      .palette-swatches {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-        min-height: 2rem;
-      }
-      .palette-swatch {
-        width: 2rem;
-        height: 2rem;
-        border: 1px solid var(--hub-accent);
-        background: var(--swatch);
-        cursor: pointer;
-      }
-      .role-palette {
-        display: grid;
-        gap: 0.35rem;
-      }
-      .role-row {
-        display: grid;
-        grid-template-columns: 6rem 2.2rem 1fr;
-        gap: 0.35rem;
-        align-items: center;
-      }
-      .palette-css {
-        min-height: 6rem;
-        font-size: 0.72rem;
-      }
-      .badger-runner {
-        position: fixed;
-        left: 0;
-        bottom: 0.15rem;
-        z-index: 30;
-        pointer-events: none;
-        width: 96px;
-        height: auto;
-        image-rendering: pixelated;
-        animation: badger-run 11s linear infinite;
-        filter: brightness(135%) saturate(120.5%);
-        mix-blend-mode: lighten;
-      }
-      @keyframes badger-run {
-        from {
-          transform: translateX(-90px) scaleX(1);
-        }
-        49% {
-          transform: translateX(calc(100vw + 20px)) scaleX(1);
-        }
-        50% {
-          transform: translateX(calc(100vw + 20px)) scaleX(-1);
-        }
-        99% {
-          transform: translateX(-90px) scaleX(-1);
-        }
-        to {
-          transform: translateX(-90px) scaleX(1);
-        }
-      }
       @media (max-width: 860px) {
         .shell {
           grid-template-columns: 1fr;
@@ -653,9 +607,6 @@
         }
         body {
           overflow: auto;
-        }
-        .badger-runner {
-          width: 54px;
         }
       }
     </style>
@@ -892,22 +843,14 @@
         </div>
         <div id="themeGrid" class="theme-grid"></div>
       </section>
-      <section id="paletteGenerator" class="card stack">
+      <section class="card stack">
         <div class="row between">
-          <h3>Palette Generator</h3>
-          <button id="applyRolePalette" type="button">preview/apply</button>
+          <h3>Palette Studio</h3>
+          <a href="./palette-studio.html" class="pill">open artifact</a>
         </div>
-        <label
-          >Image source
-          <input id="paletteImageInput" type="file" accept="image/*"
-        /></label>
-        <div id="derivedPalette" class="palette-swatches"></div>
-        <div id="rolePalette" class="role-palette"></div>
-        <div class="row">
-          <button id="pickRolePalette" type="button">pick tasteful roles</button
-          ><button id="copyRolePalette" type="button">copy CSS vars</button>
+        <div class="muted">
+          Advanced palette generation moved out of settings into its own artifact with richer controls.
         </div>
-        <textarea id="rolePaletteCss" class="palette-css" readonly></textarea>
       </section>
       <section class="card stack">
         <div class="row between">
@@ -941,12 +884,6 @@
       </section>
     </aside>
 
-    <img
-      class="badger-runner"
-      src="../bdg.gif"
-      alt="running badger"
-      aria-hidden="true"
-    />
     <div id="presenceMenu" class="presence-menu" role="menu" aria-label="User options">
       <button id="presencePrimaryAction" type="button" role="menuitem"></button>
       <button id="presenceSecondaryAction" type="button" role="menuitem"></button>
@@ -1020,8 +957,7 @@
       const eventLog = createEventLog({ target: $("eventLog") });
       const tagState = createTagFilterState([], "OR");
       const workspacePane = $("workspacePane");
-      workspacePane.style.resize = "vertical";
-      workspacePane.style.overflow = "auto";
+      workspacePane.style.overflow = "hidden";
       let selected = null,
         viewMode = readHubSetting("viewMode", "cards"),
         defaultAction = readHubSetting("defaultAction", "newWindow"),
@@ -1165,7 +1101,6 @@
       setTheme(readHubSetting("theme", "nexus"), false);
       renderProfile();
       renderThemeGrid();
-      renderPaletteGenerator();
       renderLobbyChat();
       renderChatChannels();
       renderOnlineUsers();
@@ -1869,158 +1804,6 @@
               eventLog.info("chat channel", selectedChatChannel);
             };
           });
-      }
-      function basicPalette() {
-        return ["#00ffff", "#ff00ff", "#00ff88", "#05070d", "#f7fbff"];
-      }
-      function rgbToHex(r, g, b) {
-        return (
-          "#" +
-          [r, g, b]
-            .map((v) =>
-              Math.max(0, Math.min(255, Math.round(v)))
-                .toString(16)
-                .padStart(2, "0"),
-            )
-            .join("")
-        );
-      }
-      function hexObj(hex) {
-        return {
-          r: parseInt(hex.slice(1, 3), 16),
-          g: parseInt(hex.slice(3, 5), 16),
-          b: parseInt(hex.slice(5, 7), 16),
-        };
-      }
-      function lum(hex) {
-        const c = hexObj(hex);
-        return (c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722) / 255;
-      }
-      function sat(hex) {
-        const c = hexObj(hex),
-          max = Math.max(c.r, c.g, c.b),
-          min = Math.min(c.r, c.g, c.b);
-        return max ? (max - min) / max : 0;
-      }
-      async function derivePaletteFromImage(file) {
-        const bitmap = await createImageBitmap(file);
-        const canvas = document.createElement("canvas");
-        const scale = Math.min(1, 128 / Math.max(bitmap.width, bitmap.height));
-        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        const map = new Map();
-        for (let i = 0; i < data.length; i += 20) {
-          if (data[i + 3] < 160) continue;
-          const key = `${Math.round(data[i] / 32) * 32},${Math.round(data[i + 1] / 32) * 32},${Math.round(data[i + 2] / 32) * 32}`;
-          const item = map.get(key) || { r: 0, g: 0, b: 0, n: 0 };
-          item.r += data[i];
-          item.g += data[i + 1];
-          item.b += data[i + 2];
-          item.n += 1;
-          map.set(key, item);
-        }
-        return [...map.values()]
-          .sort((a, b) => b.n - a.n)
-          .slice(0, 12)
-          .map((c) => rgbToHex(c.r / c.n, c.g / c.n, c.b / c.n))
-          .concat(basicPalette())
-          .slice(0, 12);
-      }
-      function pickTastefulRoles(colors = []) {
-        const pool = colors.length ? colors : basicPalette();
-        const byLight = [...pool].sort((a, b) => lum(b) - lum(a));
-        const byDark = [...pool].sort((a, b) => lum(a) - lum(b));
-        const vivid = [...pool].sort((a, b) => sat(b) - sat(a));
-        return {
-          primary: vivid[0] || "#00ffff",
-          secondary: vivid[1] || "#ff00ff",
-          accent: vivid[2] || "#00ff88",
-          "dark-font": byDark[0] || "#05070d",
-          "light-font": byLight[0] || "#f7fbff",
-        };
-      }
-      function renderDerivedPalette(
-        colors = readHubSetting("derivedPalette", basicPalette()),
-      ) {
-        $("derivedPalette").innerHTML = colors
-          .map(
-            (color) =>
-              `<button type="button" class="palette-swatch" data-palette-color="${esc(color)}" style="--swatch:${esc(color)}" title="${esc(color)}"></button>`,
-          )
-          .join("");
-      }
-      function renderRolePalette(
-        roles = readHubSetting("rolePalette", pickTastefulRoles()),
-      ) {
-        writeHubSetting("rolePalette", roles);
-        $("rolePalette").innerHTML = Object.entries(roles)
-          .map(
-            ([role, color]) =>
-              `<label class="role-row"><span>${esc(role)}</span><input type="color" data-role="${esc(role)}" value="${esc(color)}"><code>${esc(color)}</code></label>`,
-          )
-          .join("");
-        $("rolePalette")
-          .querySelectorAll("[data-role]")
-          .forEach(
-            (input) => (input.oninput = () => copyRolePaletteCss(false)),
-          );
-        copyRolePaletteCss(false);
-      }
-      function currentRolePalette() {
-        const roles = {};
-        $("rolePalette")
-          .querySelectorAll("[data-role]")
-          .forEach((input) => {
-            roles[input.dataset.role] = input.value;
-          });
-        return roles;
-      }
-      function copyRolePaletteCss(copy = true) {
-        const r = currentRolePalette();
-        const css = `:root {\n  --generated-primary: ${r.primary};\n  --generated-secondary: ${r.secondary};\n  --generated-accent: ${r.accent};\n  --generated-dark-font: ${r["dark-font"]};\n  --generated-light-font: ${r["light-font"]};\n}`;
-        $("rolePaletteCss").value = css;
-        if (copy) navigator.clipboard?.writeText(css);
-        return css;
-      }
-      function applyRolePaletteToTheme() {
-        const r = currentRolePalette();
-        document.documentElement.style.setProperty(
-          "--hub-accent",
-          r.accent || r.primary,
-        );
-        document.documentElement.style.setProperty(
-          "--hub-text",
-          r["light-font"] || "#f7fbff",
-        );
-        document.documentElement.style.setProperty(
-          "--hub-background",
-          r["dark-font"] || "#05070d",
-        );
-        Object.entries(r).forEach(([k, v]) =>
-          document.documentElement.style.setProperty(`--generated-${k}`, v),
-        );
-        eventLog.success("palette applied", r.primary, r.secondary, r.accent);
-      }
-      function renderPaletteGenerator() {
-        renderDerivedPalette();
-        renderRolePalette();
-        $("paletteImageInput").onchange = async () => {
-          const file = $("paletteImageInput").files?.[0];
-          if (!file) return;
-          const colors = await derivePaletteFromImage(file);
-          writeHubSetting("derivedPalette", colors);
-          renderDerivedPalette(colors);
-          renderRolePalette(pickTastefulRoles(colors));
-        };
-        $("pickRolePalette").onclick = () =>
-          renderRolePalette(
-            pickTastefulRoles(readHubSetting("derivedPalette", basicPalette())),
-          );
-        $("copyRolePalette").onclick = () => copyRolePaletteCss(true);
-        $("applyRolePalette").onclick = applyRolePaletteToTheme;
       }
       function renderThemeGrid() {
         const current = themeById(

@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-16T00:11:48.912Z",
+  "generatedAt": "2026-05-17T01:04:34.305Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -40,13 +40,19 @@
     }
   },
   "summary": {
-    "total": 27,
+    "total": 28,
     "byKind": {
-      "html-path": 23,
+      "html-path": 24,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
+      "tool": 6,
+      "palette": 1,
+      "theme": 1,
+      "color": 1,
+      "design": 1,
+      "v11": 5,
       "editor": 7,
       "notepad": 3,
       "native": 1,
@@ -62,7 +68,6 @@
       "themes": 1,
       "sound": 1,
       "floating": 1,
-      "tool": 5,
       "calculator": 1,
       "math": 1,
       "collaborative": 3,
@@ -95,7 +100,6 @@
       "external": 1,
       "example": 1,
       "font": 1,
-      "v11": 4,
       "bomberman": 1,
       "multiplayer": 2,
       "shooter": 1,
@@ -106,6 +110,38 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "palette",
+        "theme",
+        "color",
+        "design",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "palette-studio",
+      "title": "Palette Studio",
+      "href": "palette-studio.html",
+      "description": "Advanced palette generator with multiple anchors, role inference, contrast checks, and CSS variable export for readable UI themes.",
+      "modifiedAt": "2026-05-17T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
     {
       "kind": "html-path",
       "tags": [

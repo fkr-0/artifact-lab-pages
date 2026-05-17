@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Palette Studio v11</title>
+    <style>
+      :root {
+        --bg: #0a0e16;
+        --fg: #edf4ff;
+        --panel: #111829;
+        --accent: #52e6ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Share Tech Mono", ui-monospace, monospace;
+        color: var(--fg);
+        background:
+          radial-gradient(circle at 10% 0, #2f6f8733, transparent 26rem),
+          radial-gradient(circle at 100% 100%, #8e40ff33, transparent 24rem),
+          var(--bg);
+      }
+      main {
+        width: min(1100px, 96vw);
+        margin: 1rem auto;
+        display: grid;
+        gap: 0.9rem;
+      }
+      .card {
+        background: color-mix(in srgb, var(--panel), #000 12%);
+        border: 1px solid color-mix(in srgb, var(--accent), transparent 48%);
+        border-radius: 12px;
+        padding: 0.85rem;
+      }
+      .grid { display: grid; gap: 0.7rem; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+      .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+      .swatch {
+        border-radius: 10px;
+        min-height: 96px;
+        border: 1px solid #ffffff28;
+        padding: 0.5rem;
+        display: grid;
+        align-content: space-between;
+      }
+      .preview {
+        border-radius: 12px;
+        padding: 0.9rem;
+        border: 1px solid #ffffff24;
+      }
+      button, input[type="color"] {
+        border: 1px solid #ffffff40;
+        background: #0a1322;
+        color: inherit;
+        border-radius: 10px;
+        padding: 0.45rem 0.65rem;
+      }
+      input[type="color"] { width: 3rem; height: 2.4rem; padding: 0.15rem; }
+      textarea {
+        width: 100%;
+        min-height: 8rem;
+        background: #08101d;
+        color: #dff6ff;
+        border: 1px solid #ffffff33;
+        border-radius: 10px;
+        padding: 0.65rem;
+      }
+      .ok { color: #7cff9a; }
+      .bad { color: #ff9ea2; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="card">
+        <h1>Palette Studio</h1>
+        <div class="row">
+          <label>Primary <input id="primary" type="color" value="#52e6ff" /></label>
+          <label>Secondary <input id="secondary" type="color" value="#ff4fd8" /></label>
+          <label>Accent <input id="accent" type="color" value="#8aff3a" /></label>
+          <label>Base dark <input id="baseDark" type="color" value="#0a0e16" /></label>
+          <button id="autoRoles" type="button">Infer UX-safe roles</button>
+          <button id="copyCss" type="button">Copy CSS vars</button>
+        </div>
+      </section>
+      <section id="swatches" class="card grid"></section>
+      <section class="card">
+        <h2>Preview</h2>
+        <div id="preview" class="preview"></div>
+      </section>
+      <section class="card">
+        <h2>Role CSS</h2>
+        <textarea id="cssOut" readonly></textarea>
+      </section>
+    </main>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const ids = ["primary", "secondary", "accent", "baseDark"];
+      const hexToRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+      const rgbToHex = ([r, g, b]) => "#" + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+      const mix = (a, b, t) => rgbToHex(hexToRgb(a).map((v, i) => v * (1 - t) + hexToRgb(b)[i] * t));
+      const lum = (hex) => {
+        const [r, g, b] = hexToRgb(hex).map((c) => {
+          const v = c / 255;
+          return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const contrast = (a, b) => {
+        const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+        return (x + 0.05) / (y + 0.05);
+      };
+      const rolePalette = () => {
+        const primary = $("primary").value;
+        const secondary = $("secondary").value;
+        const accent = $("accent").value;
+        const dark = $("baseDark").value;
+        const panel = mix(dark, primary, 0.18);
+        const surface = mix(dark, secondary, 0.12);
+        const text = contrast("#ffffff", dark) >= 5 ? "#ffffff" : "#e8f6ff";
+        const muted = mix(text, dark, 0.44);
+        return { primary, secondary, accent, dark, panel, surface, text, muted };
+      };
+      function inferRoles() {
+        const p = $("primary").value;
+        const s = $("secondary").value;
+        const a = $("accent").value;
+        const d = $("baseDark").value;
+        const vivid = [p, s, a].sort((x, y) => lum(x) - lum(y));
+        $("accent").value = vivid[0];
+        $("primary").value = vivid[1];
+        $("secondary").value = vivid[2];
+        $("baseDark").value = mix(d, "#000000", 0.22);
+        render();
+      }
+      function render() {
+        const r = rolePalette();
+        const roles = [
+          ["primary", r.primary],
+          ["secondary", r.secondary],
+          ["accent", r.accent],
+          ["background", r.dark],
+          ["panel", r.panel],
+          ["surface", r.surface],
+          ["text", r.text],
+          ["muted", r.muted],
+        ];
+        $("swatches").innerHTML = roles.map(([name, color]) => `<div class="swatch" style="background:${color};color:${contrast(color, "#fff") > 4.5 ? "#fff" : "#05070d"}"><strong>${name}</strong><code>${color}</code></div>`).join("");
+        const c = contrast(r.text, r.dark);
+        $("preview").style.background = `linear-gradient(145deg, ${r.panel}, ${r.surface})`;
+        $("preview").style.color = r.text;
+        $("preview").innerHTML = `<h3>Hub-style sample panel</h3><p>This palette is inferred for readable UI contrast and balanced surfaces.</p><div class="${c >= 4.5 ? "ok" : "bad"}">Text/background contrast: ${c.toFixed(2)} (${c >= 4.5 ? "good" : "low"})</div>`;
+        $("cssOut").value = `:root {\n  --hub-accent: ${r.accent};\n  --hub-background: ${r.dark};\n  --hub-surface: ${r.surface};\n  --hub-panel: ${r.panel};\n  --hub-text: ${r.text};\n  --hub-muted: ${r.muted};\n  --generated-primary: ${r.primary};\n  --generated-secondary: ${r.secondary};\n  --generated-accent: ${r.accent};\n}`;
+      }
+      ids.forEach((id) => $(id).addEventListener("input", render));
+      $("autoRoles").onclick = inferRoles;
+      $("copyCss").onclick = () => navigator.clipboard?.writeText($("cssOut").value);
+      render();
+    </script>
+  </body>
+</html>
