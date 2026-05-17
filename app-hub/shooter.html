@@ -1,0 +1,1379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hyperblast Shooter - Multiplayer</title>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #080012;
+      overflow: hidden;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+    }
+    #gameCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #hud {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      color: #0cf;
+      font-size: 14px;
+      text-shadow: 0 0 10px rgba(0,255,255,0.5);
+      pointer-events: none;
+      z-index: 10;
+    }
+    #hud div {
+      margin-bottom: 5px;
+    }
+    #controls {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    #controls button {
+      padding: 0.5rem 1rem;
+      background: rgba(0,255,255,0.1);
+      border: 1px solid #0cf;
+      color: #0cf;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    #controls button:hover {
+      background: rgba(0,255,255,0.2);
+      box-shadow: 0 0 10px rgba(0,255,255,0.3);
+    }
+    #controls button.active {
+      background: rgba(0,255,255,0.3);
+      box-shadow: 0 0 15px rgba(0,255,255,0.5);
+    }
+    #multiplayerPanel {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid rgba(0,255,255,0.3);
+      border-radius: 8px;
+      padding: 10px;
+      color: #0cf;
+      font-size: 12px;
+      max-width: 300px;
+      display: none;
+      z-index: 10;
+    }
+    #multiplayerPanel.visible {
+      display: block;
+    }
+    #multiplayerPanel .player {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    #multiplayerPanel .player-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0cf;
+      box-shadow: 0 0 8px #0cf;
+    }
+    #multiplayerPanel .player-name {
+      flex: 1;
+    }
+    #multiplayerPanel .player-score {
+      font-weight: bold;
+    }
+    #multiplayerPanel .you {
+      color: #ff0;
+    }
+    #notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      border: 2px solid #0cf;
+      border-radius: 10px;
+      padding: 20px 40px;
+      color: #0cf;
+      font-size: 24px;
+      text-align: center;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 0 30px rgba(0,255,255,0.3);
+    }
+    #notification.visible {
+      display: block;
+    }
+    #gameOverScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    #gameOverScreen.visible {
+      display: flex;
+    }
+    #gameOverScreen h1 {
+      color: #f60;
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px #f60;
+    }
+    #gameOverScreen p {
+      color: #0cf;
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    #gameOverScreen button {
+      padding: 1rem 2rem;
+      background: rgba(0,255,255,0.2);
+      border: 2px solid #0cf;
+      color: #0cf;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <div>Score: <span id="score">0</span></div>
+    <div id="economyHud">Money: ¤<span id="money">200</span></div>
+    <div>Lives: <span id="lives">3</span></div>
+    <div>Stage: <span id="stage">1</span> | <span id="environmentName">Neon Drift</span></div>
+    <div>Kills: <span id="stageKills">0</span>/<span id="stageGoal">8</span> | Boss: <span id="bossStatus">none</span></div>
+    <div>Turrets: <span id="turretCount">0</span> | Drop cost: ¤<span id="turretCost">120</span></div>
+    <div>Upgrade: <span id="weaponLevel">1</span> | Boost: <span id="boostLevel">1</span></div>
+    <div>Ship: <span id="shipModel">Interceptor</span> | Weapon: <span id="weaponType">bullet</span></div>
+    <div style="font-size: 11px; opacity: 0.7; margin-top: 10px;">
+      WASD/Arrows: Move | Space: Shoot | Q: Weapon | T: Drop auto-laser turret
+    </div>
+  </div>
+
+  <div id="controls">
+    <div style="display:flex;flex-direction:column;gap:4px;background:rgba(0,0,0,0.5);padding:8px;border-radius:6px;border:1px solid rgba(0,255,255,0.2)">
+      <label style="color:#0cf;font-size:11px">Enemy Amount <strong id="enemyAmountValue">2</strong><input id="enemyAmount" type="range" min="1" max="5" step="1" value="2"></label>
+      <label style="color:#0cf;font-size:11px">Enemy Power <strong id="enemyPowerValue">2</strong><input id="enemyPower" type="range" min="1" max="5" step="1" value="2"></label>
+      <div style="color:rgba(0,255,255,.65);font-size:10px;max-width:210px">More pressure pays more money per kill.</div>
+    </div>
+    <button id="repairBtn">Repair +1: $60</button>
+    <button id="upgradeBtn">Upgrade Gun: $120</button>
+    <button id="boostBtn">Booster: $90</button>
+    <button id="shipyardBtn">Shipyard</button>
+    <button id="multiplayerBtn">Multiplayer: OFF</button>
+    <button id="restartBtn">Restart</button>
+  </div>
+
+  <div id="multiplayerPanel">
+    <div style="font-size: 10px; opacity: 0.7; margin-bottom: 8px;">MULTIPLAYER SESSION</div>
+    <div id="playerList"></div>
+  </div>
+
+  <div id="notification"></div>
+
+  <div id="storyPanel" style="position:absolute;left:18px;bottom:18px;max-width:440px;display:none;z-index:12;pointer-events:none">
+    <div id="storyMessages" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:rgba(205,245,255,.86);text-shadow:0 0 10px rgba(0,220,255,.35);background:rgba(0,8,16,.34);border-left:1px solid rgba(0,255,255,.22);padding:8px 10px;border-radius:0 10px 10px 0"></div>
+  </div>
+
+  <div id="shipyardPanel" style="position:absolute;right:18px;bottom:18px;width:340px;max-height:70vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(5,10,25,0.92);border:1px solid rgba(0,255,255,0.25);box-shadow:0 0 30px rgba(0,255,255,0.15);display:none;backdrop-filter:blur(10px);z-index:15;color:#dff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:18px;font-weight:bold;color:#0ff">SHIPYARD</div>
+      <button id="shipyardCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dff;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="shipyardMoney" style="margin-bottom:12px;color:#fc0"></div>
+    <div style="font-size:11px;color:#8ff;margin:8px 0">SHIPS</div>
+    <div id="shipyardShips" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#f8f;margin:12px 0 8px">BOOSTERS</div>
+    <div id="shipyardBoosters" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#fff;margin:12px 0 8px">WEAPONS</div>
+    <div id="shipyardWeapons" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#7ff;margin:12px 0 8px">BAR / ALLIES</div>
+    <div id="shipyardAllies" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="font-size:11px;color:#9cf;margin:12px 0 8px">DEFENSE</div>
+    <div id="shipyardShields" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="gameOverScreen">
+    <h1>GAME OVER</h1>
+    <p>Final Score: <span id="finalScore">0</span></p>
+    <button onclick="game.restart()">Play Again</button>
+  </div>
+
+  <script type="module">
+    import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
+    import {
+      ALLY_MODELS,
+      BOOSTER_MODELS,
+      SHIELD_MODELS,
+      SHIP_MODELS,
+      TURRET_COST,
+      WEAPON_TYPES,
+      buyBoosterModel,
+      buyShipModel,
+      buyWeaponUnlock,
+      deployShield,
+      hireAlly,
+      createEnemy,
+      createInitialEconomy,
+      createInitialStoryState,
+      createPlayerShot,
+      cycleWeaponType,
+      deployTurret as buyTurret,
+      getSpawnBatchSize,
+      getSpawnThreshold,
+      recordEnemyKill,
+      updateAllies,
+      updateShields,
+      updateStoryMode,
+      updateTurrets,
+    } from './lib/shooter-balance.mjs';
+
+    const SHOOTER_LOBBY_ID = 'shooter-arena';
+    const PRESENCE_KEY = 'shooter-presence';
+
+    class ShooterGame {
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+
+        this.urlParams = new URLSearchParams(window.location.search);
+        this.multiplayer = false;
+        this.lobby = null;
+        this.username = this.getUsername();
+        this.targetPeerId = this.urlParams.get('targetPeerId') || '';
+        this.sessionMode = this.urlParams.get('mode') || 'stage';
+        this.spectateMode = this.urlParams.get('spectate') === 'true' || this.urlParams.get('observe') === 'true';
+        this.playerColor = this.getRandomColor();
+
+        this.state = {
+          local: this.createInitialLocalState({ y: 0 }),
+          remote: new Map() // peerId -> { player, bullets, score, lastUpdate }
+        };
+
+        this.gameLoop = null;
+        this.networkUpdateInterval = null;
+
+        this.init();
+      }
+
+      createInitialLocalState({ y = 0, keys = {}, enemyAmount = 2, enemyPower = 2 } = {}) {
+        const economy = createInitialEconomy();
+        return {
+          player: { x: 50, y, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
+          ownedShips: ['interceptor'],
+          ownedBoosters: ['ion'],
+          ownedWeapons: ['bullet'],
+          bullets: [],
+          enemies: [],
+          particles: [],
+          turrets: economy.turrets,
+          allies: [],
+          shields: [],
+          enemyProjectiles: [],
+          score: economy.score,
+          money: economy.money,
+          enemyAmountMultiplier: Number(enemyAmount),
+          enemyPowerMultiplier: Number(enemyPower),
+          stage: 1,
+          stageKills: 0,
+          stageGoal: 8,
+          bossActive: false,
+          bossDefeated: 0,
+          keys: keys,
+          spawnTimer: 0,
+          lastFrameAt: performance.now(),
+          story: createInitialStoryState(performance.now()),
+          gameOver: false
+        };
+      }
+
+      getUsername() {
+        return this.urlParams.get('username') ||
+               localStorage.getItem('v10-username') ||
+               `Pilot-${Math.floor(Math.random() * 9000 + 1000)}`;
+      }
+
+      isEmbedded() {
+        return this.urlParams.get('embedded') === 'true';
+      }
+
+      getRandomColor() {
+        const colors = ['#0cf', '#f0f', '#ff0', '#0f0', '#f60', '#f00', '#f0f', '#0ff'];
+        return colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      getStageTheme() {
+        const themes = [
+          { name: 'Neon Drift', bg: '#080012', nebula: '#0cf', star: 'rgba(255,255,255,0.3)', lane: 'rgba(0,255,255,0.08)' },
+          { name: 'Ember Belt', bg: '#140700', nebula: '#f60', star: 'rgba(255,180,90,0.45)', lane: 'rgba(255,96,0,0.11)' },
+          { name: 'Verdant Ion Reef', bg: '#00120a', nebula: '#0f8', star: 'rgba(120,255,190,0.38)', lane: 'rgba(0,255,128,0.09)' },
+          { name: 'Violet Singularity', bg: '#100018', nebula: '#b0f', star: 'rgba(220,160,255,0.42)', lane: 'rgba(180,0,255,0.10)' },
+          { name: 'Frozen Relay', bg: '#001018', nebula: '#7df', star: 'rgba(170,235,255,0.5)', lane: 'rgba(120,220,255,0.08)' }
+        ];
+        return themes[(this.state.local.stage - 1) % themes.length];
+      }
+
+      init() {
+        this.embedded = this.isEmbedded();
+
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+
+        this.setupControls();
+        this.setupKeyboard();
+
+        this.state.local.player.y = this.canvas.height / 2;
+
+        // Notify parent we're ready
+        if (this.embedded && window.parent !== window) {
+          window.parent.postMessage({ type: 'shooter-ready' }, '*');
+        }
+
+        this.start();
+      }
+
+      resize() {
+        if (this.embedded) {
+          // In embedded mode, use parent container size
+          const container = this.canvas.parentElement;
+          if (container) {
+            this.canvas.width = Math.max(640, container.clientWidth);
+            this.canvas.height = Math.max(400, container.clientHeight);
+          }
+        } else {
+          this.canvas.width = Math.max(640, window.innerWidth);
+          this.canvas.height = Math.max(400, window.innerHeight);
+        }
+      }
+
+      setupControls() {
+        document.getElementById('repairBtn').onclick = () => this.buyRepair();
+        document.getElementById('upgradeBtn').onclick = () => this.buyWeaponUpgrade();
+        document.getElementById('boostBtn').onclick = () => this.buyBooster();
+        document.getElementById('shipyardBtn').onclick = () => this.toggleShipyard();
+        document.getElementById('shipyardCloseBtn').onclick = () => this.toggleShipyard(false);
+        document.getElementById('multiplayerBtn').onclick = () => this.toggleMultiplayer();
+        document.getElementById('restartBtn').onclick = () => this.restart();
+        document.getElementById('turretCost').textContent = TURRET_COST;
+
+        const syncFaders = () => {
+          const amount = document.getElementById('enemyAmount').value;
+          const power = document.getElementById('enemyPower').value;
+          document.getElementById('enemyAmountValue').textContent = amount;
+          document.getElementById('enemyPowerValue').textContent = power;
+          this.state.local.enemyAmountMultiplier = Number(amount);
+          this.state.local.enemyPowerMultiplier = Number(power);
+        };
+        document.getElementById('enemyAmount').oninput = syncFaders;
+        document.getElementById('enemyPower').oninput = syncFaders;
+        syncFaders();
+
+        // Hide multiplayer button in embedded mode
+        if (this.embedded) {
+          document.getElementById('multiplayerBtn').style.display = 'none';
+        }
+      }
+
+      setupKeyboard() {
+        this.keyHandler = (e) => {
+          this.state.local.keys[e.code] = true;
+          if (e.code === 'KeyT' && !e.repeat) {
+            this.deployTurret();
+          }
+          if (e.code === 'KeyQ' && !e.repeat) {
+            this.state.local.player.weaponType = cycleWeaponType(this.state.local.player.weaponType);
+            this.showNotification(`WEAPON: ${this.state.local.player.weaponType.toUpperCase()}`);
+            this.updateHUD();
+          }
+
+          if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyT', 'KeyQ'].includes(e.code)) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        };
+
+        this.keyUpHandler = (e) => {
+          this.state.local.keys[e.code] = false;
+        };
+
+        document.addEventListener('keydown', this.keyHandler);
+        document.addEventListener('keyup', this.keyUpHandler);
+
+        // Focus canvas on click to ensure keyboard events are captured
+        this.canvas.addEventListener('click', () => {
+          this.canvas.focus();
+        });
+      }
+
+      start() {
+        if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
+        this.resize();
+
+        this.state.local = this.createInitialLocalState({
+          y: this.canvas.height / 2,
+          keys: this.state.local.keys,
+          enemyAmount: document.getElementById('enemyAmount')?.value || 2,
+          enemyPower: document.getElementById('enemyPower')?.value || 2,
+        });
+
+        this.updateHUD();
+        document.getElementById('gameOverScreen').classList.remove('visible');
+
+        this.gameLoop = requestAnimationFrame(() => this.loop());
+      }
+
+      restart() {
+        this.start();
+      }
+
+      toggleMultiplayer() {
+        this.multiplayer = !this.multiplayer;
+        const btn = document.getElementById('multiplayerBtn');
+
+        if (this.multiplayer) {
+          btn.textContent = 'Multiplayer: ON';
+          btn.classList.add('active');
+          this.startMultiplayer();
+        } else {
+          btn.textContent = 'Multiplayer: OFF';
+          btn.classList.remove('active');
+          this.stopMultiplayer();
+        }
+      }
+
+      async startMultiplayer() {
+        try {
+          this.lobby = new PeernetLobby(SHOOTER_LOBBY_ID, {
+            storageKey: 'shooter-lobby',
+            debug: false
+          });
+
+          this.lobby.addEventListener('status', (e) => {
+            console.log('Lobby status:', e.detail);
+          });
+
+          this.lobby.addEventListener('peers', (e) => {
+            this.renderPlayerList(e.detail);
+          });
+
+          this.lobby.addEventListener('data', (e) => {
+            this.handleNetworkMessage(e.detail);
+          });
+
+          await this.lobby.connect(this.username);
+
+          if (this.targetPeerId) {
+            this.lobby.send?.(this.targetPeerId, {
+              type: 'shooter-join-request',
+              payload: { username: this.username, targetPeerId: this.targetPeerId, mode: this.sessionMode, spectate: this.spectateMode, at: Date.now() }
+            });
+          }
+
+          // Start broadcasting game state unless this panel is observing a peer.
+          if (!this.spectateMode) {
+            this.networkUpdateInterval = setInterval(() => {
+              this.broadcastGameState();
+            }, 50); // 20 updates per second
+          }
+
+          // Initial broadcast
+          this.broadcastPresence();
+
+          this.showNotification('Connected to multiplayer arena!');
+
+        } catch (err) {
+          console.error('Failed to connect to lobby:', err);
+          this.showNotification('Failed to connect to multiplayer');
+          this.toggleMultiplayer();
+        }
+      }
+
+      stopMultiplayer() {
+        if (this.networkUpdateInterval) {
+          clearInterval(this.networkUpdateInterval);
+          this.networkUpdateInterval = null;
+        }
+
+        // Clear remote players
+        this.state.remote.clear();
+        this.updateMultiplayerPanel();
+
+        // Disconnect from lobby
+        if (this.lobby) {
+          this.broadcastPresence(false); // Broadcast leaving
+          this.lobby.destroy?.();
+          this.lobby = null;
+        }
+      }
+
+      broadcastGameState() {
+        if (!this.lobby || !this.multiplayer) return;
+
+        const state = this.state.local;
+
+        this.lobby.broadcast({
+          type: 'shooter-state',
+          payload: {
+            player: { x: state.player.x, y: state.player.y },
+            bullets: state.bullets.map(b => ({ x: b.x, y: b.y })),
+            score: state.score,
+            lives: state.player.lives,
+            stage: state.stage,
+            mode: this.sessionMode,
+            gameOver: state.gameOver
+          }
+        });
+      }
+
+      broadcastPresence(playing = true) {
+        if (!this.lobby || !this.multiplayer) return;
+
+        this.lobby.broadcast({
+          type: 'shooter-presence',
+          payload: {
+            playing: playing,
+            observing: this.spectateMode,
+            targetPeerId: this.targetPeerId,
+            mode: this.sessionMode,
+            score: this.state.local.score,
+            color: this.playerColor
+          }
+        });
+      }
+
+      handleNetworkMessage({ from, data }) {
+        if (!data || !data.type) return;
+
+        switch (data.type) {
+          case 'shooter-state':
+            this.updateRemotePlayer(from, data.payload);
+            break;
+          case 'shooter-presence':
+            this.updateRemotePresence(from, data.payload);
+            break;
+          case 'shooter-join-request':
+            if (!this.spectateMode) this.broadcastGameState();
+            break;
+        }
+      }
+
+      updateRemotePlayer(peerId, payload) {
+        const now = Date.now();
+
+        if (!this.state.remote.has(peerId)) {
+          // New player joined
+          this.state.remote.set(peerId, {
+            username: `Peer-${peerId.slice(0, 4)}`,
+            color: this.getRandomColor(),
+            ...payload,
+            lastUpdate: now
+          });
+        } else {
+          // Update existing player
+          const remote = this.state.remote.get(peerId);
+          remote.player = payload.player;
+          remote.bullets = payload.bullets;
+          remote.score = payload.score;
+          remote.lives = payload.lives;
+          remote.stage = payload.stage;
+          remote.mode = payload.mode;
+          remote.lastUpdate = now;
+        }
+
+        // Cleanup stale players
+        const timeout = 5000;
+        for (const [id, player] of this.state.remote) {
+          if (now - player.lastUpdate > timeout) {
+            this.state.remote.delete(id);
+          }
+        }
+
+        this.updateMultiplayerPanel();
+      }
+
+      updateRemotePresence(peerId, payload) {
+        if (payload?.playing === false) {
+          this.state.remote.delete(peerId);
+          this.updateMultiplayerPanel();
+        }
+      }
+
+      renderPlayerList(peers) {
+        // Called when peer list changes
+        this.updateMultiplayerPanel();
+      }
+
+      updateMultiplayerPanel() {
+        const panel = document.getElementById('multiplayerPanel');
+        const list = document.getElementById('playerList');
+
+        if (!this.multiplayer || this.state.remote.size === 0) {
+          panel.classList.remove('visible');
+          return;
+        }
+
+        panel.classList.add('visible');
+
+        const players = [
+          { username: this.username + ' (you)', score: this.state.local.score, color: this.playerColor, isYou: true },
+          ...Array.from(this.state.remote.values()).map(p => ({
+            username: p.username,
+            score: p.score,
+            color: p.color,
+            isYou: false
+          }))
+        ].sort((a, b) => b.score - a.score);
+
+        list.innerHTML = players.map(p => `
+          <div class="player ${p.isYou ? 'you' : ''}">
+            <div class="player-dot" style="background: ${p.color}; box-shadow: 0 0 8px ${p.color}"></div>
+            <span class="player-name">${p.username}</span>
+            <span class="player-score">${p.score}</span>
+          </div>
+        `).join('');
+      }
+
+      showNotification(text) {
+        const notif = document.getElementById('notification');
+        notif.textContent = text;
+        notif.classList.add('visible');
+        setTimeout(() => notif.classList.remove('visible'), 2000);
+      }
+
+      toggleShipyard(forceOpen) {
+        const panel = document.getElementById('shipyardPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderShipyard();
+      }
+
+      loadoutState() {
+        const s = this.state.local;
+        return {
+          money: s.money,
+          ownedShips: s.ownedShips,
+          ownedBoosters: s.ownedBoosters,
+          ownedWeapons: s.ownedWeapons,
+          player: s.player,
+        };
+      }
+
+      applyLoadoutState(next) {
+        const s = this.state.local;
+        const changed = next !== this.loadoutState();
+        s.money = next.money;
+        s.ownedShips = next.ownedShips ?? s.ownedShips;
+        s.ownedBoosters = next.ownedBoosters ?? s.ownedBoosters;
+        s.ownedWeapons = next.ownedWeapons ?? s.ownedWeapons;
+        s.player = { ...s.player, ...next.player };
+        this.updateHUD();
+        this.renderShipyard();
+      }
+
+      renderShipyard() {
+        const panel = document.getElementById('shipyardPanel');
+        if (!panel || panel.style.display !== 'block') return;
+
+        const s = this.state.local;
+        document.getElementById('shipyardMoney').textContent = `Credits: ¤${Math.floor(s.money)}`;
+
+        document.getElementById('shipyardShips').innerHTML = Object.entries(SHIP_MODELS).map(([id, model]) => {
+          const owned = s.ownedShips.includes(id);
+          const equipped = s.player.shipModel === id;
+          const current = SHIP_MODELS[s.player.shipModel] || SHIP_MODELS.interceptor;
+          const hullDelta = model.hull - current.hull;
+          const speedDelta = model.speedBonus - current.speedBonus;
+          const action = owned ? (equipped ? 'EQUIPPED' : 'EQUIP') : `BUY ¤${model.cost}`;
+          return `
+            <button data-ship="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:${equipped ? 'rgba(0,255,255,0.18)' : 'rgba(255,255,255,0.04)'};color:#fff;cursor:pointer">
+              <div>
+                <div style="font-weight:bold;color:${model.color}">${model.label}</div>
+                <div style="font-size:11px;opacity:0.75">Hull ${model.hull} (${hullDelta >= 0 ? '+' : ''}${hullDelta}) • Speed ${model.speedBonus.toFixed(2)} (${speedDelta >= 0 ? '+' : ''}${speedDelta.toFixed(2)})</div>
+              </div>
+              <div>${action}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.getElementById('shipyardBoosters').innerHTML = Object.entries(BOOSTER_MODELS).map(([id, model]) => {
+          const owned = s.ownedBoosters.includes(id);
+          const equipped = s.player.boosterModel === id;
+          const current = BOOSTER_MODELS[s.player.boosterModel] || BOOSTER_MODELS.ion;
+          const thrustDelta = model.thrustBonus - current.thrustBonus;
+          const action = owned ? (equipped ? 'EQUIPPED' : 'EQUIP') : `BUY ¤${model.cost}`;
+          return `
+            <button data-booster="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:${equipped ? 'rgba(255,0,255,0.16)' : 'rgba(255,255,255,0.04)'};color:#fff;cursor:pointer">
+              <div>
+                <div style="font-weight:bold;color:${model.trail}">${model.label}</div>
+                <div style="font-size:11px;opacity:0.75">Thrust ${model.thrustBonus.toFixed(2)} (${thrustDelta >= 0 ? '+' : ''}${thrustDelta.toFixed(2)})</div>
+              </div>
+              <div>${action}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.getElementById('shipyardWeapons').innerHTML = WEAPON_TYPES.map(model => {
+          const owned = s.ownedWeapons.includes(model.id);
+          const equipped = s.player.weaponType === model.id;
+          const action = owned ? (equipped ? 'EQUIPPED' : 'EQUIP') : `UNLOCK ¤${model.cost}`;
+          return `
+            <button data-weapon="${model.id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:${equipped ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.04)'};color:#fff;cursor:pointer">
+              <div>
+                <div style="font-weight:bold;color:${model.color}">${model.label}</div>
+                <div style="font-size:11px;opacity:0.75">Damage ${model.damage} • ${model.id}</div>
+              </div>
+              <div>${action}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.querySelectorAll('[data-ship]').forEach(btn => {
+          btn.onclick = () => this.applyLoadoutState(buyShipModel(this.loadoutState(), btn.dataset.ship));
+        });
+        document.querySelectorAll('[data-booster]').forEach(btn => {
+          btn.onclick = () => this.applyLoadoutState(buyBoosterModel(this.loadoutState(), btn.dataset.booster));
+        });
+        document.querySelectorAll('[data-weapon]').forEach(btn => {
+          btn.onclick = () => this.applyLoadoutState(buyWeaponUnlock(this.loadoutState(), btn.dataset.weapon));
+        });
+
+        document.getElementById('shipyardAllies').innerHTML = Object.entries(ALLY_MODELS).map(([id, model]) => `
+          <button data-ally="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,255,255,0.06);color:#fff;cursor:pointer">
+            <div>
+              <div style="font-weight:bold;color:#7ff">${model.label}</div>
+              <div style="font-size:11px;opacity:0.75">${model.role} • HP ${model.health} • catches shots</div>
+            </div>
+            <div>HIRE ¤${model.cost}</div>
+          </button>
+        `).join('');
+
+        document.getElementById('shipyardShields').innerHTML = Object.entries(SHIELD_MODELS).map(([id, model]) => `
+          <button data-shield="${id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(120,180,255,0.07);color:#fff;cursor:pointer">
+            <div>
+              <div style="font-weight:bold;color:#9cf">${model.label}</div>
+              <div style="font-size:11px;opacity:0.75">Radius ${model.radius} • HP ${model.health}</div>
+            </div>
+            <div>DEPLOY ¤${model.cost}</div>
+          </button>
+        `).join('');
+
+        document.querySelectorAll('[data-ally]').forEach(btn => {
+          btn.onclick = () => this.hireAlly(btn.dataset.ally);
+        });
+        document.querySelectorAll('[data-shield]').forEach(btn => {
+          btn.onclick = () => this.deployShield(btn.dataset.shield);
+        });
+      }
+
+      emitStoryMessages(messages) {
+        if (!messages.length) return;
+        const panel = document.getElementById('storyPanel');
+        const list = document.getElementById('storyMessages');
+        panel.style.display = 'block';
+        list.innerHTML = messages.map(m => `
+          <div style="opacity:.92;margin:2px 0">
+            <span style="opacity:.45">${m.speaker}&gt;</span> ${m.text}
+          </div>
+        `).join('') + list.innerHTML;
+        window.clearTimeout(this.storyHideTimer);
+        this.storyHideTimer = window.setTimeout(() => {
+          panel.style.display = 'none';
+        }, 5200);
+      }
+
+      updateStory(now) {
+        const s = this.state.local;
+        const result = updateStoryMode({
+          story: s.story,
+          now,
+          enemyCount: s.enemies.length,
+          enemyAmount: s.enemyAmountMultiplier,
+          stage: s.stage,
+          bossActive: s.bossActive,
+        });
+        s.story = result.story;
+        this.emitStoryMessages(result.messages);
+      }
+
+      updateHUD() {
+        document.getElementById('score').textContent = this.state.local.score;
+        document.getElementById('money').textContent = Math.floor(this.state.local.money);
+        document.getElementById('lives').textContent = this.state.local.player.lives;
+        const theme = this.getStageTheme();
+        document.getElementById('stage').textContent = this.state.local.stage;
+        document.getElementById('environmentName').textContent = theme.name;
+        document.getElementById('stageKills').textContent = this.state.local.stageKills;
+        document.getElementById('stageGoal').textContent = this.state.local.stageGoal;
+        document.getElementById('bossStatus').textContent = this.state.local.bossActive ? 'ACTIVE' : 'none';
+        document.getElementById('weaponLevel').textContent = this.state.local.player.weaponLevel;
+        document.getElementById('boostLevel').textContent = this.state.local.player.boostLevel;
+        document.getElementById('shipModel').textContent = SHIP_MODELS[this.state.local.player.shipModel].label;
+        document.getElementById('weaponType').textContent = this.state.local.player.weaponType;
+        document.getElementById('turretCount').textContent = this.state.local.turrets.length;
+        document.getElementById('turretCost').textContent = TURRET_COST;
+        this.renderShipyard();
+
+        // Notify parent window in embedded mode
+        if (this.embedded && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'shooter-update',
+            score: this.state.local.score,
+            lives: this.state.local.player.lives
+          }, '*');
+        }
+      }
+
+      destroy() {
+        // Cleanup event listeners
+        if (this.keyHandler) {
+          document.removeEventListener('keydown', this.keyHandler);
+        }
+        if (this.keyUpHandler) {
+          document.removeEventListener('keyup', this.keyUpHandler);
+        }
+
+        // Stop game loop
+        if (this.gameLoop) {
+          cancelAnimationFrame(this.gameLoop);
+        }
+
+        this.stopMultiplayer();
+      }
+
+      loop() {
+        if (!this.state.local.gameOver) {
+          this.update();
+          this.draw();
+        }
+        this.gameLoop = requestAnimationFrame(() => this.loop());
+      }
+
+      spendMoney(cost, label) {
+        const s = this.state.local;
+        if (s.money < cost) {
+          this.showNotification(`NOT ENOUGH MONEY FOR ${label}`);
+          return false;
+        }
+        s.money -= cost;
+        return true;
+      }
+
+      buyRepair() {
+        const p = this.state.local.player;
+        if (p.lives >= 5) {
+          this.showNotification('HULL ALREADY STABLE');
+          return;
+        }
+        if (!this.spendMoney(60, 'REPAIR')) return;
+        p.lives++;
+        this.updateHUD();
+      }
+
+      buyWeaponUpgrade() {
+        const p = this.state.local.player;
+        const cost = 120 * p.weaponLevel;
+        if (!this.spendMoney(cost, 'UPGRADE')) return;
+        p.weaponLevel++;
+        p.upgrades.push({ type: 'weapon', level: p.weaponLevel });
+        document.getElementById('upgradeBtn').textContent = `Upgrade Gun: $${120 * p.weaponLevel}`;
+        this.updateHUD();
+      }
+
+      buyBooster() {
+        const p = this.state.local.player;
+        const cost = 90 * p.boostLevel;
+        if (!this.spendMoney(cost, 'BOOSTER')) return;
+        p.boostLevel++;
+        p.upgrades.push({ type: 'booster', level: p.boostLevel });
+        document.getElementById('boostBtn').textContent = `Booster: $${90 * p.boostLevel}`;
+        this.updateHUD();
+      }
+
+      deployTurret() {
+        const s = this.state.local;
+        const nextEconomy = buyTurret({
+          score: s.score,
+          money: s.money,
+          turrets: s.turrets,
+          upgrades: s.player.upgrades,
+        }, { x: s.player.x + 10, y: s.player.y });
+
+        if (nextEconomy === s || nextEconomy.turrets.length === s.turrets.length) {
+          this.showNotification('NOT ENOUGH MONEY FOR TURRET');
+          return;
+        }
+
+        s.money = nextEconomy.money;
+        s.turrets = nextEconomy.turrets;
+        this.updateHUD();
+      }
+
+      hireAlly(modelId) {
+        const s = this.state.local;
+        const next = hireAlly({ money: s.money, allies: s.allies }, modelId, { x: s.player.x - 35, y: s.player.y }, performance.now());
+        if (next === s || next.allies.length === s.allies.length) {
+          this.showNotification('NOT ENOUGH MONEY FOR ALLY');
+          return;
+        }
+        s.money = next.money;
+        s.allies = next.allies;
+        this.showNotification('ALLY HIRED');
+        this.updateHUD();
+      }
+
+      deployShield(modelId = 'bubble') {
+        const s = this.state.local;
+        const next = deployShield({ money: s.money, shields: s.shields }, modelId, { x: s.player.x + 38, y: s.player.y }, performance.now());
+        if (next === s || next.shields.length === s.shields.length) {
+          this.showNotification('NOT ENOUGH MONEY FOR SHIELD');
+          return;
+        }
+        s.money = next.money;
+        s.shields = next.shields;
+        this.showNotification('SHIELD DEPLOYED');
+        this.updateHUD();
+      }
+
+      spawnBoss() {
+        const s = this.state.local;
+        const power = 2 + s.stage * 0.55;
+        s.bossActive = true;
+        s.enemies.push({
+          boss: true,
+          x: this.canvas.width + 80,
+          y: this.canvas.height / 2,
+          vx: -1.2 - s.stage * 0.1,
+          vy: 1.2 + s.stage * 0.08,
+          size: 46 + s.stage * 8,
+          power,
+          hp: 12 + s.stage * 8,
+          maxHp: 12 + s.stage * 8,
+          reward: 180 + s.stage * 90
+        });
+        this.showNotification(`STAGE ${s.stage} BOSS INCOMING`);
+        this.updateHUD();
+      }
+
+      advanceStage() {
+        const s = this.state.local;
+        s.bossActive = false;
+        s.bossDefeated++;
+        s.stage++;
+        s.stageKills = 0;
+        s.stageGoal = 8 + s.stage * 4;
+        s.money += 100 + s.stage * 25;
+        s.enemyAmountMultiplier += 0.1;
+        s.enemyPowerMultiplier += 0.08;
+        this.showNotification(`STAGE ${s.stage} - SYSTEM ESCALATION`);
+        this.updateHUD();
+      }
+
+      update() {
+        const s = this.state.local;
+        const p = s.player;
+
+        // Player movement
+        p.weaponType ||= 'bullet';
+        p.shipModel ||= 'interceptor';
+        p.boosterModel ||= 'ion';
+        const booster = BOOSTER_MODELS[p.boosterModel] || BOOSTER_MODELS.ion;
+        const ship = SHIP_MODELS[p.shipModel] || SHIP_MODELS.interceptor;
+        const thrust = 0.8 + (p.boostLevel - 1) * 0.18 + booster.thrustBonus + ship.speedBonus;
+        if (s.keys['ArrowUp'] || s.keys['KeyW']) p.vy -= thrust;
+        if (s.keys['ArrowDown'] || s.keys['KeyS']) p.vy += thrust;
+        p.vy *= 0.9;
+        p.y += p.vy;
+        p.y = Math.max(20, Math.min(this.canvas.height - 20, p.y));
+
+        // Shooting
+        if (s.keys['Space'] && s.bullets.filter(b => Date.now() - b.time < 100).length < 3 + p.weaponLevel) {
+          const spread = Math.min(3, p.weaponLevel);
+          for (let i = 0; i < spread; i++) {
+            s.bullets.push({
+              ...createPlayerShot({
+                weaponType: p.weaponType,
+                origin: {
+                  x: p.x + 20,
+                  y: p.y + (i - (spread - 1) / 2) * 8,
+                },
+                weaponLevel: p.weaponLevel,
+                target: { x: this.canvas.width, y: p.y },
+              }),
+              time: Date.now()
+            });
+          }
+        }
+
+        // Spawn enemies. Amount controls frequency + batch size, power controls health/size/speed.
+        s.enemyAmountMultiplier = Number(document.getElementById('enemyAmount').value);
+        s.enemyPowerMultiplier = Number(document.getElementById('enemyPower').value);
+
+        s.spawnTimer++;
+        if (!s.bossActive && s.stageKills >= s.stageGoal) {
+          this.spawnBoss();
+        }
+
+        const pressureSettings = {
+          amount: Math.min(5, s.enemyAmountMultiplier + s.stage * 0.08),
+          power: Math.min(5, s.enemyPowerMultiplier + s.stage * 0.08),
+        };
+        if (!s.bossActive && s.spawnTimer > getSpawnThreshold(pressureSettings)) {
+          s.spawnTimer = 0;
+          const batchSize = getSpawnBatchSize(pressureSettings);
+          for (let i = 0; i < batchSize; i++) {
+            s.enemies.push(createEnemy({
+              canvasWidth: this.canvas.width + i * 18,
+              canvasHeight: this.canvas.height,
+              settings: pressureSettings,
+            }));
+          }
+        }
+
+        // Update bullets
+        s.bullets = s.bullets.filter(b => {
+          b.x += b.vx;
+          b.y += b.vy || 0;
+          return b.x > 0 && b.x < this.canvas.width + 50;
+        });
+
+        s.enemyProjectiles = s.enemyProjectiles.filter(b => {
+          b.x += b.vx;
+          b.y += b.vy || 0;
+          if (Math.abs(b.x - p.x) < 18 && Math.abs(b.y - p.y) < 18) {
+            p.lives--;
+            this.updateHUD();
+            if (p.lives <= 0) this.gameOver();
+            return false;
+          }
+          return b.x > -40 && b.x < this.canvas.width + 80 && b.y > -40 && b.y < this.canvas.height + 40;
+        });
+
+        // Turrets decay over time, lose health on collisions, and auto-aim precisely.
+        const now = performance.now();
+        const deltaMs = Math.min(50, Math.max(0, now - (s.lastFrameAt || now)));
+        s.lastFrameAt = now;
+        this.updateStory(now);
+        const turretUpdate = updateTurrets({
+          turrets: s.turrets,
+          enemies: s.enemies,
+          now,
+          deltaMs,
+        });
+        s.turrets = turretUpdate.turrets;
+        s.bullets.push(...turretUpdate.bullets);
+
+        const shieldUpdate = updateShields({
+          shields: s.shields,
+          enemyProjectiles: s.enemyProjectiles,
+          now,
+          deltaMs,
+        });
+        s.shields = shieldUpdate.shields;
+        s.enemyProjectiles = shieldUpdate.enemyProjectiles;
+
+        const allyUpdate = updateAllies({
+          allies: s.allies,
+          player: s.player,
+          enemies: s.enemies,
+          enemyProjectiles: s.enemyProjectiles,
+          now,
+          deltaMs,
+        });
+        s.allies = allyUpdate.allies;
+        s.enemyProjectiles = allyUpdate.enemyProjectiles;
+        s.bullets.push(...allyUpdate.bullets);
+
+        // Update enemies
+        s.enemies = s.enemies.filter(e => {
+          e.x += e.vx;
+          if (e.boss) {
+            e.y += e.vy;
+            if (e.y < 60 || e.y > this.canvas.height - 60) e.vy *= -1;
+          }
+          if (!e.lastShotAt) e.lastShotAt = 0;
+          const enemyCooldown = e.boss ? 750 : 2200;
+          if (now - e.lastShotAt > enemyCooldown) {
+            const aim = { x: p.x - e.x, y: p.y - e.y };
+            const len = Math.hypot(aim.x, aim.y) || 1;
+            s.enemyProjectiles.push({ x: e.x, y: e.y, vx: (aim.x / len) * 3.5, vy: (aim.y / len) * 3.5, source: 'enemy' });
+            e.lastShotAt = now;
+          }
+
+          // Bullet collision
+          for (let i = s.bullets.length - 1; i >= 0; i--) {
+            const b = s.bullets[i];
+            if (Math.abs(b.x - e.x) < e.size && Math.abs(b.y - e.y) < e.size) {
+              s.bullets.splice(i, 1);
+              if (e.boss) {
+                e.hp--;
+                if (e.hp > 0) {
+                  this.updateHUD();
+                  return true;
+                }
+              }
+
+              const rewarded = recordEnemyKill({
+                score: s.score,
+                money: s.money,
+                turrets: s.turrets,
+                upgrades: s.player.upgrades,
+              }, e);
+              const reward = rewarded.money - s.money;
+              s.score = rewarded.score;
+              s.money = rewarded.money;
+
+              if (e.boss) {
+                this.advanceStage();
+              } else {
+                s.stageKills++;
+              }
+
+              if (Math.random() < (e.boss ? 0.5 : 0.08)) {
+                s.player.upgrades.push({ type: e.boss ? 'boss-core' : 'salvage-core', power: e.power || 1 });
+              }
+
+              this.updateHUD();
+              // Spawn particles
+              for (let j = 0; j < 8; j++) {
+                s.particles.push({
+                  x: e.x, y: e.y,
+                  vx: (Math.random() - 0.5) * 6,
+                  vy: (Math.random() - 0.5) * 6,
+                  life: 30,
+                  color: e.boss ? '#f0f' : (e.size > 25 ? '#f60' : '#fc0')
+                });
+              }
+              return false;
+            }
+          }
+
+          // Turret collisions are handled by updateTurrets; player collisions still hurt the ship.
+          if (Math.abs(p.x - e.x) < 25 && Math.abs(p.y - e.y) < e.size) {
+            p.lives -= e.boss ? 2 : 1;
+            if (e.boss) e.hp = Math.max(1, e.hp - 2);
+            this.updateHUD();
+            if (p.lives <= 0) {
+              this.gameOver();
+            }
+            return false;
+          }
+
+          return e.x > -30;
+        });
+
+        // Update particles
+        s.particles = s.particles.filter(pt => {
+          pt.x += pt.vx;
+          pt.y += pt.vy;
+          pt.life--;
+          return pt.life > 0;
+        });
+      }
+
+      draw() {
+        const ctx = this.ctx;
+        const canvas = this.canvas;
+
+        const s = this.state.local;
+        const theme = this.getStageTheme();
+
+        // Clear / environment wash
+        ctx.fillStyle = theme.bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const gradient = ctx.createRadialGradient(canvas.width * 0.75, canvas.height * 0.25, 20, canvas.width * 0.75, canvas.height * 0.25, canvas.width * 0.8);
+        gradient.addColorStop(0, `${theme.nebula}33`);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Stage-specific drift lanes
+        ctx.fillStyle = theme.lane;
+        for (let lane = 0; lane < 4; lane++) {
+          const y = ((lane + 1) * canvas.height / 5) + Math.sin(Date.now() / 900 + lane + s.stage) * 18;
+          ctx.fillRect(0, y, canvas.width, 2 + (s.stage % 3));
+        }
+
+        // Stars
+        ctx.fillStyle = theme.star;
+        const starSpeed = 25 + s.stage * 3;
+        for (let i = 0; i < 35; i++) {
+          const x = (i * 47 + Date.now() / starSpeed) % canvas.width;
+          const y = (i * 31 + s.stage * 19) % canvas.height;
+          ctx.fillRect(x, y, i % 7 === 0 ? 2 : 1, i % 7 === 0 ? 2 : 1);
+        }
+
+
+        // Particles
+        s.particles.forEach(pt => {
+          ctx.globalAlpha = pt.life / 30;
+          ctx.fillStyle = pt.color;
+          ctx.fillRect(pt.x - 2, pt.y - 2, 4, 4);
+        });
+        ctx.globalAlpha = 1;
+
+        // Draw remote players
+        for (const [peerId, remote] of this.state.remote) {
+          this.drawPlayer(ctx, remote.player, remote.color);
+
+          // Remote bullets
+          ctx.fillStyle = remote.color;
+          ctx.shadowColor = remote.color;
+          ctx.shadowBlur = 10;
+          remote.bullets.forEach(b => {
+            ctx.fillRect(b.x - 4, b.y - 2, 8, 4);
+          });
+          ctx.shadowBlur = 0;
+        }
+
+        // Bullets
+        ctx.fillStyle = '#0cf';
+        ctx.shadowColor = '#0cf';
+        ctx.shadowBlur = 10;
+        s.bullets.forEach(b => {
+          ctx.fillRect(b.x - 4, b.y - 2, 8, 4);
+        });
+        ctx.shadowBlur = 0;
+
+        // Enemy projectiles
+        ctx.fillStyle = '#f8a';
+        ctx.shadowColor = '#f8a';
+        ctx.shadowBlur = 10;
+        s.enemyProjectiles.forEach(b => {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+
+        // Deployable shields
+        s.shields.forEach(sh => {
+          const model = SHIELD_MODELS[sh.modelId] || SHIELD_MODELS.bubble;
+          ctx.strokeStyle = 'rgba(120,180,255,0.65)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(sh.x, sh.y, model.radius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(120,180,255,0.08)';
+          ctx.fill();
+        });
+
+        // NPC allies
+        s.allies.forEach(a => {
+          const model = ALLY_MODELS[a.modelId] || ALLY_MODELS.wingman;
+          ctx.fillStyle = model.role === 'screen' ? '#9cf' : '#7ff';
+          ctx.shadowColor = ctx.fillStyle;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.moveTo(a.x + 12, a.y);
+          ctx.lineTo(a.x - 8, a.y - 7);
+          ctx.lineTo(a.x - 4, a.y);
+          ctx.lineTo(a.x - 8, a.y + 7);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+
+        // Enemies
+        s.enemies.forEach(e => {
+          ctx.fillStyle = e.boss ? theme.nebula : (e.size > 25 ? '#c60' : '#c36');
+          ctx.shadowColor = e.boss ? theme.nebula : (e.size > 25 ? '#c60' : '#c36');
+          ctx.shadowBlur = e.boss ? 20 : 8;
+          ctx.beginPath();
+          ctx.moveTo(e.x + e.size/2, e.y - e.size/2);
+          ctx.lineTo(e.x - e.size/2, e.y + e.size/2);
+          ctx.lineTo(e.x - e.size/2 + 6, e.y);
+          ctx.closePath();
+          ctx.fill();
+
+          if (e.boss) {
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(e.x - 50, e.y - e.size - 18, 100, 8);
+            ctx.fillStyle = theme.nebula;
+            ctx.fillRect(e.x - 50, e.y - e.size - 18, (e.hp / e.maxHp) * 100, 8);
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px monospace';
+            ctx.fillText(`BOSS HP ${e.hp}/${e.maxHp}`, e.x - 48, e.y - e.size - 24);
+          }
+        });
+        ctx.shadowBlur = 0;
+
+        // Disposable auto-laser turrets
+        s.turrets.forEach(t => {
+          const decay = Math.max(0.15, t.lifeMs / 12000);
+          ctx.globalAlpha = decay;
+          ctx.fillStyle = '#ff0';
+          ctx.shadowColor = '#ff0';
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, 8 + t.health * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        });
+        ctx.shadowBlur = 0;
+
+        // Local player
+        this.drawPlayer(ctx, s.player, this.playerColor);
+      }
+
+      drawPlayer(ctx, player, color) {
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.moveTo(player.x + 20, player.y);
+        ctx.lineTo(player.x - 10, player.y - 10);
+        ctx.lineTo(player.x - 5, player.y);
+        ctx.lineTo(player.x - 10, player.y + 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      gameOver() {
+        this.state.local.gameOver = true;
+        document.getElementById('finalScore').textContent = this.state.local.score;
+        document.getElementById('gameOverScreen').classList.add('visible');
+        this.broadcastPresence(false);
+      }
+    }
+
+    // Initialize game
+    const game = new ShooterGame();
+    window.game = game; // Expose for restart button
+
+    window.addEventListener('beforeunload', () => game.destroy());
+
+    // Auto-enable multiplayer by default, while keeping explicit join links supported.
+    const DEFAULT_MULTIPLAYER = true;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (DEFAULT_MULTIPLAYER || urlParams.get('multiplayer') === 'true') {
+      setTimeout(() => {
+        if (!game.multiplayer) game.toggleMultiplayer();
+      }, 500);
+    }
+  </script>
+</body>
+</html>
