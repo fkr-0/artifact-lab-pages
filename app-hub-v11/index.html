@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NEXUS App Hub v11</title>
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
     <style id="themeStyles"></style>
     <link rel="stylesheet" href="lib/v9-shell.css">
     <style>
@@ -33,12 +37,11 @@
         margin: 0;
         height: 100vh;
         overflow: hidden;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-family: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         background:
           radial-gradient(circle at 12% 0, var(--hub-glow), transparent 28rem),
           linear-gradient(135deg, #05070d, #090d18 55%, #030407);
         color: var(--hub-text);
-        image-rendering: pixelated;
       }
       body::before {
         content: "";
@@ -76,6 +79,8 @@
         grid-template-columns: var(--sidebar-width) 12px 1fr;
         height: 100vh;
         min-height: 0;
+        gap: 0.35rem;
+        padding: 0.35rem;
       }
       .sidebar {
         display: grid;
@@ -84,13 +89,14 @@
             1fr
           );
         gap: 0.6rem;
-        border-right: 1px solid var(--hub-accent);
-        background: var(--hub-panel);
-        padding: 0.5rem;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 58%);
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--hub-panel), #071222 28%);
+        padding: 0.6rem;
         overflow: hidden;
       }
       main {
-        padding: 0.5rem;
+        padding: 0.15rem 0.25rem 0.25rem 0.1rem;
         overflow: hidden;
         display: grid;
         gap: 0.6rem;
@@ -102,10 +108,10 @@
       }
       .card {
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 50%);
-        border-radius: 0;
-        padding: 0.55rem;
-        background: var(--hub-surface);
-        box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 0.65rem;
+        background: color-mix(in srgb, var(--hub-surface), #08172a 24%);
+        box-shadow: 0 8px 26px rgba(0, 12, 20, 0.42);
       }
       .stack {
         display: grid;
@@ -125,10 +131,12 @@
         color: var(--hub-muted);
       }
       h1 {
-        font-size: 1rem;
+        font-family: "Orbitron", "Share Tech Mono", ui-monospace, monospace;
+        font-size: 1.03rem;
         margin: 0;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.13em;
         text-transform: uppercase;
+        text-shadow: 0 0 20px color-mix(in srgb, var(--hub-accent), transparent 65%);
       }
       h2,
       h3 {
@@ -138,20 +146,20 @@
         display: inline-flex;
         align-items: center;
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 60%);
-        border-radius: 0;
-        padding: 0.1rem 0.35rem;
+        border-radius: 999px;
+        padding: 0.14rem 0.5rem;
         font-size: 0.65rem;
         color: var(--hub-accent);
-        background: rgba(0, 0, 0, 0.22);
+        background: color-mix(in srgb, #031019, transparent 22%);
       }
       button,
       input,
       select,
       textarea {
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 48%);
-        border-radius: 0;
+        border-radius: 10px;
         padding: 0.4rem 0.5rem;
-        background: rgba(0, 0, 0, 0.45);
+        background: color-mix(in srgb, #020b14, transparent 22%);
         color: inherit;
         font: inherit;
       }
@@ -161,7 +169,9 @@
       }
       button {
         cursor: pointer;
-        box-shadow: 2px 2px 0 rgba(0, 255, 255, 0.1);
+        border-radius: 999px;
+        box-shadow: 0 6px 14px rgba(0, 10, 20, 0.35);
+        transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
       }
       button:hover,
       .artifact-card:hover,
@@ -226,12 +236,12 @@
       .artifact-card,
       .artifact-row {
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 68%);
-        border-radius: 0;
-        padding: 0.5rem;
-        background: rgba(255, 255, 255, 0.035);
+        border-radius: 10px;
+        padding: 0.58rem;
+        background: color-mix(in srgb, #08172a, transparent 34%);
         display: grid;
         gap: 0.3rem;
-        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.42);
+        box-shadow: 0 8px 18px rgba(0, 8, 14, 0.34);
       }
       .artifact-row {
         grid-template-columns: 1fr auto;
