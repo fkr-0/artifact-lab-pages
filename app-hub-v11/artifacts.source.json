@@ -818,6 +818,34 @@
       "modifiedAt": "2026-05-01T12:00:00.000Z"
     },
     {
+      "id": "palette-studio",
+      "title": "Palette Studio",
+      "kind": "html-path",
+      "href": "palette-studio.html",
+      "description": "Dedicated palette generation studio with readable role inference, image-based seed extraction, and CSS variable export.",
+      "tags": [
+        "tool",
+        "palette",
+        "theme",
+        "color",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-05-17T00:00:00.000Z"
+    },
+    {
       "id": "font-lab-browser",
       "title": "Font Lab Browser",
       "kind": "html-path",

@@ -8,6 +8,7 @@ export function createResizablePanels({ root, handles = [], runtime = globalThis
     const cssValue = `${value}${unit}`;
     root.style.setProperty(variable, cssValue);
     if (storageKey && storage?.setItem) storage.setItem(storageKey, cssValue);
+    runtime.requestAnimationFrame?.(() => runtime.dispatchEvent?.(new Event('resize')));
   };
   const restore = ({ variable, storageKey, unit = 'px', min = 0, max = 9999 }) => {
     const saved = storageKey && storage?.getItem?.(storageKey);
