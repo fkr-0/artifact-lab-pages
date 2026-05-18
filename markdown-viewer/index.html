@@ -71,8 +71,8 @@
     </main>
   </div>
   <script type="module">
-    import { themes, applyThemeTokens, buildThemeStyleText } from './lib/themes.js';
-    import { readHubSetting, writeHubSetting } from './lib/storage.js';
+    import { themes, applyThemeTokens, buildThemeStyleText } from '../app-hub-v11/lib/themes.js';
+    import { readHubSetting, writeHubSetting } from '../app-hub-v11/lib/storage.js';
     import { renderMarkdown, extractHeadings, escapeHtml } from './lib/markdown-renderer.mjs';
 
     const $ = (id) => document.getElementById(id);

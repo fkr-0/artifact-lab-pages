@@ -25,6 +25,104 @@ export function createTagFilterState(activeTags = [], mode = 'OR') {
 }
 
 export function tagColorStyle(tag = '') {
+  // Type-based color mapping for consistent artifact categorization
+  const typeColors = {
+    // Games - Red
+    'game': { hue: 0, class: 'tag-type-game' },
+    'shooter': { hue: 0, class: 'tag-type-game' },
+    'bomberman': { hue: 0, class: 'tag-type-game' },
+    'minesweeper': { hue: 0, class: 'tag-type-game' },
+    'solitaire': { hue: 0, class: 'tag-type-game' },
+    'brawler': { hue: 0, class: 'tag-type-game' },
+    'puzzle': { hue: 0, class: 'tag-type-game' },
+    'classic': { hue: 0, class: 'tag-type-game' },
+    'cards': { hue: 0, class: 'tag-type-game' },
+    'space': { hue: 0, class: 'tag-type-game' },
+    'multiplayer': { hue: 0, class: 'tag-type-game' },
+    'cyberpunk': { hue: 0, class: 'tag-type-game' },
+
+    // Tools - Green
+    'tool': { hue: 142, class: 'tag-type-tool' },
+    'generator': { hue: 142, class: 'tag-type-tool' },
+    'qr-code': { hue: 142, class: 'tag-type-tool' },
+    'utility': { hue: 142, class: 'tag-type-tool' },
+    'export': { hue: 142, class: 'tag-type-tool' },
+    'palette': { hue: 142, class: 'tag-type-tool' },
+    'color': { hue: 142, class: 'tag-type-tool' },
+    'theme': { hue: 142, class: 'tag-type-tool' },
+    'font': { hue: 142, class: 'tag-type-tool' },
+    'sprite': { hue: 142, class: 'tag-type-tool' },
+    'extraction': { hue: 142, class: 'tag-type-tool' },
+    'graphics': { hue: 280, class: 'tag-type-graphics' },
+    'math': { hue: 142, class: 'tag-type-tool' },
+    'calculator': { hue: 142, class: 'tag-type-tool' },
+
+    // Editors - Yellow
+    'editor': { hue: 45, class: 'tag-type-editor' },
+    'notepad': { hue: 45, class: 'tag-type-editor' },
+    'text': { hue: 45, class: 'tag-type-editor' },
+    'code': { hue: 45, class: 'tag-type-editor' },
+    'monaco': { hue: 45, class: 'tag-type-editor' },
+    'textarea': { hue: 45, class: 'tag-type-editor' },
+
+    // Audio - Purple
+    'audio': { hue: 270, class: 'tag-type-audio' },
+    'daw': { hue: 270, class: 'tag-type-audio' },
+    'modular': { hue: 270, class: 'tag-type-audio' },
+    'music': { hue: 270, class: 'tag-type-audio' },
+
+    // Graphics - Pink
+    'graphics': { hue: 300, class: 'tag-type-graphics' },
+    'image': { hue: 300, class: 'tag-type-graphics' },
+    'visual': { hue: 300, class: 'tag-type-graphics' },
+
+    // Hub - Cyan
+    'hub': { hue: 190, class: 'tag-type-hub' },
+    'v9': { hue: 190, class: 'tag-type-hub' },
+    'v10': { hue: 190, class: 'tag-type-hub' },
+    'v11': { hue: 190, class: 'tag-type-hub' },
+    'legacy': { hue: 190, class: 'tag-type-hub' },
+    'compatibility': { hue: 190, class: 'tag-type-hub' },
+    'tooling': { hue: 190, class: 'tag-type-hub' },
+    'peernet': { hue: 190, class: 'tag-type-hub' },
+    'built': { hue: 190, class: 'tag-type-hub' },
+
+    // Collaborative - Orange
+    'collaborative': { hue: 25, class: 'tag-type-collaborative' },
+    'p2p': { hue: 25, class: 'tag-type-collaborative' },
+    'shared': { hue: 25, class: 'tag-type-collaborative' },
+
+    // Docs - Gray
+    'docs': { hue: 210, class: 'tag-type-docs', saturation: 10 },
+    'markdown': { hue: 210, class: 'tag-type-docs', saturation: 10 },
+    'viewer': { hue: 210, class: 'tag-type-docs', saturation: 10 },
+    'catalog': { hue: 210, class: 'tag-type-docs', saturation: 10 },
+    'server': { hue: 210, class: 'tag-type-docs', saturation: 10 },
+    'roadmap': { hue: 210, class: 'tag-type-docs', saturation: 10 },
+
+    // Writing/Creative - Additional tags
+    'ai': { hue: 280, class: 'tag-type-graphics' },
+    'prompts': { hue: 280, class: 'tag-type-graphics' },
+    'creative': { hue: 280, class: 'tag-type-graphics' },
+    'writing': { hue: 280, class: 'tag-type-graphics' },
+    'notes': { hue: 45, class: 'tag-type-editor' },
+    'console': { hue: 45, class: 'tag-type-editor' },
+    'local-first': { hue: 142, class: 'tag-type-tool' },
+    'floating': { hue: 190, class: 'tag-type-hub' },
+    'themes': { hue: 142, class: 'tag-type-tool' },
+    'sound': { hue: 270, class: 'tag-type-audio' },
+    'design': { hue: 142, class: 'tag-type-tool' },
+  };
+
+  const tagLower = String(tag).toLowerCase();
+  const colorConfig = typeColors[tagLower] || typeColors[tagLower.replace(/[^a-z0-9]/g, '')];
+
+  if (colorConfig) {
+    const saturation = colorConfig.saturation || 92;
+    return `--tag-hue:${colorConfig.hue};--tag-border:hsl(${colorConfig.hue} ${saturation}% 58%);--tag-bg:hsl(${colorConfig.hue} ${saturation}% 18% / .36);--tag-class:${colorConfig.class};`;
+  }
+
+  // Fallback to hash-based coloring for unknown tags
   let hash = 0;
   for (const char of String(tag)) hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;
   const hue = Math.abs(hash) % 360;
@@ -52,7 +150,10 @@ export function filterArtifactsAdvanced(items, { query = '', tagState = createTa
 export function renderTagFilterControls(items, state = createTagFilterState()) {
   return collectTagStats(items).map(({ tag, count }) => {
     const active = state.activeTags?.has(tag) ? ' active' : '';
-    return `<button type="button" class="tag-button${active}" data-tag="${escapeHtml(tag)}" style="${tagColorStyle(tag)}">${escapeHtml(tag)} (${count})</button>`;
+    const colorStyle = tagColorStyle(tag);
+    const tagClassMatch = colorStyle.match(/--tag-class:([^;]+)/);
+    const tagClass = tagClassMatch ? tagClassMatch[1] : '';
+    return `<button type="button" class="tag-button ${tagClass}${active}" data-tag="${escapeHtml(tag)}" style="${colorStyle}">${escapeHtml(tag)} (${count})</button>`;
   }).join('');
 }
 

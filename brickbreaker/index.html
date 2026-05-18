@@ -64,7 +64,7 @@ import {
 } from './lib/brickbreaker-core.mjs';
 import { createBrickbreakerAudio } from './lib/brickbreaker-audio.mjs';
 import { createBrickbreakerPeernetNetwork } from './lib/brickbreaker-peernet.mjs';
-import { createNoopNetwork } from './lib/network.js';
+import { createNoopNetwork } from '../app-hub-v11/lib/network.js';
 
 const multiplayer = new URL(location.href).searchParams.get('multiplayer') === 'true';
 const canvas = document.getElementById('game');

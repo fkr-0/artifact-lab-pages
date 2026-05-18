@@ -5,24 +5,28 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NEXUS App Hub v11</title>
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
     <style id="themeStyles"></style>
     <link rel="stylesheet" href="lib/v9-shell.css">
     <style>
       :root {
         --hub-accent: #00ffff;
-        --hub-background: #05070d;
-        --hub-surface: rgba(5, 16, 28, 0.82);
-        --hub-panel: rgba(0, 0, 0, 0.44);
-        --hub-text: #e8fbff;
-        --hub-muted: rgba(232, 251, 255, 0.62);
-        --hub-glow: rgba(0, 255, 255, 0.18);
+        --hub-secondary: #ff00ff;
+        --hub-accent-green: #00ff88;
+        --hub-background: #0a0a12;
+        --hub-surface: rgba(18, 18, 31, 0.92);
+        --hub-panel: rgba(10, 10, 18, 0.88);
+        --hub-text: #eaeaed;
+        --hub-muted: rgba(234, 234, 237, 0.58);
+        --hub-glow: rgba(0, 255, 255, 0.5);
+        --hub-glow-secondary: rgba(255, 0, 255, 0.5);
         --sidebar-width: 360px;
         --filter-panel-fr: 1.25fr;
         --workspace-height: 58vh;
         --generated-primary: #00ffff;
         --generated-secondary: #ff00ff;
         --generated-accent: #00ff88;
-        --generated-dark-font: #05070d;
+        --generated-dark-font: #0a0a12;
         --generated-light-font: #f7fbff;
         color-scheme: dark;
       }
@@ -33,16 +37,8 @@
         margin: 0;
         height: 100vh;
         overflow: hidden;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        background:
-          radial-gradient(circle at 12% 0, var(--hub-glow), transparent 28rem),
-          radial-gradient(circle at 88% 100%, color-mix(in srgb, var(--hub-accent), transparent 85%), transparent 30rem),
-          linear-gradient(
-            135deg,
-            color-mix(in srgb, var(--hub-background), #000 18%),
-            color-mix(in srgb, var(--hub-background), var(--hub-accent) 12%) 55%,
-            color-mix(in srgb, var(--hub-background), #000 28%)
-          );
+        font-family: "Share Tech Mono", monospace;
+        background: var(--hub-background);
         color: var(--hub-text);
         image-rendering: pixelated;
       }
@@ -53,27 +49,40 @@
         pointer-events: none;
         z-index: 0;
         background:
+          radial-gradient(circle at 12% 0, var(--hub-glow), transparent 28rem),
+          radial-gradient(circle at 88% 100%, var(--hub-glow-secondary), transparent 30rem);
+        opacity: 0.15;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background:
           repeating-linear-gradient(
             0deg,
-            rgba(255, 255, 255, 0.035) 0 1px,
+            rgba(0, 255, 255, 0.03) 0 1px,
             transparent 1px 3px
           ),
           repeating-linear-gradient(
             90deg,
-            rgba(0, 255, 255, 0.025) 0 1px,
+            rgba(255, 0, 255, 0.02) 0 1px,
             transparent 1px 5px
           );
-        mix-blend-mode: screen;
-        opacity: 0.32;
+        opacity: 0.4;
       }
       .pixel-noise {
         position: fixed;
         inset: 0;
         pointer-events: none;
         z-index: 1;
-        background-image: radial-gradient(#fff2 1px, transparent 1px);
-        background-size: 7px 7px;
-        opacity: 0.16;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 4px 4px;
+        opacity: 0.25;
+      }
+      .font-orb {
+        font-family: "Orbitron", sans-serif;
       }
       .shell {
         position: relative;
@@ -107,11 +116,12 @@
         min-height: 0;
       }
       .card {
-        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 50%);
-        border-radius: 0;
-        padding: 0.55rem;
+        border: 1px solid rgba(0, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 0.75rem;
         background: var(--hub-surface);
-        box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.12);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 255, 0.08);
+        backdrop-filter: blur(8px);
       }
       .stack {
         display: grid;
@@ -131,9 +141,19 @@
         color: var(--hub-muted);
       }
       h1 {
-        font-size: 1rem;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.1rem;
         margin: 0;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-weight: 900;
+        color: var(--hub-accent);
+        text-shadow: 0 0 10px var(--hub-glow), 0 0 30px var(--hub-glow);
+      }
+      h2, h3 {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
       h2,
@@ -143,23 +163,27 @@
       .pill {
         display: inline-flex;
         align-items: center;
-        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 60%);
-        border-radius: 0;
-        padding: 0.1rem 0.35rem;
-        font-size: 0.65rem;
+        border: 1px solid rgba(0, 255, 255, 0.25);
+        border-radius: 6px;
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
         color: var(--hub-accent);
-        background: rgba(0, 0, 0, 0.22);
+        background: rgba(0, 255, 255, 0.08);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
       button,
       input,
       select,
       textarea {
-        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 48%);
-        border-radius: 0;
-        padding: 0.4rem 0.5rem;
-        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 6px;
+        padding: 0.5rem 0.7rem;
+        background: rgba(0, 0, 0, 0.5);
         color: inherit;
         font: inherit;
+        transition: all 0.18s ease;
       }
       input,
       textarea {
@@ -167,15 +191,19 @@
       }
       button {
         cursor: pointer;
-        box-shadow: 2px 2px 0 rgba(0, 255, 255, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 255, 255, 0.15);
       }
       button:hover,
       .artifact-card:hover,
       .artifact-row:hover,
       .theme-card:hover {
         border-color: var(--hub-accent);
-        transform: translate(-1px, -1px);
-        box-shadow: 4px 4px 0 rgba(0, 255, 255, 0.18);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0, 255, 255, 0.25);
+      }
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(0, 255, 255, 0.2);
       }
       .sidebar-scroll {
         overflow: auto;
@@ -188,12 +216,103 @@
       }
       .tag-button,
       .tag-pill {
-        font-size: 0.65rem;
-        padding: 0.1rem 0.35rem;
-        border-radius: 0;
-        border-color: var(--tag-border);
-        background: var(--tag-bg);
-        color: hsl(var(--tag-hue) 100% 78%);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        border-width: 1px;
+        border-style: solid;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.18s ease;
+      }
+      /* Tag type colors */
+      .tag-type-game {
+        border-color: rgba(239, 68, 68, 0.5);
+        background: rgba(239, 68, 68, 0.12);
+        color: #fca5a5;
+      }
+      .tag-type-game:hover, .tag-type-game.active {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.25);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+      }
+      .tag-type-tool {
+        border-color: rgba(34, 197, 94, 0.5);
+        background: rgba(34, 197, 94, 0.12);
+        color: #86efac;
+      }
+      .tag-type-tool:hover, .tag-type-tool.active {
+        border-color: #22c55e;
+        background: rgba(34, 197, 94, 0.25);
+        box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+      }
+      .tag-type-editor {
+        border-color: rgba(251, 191, 36, 0.5);
+        background: rgba(251, 191, 36, 0.12);
+        color: #fde047;
+      }
+      .tag-type-editor:hover, .tag-type-editor.active {
+        border-color: #fbbf24;
+        background: rgba(251, 191, 36, 0.25);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+      }
+      .tag-type-audio {
+        border-color: rgba(168, 85, 247, 0.5);
+        background: rgba(168, 85, 247, 0.12);
+        color: #d8b4fe;
+      }
+      .tag-type-audio:hover, .tag-type-audio.active {
+        border-color: #a855f7;
+        background: rgba(168, 85, 247, 0.25);
+        box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+      }
+      .tag-type-graphics {
+        border-color: rgba(236, 72, 153, 0.5);
+        background: rgba(236, 72, 153, 0.12);
+        color: #f9a8d4;
+      }
+      .tag-type-graphics:hover, .tag-type-graphics.active {
+        border-color: #ec4899;
+        background: rgba(236, 72, 153, 0.25);
+        box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+      }
+      .tag-type-hub {
+        border-color: rgba(6, 182, 212, 0.5);
+        background: rgba(6, 182, 212, 0.12);
+        color: #67e8f9;
+      }
+      .tag-type-hub:hover, .tag-type-hub.active {
+        border-color: #06b6d4;
+        background: rgba(6, 182, 212, 0.25);
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+      }
+      .tag-type-collaborative {
+        border-color: rgba(249, 115, 22, 0.5);
+        background: rgba(249, 115, 22, 0.12);
+        color: #fdba74;
+      }
+      .tag-type-collaborative:hover, .tag-type-collaborative.active {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.25);
+        box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+      }
+      .tag-type-docs {
+        border-color: rgba(107, 114, 128, 0.5);
+        background: rgba(107, 114, 128, 0.12);
+        color: #d1d5db;
+      }
+      .tag-type-docs:hover, .tag-type-docs.active {
+        border-color: #6b7280;
+        background: rgba(107, 114, 128, 0.25);
+        box-shadow: 0 0 12px rgba(107, 114, 128, 0.4);
+      }
+      /* Default tag styling */
+      .tag-button:not(.tag-type-game):not(.tag-type-tool):not(.tag-type-editor):not(.tag-type-audio):not(.tag-type-graphics):not(.tag-type-hub):not(.tag-type-collaborative):not(.tag-type-docs),
+      .tag-pill:not(.tag-type-game):not(.tag-type-tool):not(.tag-type-editor):not(.tag-type-audio):not(.tag-type-graphics):not(.tag-type-hub):not(.tag-type-collaborative):not(.tag-type-docs) {
+        border-color: var(--tag-border, rgba(0, 255, 255, 0.3));
+        background: var(--tag-bg, rgba(0, 255, 255, 0.08));
+        color: hsl(var(--tag-hue, 180) 100% 78%);
       }
       .tag-button.active,
       .mode-btn.active,
@@ -231,13 +350,14 @@
       }
       .artifact-card,
       .artifact-row {
-        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 68%);
-        border-radius: 0;
-        padding: 0.5rem;
+        border: 1px solid rgba(0, 255, 255, 0.12);
+        border-radius: 8px;
+        padding: 0.75rem;
         background: rgba(255, 255, 255, 0.035);
         display: grid;
-        gap: 0.3rem;
-        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.42);
+        gap: 0.4rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
       }
       .artifact-row {
         grid-template-columns: 1fr auto;
@@ -346,17 +466,32 @@
       }
       .lobby-grid {
         display: grid;
-        grid-template-columns: minmax(240px, 0.9fr) minmax(360px, 1.6fr);
-        gap: 0.6rem;
+        grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
+        gap: 1rem;
         min-height: 0;
+        height: 100%;
       }
-      .lobby-chat-main,
+      .lobby-chat-main {
+        min-height: 0;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
       .lobby-roster {
         min-height: 0;
         overflow: auto;
+        border-left: 1px solid rgba(0, 255, 255, 0.1);
+        padding-left: 1rem;
       }
       .lobby-chat-log {
-        min-height: 18rem;
+        min-height: 16rem;
+        max-height: calc(100vh - 420px);
+        overflow-y: auto;
+        border: 1px solid rgba(0, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 0.75rem;
+        background: rgba(0, 0, 0, 0.3);
       }
       .lobby-summary-compact {
         display: grid;
@@ -370,6 +505,39 @@
       .observer-stale {
         border-color: #f59e0b;
         color: #fbbf24;
+        background: rgba(251, 191, 36, 0.08);
+      }
+      .lobby-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid rgba(0, 255, 255, 0.15);
+        background: rgba(0, 255, 255, 0.05);
+        border-radius: 8px 8px 0 0;
+      }
+      .lobby-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--hub-accent);
+        text-transform: uppercase;
+      }
+      .lobby-input-area {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 0 0 8px 8px;
+        border-top: 1px solid rgba(0, 255, 255, 0.1);
+      }
+      .lobby-input-area input {
+        flex: 1;
+        min-width: 0;
+      }
+      .lobby-input-area button {
+        white-space: nowrap;
       }
       .online-users,
       .chat-channels {
@@ -522,22 +690,39 @@
         background: linear-gradient(
           90deg,
           transparent,
-          color-mix(in srgb, var(--hub-accent), transparent 30%),
+          rgba(0, 255, 255, 0.15),
           transparent
         );
         cursor: col-resize;
         position: relative;
         touch-action: none;
         z-index: 4;
-        min-width: 7px;
-        min-height: 7px;
+        min-width: 8px;
+        min-height: 8px;
+        transition: background 0.2s ease;
+      }
+      .resize-handle:hover {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 255, 255, 0.3),
+          transparent
+        );
       }
       .resize-handle.horizontal {
         cursor: row-resize;
         background: linear-gradient(
           0deg,
           transparent,
-          color-mix(in srgb, var(--hub-accent), transparent 30%),
+          rgba(0, 255, 255, 0.15),
+          transparent
+        );
+      }
+      .resize-handle.horizontal:hover {
+        background: linear-gradient(
+          0deg,
+          transparent,
+          rgba(0, 255, 255, 0.3),
           transparent
         );
       }
@@ -547,8 +732,8 @@
         inset: 0;
         background: repeating-linear-gradient(
           45deg,
-          transparent 0 5px,
-          rgba(0, 255, 255, 0.22) 5px 6px
+          transparent 0 4px,
+          rgba(0, 255, 255, 0.18) 4px 5px
         );
       }
       .pixel-muse {
@@ -908,7 +1093,7 @@
         import(hubUrl('lib/menu.js')),
         import(hubUrl('lib/launcher.js')),
         import(hubUrl('lib/event-log.js')),
-        import(hubUrl('lib/resizable-panels.js')),
+        import('../lib/ui/resizable-panels.js'),
         import(hubUrl('lib/storage.js')),
         import(hubUrl('lib/themes.js')),
         import(hubUrl('lib/sound.js')),
@@ -1456,10 +1641,12 @@
       }
       function renderArtifactItem(item) {
         const tags = (item.tags || [])
-          .map(
-            (tag) =>
-              `<span class="pill tag-pill" style="${tagColorStyle(tag)}">${esc(tag)}</span>`,
-          )
+          .map((tag) => {
+            const colorStyle = tagColorStyle(tag);
+            const tagClassMatch = colorStyle.match(/--tag-class:([^;]+)/);
+            const tagClass = tagClassMatch ? tagClassMatch[1] : '';
+            return `<span class="pill tag-pill ${tagClass}" style="${colorStyle}">${esc(tag)}</span>`;
+          })
           .join("");
         const icons = `<div class="launch-icons"><button class="icon-btn" title="inline" data-launch="inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow">↗</button></div>`;
         return viewMode === "list"

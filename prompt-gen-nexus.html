@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PROMPT FORGE v1 // LLM Prompt Generator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<style>
+/* ══════════════════════════════════════
+   ROOT TOKENS — NEXUS DESIGN SYSTEM
+══════════════════════════════════════ */
+:root {
+  --bg-primary: #0a0a12;
+  --bg-secondary: #12121f;
+  --bg-tertiary: #1a1a2e;
+  --fg-primary: #00ffff;
+  --fg-secondary: #ff00ff;
+  --accent: #00ff88;
+  --accent-secondary: #ff3366;
+  --glow-primary: rgba(0,255,255,0.5);
+  --glow-secondary: rgba(255,0,255,0.5);
+  --grid-color: rgba(0,255,255,0.08);
+  --placeholder-color: #00ff88;
+  --special-color: #ff8c00;
+  --variable-color: #c084fc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Share Tech Mono", monospace;
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  min-height: 100vh;
+  overflow: hidden;
+  transition: background 0.4s ease, color 0.3s ease;
+}
+.font-orb { font-family: "Orbitron", sans-serif; }
+
+/* ══════════════════════════════════════
+   THEMES
+══════════════════════════════════════ */
+[data-theme="synthwave"] {
+  --bg-primary: #1a0a2e; --bg-secondary: #2d1b4e; --bg-tertiary: #3a2560;
+  --fg-primary: #ff00ff; --fg-secondary: #00ffff;
+  --accent: #ff6ec7; --accent-secondary: #ffaa00;
+  --glow-primary: rgba(255,0,255,0.6); --glow-secondary: rgba(255,170,0,0.5);
+  --placeholder-color: #ff6ec7; --special-color: #ffaa00; --variable-color: #01cdfe;
+}
+[data-theme="cyberpunk"] {
+  --bg-primary: #0d0d0d; --bg-secondary: #1a1a1a; --bg-tertiary: #252525;
+  --fg-primary: #f0e68c; --fg-secondary: #ff0080;
+  --accent: #00ff41; --accent-secondary: #ff073a;
+  --glow-primary: rgba(240,230,140,0.6); --glow-secondary: rgba(255,0,128,0.5);
+  --placeholder-color: #00ff41; --special-color: #ff073a; --variable-color: #f0e68c;
+}
+[data-theme="retro8bit"] {
+  --bg-primary: #0f0f0f; --bg-secondary: #1a1a0a; --bg-tertiary: #252510;
+  --fg-primary: #33ff00; --fg-secondary: #ffb000;
+  --accent: #00ff88; --accent-secondary: #ff4444;
+  --glow-primary: rgba(51,255,0,0.5); --glow-secondary: rgba(255,176,0,0.5);
+  --placeholder-color: #00ff88; --special-color: #ffb000; --variable-color: #33ff00;
+}
+[data-theme="midnight"] {
+  --bg-primary: #0a1628; --bg-secondary: #0f2140; --bg-tertiary: #162d55;
+  --fg-primary: #87ceeb; --fg-secondary: #c0c0c0;
+  --accent: #4169e1; --accent-secondary: #ffd700;
+  --glow-primary: rgba(135,206,235,0.5); --glow-secondary: rgba(192,192,192,0.4);
+  --placeholder-color: #4169e1; --special-color: #ffd700; --variable-color: #87ceeb;
+}
+[data-theme="vaporwave"] {
+  --bg-primary: #1a0a20; --bg-secondary: #2d1536; --bg-tertiary: #3d1f4a;
+  --fg-primary: #ff71ce; --fg-secondary: #01cdfe;
+  --accent: #b967ff; --accent-secondary: #05ffa1;
+  --glow-primary: rgba(255,113,206,0.5); --glow-secondary: rgba(1,205,254,0.5);
+  --placeholder-color: #b967ff; --special-color: #05ffa1; --variable-color: #01cdfe;
+}
+[data-theme="matrix"] {
+  --bg-primary: #000300; --bg-secondary: #001200; --bg-tertiary: #001a00;
+  --fg-primary: #00ff41; --fg-secondary: #008f11;
+  --accent: #00ff41; --accent-secondary: #39ff14;
+  --glow-primary: rgba(0,255,65,0.6); --glow-secondary: rgba(0,143,17,0.5);
+  --placeholder-color: #39ff14; --special-color: #ff8c00; --variable-color: #00ff41;
+}
+
+/* ══════════════════════════════════════
+   BACKGROUND FX
+══════════════════════════════════════ */
+.starfield { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+@keyframes twinkle { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.3)} }
+.scanlines {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px);
+}
+.warp-lines { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.warp-line {
+  position: absolute; top: -50%; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--fg-primary), transparent);
+  animation: warpScroll 4s linear infinite; opacity: 0.12;
+}
+@keyframes warpScroll { 0%{transform:translateY(-100%)} 100%{transform:translateY(200vh)} }
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.header {
+  background: linear-gradient(180deg, var(--bg-secondary), transparent);
+  border-bottom: 1px solid var(--fg-primary);
+  padding: 0.6rem 1.25rem;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 100; position: relative;
+}
+.logo {
+  font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1rem;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--fg-primary);
+  text-shadow: 0 0 10px var(--fg-primary), 0 0 30px var(--fg-primary);
+}
+.header-controls { display: flex; gap: 0.4rem; align-items: center; }
+.hdr-chip {
+  display: flex; align-items: center; gap: 0.3rem; font-size: 0.65rem;
+  padding: 0.2rem 0.5rem; border: 1px solid rgba(0,255,255,0.15);
+  border-radius: 3px; background: rgba(0,255,255,0.04); white-space: nowrap;
+}
+.hdr-chip .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.hdr-chip .dot.on { background: var(--accent); box-shadow: 0 0 5px var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.hdr-btn {
+  padding: 0.25rem 0.55rem; background: rgba(0,255,255,0.06);
+  border: 1px solid rgba(0,255,255,0.2); border-radius: 3px;
+  color: var(--fg-primary); font-family: "Share Tech Mono", monospace;
+  font-size: 0.85rem; cursor: pointer; line-height: 1; transition: all 0.15s;
+}
+.hdr-btn:hover, .hdr-btn.active { background: rgba(0,255,255,0.15); border-color: var(--fg-primary); }
+
+/* ══════════════════════════════════════
+   SEARCH
+══════════════════════════════════════ */
+.search-wrap {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: rgba(0,255,255,0.05); border: 1px solid rgba(0,255,255,0.2);
+  border-radius: 4px; padding: 0.3rem 0.6rem;
+}
+.search-wrap:focus-within { border-color: rgba(0,255,255,0.5); background: rgba(0,255,255,0.08); }
+.search-input {
+  background: none; border: none; color: var(--fg-primary);
+  font-family: "Share Tech Mono", monospace; font-size: 0.75rem;
+  width: 180px; outline: none;
+}
+.search-input::placeholder { color: rgba(0,255,255,0.35); }
+
+/* ══════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════ */
+.main { display: flex; height: calc(100vh - 60px - 28px); position: relative; }
+
+/* ══════════════════════════════════════
+   TAG SIDEBAR
+══════════════════════════════════════ */
+.tag-sidebar {
+  width: 220px; background: var(--bg-secondary);
+  border-right: 1px solid rgba(0,255,255,0.1);
+  display: flex; flex-direction: column; padding: 0.75rem;
+  overflow-y: auto; flex-shrink: 0;
+}
+.tag-title {
+  font-family: "Orbitron", sans-serif; font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
+  margin-bottom: 0.5rem; padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0,255,255,0.1);
+}
+.tag-mode-toggle { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; }
+.mode-btn {
+  flex: 1; padding: 0.3rem 0.5rem; background: rgba(0,255,255,0.05);
+  border: 1px solid rgba(0,255,255,0.2); border-radius: 3px;
+  color: rgba(0,255,255,0.6); font-family: "Share Tech Mono", monospace;
+  font-size: 0.7rem; cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+}
+.mode-btn:hover { background: rgba(0,255,255,0.1); color: rgba(0,255,255,0.9); }
+.mode-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+.tag-filter { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.tag-button {
+  font-size: 0.65rem; padding: 0.15rem 0.4rem;
+  background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.1);
+  border-radius: 3px; color: var(--fg-primary);
+  font-family: "Share Tech Mono", monospace; cursor: pointer; transition: all 0.2s;
+}
+.tag-button:hover { background: rgba(0,255,255,0.15); color: rgba(0,255,255,0.9); }
+.tag-button.active { background: var(--accent); border-color: var(--accent); color: #000; box-shadow: 0 0 10px rgba(0,255,136,0.4); }
+.clear-tags {
+  margin-top: 0.75rem; padding: 0.4rem 0.6rem;
+  background: rgba(255,0,102,0.1); border: 1px solid rgba(255,0,102,0.3);
+  border-radius: 3px; color: var(--accent-secondary);
+  font-family: "Share Tech Mono", monospace; font-size: 0.65rem;
+  cursor: pointer; text-align: center; width: 100%;
+}
+.clear-tags:hover { background: rgba(255,0,102,0.2); }
+
+/* ══════════════════════════════════════
+   PROMPT LIST (in sidebar)
+══════════════════════════════════════ */
+.prompt-list-section { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(0,255,255,0.15); }
+.prompt-list { max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem; }
+.prompt-list-item {
+  padding: 0.5rem 0.6rem; background: rgba(0,255,255,0.03);
+  border: 1px solid rgba(0,255,255,0.08); border-radius: 4px;
+  cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent;
+}
+.prompt-list-item:hover { background: rgba(0,255,255,0.07); border-color: rgba(0,255,255,0.25); border-left-color: rgba(0,255,255,0.4); }
+.prompt-list-item.active { background: rgba(0,255,255,0.1); border-color: rgba(0,255,255,0.3); border-left-color: var(--accent); box-shadow: 0 0 8px rgba(0,255,255,0.15); }
+.prompt-list-name { font-family: "Orbitron", sans-serif; font-size: 0.72rem; font-weight: 600; color: var(--fg-primary); line-height: 1.3; }
+.prompt-list-preview { font-size: 0.65rem; color: rgba(0,255,255,0.5); margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prompt-list-tags { display: flex; flex-wrap: wrap; gap: 0.15rem; margin-top: 0.25rem; }
+.prompt-list-tag { font-size: 0.58rem; padding: 0.1rem 0.3rem; background: rgba(0,255,255,0.08); border-radius: 2px; color: rgba(0,255,255,0.7); }
+.new-prompt-btn {
+  margin-top: 0.5rem; padding: 0.5rem; background: rgba(0,255,136,0.08);
+  border: 1px solid var(--accent); border-radius: 4px; color: var(--accent);
+  font-family: "Share Tech Mono", monospace; font-size: 0.7rem;
+  cursor: pointer; text-align: center; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+.new-prompt-btn:hover { background: rgba(0,255,136,0.18); box-shadow: 0 0 12px rgba(0,255,136,0.3); }
+
+/* ══════════════════════════════════════
+   CONTENT AREA
+══════════════════════════════════════ */
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.content-header {
+  padding: 0.6rem 1.25rem; border-bottom: 1px solid rgba(0,255,255,0.1);
+  background: rgba(0,0,0,0.2); display: flex; align-items: center; gap: 0.75rem;
+}
+.content-title-input {
+  flex: 1; background: none; border: none; color: var(--fg-primary);
+  font-family: "Orbitron", sans-serif; font-size: 0.9rem; font-weight: 600;
+  outline: none;
+}
+.content-title-input::placeholder { color: rgba(0,255,255,0.35); }
+.action-btn {
+  padding: 0.3rem 0.6rem; border-radius: 3px;
+  font-family: "Share Tech Mono", monospace; font-size: 0.7rem;
+  cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 0.3rem;
+  border: 1px solid;
+}
+.action-btn.save { background: rgba(0,255,136,0.1); border-color: var(--accent); color: var(--accent); }
+.action-btn.save:hover { background: rgba(0,255,136,0.25); box-shadow: 0 0 8px rgba(0,255,136,0.3); }
+.action-btn.delete { background: rgba(255,51,102,0.08); border-color: rgba(255,51,102,0.4); color: var(--accent-secondary); }
+.action-btn.delete:hover { background: rgba(255,51,102,0.2); }
+.action-btn.copy { background: rgba(0,255,255,0.06); border-color: rgba(0,255,255,0.25); color: var(--fg-primary); }
+.action-btn.copy:hover { background: rgba(0,255,255,0.15); }
+
+/* ══════════════════════════════════════
+   CONTENT BODY
+══════════════════════════════════════ */
+.content-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* Tabs */
+.tab-bar {
+  display: flex; background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(0,255,136,0.15); flex-shrink: 0;
+}
+.tab-btn {
+  padding: 0.45rem 1rem; background: transparent; border: none;
+  border-right: 1px solid rgba(0,255,255,0.08); color: rgba(0,255,255,0.5);
+  font-family: "Share Tech Mono", monospace; font-size: 0.7rem;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.tab-btn:hover { background: rgba(0,255,255,0.05); color: rgba(0,255,255,0.9); }
+.tab-btn.active { background: var(--accent); color: #000; font-weight: 600; }
+.tab-panel { display: none; flex: 1; overflow: hidden; }
+.tab-panel.active { display: flex; flex-direction: column; }
+
+/* ══════════════════════════════════════
+   CODEMIRROR
+══════════════════════════════════════ */
+.CodeMirror {
+  height: 100% !important; font-family: "Share Tech Mono", monospace;
+  font-size: 14px; line-height: 1.65; background: transparent !important;
+}
+.CodeMirror-gutters { background: transparent !important; border-right: 1px solid rgba(0,255,255,0.08) !important; }
+.CodeMirror-linenumber { color: rgba(0,255,255,0.25) !important; }
+.CodeMirror-cursor { border-left-color: var(--fg-primary) !important; }
+.CodeMirror-selected { background: rgba(0,255,255,0.12) !important; }
+.CodeMirror-focused .CodeMirror-selected { background: rgba(0,255,255,0.2) !important; }
+.cm-placeholder { color: var(--placeholder-color) !important; font-weight: 700; background: rgba(0,255,136,0.08); border-radius: 2px; padding: 0 2px; }
+.cm-special-placeholder { color: var(--special-color) !important; font-weight: 700; background: rgba(255,140,0,0.12); border-radius: 2px; padding: 0 2px; }
+.cm-variable { color: var(--variable-color) !important; font-weight: 600; }
+
+/* ══════════════════════════════════════
+   PLACEHOLDER PANEL
+══════════════════════════════════════ */
+.placeholder-panel {
+  border-top: 1px solid rgba(0,255,136,0.2); background: var(--bg-secondary); flex-shrink: 0;
+}
+.placeholder-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 1rem; cursor: pointer; transition: background 0.15s;
+}
+.placeholder-header:hover { background: rgba(0,255,136,0.04); }
+.placeholder-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--accent); font-family: "Orbitron", sans-serif; text-transform: uppercase; letter-spacing: 0.08em; }
+.placeholder-count { font-size: 0.6rem; background: rgba(0,255,136,0.15); color: var(--accent); padding: 0.1rem 0.4rem; border-radius: 999px; }
+.placeholder-chevron { transition: transform 0.2s; color: rgba(0,255,255,0.5); }
+.placeholder-fields { padding: 0 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; }
+.placeholder-row { animation: phSlideIn 0.2s ease-out; }
+@keyframes phSlideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.placeholder-label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; margin-bottom: 0.2rem; }
+.placeholder-label.regular { color: var(--placeholder-color); }
+.placeholder-label.special { color: var(--special-color); }
+.placeholder-hint { font-size: 0.58rem; color: rgba(0,255,255,0.35); font-weight: normal; }
+.ph-textarea, .ph-select {
+  width: 100%; padding: 0.4rem 0.6rem; background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,255,255,0.15); border-radius: 4px;
+  color: var(--fg-primary); font-family: "Share Tech Mono", monospace;
+  font-size: 0.72rem; outline: none; resize: none;
+}
+.ph-textarea:focus { border-color: var(--accent); box-shadow: 0 0 6px rgba(0,255,136,0.2); }
+.ph-select:focus { border-color: var(--special-color); }
+.ph-select option { background: var(--bg-primary); color: var(--fg-primary); }
+
+/* ══════════════════════════════════════
+   OPERATIONS PANEL
+══════════════════════════════════════ */
+.ops-panel { padding: 1.25rem; overflow-y: auto; }
+.ops-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+.op-card {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem;
+  background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.1);
+  border-radius: 6px; transition: all 0.15s;
+}
+.op-card:hover { background: rgba(0,255,255,0.07); border-color: rgba(0,255,255,0.25); }
+.op-name { font-family: "Orbitron", sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--fg-primary); }
+.op-template-preview { font-size: 0.65rem; color: rgba(0,255,255,0.5); margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.op-apply-btn {
+  padding: 0.3rem 0.6rem; background: rgba(255,140,0,0.1);
+  border: 1px solid var(--special-color); border-radius: 3px;
+  color: var(--special-color); font-family: "Share Tech Mono", monospace;
+  font-size: 0.65rem; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.op-apply-btn:hover { background: rgba(255,140,0,0.25); box-shadow: 0 0 8px rgba(255,140,0,0.3); }
+.op-delete-btn { background: none; border: none; color: rgba(255,51,102,0.5); cursor: pointer; font-size: 0.75rem; padding: 0.2rem; }
+.op-delete-btn:hover { color: var(--accent-secondary); }
+.op-create-form { margin-top: 1rem; padding: 1rem; background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.1); border-radius: 6px; }
+.op-create-form input, .op-create-form textarea {
+  width: 100%; padding: 0.4rem 0.6rem; margin-bottom: 0.5rem;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,255,0.15);
+  border-radius: 4px; color: var(--fg-primary);
+  font-family: "Share Tech Mono", monospace; font-size: 0.72rem; outline: none; resize: none;
+}
+.op-create-form input:focus, .op-create-form textarea:focus { border-color: var(--accent); }
+
+/* ══════════════════════════════════════
+   PREVIEW PANEL
+══════════════════════════════════════ */
+.preview-panel { padding: 1.25rem; overflow-y: auto; }
+.preview-box {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,255,0.12);
+  border-radius: 6px; padding: 1rem; font-size: 0.8rem; line-height: 1.6;
+  white-space: pre-wrap; word-wrap: break-word; color: var(--fg-primary);
+}
+.preview-section-title { font-family: "Orbitron", sans-serif; font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+
+/* ══════════════════════════════════════
+   ASSEMBLY MODAL
+══════════════════════════════════════ */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7);
+}
+.modal-backdrop.open { display: flex; align-items: center; justify-content: center; }
+.modal-box {
+  width: 680px; max-width: 95vw; max-height: 80vh;
+  background: var(--bg-secondary); border: 1px solid var(--fg-primary);
+  border-radius: 8px; display: flex; flex-direction: column;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6), 0 0 20px var(--glow-primary);
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.25rem; border-bottom: 1px solid rgba(0,255,255,0.12);
+}
+.modal-title { font-family: "Orbitron", sans-serif; font-size: 0.85rem; color: var(--fg-primary); letter-spacing: 0.1em; }
+.modal-close {
+  background: none; border: 1px solid rgba(255,51,102,0.3); color: var(--accent-secondary);
+  padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; border-radius: 3px;
+}
+.modal-close:hover { background: rgba(255,51,102,0.15); }
+.modal-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 0.75rem 1.25rem; border-top: 1px solid rgba(0,255,255,0.12); display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+/* Assembly specific */
+.asm-available, .asm-order { display: flex; flex-direction: column; gap: 0.3rem; max-height: 160px; overflow-y: auto; }
+.asm-item {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem;
+  background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.1);
+  border-radius: 4px; font-size: 0.72rem;
+}
+.asm-item:hover { background: rgba(0,255,255,0.07); }
+.asm-add-btn, .asm-remove-btn, .asm-move-btn {
+  background: none; border: 1px solid rgba(0,255,255,0.2); border-radius: 3px;
+  color: var(--fg-primary); cursor: pointer; font-size: 0.7rem; padding: 0.15rem 0.35rem;
+  font-family: "Share Tech Mono", monospace;
+}
+.asm-add-btn { border-color: var(--accent); color: var(--accent); }
+.asm-add-btn:hover { background: rgba(0,255,136,0.15); }
+.asm-remove-btn { border-color: var(--accent-secondary); color: var(--accent-secondary); }
+.asm-remove-btn:hover { background: rgba(255,51,102,0.15); }
+.asm-move-btn:hover { background: rgba(0,255,255,0.1); }
+.asm-separator {
+  padding: 0.4rem; margin: 0.5rem 0; background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,255,255,0.15); border-radius: 4px;
+  color: var(--fg-primary); font-family: "Share Tech Mono", monospace; font-size: 0.72rem;
+  outline: none; width: 100%;
+}
+.asm-preview {
+  margin-top: 0.75rem; padding: 0.75rem; background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,255,255,0.1); border-radius: 4px;
+  font-size: 0.7rem; white-space: pre-wrap; max-height: 150px; overflow-y: auto; color: rgba(0,255,255,0.7);
+}
+
+/* ══════════════════════════════════════
+   TAG INPUT MODAL
+══════════════════════════════════════ */
+.tag-modal-input {
+  width: 100%; padding: 0.5rem 0.7rem; background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,255,255,0.25); border-radius: 4px;
+  color: var(--fg-primary); font-family: "Share Tech Mono", monospace;
+  font-size: 0.75rem; outline: none;
+}
+.tag-modal-input:focus { border-color: var(--accent); box-shadow: 0 0 8px rgba(0,255,136,0.2); }
+.tag-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.65rem; padding: 0.15rem 0.45rem;
+  background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.15);
+  border-radius: 3px; color: var(--fg-primary); cursor: pointer; transition: all 0.15s;
+}
+.tag-chip:hover { background: rgba(255,51,102,0.15); border-color: var(--accent-secondary); color: var(--accent-secondary); }
+
+/* ══════════════════════════════════════
+   FOOTER BAR
+══════════════════════════════════════ */
+.footer-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+  background: var(--bg-secondary); border-top: 1px solid rgba(0,255,255,0.12);
+  display: flex; align-items: center; z-index: 200;
+  font-size: 0.65rem; color: rgba(0,255,255,0.6); overflow: hidden;
+}
+.footer-left { display: flex; align-items: center; gap: 0.5rem; padding: 0 0.75rem; flex-shrink: 0; border-right: 1px solid rgba(0,255,255,0.1); }
+.footer-right { display: flex; align-items: center; gap: 0.5rem; padding: 0 0.75rem; flex-shrink: 0; border-left: 1px solid rgba(0,255,255,0.1); margin-left: auto; }
+.footer-sep { color: rgba(0,255,255,0.2); }
+.ticker-wrap { flex: 1; overflow: hidden; position: relative; }
+.ticker-track { display: inline-flex; white-space: nowrap; animation: tickerScroll 60s linear infinite; }
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.ticker-item { padding: 0 1.5rem; color: rgba(0,255,255,0.35); }
+.ticker-item.hi { color: var(--accent); }
+
+/* ══════════════════════════════════════
+   SETTINGS DRAWER
+══════════════════════════════════════ */
+.settings-backdrop { display: none; position: fixed; inset: 0; z-index: 1400; background: rgba(0,0,0,0.5); }
+.settings-backdrop.open { display: block; }
+.settings-drawer {
+  position: fixed; top: 0; right: -420px; width: 380px; height: 100vh;
+  background: var(--bg-secondary); border-left: 1px solid var(--fg-primary);
+  z-index: 1500; transition: right 0.3s ease; overflow-y: auto;
+  display: flex; flex-direction: column; box-shadow: -10px 0 40px rgba(0,0,0,0.6);
+}
+.settings-drawer.open { right: 0; }
+.settings-drawer-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem; border-bottom: 1px solid rgba(0,255,255,0.12); flex-shrink: 0;
+}
+.settings-drawer-title { font-family: "Orbitron", sans-serif; font-size: 0.8rem; color: var(--fg-primary); letter-spacing: 0.12em; }
+.settings-close { background: none; border: 1px solid rgba(255,0,102,0.3); color: var(--accent-secondary); padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; border-radius: 3px; }
+.settings-close:hover { background: rgba(255,0,102,0.15); }
+.settings-body { padding: 1rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.settings-sect-title {
+  font-family: "Orbitron", sans-serif; font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--accent); margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem; border-bottom: 1px solid rgba(0,255,255,0.1);
+}
+.theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.theme-btn {
+  aspect-ratio: 1; border-radius: 6px; cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.1); transition: all 0.15s;
+  position: relative; overflow: hidden;
+}
+.theme-btn:hover { transform: scale(1.08); border-color: rgba(255,255,255,0.4); }
+.theme-btn.active { border-color: var(--fg-primary); box-shadow: 0 0 12px var(--glow-primary); }
+.theme-btn-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.6); font-size: 0.45rem;
+  font-family: "Orbitron", sans-serif; text-align: center;
+  padding: 0.15rem 0; color: #fff; letter-spacing: 0.05em;
+}
+.theme-btn[data-theme="default"] { background: linear-gradient(135deg, #0a0a12, #00ffff); }
+.theme-btn[data-theme="synthwave"] { background: linear-gradient(135deg, #1a0a2e, #ff00ff); }
+.theme-btn[data-theme="cyberpunk"] { background: linear-gradient(135deg, #0d0d0d, #f0e68c); }
+.theme-btn[data-theme="retro8bit"] { background: linear-gradient(135deg, #0f0f0f, #33ff00); }
+.theme-btn[data-theme="midnight"] { background: linear-gradient(135deg, #0a1628, #87ceeb); }
+.theme-btn[data-theme="vaporwave"] { background: linear-gradient(135deg, #1a0a20, #ff71ce); }
+.theme-btn[data-theme="matrix"] { background: linear-gradient(135deg, #000300, #00ff41); }
+.setting-row { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0; font-size: 0.72rem; border-bottom: 1px solid rgba(0,255,255,0.05); }
+.toggle-sw {
+  width: 36px; height: 18px; border-radius: 9px;
+  background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.25);
+  cursor: pointer; position: relative; transition: all 0.2s; flex-shrink: 0;
+}
+.toggle-sw::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+  border-radius: 50%; background: rgba(0,255,255,0.4); transition: all 0.2s;
+}
+.toggle-sw.on { background: rgba(0,255,136,0.2); border-color: var(--accent); }
+.toggle-sw.on::after { left: 20px; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+/* ══════════════════════════════════════
+   API DOCS (in ops tab)
+══════════════════════════════════════ */
+.api-block {
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,255,0.1);
+  border-radius: 6px; padding: 0.75rem; font-size: 0.68rem; line-height: 1.6;
+  overflow-x: auto; margin: 0.5rem 0;
+}
+.api-block .method { font-weight: 700; }
+.api-block .get { color: #34d399; }
+.api-block .post { color: #60a5fa; }
+.api-block .put { color: #fbbf24; }
+.api-block .del { color: #f43f5e; }
+.api-block .key { color: var(--variable-color); }
+.api-block .str { color: var(--placeholder-color); }
+.api-block .comment { color: rgba(0,255,255,0.25); font-style: italic; }
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast-container { position: fixed; bottom: 2.5rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.4rem; }
+.toast {
+  padding: 0.5rem 0.85rem; border-radius: 4px; font-size: 0.72rem;
+  font-family: "Share Tech Mono", monospace; animation: toastIn 0.25s ease-out;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.toast.success { background: rgba(0,255,136,0.15); border: 1px solid var(--accent); color: var(--accent); }
+.toast.error { background: rgba(255,51,102,0.15); border: 1px solid var(--accent-secondary); color: var(--accent-secondary); }
+.toast.info { background: rgba(0,255,255,0.1); border: 1px solid var(--fg-primary); color: var(--fg-primary); }
+
+/* Search highlight */
+mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius: 2px; padding: 0 1px; }
+</style>
+</head>
+
+<body data-theme="default">
+<!-- Background FX -->
+<div class="starfield" id="starfield"></div>
+<div class="scanlines"></div>
+<div class="warp-lines" id="warpLines"></div>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="header">
+  <div class="logo">PROMPT FORGE</div>
+  <div class="search-wrap">
+    <span style="font-size:0.8rem;opacity:0.5">⌕</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="Search prompts…" autocomplete="off" />
+  </div>
+  <div class="header-controls">
+    <div class="hdr-chip" id="hdrStorageChip"><div class="dot on"></div><span>LOCAL</span></div>
+    <div class="hdr-chip"><span id="hdrPromptCount">0 PRMPT</span></div>
+    <div class="hdr-chip"><span id="hdrDateTime">--:--:--</span></div>
+    <button class="hdr-btn" onclick="App.openAssembly()" title="Assemble">⊕</button>
+    <button class="hdr-btn" onclick="App.openSettings()" title="Settings">⚙</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     MAIN
+══════════════════════════════════════ -->
+<div class="main">
+  <!-- Tag Sidebar -->
+  <aside class="tag-sidebar">
+    <div class="tag-title">Tag Filter</div>
+    <div class="tag-mode-toggle">
+      <button class="mode-btn" id="modeAnd" onclick="App.setTagMode('AND')">AND</button>
+      <button class="mode-btn active" id="modeOr" onclick="App.setTagMode('OR')">OR</button>
+    </div>
+    <div class="tag-filter" id="tagFilter"></div>
+    <button class="clear-tags" onclick="App.clearAllTags()">Clear All Tags</button>
+
+    <!-- Prompt List -->
+    <div class="prompt-list-section">
+      <div class="tag-title">Prompts</div>
+      <div class="prompt-list" id="promptList"></div>
+      <button class="new-prompt-btn" onclick="App.createPrompt()">
+        <span>＋</span> New Prompt
+      </button>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="content-header">
+      <input class="content-title-input" id="promptTitle" type="text" placeholder="Prompt title…" />
+      <div class="tag-chips" id="promptTags"></div>
+      <button class="action-btn" onclick="App.openTagModal()" title="Add tag">🏷</button>
+      <div style="width:1px;height:20px;background:rgba(0,255,255,0.15)"></div>
+      <button class="action-btn save" onclick="App.savePrompt()">💾 Save</button>
+      <button class="action-btn copy" onclick="App.copyPrompt()">📋 Copy</button>
+      <button class="action-btn delete" onclick="App.deletePrompt()">🗑 Del</button>
+    </div>
+
+    <div class="content-body">
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="editor" onclick="App.switchTab('editor')">EDITOR</button>
+        <button class="tab-btn" data-tab="preview" onclick="App.switchTab('preview')">PREVIEW</button>
+        <button class="tab-btn" data-tab="operations" onclick="App.switchTab('operations')">OPERATIONS</button>
+        <button class="tab-btn" data-tab="apidocs" onclick="App.switchTab('apidocs')">API DOCS</button>
+      </div>
+
+      <!-- Tab: Editor -->
+      <div class="tab-panel active" id="tab-editor">
+        <div id="editorContainer" style="flex:1;overflow:hidden;padding:0.5rem;"></div>
+        <div class="placeholder-panel" id="placeholderPanel">
+          <div class="placeholder-header" onclick="App.togglePlaceholderPanel()">
+            <div class="placeholder-title">
+              <span>◈</span> Placeholder Values
+              <span class="placeholder-count" id="placeholderCount">0</span>
+            </div>
+            <span class="placeholder-chevron" id="placeholderChevron">▼</span>
+          </div>
+          <div class="placeholder-fields" id="placeholderFields">
+            <div style="font-size:0.68rem;color:rgba(0,255,255,0.35);font-style:italic">
+              Placeholders like &lt;content&gt; will auto-spawn fields here.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Preview -->
+      <div class="tab-panel" id="tab-preview">
+        <div class="preview-panel">
+          <div class="preview-section-title">◈ Resolved Output</div>
+          <div class="preview-box" id="previewOutput">No prompt selected.</div>
+          <div class="preview-section-title" style="margin-top:1rem">◈ Raw (placeholders preserved)</div>
+          <div class="preview-box" id="previewRaw" style="opacity:0.6">—</div>
+        </div>
+      </div>
+
+      <!-- Tab: Operations -->
+      <div class="tab-panel" id="tab-operations">
+        <div class="ops-panel">
+          <div class="preview-section-title">◈ Apply Operation</div>
+          <p style="font-size:0.68rem;color:rgba(0,255,255,0.5);margin-bottom:0.75rem">
+            Operations transform prompts via <span style="color:var(--special-color);font-weight:700">&lt;!prompt&gt;</span> injection.
+            The current prompt body replaces <span style="color:var(--special-color);font-weight:700">&lt;!prompt&gt;</span> in the operation template.
+          </p>
+          <div class="ops-grid" id="opsList"></div>
+
+          <div class="preview-section-title" style="margin-top:1.25rem">◈ Create Operation</div>
+          <div class="op-create-form">
+            <input id="opName" type="text" placeholder="Operation name…" />
+            <textarea id="opTemplate" rows="4" placeholder="Template… Use <!prompt> where the current prompt is injected.&#10;Example: Optimize this: <!prompt>"></textarea>
+            <button class="action-btn save" onclick="App.createOperation()">＋ Create Operation</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: API Docs -->
+      <div class="tab-panel" id="tab-apidocs">
+        <div class="ops-panel" id="apiDocsContent"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer class="footer-bar">
+  <div class="footer-left">
+    <span style="color:var(--accent);font-weight:bold">READY</span>
+    <span class="footer-sep">│</span>
+    <span>STORAGE <span style="color:var(--fg-primary)" id="footerStorage">LOCAL</span></span>
+    <span class="footer-sep">│</span>
+    <span>THEME <span style="color:var(--fg-primary)" id="footerTheme">TRON</span></span>
+  </div>
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+  <div class="footer-right">
+    <span style="color:var(--fg-primary)" id="footerCount">0</span> PROMPTS
+    <span class="footer-sep">│</span>
+    SECTOR <span style="color:var(--accent)">FORGE-1</span>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════
+     SETTINGS DRAWER
+══════════════════════════════════════ -->
+<div class="settings-backdrop" id="settingsBackdrop" onclick="App.closeSettings()"></div>
+<div class="settings-drawer" id="settingsDrawer">
+  <div class="settings-drawer-hdr">
+    <span class="settings-drawer-title">⚙ SYSTEM CONFIG</span>
+    <button class="settings-close" onclick="App.closeSettings()">✕ CLOSE</button>
+  </div>
+  <div class="settings-body">
+    <div>
+      <div class="settings-sect-title">Interface Theme</div>
+      <div class="theme-grid" id="themeGrid">
+        <div class="theme-btn active" data-theme="default" onclick="App.setTheme('default')"><span class="theme-btn-label">TRON</span></div>
+        <div class="theme-btn" data-theme="synthwave" onclick="App.setTheme('synthwave')"><span class="theme-btn-label">SYNTH</span></div>
+        <div class="theme-btn" data-theme="cyberpunk" onclick="App.setTheme('cyberpunk')"><span class="theme-btn-label">CYBER</span></div>
+        <div class="theme-btn" data-theme="retro8bit" onclick="App.setTheme('retro8bit')"><span class="theme-btn-label">8-BIT</span></div>
+        <div class="theme-btn" data-theme="midnight" onclick="App.setTheme('midnight')"><span class="theme-btn-label">MIDN</span></div>
+        <div class="theme-btn" data-theme="vaporwave" onclick="App.setTheme('vaporwave')"><span class="theme-btn-label">VAPOR</span></div>
+        <div class="theme-btn" data-theme="matrix" onclick="App.setTheme('matrix')"><span class="theme-btn-label">MATRIX</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="settings-sect-title">Editor</div>
+      <div class="setting-row"><span>Line wrapping</span><div class="toggle-sw on" id="toggleWrap" onclick="App.toggleWrap()"></div></div>
+      <div class="setting-row"><span>Line numbers</span><div class="toggle-sw on" id="toggleNumbers" onclick="App.toggleNumbers()"></div></div>
+    </div>
+    <div>
+      <div class="settings-sect-title">Data</div>
+      <div class="setting-row"><span>Export all (JSON)</span><button class="action-btn copy" onclick="App.exportData()">📤</button></div>
+      <div class="setting-row"><span>Import JSON</span><button class="action-btn save" onclick="document.getElementById('importFile').click()">📥</button></div>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="App.importData(event)" />
+      <div class="setting-row"><span>Purge all data</span><button class="action-btn delete" onclick="App.purgeData()">☠</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAG MODAL
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="tagModal">
+  <div class="modal-box" style="width:360px">
+    <div class="modal-header">
+      <span class="modal-title">🏷 ADD TAG</span>
+      <button class="modal-close" onclick="App.closeTagModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input class="tag-modal-input" id="tagModalInput" type="text" placeholder="Type tag, press Enter…" />
+      <div class="tag-chips" id="tagModalExisting" style="margin-top:0.75rem"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn" onclick="App.closeTagModal()">Cancel</button>
+      <button class="action-btn save" onclick="App.addTagFromModal()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ASSEMBLY MODAL
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="assemblyModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">⊕ ASSEMBLE PROMPTS</span>
+      <button class="modal-close" onclick="App.closeAssembly()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-sect-title">Separator</div>
+      <select class="asm-separator" id="asmSeparator">
+        <option value="\n\n">Double newline</option>
+        <option value="\n---\n">Horizontal rule</option>
+        <option value="\n###\n">Hash separator</option>
+        <option value="\n">Single newline</option>
+        <option value=" ">Space</option>
+      </select>
+      <div class="settings-sect-title" style="margin-top:0.75rem">Available</div>
+      <div class="asm-available" id="asmAvailable"></div>
+      <div class="settings-sect-title" style="margin-top:0.75rem">Assembly Order</div>
+      <div class="asm-order" id="asmOrder"><div style="font-size:0.65rem;color:rgba(0,255,255,0.35);text-align:center;padding:0.5rem">Add prompts from above</div></div>
+      <div class="settings-sect-title" style="margin-top:0.75rem">Preview</div>
+      <div class="asm-preview" id="asmPreview">—</div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn" onclick="App.closeAssembly()">Cancel</button>
+      <button class="action-btn save" onclick="App.saveAssembly()">💾 Save Assembled</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TOASTS
+══════════════════════════════════════ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══════════════════════════════════════
+     APPLICATION
+══════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════════════════════════
+//  PROMPT FORGE v1 — Pure LocalStorage LLM Prompt Generator
+// ══════════════════════════════════════════════════════════════
+
+const uid = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxx-xxxx'.replace(/x/g, () => ((Math.random()*16)|0).toString(16));
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ══════════════════════════════════════
+   CUSTOM CODEMIRROR MODE
+══════════════════════════════════════ */
+CodeMirror.defineMode('prompt-template', function() {
+  return {
+    token(stream) {
+      if (stream.match(/<!\w+>/)) return 'special-placeholder';
+      if (stream.match(/<(?!\/|!)\w+>/)) return 'placeholder';
+      if (stream.match(/\{\{[^}]*\}\}/)) return 'variable';
+      stream.next();
+      return null;
+    }
+  };
+});
+
+/* ══════════════════════════════════════
+   STORE — Pure LocalStorage
+══════════════════════════════════════ */
+const STORE_KEY = 'promptforge_prompts';
+const OPS_KEY = 'promptforge_ops';
+
+const Store = {
+  _read(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; } },
+  _write(key, data) { localStorage.setItem(key, JSON.stringify(data)); },
+
+  getPrompts() { return this._read(STORE_KEY); },
+  savePrompts(p) { this._write(STORE_KEY, p); },
+
+  getPrompt(id) { return this.getPrompts().find(p => p.id === id) || null; },
+
+  createPrompt(data) {
+    const prompts = this.getPrompts();
+    const p = { id: uid(), title: data.title || 'Untitled', body: data.body || '', tags: data.tags || [], created: new Date().toISOString(), updated: new Date().toISOString() };
+    prompts.push(p);
+    this.savePrompts(prompts);
+    return p;
+  },
+
+  updatePrompt(id, data) {
+    const prompts = this.getPrompts();
+    const idx = prompts.findIndex(p => p.id === id);
+    if (idx === -1) return null;
+    Object.assign(prompts[idx], data, { updated: new Date().toISOString() });
+    this.savePrompts(prompts);
+    return prompts[idx];
+  },
+
+  deletePrompt(id) {
+    this.savePrompts(this.getPrompts().filter(p => p.id !== id));
+  },
+
+  getOperations() { return this._read(OPS_KEY); },
+  saveOperations(o) { this._write(OPS_KEY, o); },
+
+  createOperation(data) {
+    const ops = this.getOperations();
+    const op = { id: uid(), name: data.name, template: data.template };
+    ops.push(op);
+    this.saveOperations(ops);
+    return op;
+  },
+
+  deleteOperation(id) {
+    this.saveOperations(this.getOperations().filter(o => o.id !== id));
+  },
+
+  /* Detect placeholders in text */
+  detectPlaceholders(text) {
+    const regular = [], special = [];
+    let m;
+    const sRe = /<!(\w+)>/g; while ((m = sRe.exec(text)) !== null) if (!special.includes(m[1])) special.push(m[1]);
+    const rRe = /<(?!\/|!)(\w+)>/g;
+    const html = new Set(['div','span','p','br','b','i','em','strong','a','ul','ol','li','h1','h2','h3','h4','h5','h6','table','tr','td','th','img','code','pre','blockquote','hr']);
+    while ((m = rRe.exec(text)) !== null) if (!html.has(m[1].toLowerCase()) && !regular.includes(m[1])) regular.push(m[1]);
+    return { regular, special };
+  },
+
+  resolvePlaceholders(text, values) {
+    let r = text;
+    for (const [k, v] of Object.entries(values)) {
+      const re = new RegExp(`<${k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}>`, 'g');
+      r = r.replace(re, v);
+    }
+    return r;
+  }
+};
+
+/* ══════════════════════════════════════
+   APPLICATION CONTROLLER
+══════════════════════════════════════ */
+const App = {
+  editor: null,
+  currentId: null,
+  phValues: {},
+  phPanelOpen: true,
+  tagMode: 'OR',
+  activeTags: new Set(),
+  assemblyItems: [],
+
+  init() {
+    this._seedDefaults();
+    this._initEditor();
+    this._initBgFx();
+    this._initClock();
+    this._initSearch();
+    this._initTicker();
+    this.renderAll();
+    // Auto-select first
+    const prompts = Store.getPrompts();
+    if (prompts.length > 0) this.selectPrompt(prompts[0].id);
+  },
+
+  _seedDefaults() {
+    if (Store.getOperations().length === 0) {
+      Store.saveOperations([
+        { id: uid(), name: 'Optimize', template: 'Check the following prompt and optimize it to facilitate an LLM agent to cleanly achieve the described target in a structural step-by-step way:\n\n<!prompt>' },
+        { id: uid(), name: 'Step-by-Step', template: 'Rewrite the following prompt so that it instructs the LLM to proceed step by step, numbering each step clearly:\n\n<!prompt>' },
+        { id: uid(), name: 'Add Format', template: 'Given the following prompt, add a clear output format specification (JSON schema, markdown structure, or bullet list) that the LLM should follow:\n\n<!prompt>' },
+        { id: uid(), name: 'Add Constraints', template: 'Enhance the following prompt by adding explicit constraints, edge-case handling, and failure-mode guidance:\n\n<!prompt>' },
+        { id: uid(), name: 'Simplify', template: 'Simplify the following prompt to be more concise while preserving all essential instructions:\n\n<!prompt>' },
+      ]);
+    }
+    if (Store.getPrompts().length === 0) {
+      Store.createPrompt({
+        title: 'Welcome Prompt',
+        body: 'You are a helpful assistant.\n\nAnalyze the following <content> and provide a detailed summary.\n\nFocus on the key points and present them in a structured format using <output_format>.',
+        tags: ['example', 'starter']
+      });
+    }
+  },
+
+  _initEditor() {
+    this.editor = CodeMirror(document.getElementById('editorContainer'), {
+      value: '', mode: 'prompt-template', lineNumbers: true, lineWrapping: true,
+      indentUnit: 2, tabSize: 2,
+      placeholder: 'Write your prompt here…\n\nUse <content> for placeholders.\nUse <!prompt> for operation injection points.\nUse {{variable}} for variables.',
+      extraKeys: { 'Ctrl-S': () => this.savePrompt(), 'Cmd-S': () => this.savePrompt() }
+    });
+    let timer;
+    this.editor.on('change', () => { clearTimeout(timer); timer = setTimeout(() => this.detectPlaceholders(), 300); });
+  },
+
+  _initBgFx() {
+    // Stars
+    const sf = document.getElementById('starfield');
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div'); s.className = 'star';
+      const sz = Math.random() * 2 + 1;
+      s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+      sf.appendChild(s);
+    }
+    // Warp lines
+    const wl = document.getElementById('warpLines');
+    for (let i = 0; i < 8; i++) {
+      const l = document.createElement('div'); l.className = 'warp-line';
+      l.style.cssText = `left:${5+Math.random()*90}%;animation-delay:${Math.random()*4}s;animation-duration:${3+Math.random()*3}s;height:${50+Math.random()*100}vh`;
+      wl.appendChild(l);
+    }
+  },
+
+  _initClock() {
+    const update = () => {
+      const d = new Date();
+      document.getElementById('hdrDateTime').textContent = d.toLocaleTimeString('en-GB');
+    };
+    update(); setInterval(update, 1000);
+  },
+
+  _initSearch() {
+    document.getElementById('searchInput').addEventListener('input', e => { this.renderPromptList(); });
+  },
+
+  _initTicker() {
+    const items = [
+      'PROMPT FORGE v1.0', '◈ LOCAL STORAGE ENGINE', '◈ <content> PLACEHOLDERS AUTO-DETECTED',
+      '◈ <!prompt> OPERATION INJECTION', '◈ TAG-BASED FILTERING', '◈ ASSEMBLE MULTIPLE PROMPTS',
+      '◈ 7 THEMES AVAILABLE', '◈ EXPORT/IMPORT JSON', '◈ CODEMIRROR SYNTAX HIGHLIGHT',
+      '◈ PURE CLIENT-SIDE', '◈ NO SERVER REQUIRED', '◈ ZERO DEPENDENCIES BEYOND CDN',
+    ];
+    const track = document.getElementById('tickerTrack');
+    const html = items.map(t => `<span class="ticker-item${t.startsWith('◈') ? ' hi' : ''}">${esc(t)}</span>`).join('');
+    track.innerHTML = html + html;
+  },
+
+  /* ── Rendering ── */
+  renderAll() {
+    this.renderTagFilter();
+    this.renderPromptList();
+    this.renderOperations();
+    this.renderApiDocs();
+    this.updateCounts();
+  },
+
+  updateCounts() {
+    const n = Store.getPrompts().length;
+    document.getElementById('hdrPromptCount').textContent = n + ' PRMPT';
+    document.getElementById('footerCount').textContent = n;
+  },
+
+  renderTagFilter() {
+    const allTags = [...new Set(Store.getPrompts().flatMap(p => p.tags || []))].sort();
+    const el = document.getElementById('tagFilter');
+    el.innerHTML = allTags.length === 0
+      ? '<span style="font-size:0.6rem;color:rgba(0,255,255,0.3)">No tags yet</span>'
+      : allTags.map(t => `<button class="tag-button${this.activeTags.has(t)?' active':''}" onclick="App.toggleTag('${esc(t)}')">${esc(t)}</button>`).join('');
+  },
+
+  renderPromptList() {
+    const q = (document.getElementById('searchInput').value || '').toLowerCase();
+    let prompts = Store.getPrompts();
+
+    // Search filter
+    if (q) prompts = prompts.filter(p => p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q) || (p.tags||[]).some(t => t.toLowerCase().includes(q)));
+
+    // Tag filter
+    if (this.activeTags.size > 0) {
+      const tags = [...this.activeTags];
+      prompts = prompts.filter(p => {
+        const pt = p.tags || [];
+        return this.tagMode === 'AND' ? tags.every(t => pt.includes(t)) : tags.some(t => pt.includes(t));
+      });
+    }
+
+    const el = document.getElementById('promptList');
+    el.innerHTML = prompts.length === 0
+      ? '<div style="font-size:0.65rem;color:rgba(0,255,255,0.35);text-align:center;padding:0.75rem">No prompts found</div>'
+      : prompts.map(p => `
+        <div class="prompt-list-item${p.id===this.currentId?' active':''}" onclick="App.selectPrompt('${p.id}')">
+          <div class="prompt-list-name">${esc(p.title)}</div>
+          <div class="prompt-list-preview">${esc(p.body.substring(0,50)) || 'Empty'}</div>
+          ${p.tags&&p.tags.length ? `<div class="prompt-list-tags">${p.tags.map(t=>`<span class="prompt-list-tag">${esc(t)}</span>`).join('')}</div>` : ''}
+        </div>
+      `).join('');
+  },
+
+  renderOperations() {
+    const ops = Store.getOperations();
+    document.getElementById('opsList').innerHTML = ops.map(op => `
+      <div class="op-card">
+        <div style="flex:1;min-width:0">
+          <div class="op-name">${esc(op.name)}</div>
+          <div class="op-template-preview">${esc(op.template.substring(0,70))}</div>
+        </div>
+        <button class="op-apply-btn" onclick="App.applyOperation('${op.id}')">▶ Apply</button>
+        <button class="op-delete-btn" onclick="App.deleteOperation('${op.id}')" title="Delete">✕</button>
+      </div>
+    `).join('');
+  },
+
+  renderApiDocs() {
+    document.getElementById('apiDocsContent').innerHTML = `
+      <div class="preview-section-title">◈ REST API SPECIFICATION</div>
+      <p style="font-size:0.68rem;color:rgba(0,255,255,0.5);margin-bottom:0.75rem">
+        This application operates purely on <span style="color:var(--accent)">localStorage</span>.
+        To adopt it into a server-backed infrastructure, implement the following REST API.
+        The store uses <code style="color:var(--fg-primary)">localStorage</code> keys <code>promptforge_prompts</code> and <code>promptforge_ops</code>.
+      </p>
+
+      <div class="api-block"><span class="method get">GET</span> /prompts
+<span class="comment">// List all prompts. Optional: ?tag=xxx</span>
+<span class="comment">// Response: [{ id, title, body, tags, created, updated }]</span></div>
+
+      <div class="api-block"><span class="method get">GET</span> /prompts/:id
+<span class="comment">// Get single prompt</span></div>
+
+      <div class="api-block"><span class="method post">POST</span> /prompts
+<span class="comment">// Create prompt. Body: { title, body, tags }</span></div>
+
+      <div class="api-block"><span class="method put">PUT</span> /prompts/:id
+<span class="comment">// Update prompt. Body: { title?, body?, tags? }</span></div>
+
+      <div class="api-block"><span class="method del">DELETE</span> /prompts/:id
+<span class="comment">// Delete prompt. Response: 204</span></div>
+
+      <div class="api-block"><span class="method post">POST</span> /prompts/assemble
+<span class="comment">// Body: { ids: [uuid...], separator: "\\n\\n" }</span>
+<span class="comment">// Response: { assembled: "combined text" }</span></div>
+
+      <div class="api-block"><span class="method get">GET</span> /operations
+<span class="comment">// List all operations</span></div>
+
+      <div class="api-block"><span class="method post">POST</span> /operations
+<span class="comment">// Create operation. Body: { name, template }</span>
+<span class="comment">// template MUST contain &lt;!prompt&gt;</span></div>
+
+      <div class="api-block"><span class="method del">DELETE</span> /operations/:id
+<span class="comment">// Delete operation. Response: 204</span></div>
+
+      <div style="margin-top:1rem;padding:0.75rem;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:6px">
+        <div class="preview-section-title">◈ Placeholder System</div>
+        <ul style="font-size:0.68rem;color:rgba(0,255,255,0.6);list-style:none;padding:0">
+          <li style="margin-bottom:0.3rem"><code style="color:var(--placeholder-color)">&lt;name&gt;</code> — Regular placeholder. Auto-detected; spawns input field.</li>
+          <li style="margin-bottom:0.3rem"><code style="color:var(--special-color)">&lt;!prompt&gt;</code> — Special placeholder for operations. Full prompt injection point.</li>
+          <li><code style="color:var(--variable-color)">{{variable}}</code> — Double-curly variable. Highlighted in editor.</li>
+        </ul>
+      </div>
+    `;
+  },
+
+  /* ── Prompt CRUD ── */
+  selectPrompt(id) {
+    const p = Store.getPrompt(id);
+    if (!p) return;
+    this.currentId = id;
+    this.phValues = {};
+    document.getElementById('promptTitle').value = p.title;
+    this.editor.setValue(p.body);
+    this.renderPromptTags(p.tags || []);
+    this.renderPromptList();
+    this.detectPlaceholders();
+  },
+
+  createPrompt() {
+    const p = Store.createPrompt({ title: 'New Prompt', body: '' });
+    this.renderAll();
+    this.selectPrompt(p.id);
+    document.getElementById('promptTitle').focus();
+  },
+
+  savePrompt() {
+    if (!this.currentId) return;
+    Store.updatePrompt(this.currentId, {
+      title: document.getElementById('promptTitle').value || 'Untitled',
+      body: this.editor.getValue()
+    });
+    this.renderAll();
+    this.toast('Prompt saved', 'success');
+  },
+
+  deletePrompt() {
+    if (!this.currentId) return;
+    if (!confirm('Delete this prompt?')) return;
+    Store.deletePrompt(this.currentId);
+    this.currentId = null;
+    this.editor.setValue('');
+    document.getElementById('promptTitle').value = '';
+    this.renderAll();
+    const prompts = Store.getPrompts();
+    if (prompts.length > 0) this.selectPrompt(prompts[0].id);
+    this.toast('Deleted', 'info');
+  },
+
+  async copyPrompt() {
+    if (!this.currentId) return;
+    const p = Store.getPrompt(this.currentId);
+    if (!p) return;
+    const resolved = Store.resolvePlaceholders(p.body, this.phValues);
+    try { await navigator.clipboard.writeText(resolved); this.toast('Copied to clipboard', 'success'); }
+    catch { this.toast('Copy failed', 'error'); }
+  },
+
+  /* ── Tags ── */
+  renderPromptTags(tags) {
+    document.getElementById('promptTags').innerHTML = tags.map(t =>
+      `<span class="tag-chip" onclick="App.removeTag('${esc(t)}')">${esc(t)} ✕</span>`
+    ).join('');
+  },
+
+  toggleTag(tag) {
+    if (this.activeTags.has(tag)) this.activeTags.delete(tag); else this.activeTags.add(tag);
+    this.renderTagFilter();
+    this.renderPromptList();
+  },
+
+  clearAllTags() {
+    this.activeTags.clear();
+    this.renderTagFilter();
+    this.renderPromptList();
+  },
+
+  setTagMode(mode) {
+    this.tagMode = mode;
+    document.getElementById('modeAnd').classList.toggle('active', mode === 'AND');
+    document.getElementById('modeOr').classList.toggle('active', mode === 'OR');
+    this.renderPromptList();
+  },
+
+  openTagModal() {
+    if (!this.currentId) return;
+    document.getElementById('tagModal').classList.add('open');
+    const input = document.getElementById('tagModalInput');
+    input.value = '';
+    // Show existing tags
+    const p = Store.getPrompt(this.currentId);
+    const allTags = [...new Set(Store.getPrompts().flatMap(pr => pr.tags || []))].sort();
+    document.getElementById('tagModalExisting').innerHTML = allTags.map(t =>
+      `<span class="tag-chip" onclick="App.quickAddTag('${esc(t)}')">${esc(t)}</span>`
+    ).join('');
+    setTimeout(() => input.focus(), 100);
+  },
+
+  closeTagModal() { document.getElementById('tagModal').classList.remove('open'); },
+
+  addTagFromModal() {
+    const input = document.getElementById('tagModalInput');
+    const tag = input.value.trim();
+    if (!tag || !this.currentId) return;
+    this._addTagToCurrent(tag);
+    this.closeTagModal();
+  },
+
+  quickAddTag(tag) {
+    this._addTagToCurrent(tag);
+    this.closeTagModal();
+  },
+
+  _addTagToCurrent(tag) {
+    const p = Store.getPrompt(this.currentId);
+    if (!p) return;
+    if (!p.tags) p.tags = [];
+    if (!p.tags.includes(tag)) {
+      p.tags.push(tag);
+      Store.updatePrompt(this.currentId, { tags: p.tags });
+      this.renderPromptTags(p.tags);
+      this.renderAll();
+    }
+  },
+
+  removeTag(tag) {
+    if (!this.currentId) return;
+    const p = Store.getPrompt(this.currentId);
+    if (!p) return;
+    p.tags = (p.tags || []).filter(t => t !== tag);
+    Store.updatePrompt(this.currentId, { tags: p.tags });
+    this.renderPromptTags(p.tags);
+    this.renderAll();
+  },
+
+  /* ── Placeholders ── */
+  detectPlaceholders() {
+    const text = this.editor.getValue();
+    const { regular, special } = Store.detectPlaceholders(text);
+    const all = [...regular, ...special.map(s => '!' + s)];
+    document.getElementById('placeholderCount').textContent = all.length;
+
+    const container = document.getElementById('placeholderFields');
+    if (all.length === 0) {
+      container.innerHTML = '<div style="font-size:0.68rem;color:rgba(0,255,255,0.35);font-style:italic">Placeholders like &lt;content&gt; will auto-spawn fields here.</div>';
+      return;
+    }
+
+    container.innerHTML = all.map(name => {
+      const isSpecial = name.startsWith('!');
+      const displayName = isSpecial ? name.slice(1) : name;
+      const labelClass = isSpecial ? 'special' : 'regular';
+      const hint = isSpecial ? 'Special — expects full prompt injection' : 'Regular placeholder';
+      const currentVal = this.phValues[name] || '';
+
+      return `<div class="placeholder-row">
+        <div class="placeholder-label ${labelClass}">
+          ${isSpecial ? '⚡' : '◈'} &lt;${esc(displayName)}&gt;
+          <span class="placeholder-hint">${hint}</span>
+        </div>
+        ${isSpecial ? `
+          <select class="ph-select" onchange="App.setPh('${esc(name)}',this.value)" data-ph="${esc(name)}">
+            <option value="">— Select prompt to inject —</option>
+            ${Store.getPrompts().filter(p=>p.id!==this.currentId).map(p=>`<option value="${esc(p.body)}" ${currentVal===p.body?'selected':''}>${esc(p.title)}</option>`).join('')}
+          </select>
+        ` : `
+          <textarea class="ph-textarea" rows="2" placeholder="Value for <${esc(displayName)}>…"
+            oninput="App.setPh('${esc(name)}',this.value)" data-ph="${esc(name)}">${esc(currentVal)}</textarea>
+        `}
+      </div>`;
+    }).join('');
+  },
+
+  setPh(name, value) { this.phValues[name] = value; },
+
+  togglePlaceholderPanel() {
+    this.phPanelOpen = !this.phPanelOpen;
+    document.getElementById('placeholderFields').style.display = this.phPanelOpen ? '' : 'none';
+    document.getElementById('placeholderChevron').textContent = this.phPanelOpen ? '▼' : '▶';
+  },
+
+  /* ── Tabs ── */
+  switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+    if (tab === 'preview') this.renderPreview();
+    if (tab === 'editor') setTimeout(() => this.editor.refresh(), 10);
+  },
+
+  renderPreview() {
+    if (!this.currentId) return;
+    const p = Store.getPrompt(this.currentId);
+    if (!p) return;
+    const resolved = Store.resolvePlaceholders(p.body, this.phValues);
+    document.getElementById('previewRaw').textContent = p.body;
+    // Highlight placeholders in resolved
+    document.getElementById('previewOutput').innerHTML = esc(resolved)
+      .replace(/&lt;(\/?!?\w+)&gt;/g, '<span style="color:var(--placeholder-color);font-weight:600">&lt;$1&gt;</span>')
+      .replace(/\n/g, '<br>');
+  },
+
+  /* ── Operations ── */
+  applyOperation(opId) {
+    const op = Store.getOperations().find(o => o.id === opId);
+    if (!op) return;
+    const p = Store.getPrompt(this.currentId);
+    if (!p) return;
+    const resolved = Store.resolvePlaceholders(p.body, this.phValues);
+    const result = op.template.replace(/<!prompt>/g, resolved);
+    const newP = Store.createPrompt({
+      title: `[${op.name}] ${p.title}`,
+      body: result,
+      tags: [...(p.tags || []), op.name.toLowerCase()]
+    });
+    this.renderAll();
+    this.selectPrompt(newP.id);
+    this.switchTab('editor');
+    this.toast(`"${op.name}" applied → new prompt`, 'success');
+  },
+
+  createOperation() {
+    const name = document.getElementById('opName').value.trim();
+    const template = document.getElementById('opTemplate').value.trim();
+    if (!name || !template) { this.toast('Name + template required', 'error'); return; }
+    if (!template.includes('<!prompt>')) { this.toast('Must contain <!prompt>', 'error'); return; }
+    Store.createOperation({ name, template });
+    document.getElementById('opName').value = '';
+    document.getElementById('opTemplate').value = '';
+    this.renderOperations();
+    this.toast('Operation created', 'success');
+  },
+
+  deleteOperation(id) {
+    if (!confirm('Delete this operation?')) return;
+    Store.deleteOperation(id);
+    this.renderOperations();
+    this.toast('Operation deleted', 'info');
+  },
+
+  /* ── Assembly ── */
+  openAssembly() {
+    this.assemblyItems = [];
+    document.getElementById('assemblyModal').classList.add('open');
+    this.renderAssembly();
+  },
+
+  closeAssembly() { document.getElementById('assemblyModal').classList.remove('open'); },
+
+  renderAssembly() {
+    const addedIds = this.assemblyItems.map(a => a.id);
+    const available = Store.getPrompts().filter(p => !addedIds.includes(p.id));
+
+    document.getElementById('asmAvailable').innerHTML = available.length === 0
+      ? '<div style="font-size:0.65rem;color:rgba(0,255,255,0.35);text-align:center;padding:0.4rem">All added</div>'
+      : available.map(p => `
+        <div class="asm-item">
+          <span style="flex:1;color:var(--fg-primary)">${esc(p.title)}</span>
+          <button class="asm-add-btn" onclick="App.addAssembly('${p.id}')">＋</button>
+        </div>
+      `).join('');
+
+    document.getElementById('asmOrder').innerHTML = this.assemblyItems.length === 0
+      ? '<div style="font-size:0.65rem;color:rgba(0,255,255,0.35);text-align:center;padding:0.5rem">Add prompts from above</div>'
+      : this.assemblyItems.map((item, i) => `
+        <div class="asm-item">
+          <span style="color:rgba(0,255,255,0.4);font-size:0.6rem">${i+1}</span>
+          <span style="flex:1;color:var(--fg-primary)">${esc(item.title)}</span>
+          <button class="asm-move-btn" onclick="App.moveAssembly(${i},-1)" ${i===0?'disabled':''}>▲</button>
+          <button class="asm-move-btn" onclick="App.moveAssembly(${i},1)" ${i===this.assemblyItems.length-1?'disabled':''}>▼</button>
+          <button class="asm-remove-btn" onclick="App.removeAssembly(${i})">✕</button>
+        </div>
+      `).join('');
+
+    this._renderAsmPreview();
+  },
+
+  addAssembly(id) {
+    const p = Store.getPrompt(id);
+    if (p) { this.assemblyItems.push({ id: p.id, title: p.title, body: p.body }); this.renderAssembly(); }
+  },
+
+  removeAssembly(idx) { this.assemblyItems.splice(idx, 1); this.renderAssembly(); },
+
+  moveAssembly(idx, dir) {
+    const n = idx + dir;
+    if (n < 0 || n >= this.assemblyItems.length) return;
+    [this.assemblyItems[idx], this.assemblyItems[n]] = [this.assemblyItems[n], this.assemblyItems[idx]];
+    this.renderAssembly();
+  },
+
+  _renderAsmPreview() {
+    if (this.assemblyItems.length === 0) { document.getElementById('asmPreview').textContent = '—'; return; }
+    const sep = document.getElementById('asmSeparator').value.replace(/\\n/g, '\n');
+    document.getElementById('asmPreview').textContent = this.assemblyItems.map(a => a.body).join(sep);
+  },
+
+  saveAssembly() {
+    if (this.assemblyItems.length === 0) { this.toast('Add at least one prompt', 'error'); return; }
+    const sep = document.getElementById('asmSeparator').value.replace(/\\n/g, '\n');
+    const text = this.assemblyItems.map(a => a.body).join(sep);
+    const tags = [...new Set(this.assemblyItems.flatMap(a => { const p = Store.getPrompt(a.id); return p ? (p.tags||[]) : []; }))];
+    tags.push('assembled');
+    const newP = Store.createPrompt({
+      title: 'ASM: ' + this.assemblyItems.map(a => a.title).join(' + '),
+      body: text, tags
+    });
+    this.closeAssembly();
+    this.renderAll();
+    this.selectPrompt(newP.id);
+    this.switchTab('editor');
+    this.toast('Assembled prompt created', 'success');
+  },
+
+  /* ── Settings ── */
+  openSettings() { document.getElementById('settingsBackdrop').classList.add('open'); document.getElementById('settingsDrawer').classList.add('open'); },
+  closeSettings() { document.getElementById('settingsBackdrop').classList.remove('open'); document.getElementById('settingsDrawer').classList.remove('open'); },
+
+  setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+    const names = { default:'TRON', synthwave:'SYNTH', cyberpunk:'CYBER', retro8bit:'8-BIT', midnight:'MIDN', vaporwave:'VAPOR', matrix:'MATRIX' };
+    document.getElementById('footerTheme').textContent = names[theme] || theme.toUpperCase();
+    localStorage.setItem('promptforge_theme', theme);
+    this.toast('Theme: ' + (names[theme]||theme), 'info');
+  },
+
+  toggleWrap() {
+    const sw = document.getElementById('toggleWrap');
+    sw.classList.toggle('on');
+    this.editor.setOption('lineWrapping', sw.classList.contains('on'));
+  },
+
+  toggleNumbers() {
+    const sw = document.getElementById('toggleNumbers');
+    sw.classList.toggle('on');
+    this.editor.setOption('lineNumbers', sw.classList.contains('on'));
+  },
+
+  exportData() {
+    const data = { prompts: Store.getPrompts(), operations: Store.getOperations(), exported: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'promptforge-export.json'; a.click();
+    this.toast('Exported', 'success');
+  },
+
+  importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.prompts) { Store.savePrompts(data.prompts); }
+        if (data.operations) { Store.saveOperations(data.operations); }
+        this.renderAll();
+        const prompts = Store.getPrompts();
+        if (prompts.length > 0) this.selectPrompt(prompts[0].id);
+        this.toast('Imported', 'success');
+      } catch { this.toast('Invalid JSON', 'error'); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  },
+
+  purgeData() {
+    if (!confirm('Delete ALL prompts and operations? This cannot be undone.')) return;
+    Store.savePrompts([]); Store.saveOperations([]);
+    this.currentId = null;
+    this.editor.setValue('');
+    document.getElementById('promptTitle').value = '';
+    this.renderAll();
+    this._seedDefaults();
+    this.renderAll();
+    const prompts = Store.getPrompts();
+    if (prompts.length > 0) this.selectPrompt(prompts[0].id);
+    this.toast('Data purged', 'info');
+  },
+
+  /* ── Toast ── */
+  toast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    container.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2500);
+  }
+};
+
+/* ── Global keyboard shortcuts ── */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); App.savePrompt(); }
+});
+document.getElementById('tagModalInput').addEventListener('keydown', e => { if (e.key === 'Enter') App.addTagFromModal(); });
+document.getElementById('asmSeparator').addEventListener('change', () => App._renderAsmPreview());
+
+/* ── Restore theme ── */
+const savedTheme = localStorage.getItem('promptforge_theme');
+if (savedTheme) App.setTheme(savedTheme);
+
+/* ── Boot ── */
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>

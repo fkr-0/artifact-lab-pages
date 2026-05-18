@@ -192,6 +192,105 @@
         animation: glow 2s ease-in-out infinite;
       }
 
+      .name-config {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 25px;
+        margin: 20px auto;
+        max-width: 420px;
+        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.25);
+        animation: fadeIn 1s ease;
+      }
+
+      .name-input-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .name-input-group label {
+        display: block;
+        color: #7c3aed;
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 1rem;
+      }
+
+      .name-input-group input {
+        width: 100%;
+        padding: 12px 18px;
+        border: 2px solid #c084fc;
+        border-radius: 15px;
+        font-size: 1rem;
+        outline: none;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .name-input-group input:focus {
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+      }
+
+      .start-btn {
+        width: 100%;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #ec4899, #a855f7);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(168, 85, 247, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .start-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(168, 85, 247, 0.45);
+      }
+
+      .btn-emoji {
+        font-size: 1.3rem;
+      }
+
+      .config-hint {
+        color: #a855f7;
+        font-size: 0.9rem;
+        margin-top: 15px;
+        text-align: center;
+      }
+
+      .name-display {
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .created-as, .waiting-for {
+        color: #7c3aed;
+        font-size: 1.1rem;
+        margin: 8px 0;
+      }
+
+      .primary-heart {
+        background: linear-gradient(135deg, #c084fc, #a855f7);
+        border-radius: 20px;
+        padding: 15px;
+        box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35);
+      }
+
+      .primary-heart .emoji {
+        font-size: 110px !important;
+      }
+
+      .primary-heart:hover {
+        transform: scale(1.1);
+      }
+
       @keyframes glow {
         0%,
         100% {
@@ -633,32 +732,54 @@
       <!-- Intro Screen -->
       <div id="introScreen" class="intro">
         <h1>Magical Love Chat</h1>
-        <div class="hearts-container">
-          <button class="heart-btn" onclick="selectSam()">
-            <span class="emoji">&#128151;</span>
-            <span class="name">Sam</span>
+
+        <!-- Name Configuration -->
+        <div id="nameConfig" class="name-config">
+          <div class="name-input-group">
+            <label for="yourName">Your Name:</label>
+            <input type="text" id="yourName" placeholder="Enter your name..." maxlength="20">
+          </div>
+          <div class="name-input-group">
+            <label for="partnerName">Partner's Name:</label>
+            <input type="text" id="partnerName" placeholder="Enter partner's name..." maxlength="20">
+          </div>
+          <button class="start-btn" onclick="createCustomRoom()">
+            <span class="btn-emoji">✨</span> Create Magical Room
           </button>
-          <button class="heart-btn" onclick="selectDave()">
-            <span class="emoji" id="daveEmoji">&#128156;</span>
-            <span class="name" id="daveName">Dave</span>
-          </button>
+          <p class="config-hint">Set names and create your private love chat room!</p>
         </div>
+
+        <div id="nameDisplay" class="hidden">
+          <p class="created-as">Created as: <strong id="displayYourName"></strong></p>
+          <p class="waiting-for">Waiting for: <strong id="displayPartnerName"></strong></p>
+          <div class="hearts-container">
+            <button class="heart-btn primary-heart" onclick="createRoom()">
+              <span class="emoji" id="yourEmoji">&#128151;</span>
+              <span class="name" id="yourHeartName">You</span>
+            </button>
+            <button class="heart-btn" onclick="joinAsPartner()">
+              <span class="emoji" id="partnerEmoji">&#128156;</span>
+              <span class="name" id="partnerHeartName">Partner</span>
+            </button>
+          </div>
+        </div>
+
         <p id="errorMsg" class="error-msg hidden">no, nono, no!</p>
-        <p class="hint">Click your heart to enter...</p>
+        <p class="hint" id="introHint">Configure your magical chat room...</p>
       </div>
 
-      <!-- Lobby Screen (Sam waiting) -->
+      <!-- Lobby Screen (Creator waiting) -->
       <div id="lobbyScreen" class="lobby hidden">
-        <h2>Waiting for Dave...</h2>
+        <h2 id="lobbyTitle">Waiting for your partner...</h2>
         <div class="lobby-box">
           <div class="status-box">
             <div class="status-icon">&#129412;</div>
-            <div class="status-text" id="lobbyStatus">No one there! :(</div>
+            <div class="status-text" id="lobbyStatus">Creating magical room...</div>
           </div>
           <div class="secret-hint">
-            <p>Send Dave the secret door link:</p>
+            <p id="linkInstructions">Share this magical link with <span id="partnerNameInInstructions">your partner</span>:</p>
             <code id="secretLink"></code>
-            <button class="copy-btn" onclick="copySecretLink()">Copy Secret Link</button>
+            <button class="copy-btn" onclick="copySecretLink()">Copy Magical Link</button>
           </div>
         </div>
       </div>
@@ -727,15 +848,45 @@
     <script>
       // State
       let username = 'sam'
+      let userDisplayName = 'You'
+      let partnerDisplayName = 'Partner'
+      let partnerName = 'dave'
       let peer = null
       let conn = null
       let connected = false
       let audioContext = null
       let musicStarted = false
+      let customRoomId = null
+      let userCustomName = ''
+      let partnerCustomName = ''
 
-      // HEARTCODED: Single fixed lobby
-      const HEARTCODE_ID = 'magical-love-chat-heartcoded-lobby-2024'
-      const SECRET_DOOR = 'lovedovey123'
+      // Generate unique room ID
+      function generateRoomId() {
+        return 'love-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36)
+      }
+
+      // URL parameter handling
+      function getCustomRoomFromUrl() {
+        const params = new URLSearchParams(window.location.search)
+        const room = params.get('room')
+        if (room) {
+          try {
+            const decoded = atob(room)
+            const data = JSON.parse(decoded)
+            return data
+          } catch (e) {
+            console.log('Invalid room parameter')
+          }
+        }
+        return null
+      }
+
+      function createCustomRoomUrl(roomData) {
+        const encoded = btoa(JSON.stringify(roomData))
+        const url = new URL(window.location.href)
+        url.searchParams.set('room', encoded)
+        return url.toString()
+      }
 
       // Graph game state
       let graphNodes = []
@@ -824,41 +975,114 @@
       }
       animateFloat()
 
-      // Heart selection
+      // Name validation and room creation
+      function createCustomRoom() {
+        const yourName = document.getElementById('yourName').value.trim()
+        const partnerName = document.getElementById('partnerName').value.trim()
+
+        if (!yourName || yourName.length < 2) {
+          alert('Please enter your name (at least 2 characters)')
+          return
+        }
+
+        if (!partnerName || partnerName.length < 2) {
+          alert('Please enter your partner\'s name (at least 2 characters)')
+          return
+        }
+
+        userCustomName = yourName
+        partnerCustomName = partnerName
+        username = 'user1'
+        partnerName = 'user2'
+        userDisplayName = yourName
+        partnerDisplayName = partnerName
+
+        // Update UI
+        document.getElementById('nameConfig').classList.add('hidden')
+        document.getElementById('nameDisplay').classList.remove('hidden')
+        document.getElementById('displayYourName').textContent = yourName
+        document.getElementById('displayPartnerName').textContent = partnerName
+        document.getElementById('yourHeartName').textContent = yourName
+        document.getElementById('partnerHeartName').textContent = partnerName
+        document.getElementById('introHint').textContent = 'Share your magical link or wait for your partner!'
+
+        createRoomWithCustomNames()
+      }
+
+      function createRoom() {
+        username = 'user1'
+        userDisplayName = userCustomName || 'You'
+        partnerDisplayName = partnerCustomName || 'Partner'
+        createRoomWithCustomNames()
+      }
+
+      function joinAsPartner() {
+        username = 'user2'
+        partnerName = 'user1'
+        userDisplayName = partnerCustomName || 'Partner'
+        partnerDisplayName = userCustomName || 'You'
+        joinRoom()
+      }
+
+      // Legacy heart selection (for compatibility)
       function selectSam() {
-        username = 'sam'
-        createRoom()
+        if (userCustomName) {
+          createRoom()
+        } else {
+          alert('Please configure your room first using the form above!')
+        }
       }
 
       function selectDave() {
-        const daveEmoji = document.getElementById('daveEmoji')
-        const daveName = document.getElementById('daveName')
-        const errorMsg = document.getElementById('errorMsg')
-        daveEmoji.innerHTML = '&#10060;'
-        daveName.textContent = 'NO!'
-        errorMsg.classList.remove('hidden')
-        setTimeout(() => {
-          daveEmoji.innerHTML = '&#128156;'
-          daveName.textContent = 'Dave'
-          errorMsg.classList.add('hidden')
-        }, 1200)
+        if (userCustomName && partnerCustomName) {
+          joinAsPartner()
+        } else {
+          const daveEmoji = document.getElementById('daveEmoji')
+          const daveName = document.getElementById('daveName')
+          const errorMsg = document.getElementById('errorMsg')
+          daveEmoji.innerHTML = '&#10060;'
+          daveName.textContent = 'Configure first!'
+          errorMsg.textContent = 'Please set names in the form above!'
+          errorMsg.classList.remove('hidden')
+          setTimeout(() => {
+            daveEmoji.innerHTML = '&#128156;'
+            daveName.textContent = 'Partner'
+            errorMsg.classList.add('hidden')
+          }, 1500)
+        }
       }
 
-      // Create room (Sam)
-      function createRoom() {
+      // Create room with custom names
+      function createRoomWithCustomNames() {
         showScreen('lobby')
         startMusic()
 
-        // Show secret link for Dave
-        const secretUrl = `${window.location.origin}${window.location.pathname}?dave=${SECRET_DOOR}`
-        document.getElementById('secretLink').textContent = secretUrl
+        // Generate unique room ID and create shareable link
+        customRoomId = generateRoomId()
 
-        const peerId = `${HEARTCODE_ID}-sam`
+        const roomData = {
+          roomId: customRoomId,
+          user1Name: userCustomName || 'User 1',
+          user2Name: partnerCustomName || 'User 2',
+          created: Date.now()
+        }
+
+        const shareableUrl = createCustomRoomUrl(roomData)
+
+        // Update the lobby with custom names
+        document.getElementById('lobbyTitle').textContent = `Waiting for ${partnerDisplayName}...`
+        document.getElementById('partnerNameInInstructions').textContent = partnerDisplayName
+        document.getElementById('secretLink').textContent = shareableUrl
+
+        // Update status
+        updateLobbyScreen(userDisplayName, partnerDisplayName)
+
+        const peerId = `magical-love-chat-${customRoomId}-user1`
         peer = new Peer(peerId)
 
         peer.on('open', (id) => {
-          console.log('Sam waiting:', id)
-          updateLobbyStatus(false)
+          console.log('User1 waiting:', id)
+          updateLobbyStatus(false, userDisplayName, partnerDisplayName)
         })
 
         peer.on('connection', (connection) => {
@@ -874,27 +1098,39 @@
           if (err.type === 'unavailable-id') {
             showScreen('full')
             document.querySelector('#fullScreen .status-text').textContent =
-              'Sam is already waiting!'
+              `${userDisplayName} is already waiting!`
           }
         })
       }
 
-      // Join room (Dave - via secret door)
+      // Join room (Partner - via custom link)
       function joinRoom() {
-        username = 'dave'
+        username = 'user2'
         showScreen('connecting')
         startMusic()
 
-        const peerId = `${HEARTCODE_ID}-dave-${Date.now()}`
+        // Check if we have custom room data from URL
+        const roomData = getCustomRoomFromUrl()
+        if (roomData) {
+          // Extract custom names from the room data
+          partnerCustomName = roomData.user1Name || 'Partner'
+          userCustomName = roomData.user2Name || 'You'
+          customRoomId = roomData.roomId
+
+          userDisplayName = userCustomName
+          partnerDisplayName = partnerCustomName
+        }
+
+        const peerId = `magical-love-chat-${customRoomId || 'default'}-user2-${Date.now()}`
         peer = new Peer(peerId)
 
         peer.on('open', () => {
-          const samPeerId = `${HEARTCODE_ID}-sam`
-          const connection = peer.connect(samPeerId, { reliable: true })
+          const partnerPeerId = `magical-love-chat-${customRoomId || 'default'}-user1`
+          const connection = peer.connect(partnerPeerId, { reliable: true })
 
           connection.on('error', () => {
             showScreen('intro')
-            alert('Sam is not waiting right now!')
+            alert(`${partnerDisplayName} is not waiting right now!`)
           })
 
           handleConnection(connection)
@@ -904,10 +1140,11 @@
           console.log('Peer error:', err)
           if (err.type === 'peer-unavailable') {
             showScreen('intro')
-            alert('Sam is not waiting right now! Click Sam to create a room first.')
+            alert(`${partnerDisplayName} is not waiting right now! Create a room first.`)
           }
         })
       }
+
 
       // Handle connection
       function handleConnection(connection) {
@@ -916,17 +1153,20 @@
         conn.on('open', () => {
           connected = true
           showScreen('chat')
-          updateLobbyStatus(true)
-          document.getElementById('chatTitle').textContent =
-            `${username === 'sam' ? 'Sam' : 'Dave'}'s Chat`
-          addMessage('system', `Connected! ${username === 'sam' ? 'Dave' : 'Sam'} joined!`)
+          updateLobbyStatus(true, userDisplayName, partnerDisplayName)
+
+          // Update chat title with custom names
+          const chatTitle = `${userDisplayName} & ${partnerDisplayName}`
+          document.getElementById('chatTitle').textContent = chatTitle
+
+          addMessage('system', `Connected! ${partnerDisplayName} joined the chat!`)
           startNewGame()
         })
 
         conn.on('data', (data) => {
           if (data.type === 'message' || data.type === 'reaction') {
-            const partnerName = data.from === 'sam' ? 'Sam' : 'Dave'
-            addMessage('partner', data.text, partnerName)
+            const senderDisplayName = data.from === 'user1' ? data.user1Name || userDisplayName : data.user2Name || partnerDisplayName
+            addMessage('partner', data.text, senderDisplayName)
           } else if (data.type === 'heart') {
             spawnHeartsLocal(data.index)
           } else if (data.type === 'graph') {
@@ -952,16 +1192,28 @@
           if (peer) peer.destroy()
           peer = null
           conn = null
+          // Reset custom names for next session
+          userCustomName = ''
+          partnerCustomName = ''
+          customRoomId = null
         })
       }
 
-      function updateLobbyStatus(isConnected) {
+      function updateLobbyStatus(isConnected, user1Name, user2Name) {
         const statusEl = document.getElementById('lobbyStatus')
         if (isConnected) {
-          statusEl.textContent = 'Connected <3 :D'
+          statusEl.textContent = `Connected <3 :D`
         } else {
-          statusEl.textContent = 'No one there! :('
+          const waitingName = user2Name || 'someone special'
+          statusEl.textContent = `Waiting for ${waitingName}...`
         }
+      }
+
+      function updateLobbyScreen(user1Name, user2Name) {
+        document.querySelector('#lobbyScreen h2').textContent =
+          `Waiting for ${user2Name}...`
+        const statusBox = document.querySelector('.status-box .status-text')
+        statusBox.textContent = `Share this link with ${user2Name}!`
       }
 
       // Show screen
@@ -1005,8 +1257,11 @@
         if (type !== 'system') {
           const senderDiv = document.createElement('div')
           senderDiv.className = 'sender'
-          senderDiv.textContent =
-            type === 'me' ? `You (${username === 'sam' ? 'Sam' : 'Dave'})` : senderName
+          if (type === 'me') {
+            senderDiv.textContent = `You (${userDisplayName})`
+          } else {
+            senderDiv.textContent = senderName
+          }
           msgDiv.appendChild(senderDiv)
         }
         const textDiv = document.createElement('div')
@@ -1019,14 +1274,26 @@
       function sendMessage() {
         const text = messageInput.value.trim()
         if (!text || !connected) return
-        conn.send({ type: 'message', from: username, text })
+        conn.send({
+          type: 'message',
+          from: username,
+          text: text,
+          user1Name: userCustomName,
+          user2Name: partnerCustomName
+        })
         addMessage('me', text)
         messageInput.value = ''
       }
 
       function sendReaction(text) {
         if (!connected) return
-        conn.send({ type: 'reaction', from: username, text })
+        conn.send({
+          type: 'reaction',
+          from: username,
+          text: text,
+          user1Name: userCustomName,
+          user2Name: partnerCustomName
+        })
         addMessage('me', text)
       }
 
@@ -1292,13 +1559,35 @@
         setTimeout(playArpeggio, 600)
       }
 
-      // Check URL for secret door on load
+      // Check URL for custom room on load
       const params = new URLSearchParams(window.location.search)
-      const daveSecret = params.get('dave')
+      const roomParam = params.get('room')
 
-      if (daveSecret === SECRET_DOOR) {
-        // Dave is entering through the secret door!
-        joinRoom()
+      if (roomParam) {
+        // Someone is joining via custom link!
+        try {
+          const roomData = JSON.parse(atob(roomParam))
+          // Set the custom names from the room data
+          partnerCustomName = roomData.user1Name || 'Partner'
+          userCustomName = roomData.user2Name || 'You'
+          customRoomId = roomData.roomId
+
+          userDisplayName = userCustomName
+          partnerDisplayName = partnerCustomName
+
+          // Update UI to show we're joining
+          document.getElementById('yourName').value = userCustomName
+          document.getElementById('partnerName').value = partnerCustomName
+          document.getElementById('yourName').disabled = true
+          document.getElementById('partnerName').disabled = true
+
+          // Auto-join as partner
+          setTimeout(() => {
+            joinRoom()
+          }, 500)
+        } catch (e) {
+          console.log('Invalid room parameter, showing intro screen')
+        }
       }
     </script>
   </body>

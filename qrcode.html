@@ -1,0 +1,1371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['"Space Grotesk"', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      :root {
+        --bg: #07070a;
+        --surface: #0f0f13;
+        --surface-raised: #17171d;
+        --border: #24242c;
+        --border-hover: #38384a;
+        --text: #eaeaed;
+        --text-sec: #8c8c9a;
+        --text-muted: #55556a;
+        --accent: #cf6a3a;
+        --accent-h: #e07d4d;
+        --accent-sub: rgba(207, 106, 58, 0.1);
+        --accent-glow: rgba(207, 106, 58, 0.28);
+        --danger: #ef4444;
+        --success: #22c55e;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Space Grotesk', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        margin: 0;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--border-hover);
+      }
+
+      /* Subtle grid bg */
+      .bg-grid {
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+        background-size: 48px 48px;
+      }
+
+      /* Type pills */
+      .type-pill {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 15px;
+        border-radius: 9px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-sec);
+        cursor: pointer;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        user-select: none;
+      }
+      .type-pill i {
+        font-size: 13px;
+        opacity: 0.8;
+      }
+      .type-pill:hover {
+        border-color: var(--border-hover);
+        color: var(--text);
+        background: var(--surface-raised);
+      }
+      .type-pill.active {
+        border-color: var(--accent);
+        background: var(--accent-sub);
+        color: var(--accent);
+        box-shadow: 0 0 16px var(--accent-glow);
+      }
+      .type-pill.active i {
+        opacity: 1;
+      }
+
+      /* Fields */
+      .field-group {
+        margin-bottom: 14px;
+      }
+      .field-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-sec);
+        margin-bottom: 5px;
+      }
+      .field-input {
+        width: 100%;
+        padding: 9px 13px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 13.5px;
+        transition:
+          border-color 0.18s,
+          box-shadow 0.18s;
+        outline: none;
+      }
+      .field-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-sub);
+      }
+      .field-input::placeholder {
+        color: var(--text-muted);
+      }
+      textarea.field-input {
+        resize: vertical;
+        min-height: 80px;
+        line-height: 1.5;
+      }
+      select.field-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238c8c9a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 30px;
+      }
+      .char-count {
+        font-size: 10.5px;
+        color: var(--text-muted);
+        margin-top: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        display: flex;
+        justify-content: space-between;
+      }
+      .char-count.warn {
+        color: #f59e0b;
+      }
+      .char-count.over {
+        color: var(--danger);
+      }
+
+      .field-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--text-sec);
+      }
+      .field-checkbox input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+      .field-help {
+        font-size: 10.5px;
+        color: var(--text-muted);
+        margin-top: 3px;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      @media (max-width: 640px) {
+        .field-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Password toggle */
+      .pw-wrap {
+        position: relative;
+      }
+      .pw-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 13px;
+        padding: 4px;
+      }
+      .pw-toggle:hover {
+        color: var(--text-sec);
+      }
+
+      /* QR Preview */
+      .qr-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+        border-radius: 14px;
+        position: relative;
+        min-height: 260px;
+        transition: background 0.25s;
+      }
+      .qr-box svg {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* Buttons */
+      .act-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 18px;
+        border-radius: 9px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        letter-spacing: 0.01em;
+        user-select: none;
+      }
+      .act-btn:hover {
+        border-color: var(--border-hover);
+        background: var(--surface-raised);
+        transform: translateY(-1px);
+      }
+      .act-btn:active {
+        transform: translateY(0);
+      }
+      .act-btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .act-btn.primary:hover {
+        background: var(--accent-h);
+        border-color: var(--accent-h);
+      }
+
+      /* Color picker */
+      .cpick-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .cpick-wrap input[type='color'] {
+        width: 32px;
+        height: 32px;
+        border: 2px solid var(--border);
+        border-radius: 7px;
+        cursor: pointer;
+        padding: 1px;
+        background: var(--surface);
+        transition: border-color 0.15s;
+      }
+      .cpick-wrap input[type='color']:hover {
+        border-color: var(--border-hover);
+      }
+      .cpick-wrap input[type='color']::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      .cpick-wrap input[type='color']::-webkit-color-swatch {
+        border: none;
+        border-radius: 4px;
+      }
+
+      /* Toast */
+      .toast-el {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        padding: 10px 22px;
+        border-radius: 9px;
+        font-size: 12.5px;
+        font-weight: 600;
+        z-index: 9999;
+        transition:
+          transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.28s;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .toast-el.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      .toast-el.success {
+        background: #064e3b;
+        color: #6ee7b7;
+        border: 1px solid #059669;
+      }
+      .toast-el.error {
+        background: #7f1d1d;
+        color: #fca5a5;
+        border: 1px solid #dc2626;
+      }
+      .toast-el.info {
+        background: #1e3a5f;
+        color: #93c5fd;
+        border: 1px solid #2563eb;
+      }
+
+      /* Empty state */
+      .empty-st {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 36px 16px;
+        color: var(--text-muted);
+        text-align: center;
+      }
+      .empty-st i {
+        font-size: 40px;
+        margin-bottom: 12px;
+        opacity: 0.25;
+      }
+      .empty-st p {
+        font-size: 13px;
+      }
+
+      /* Data preview */
+      .data-pre {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        overflow-x: auto;
+        background: var(--bg);
+        color: var(--text-sec);
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 110px;
+        overflow-y: auto;
+        line-height: 1.55;
+        border: 1px solid var(--border);
+      }
+
+      /* Section cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        transition: border-color 0.2s;
+      }
+      .card:hover {
+        border-color: var(--border-hover);
+      }
+
+      /* Decorative blobs */
+      .blob {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* QR render animation */
+      @keyframes qrIn {
+        from {
+          opacity: 0;
+          transform: scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .qr-anim {
+        animation: qrIn 0.25s ease-out;
+      }
+
+      /* Print */
+      @media print {
+        body {
+          background: #fff;
+          color: #000;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .qr-box {
+          box-shadow: none;
+          border: 2px solid #ddd;
+        }
+        .card {
+          border-color: #ddd;
+        }
+      }
+
+      /* Focus-visible */
+      .field-input:focus-visible,
+      .act-btn:focus-visible,
+      .type-pill:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      /* Section title */
+      .sec-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .sec-title i {
+        color: var(--accent);
+        font-size: 14px;
+      }
+      .sec-title h2 {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      /* Responsive type scroll */
+      @media (max-width: 768px) {
+        .types-scroll {
+          overflow-x: auto;
+          flex-wrap: nowrap !important;
+          padding-bottom: 6px;
+          -webkit-overflow-scrolling: touch;
+        }
+        .types-scroll::-webkit-scrollbar {
+          height: 3px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-grid">
+    <!-- Decorative blobs -->
+    <div
+      class="blob"
+      style="
+        width: 500px;
+        height: 500px;
+        top: -180px;
+        right: -120px;
+        background: rgba(207, 106, 58, 0.045);
+      "
+    ></div>
+    <div
+      class="blob"
+      style="
+        width: 350px;
+        height: 350px;
+        bottom: -80px;
+        left: -60px;
+        background: rgba(207, 106, 58, 0.03);
+      "
+    ></div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast-el"></div>
+
+    <!-- Header -->
+    <header
+      class="no-print"
+      style="
+        border-bottom: 1px solid var(--border);
+        background: rgba(7, 7, 10, 0.82);
+        backdrop-filter: blur(14px);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      "
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            style="
+              width: 30px;
+              height: 30px;
+              background: var(--accent);
+              border-radius: 7px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fa-solid fa-qrcode text-white text-xs"></i>
+          </div>
+          <span class="font-display text-lg font-bold tracking-tight">QR Studio</span>
+        </div>
+        <span class="text-xs font-mono" style="color: var(--text-muted)"
+          >generate &middot; customize &middot; share</span
+        >
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 relative z-10">
+      <!-- Type selector -->
+      <section class="mb-5 no-print">
+        <div id="type-selector" class="flex flex-wrap gap-1.5 types-scroll"></div>
+      </section>
+
+      <!-- Content grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <!-- Left: Form -->
+        <section class="lg:col-span-3 card">
+          <div class="sec-title">
+            <i id="form-icon" class="fa-solid fa-link"></i>
+            <h2 id="form-title">URL</h2>
+          </div>
+          <div id="form-container"></div>
+        </section>
+
+        <!-- Right: Preview + options + actions -->
+        <section class="lg:col-span-2 flex flex-col gap-4">
+          <!-- QR preview -->
+          <div class="card" style="padding: 20px">
+            <div id="qr-preview" class="qr-box" style="background: #fff">
+              <div class="empty-st">
+                <i class="fa-solid fa-qrcode"></i>
+                <p>Enter content to generate</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="card no-print" style="padding: 18px">
+            <h3
+              class="font-display text-xs font-bold uppercase tracking-widest mb-3"
+              style="color: var(--text-muted)"
+            >
+              Options
+            </h3>
+
+            <div class="mb-3">
+              <label class="field-label">Error Correction</label>
+              <select id="opt-ec" class="field-input" style="font-size: 12.5px; padding: 7px 11px">
+                <option value="L">L &mdash; 7% recovery</option>
+                <option value="M" selected>M &mdash; 15% recovery</option>
+                <option value="Q">Q &mdash; 25% recovery</option>
+                <option value="H">H &mdash; 30% recovery</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="field-label">Foreground</label>
+                <div class="cpick-wrap">
+                  <input type="color" id="opt-fg" value="#1a1a1f" />
+                  <span id="fg-hex" class="font-mono text-xs" style="color: var(--text-muted)"
+                    >#1a1a1f</span
+                  >
+                </div>
+              </div>
+              <div>
+                <label class="field-label">Background</label>
+                <div class="cpick-wrap">
+                  <input type="color" id="opt-bg" value="#ffffff" />
+                  <span id="bg-hex" class="font-mono text-xs" style="color: var(--text-muted)"
+                    >#ffffff</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="no-print flex flex-wrap gap-2">
+            <button
+              onclick="downloadPNG()"
+              class="act-btn primary flex-1"
+              aria-label="Download PNG"
+            >
+              <i class="fa-solid fa-image"></i> PNG
+            </button>
+            <button onclick="downloadSVG()" class="act-btn flex-1" aria-label="Download SVG">
+              <i class="fa-solid fa-vector-square"></i> SVG
+            </button>
+            <button onclick="shareEmail()" class="act-btn flex-1" aria-label="Share via email">
+              <i class="fa-solid fa-envelope"></i> Share
+            </button>
+            <button onclick="printQR()" class="act-btn" aria-label="Print QR code">
+              <i class="fa-solid fa-print"></i>
+            </button>
+          </div>
+
+          <!-- Encoded data -->
+          <div id="data-section" class="card" style="padding: 16px; display: none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="field-label" style="margin-bottom: 0">Encoded Data</span>
+              <button
+                onclick="copyData()"
+                style="
+                  color: var(--accent);
+                  cursor: pointer;
+                  background: none;
+                  border: none;
+                  font-size: 11px;
+                  font-family: 'JetBrains Mono', monospace;
+                "
+                aria-label="Copy encoded data"
+              >
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre id="data-pre" class="data-pre"></pre>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      /* ===== State ===== */
+      let currentType = 'url'
+      let currentQR = null
+      let currentData = ''
+      let debounceTimer = null
+
+      /* ===== QR Type Definitions ===== */
+      const QR_TYPES = [
+        {
+          id: 'text',
+          name: 'Plain Text',
+          icon: 'fa-align-left',
+          fields: [
+            {
+              id: 'content',
+              type: 'textarea',
+              label: 'Content',
+              placeholder: 'Enter any text here...',
+              rows: 5,
+              charCount: true,
+              maxChars: 2953,
+            },
+          ],
+          build: (v) => v.content || '',
+        },
+        {
+          id: 'url',
+          name: 'URL',
+          icon: 'fa-link',
+          fields: [
+            {
+              id: 'url',
+              type: 'url',
+              label: 'URL',
+              placeholder: 'https://example.com',
+              required: true,
+            },
+          ],
+          build: (v) => v.url || '',
+        },
+        {
+          id: 'wifi',
+          name: 'WiFi',
+          icon: 'fa-wifi',
+          fields: [
+            {
+              id: 'ssid',
+              type: 'text',
+              label: 'Network Name (SSID)',
+              placeholder: 'MyWiFi',
+              required: true,
+            },
+            {
+              id: 'password',
+              type: 'password',
+              label: 'Password',
+              placeholder: 'Enter password',
+              toggle: true,
+            },
+            {
+              id: 'encryption',
+              type: 'select',
+              label: 'Encryption',
+              options: [
+                { value: 'WPA', label: 'WPA / WPA2 / WPA3' },
+                { value: 'WEP', label: 'WEP' },
+                { value: 'nopass', label: 'None (Open)' },
+              ],
+              default: 'WPA',
+            },
+            { id: 'hidden', type: 'checkbox', label: 'Hidden network' },
+          ],
+          build: (v) => {
+            const enc = v.encryption || 'WPA'
+            const hid = v.hidden ? 'true' : 'false'
+            return `WIFI:T:${enc};S:${v.ssid || ''};P:${v.password || ''};H:${hid};;`
+          },
+        },
+        {
+          id: 'otp',
+          name: '2FA / TOTP',
+          icon: 'fa-shield-halved',
+          fields: [
+            {
+              id: 'issuer',
+              type: 'text',
+              label: 'Issuer',
+              placeholder: 'Google',
+              help: 'Service or app name',
+            },
+            {
+              id: 'account',
+              type: 'text',
+              label: 'Account',
+              placeholder: 'user@example.com',
+              required: true,
+            },
+            {
+              id: 'secret',
+              type: 'text',
+              label: 'Secret Key',
+              placeholder: 'JBSWY3DPEHPK3PXP',
+              required: true,
+              help: 'Base32-encoded secret from the service',
+            },
+            {
+              id: 'algorithm',
+              type: 'select',
+              label: 'Algorithm',
+              options: [
+                { value: 'SHA1', label: 'SHA-1 (most common)' },
+                { value: 'SHA256', label: 'SHA-256' },
+                { value: 'SHA512', label: 'SHA-512' },
+              ],
+              default: 'SHA1',
+            },
+            {
+              id: 'digits',
+              type: 'select',
+              label: 'Digits',
+              options: [
+                { value: '6', label: '6 digits' },
+                { value: '8', label: '8 digits' },
+              ],
+              default: '6',
+            },
+            {
+              id: 'period',
+              type: 'select',
+              label: 'Period',
+              options: [
+                { value: '30', label: '30 seconds' },
+                { value: '60', label: '60 seconds' },
+              ],
+              default: '30',
+            },
+          ],
+          build: (v) => {
+            const iss = v.issuer || '',
+              acc = v.account || '',
+              sec = v.secret || ''
+            let s = 'otpauth://totp/'
+            s += iss
+              ? `${encodeURIComponent(iss)}:${encodeURIComponent(acc)}`
+              : encodeURIComponent(acc)
+            s += `?secret=${encodeURIComponent(sec)}`
+            if (iss) s += `&issuer=${encodeURIComponent(iss)}`
+            s += `&algorithm=${v.algorithm || 'SHA1'}&digits=${v.digits || '6'}&period=${v.period || '30'}`
+            return s
+          },
+        },
+        {
+          id: 'esim',
+          name: 'eSIM',
+          icon: 'fa-sim-card',
+          fields: [
+            {
+              id: 'smdp',
+              type: 'text',
+              label: 'SM-DP+ Address',
+              placeholder: 'smdp.example.com',
+              required: true,
+              help: 'Provided by your carrier',
+            },
+            {
+              id: 'matching_id',
+              type: 'text',
+              label: 'Activation Code',
+              placeholder: 'Optional matching ID',
+              help: 'Leave empty if not provided by carrier',
+            },
+            {
+              id: 'confirmation_code',
+              type: 'text',
+              label: 'Confirmation Code',
+              placeholder: 'Optional',
+              help: 'Some carriers require this',
+            },
+          ],
+          build: (v) => {
+            let s = `LPA:1$${v.smdp || ''}$${v.matching_id || ''}`
+            if (v.confirmation_code) s += `$${v.confirmation_code}`
+            return s
+          },
+        },
+        {
+          id: 'email',
+          name: 'Email',
+          icon: 'fa-envelope',
+          fields: [
+            {
+              id: 'address',
+              type: 'email',
+              label: 'Email Address',
+              placeholder: 'hello@example.com',
+              required: true,
+            },
+            { id: 'subject', type: 'text', label: 'Subject', placeholder: 'Optional subject line' },
+            {
+              id: 'body',
+              type: 'textarea',
+              label: 'Body',
+              placeholder: 'Optional email body text...',
+              rows: 3,
+            },
+          ],
+          build: (v) => {
+            let s = `mailto:${v.address || ''}`
+            const p = []
+            if (v.subject) p.push(`subject=${encodeURIComponent(v.subject)}`)
+            if (v.body) p.push(`body=${encodeURIComponent(v.body)}`)
+            if (p.length) s += '?' + p.join('&')
+            return s
+          },
+        },
+        {
+          id: 'phone',
+          name: 'Phone',
+          icon: 'fa-phone',
+          fields: [
+            {
+              id: 'phone',
+              type: 'tel',
+              label: 'Phone Number',
+              placeholder: '+1 234 567 8900',
+              required: true,
+            },
+          ],
+          build: (v) => `tel:${v.phone || ''}`,
+        },
+        {
+          id: 'sms',
+          name: 'SMS',
+          icon: 'fa-comment-sms',
+          fields: [
+            {
+              id: 'phone',
+              type: 'tel',
+              label: 'Phone Number',
+              placeholder: '+1 234 567 8900',
+              required: true,
+            },
+            {
+              id: 'message',
+              type: 'textarea',
+              label: 'Message',
+              placeholder: 'Pre-filled SMS text...',
+              rows: 3,
+            },
+          ],
+          build: (v) => {
+            let s = `sms:${v.phone || ''}`
+            if (v.message) s += `?body=${encodeURIComponent(v.message)}`
+            return s
+          },
+        },
+        {
+          id: 'vcard',
+          name: 'Contact',
+          icon: 'fa-address-card',
+          fields: [
+            { id: 'firstName', type: 'text', label: 'First Name', placeholder: 'John', half: true },
+            { id: 'lastName', type: 'text', label: 'Last Name', placeholder: 'Doe', half: true },
+            { id: 'org', type: 'text', label: 'Organization', placeholder: 'Acme Corp' },
+            { id: 'title', type: 'text', label: 'Job Title', placeholder: 'Software Engineer' },
+            { id: 'phone', type: 'tel', label: 'Phone', placeholder: '+1 234 567 8900' },
+            { id: 'email', type: 'email', label: 'Email', placeholder: 'john@acme.com' },
+            { id: 'url', type: 'url', label: 'Website', placeholder: 'https://acme.com' },
+          ],
+          build: (v) => {
+            const L = []
+            L.push('BEGIN:VCARD', 'VERSION:3.0')
+            if (v.lastName || v.firstName) {
+              L.push(`N:${v.lastName || ''};${v.firstName || ''};;;`)
+              L.push(`FN:${(v.firstName || '').trim()} ${(v.lastName || '').trim()}`)
+            }
+            if (v.org) L.push(`ORG:${v.org}`)
+            if (v.title) L.push(`TITLE:${v.title}`)
+            if (v.phone) L.push(`TEL;TYPE=CELL:${v.phone}`)
+            if (v.email) L.push(`EMAIL;TYPE=INTERNET:${v.email}`)
+            if (v.url) L.push(`URL:${v.url}`)
+            L.push('END:VCARD')
+            return L.join('\n')
+          },
+        },
+        {
+          id: 'geo',
+          name: 'Location',
+          icon: 'fa-location-dot',
+          fields: [
+            {
+              id: 'lat',
+              type: 'number',
+              label: 'Latitude',
+              placeholder: '40.7128',
+              required: true,
+              step: 'any',
+              half: true,
+            },
+            {
+              id: 'lng',
+              type: 'number',
+              label: 'Longitude',
+              placeholder: '-74.006',
+              required: true,
+              step: 'any',
+              half: true,
+            },
+            {
+              id: 'label',
+              type: 'text',
+              label: 'Label',
+              placeholder: 'New York City',
+              help: 'Optional place name',
+            },
+          ],
+          build: (v) => {
+            let s = `geo:${v.lat || ''},${v.lng || ''}`
+            if (v.label) s += `?q=${encodeURIComponent(v.label)}`
+            return s
+          },
+        },
+        {
+          id: 'event',
+          name: 'Event',
+          icon: 'fa-calendar-days',
+          fields: [
+            {
+              id: 'title',
+              type: 'text',
+              label: 'Event Title',
+              placeholder: 'Team Meeting',
+              required: true,
+            },
+            { id: 'start', type: 'datetime-local', label: 'Start', required: true, half: true },
+            { id: 'end', type: 'datetime-local', label: 'End', half: true },
+            { id: 'location', type: 'text', label: 'Location', placeholder: 'Conference Room B' },
+            {
+              id: 'description',
+              type: 'textarea',
+              label: 'Description',
+              placeholder: 'Event details...',
+              rows: 3,
+            },
+          ],
+          build: (v) => {
+            const fmt = (dt) => {
+              if (!dt) return ''
+              const d = new Date(dt)
+              const p = (n) => String(n).padStart(2, '0')
+              return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`
+            }
+            const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//QR Studio//EN', 'BEGIN:VEVENT']
+            L.push(`SUMMARY:${v.title || ''}`)
+            if (v.start) L.push(`DTSTART:${fmt(v.start)}`)
+            if (v.end) L.push(`DTEND:${fmt(v.end)}`)
+            if (v.location) L.push(`LOCATION:${v.location}`)
+            if (v.description) L.push(`DESCRIPTION:${v.description}`)
+            L.push('END:VEVENT', 'END:VCALENDAR')
+            return L.join('\r\n')
+          },
+        },
+      ]
+
+      /* ===== Init ===== */
+      document.addEventListener('DOMContentLoaded', () => {
+        renderTypeSelector()
+        selectType('url')
+        document.getElementById('opt-ec').addEventListener('change', generateQR)
+        document.getElementById('opt-fg').addEventListener('input', (e) => {
+          document.getElementById('fg-hex').textContent = e.target.value
+          generateQR()
+        })
+        document.getElementById('opt-bg').addEventListener('input', (e) => {
+          document.getElementById('bg-hex').textContent = e.target.value
+          generateQR()
+        })
+      })
+
+      /* ===== Type Selector ===== */
+      function renderTypeSelector() {
+        const c = document.getElementById('type-selector')
+        c.innerHTML = QR_TYPES.map(
+          (t) =>
+            `<button class="type-pill" data-type="${t.id}" onclick="selectType('${t.id}')" tabindex="0" aria-label="${t.name}">` +
+            `<i class="fa-solid ${t.icon}"></i><span>${t.name}</span></button>`
+        ).join('')
+      }
+
+      function selectType(typeId) {
+        currentType = typeId
+        const type = QR_TYPES.find((t) => t.id === typeId)
+        if (!type) return
+        document
+          .querySelectorAll('.type-pill')
+          .forEach((el) => el.classList.toggle('active', el.dataset.type === typeId))
+        document.getElementById('form-icon').className = `fa-solid ${type.icon}`
+        document.getElementById('form-title').textContent = type.name
+        renderForm(type)
+        generateQR()
+      }
+
+      /* ===== Form Rendering ===== */
+      function renderForm(type) {
+        const c = document.getElementById('form-container')
+        let html = '',
+          inRow = false
+        type.fields.forEach((f, i) => {
+          const next = type.fields[i + 1]
+          if (f.half && !inRow) {
+            html += '<div class="field-row">'
+            inRow = true
+          }
+          html += renderField(f)
+          if (inRow && (!next || !next.half)) {
+            html += '</div>'
+            inRow = false
+          }
+        })
+        c.innerHTML = html
+        /* Attach listeners */
+        c.querySelectorAll('input, textarea, select').forEach((el) => {
+          const ev = el.type === 'checkbox' ? 'change' : 'input'
+          el.addEventListener(ev, () => {
+            updateCharCounts()
+            debouncedGenerate()
+          })
+        })
+        c.querySelectorAll('.pw-toggle').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const inp = btn.parentElement.querySelector('input')
+            const ico = btn.querySelector('i')
+            if (inp.type === 'password') {
+              inp.type = 'text'
+              ico.className = 'fa-regular fa-eye-slash'
+            } else {
+              inp.type = 'password'
+              ico.className = 'fa-regular fa-eye'
+            }
+          })
+        })
+        updateCharCounts()
+      }
+
+      function renderField(f) {
+        /* Checkbox has its own label built-in */
+        if (f.type === 'checkbox') {
+          return (
+            `<div class="field-group"><label class="field-checkbox">` +
+            `<input id="f-${f.id}" type="checkbox" ${f.default ? 'checked' : ''}> ${f.label}` +
+            `</label>${f.help ? `<div class="field-help">${f.help}</div>` : ''}</div>`
+          )
+        }
+        let h = '<div class="field-group">'
+        h += `<label class="field-label" for="f-${f.id}">${f.label}${f.required ? ' <span style="color:var(--accent)">*</span>' : ''}</label>`
+        switch (f.type) {
+          case 'textarea':
+            h += `<textarea id="f-${f.id}" class="field-input" placeholder="${f.placeholder || ''}" rows="${f.rows || 3}" ${f.required ? 'required' : ''}></textarea>`
+            if (f.charCount)
+              h += `<div class="char-count" id="cc-${f.id}"><span>0 / ${f.maxChars || 2953}</span><span></span></div>`
+            break
+          case 'password':
+            h += `<div class="pw-wrap"><input id="f-${f.id}" type="password" class="field-input" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''} style="padding-right:36px;"><button type="button" class="pw-toggle" tabindex="-1"><i class="fa-regular fa-eye"></i></button></div>`
+            break
+          case 'select':
+            h += `<select id="f-${f.id}" class="field-input">${f.options.map((o) => `<option value="${o.value}"${o.value === f.default ? ' selected' : ''}>${o.label}</option>`).join('')}</select>`
+            break
+          case 'datetime-local':
+            h += `<input id="f-${f.id}" type="datetime-local" class="field-input" ${f.required ? 'required' : ''}>`
+            break
+          case 'number':
+            h += `<input id="f-${f.id}" type="number" class="field-input" placeholder="${f.placeholder || ''}" ${f.step ? 'step="' + f.step + '"' : ''} ${f.required ? 'required' : ''}>`
+            break
+          default:
+            h += `<input id="f-${f.id}" type="${f.type}" class="field-input" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}>`
+        }
+        if (f.help && f.type !== 'checkbox') h += `<div class="field-help">${f.help}</div>`
+        h += '</div>'
+        return h
+      }
+
+      /* ===== Character Counts ===== */
+      function updateCharCounts() {
+        const type = QR_TYPES.find((t) => t.id === currentType)
+        type.fields.forEach((f) => {
+          if (!f.charCount) return
+          const el = document.getElementById(`f-${f.id}`)
+          const cc = document.getElementById(`cc-${f.id}`)
+          if (!el || !cc) return
+          const len = el.value.length,
+            max = f.maxChars || 2953
+          const pct = len / max
+          const cls = pct > 1 ? 'over' : pct > 0.85 ? 'warn' : ''
+          cc.className = 'char-count ' + cls
+          cc.querySelector('span:first-child').textContent = `${len} / ${max}`
+          cc.querySelector('span:last-child').textContent =
+            pct > 0.85
+              ? pct > 1
+                ? 'Too long!'
+                : 'Near limit'
+              : `${Math.round((1 - pct) * 100)}% remaining`
+        })
+      }
+
+      /* ===== Form Values ===== */
+      function getFormValues() {
+        const type = QR_TYPES.find((t) => t.id === currentType)
+        const vals = {}
+        type.fields.forEach((f) => {
+          const el = document.getElementById(`f-${f.id}`)
+          if (!el) return
+          vals[f.id] = f.type === 'checkbox' ? el.checked : el.value
+        })
+        return vals
+      }
+
+      /* ===== QR Generation ===== */
+      function debouncedGenerate() {
+        clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(generateQR, 180)
+      }
+
+      function generateQR() {
+        const type = QR_TYPES.find((t) => t.id === currentType)
+        const vals = getFormValues()
+        const data = type.build(vals)
+        currentData = data
+
+        if (!data) {
+          showEmpty()
+          return
+        }
+
+        const ec = document.getElementById('opt-ec').value
+        const fg = document.getElementById('opt-fg').value
+        const bg = document.getElementById('opt-bg').value
+
+        try {
+          const qr = qrcode(0, ec)
+          qr.addData(data)
+          qr.make()
+          currentQR = qr
+          renderPreview(qr, fg, bg)
+          showDataPreview(data)
+        } catch (e) {
+          currentQR = null
+          showError('Data too long for QR code. Reduce content or lower error correction.')
+        }
+      }
+
+      /* ===== SVG Builder ===== */
+      function buildSVG(qr, fg, bg, cellSize) {
+        cellSize = cellSize || 10
+        const mc = qr.getModuleCount()
+        const margin = 4
+        const total = (mc + margin * 2) * cellSize
+        const off = margin * cellSize
+        let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges">`
+        s += `<rect width="${total}" height="${total}" fill="${bg}"/>`
+        for (let r = 0; r < mc; r++) {
+          for (let c = 0; c < mc; c++) {
+            if (qr.isDark(r, c)) {
+              s += `<rect x="${off + c * cellSize}" y="${off + r * cellSize}" width="${cellSize}" height="${cellSize}" fill="${fg}"/>`
+            }
+          }
+        }
+        s += '</svg>'
+        return s
+      }
+
+      function renderPreview(qr, fg, bg) {
+        const svg = buildSVG(qr, fg, bg, 10)
+        const box = document.getElementById('qr-preview')
+        box.innerHTML = svg
+        box.style.background = bg
+        const svgEl = box.querySelector('svg')
+        if (svgEl) {
+          svgEl.removeAttribute('width')
+          svgEl.removeAttribute('height')
+          svgEl.style.width = '100%'
+          svgEl.style.maxWidth = '320px'
+          svgEl.classList.add('qr-anim')
+        }
+      }
+
+      function showEmpty() {
+        currentQR = null
+        const box = document.getElementById('qr-preview')
+        box.innerHTML =
+          '<div class="empty-st"><i class="fa-solid fa-qrcode"></i><p>Enter content to generate</p></div>'
+        box.style.background = '#fff'
+        document.getElementById('data-section').style.display = 'none'
+      }
+
+      function showError(msg) {
+        const box = document.getElementById('qr-preview')
+        box.innerHTML = `<div class="empty-st" style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i><p style="font-size:12px;max-width:220px;">${msg}</p></div>`
+        box.style.background = '#fff'
+        document.getElementById('data-section').style.display = 'none'
+      }
+
+      function showDataPreview(data) {
+        const sec = document.getElementById('data-section')
+        const pre = document.getElementById('data-pre')
+        sec.style.display = 'block'
+        pre.textContent = data
+      }
+
+      /* ===== Downloads ===== */
+      function downloadPNG() {
+        if (!currentQR) {
+          showToast('Generate a QR code first', 'error')
+          return
+        }
+        const fg = document.getElementById('opt-fg').value
+        const bg = document.getElementById('opt-bg').value
+        const mc = currentQR.getModuleCount()
+        const scale = 20
+        const margin = 4
+        const size = (mc + margin * 2) * scale
+        const off = margin * scale
+
+        const canvas = document.createElement('canvas')
+        canvas.width = size
+        canvas.height = size
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = bg
+        ctx.fillRect(0, 0, size, size)
+        ctx.fillStyle = fg
+        for (let r = 0; r < mc; r++) {
+          for (let c = 0; c < mc; c++) {
+            if (currentQR.isDark(r, c)) {
+              ctx.fillRect(off + c * scale, off + r * scale, scale, scale)
+            }
+          }
+        }
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `qrcode-${currentType}.png`
+          a.click()
+          URL.revokeObjectURL(url)
+          showToast('PNG downloaded', 'success')
+        })
+      }
+
+      function downloadSVG() {
+        if (!currentQR) {
+          showToast('Generate a QR code first', 'error')
+          return
+        }
+        const fg = document.getElementById('opt-fg').value
+        const bg = document.getElementById('opt-bg').value
+        const svgStr = buildSVG(currentQR, fg, bg, 10)
+        const blob = new Blob([svgStr], { type: 'image/svg+xml' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `qrcode-${currentType}.svg`
+        a.click()
+        URL.revokeObjectURL(url)
+        showToast('SVG downloaded', 'success')
+      }
+
+      /* ===== Share ===== */
+      function shareEmail() {
+        if (!currentQR) {
+          showToast('Generate a QR code first', 'error')
+          return
+        }
+        const subject = encodeURIComponent('QR Code — QR Studio')
+        const body = encodeURIComponent(
+          `Here is a QR code generated with QR Studio.\n\nEncoded data:\n${currentData}`
+        )
+        if (navigator.share) {
+          navigator.share({ title: 'QR Code', text: `QR Code data: ${currentData}` }).catch(() => {
+            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+          })
+        } else {
+          window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+        }
+        showToast('Share initiated', 'info')
+      }
+
+      /* ===== Print ===== */
+      function printQR() {
+        if (!currentQR) {
+          showToast('Generate a QR code first', 'error')
+          return
+        }
+        window.print()
+      }
+
+      /* ===== Copy Data ===== */
+      function copyData() {
+        if (!currentData) return
+        navigator.clipboard
+          .writeText(currentData)
+          .then(() => {
+            showToast('Data copied to clipboard', 'success')
+          })
+          .catch(() => showToast('Copy failed', 'error'))
+      }
+
+      /* ===== Toast ===== */
+      function showToast(msg, type) {
+        const t = document.getElementById('toast')
+        t.textContent = msg
+        t.className = `toast-el ${type} show`
+        clearTimeout(t._timer)
+        t._timer = setTimeout(() => t.classList.remove('show'), 2800)
+      }
+    </script>
+  </body>
+</html>
