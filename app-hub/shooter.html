@@ -1339,6 +1339,7 @@
       }
 
       drawPlayer(ctx, player, color) {
+        if (!ctx || !player) return;
         ctx.fillStyle = color;
         ctx.shadowColor = color;
         ctx.shadowBlur = 15;

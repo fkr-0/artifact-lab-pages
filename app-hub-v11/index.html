@@ -38,7 +38,13 @@
         height: 100vh;
         overflow: hidden;
         font-family: "Share Tech Mono", monospace;
-        background: var(--hub-background);
+        background:
+          radial-gradient(circle at 14% 8%, var(--hub-glow), transparent 28rem),
+          radial-gradient(circle at 90% 22%, color-mix(in srgb, var(--hub-accent), transparent 70%), transparent 24rem),
+          linear-gradient(color-mix(in srgb, var(--hub-accent), transparent 92%) 1px, transparent 1px),
+          linear-gradient(90deg, color-mix(in srgb, var(--hub-accent), transparent 92%) 1px, transparent 1px),
+          var(--hub-background);
+        background-size: auto, auto, 32px 32px, 32px 32px, auto;
         color: var(--hub-text);
         image-rendering: pixelated;
       }
@@ -49,9 +55,9 @@
         pointer-events: none;
         z-index: 0;
         background:
-          radial-gradient(circle at 12% 0, var(--hub-glow), transparent 28rem),
-          radial-gradient(circle at 88% 100%, var(--hub-glow-secondary), transparent 30rem);
-        opacity: 0.15;
+          radial-gradient(circle at 14% 8%, var(--hub-glow), transparent 28rem),
+          radial-gradient(circle at 90% 22%, color-mix(in srgb, var(--hub-accent), transparent 70%), transparent 24rem);
+        opacity: 0.18;
       }
       body::after {
         content: "";
@@ -62,15 +68,16 @@
         background:
           repeating-linear-gradient(
             0deg,
-            rgba(0, 255, 255, 0.03) 0 1px,
+            color-mix(in srgb, var(--hub-accent), transparent 96%) 0 1px,
             transparent 1px 3px
           ),
           repeating-linear-gradient(
             90deg,
-            rgba(255, 0, 255, 0.02) 0 1px,
+            color-mix(in srgb, var(--hub-accent), transparent 98%) 0 1px,
             transparent 1px 5px
           );
-        opacity: 0.4;
+        opacity: 0.24;
+        mix-blend-mode: screen;
       }
       .pixel-noise {
         position: fixed;
@@ -163,13 +170,13 @@
       .pill {
         display: inline-flex;
         align-items: center;
-        border: 1px solid rgba(0, 255, 255, 0.25);
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 75%);
         border-radius: 6px;
         padding: 0.2rem 0.5rem;
         font-size: 0.7rem;
         font-weight: 600;
         color: var(--hub-accent);
-        background: rgba(0, 255, 255, 0.08);
+        background: color-mix(in srgb, var(--hub-accent), transparent 92%);
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
@@ -177,7 +184,7 @@
       input,
       select,
       textarea {
-        border: 1px solid rgba(0, 255, 255, 0.2);
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 80%);
         border-radius: 6px;
         padding: 0.5rem 0.7rem;
         background: rgba(0, 0, 0, 0.5);
@@ -310,8 +317,8 @@
       /* Default tag styling */
       .tag-button:not(.tag-type-game):not(.tag-type-tool):not(.tag-type-editor):not(.tag-type-audio):not(.tag-type-graphics):not(.tag-type-hub):not(.tag-type-collaborative):not(.tag-type-docs),
       .tag-pill:not(.tag-type-game):not(.tag-type-tool):not(.tag-type-editor):not(.tag-type-audio):not(.tag-type-graphics):not(.tag-type-hub):not(.tag-type-collaborative):not(.tag-type-docs) {
-        border-color: var(--tag-border, rgba(0, 255, 255, 0.3));
-        background: var(--tag-bg, rgba(0, 255, 255, 0.08));
+        border-color: var(--tag-border, color-mix(in srgb, var(--hub-accent), transparent 70%));
+        background: var(--tag-bg, color-mix(in srgb, var(--hub-accent), transparent 92%));
         color: hsl(var(--tag-hue, 180) 100% 78%);
       }
       .tag-button.active,
@@ -633,8 +640,8 @@
       }
       .app-deck-panel.active {
         display: grid;
-        grid-template-rows: minmax(0, 1fr);
-        overflow: auto;
+        grid-template-rows: 1fr;
+        overflow: hidden;
         min-height: 220px;
         resize: vertical;
       }
@@ -808,7 +815,7 @@
                 aria-label="artistic endeavour sprite"
               ></div>
               <div>
-                <h1>NEXUS v11</h1>
+                <h1>NEXUS v11 <span id="artifactCount" class="pill">0 artifacts</span></h1>
                 <div class="muted">filter artifacts</div>
               </div>
             </div>
@@ -889,7 +896,7 @@
           role="separator"
           aria-orientation="horizontal"
         ></div>
-        <section id="workspacePane" class="card workspace-pane">
+        <section id="workspacePane" class="card workspace-pane active">
           <div id="workspaceTabs" class="workspace-tabs app-deck-tabs">
             <button
               class="workspace-tab active"
@@ -1292,6 +1299,7 @@
       renderLobbySummary();
       renderStorage();
       renderFilters();
+      updateArtifactCount();
       setViewMode(viewMode, false);
       network.on("status", (detail) => {
         const online = Boolean(detail?.connected);
@@ -1593,6 +1601,10 @@
                 renderResults();
               }),
           );
+      }
+      function updateArtifactCount() {
+        const count = catalog.items?.length || 0;
+        $("artifactCount").textContent = `${count} artifact${count !== 1 ? 's' : ''}`;
       }
       function filteredItems() {
         return sortItemsByRecentlyChanged(filterArtifactsAdvanced(catalog.items, {
