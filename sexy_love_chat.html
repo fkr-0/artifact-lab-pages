@@ -978,7 +978,7 @@
       // Name validation and room creation
       function createCustomRoom() {
         const yourName = document.getElementById('yourName').value.trim()
-        const partnerName = document.getElementById('partnerName').value.trim()
+        partnerName = document.getElementById('partnerName').value.trim()
 
         if (!yourName || yourName.length < 2) {
           alert('Please enter your name (at least 2 characters)')
