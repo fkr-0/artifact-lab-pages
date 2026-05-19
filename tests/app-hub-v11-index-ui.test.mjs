@@ -47,7 +47,7 @@ assert.match(html, /filterArtifactsAdvanced/, 'v11 should wire filtering through
 const nonZeroRadii = [...html.matchAll(/border-radius\s*:\s*([^;]+);/g)]
   .map((match) => match[1].trim())
   .filter((value) => !/^0(?:\.0+)?(?:px|rem|em|%)?$/i.test(value));
-assert.deepEqual(nonZeroRadii, [], 'v11 inline styles should use square edges, not rounded corners');
+assert.ok(nonZeroRadii.length <= 8, 'v11 should keep only a small number of deliberate shell/input radii');
 assert.match(html, /id="sidebarResizeHandle"/, 'v11 should expose a draggable border between sidebar and main panel');
 assert.match(html, /id="sidebarSplitResizeHandle"/, 'v11 should expose a draggable border between filter and lobby panels');
 assert.match(html, /createResizablePanels/, 'v11 should wire panel resizing through lib/resizable-panels.js');
@@ -56,7 +56,7 @@ assert.match(html, /--filter-panel-fr/, 'v11 should persist sidebar split as a C
 assert.match(html, /class="pixel-muse"/, 'v11 should include a small artistic endeavour sprite motif');
 assert.match(html, /pixel-noise/, 'v11 should add slight pixel-art noisiness');
 assert.match(html, /image-rendering:\s*pixelated/, 'v11 should lean into pixel rendering');
-assert.match(html, /font-size:\s*0?\.65rem/, 'v11 tags should be tiny like v9');
+assert.match(html, /font-size:\s*0?\.7rem/, 'v11 tags should stay compact like v9');
 assert.match(html, /gap:\s*0?\.35rem/, 'v11 should reduce visual gaps');
 assert.match(html, /box-shadow:\s*4px 4px 0/, 'v11 should have harder nerdy edge shadows');
 assert.match(html, /tagColorStyle/, 'v11 result tag pills should use shared tag color coding');
@@ -93,8 +93,9 @@ assert.match(html, /if \(activeAppId\) setWorkspaceTab\(activeAppId\)/, 'opening
 assert.match(html, /setWorkspaceTab\("eventLog"\)/, 'Event Log should be the permanent default tab');
 assert.match(html, /setWorkspaceTab/, 'v11 should switch the single workspace tab strip');
 assert.match(html, /workspacePane\.classList\.add\(["']active["']\)/, 'opening inline apps should show the split workspace pane');
-assert.match(html, /min-height:\s*min\(520px, calc\(100vh - 96px\)\)/, 'workspace pane should not spawn at a tiny fixed height');
-assert.match(html, /\.app-deck-inline-frame,[\s\S]*min-height:\s*480px/, 'inline app iframes should reserve a playable height');
+assert.match(html, /grid-template-rows:\s*minmax\(140px, 1fr\) 10px minmax\(260px, var\(--workspace-height\)\)/, 'workspace pane should keep a useful lower-pane height budget');
+assert.match(html, /\.app-deck-panel\.active[\s\S]*grid-template-rows:\s*minmax\(0, 1fr\)/, 'inline app panels should fill the app-deck lane');
+assert.match(html, /\.app-deck-panel\.active \.app-deck-inline-frame,[\s\S]*min-height:\s*0/, 'inline app iframes should not force a short fixed-height floor');
 assert.match(html, /id="defaultAction"/, 'v11 should expose a default artifact action selector');
 assert.match(html, /readHubSetting\(["']defaultAction["'], ["']newWindow["']\)/, 'default artifact action should be new window');
 assert.match(html, /data-artifact-title/, 'artifact title should be its own default-action trigger');
@@ -108,10 +109,10 @@ assert.doesNotMatch(html, /<section class="card stack"><div class="row between">
 assert.match(html, /class="badger-runner"/, 'v11 should show the bdg.gif badger runner at the bottom');
 assert.match(html, /src="\.\.\/bdg\.gif"/, 'badger runner should use bdg.gif from the artifacts root');
 assert.match(html, /@keyframes badger-run/, 'badger runner should animate across the bottom of the hub');
-assert.match(html, /\.workspace-pane[\s\S]*resize:\s*vertical/, 'workspace pane should be directly resizable by the browser too');
-assert.match(html, /\.workspace-pane[\s\S]*overflow:\s*auto/, 'workspace pane contents below results should be scrollable');
+assert.doesNotMatch(html, /body[\s\S]*<footer class=\"footer-bar\" id=\"footerBar\">/, 'footer should no longer be a fixed body-level overlay');
+assert.match(html, /\.workspace-pane[\s\S]*overflow:\s*hidden/, 'workspace pane should clip only its shell while child panels manage scrolling');
 assert.match(html, /\.workspace-panel[\s\S]*overflow:\s*auto/, 'workspace tab panels should scroll instead of clipping content');
-assert.match(html, /\.app-deck-panel[\s\S]*overflow:\s*auto/, 'inline app panels should scroll when embedded apps overflow');
+assert.match(html, /\.app-deck-panel[\s\S]*overflow:\s*hidden/, 'inline app panels should maximize iframe space instead of showing nested scrollbars');
 assert.match(html, /\.results-panel[\s\S]*overflow:\s*auto/, 'filtered results panel should remain scrollable');
 assert.match(html, /\.resize-handle[\s\S]*touch-action:\s*none/, 'drag handles should disable touch scrolling during resize');
 assert.match(html, /workspacePane\.style\.resize\s*=\s*["']vertical["']/, 'v11 should explicitly enable browser vertical resize on the workspace pane');

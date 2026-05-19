@@ -54,9 +54,9 @@ const resizeBlock = html.slice(
   html.indexOf('resize() {'),
   html.indexOf('setupControls() {')
 );
-assert.match(resizeBlock, /Math\.max\(640, container\.clientWidth\)/, 'embedded resize should keep a playable minimum canvas width');
-assert.match(resizeBlock, /Math\.max\(640, window\.innerWidth\)/, 'standalone resize should keep a playable minimum canvas width');
-assert.match(resizeBlock, /Math\.max\(400, window\.innerHeight\)/, 'standalone resize should keep a playable minimum canvas height');
+assert.match(resizeBlock, /Math\.max\(GAME_CONFIG\.MIN_CANVAS_WIDTH, container\.clientWidth\)/, 'embedded resize should keep a playable minimum canvas width');
+assert.match(resizeBlock, /Math\.max\(GAME_CONFIG\.MIN_CANVAS_WIDTH, window\.innerWidth\)/, 'standalone resize should keep a playable minimum canvas width');
+assert.match(resizeBlock, /Math\.max\(GAME_CONFIG\.MIN_CANVAS_HEIGHT, window\.innerHeight\)/, 'standalone resize should keep a playable minimum canvas height');
 
 const startBlock = html.slice(
   html.indexOf('start() {'),

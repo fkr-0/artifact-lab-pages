@@ -33,7 +33,7 @@ assert.match(startMultiplayerBlock, /await this\.lobby\.connect\(this\.username\
 assert.match(startMultiplayerBlock, /this\.lobby\.send\?\.\(this\.targetPeerId/, 'startMultiplayer should request state from the target peer when joining');
 assert.match(startMultiplayerBlock, /type: 'shooter-join-request'/, 'startMultiplayer should emit explicit shooter join requests');
 assert.match(startMultiplayerBlock, /if \(!this\.spectateMode\) \{\s*this\.networkUpdateInterval\s*=\s*setInterval/s, 'spectate mode should not broadcast a playable state loop');
-assert.match(startMultiplayerBlock, /this\.networkUpdateInterval\s*=\s*setInterval\(\(\) => \{\s*this\.broadcastGameState\(\);\s*\}, 50\)/s, 'startMultiplayer should broadcast state at 20Hz');
+assert.match(startMultiplayerBlock, /this\.networkUpdateInterval\s*=\s*setInterval\(\(\) => \{\s*this\.broadcastGameState\(\);\s*\}, GAME_CONFIG\.NETWORK_UPDATE_INTERVAL\)/s, 'startMultiplayer should broadcast state at the configured 20Hz interval');
 assert.match(startMultiplayerBlock, /this\.broadcastPresence\(\)/, 'startMultiplayer should announce local presence after connecting');
 assert.match(startMultiplayerBlock, /this\.toggleMultiplayer\(\)/, 'startMultiplayer should roll back mode on connection failure');
 
