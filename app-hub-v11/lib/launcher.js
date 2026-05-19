@@ -148,6 +148,7 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
 
   const createTab = (artifact, instanceId) => {
     const tab = documentRef.createElement('button');
+    tab.type = 'button';
     tab.className = 'app-deck-tab';
     tab.dataset.appId = artifact.id;
     tab.dataset.instanceId = instanceId;
@@ -187,7 +188,9 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
       iframe.className = 'app-deck-inline-frame';
       iframe.src = launch.url || artifactHref(artifact);
       iframe.title = artifact.title || artifact.id;
-      iframe.setAttribute?.('allow', 'autoplay; fullscreen');
+      iframe.setAttribute?.('allow', 'autoplay; fullscreen; clipboard-read; clipboard-write; gamepad');
+      iframe.setAttribute?.('allowfullscreen', '');
+      iframe.setAttribute?.('loading', 'eager');
       panel.appendChild(iframe);
     }
     return panel;

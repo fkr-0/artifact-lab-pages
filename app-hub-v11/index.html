@@ -115,11 +115,8 @@
         padding: 0.5rem;
         overflow: hidden;
         display: grid;
-        gap: 0.6rem;
-        grid-template-rows: minmax(160px, 1fr) 12px minmax(
-            180px,
-            var(--workspace-height)
-          );
+        gap: 0.55rem;
+        grid-template-rows: minmax(140px, 1fr) 10px minmax(260px, var(--workspace-height));
         min-height: 0;
       }
       .card {
@@ -574,10 +571,10 @@
       }
       .workspace-pane {
         display: none;
-        min-height: 220px;
+        min-height: 260px;
         max-height: 100%;
         overflow: hidden;
-        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr) auto;
       }
       .workspace-pane.active {
         display: grid;
@@ -604,7 +601,7 @@
       }
       .app-deck {
         display: grid;
-        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
         min-height: 0;
         overflow: hidden;
       }
@@ -640,9 +637,9 @@
       }
       .app-deck-panel.active {
         display: grid;
-        grid-template-rows: 1fr;
+        grid-template-rows: minmax(0, 1fr);
         overflow: hidden;
-        min-height: 220px;
+        min-height: 0;
       }
       .app-deck-inline-frame,
       iframe {
@@ -654,7 +651,10 @@
       }
       .app-deck-panel.active .app-deck-inline-frame,
       .app-deck-panel.active iframe {
-        min-height: 220px;
+        min-height: 0;
+      }
+      .app-deck-inline-frame {
+        display: block;
       }
       .floating {
         position: fixed;
@@ -793,17 +793,18 @@
          FOOTER STATUS BAR (v9-style ticker)
       ══════════════════════════════════════ */
       .footer-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 28px;
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        width: 100%;
+        min-height: 38px;
         background: var(--hub-panel);
         border-top: 1px solid rgba(0, 255, 255, 0.12);
         display: flex;
         align-items: center;
-        z-index: 200;
-        font-size: 0.65rem;
+        z-index: 1;
+        font-size: 0.75rem;
         color: rgba(0, 255, 255, 0.6);
         overflow: hidden;
       }
@@ -855,14 +856,16 @@
         color: var(--hub-accent);
       }
       .badger-runner {
-        position: fixed;
-        left: 8px;
-        bottom: 3px;
-        width: 124px;
-        height: 24px;
+        position: relative;
+        left: auto;
+        bottom: auto;
+        width: 156px;
+        height: 30px;
         pointer-events: none;
-        z-index: 260;
+        z-index: 2;
         opacity: 0.98;
+        flex: 0 0 auto;
+        margin: 0 0.75rem;
         border: 1px solid rgba(0, 255, 255, 0.18);
         background: linear-gradient(
           90deg,
@@ -888,13 +891,15 @@
       .badger-runner::after {
         content: "CBADGER // NAV-01";
       }
-      /* adjust content-body bottom pad for footer */
-      .content-body {
-        padding-bottom: 32px;
+      #stage {
+        display: grid;
+        padding: 0;
+        margin-top: 0.45rem;
+        min-height: 42px;
+        overflow: hidden;
       }
-      /* push app-deck above footer */
-      .app-deck {
-        padding-bottom: 32px;
+      #stage[hidden] {
+        display: none !important;
       }
       @media (max-width: 860px) {
         .shell {
@@ -911,7 +916,7 @@
         body {
           overflow: auto;
         }
-        .footer-bar {
+        #stage {
           display: none;
         }
       }
@@ -1091,8 +1096,30 @@
             </div>
             <div id="eventLog" class="event-log muted"></div>
           </div>
+          <section id="stage" class="card stack">
+            <footer class="footer-bar" id="footerBar">
+              <div class="footer-left">
+                <span style="color: var(--hub-accent); font-weight: bold">READY</span>
+                <span class="footer-sep">│</span>
+                <span id="buildCommitShort" style="color: var(--hub-text)">--</span>
+                <span class="footer-sep">│</span>
+                <span id="buildDate" style="color: var(--hub-text)">--</span>
+              </div>
+              <div class="ticker-wrap">
+                <div class="badger-runner" aria-hidden="true"></div>
+                <div class="ticker-track" id="tickerTrack">
+                  <!-- populated by JS -->
+                </div>
+              </div>
+              <div class="footer-right">
+                <span id="artifactCount" style="color: var(--hub-text)">--</span>
+                ARTIFACTS
+                <span class="footer-sep">│</span>
+                <span id="sectorDisplay" style="color: var(--hub-accent)">ZETA-8</span>
+              </div>
+            </footer>
+          </section>
         </section>
-        <section id="stage" class="card stack" hidden></section>
       </main>
     </div>
 
@@ -1187,29 +1214,6 @@
       <button id="presenceTertiaryAction" type="button" role="menuitem"></button>
       <button id="presenceQuaternaryAction" type="button" role="menuitem"></button>
     </div>
-
-    <!-- Footer status bar -->
-    <footer class="footer-bar" id="footerBar">
-      <div class="footer-left">
-        <span style="color: var(--hub-accent); font-weight: bold">READY</span>
-        <span class="footer-sep">│</span>
-        <span id="buildCommitShort" style="color: var(--hub-text)">--</span>
-        <span class="footer-sep">│</span>
-        <span id="buildDate" style="color: var(--hub-text)">--</span>
-      </div>
-      <div class="ticker-wrap">
-        <div class="badger-runner" aria-hidden="true"></div>
-        <div class="ticker-track" id="tickerTrack">
-          <!-- populated by JS -->
-        </div>
-      </div>
-      <div class="footer-right">
-        <span id="artifactCount" style="color: var(--hub-text)">--</span>
-        ARTIFACTS
-        <span class="footer-sep">│</span>
-        <span id="sectorDisplay" style="color: var(--hub-accent)">ZETA-8</span>
-      </div>
-    </footer>
 
 
     <script type="module">
