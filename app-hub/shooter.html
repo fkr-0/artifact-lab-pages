@@ -171,18 +171,18 @@
     </div>
   </div>
 
-  <div id="controls">
-    <div style="display:flex;flex-direction:column;gap:4px;background:rgba(0,0,0,0.5);padding:8px;border-radius:6px;border:1px solid rgba(0,255,255,0.2)">
-      <label style="color:#0cf;font-size:11px">Enemy Amount <strong id="enemyAmountValue">2</strong><input id="enemyAmount" type="range" min="1" max="5" step="1" value="2"></label>
-      <label style="color:#0cf;font-size:11px">Enemy Power <strong id="enemyPowerValue">2</strong><input id="enemyPower" type="range" min="1" max="5" step="1" value="2"></label>
+  <div id="controls" role="group" aria-label="Game controls">
+    <div style="display:flex;flex-direction:column;gap:4px;background:rgba(0,0,0,0.5);padding:8px;border-radius:6px;border:1px solid rgba(0,255,255,0.2)" role="group" aria-label="Difficulty settings">
+      <label for="enemyAmount" style="color:#0cf;font-size:11px">Enemy Amount <strong id="enemyAmountValue">2</strong><input id="enemyAmount" type="range" min="1" max="5" step="1" value="2" aria-valuenow="2" aria-valuemin="1" aria-valuemax="5" aria-label="Enemy amount multiplier"></label>
+      <label for="enemyPower" style="color:#0cf;font-size:11px">Enemy Power <strong id="enemyPowerValue">2</strong><input id="enemyPower" type="range" min="1" max="5" step="1" value="2" aria-valuenow="2" aria-valuemin="1" aria-valuemax="5" aria-label="Enemy power multiplier"></label>
       <div style="color:rgba(0,255,255,.65);font-size:10px;max-width:210px">More pressure pays more money per kill.</div>
     </div>
-    <button id="repairBtn">Repair +1: $60</button>
-    <button id="upgradeBtn">Upgrade Gun: $120</button>
-    <button id="boostBtn">Booster: $90</button>
-    <button id="shipyardBtn">Shipyard</button>
-    <button id="multiplayerBtn">Multiplayer: OFF</button>
-    <button id="restartBtn">Restart</button>
+    <button id="repairBtn" aria-label="Repair hull for 60 credits">Repair +1: $60</button>
+    <button id="upgradeBtn" aria-label="Upgrade weapon for 120 credits">Upgrade Gun: $120</button>
+    <button id="boostBtn" aria-label="Purchase booster upgrade for 90 credits">Booster: $90</button>
+    <button id="shipyardBtn" aria-label="Open shipyard panel">Shipyard</button>
+    <button id="multiplayerBtn" aria-label="Toggle multiplayer mode">Multiplayer: OFF</button>
+    <button id="restartBtn" aria-label="Restart the game">Restart</button>
   </div>
 
   <div id="multiplayerPanel">
@@ -220,8 +220,14 @@
     <button onclick="game.restart()">Play Again</button>
   </div>
 
+  <div id="achievementPanel" style="position:fixed;top:70px;right:10px;max-width:320px;z-index:100;display:none"></div>
+
   <script type="module">
     import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
+    import { GAME_CONFIG, STAGE_THEMES } from './js/config.js';
+    import { StoryManager, createInitialStoryState, updateStoryMode } from './js/story.js';
+    import { MultiplayerManager } from './js/multiplayer.js';
+    import { UIManager } from './js/ui.js';
     import {
       ALLY_MODELS,
       BOOSTER_MODELS,
@@ -236,7 +242,6 @@
       hireAlly,
       createEnemy,
       createInitialEconomy,
-      createInitialStoryState,
       createPlayerShot,
       cycleWeaponType,
       deployTurret as buyTurret,
@@ -245,10 +250,10 @@
       recordEnemyKill,
       updateAllies,
       updateShields,
-      updateStoryMode,
       updateTurrets,
     } from './lib/shooter-balance.mjs';
 
+    // Game constants
     const SHOOTER_LOBBY_ID = 'shooter-arena';
     const PRESENCE_KEY = 'shooter-presence';
 
@@ -257,10 +262,16 @@
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
 
+        // Initialize new managers
+        this.ui = new UIManager(this.canvas);
+        this.storyManager = new StoryManager();
+        this.multiplayerManager = null; // Will be initialized when needed
+
         this.urlParams = new URLSearchParams(window.location.search);
         this.multiplayer = false;
         this.lobby = null;
-        this.username = this.getUsername();
+        const settings = this.ui.getSettings();
+        this.username = settings.playerName;
         this.targetPeerId = this.urlParams.get('targetPeerId') || '';
         this.sessionMode = this.urlParams.get('mode') || 'stage';
         this.spectateMode = this.urlParams.get('spectate') === 'true' || this.urlParams.get('observe') === 'true';
@@ -280,7 +291,7 @@
       createInitialLocalState({ y = 0, keys = {}, enemyAmount = 2, enemyPower = 2 } = {}) {
         const economy = createInitialEconomy();
         return {
-          player: { x: 50, y, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
+          player: { x: GAME_CONFIG.PLAYER_INITIAL_X, y, vy: 0, lives: 3, upgrades: economy.upgrades, weaponLevel: 1, boostLevel: 1, weaponType: 'bullet', shipModel: 'interceptor', boosterModel: 'ion' },
           ownedShips: ['interceptor'],
           ownedBoosters: ['ion'],
           ownedWeapons: ['bullet'],
@@ -324,30 +335,67 @@
       }
 
       getStageTheme() {
-        const themes = [
-          { name: 'Neon Drift', bg: '#080012', nebula: '#0cf', star: 'rgba(255,255,255,0.3)', lane: 'rgba(0,255,255,0.08)' },
-          { name: 'Ember Belt', bg: '#140700', nebula: '#f60', star: 'rgba(255,180,90,0.45)', lane: 'rgba(255,96,0,0.11)' },
-          { name: 'Verdant Ion Reef', bg: '#00120a', nebula: '#0f8', star: 'rgba(120,255,190,0.38)', lane: 'rgba(0,255,128,0.09)' },
-          { name: 'Violet Singularity', bg: '#100018', nebula: '#b0f', star: 'rgba(220,160,255,0.42)', lane: 'rgba(180,0,255,0.10)' },
-          { name: 'Frozen Relay', bg: '#001018', nebula: '#7df', star: 'rgba(170,235,255,0.5)', lane: 'rgba(120,220,255,0.08)' }
-        ];
-        return themes[(this.state.local.stage - 1) % themes.length];
+        return STAGE_THEMES[(this.state.local.stage - 1) % STAGE_THEMES.length];
       }
 
       init() {
         this.embedded = this.isEmbedded();
 
+        // Store bound event handlers for proper cleanup
+        this.resizeHandler = () => this.resize();
+        this.canvasClickHandler = () => this.canvas.focus();
+        this.pauseHandler = (e) => this.handlePause(e);
+
         this.resize();
-        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('resize', this.resizeHandler);
 
         this.setupControls();
         this.setupKeyboard();
 
         this.state.local.player.y = this.canvas.height / 2;
 
-        // Notify parent we're ready
+        // Setup pause handler
+        document.addEventListener('keydown', this.pauseHandler);
+
+        // Show setup menu first (unless in embedded mode or URL parameters suggest direct start)
+        const shouldShowSetup = !this.embedded &&
+                               !this.urlParams.get('directStart') &&
+                               !this.urlParams.get('embedded');
+
+        if (shouldShowSetup) {
+          const setupMenu = this.ui.showSetupMenu();
+
+          // Attach setup menu handlers
+          const startButton = setupMenu.querySelector('#setupStart');
+          const multiplayerButton = setupMenu.querySelector('#setupMultiplayer');
+
+          if (startButton) {
+            startButton.onclick = () => {
+              this.ui.hideSetupMenu();
+              this.start();
+            };
+          }
+
+          if (multiplayerButton) {
+            multiplayerButton.onclick = () => {
+              this.ui.hideSetupMenu();
+              this.toggleMultiplayer();
+              this.start();
+            };
+          }
+
+          // Don't start the game yet - wait for user to click start
+          return;
+        }
+
+        // Notify parent we're ready (with origin check)
         if (this.embedded && window.parent !== window) {
-          window.parent.postMessage({ type: 'shooter-ready' }, '*');
+          const targetOrigin = window.location.origin;
+          try {
+            window.parent.postMessage({ type: 'shooter-ready' }, targetOrigin);
+          } catch (e) {
+            console.warn('Failed to notify parent:', e);
+          }
         }
 
         this.start();
@@ -358,12 +406,12 @@
           // In embedded mode, use parent container size
           const container = this.canvas.parentElement;
           if (container) {
-            this.canvas.width = Math.max(640, container.clientWidth);
-            this.canvas.height = Math.max(400, container.clientHeight);
+            this.canvas.width = Math.max(GAME_CONFIG.MIN_CANVAS_WIDTH, container.clientWidth);
+            this.canvas.height = Math.max(GAME_CONFIG.MIN_CANVAS_HEIGHT, container.clientHeight);
           }
         } else {
-          this.canvas.width = Math.max(640, window.innerWidth);
-          this.canvas.height = Math.max(400, window.innerHeight);
+          this.canvas.width = Math.max(GAME_CONFIG.MIN_CANVAS_WIDTH, window.innerWidth);
+          this.canvas.height = Math.max(GAME_CONFIG.MIN_CANVAS_HEIGHT, window.innerHeight);
         }
       }
 
@@ -421,9 +469,7 @@
         document.addEventListener('keyup', this.keyUpHandler);
 
         // Focus canvas on click to ensure keyboard events are captured
-        this.canvas.addEventListener('click', () => {
-          this.canvas.focus();
-        });
+        this.canvas.addEventListener('click', this.canvasClickHandler);
       }
 
       start() {
@@ -437,8 +483,11 @@
           enemyPower: document.getElementById('enemyPower')?.value || 2,
         });
 
+        // Reset story manager for new game
+        this.storyManager.reset();
+
         this.updateHUD();
-        document.getElementById('gameOverScreen').classList.remove('visible');
+        this.ui.hideGameOverScreen();
 
         this.gameLoop = requestAnimationFrame(() => this.loop());
       }
@@ -494,7 +543,7 @@
           if (!this.spectateMode) {
             this.networkUpdateInterval = setInterval(() => {
               this.broadcastGameState();
-            }, 50); // 20 updates per second
+            }, GAME_CONFIG.NETWORK_UPDATE_INTERVAL);
           }
 
           // Initial broadcast
@@ -602,7 +651,7 @@
         }
 
         // Cleanup stale players
-        const timeout = 5000;
+        const timeout = GAME_CONFIG.PLAYER_TIMEOUT;
         for (const [id, player] of this.state.remote) {
           if (now - player.lastUpdate > timeout) {
             this.state.remote.delete(id);
@@ -655,10 +704,53 @@
       }
 
       showNotification(text) {
-        const notif = document.getElementById('notification');
-        notif.textContent = text;
-        notif.classList.add('visible');
-        setTimeout(() => notif.classList.remove('visible'), 2000);
+        this.ui.showNotification(text);
+      }
+
+      handlePause(e) {
+        if (e.code === 'Escape' && !this.state.local.gameOver) {
+          const pauseMenu = this.ui.showPauseMenu();
+
+          // Attach pause menu handlers
+          const resumeBtn = pauseMenu?.querySelector('#pauseResume');
+          const settingsBtn = pauseMenu?.querySelector('#pauseSettings');
+          const restartBtn = pauseMenu?.querySelector('#pauseRestart');
+          const quitBtn = pauseMenu?.querySelector('#pauseQuit');
+
+          if (resumeBtn) {
+            resumeBtn.onclick = () => this.ui.hidePauseMenu();
+          }
+
+          if (settingsBtn) {
+            settingsBtn.onclick = () => {
+              this.ui.hidePauseMenu();
+              const setupMenu = this.ui.showSetupMenu();
+              // Add handlers to return to game
+              const backBtn = setupMenu?.querySelector('#setupStart');
+              if (backBtn) {
+                backBtn.textContent = 'RETURN TO GAME';
+                backBtn.onclick = () => {
+                  this.ui.hideSetupMenu();
+                };
+              }
+            };
+          }
+
+          if (restartBtn) {
+            restartBtn.onclick = () => {
+              this.ui.hidePauseMenu();
+              this.restart();
+            };
+          }
+
+          if (quitBtn) {
+            quitBtn.onclick = () => {
+              this.ui.hidePauseMenu();
+              this.destroy();
+              location.reload();
+            };
+          }
+        }
       }
 
       toggleShipyard(forceOpen) {
@@ -799,7 +891,7 @@
         window.clearTimeout(this.storyHideTimer);
         this.storyHideTimer = window.setTimeout(() => {
           panel.style.display = 'none';
-        }, 5200);
+        }, GAME_CONFIG.STORY_MESSAGE_DURATION);
       }
 
       updateStory(now) {
@@ -811,36 +903,49 @@
           enemyAmount: s.enemyAmountMultiplier,
           stage: s.stage,
           bossActive: s.bossActive,
+          stageKills: s.stageKills,
+          score: s.score
         });
+
         s.story = result.story;
-        this.emitStoryMessages(result.messages);
+
+        // Use UI manager for story messages
+        this.ui.showStoryMessages(result.messages);
+
+        // Show achievements if any
+        if (result.achievements && result.achievements.length > 0) {
+          result.achievements.forEach(achievement => {
+            this.ui.showAchievement(achievement);
+          });
+        }
       }
 
       updateHUD() {
-        document.getElementById('score').textContent = this.state.local.score;
-        document.getElementById('money').textContent = Math.floor(this.state.local.money);
-        document.getElementById('lives').textContent = this.state.local.player.lives;
-        const theme = this.getStageTheme();
-        document.getElementById('stage').textContent = this.state.local.stage;
-        document.getElementById('environmentName').textContent = theme.name;
-        document.getElementById('stageKills').textContent = this.state.local.stageKills;
-        document.getElementById('stageGoal').textContent = this.state.local.stageGoal;
-        document.getElementById('bossStatus').textContent = this.state.local.bossActive ? 'ACTIVE' : 'none';
-        document.getElementById('weaponLevel').textContent = this.state.local.player.weaponLevel;
-        document.getElementById('boostLevel').textContent = this.state.local.player.boostLevel;
-        document.getElementById('shipModel').textContent = SHIP_MODELS[this.state.local.player.shipModel].label;
-        document.getElementById('weaponType').textContent = this.state.local.player.weaponType;
-        document.getElementById('turretCount').textContent = this.state.local.turrets.length;
-        document.getElementById('turretCost').textContent = TURRET_COST;
+        const s = this.state.local;
+        this.ui.updateHUD({
+          score: s.score,
+          money: s.money,
+          player: s.player,
+          stage: s.stage,
+          stageKills: s.stageKills,
+          stageGoal: s.stageGoal,
+          bossActive: s.bossActive,
+          turrets: s.turrets
+        });
         this.renderShipyard();
 
-        // Notify parent window in embedded mode
+        // Notify parent window in embedded mode (with origin check)
         if (this.embedded && window.parent !== window) {
-          window.parent.postMessage({
-            type: 'shooter-update',
-            score: this.state.local.score,
-            lives: this.state.local.player.lives
-          }, '*');
+          const targetOrigin = window.location.origin;
+          try {
+            window.parent.postMessage({
+              type: 'shooter-update',
+              score: this.state.local.score,
+              lives: this.state.local.player.lives
+            }, targetOrigin);
+          } catch (e) {
+            console.warn('Failed to send update to parent:', e);
+          }
         }
       }
 
@@ -848,17 +953,38 @@
         // Cleanup event listeners
         if (this.keyHandler) {
           document.removeEventListener('keydown', this.keyHandler);
+          this.keyHandler = null;
         }
         if (this.keyUpHandler) {
           document.removeEventListener('keyup', this.keyUpHandler);
+          this.keyUpHandler = null;
+        }
+        if (this.resizeHandler) {
+          window.removeEventListener('resize', this.resizeHandler);
+          this.resizeHandler = null;
+        }
+        if (this.canvasClickHandler) {
+          this.canvas.removeEventListener('click', this.canvasClickHandler);
+          this.canvasClickHandler = null;
+        }
+
+        // Clear timers and intervals
+        if (this.storyHideTimer) {
+          clearTimeout(this.storyHideTimer);
+          this.storyHideTimer = null;
         }
 
         // Stop game loop
         if (this.gameLoop) {
           cancelAnimationFrame(this.gameLoop);
+          this.gameLoop = null;
         }
 
+        // Stop multiplayer
         this.stopMultiplayer();
+
+        // Clear state
+        this.state = null;
       }
 
       loop() {
@@ -999,23 +1125,23 @@
         p.boosterModel ||= 'ion';
         const booster = BOOSTER_MODELS[p.boosterModel] || BOOSTER_MODELS.ion;
         const ship = SHIP_MODELS[p.shipModel] || SHIP_MODELS.interceptor;
-        const thrust = 0.8 + (p.boostLevel - 1) * 0.18 + booster.thrustBonus + ship.speedBonus;
+        const thrust = GAME_CONFIG.BASE_THRUST + (p.boostLevel - 1) * GAME_CONFIG.THRUST_PER_BOOST_LEVEL + booster.thrustBonus + ship.speedBonus;
         if (s.keys['ArrowUp'] || s.keys['KeyW']) p.vy -= thrust;
         if (s.keys['ArrowDown'] || s.keys['KeyS']) p.vy += thrust;
-        p.vy *= 0.9;
+        p.vy *= GAME_CONFIG.PLAYER_FRICTION;
         p.y += p.vy;
-        p.y = Math.max(20, Math.min(this.canvas.height - 20, p.y));
+        p.y = Math.max(GAME_CONFIG.PLAYER_MIN_Y, Math.min(this.canvas.height - GAME_CONFIG.PLAYER_MIN_Y, p.y));
 
         // Shooting
-        if (s.keys['Space'] && s.bullets.filter(b => Date.now() - b.time < 100).length < 3 + p.weaponLevel) {
-          const spread = Math.min(3, p.weaponLevel);
+        if (s.keys['Space'] && s.bullets.filter(b => Date.now() - b.time < GAME_CONFIG.MAX_BULLET_AGE).length < GAME_CONFIG.BULLET_SPREAD_MAX + p.weaponLevel) {
+          const spread = Math.min(GAME_CONFIG.BULLET_SPREAD_MAX, p.weaponLevel);
           for (let i = 0; i < spread; i++) {
             s.bullets.push({
               ...createPlayerShot({
                 weaponType: p.weaponType,
                 origin: {
                   x: p.x + 20,
-                  y: p.y + (i - (spread - 1) / 2) * 8,
+                  y: p.y + (i - (spread - 1) / 2) * GAME_CONFIG.BULLET_SPREAD_GAP,
                 },
                 weaponLevel: p.weaponLevel,
                 target: { x: this.canvas.width, y: p.y },
@@ -1060,7 +1186,7 @@
         s.enemyProjectiles = s.enemyProjectiles.filter(b => {
           b.x += b.vx;
           b.y += b.vy || 0;
-          if (Math.abs(b.x - p.x) < 18 && Math.abs(b.y - p.y) < 18) {
+          if (Math.abs(b.x - p.x) < GAME_CONFIG.PROJECTILE_COLLISION_DISTANCE && Math.abs(b.y - p.y) < GAME_CONFIG.PROJECTILE_COLLISION_DISTANCE) {
             p.lives--;
             this.updateHUD();
             if (p.lives <= 0) this.gameOver();
@@ -1071,7 +1197,7 @@
 
         // Turrets decay over time, lose health on collisions, and auto-aim precisely.
         const now = performance.now();
-        const deltaMs = Math.min(50, Math.max(0, now - (s.lastFrameAt || now)));
+        const deltaMs = Math.min(GAME_CONFIG.MAX_DELTA_MS, Math.max(0, now - (s.lastFrameAt || now)));
         s.lastFrameAt = now;
         this.updateStory(now);
         const turretUpdate = updateTurrets({
@@ -1112,11 +1238,11 @@
             if (e.y < 60 || e.y > this.canvas.height - 60) e.vy *= -1;
           }
           if (!e.lastShotAt) e.lastShotAt = 0;
-          const enemyCooldown = e.boss ? 750 : 2200;
+          const enemyCooldown = e.boss ? GAME_CONFIG.ENEMY_SHOOT_COOLDOWN_BOSS : GAME_CONFIG.ENEMY_SHOOT_COOLDOWN_NORMAL;
           if (now - e.lastShotAt > enemyCooldown) {
             const aim = { x: p.x - e.x, y: p.y - e.y };
             const len = Math.hypot(aim.x, aim.y) || 1;
-            s.enemyProjectiles.push({ x: e.x, y: e.y, vx: (aim.x / len) * 3.5, vy: (aim.y / len) * 3.5, source: 'enemy' });
+            s.enemyProjectiles.push({ x: e.x, y: e.y, vx: (aim.x / len) * GAME_CONFIG.ENEMY_PROJECTILE_SPEED, vy: (aim.y / len) * GAME_CONFIG.ENEMY_PROJECTILE_SPEED, source: 'enemy' });
             e.lastShotAt = now;
           }
 
@@ -1155,12 +1281,12 @@
 
               this.updateHUD();
               // Spawn particles
-              for (let j = 0; j < 8; j++) {
+              for (let j = 0; j < GAME_CONFIG.PARTICLE_COUNT; j++) {
                 s.particles.push({
                   x: e.x, y: e.y,
-                  vx: (Math.random() - 0.5) * 6,
-                  vy: (Math.random() - 0.5) * 6,
-                  life: 30,
+                  vx: (Math.random() - 0.5) * GAME_CONFIG.PARTICLE_SPEED,
+                  vy: (Math.random() - 0.5) * GAME_CONFIG.PARTICLE_SPEED,
+                  life: GAME_CONFIG.PARTICLE_LIFE,
                   color: e.boss ? '#f0f' : (e.size > 25 ? '#f60' : '#fc0')
                 });
               }
@@ -1169,7 +1295,7 @@
           }
 
           // Turret collisions are handled by updateTurrets; player collisions still hurt the ship.
-          if (Math.abs(p.x - e.x) < 25 && Math.abs(p.y - e.y) < e.size) {
+          if (Math.abs(p.x - e.x) < GAME_CONFIG.ENEMY_COLLISION_DISTANCE && Math.abs(p.y - e.y) < e.size) {
             p.lives -= e.boss ? 2 : 1;
             if (e.boss) e.hp = Math.max(1, e.hp - 2);
             this.updateHUD();
@@ -1227,7 +1353,7 @@
 
         // Particles
         s.particles.forEach(pt => {
-          ctx.globalAlpha = pt.life / 30;
+          ctx.globalAlpha = pt.life / GAME_CONFIG.PARTICLE_LIFE;
           ctx.fillStyle = pt.color;
           ctx.fillRect(pt.x - 2, pt.y - 2, 4, 4);
         });
@@ -1240,7 +1366,7 @@
           // Remote bullets
           ctx.fillStyle = remote.color;
           ctx.shadowColor = remote.color;
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = GAME_CONFIG.SHADOW_BLUR_BULLET;
           remote.bullets.forEach(b => {
             ctx.fillRect(b.x - 4, b.y - 2, 8, 4);
           });
@@ -1250,7 +1376,7 @@
         // Bullets
         ctx.fillStyle = '#0cf';
         ctx.shadowColor = '#0cf';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = GAME_CONFIG.SHADOW_BLUR_BULLET;
         s.bullets.forEach(b => {
           ctx.fillRect(b.x - 4, b.y - 2, 8, 4);
         });
@@ -1299,7 +1425,7 @@
         s.enemies.forEach(e => {
           ctx.fillStyle = e.boss ? theme.nebula : (e.size > 25 ? '#c60' : '#c36');
           ctx.shadowColor = e.boss ? theme.nebula : (e.size > 25 ? '#c60' : '#c36');
-          ctx.shadowBlur = e.boss ? 20 : 8;
+          ctx.shadowBlur = e.boss ? GAME_CONFIG.SHADOW_BLUR_BOSS : GAME_CONFIG.SHADOW_BLUR_ENEMY;
           ctx.beginPath();
           ctx.moveTo(e.x + e.size/2, e.y - e.size/2);
           ctx.lineTo(e.x - e.size/2, e.y + e.size/2);
@@ -1346,7 +1472,7 @@
         ctx.globalAlpha = 1;
         ctx.fillStyle = color;
         ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = GAME_CONFIG.SHADOW_BLUR_PLAYER;
 
         ctx.beginPath();
         ctx.moveTo(player.x + 20, player.y);
@@ -1361,8 +1487,7 @@
 
       gameOver() {
         this.state.local.gameOver = true;
-        document.getElementById('finalScore').textContent = this.state.local.score;
-        document.getElementById('gameOverScreen').classList.add('visible');
+        this.ui.showGameOverScreen(this.state.local.score);
         this.broadcastPresence(false);
       }
     }
@@ -1379,7 +1504,7 @@
     if (DEFAULT_MULTIPLAYER || urlParams.get('multiplayer') === 'true') {
       setTimeout(() => {
         if (!game.multiplayer) game.toggleMultiplayer();
-      }, 500);
+      }, GAME_CONFIG.MULTIPLAYER_START_DELAY);
     }
   </script>
 </body>
