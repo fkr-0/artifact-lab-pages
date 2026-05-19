@@ -705,6 +705,73 @@
         z-index: 100;
       }
 
+      .connection-tools {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .secondary-btn,
+      .sound-btn {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #6b21a8;
+        background: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.18);
+        transition: all 0.2s ease;
+      }
+
+      .secondary-btn:hover,
+      .sound-btn:hover {
+        transform: translateY(-1px) scale(1.03);
+        background: white;
+      }
+
+      .status-detail {
+        color: #9d4edd;
+        font-size: 0.82rem;
+        margin-top: 10px;
+        line-height: 1.35;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 58px;
+        transform: translateX(-50%) translateY(20px);
+        z-index: 1200;
+        min-width: 220px;
+        max-width: min(92vw, 420px);
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: rgba(88, 28, 135, 0.92);
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.25s ease;
+        box-shadow: 0 10px 25px rgba(88, 28, 135, 0.25);
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
       .hidden {
         display: none !important;
       }
@@ -732,7 +799,7 @@
     <div class="container">
       <!-- Intro Screen -->
       <div id="introScreen" class="intro">
-        <h1>Magical Love Chat</h1>
+        <h1>Magical Sexy Love Chat</h1>
 
         <!-- Name Configuration -->
         <div id="nameConfig" class="name-config">
@@ -799,6 +866,11 @@
           <div class="status-box">
             <div class="status-icon">&#10024;</div>
             <div class="status-text" id="connectingStatus">Creating magical connection...</div>
+            <div class="status-detail" id="connectingDetail">Preparing sparkly tunnel...</div>
+          </div>
+          <div class="connection-tools">
+            <button class="secondary-btn" onclick="retryJoinNow()">Retry now</button>
+            <button class="secondary-btn" onclick="goBackToIntro()">Back</button>
           </div>
         </div>
       </div>
@@ -851,7 +923,11 @@
       </div>
     </div>
 
-    <footer>Made with love and unicorns</footer>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <footer>
+      <span>Made with love and unicorns</span>
+      <button id="soundToggle" class="sound-btn" onclick="toggleMusic()">Sound: off</button>
+    </footer>
 
     <script>
       // State
@@ -863,10 +939,19 @@
       let conn = null
       let connected = false
       let audioContext = null
+      let masterGain = null
       let musicStarted = false
+      let musicTimers = []
       let customRoomId = null
       let userCustomName = ''
       let partnerCustomName = ''
+      let joinAttempt = 0
+      let joinRetryTimer = null
+      let connectionWatchdogTimer = null
+      const MAX_JOIN_ATTEMPTS = 12
+      const JOIN_RETRY_MS = 1800
+      const CONNECT_WATCHDOG_MS = 7000
+      const PEER_PREFIX = 'magical-love-chat'
 
       // Generate unique room ID
       function generateRoomId() {
@@ -874,17 +959,31 @@
       }
 
       // URL parameter handling
+      function encodeRoomData(roomData) {
+        const json = JSON.stringify(roomData)
+        const bytes = new TextEncoder().encode(json)
+        let binary = ''
+        bytes.forEach((byte) => (binary += String.fromCharCode(byte)))
+        return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+      }
+
+      function decodeRoomData(encoded) {
+        const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/')
+        const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')
+        const binary = atob(padded)
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+        return JSON.parse(new TextDecoder().decode(bytes))
+      }
+
       function getCustomRoomFromUrl() {
         const params = new URLSearchParams(window.location.search)
         const room = params.get('room')
-        if (room) {
-          try {
-            const decoded = atob(room)
-            const data = JSON.parse(decoded)
-            return data
-          } catch (e) {
-            console.log('Invalid room parameter')
-          }
+        if (!room) return null
+        try {
+          return decodeRoomData(room)
+        } catch (e) {
+          console.warn('Invalid room parameter:', e)
+          showToast('This magical link looks broken.')
         }
         return null
       }
@@ -915,10 +1014,74 @@
       }
 
       function createCustomRoomUrl(roomData) {
-        const encoded = btoa(JSON.stringify(roomData))
+        const encoded = encodeRoomData(roomData)
         const url = new URL(window.location.href)
         url.searchParams.set('room', encoded)
+        url.searchParams.delete('autojoin')
         return url.toString()
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById('toast')
+        if (!toast) return
+        toast.textContent = message
+        toast.classList.add('show')
+        clearTimeout(showToast.timer)
+        showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200)
+      }
+
+      function setText(id, text) {
+        const el = document.getElementById(id)
+        if (el) el.textContent = text
+      }
+
+      function buildPeerId(role, suffix = '') {
+        return `${PEER_PREFIX}-${customRoomId || 'default'}-${role}${suffix}`
+      }
+
+      function canSend() {
+        return connected && conn && conn.open
+      }
+
+      function safeSend(payload) {
+        if (!canSend()) return false
+        try {
+          conn.send(payload)
+          return true
+        } catch (error) {
+          console.warn('Send failed:', error)
+          showToast('Connection hiccup. Try again in a second.')
+          return false
+        }
+      }
+
+      function chatPayload(type, extra = {}) {
+        return {
+          type,
+          from: username,
+          displayName: userDisplayName,
+          user1Name: username === 'user1' ? userDisplayName : partnerDisplayName,
+          user2Name: username === 'user2' ? userDisplayName : partnerDisplayName,
+          ...extra,
+        }
+      }
+
+      function cleanupConnectionTimers() {
+        clearTimeout(joinRetryTimer)
+        clearTimeout(connectionWatchdogTimer)
+        joinRetryTimer = null
+        connectionWatchdogTimer = null
+      }
+
+      function destroyPeerOnly() {
+        try {
+          if (conn) conn.close()
+        } catch (e) {}
+        try {
+          if (peer) peer.destroy()
+        } catch (e) {}
+        conn = null
+        peer = null
       }
 
       // Graph game state
@@ -1090,31 +1253,36 @@
         }
       }
 
-      // Optimized createRoomWithCustomNames
+      // Create a new host room and wait for the secret-link guest.
       function createRoomWithCustomNames() {
+        cleanupConnectionTimers()
+        destroyPeerOnly()
+        connected = false
         showScreen('lobby')
         startMusic()
 
-        // Generate unique room ID and create shareable link
         customRoomId = generateRoomId()
         const roomData = {
           roomId: customRoomId,
-          user1Name: userCustomName || 'User 1',
-          user2Name: partnerCustomName || 'User 2',
+          user1Name: userCustomName || userDisplayName || 'User 1',
+          user2Name: partnerCustomName || partnerDisplayName || 'User 2',
+          createdAt: Date.now(),
         }
         const shareableUrl = createCustomRoomUrl(roomData)
 
-        // Update the lobby with custom names
-        document.getElementById('lobbyTitle').textContent = `Waiting for ${partnerDisplayName}...`
-        document.getElementById('partnerNameInInstructions').textContent = partnerDisplayName
-        document.getElementById('secretLink').textContent = shareableUrl
-
-        // Update status
+        setText('lobbyTitle', `Waiting for ${partnerDisplayName}...`)
+        setText('partnerNameInInstructions', partnerDisplayName)
+        setText('secretLink', shareableUrl)
         updateLobbyScreen(userDisplayName, partnerDisplayName)
 
-        // PeerJS setup
-        const peerId = `magical-love-chat-${customRoomId}-user1`
-        peer = new Peer(peerId)
+        const peerId = buildPeerId('user1')
+        try {
+          peer = new Peer(peerId, { debug: 1 })
+        } catch (error) {
+          console.error('Peer creation failed:', error)
+          setText('lobbyStatus', 'Could not start the magic room in this browser.')
+          return
+        }
 
         peer.on('open', (id) => {
           console.log('User1 waiting:', id)
@@ -1122,103 +1290,201 @@
         })
 
         peer.on('connection', (connection) => {
-          if (conn) {
-            connection.close()
+          if (conn && conn.open) {
+            connection.on('open', () => {
+              connection.send({ type: 'roomFull' })
+              connection.close()
+            })
             return
           }
           handleConnection(connection)
         })
 
         peer.on('error', (err) => {
-          console.log('Peer error:', err)
+          console.warn('Host peer error:', err)
           if (err.type === 'unavailable-id') {
             showScreen('full')
-            document.querySelector('#fullScreen .status-text').textContent =
-              `${userDisplayName} is already waiting!`
+            const fullText = document.querySelector('#fullScreen .status-text')
+            if (fullText) fullText.textContent = `${userDisplayName} is already waiting!`
+          } else {
+            setText('lobbyStatus', 'Connection server hiccup. Make a fresh room and try again.')
           }
         })
       }
 
-      // Optimized joinRoom
+      // Join a room from the secret link, with retries while the host peer registers.
       function joinRoom() {
         username = 'user2'
 
-        // Check if we have custom room data from URL
         const roomData = getCustomRoomFromUrl()
         if (roomData) {
-          // Extract custom names from the room data
           partnerCustomName = roomData.user1Name || 'Partner'
           userCustomName = roomData.user2Name || 'You'
           customRoomId = roomData.roomId
-
           userDisplayName = userCustomName
           partnerDisplayName = partnerCustomName
         }
 
-        // Update connecting screen with partner name
-        document.getElementById('connectingTitle').textContent =
-          `Connecting to ${partnerDisplayName}...`
-        document.getElementById('connectingStatus').textContent =
-          `Creating magical connection with ${partnerDisplayName}...`
+        if (!customRoomId) {
+          showScreen('intro')
+          showToast('Missing room id in the secret link.')
+          return
+        }
 
+        setText('connectingTitle', `Connecting to ${partnerDisplayName}...`)
+        setText('connectingStatus', `Creating magical connection with ${partnerDisplayName}...`)
+        setText('connectingDetail', 'Looking for the room...')
         showScreen('connecting')
         startMusic()
+        joinAttempt = 0
+        connectToHost()
+      }
 
-        const peerId = `magical-love-chat-${customRoomId || 'default'}-user2-${Date.now()}`
-        peer = new Peer(peerId)
+      function connectToHost() {
+        cleanupConnectionTimers()
+        if (connected) return
+
+        joinAttempt++
+        setText(
+          'connectingDetail',
+          `Attempt ${joinAttempt}/${MAX_JOIN_ATTEMPTS}: asking the love tunnel to open...`
+        )
+
+        destroyPeerOnly()
+        const peerId = buildPeerId(
+          'user2',
+          `-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+        )
+
+        try {
+          peer = new Peer(peerId, { debug: 1 })
+        } catch (error) {
+          console.error('Join peer creation failed:', error)
+          scheduleJoinRetry('Browser could not create a peer yet.')
+          return
+        }
 
         peer.on('open', () => {
-          const partnerPeerId = `magical-love-chat-${customRoomId || 'default'}-user1`
-          const connection = peer.connect(partnerPeerId, { reliable: true })
+          if (connected) return
+          const partnerPeerId = buildPeerId('user1')
+          setText('connectingStatus', `Found the stars. Calling ${partnerDisplayName}...`)
+          const connection = peer.connect(partnerPeerId, {
+            reliable: true,
+            metadata: { displayName: userDisplayName, roomId: customRoomId },
+          })
 
-          connection.on('error', () => {
-            showScreen('intro')
-            alert(`${partnerDisplayName} is not waiting right now!`)
+          connectionWatchdogTimer = setTimeout(() => {
+            if (!connected) scheduleJoinRetry('Still waiting for the data channel to open.')
+          }, CONNECT_WATCHDOG_MS)
+
+          connection.on('error', (error) => {
+            console.warn('Data connection error:', error)
+            scheduleJoinRetry('The data channel blinked. Retrying...')
           })
 
           handleConnection(connection)
         })
 
         peer.on('error', (err) => {
-          console.log('Peer error:', err)
+          console.warn('Join peer error:', err)
           if (err.type === 'peer-unavailable') {
-            showScreen('intro')
-            alert(`${partnerDisplayName} is not waiting right now! Create a room first.`)
+            scheduleJoinRetry(`${partnerDisplayName} is not waiting yet.`)
+          } else if (
+            err.type === 'network' ||
+            err.type === 'server-error' ||
+            err.type === 'socket-error'
+          ) {
+            scheduleJoinRetry('PeerJS signalling server hiccup.')
+          } else {
+            setText('connectingStatus', 'Connection failed.')
+            setText('connectingDetail', err.message || 'Unknown PeerJS error.')
           }
         })
       }
 
-      // Handle connection
+      function scheduleJoinRetry(reason) {
+        if (connected) return
+        cleanupConnectionTimers()
+        setText('connectingStatus', reason)
+
+        if (joinAttempt >= MAX_JOIN_ATTEMPTS) {
+          setText(
+            'connectingDetail',
+            'Could not connect. Make sure the creator tab is still open, then retry.'
+          )
+          showToast('Room not found yet. Keep the creator tab open.')
+          return
+        }
+
+        setText('connectingDetail', `Retrying in ${Math.round(JOIN_RETRY_MS / 1000)} seconds...`)
+        joinRetryTimer = setTimeout(connectToHost, JOIN_RETRY_MS)
+      }
+
+      function retryJoinNow() {
+        if (connected) return
+        connectToHost()
+      }
+
+      function goBackToIntro() {
+        cleanupConnectionTimers()
+        destroyPeerOnly()
+        connected = false
+        showScreen('intro')
+      }
+
+      // Handle a PeerJS DataConnection. The explicit conn.open check fixes missed-open races.
       function handleConnection(connection) {
         conn = connection
+        let opened = false
 
-        conn.on('open', () => {
+        const finishOpen = () => {
+          if (opened) return
+          opened = true
+          cleanupConnectionTimers()
           connected = true
           showScreen('chat')
           updateLobbyStatus(true, userDisplayName, partnerDisplayName)
 
-          // Update chat title with custom names
-          const chatTitle = `${userDisplayName} & ${partnerDisplayName}`
-          document.getElementById('chatTitle').textContent = chatTitle
-
+          setText('chatTitle', `${userDisplayName} & ${partnerDisplayName}`)
+          setText('connectionStatus', 'Connected <3 :D')
           addMessage('system', `Connected! ${partnerDisplayName} joined the chat!`)
-          startNewGame()
-        })
+          playSparkleSound()
+
+          if (username === 'user1') {
+            startNewGame()
+          } else {
+            safeSend(chatPayload('requestGraph'))
+          }
+        }
+
+        conn.on('open', finishOpen)
+        setTimeout(() => {
+          if (conn === connection && connection.open) finishOpen()
+        }, 50)
 
         conn.on('data', (data) => {
+          if (!data || typeof data !== 'object') return
+
+          if (data.type === 'roomFull') {
+            showScreen('full')
+            return
+          }
+
           if (data.type === 'message' || data.type === 'reaction') {
-            const senderDisplayName =
-              data.from === 'user1'
-                ? data.user1Name || userDisplayName
-                : data.user2Name || partnerDisplayName
-            addMessage('partner', data.text, senderDisplayName)
+            addMessage('partner', data.text, data.displayName || partnerDisplayName)
+            playSparkleSound()
           } else if (data.type === 'heart') {
             spawnHeartsLocal(data.index)
+            playSparkleSound()
+          } else if (data.type === 'requestGraph') {
+            if (graphNodes.length === 0) startNewGame()
+            else safeSend(chatPayload('newGame', { nodes: graphNodes, edges: graphEdges }))
           } else if (data.type === 'graph') {
             graphNodes = data.nodes
             graphEdges = data.edges
             renderGraph()
           } else if (data.type === 'graphUpdate') {
+            if (!graphNodes[data.nodeIndex]) return
             graphNodes[data.nodeIndex].colorIndex = data.colorIndex
             renderGraph()
             checkGraphSolved()
@@ -1226,21 +1492,26 @@
             graphNodes = data.nodes
             graphEdges = data.edges
             renderGraph()
-            document.getElementById('gameStatus').textContent =
-              'Color all nodes - no neighbors same color!'
+            setText('gameStatus', 'Color all nodes - no neighbors same color!')
           }
         })
 
         conn.on('close', () => {
+          if (!opened) return
           connected = false
+          cleanupConnectionTimers()
           showScreen('intro')
-          if (peer) peer.destroy()
-          peer = null
-          conn = null
-          // Reset custom names for next session
+          showToast('Connection closed.')
+          destroyPeerOnly()
           userCustomName = ''
           partnerCustomName = ''
           customRoomId = null
+        })
+
+        conn.on('error', (err) => {
+          console.warn('Connection error:', err)
+          if (!opened) scheduleJoinRetry('Connection failed before it opened.')
+          else showToast('Connection hiccup.')
         })
       }
 
@@ -1287,11 +1558,40 @@
       // Copy secret link
       function copySecretLink() {
         const link = document.getElementById('secretLink').textContent
-        navigator.clipboard.writeText(link).then(() => {
+        const finish = () => {
           const btn = document.querySelector('.copy-btn')
+          if (!btn) return
           btn.textContent = 'Copied!'
-          setTimeout(() => (btn.textContent = 'Copy Secret Link'), 1200)
-        })
+          showToast('Magical link copied!')
+          setTimeout(() => (btn.textContent = 'Copy Magical Link'), 1200)
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard
+            .writeText(link)
+            .then(finish)
+            .catch(() => fallbackCopy(link, finish))
+        } else {
+          fallbackCopy(link, finish)
+        }
+      }
+
+      function fallbackCopy(text, onDone) {
+        const area = document.createElement('textarea')
+        area.value = text
+        area.setAttribute('readonly', '')
+        area.style.position = 'fixed'
+        area.style.left = '-9999px'
+        document.body.appendChild(area)
+        area.select()
+        try {
+          document.execCommand('copy')
+          onDone()
+        } catch (e) {
+          showToast('Copy failed. Select the link manually.')
+        } finally {
+          area.remove()
+        }
       }
 
       // Messages
@@ -1317,28 +1617,20 @@
 
       function sendMessage() {
         const text = messageInput.value.trim()
-        if (!text || !connected) return
-        conn.send({
-          type: 'message',
-          from: username,
-          text: text,
-          user1Name: userCustomName,
-          user2Name: partnerCustomName,
-        })
-        addMessage('me', text)
-        messageInput.value = ''
+        if (!text || !canSend()) return
+        if (safeSend(chatPayload('message', { text }))) {
+          addMessage('me', text)
+          messageInput.value = ''
+          playSparkleSound()
+        }
       }
 
       function sendReaction(text) {
-        if (!connected) return
-        conn.send({
-          type: 'reaction',
-          from: username,
-          text: text,
-          user1Name: userCustomName,
-          user2Name: partnerCustomName,
-        })
-        addMessage('me', text)
+        if (!canSend()) return
+        if (safeSend(chatPayload('reaction', { text }))) {
+          addMessage('me', text)
+          playSparkleSound()
+        }
       }
 
       function handleKeyPress(e) {
@@ -1347,9 +1639,10 @@
 
       // Heart emojis
       function sendHeartEmoji(index) {
-        if (!connected) return
+        if (!canSend()) return
         spawnHeartsLocal(index)
-        conn.send({ type: 'heart', index: index })
+        safeSend(chatPayload('heart', { index }))
+        playSparkleSound()
       }
 
       function spawnHeartsLocal(index) {
@@ -1444,8 +1737,8 @@
 
       function handleGraphClick(e) {
         const rect = graphCanvas.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
+        const x = (e.clientX - rect.left) * (graphCanvas.width / rect.width)
+        const y = (e.clientY - rect.top) * (graphCanvas.height / rect.height)
 
         for (let i = 0; i < graphNodes.length; i++) {
           const node = graphNodes[i]
@@ -1453,9 +1746,7 @@
             node.colorIndex = (node.colorIndex + 1) % 3
             renderGraph()
 
-            if (connected && conn) {
-              conn.send({ type: 'graphUpdate', nodeIndex: i, colorIndex: node.colorIndex })
-            }
+            safeSend(chatPayload('graphUpdate', { nodeIndex: i, colorIndex: node.colorIndex }))
 
             checkGraphSolved()
             break
@@ -1498,109 +1789,121 @@
       function startNewGame() {
         generateGraph()
         renderGraph()
-        document.getElementById('gameStatus').textContent =
-          'Color all nodes - no neighbors same color!'
-
-        if (connected && conn) {
-          conn.send({ type: 'newGame', nodes: graphNodes, edges: graphEdges })
-        }
+        setText('gameStatus', 'Color all nodes - no neighbors same color!')
+        safeSend(chatPayload('newGame', { nodes: graphNodes, edges: graphEdges }))
       }
 
-      // Better music
+      // Soft, non-blocking music. It never throws into the connection flow.
       function startMusic() {
-        if (musicStarted) return
-        musicStarted = true
+        if (musicStarted) {
+          if (audioContext && audioContext.state === 'suspended')
+            audioContext.resume().catch(() => {})
+          return
+        }
 
-        audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        const AudioCtor = window.AudioContext || window.webkitAudioContext
+        if (!AudioCtor) return
+
+        try {
+          audioContext = new AudioCtor()
+          masterGain = audioContext.createGain()
+          masterGain.gain.value = 0.16
+          masterGain.connect(audioContext.destination)
+          musicStarted = true
+          setText('soundToggle', 'Sound: on')
+        } catch (error) {
+          console.warn('Audio could not start:', error)
+          musicStarted = false
+          setText('soundToggle', 'Sound: off')
+          return
+        }
 
         const chords = [
           [146.83, 185.0, 220.0],
           [164.81, 196.0, 246.94],
           [174.61, 220.0, 261.63],
-          [146.83, 185.0, 220.0],
           [130.81, 164.81, 196.0],
-          [146.83, 185.0, 220.0],
-          [164.81, 196.0, 246.94],
-          [174.61, 196.0, 220.0],
         ]
-
-        const melodyScale = [293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25, 587.33, 659.25]
-
+        const melodyScale = [293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25]
         let chordIndex = 0
         let melodyIndex = 0
-        let beat = 0
+
+        const schedule = (fn, ms) => {
+          const id = setTimeout(fn, ms)
+          musicTimers.push(id)
+          return id
+        }
+
+        const note = (freq, duration, type = 'sine', volume = 0.08, delay = 0) => {
+          if (!audioContext || !masterGain || audioContext.state === 'closed') return
+          const now = audioContext.currentTime + delay
+          const osc = audioContext.createOscillator()
+          const gain = audioContext.createGain()
+          osc.type = type
+          osc.frequency.value = freq
+          gain.gain.setValueAtTime(0.0001, now)
+          gain.gain.exponentialRampToValueAtTime(volume, now + 0.03)
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+          osc.connect(gain)
+          gain.connect(masterGain)
+          osc.start(now)
+          osc.stop(now + duration + 0.05)
+        }
 
         function playChord() {
-          if (!audioContext) return
+          if (!musicStarted || !audioContext) return
           const chord = chords[chordIndex % chords.length]
-
-          chord.forEach((freq, i) => {
-            const osc = audioContext.createOscillator()
-            const gain = audioContext.createGain()
-            osc.connect(gain)
-            gain.connect(audioContext.destination)
-            osc.type = 'triangle'
-            osc.frequency.value = freq
-            gain.gain.setValueAtTime(0.04, audioContext.currentTime)
-            gain.gain.exponentialRampToValueAtTime(0.005, audioContext.currentTime + 2)
-            osc.start(audioContext.currentTime)
-            osc.stop(audioContext.currentTime + 2)
-          })
-
+          chord.forEach((freq, i) => note(freq, 1.9, 'triangle', 0.035, i * 0.03))
           chordIndex++
-          setTimeout(playChord, 2000)
+          schedule(playChord, 2100)
         }
 
         function playMelody() {
-          if (!audioContext) return
-
-          if (Math.random() > 0.15) {
-            const osc = audioContext.createOscillator()
-            const gain = audioContext.createGain()
-            osc.connect(gain)
-            gain.connect(audioContext.destination)
-
-            osc.type = 'sine'
-            const noteIdx =
-              (melodyIndex + Math.floor(Math.random() * 3) - 1 + melodyScale.length) %
-              melodyScale.length
-            osc.frequency.value = melodyScale[noteIdx] * (1 + Math.floor(beat / 8) * 0.05)
-
-            gain.gain.setValueAtTime(0.025, audioContext.currentTime)
-            gain.gain.exponentialRampToValueAtTime(0.005, audioContext.currentTime + 0.4)
-
-            osc.start(audioContext.currentTime)
-            osc.stop(audioContext.currentTime + 0.4)
-          }
-
+          if (!musicStarted || !audioContext) return
+          const noteIdx = (melodyIndex + Math.floor(Math.random() * 3)) % melodyScale.length
+          note(melodyScale[noteIdx], 0.35, 'sine', 0.025)
           melodyIndex = (melodyIndex + 1) % melodyScale.length
-          beat++
-          setTimeout(playMelody, 350 + Math.random() * 100)
+          schedule(playMelody, 420 + Math.random() * 160)
         }
 
-        function playArpeggio() {
-          if (!audioContext) return
+        if (audioContext.state === 'suspended') audioContext.resume().catch(() => {})
+        playChord()
+        schedule(playMelody, 450)
+      }
 
-          const chord = chords[Math.floor(beat / 4) % chords.length]
-          const noteIdx = Math.floor(Math.random() * chord.length)
+      function stopMusic() {
+        musicTimers.forEach(clearTimeout)
+        musicTimers = []
+        musicStarted = false
+        setText('soundToggle', 'Sound: off')
+        if (audioContext) {
+          audioContext.close().catch(() => {})
+          audioContext = null
+          masterGain = null
+        }
+      }
 
+      function toggleMusic() {
+        if (musicStarted) stopMusic()
+        else startMusic()
+      }
+
+      function playSparkleSound() {
+        if (!musicStarted || !audioContext || !masterGain || audioContext.state === 'closed') return
+        const now = audioContext.currentTime
+        ;[659.25, 783.99, 987.77].forEach((freq, i) => {
           const osc = audioContext.createOscillator()
           const gain = audioContext.createGain()
-          osc.connect(gain)
-          gain.connect(audioContext.destination)
           osc.type = 'sine'
-          osc.frequency.value = chord[noteIdx] * 2
-          gain.gain.setValueAtTime(0.015, audioContext.currentTime)
-          gain.gain.exponentialRampToValueAtTime(0.003, audioContext.currentTime + 0.3)
-          osc.start(audioContext.currentTime)
-          osc.stop(audioContext.currentTime + 0.3)
-
-          setTimeout(playArpeggio, 200 + Math.random() * 150)
-        }
-
-        playChord()
-        setTimeout(playMelody, 300)
-        setTimeout(playArpeggio, 600)
+          osc.frequency.value = freq
+          gain.gain.setValueAtTime(0.0001, now + i * 0.04)
+          gain.gain.exponentialRampToValueAtTime(0.045, now + i * 0.04 + 0.02)
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.04 + 0.22)
+          osc.connect(gain)
+          gain.connect(masterGain)
+          osc.start(now + i * 0.04)
+          osc.stop(now + i * 0.04 + 0.25)
+        })
       }
 
       // Check URL for custom room on load
@@ -1608,10 +1911,8 @@
       const roomParam = params.get('room')
 
       if (roomParam) {
-        // Someone is joining via custom link!
-        try {
-          const roomData = JSON.parse(atob(roomParam))
-          // Set the custom names from the room data
+        const roomData = getCustomRoomFromUrl()
+        if (roomData) {
           partnerCustomName = roomData.user1Name || 'Partner'
           userCustomName = roomData.user2Name || 'You'
           customRoomId = roomData.roomId
@@ -1619,18 +1920,12 @@
           userDisplayName = userCustomName
           partnerDisplayName = partnerCustomName
 
-          // Update UI to show we're joining
           document.getElementById('yourName').value = userCustomName
           document.getElementById('partnerName').value = partnerCustomName
           document.getElementById('yourName').disabled = true
           document.getElementById('partnerName').disabled = true
 
-          // Auto-join as partner
-          setTimeout(() => {
-            joinRoom()
-          }, 500)
-        } catch (e) {
-          console.log('Invalid room parameter, showing intro screen')
+          setTimeout(joinRoom, 250)
         }
       }
 
