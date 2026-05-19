@@ -270,7 +270,8 @@
         margin: 20px 0;
       }
 
-      .created-as, .waiting-for {
+      .created-as,
+      .waiting-for {
         color: #7c3aed;
         font-size: 1.1rem;
         margin: 8px 0;
@@ -737,11 +738,16 @@
         <div id="nameConfig" class="name-config">
           <div class="name-input-group">
             <label for="yourName">Your Name:</label>
-            <input type="text" id="yourName" placeholder="Enter your name..." maxlength="20">
+            <input type="text" id="yourName" placeholder="Enter your name..." maxlength="20" />
           </div>
           <div class="name-input-group">
             <label for="partnerName">Partner's Name:</label>
-            <input type="text" id="partnerName" placeholder="Enter partner's name..." maxlength="20">
+            <input
+              type="text"
+              id="partnerName"
+              placeholder="Enter partner's name..."
+              maxlength="20"
+            />
           </div>
           <button class="start-btn" onclick="createCustomRoom()">
             <span class="btn-emoji">✨</span> Create Magical Room
@@ -777,7 +783,9 @@
             <div class="status-text" id="lobbyStatus">Creating magical room...</div>
           </div>
           <div class="secret-hint">
-            <p id="linkInstructions">Share this magical link with <span id="partnerNameInInstructions">your partner</span>:</p>
+            <p id="linkInstructions">
+              Share this magical link with <span id="partnerNameInInstructions">your partner</span>:
+            </p>
             <code id="secretLink"></code>
             <button class="copy-btn" onclick="copySecretLink()">Copy Magical Link</button>
           </div>
@@ -1001,35 +1009,36 @@
       animateFloat()
 
       // Name validation and room creation
+
       function createCustomRoom() {
         const yourName = document.getElementById('yourName').value.trim()
-        partnerName = document.getElementById('partnerName').value.trim()
+        const partnerInputName = document.getElementById('partnerName').value.trim()
 
         if (!yourName || yourName.length < 2) {
           alert('Please enter your name (at least 2 characters)')
           return
         }
 
-        if (!partnerName || partnerName.length < 2) {
-          alert('Please enter your partner\'s name (at least 2 characters)')
+        if (!partnerInputName || partnerInputName.length < 2) {
+          alert("Please enter your partner's name (at least 2 characters)")
           return
         }
 
         userCustomName = yourName
-        partnerCustomName = partnerName
+        partnerCustomName = partnerInputName
         username = 'user1'
-        partnerName = 'user2'
         userDisplayName = yourName
-        partnerDisplayName = partnerName
+        partnerDisplayName = partnerInputName
 
         // Update UI
         document.getElementById('nameConfig').classList.add('hidden')
         document.getElementById('nameDisplay').classList.remove('hidden')
         document.getElementById('displayYourName').textContent = yourName
-        document.getElementById('displayPartnerName').textContent = partnerName
+        document.getElementById('displayPartnerName').textContent = partnerInputName
         document.getElementById('yourHeartName').textContent = yourName
-        document.getElementById('partnerHeartName').textContent = partnerName
-        document.getElementById('introHint').textContent = 'Share your magical link or wait for your partner!'
+        document.getElementById('partnerHeartName').textContent = partnerInputName
+        document.getElementById('introHint').textContent =
+          'Share your magical link or wait for your partner!'
 
         createRoomWithCustomNames()
       }
@@ -1058,40 +1067,41 @@
         }
       }
 
+      // Optimized selectDave
       function selectDave() {
         if (userCustomName && partnerCustomName) {
           joinAsPartner()
-        } else {
-          const daveEmoji = document.getElementById('daveEmoji')
-          const daveName = document.getElementById('daveName')
-          const errorMsg = document.getElementById('errorMsg')
-          daveEmoji.innerHTML = '&#10060;'
-          daveName.textContent = 'Configure first!'
+          return
+        }
+        // Cache DOM elements once
+        const daveEmoji = document.getElementById('daveEmoji')
+        const daveName = document.getElementById('daveName')
+        const errorMsg = document.getElementById('errorMsg')
+        if (daveEmoji) daveEmoji.innerHTML = '&#10060;'
+        if (daveName) daveName.textContent = 'Configure first!'
+        if (errorMsg) {
           errorMsg.textContent = 'Please set names in the form above!'
           errorMsg.classList.remove('hidden')
           setTimeout(() => {
-            daveEmoji.innerHTML = '&#128156;'
-            daveName.textContent = 'Partner'
+            if (daveEmoji) daveEmoji.innerHTML = '&#128156;'
+            if (daveName) daveName.textContent = 'Partner'
             errorMsg.classList.add('hidden')
           }, 1500)
         }
       }
 
-      // Create room with custom names
+      // Optimized createRoomWithCustomNames
       function createRoomWithCustomNames() {
         showScreen('lobby')
         startMusic()
 
         // Generate unique room ID and create shareable link
         customRoomId = generateRoomId()
-
         const roomData = {
           roomId: customRoomId,
           user1Name: userCustomName || 'User 1',
           user2Name: partnerCustomName || 'User 2',
-          created: Date.now()
         }
-
         const shareableUrl = createCustomRoomUrl(roomData)
 
         // Update the lobby with custom names
@@ -1102,6 +1112,7 @@
         // Update status
         updateLobbyScreen(userDisplayName, partnerDisplayName)
 
+        // PeerJS setup
         const peerId = `magical-love-chat-${customRoomId}-user1`
         peer = new Peer(peerId)
 
@@ -1128,7 +1139,7 @@
         })
       }
 
-      // Join room (Partner - via custom link)
+      // Optimized joinRoom
       function joinRoom() {
         username = 'user2'
 
@@ -1145,8 +1156,10 @@
         }
 
         // Update connecting screen with partner name
-        document.getElementById('connectingTitle').textContent = `Connecting to ${partnerDisplayName}...`
-        document.getElementById('connectingStatus').textContent = `Creating magical connection with ${partnerDisplayName}...`
+        document.getElementById('connectingTitle').textContent =
+          `Connecting to ${partnerDisplayName}...`
+        document.getElementById('connectingStatus').textContent =
+          `Creating magical connection with ${partnerDisplayName}...`
 
         showScreen('connecting')
         startMusic()
@@ -1175,7 +1188,6 @@
         })
       }
 
-
       // Handle connection
       function handleConnection(connection) {
         conn = connection
@@ -1195,7 +1207,10 @@
 
         conn.on('data', (data) => {
           if (data.type === 'message' || data.type === 'reaction') {
-            const senderDisplayName = data.from === 'user1' ? data.user1Name || userDisplayName : data.user2Name || partnerDisplayName
+            const senderDisplayName =
+              data.from === 'user1'
+                ? data.user1Name || userDisplayName
+                : data.user2Name || partnerDisplayName
             addMessage('partner', data.text, senderDisplayName)
           } else if (data.type === 'heart') {
             spawnHeartsLocal(data.index)
@@ -1240,8 +1255,7 @@
       }
 
       function updateLobbyScreen(user1Name, user2Name) {
-        document.querySelector('#lobbyScreen h2').textContent =
-          `Waiting for ${user2Name}...`
+        document.querySelector('#lobbyScreen h2').textContent = `Waiting for ${user2Name}...`
         const statusBox = document.querySelector('.status-box .status-text')
         statusBox.textContent = `Share this link with ${user2Name}!`
       }
@@ -1309,7 +1323,7 @@
           from: username,
           text: text,
           user1Name: userCustomName,
-          user2Name: partnerCustomName
+          user2Name: partnerCustomName,
         })
         addMessage('me', text)
         messageInput.value = ''
@@ -1322,7 +1336,7 @@
           from: username,
           text: text,
           user1Name: userCustomName,
-          user2Name: partnerCustomName
+          user2Name: partnerCustomName,
         })
         addMessage('me', text)
       }
