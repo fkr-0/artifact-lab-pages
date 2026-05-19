@@ -324,6 +324,9 @@ function makeFloatingPanelMovable(panel, runtime = globalThis) {
     };
     panel.style.position = 'fixed';
     panel.style.margin = '0';
+    panel.style.inset = 'auto';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
     runtime.addEventListener?.('pointermove', onPointerMove);
     runtime.addEventListener?.('pointerup', onPointerUp, { once: true });
     event.preventDefault?.();
