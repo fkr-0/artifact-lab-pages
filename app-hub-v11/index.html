@@ -648,10 +648,13 @@
       iframe {
         width: 100%;
         height: 100%;
-        min-height: 220px;
         border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 45%);
         border-radius: 0;
         background: #000;
+      }
+      .app-deck-panel.active .app-deck-inline-frame,
+      .app-deck-panel.active iframe {
+        min-height: 220px;
       }
       .floating {
         position: fixed;
@@ -784,42 +787,112 @@
           38% 35%
         );
       }
-      .build-banner {
+      /* ══════════════════════════════════════
+         FOOTER STATUS BAR (v9-style ticker)
+      ══════════════════════════════════════ */
+      .footer-bar {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        z-index: 5;
-        background: linear-gradient(135deg, rgba(10, 10, 18, 0.95), rgba(18, 18, 31, 0.92));
-        border-top: 1px solid var(--hub-accent);
-        box-shadow: 0 -4px 12px rgba(0, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-        overflow: hidden;
         height: 28px;
+        background: var(--hub-panel);
+        border-top: 1px solid rgba(0, 255, 255, 0.12);
         display: flex;
         align-items: center;
+        z-index: 200;
+        font-size: 0.65rem;
+        color: rgba(0, 255, 255, 0.6);
+        overflow: hidden;
       }
-      .build-banner-content {
+      .footer-left {
         display: flex;
         align-items: center;
-        width: 100%;
-        animation: scrollBanner 30s linear infinite;
+        gap: 0.5rem;
+        padding: 0 0.75rem;
+        flex-shrink: 0;
+        border-right: 1px solid rgba(0, 255, 255, 0.1);
       }
-      #buildBannerText {
+      .footer-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 0.75rem;
+        flex-shrink: 0;
+        border-left: 1px solid rgba(0, 255, 255, 0.1);
+      }
+      .footer-sep {
+        color: rgba(0, 255, 255, 0.2);
+      }
+      .ticker-wrap {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+      .ticker-track {
+        display: inline-flex;
         white-space: nowrap;
-        font-size: 0.75rem;
-        font-family: 'Share Tech Mono', monospace;
-        color: var(--hub-accent);
-        padding: 0 1rem;
-        text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+        animation: tickerScroll 45s linear infinite;
       }
-      @keyframes scrollBanner {
+      .ticker-track:hover {
+        animation-play-state: paused;
+      }
+      @keyframes tickerScroll {
         0% {
-          transform: translateX(100%);
+          transform: translateX(0);
         }
         100% {
-          transform: translateX(-100%);
+          transform: translateX(-50%);
         }
+      }
+      .ticker-item {
+        padding: 0 1.5rem;
+        color: rgba(0, 255, 255, 0.45);
+      }
+      .ticker-item.hi {
+        color: var(--hub-accent);
+      }
+      .badger-runner {
+        position: fixed;
+        left: 8px;
+        bottom: 3px;
+        width: 124px;
+        height: 24px;
+        pointer-events: none;
+        z-index: 260;
+        opacity: 0.98;
+        border: 1px solid rgba(0, 255, 255, 0.18);
+        background: linear-gradient(
+          90deg,
+          transparent 0 7px,
+          #0ff 7px 14px,
+          transparent 14px
+        ),
+        linear-gradient(
+          transparent 0 7px,
+          #f0f 7px 14px,
+          #ff0 14px 21px,
+          transparent 21px
+        ),
+        #05070d;
+        display: grid;
+        place-items: center;
+        font-size: 0.55rem;
+        font-weight: bold;
+        color: var(--hub-accent);
+        text-shadow: 0 0 6px rgba(0, 255, 255, 0.5);
+        font-family: monospace;
+      }
+      .badger-runner::after {
+        content: "CBADGER // NAV-01";
+      }
+      /* adjust content-body bottom pad for footer */
+      .content-body {
+        padding-bottom: 32px;
+      }
+      /* push app-deck above footer */
+      .app-deck {
+        padding-bottom: 32px;
       }
       @media (max-width: 860px) {
         .shell {
@@ -836,7 +909,7 @@
         body {
           overflow: auto;
         }
-        .build-banner {
+        .footer-bar {
           display: none;
         }
       }
@@ -1113,11 +1186,29 @@
       <button id="presenceQuaternaryAction" type="button" role="menuitem"></button>
     </div>
 
-    <div id="buildBanner" class="build-banner">
-      <div class="build-banner-content">
-        <span id="buildBannerText">Loading build info...</span>
+    <!-- Footer status bar -->
+    <footer class="footer-bar" id="footerBar">
+      <div class="footer-left">
+        <span style="color: var(--hub-accent); font-weight: bold">READY</span>
+        <span class="footer-sep">│</span>
+        <span id="buildCommitShort" style="color: var(--hub-text)">--</span>
+        <span class="footer-sep">│</span>
+        <span id="buildDate" style="color: var(--hub-text)">--</span>
       </div>
-    </div>
+      <div class="ticker-wrap">
+        <div class="badger-runner" aria-hidden="true"></div>
+        <div class="ticker-track" id="tickerTrack">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div class="footer-right">
+        <span id="artifactCount" style="color: var(--hub-text)">--</span>
+        ARTIFACTS
+        <span class="footer-sep">│</span>
+        <span id="sectorDisplay" style="color: var(--hub-accent)">ZETA-8</span>
+      </div>
+    </footer>
+
 
     <script type="module">
       const HUB_BASE = document.baseURI.includes('app-hub-v11/') ? './' : 'app-hub-v11/';
@@ -2086,14 +2177,48 @@
           if (!response.ok) return;
           const stats = await response.json();
           const buildDate = new Date(stats.buildDate).toLocaleDateString();
-          const bannerText = `${stats.commitHash} · ${stats.artifactCount} artifacts · ${buildDate} · ${stats.commitMessage}`;
-          $("buildBannerText").textContent = bannerText;
-          $("buildBanner").style.display = "flex";
+          $("buildCommitShort").textContent = stats.commitHash || "--";
+          $("buildDate").textContent = buildDate || "--";
+          $("artifactCount").textContent = stats.artifactCount || "--";
         } catch (e) {
           console.log("Build stats not available");
         }
       }
+      function buildTickerContent() {
+        const commitHash = $("buildCommitShort").textContent || "--";
+        const artifactCount = catalog.summary.total || 0;
+        const buildDate = $("buildDate").textContent || "--";
+        const commitMsg = $("buildCommitShort").textContent ?
+          `NEXUS v11 HUB ACTIVE // ALL SYSTEMS NOMINAL` :
+          `NEXUS v11 HUB ACTIVE // BUILD STATS UNAVAILABLE`;
+        const items = [
+          commitMsg,
+          `${artifactCount} ARTIFACTS INDEXED`,
+          `BUILD: ${commitHash} // ${buildDate}`,
+          `SECTOR: ZETA-8 // NAV-01 PROTOCOL ACTIVE`,
+          `CBADGER NODE ONLINE // BADGER PROTOCOL WALKING THE GRID`,
+          `QUANTUM FIELD STABLE // DECRYPTING ARTIFACT MATRIX // UPLINK CONFIRMED`,
+          `PEER NET ACTIVE // REALTIME SYNC ENABLED`,
+          `THEME ENGINE LOADED // MODULAR ARCHITECTURE ONLINE`,
+        ];
+        const doubled = [...items, ...items]; // duplicate for seamless loop
+        return doubled
+          .map(
+            (t, i) =>
+              `<span class="ticker-item ${i === 0 || i === items.length ? "hi" : ""}">${t}</span>`,
+          )
+          .join('<span class="ticker-item footer-sep">◆</span>');
+      }
+      function startTicker() {
+        function rebuild() {
+          const el = document.getElementById("tickerTrack");
+          if (el) el.innerHTML = buildTickerContent();
+        }
+        rebuild();
+        setInterval(rebuild, 30000);
+      }
       loadBuildStats();
+      startTicker();
       eventLog.success("v11 hub ready");
     </script>
   </body>
