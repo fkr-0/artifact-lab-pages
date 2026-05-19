@@ -338,6 +338,24 @@
         return STAGE_THEMES[(this.state.local.stage - 1) % STAGE_THEMES.length];
       }
 
+      alphaColor(hex, alpha = 1) {
+        const value = String(hex || '').trim();
+        const shorthand = value.match(/^#([0-9a-f]{3})$/i);
+        const full = value.match(/^#([0-9a-f]{6})$/i);
+        if (shorthand) {
+          const [r, g, b] = shorthand[1].split('').map((part) => parseInt(part + part, 16));
+          return `rgba(${r},${g},${b},${alpha})`;
+        }
+        if (full) {
+          const raw = full[1];
+          const r = parseInt(raw.slice(0, 2), 16);
+          const g = parseInt(raw.slice(2, 4), 16);
+          const b = parseInt(raw.slice(4, 6), 16);
+          return `rgba(${r},${g},${b},${alpha})`;
+        }
+        return value || `rgba(0,255,255,${alpha})`;
+      }
+
       init() {
         this.embedded = this.isEmbedded();
 
@@ -1329,7 +1347,7 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const gradient = ctx.createRadialGradient(canvas.width * 0.75, canvas.height * 0.25, 20, canvas.width * 0.75, canvas.height * 0.25, canvas.width * 0.8);
-        gradient.addColorStop(0, `${theme.nebula}33`);
+        gradient.addColorStop(0, this.alphaColor(theme.nebula, 0.2));
         gradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);

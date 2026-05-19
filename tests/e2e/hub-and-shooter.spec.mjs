@@ -108,15 +108,16 @@ test.describe('Hyperblast Shooter', () => {
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(150);
     await page.keyboard.up('ArrowUp');
-    await page.keyboard.press('Space');
-    await page.waitForTimeout(120);
+    await page.keyboard.down('Space');
+    await expect.poll(async () => page.evaluate(() => window.game.state.local.bullets.length)).toBeGreaterThanOrEqual(before.bullets + 1);
+    await page.keyboard.up('Space');
 
     const after = await page.evaluate(() => ({
       y: window.game.state.local.player.y,
-      bullets: window.game.state.local.bullets.length,
+      bulletsCreated: window.game.state.local.bullets.length,
     }));
     expect(after.y).toBeLessThan(before.y);
-    expect(after.bullets).toBeGreaterThanOrEqual(before.bullets + 1);
+    expect(after.bulletsCreated).toBeGreaterThanOrEqual(before.bullets + 1);
 
     await page.locator('#restartBtn').click();
     await expect(page.locator('#score')).toHaveText('0');
