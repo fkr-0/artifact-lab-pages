@@ -71,7 +71,7 @@ test.describe('app-hub-v11 shell', () => {
 test.describe('Hyperblast Shooter', () => {
   test('boots directly in embedded/directStart mode and exposes a live game API', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/app-hub/shooter.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
 
     await expect(page.locator('#gameCanvas')).toBeVisible();
     await expect(page.locator('#score')).toHaveText('0');
@@ -97,7 +97,7 @@ test.describe('Hyperblast Shooter', () => {
 
   test('responds to keyboard input, fires bullets, and can restart cleanly', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/app-hub/shooter.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
     await page.locator('#gameCanvas').click();
 
     const before = await page.evaluate(() => ({

@@ -8,7 +8,7 @@ import {
   deployTurret,
   updateTurrets,
   recordEnemyKill,
-} from '../app-hub/lib/shooter-balance.mjs';
+} from '../hyperblast-shooter/lib/shooter-balance.mjs';
 
 const baseEconomy = createInitialEconomy();
 assert.equal(STARTING_MONEY, 200, 'v10 joining players start with 200 base money');

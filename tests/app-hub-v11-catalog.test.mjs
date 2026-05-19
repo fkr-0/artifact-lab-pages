@@ -79,7 +79,7 @@ assert.equal(
 
 const shooter = shooterCatalog.items.find((item) => item.id === 'hyperblast-shooter');
 assert.ok(shooter, 'expected Hyperblast Shooter artifact in v11 catalog');
-assert.equal(shooter.href, '../app-hub/shooter.html');
+assert.equal(shooter.href, '../hyperblast-shooter/index.html');
 assert.deepEqual(
   shooter.launch.modes,
   ['inline', 'floating', 'newWindow'],

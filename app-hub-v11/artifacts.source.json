@@ -428,7 +428,7 @@
       "id": "hyperblast-shooter",
       "title": "Hyperblast Shooter",
       "kind": "html-path",
-      "href": "../app-hub/shooter.html",
+      "href": "../hyperblast-shooter/index.html",
       "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
       "tags": [
         "game",
@@ -676,7 +676,7 @@
     },
     {
       "id": "v11-peer-daw",
-      "title": "v11 Peer DAW",
+      "title": "V11 Peer DAW",
       "kind": "html-path",
       "href": "../v11-peer-daw/index.html",
       "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",

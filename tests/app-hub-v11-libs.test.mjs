@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { buildMenuGroups, collectTagStats, createTagFilterState, filterArtifacts, filterArtifactsWithTags, renderTagFilterControls, tagColorStyle, toggleTagFilter } from '../app-hub-v11/lib/menu.js';
 import { createAppRuntimeRegistry, createFloatingPanel, createInlineTabDeck, launchArtifact, launchUrlForMode, normalizeLaunchMode } from '../app-hub-v11/lib/launcher.js';
 import { createEventLog } from '../app-hub-v11/lib/event-log.js';
-import { clamp, createResizablePanels } from '../app-hub-v11/lib/resizable-panels.js';
+import { clamp, createResizablePanels } from '../lib/ui/resizable-panels.js';
 import { readHubSetting, writeHubSetting } from '../app-hub-v11/lib/storage.js';
 import { themes } from '../app-hub-v11/lib/themes.js';
 
@@ -22,7 +22,7 @@ toggleTagFilter(tagState, 'audio');
 tagState.mode = 'AND';
 assert.deepEqual(filterArtifactsWithTags(items, tagState).map((item) => item.id), []);
 assert.match(renderTagFilterControls(items, tagState), /data-tag="docs"/);
-assert.match(renderTagFilterControls(items, tagState), /tag-button active/);
+assert.match(renderTagFilterControls(items, tagState), /class="[^"]*tag-button[^"]*active/, 'active tag controls should be marked active regardless of type-color class order');
 assert.match(renderTagFilterControls(items, tagState), /--tag-hue:/, 'tag controls should be color coded');
 assert.match(tagColorStyle('docs'), /--tag-hue:\d+/, 'tagColorStyle should produce deterministic CSS variables');
 assert.equal(normalizeLaunchMode('popup'), 'newWindow');
@@ -76,11 +76,11 @@ const floatingRuntime = {
   },
 };
 floatingRuntime.existingPanel = { removed: false, remove() { this.removed = true; } };
-const panel = createFloatingPanel({ title: 'Hyperblast Shooter', url: '../app-hub/shooter.html?embedded=true' }, floatingRuntime);
+const panel = createFloatingPanel({ title: 'Hyperblast Shooter', url: '../hyperblast-shooter/index.html?embedded=true' }, floatingRuntime);
 assert.equal(floatingRuntime.existingPanel.removed, true);
 assert.equal(panel.className, 'floating');
 assert.match(panel.innerHTML, /Hyperblast Shooter/);
-assert.match(panel.innerHTML, /..\/app-hub\/shooter.html\?embedded=true/);
+assert.match(panel.innerHTML, /..\/hyperblast-shooter\/index.html\?embedded=true/);
 assert.match(panel.innerHTML, /data-floating-drag-handle/, 'floating panel should expose a drag handle');
 assert.match(panel.innerHTML, /data-floating-resize-handle/, 'floating panel should expose a resize handle');
 const docked = [];
@@ -97,14 +97,14 @@ assert.equal(panel.removed, true);
 
 
 const multiplayerLaunch = launchArtifact(
-  { href: '../app-hub/shooter.html' },
+  { href: '../hyperblast-shooter/index.html' },
   'floating',
   { open() { throw new Error('floating launch should not open browser window'); } },
   { multiplayer: true }
 );
 assert.equal(multiplayerLaunch.mode, 'floating');
 assert.equal(multiplayerLaunch.handledByBrowser, false);
-assert.equal(multiplayerLaunch.url, '../app-hub/shooter.html?embedded=true&multiplayer=true');
+assert.equal(multiplayerLaunch.url, '../hyperblast-shooter/index.html?embedded=true&multiplayer=true');
 
 const bombermanMultiplayerLaunch = launchArtifact(
   { href: '../app-hub/bomberman.html' },

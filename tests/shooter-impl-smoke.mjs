@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const html = await readFile('app-hub/shooter.html', 'utf8');
+const html = await readFile('hyperblast-shooter/index.html', 'utf8');
 
 const constructorBlock = html.slice(
   html.indexOf('constructor() {'),

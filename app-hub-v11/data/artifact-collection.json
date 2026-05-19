@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-17T01:04:34.305Z",
+  "generatedAt": "2026-05-19T21:08:11.265Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -40,20 +40,58 @@
     }
   },
   "summary": {
-    "total": 28,
+    "total": 40,
     "byKind": {
-      "html-path": 24,
+      "html-path": 36,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
-      "tool": 6,
+      "tool": 17,
+      "graphics": 10,
+      "generative": 1,
+      "node-based": 1,
+      "visual": 1,
+      "programming": 1,
+      "creative": 3,
+      "v11": 17,
+      "game": 6,
+      "arcade": 1,
+      "multiplayer": 3,
+      "p2p": 3,
+      "collaborative": 5,
+      "retro": 1,
+      "image": 1,
+      "gif": 2,
+      "preprocessor": 1,
+      "transparency": 1,
+      "utility": 4,
+      "chat": 1,
+      "real-time": 1,
+      "social": 2,
+      "peernet": 6,
+      "pdf": 1,
+      "converter": 1,
+      "editor": 10,
+      "template": 2,
+      "procedural": 1,
+      "generator": 6,
+      "design": 3,
+      "ai": 2,
+      "prompts": 2,
+      "writing": 2,
+      "cyberpunk": 3,
+      "qr-code": 2,
+      "export": 2,
+      "sprite": 3,
+      "animator": 1,
+      "pixel-art": 1,
+      "game-dev": 1,
+      "automation": 1,
+      "workflow": 1,
       "palette": 1,
       "theme": 1,
       "color": 1,
-      "design": 1,
-      "v11": 5,
-      "editor": 7,
       "notepad": 3,
       "native": 1,
       "v8": 1,
@@ -64,13 +102,11 @@
       "compatibility": 2,
       "tooling": 2,
       "v10": 5,
-      "peernet": 5,
       "themes": 1,
       "sound": 1,
       "floating": 1,
       "calculator": 1,
       "math": 1,
-      "collaborative": 3,
       "text": 1,
       "notes": 1,
       "v4": 1,
@@ -78,30 +114,24 @@
       "monaco": 1,
       "code": 1,
       "textarea": 1,
-      "p2p": 1,
       "audio": 2,
       "modular": 1,
-      "graphics": 3,
-      "sprite": 2,
       "extraction": 1,
       "catalog": 1,
       "docs": 4,
       "markdown": 4,
       "viewer": 4,
-      "game": 5,
       "classic": 3,
       "minesweeper": 1,
       "puzzle": 1,
       "solitaire": 1,
       "cards": 1,
       "brawler": 1,
-      "cyberpunk": 2,
       "built": 2,
       "external": 1,
       "example": 1,
       "font": 1,
       "bomberman": 1,
-      "multiplayer": 2,
       "shooter": 1,
       "space": 1,
       "server": 1,
@@ -110,6 +140,410 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "generative",
+        "node-based",
+        "visual",
+        "programming",
+        "creative",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-aether-node",
+      "title": "Aether Node",
+      "href": "../spc/aether_node.html",
+      "description": "Abstract node-based visual programming tool for creating generative graphics and procedural patterns. Build networks of processing nodes, connect data flows, and export results as images or animations.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "arcade",
+        "multiplayer",
+        "p2p",
+        "collaborative",
+        "retro",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "brickbreaker",
+      "title": "BrickBreaker Coop",
+      "href": "../brickbreaker/index.html",
+      "description": "Cooperative brick-breaking arcade game with multiplayer support via PeerJS. Features powerups, progressive difficulty, and synchronized state management for networked play.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "image",
+        "gif",
+        "preprocessor",
+        "transparency",
+        "utility",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "gif-white-to-transparent",
+      "title": "GIF White→Alpha Preprocessor",
+      "href": "../gif-white-to-transparent.html",
+      "description": "Browser-based GIF preprocessor that removes white backgrounds and replaces with transparency. Upload animated GIF, adjust white threshold with live preview, and download cleaned GIF with proper alpha channel.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "chat",
+        "p2p",
+        "real-time",
+        "social",
+        "peernet",
+        "collaborative",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sexy-love-chat",
+      "title": "Magical Love Chat",
+      "href": "../sexy_love_chat.html",
+      "description": "P2P real-time chat application with magical theme and PeerJS networking. Features private messaging, room creation, user presence, emoji support, and persistent chat history via localStorage.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "pdf",
+        "converter",
+        "editor",
+        "graphics",
+        "utility",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "pdf-forge-nexus",
+      "title": "PDF Forge Nexus",
+      "href": "../pdf-forge-nexus.html",
+      "description": "Client-side PDF manipulator with merge, split, and conversion capabilities. Features drag-and-drop PDF/image loading, page reordering, rotation, multi-page merge, PDF splitting (by N pages, at page, range, or each page), PDF to text extraction, image to PDF conversion, and preview. All processing happens locally with no server upload.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "social",
+        "template",
+        "procedural",
+        "generator",
+        "design",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-procedural-sharepic-studio",
+      "title": "Procedural Sharepic Studio",
+      "href": "../spc/procedural_sharepic_studio.html",
+      "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "editor",
+        "ai",
+        "prompts",
+        "creative",
+        "writing",
+        "generator",
+        "cyberpunk",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "prompt-forge-nexus",
+      "title": "Prompt Forge Nexus",
+      "href": "../prompt-gen-nexus.html",
+      "description": "Advanced LLM prompt generator with placeholder system, tag-based filtering, prompt operations library, assembly multi-prompt combiner, and 7 cyberpunk themes. Pure client-side with localStorage persistence, export/import, and live preview.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "ai",
+        "prompts",
+        "creative",
+        "writing",
+        "generator",
+        "editor",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "prompt-forge-nexus",
+      "title": "Prompt Forge Nexus",
+      "href": "../prompt-gen-nexus.html",
+      "description": "Advanced LLM prompt generator with placeholder system, tag-based filtering, and prompt operations. Features CodeMirror syntax highlighting, placeholder auto-detection, prompt assembly from multiple templates, operation chains, theme support, and local storage persistence.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "generator",
+        "qr-code",
+        "graphics",
+        "utility",
+        "export",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "qr-studio",
+      "title": "QR Studio",
+      "href": "../qrcode.html",
+      "description": "Professional QR code generator supporting 12+ formats (URL, text, WiFi, TOTP, eSIM, email, phone, SMS, contact, location, event, vCard). Includes error correction levels, custom colors, PNG/SVG export, print support, and real-time preview.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "generator",
+        "qr-code",
+        "graphics",
+        "utility",
+        "export",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "qr-studio",
+      "title": "QR Studio",
+      "href": "../qrcode.html",
+      "description": "Professional QR code generator supporting 12+ formats including URL, text, WiFi, 2FA/TOTP, eSIM, email, phone, SMS, vCard, location, and calendar events. Features customizable error correction, foreground/background colors, PNG/SVG export, print support, and real-time preview.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "animator",
+        "gif",
+        "pixel-art",
+        "game-dev",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-sprite-gif-creator-v2",
+      "title": "Sprite GIF Creator v2",
+      "href": "../spc/sprite-gif-creator-v2.html",
+      "description": "Enhanced sprite sheet animator with timeline, frame editing, multiple source support, batch processing, and GIF export. Features source card management, improved batch operations, and pixel-perfect preview controls.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "template",
+        "generator",
+        "automation",
+        "design",
+        "workflow",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-template-engine",
+      "title": "Template Engine",
+      "href": "../spc/template_engine.html",
+      "description": "Template processing engine for creating and managing reusable design templates. Supports variable substitution, conditional rendering, loops, and custom processing logic for generating dynamic content from templates.",
+      "modifiedAt": "2026-05-18T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
     {
       "kind": "html-path",
       "tags": [
@@ -135,7 +569,7 @@
       },
       "id": "palette-studio",
       "title": "Palette Studio",
-      "href": "palette-studio.html",
+      "href": "../palette-studio/index.html",
       "description": "Advanced palette generator with multiple anchors, role inference, contrast checks, and CSS variable export for readable UI themes.",
       "modifiedAt": "2026-05-17T00:00:00.000Z",
       "deploy": {
@@ -791,7 +1225,7 @@
       },
       "id": "font-lab-browser",
       "title": "Font Lab Browser",
-      "href": "font_lab_browser.html",
+      "href": "../font-lab-browser/index.html",
       "description": "Single-file, browser-only font builder. Upload a glyph grid image, remove white to transparency, smooth and trace, then export an OTF plus debug assets.",
       "modifiedAt": "2026-05-01T12:00:00.000Z",
       "deploy": {
@@ -898,7 +1332,7 @@
       },
       "id": "hyperblast-shooter",
       "title": "Hyperblast Shooter",
-      "href": "../app-hub/shooter.html",
+      "href": "../hyperblast-shooter/index.html",
       "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
       "modifiedAt": "2026-05-01T12:00:00.000Z",
       "deploy": {
@@ -928,7 +1362,7 @@
       },
       "id": "markdown-viewer",
       "title": "Markdown Viewer",
-      "href": "markdown-viewer.html",
+      "href": "../markdown-viewer/index.html",
       "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
       "modifiedAt": "2026-05-01T12:00:00.000Z",
       "deploy": {
@@ -1020,7 +1454,7 @@
         "defaultAction": "inline"
       },
       "id": "v11-peer-daw",
-      "title": "v11 Peer DAW",
+      "title": "V11 Peer DAW",
       "href": "../v11-peer-daw/index.html",
       "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
       "deploy": {

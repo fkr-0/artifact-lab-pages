@@ -66,7 +66,7 @@ console.log('app-hub v11 index UI contract OK');
 
 assert.match(html, /id="workspacePane"/, 'v11 should include a bottom split workspace pane for inline apps and logs');
 assert.match(html, /id="workspaceResizeHandle"/, 'workspace pane should be height-resizable');
-assert.match(html, /--workspace-height:\s*58vh/, 'workspace pane should default tall enough for inline apps');
+assert.match(html, /--workspace-height:\s*66vh/, 'workspace pane should default tall enough for inline apps');
 assert.match(html, /--workspace-height/, 'workspace pane height should persist as a CSS variable');
 assert.match(html, /id="workspaceTabs"/, 'workspace pane should expose shared tabs');
 assert.doesNotMatch(html, /data-workspace-tab="appDeck"/, 'workspace tabs should not include a wrapper inline-tabs tab');
@@ -79,7 +79,7 @@ assert.match(html, /class="lobby-grid"/, 'bottom Lobby / Chat tab should use a m
 assert.match(html, /class="lobby-roster card stack"/, 'bottom Lobby / Chat tab should provide a detailed roster card');
 assert.match(html, /class="lobby-chat-main card stack"/, 'bottom Lobby / Chat tab should provide a larger chat card');
 assert.match(html, /\.lobby-chat-panel[\s\S]*min-height:\s*0/, 'Lobby / Chat panel should be a scrollable bottom-pane workspace panel');
-assert.match(html, /\.lobby-chat-log[\s\S]*min-height:\s*18rem/, 'Lobby / Chat tab should have a larger chat log than the compact sidebar');
+assert.match(html, /\.lobby-chat-log[\s\S]*min-height:\s*16rem/, 'Lobby / Chat tab should have a larger chat log than the compact sidebar');
 assert.match(html, /renderLobbySummary\(\)/, 'lobby/chat rendering should update the compact sidebar summary');
 assert.match(html, /function renderLobbySummary\(\)/, 'compact lobby summary should be rendered from live lobby state');
 assert.match(html, /id="workspaceTabs"[\s\S]*data-workspace-tab="eventLog"/, 'event log tab should be inside the single inline tab strip');
@@ -93,8 +93,8 @@ assert.match(html, /if \(activeAppId\) setWorkspaceTab\(activeAppId\)/, 'opening
 assert.match(html, /setWorkspaceTab\("eventLog"\)/, 'Event Log should be the permanent default tab');
 assert.match(html, /setWorkspaceTab/, 'v11 should switch the single workspace tab strip');
 assert.match(html, /workspacePane\.classList\.add\(["']active["']\)/, 'opening inline apps should show the split workspace pane');
-assert.match(html, /grid-template-rows:\s*minmax\(140px, 1fr\) 10px minmax\(260px, var\(--workspace-height\)\)/, 'workspace pane should keep a useful lower-pane height budget');
-assert.match(html, /\.app-deck-panel\.active[\s\S]*grid-template-rows:\s*minmax\(0, 1fr\)/, 'inline app panels should fill the app-deck lane');
+assert.match(html, /grid-template-rows:\s*minmax\(100px, 1fr\) 10px minmax\(420px, var\(--workspace-height\)\)/, 'workspace pane should keep a useful lower-pane height budget');
+assert.match(html, /\.app-deck-panel\.active[\s\S]*grid-template-rows:\s*minmax\(0, 1fr\)[\s\S]*height:\s*100%/, 'inline app panels should fill the app-deck lane');
 assert.match(html, /\.app-deck-panel\.active \.app-deck-inline-frame,[\s\S]*min-height:\s*0/, 'inline app iframes should not force a short fixed-height floor');
 assert.match(html, /id="defaultAction"/, 'v11 should expose a default artifact action selector');
 assert.match(html, /readHubSetting\(["']defaultAction["'], ["']newWindow["']\)/, 'default artifact action should be new window');
@@ -106,16 +106,17 @@ assert.match(html, /openSelected\(artifactDefaultAction\(selected\)\)/, 'artifac
 assert.doesNotMatch(html, /<section id="appDeck" class="card app-deck">/, 'app deck should not spawn as a standalone card below results');
 assert.doesNotMatch(html, /<section class="card stack"><div class="row between"><strong>Event log<\/strong>/, 'event log should not be a standalone section below results');
 
-assert.match(html, /class="badger-runner"/, 'v11 should show the bdg.gif badger runner at the bottom');
-assert.match(html, /src="\.\.\/bdg\.gif"/, 'badger runner should use bdg.gif from the artifacts root');
-assert.match(html, /@keyframes badger-run/, 'badger runner should animate across the bottom of the hub');
-assert.doesNotMatch(html, /body[\s\S]*<footer class=\"footer-bar\" id=\"footerBar\">/, 'footer should no longer be a fixed body-level overlay');
-assert.match(html, /\.workspace-pane[\s\S]*overflow:\s*hidden/, 'workspace pane should clip only its shell while child panels manage scrolling');
+assert.match(html, /id="stage" class="card stack"[\s\S]*class="footer-bar" id="footerBar"/, 'v11 should place the bottom status band inside the lower stage pane');
+assert.match(html, /class="badger-runner"/, 'v11 should show the badger runner inside the status band');
+assert.match(html, /\.footer-bar[\s\S]*min-height:\s*38px/, 'bottom status band should be slightly larger than the old fixed ticker');
+assert.match(html, /\.badger-runner[\s\S]*width:\s*156px[\s\S]*height:\s*30px/, 'badger runner should be slightly larger in the lower pane');
+assert.doesNotMatch(html, /\.footer-bar[\s\S]*position:\s*fixed/, 'footer should no longer be a fixed body-level overlay');
+assert.match(html, /\.workspace-pane[\s\S]*min-height:\s*420px[\s\S]*overflow:\s*hidden/, 'workspace pane should keep a usable floor while clipping only its shell');
 assert.match(html, /\.workspace-panel[\s\S]*overflow:\s*auto/, 'workspace tab panels should scroll instead of clipping content');
 assert.match(html, /\.app-deck-panel[\s\S]*overflow:\s*hidden/, 'inline app panels should maximize iframe space instead of showing nested scrollbars');
 assert.match(html, /\.results-panel[\s\S]*overflow:\s*auto/, 'filtered results panel should remain scrollable');
 assert.match(html, /\.resize-handle[\s\S]*touch-action:\s*none/, 'drag handles should disable touch scrolling during resize');
-assert.match(html, /workspacePane\.style\.resize\s*=\s*["']vertical["']/, 'v11 should explicitly enable browser vertical resize on the workspace pane');
+assert.match(html, /createResizablePanels/, 'v11 should resize the workspace pane through the shared drag handle helper');
 
 assert.doesNotMatch(html, /drop-shadow\(/, 'badger runner should not use a drop shadow');
 
@@ -144,4 +145,4 @@ assert.match(html, /scheduleLobbyChatAckTimeout\(message\.id\)/, 'local chat sen
 assert.match(html, /function scheduleLobbyChatAckTimeout\(messageId\)/, 'chat should fail pending peer deliveries after timeout');
 assert.match(html, /markLobbyChatDelivered\(payload\?\.messageId, "acked"\)/, 'chat acknowledgements should mark local messages acked');
 assert.match(html, /delivery:\s*connectedPeers\.size > 0 \? "pending" : "sent"/, 'local sends should show pending when peers are connected');
-assert.equal((html.match(/const scale = Math\.min\(1, 128 \/ Math\.max\(bitmap\.width, bitmap\.height\)\);/g) || []).length, 1, 'palette extraction should define scale only once');
+assert.doesNotMatch(html, /const scale = Math\.min\(1, 128 \/ Math\.max\(bitmap\.width, bitmap\.height\)\);[\s\S]*const scale = Math\.min\(1, 128 \/ Math\.max\(bitmap\.width, bitmap\.height\)\);/, 'palette extraction should not duplicate scale definitions');

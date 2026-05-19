@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const html = await readFile('app-hub/shooter.html', 'utf8');
+const html = await readFile('hyperblast-shooter/index.html', 'utf8');
 assert.match(html, /this\.urlParams = new URLSearchParams\(window\.location\.search\)/, 'shooter should centralize URL params');
 assert.match(html, /this\.targetPeerId = this\.urlParams\.get\('targetPeerId'\)/, 'shooter should consume targetPeerId for joins');
 assert.match(html, /this\.sessionMode = this\.urlParams\.get\('mode'\) \|\| 'stage'/, 'shooter should consume stage/vs mode');

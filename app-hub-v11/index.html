@@ -22,7 +22,7 @@
         --hub-glow-secondary: rgba(255, 0, 255, 0.5);
         --sidebar-width: 360px;
         --filter-panel-fr: 1.25fr;
-        --workspace-height: 58vh;
+        --workspace-height: 66vh;
         --generated-primary: #00ffff;
         --generated-secondary: #ff00ff;
         --generated-accent: #00ff88;
@@ -116,7 +116,7 @@
         overflow: hidden;
         display: grid;
         gap: 0.55rem;
-        grid-template-rows: minmax(140px, 1fr) 10px minmax(260px, var(--workspace-height));
+        grid-template-rows: minmax(100px, 1fr) 10px minmax(420px, var(--workspace-height));
         min-height: 0;
       }
       .card {
@@ -571,7 +571,7 @@
       }
       .workspace-pane {
         display: none;
-        min-height: 260px;
+        min-height: 420px;
         max-height: 100%;
         overflow: hidden;
         grid-template-rows: auto minmax(0, 1fr) auto;
@@ -603,11 +603,14 @@
         display: grid;
         grid-template-rows: minmax(0, 1fr);
         min-height: 0;
+        height: 100%;
         overflow: hidden;
       }
       #appDeckBody {
         display: grid;
+        grid-template-rows: minmax(0, 1fr);
         min-height: 0;
+        height: 100%;
       }
       .app-deck-tabs {
         display: flex;
@@ -640,6 +643,7 @@
         grid-template-rows: minmax(0, 1fr);
         overflow: hidden;
         min-height: 0;
+        height: 100%;
       }
       .app-deck-inline-frame,
       iframe {
@@ -1412,8 +1416,8 @@
             handle: $("workspaceResizeHandle"),
             axis: "y",
             variable: "--workspace-height",
-            min: 180,
-            max: Math.max(260, window.innerHeight - 220),
+            min: 420,
+            max: Math.max(420, window.innerHeight - 180),
             unit: "px",
             storageKey: "app-hub-v11:workspace-height",
             toValue: (event) => window.innerHeight - event.clientY,
@@ -1714,6 +1718,7 @@
               "active",
               panel.id === tabId ||
                 panel.dataset.appId === tabId ||
+                (panel.id === "appDeck" && Boolean($("appDeckBody").querySelector(`[data-app-id="${tabId}"]`))) ||
                 (tabId === "eventLog" && panel.id === "eventLogPanel") ||
                 (tabId === "lobbyChat" && panel.id === "lobbyChatPanel"),
             ),
