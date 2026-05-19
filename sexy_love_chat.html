@@ -786,11 +786,11 @@
 
       <!-- Connecting Screen (Dave joining) -->
       <div id="connectingScreen" class="lobby hidden">
-        <h2>Connecting to Sam...</h2>
+        <h2 id="connectingTitle">Connecting to Partner...</h2>
         <div class="lobby-box">
           <div class="status-box">
             <div class="status-icon">&#10024;</div>
-            <div class="status-text">Creating magical connection...</div>
+            <div class="status-text" id="connectingStatus">Creating magical connection...</div>
           </div>
         </div>
       </div>
@@ -879,6 +879,31 @@
           }
         }
         return null
+      }
+
+      function isEmbedded() {
+        const params = new URLSearchParams(window.location.search)
+        return params.get('embedded') === 'true'
+      }
+
+      function applyEmbeddedMode() {
+        if (!isEmbedded()) return
+
+        // Hide elements that don't make sense in embedded mode
+        const footer = document.querySelector('footer')
+        if (footer) footer.style.display = 'none'
+
+        // Adjust container padding for embedded view
+        const container = document.querySelector('.container')
+        if (container) {
+          container.style.paddingBottom = '20px'
+        }
+
+        // Adjust intro screen for embedded mode
+        const introHint = document.getElementById('introHint')
+        if (introHint) {
+          introHint.textContent = 'Configure names and create your room!'
+        }
       }
 
       function createCustomRoomUrl(roomData) {
@@ -1106,8 +1131,6 @@
       // Join room (Partner - via custom link)
       function joinRoom() {
         username = 'user2'
-        showScreen('connecting')
-        startMusic()
 
         // Check if we have custom room data from URL
         const roomData = getCustomRoomFromUrl()
@@ -1120,6 +1143,13 @@
           userDisplayName = userCustomName
           partnerDisplayName = partnerCustomName
         }
+
+        // Update connecting screen with partner name
+        document.getElementById('connectingTitle').textContent = `Connecting to ${partnerDisplayName}...`
+        document.getElementById('connectingStatus').textContent = `Creating magical connection with ${partnerDisplayName}...`
+
+        showScreen('connecting')
+        startMusic()
 
         const peerId = `magical-love-chat-${customRoomId || 'default'}-user2-${Date.now()}`
         peer = new Peer(peerId)
@@ -1589,6 +1619,9 @@
           console.log('Invalid room parameter, showing intro screen')
         }
       }
+
+      // Apply embedded mode if needed
+      applyEmbeddedMode()
     </script>
   </body>
 </html>

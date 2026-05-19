@@ -643,7 +643,6 @@
         grid-template-rows: 1fr;
         overflow: hidden;
         min-height: 220px;
-        resize: vertical;
       }
       .app-deck-inline-frame,
       iframe {
@@ -785,6 +784,43 @@
           38% 35%
         );
       }
+      .build-banner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 5;
+        background: linear-gradient(135deg, rgba(10, 10, 18, 0.95), rgba(18, 18, 31, 0.92));
+        border-top: 1px solid var(--hub-accent);
+        box-shadow: 0 -4px 12px rgba(0, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        overflow: hidden;
+        height: 28px;
+        display: flex;
+        align-items: center;
+      }
+      .build-banner-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        animation: scrollBanner 30s linear infinite;
+      }
+      #buildBannerText {
+        white-space: nowrap;
+        font-size: 0.75rem;
+        font-family: 'Share Tech Mono', monospace;
+        color: var(--hub-accent);
+        padding: 0 1rem;
+        text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+      }
+      @keyframes scrollBanner {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
       @media (max-width: 860px) {
         .shell {
           grid-template-columns: 1fr;
@@ -799,6 +835,9 @@
         }
         body {
           overflow: auto;
+        }
+        .build-banner {
+          display: none;
         }
       }
     </style>
@@ -1072,6 +1111,12 @@
       <button id="presenceSecondaryAction" type="button" role="menuitem"></button>
       <button id="presenceTertiaryAction" type="button" role="menuitem"></button>
       <button id="presenceQuaternaryAction" type="button" role="menuitem"></button>
+    </div>
+
+    <div id="buildBanner" class="build-banner">
+      <div class="build-banner-content">
+        <span id="buildBannerText">Loading build info...</span>
+      </div>
     </div>
 
     <script type="module">
@@ -2035,6 +2080,20 @@
           )
           .join("");
       }
+      async function loadBuildStats() {
+        try {
+          const response = await fetch("./data/build-stats.json");
+          if (!response.ok) return;
+          const stats = await response.json();
+          const buildDate = new Date(stats.buildDate).toLocaleDateString();
+          const bannerText = `${stats.commitHash} · ${stats.artifactCount} artifacts · ${buildDate} · ${stats.commitMessage}`;
+          $("buildBannerText").textContent = bannerText;
+          $("buildBanner").style.display = "flex";
+        } catch (e) {
+          console.log("Build stats not available");
+        }
+      }
+      loadBuildStats();
       eventLog.success("v11 hub ready");
     </script>
   </body>

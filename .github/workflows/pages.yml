@@ -74,6 +74,9 @@ jobs:
       - name: Materialize deploy stage
         run: node app-hub-v11/server/artifact-build.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage
 
+      - name: Generate build statistics
+        run: node app-hub-v11/server/generate-build-stats.mjs --source app-hub-v11/artifacts.source.json --out .artifacts-pages-stage/app-hub-v11/data/build-stats.json
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

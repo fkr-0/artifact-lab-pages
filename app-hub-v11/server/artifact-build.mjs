@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
-import { dirname, join, normalize, relative, resolve, sep } from 'node:path';
+import { dirname, join, normalize, relative, resolve, sep } from 'node/path';
 import { pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 import { compileArtifactCollectionFile } from './artifact-catalog.mjs';
+
 
 const DEFAULT_EXCLUDES = new Set([
   '.git',
@@ -83,7 +84,7 @@ export async function materializeArtifactBuild(options = {}) {
   const manifest = { generatedAt: new Date().toISOString(), sourcePath: relative(rootDir, sourcePath), rootIndex, built, included, skipped, catalog: { total: catalog.summary.total } };
   await writeFile(join(outDir, 'BUILD_MANIFEST.json'), JSON.stringify(manifest, null, 2));
 
-  return { outDir, catalog, built, included, skipped, manifest };
+  return { outDir, catalog, built, included, skipped, manifest, buildStats };
 }
 
 function deploymentIncludeForItem(item) {
