@@ -220,7 +220,7 @@
 - [x] Added jitterFrames review-report totals and cleanup-all batch deltas, with e2e coverage for pixel-shift jitter cleanup.
 - [x] Added Sprite Fan Atlas Studio to the v11 hub manifest/deploy catalog with reachability regression coverage.
 - [x] Added sprites.json generationContract and animation metadata aligned with sprite-fan/reqs atlas-grid requirements.
-- [ ] Add some guided mode that follows the reqs/ spec requirements, reads them, and yields list of unfinished stuff, while leading from prompt to working atlas through the process. importing and exporting specs and reading+persisting their state is therefore necessary
+- [x] Add guided spec mode: Manifest panel now has prompt/checklist guidance based on sprite-fan/reqs requirements, exports spec-state JSON, embeds specGuide in sprites.json/full config, and re-imports/persists checklist state through Config Manager.
 - [ ] adapt the animation spec ymls in ../badger-sprawl-runner/ to the sprite-fan spec
 - [ ] adapt the animation spec ymls in ../ethic-brawl/ to the sprite-fan spec
 - [x] add post-processing-animation preview: selectable timeline subset can be marked with Ctrl/Meta-click or `M`, preview playback loops only marked frames, and Escape/clear resets to all frames. GIF export remains a future optional extension.

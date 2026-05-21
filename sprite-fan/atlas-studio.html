@@ -396,6 +396,16 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
             <div class="field-label"><span>FPS</span><span id="fps-val">12</span></div>
             <div class="field-row"><input type="range" id="manifest-fps" min="1" max="60" value="12"/></div>
           </div>
+          <div class="field">
+            <div class="field-label"><span>Spec Prompt</span></div>
+            <div class="field-row"><textarea id="spec-prompt" placeholder="Describe the sprite/animation goal" style="width:100%;min-height:42px;font-size:11px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px"></textarea></div>
+          </div>
+          <div style="margin:8px 0;font-size:10px;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5" id="spec-guide-summary">Spec: not checked</div>
+          <div style="margin:6px 0;font-size:10px;color:var(--text-muted);line-height:1.5" id="spec-guide-list">Open export workflow and click Check Spec.</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-spec-check">Check Spec</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-spec-state">Export Spec State</button>
+          </div>
           <div class="btn-row">
             <button class="btn btn-ghost btn-sm" id="btn-export-manifest">&#x{1F4C4;} Export sprites.json</button>
             <button class="btn btn-ghost btn-sm" id="btn-export-manifest-full">Export Full Config</button>
@@ -601,6 +611,7 @@ const S = {
   viewStates: {source:null, frame:null},
   pendingFrameMeta: [],
   batchHistory: [],
+  specGuide: {prompt:'', items:[], checkedAt:null},
   reviewIssues: [],
 };
 
@@ -1320,6 +1331,7 @@ $('btn-export-manifest').addEventListener('click',()=>{
     columns:cols, rows, frameCount:S.frames.length,
     padding:pad, totalFrames:S.frames.length,
     generationContract:{source:'sprite-fan/reqs/animation.yml',gridVsIndividual:'atlas-grid',maxPromptGrid:{columns:4,rows:4,frames:16},transparentBackground:true,stableFrameSize:true,metadataPolicy:'export-grid-animations-order-loop-anchor-empty-gameplay-slots'},
+    specGuide:refreshSpecGuide(),
     grid:{columns:cols,rows,padding:pad,frameWidth:fw,frameHeight:fh,cellWidth:cellW,cellHeight:cellH,sheetWidth:cellW*cols,sheetHeight:cellH*rows},
     animation:{id:name,frames:S.frames.length,fps,order,loop:true,tags:['sprite-fan','postprocessed','atlas-grid'],anchor:S.anchor,events:[],hitboxes:[],hurtboxes:[]},
     animations:{[name]:{frames:S.frames.length,fps,order,loop:true,anchor:S.anchor,tags:['sprite-fan','postprocessed','atlas-grid'],events:[],hitboxes:[],hurtboxes:[]}},
@@ -1347,6 +1359,25 @@ $('btn-export-manifest-full').addEventListener('click',()=>{
 });
 
 // ════════════════════════════════════════════
+// SPEC GUIDE
+// ════════════════════════════════════════════
+const SPEC_REQUIREMENTS=[
+  {id:'prompt',label:'Prompt/goals captured',check:()=>($('spec-prompt')?.value||'').trim().length>0,action:'Write the intended sprite or animation prompt.'},
+  {id:'frames',label:'Frames sliced from atlas',check:()=>S.frames.length>0,action:'Load an atlas and slice frames.'},
+  {id:'grid',label:'Grid is within 4x4 generation contract',check:()=>S.frames.length>0&&S.frames.length<=16&&(+$('export-cols').value||1)<=4&&Math.ceil(S.frames.length/(+$('export-cols').value||1))<=4,action:'Use up to 16 frames with no more than 4 export columns.'},
+  {id:'stable-size',label:'Stable frame size present',check:()=>S.frames.length>0&&S.frames.every(f=>f.imgData.width===S.frames[0].imgData.width&&f.imgData.height===S.frames[0].imgData.height),action:'Slice or repack so every frame has the same dimensions.'},
+  {id:'anchor',label:'Anchor metadata present',check:()=>S.frames.length>0&&S.frames.every(f=>f.anchor&&Number.isFinite(f.anchor.x)&&Number.isFinite(f.anchor.y)),action:'Set an anchor before slicing or apply anchors through config.'},
+  {id:'review',label:'No unresolved review issues',check:()=>S.frames.length>0&&buildReviewReport().totals.issueFrames===0,action:'Use cleanup/review tools until issueFrames is zero.'},
+  {id:'animation',label:'Animation metadata exportable',check:()=>S.frames.length>0&&+$('manifest-fps').value>0&&($('manifest-name').value||'').trim().length>0,action:'Set sprite name and FPS.'},
+  {id:'preview',label:'Animation preview subset selected or all-frame preview available',check:()=>S.frames.length>0,action:'Use timeline preview; optionally mark frames with M or Ctrl/Meta-click.'},
+];
+function buildSpecGuide(){const items=SPEC_REQUIREMENTS.map(r=>{let done=false;try{done=!!r.check()}catch(e){}return{id:r.id,label:r.label,done,action:r.action}});return{version:1,source:'sprite-fan/reqs/animation.yml',prompt:$('spec-prompt')?.value||'',checkedAt:new Date().toISOString(),summary:{done:items.filter(i=>i.done).length,total:items.length},items}}
+function renderSpecGuide(guide=S.specGuide){const items=guide&&Array.isArray(guide.items)?guide.items:[];const done=items.filter(i=>i.done).length,total=items.length;const summary=$('spec-guide-summary');if(summary)summary.textContent=total?`Spec: ${done}/${total} done`:'Spec: not checked';const list=$('spec-guide-list');if(list)list.innerHTML=items.length?items.map(i=>(i.done?'✓ ':'□ ')+i.label+(i.done?'':' — '+i.action)).join('<br>'):'Open export workflow and click Check Spec.'}
+function refreshSpecGuide(){S.specGuide=buildSpecGuide();renderSpecGuide();return S.specGuide}
+function exportSpecState(){const guide=refreshSpecGuide();const b=new Blob([JSON.stringify(guide,null,2)],{type:'application/json'});const a=document.createElement('a');a.download=($('manifest-name').value||'sprite')+'_spec-state.json';a.href=URL.createObjectURL(b);a.click();URL.revokeObjectURL(a.href);toast('Spec state exported','success')}
+function applySpecGuide(guide){if(!guide||typeof guide!=='object')return;if(guide.prompt!==undefined&&$('spec-prompt'))$('spec-prompt').value=guide.prompt;S.specGuide={version:guide.version||1,source:guide.source||'sprite-fan/reqs/animation.yml',prompt:guide.prompt||'',checkedAt:guide.checkedAt||null,summary:guide.summary||{done:0,total:0},items:Array.isArray(guide.items)?guide.items.map(i=>({...i})):[]};renderSpecGuide(S.specGuide)}
+
+// ════════════════════════════════════════════
 // CONFIG SYSTEM
 // ════════════════════════════════════════════
 function getConfig(){
@@ -1358,6 +1389,7 @@ function getConfig(){
     softenRadius:+$('soften-radius').value,alphaErode:+$('alpha-erode').value,alphaDilate:+$('alpha-dilate').value,
     exportCols:+$('export-cols').value,exportPad:+$('export-pad').value,noPad:$('chk-no-pad').checked,
     manifestName:$('manifest-name').value,manifestFps:+$('manifest-fps').value,
+    specGuide:refreshSpecGuide(),
     showOnionSkin:S.showOnionSkin,onionOpacity:S.onionOpacity,autoFitFrames:S.autoFitFrames,maxAutoFitZoom:S.maxAutoFitZoom,
     frameMeta:S.frames.map((f,i)=>({index:i,label:f.label||'',notes:f.notes||'',anchor:f.anchor||S.anchor})),
     batchHistory:S.batchHistory.slice(-10),
@@ -1390,6 +1422,7 @@ function applyConfig(c){
   if(c.noPad!==undefined)$('chk-no-pad').checked=c.noPad;
   if(c.manifestName!==undefined)$('manifest-name').value=c.manifestName;
   if(c.manifestFps!==undefined){$('manifest-fps').value=c.manifestFps;$('fps-val').textContent=c.manifestFps}
+  if(c.specGuide)applySpecGuide(c.specGuide);
   if(c.showOnionSkin!==undefined){S.showOnionSkin=c.showOnionSkin;$('chk-onion').checked=c.showOnionSkin}
   if(c.onionOpacity!==undefined)S.onionOpacity=c.onionOpacity;
   if(c.autoFitFrames!==undefined){S.autoFitFrames=!!c.autoFitFrames;$('btn-auto-fit').classList.toggle('active',S.autoFitFrames)}
@@ -1411,6 +1444,9 @@ $('btn-cfg-export').addEventListener('click',()=>{const b=new Blob([JSON.stringi
 $('btn-cfg-import').addEventListener('click',()=>$('cfg-import-file').click());
 $('cfg-import-file').addEventListener('change',()=>{const f=$('cfg-import-file').files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('cfg-editor').value=r.result;toast('File loaded','success')};r.readAsText(f)});
 $('btn-cfg-apply').addEventListener('click',()=>{try{applyConfig(JSON.parse($('cfg-editor').value));closeConfigModal();toast('Config applied','success')}catch(e){toast('Invalid JSON: '+e.message,'error')}});
+$('btn-spec-check').addEventListener('click',()=>{refreshSpecGuide();toast('Spec checklist refreshed','success')});
+$('btn-export-spec-state').addEventListener('click',exportSpecState);
+$('spec-prompt').addEventListener('input',()=>{S.specGuide.prompt=$('spec-prompt').value;renderSpecGuide(S.specGuide)});
 
 // ════════════════════════════════════════════
 // DUAL BG EXTRACT
@@ -1452,6 +1488,8 @@ window.__spriteFanTest = {
   selectFrame(i){showFrame(i);return this.getState()},
   togglePreviewFrame(i){togglePreviewFrame(i);return this.getState()},
   getPreviewSequence(){return getPreviewSequence()},
+  refreshSpecGuide(){return refreshSpecGuide()},
+  getSpecGuide(){return S.specGuide},
 };
 
 // ════════════════════════════════════════════
@@ -1459,7 +1497,7 @@ window.__spriteFanTest = {
 // ════════════════════════════════════════════
 applyTransform();
 $('btn-auto-fit').classList.toggle('active',S.autoFitFrames);
-updateAnchorList();
+updateAnchorList();renderSpecGuide();
 try{const saved=localStorage.getItem('sprite-atlas-studio-cfg');if(saved)applyConfig(JSON.parse(saved))}catch(e){}
 
 // Anchor input live update
