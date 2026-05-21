@@ -30,6 +30,8 @@ const localStateKeys = [
   'bossDefeated',
   'keys',
   'spawnTimer',
+  'sessionMode',
+  'worldProgress',
   'lastFrameAt',
   'story',
   'gameOver',
@@ -74,6 +76,9 @@ const updateBlock = html.slice(
   html.indexOf('// Turrets decay over time')
 );
 assert.match(updateBlock, /s\.enemyProjectiles\s*=\s*s\.enemyProjectiles\.filter/, 'update should filter initialized enemy projectiles');
+assert.match(updateBlock, /const combatActive = this\.isCombatActive\(\)/, 'update should centralize combat-active checks for exploration pacing');
+assert.match(updateBlock, /if \(combatActive\) s\.spawnTimer\+\+/, 'exploration mode should pause spawn timer advancement');
+assert.match(updateBlock, /if \(combatActive && !s\.bossActive && s\.spawnTimer > getSpawnThreshold/, 'enemy spawning should only run during combat mode');
 
 const stopBlock = html.slice(
   html.indexOf('stopMultiplayer() {'),

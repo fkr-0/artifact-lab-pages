@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 const html = await readFile('hyperblast-shooter/index.html', 'utf8');
 assert.match(html, /this\.urlParams = new URLSearchParams\(window\.location\.search\)/, 'shooter should centralize URL params');
 assert.match(html, /this\.targetPeerId = this\.urlParams\.get\('targetPeerId'\)/, 'shooter should consume targetPeerId for joins');
-assert.match(html, /this\.sessionMode = this\.urlParams\.get\('mode'\) \|\| 'stage'/, 'shooter should consume stage/vs mode');
+assert.match(html, /this\.sessionMode = this\.normalizeSessionMode\(this\.urlParams\.get\('mode'\) \|\| 'combat'\)/, 'shooter should consume and normalize URL session mode');
 assert.match(html, /this\.spectateMode = this\.urlParams\.get\('spectate'\) === 'true' \|\| this\.urlParams\.get\('observe'\) === 'true'/, 'shooter should support spectate/observe mode');
 
 function block(startNeedle, endNeedle, from = 0) {
@@ -58,6 +58,8 @@ assert.match(broadcastPresenceBlock, /playing: playing/, 'broadcastPresence shou
 assert.match(broadcastPresenceBlock, /observing: this\.spectateMode/, 'broadcastPresence should disclose observe mode');
 assert.match(broadcastPresenceBlock, /targetPeerId: this\.targetPeerId/, 'broadcastPresence should include target peer for joins');
 assert.match(broadcastPresenceBlock, /mode: this\.sessionMode/, 'broadcastPresence should include selected session mode');
+assert.match(html, /setSessionMode\(mode\)/, 'shooter should expose explicit mode switching for combat, exploration, and world map');
+assert.match(html, /toggleWorldMap\(forceOpen\)/, 'shooter should expose a world-map panel for backtracking');
 assert.match(broadcastPresenceBlock, /score: this\.state\.local\.score/, 'broadcastPresence should include local score');
 assert.match(broadcastPresenceBlock, /color: this\.playerColor/, 'broadcastPresence should include local color');
 

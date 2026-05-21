@@ -35,11 +35,18 @@
       top: 10px;
       right: 10px;
       display: flex;
-      gap: 10px;
-      z-index: 10;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: flex-start;
+      gap: 6px;
+      max-width: min(62vw, 760px);
+      max-height: 36vh;
+      overflow: auto;
+      z-index: 30;
+      padding-bottom: 4px;
     }
     #controls button {
-      padding: 0.5rem 1rem;
+      padding: 0.42rem 0.7rem;
       background: rgba(0,255,255,0.1);
       border: 1px solid #0cf;
       color: #0cf;
@@ -161,7 +168,10 @@
     <div>Score: <span id="score">0</span></div>
     <div id="economyHud">Money: ¤<span id="money">200</span></div>
     <div>Lives: <span id="lives">3</span></div>
+    <div>Mode: <span id="sessionModeLabel">Combat</span> | World: <span id="currentWorldName">Neon Drift Lanes</span></div>
     <div>Stage: <span id="stage">1</span> | <span id="environmentName">Neon Drift</span></div>
+    <div>Objective: <span id="currentObjective">Trace distress beacons and decode the first rogue formation pattern.</span></div>
+    <div>Routes: <span id="routeCount">1</span>/<span id="routeTotal">4</span> discovered | Intel: <span id="intelCount">0</span>/<span id="intelTotal">5</span> | Chapters: <span id="chapterCount">0</span>/<span id="chapterTotal">5</span> | Patrols: <span id="patrolCount">0</span>/<span id="patrolTotal">5</span> | Milestones: <span id="milestoneCount">1</span>/<span id="milestoneTotal">7</span></div>
     <div>Kills: <span id="stageKills">0</span>/<span id="stageGoal">8</span> | Boss: <span id="bossStatus">none</span></div>
     <div>Turrets: <span id="turretCount">0</span> | Drop cost: ¤<span id="turretCost">120</span></div>
     <div>Upgrade: <span id="weaponLevel">1</span> | Boost: <span id="boostLevel">1</span></div>
@@ -180,6 +190,19 @@
     <button id="repairBtn" aria-label="Repair hull for 60 credits">Repair +1: $60</button>
     <button id="upgradeBtn" aria-label="Upgrade weapon for 120 credits">Upgrade Gun: $120</button>
     <button id="boostBtn" aria-label="Purchase booster upgrade for 90 credits">Booster: $90</button>
+    <button id="exploreBtn" aria-label="Switch to exploration mode">Explore</button>
+    <button id="combatBtn" aria-label="Resume combat mode">Combat</button>
+    <button id="worldLandingBtn" aria-label="Open world landing panel">Dock</button>
+    <button id="worldMapBtn" aria-label="Open world map panel">World Map</button>
+    <button id="routeIntelBtn" aria-label="Open route intel panel">Route Intel</button>
+    <button id="intelArchiveBtn" aria-label="Open intel archive panel">Intel Archive</button>
+    <button id="chapterLogBtn" aria-label="Open chapter log panel">Chapter Log</button>
+    <button id="progressBtn" aria-label="Open progress save panel">Progress</button>
+    <button id="milestonesBtn" aria-label="Open milestones panel">Milestones</button>
+    <button id="patrolLogBtn" aria-label="Open patrol log panel">Patrol Log</button>
+    <button id="signalPuzzleBtn" aria-label="Open local signal puzzle">Signal Puzzle</button>
+    <button id="localSignalsBtn" aria-label="Open local signal conversations">Local Signals</button>
+    <button id="questLogBtn" aria-label="Open quest log panel">Quest Log</button>
     <button id="shipyardBtn" aria-label="Open shipyard panel">Shipyard</button>
     <button id="multiplayerBtn" aria-label="Toggle multiplayer mode">Multiplayer: OFF</button>
     <button id="restartBtn" aria-label="Restart the game">Restart</button>
@@ -194,6 +217,174 @@
 
   <div id="storyPanel" style="position:absolute;left:18px;bottom:18px;max-width:440px;display:none;z-index:12;pointer-events:none">
     <div id="storyMessages" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;color:rgba(205,245,255,.86);text-shadow:0 0 10px rgba(0,220,255,.35);background:rgba(0,8,16,.34);border-left:1px solid rgba(0,255,255,.22);padding:8px 10px;border-radius:0 10px 10px 0"></div>
+  </div>
+
+  <div id="worldLandingPanel" style="position:absolute;left:50%;top:150px;transform:translateX(-50%);width:min(520px,92vw);max-height:64vh;overflow:auto;padding:16px;border-radius:16px;background:rgba(4,8,20,0.95);border:1px solid rgba(0,255,255,0.32);box-shadow:0 0 36px rgba(0,255,255,0.16);display:none;backdrop-filter:blur(12px);z-index:19;color:#dff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div id="worldLandingTitle" style="font-size:20px;font-weight:bold;color:#0ff">Neon Drift Lanes</div>
+        <div id="worldLandingSubtitle" style="font-size:11px;color:#9df">Safe dock · Stage 1</div>
+      </div>
+      <button id="worldLandingCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dff;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="worldLandingObjective" style="font-size:12px;line-height:1.4;color:#cfe;margin-bottom:10px"></div>
+    <div id="worldLandingLandmark" style="margin-bottom:12px"></div>
+    <div id="worldLandingStatus" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px"></div>
+    <div id="worldLandingBrief" style="font-size:12px;line-height:1.45;color:#eef;background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.16);padding:10px;border-radius:10px;margin-bottom:12px"></div>
+    <div id="worldLandingNextStep" style="font-size:12px;line-height:1.45;color:#ffd;background:rgba(255,200,80,.08);border:1px solid rgba(255,200,80,.22);padding:10px;border-radius:10px;margin-bottom:12px"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">
+      <button id="landingSignalsBtn" type="button">Local Signals</button>
+      <button id="landingPuzzleBtn" type="button">Signal Puzzle</button>
+      <button id="landingQuestBtn" type="button">Quest Log</button>
+      <button id="landingRoutesBtn" type="button">Route Intel</button>
+      <button id="landingIntelBtn" type="button">Intel Archive</button>
+      <button id="landingChapterBtn" type="button">Chapter Log</button>
+      <button id="landingProgressBtn" type="button">Progress</button>
+      <button id="landingMilestonesBtn" type="button">Milestones</button>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#9df">Patrol Tier
+        <select id="landingPatrolTier" style="background:rgba(255,255,255,.08);color:#dff;border:1px solid rgba(0,255,255,.25);border-radius:8px;padding:5px 8px">
+          <option value="recon">Recon</option>
+          <option value="standard" selected>Standard</option>
+          <option value="elite">Elite</option>
+        </select>
+      </label>
+      <div id="landingPatrolTierHint" style="font-size:11px;color:#9df;flex-basis:100%;text-align:right">Standard patrol contract with the listed world reward.</div>
+      <button id="landingPatrolLogBtn" type="button">Patrol Log</button>
+      <button id="landingNextStepBtn" type="button">Next Step</button>
+      <button id="landingCombatBtn" type="button">Launch Patrol</button>
+    </div>
+  </div>
+
+  <div id="routeIntelPanel" style="position:absolute;left:400px;top:150px;width:410px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(255,200,80,0.28);box-shadow:0 0 30px rgba(255,200,80,0.14);display:none;backdrop-filter:blur(10px);z-index:17;color:#ffd">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#fc8">ROUTE INTEL</div>
+        <div id="routeIntelSummary" style="font-size:11px;color:#fdc">1 / 4 corridors discovered</div>
+      </div>
+      <button id="routeIntelCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#ffd;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="routeIntelHint" style="font-size:11px;color:#fdc;margin-bottom:10px">Routes unlock from puzzle-linked quest intel. Locked routes reveal what clue is missing.</div>
+    <div id="routeIntelList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="patrolLogPanel" style="position:absolute;left:840px;top:150px;width:400px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(255,150,90,0.30);box-shadow:0 0 30px rgba(255,150,90,0.13);display:none;backdrop-filter:blur(10px);z-index:18;color:#fed">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#fa7">PATROL LOG</div>
+        <div id="patrolLogSummary" style="font-size:11px;color:#fdb">0 / 5 patrols complete</div>
+      </div>
+      <button id="patrolLogCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#fed;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="patrolLogHint" style="font-size:11px;color:#fdb;margin-bottom:10px">Bounded patrol pockets are optional combat jobs launched from Dock.</div>
+    <div id="patrolLogList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="milestonesPanel" style="position:absolute;left:840px;top:150px;width:390px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(255,230,120,0.28);box-shadow:0 0 30px rgba(255,230,120,0.12);display:none;backdrop-filter:blur(10px);z-index:18;color:#ffd">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#ffdf7a">MILESTONES</div>
+        <div id="milestonesSummary" style="font-size:11px;color:#fed">1 / 7 unlocked</div>
+      </div>
+      <button id="milestonesCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#ffd;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="milestonesHint" style="font-size:11px;color:#fed;margin-bottom:10px">Badges unlock from exploration, route plotting, quest completion, and decoded intel.</div>
+    <div id="milestonesList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="progressPanel" style="position:absolute;right:460px;top:150px;width:390px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(255,255,255,0.24);box-shadow:0 0 30px rgba(255,255,255,0.10);display:none;backdrop-filter:blur(10px);z-index:18;color:#eef">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#fff">PROGRESS</div>
+        <div id="progressSummary" style="font-size:11px;color:#cdf">not saved yet</div>
+      </div>
+      <button id="progressCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#eef;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="progressStats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px"></div>
+    <div id="progressDetails" style="font-size:12px;line-height:1.4;color:#dfe;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);padding:10px;border-radius:10px;margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button id="progressSaveBtn" type="button">Save Now</button>
+      <button id="progressResetBtn" type="button">Reset Story Progress</button>
+    </div>
+  </div>
+
+  <div id="chapterLogPanel" style="position:absolute;right:18px;top:150px;width:430px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(110,170,255,0.30);box-shadow:0 0 30px rgba(110,170,255,0.15);display:none;backdrop-filter:blur(10px);z-index:18;color:#def">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#9cf">CHAPTER LOG</div>
+        <div id="chapterLogSummary" style="font-size:11px;color:#bdf">0 / 5 chapters complete</div>
+      </div>
+      <button id="chapterLogCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#def;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="chapterLogHint" style="font-size:11px;color:#bdf;margin-bottom:10px">Story chapters follow discovered sectors. Complete each local quest to close the chapter beat.</div>
+    <div id="chapterLogList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="intelArchivePanel" style="position:absolute;right:430px;top:150px;width:410px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(120,255,190,0.28);box-shadow:0 0 30px rgba(120,255,190,0.14);display:none;backdrop-filter:blur(10px);z-index:17;color:#dfe">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#7fdb">INTEL ARCHIVE</div>
+        <div id="intelArchiveSummary" style="font-size:11px;color:#bfe">0 / 5 entries decoded</div>
+      </div>
+      <button id="intelArchiveCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dfe;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="intelArchiveHint" style="font-size:11px;color:#bfe;margin-bottom:10px">Decode signals and complete quests to turn route keys into readable archive entries.</div>
+    <div id="intelArchiveList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="localSignalsPanel" style="position:absolute;left:18px;top:150px;width:390px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(180,120,255,0.28);box-shadow:0 0 30px rgba(180,120,255,0.14);display:none;backdrop-filter:blur(10px);z-index:17;color:#eef">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#c8f">LOCAL SIGNALS</div>
+        <div id="localSignalsWorld" style="font-size:11px;color:#adf">Neon Drift Lanes</div>
+      </div>
+      <button id="localSignalsCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#eef;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="localSignalsHint" style="font-size:11px;color:#bcf;margin-bottom:10px">Listen to local voices, accept side quests, then solve their linked signal puzzle.</div>
+    <div id="localSignalsList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="worldMapPanel" style="position:absolute;left:18px;top:150px;width:360px;max-height:62vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(0,255,255,0.28);box-shadow:0 0 30px rgba(0,255,255,0.14);display:none;backdrop-filter:blur(10px);z-index:16;color:#dff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:18px;font-weight:bold;color:#0ff">WORLD MAP</div>
+      <button id="worldMapCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dff;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="worldMapHint" style="font-size:11px;color:#8ff;margin-bottom:10px">Revisit unlocked sectors, inspect objectives, then choose Explore or Combat.</div>
+    <div id="worldMapList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="questLogPanel" style="position:absolute;right:18px;top:150px;width:390px;max-height:64vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(4,8,20,0.94);border:1px solid rgba(0,255,255,0.28);box-shadow:0 0 30px rgba(0,255,255,0.14);display:none;backdrop-filter:blur(10px);z-index:17;color:#dff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:18px;font-weight:bold;color:#0ff">QUEST LOG</div>
+      <button id="questLogCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dff;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="questLogHint" style="font-size:11px;color:#8ff;margin-bottom:10px">Side quests track puzzles, local signals, and route clues across worlds.</div>
+    <div id="questLogList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <div id="signalPuzzlePanel" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(460px,92vw);padding:16px;border-radius:16px;background:rgba(3,8,22,0.96);border:1px solid rgba(0,255,255,0.34);box-shadow:0 0 40px rgba(0,255,255,0.18);display:none;backdrop-filter:blur(12px);z-index:18;color:#dff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:18px;font-weight:bold;color:#0ff">SIGNAL PUZZLE</div>
+        <div id="signalPuzzleWorld" style="font-size:11px;color:#8ff">Neon Drift Lanes</div>
+      </div>
+      <button id="signalPuzzleCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#dff;border-radius:8px;padding:2px 8px;cursor:pointer">x</button>
+    </div>
+    <div id="signalPuzzleTitle" style="font-weight:bold;color:#fff;margin-bottom:4px">Beacon Triangulation</div>
+    <div id="signalPuzzlePrompt" style="font-size:12px;color:#bfe;line-height:1.4;margin-bottom:12px"></div>
+    <label style="display:block;font-size:11px;color:#8ff;margin-bottom:8px">Frequency <strong id="signalFrequencyValue">100</strong>
+      <input id="signalFrequency" type="range" min="80" max="330" step="1" value="100" style="width:100%">
+    </label>
+    <label style="display:block;font-size:11px;color:#8ff;margin-bottom:8px">Phase <strong id="signalPhaseValue">50</strong>
+      <input id="signalPhase" type="range" min="0" max="100" step="1" value="50" style="width:100%">
+    </label>
+    <label style="display:block;font-size:11px;color:#8ff;margin-bottom:10px">Glyph
+      <input id="signalGlyph" type="text" value="" autocomplete="off" style="width:100%;margin-top:4px;padding:8px;border-radius:8px;border:1px solid rgba(0,255,255,.28);background:rgba(255,255,255,.06);color:#dff;text-transform:uppercase">
+    </label>
+    <div id="signalPuzzleReadout" style="min-height:42px;padding:8px;border-radius:10px;background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.16);font-size:12px;color:#cdf;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="signalPuzzleAutoFillBtn" type="button">Use Local Clue</button>
+      <button id="signalPuzzleCheckBtn" type="button">Check Signal</button>
+    </div>
   </div>
 
   <div id="shipyardPanel" style="position:absolute;right:18px;bottom:18px;width:340px;max-height:70vh;overflow:auto;padding:14px;border-radius:14px;background:rgba(5,10,25,0.92);border:1px solid rgba(0,255,255,0.25);box-shadow:0 0 30px rgba(0,255,255,0.15);display:none;backdrop-filter:blur(10px);z-index:15;color:#dff">
@@ -228,6 +419,17 @@
     import { StoryManager, createInitialStoryState, updateStoryMode } from './js/story.js';
     import { MultiplayerManager } from './js/multiplayer.js';
     import { UIManager } from './js/ui.js';
+    import { WORLD_NODES, WORLD_ROUTES, applyQuestUnlocks, createWorldProgress, findWorld, mergeWorldProgress, routeUnlockHint, visitWorld } from './js/worlds.js';
+    import { evaluateSignalPuzzle, getSignalPuzzleForWorld, isPuzzleSolved, markPuzzleSolved } from './js/puzzles.js';
+    import { QUESTS, acceptQuest, applyPuzzleQuestCompletion, createQuestState, mergeQuestState, questProgress, questsForWorld } from './js/quests.js';
+    import { signalLinesForState, signalsForWorld, signalStatus } from './js/signals.js';
+    import { renderDockLandmark } from './js/landmarks.js';
+    import { INTEL_ENTRIES, intelProgress, lockedIntelEntries, unlockedIntelEntries } from './js/intel.js';
+    import { chapterProgress } from './js/chapters.js';
+    import { currentWorldObjective } from './js/objectives.js';
+    import { PROGRESS_STORAGE_KEY, createProgressSave, createProgressSettings, formatSaveTime, progressMeta, summarizeProgress } from './js/progress.js';
+    import { MILESTONES, lockedMilestones, milestoneProgress, unlockedMilestones } from './js/milestones.js';
+    import { DEFAULT_PATROL_TIER_ID, PATROL_CONTRACTS, PATROL_TIERS, activeContract, activePatrolTier, adjustedKillGoal, cancelActivePatrolContract, completePatrolContract, contractLogProgress, contractProgress, contractRewardSummary, createContractState, getPatrolContractForWorld, getPatrolTier, isContractActive, mergeContractState, startPatrolContract } from './js/contracts.js';
     import {
       ALLY_MODELS,
       BOOSTER_MODELS,
@@ -273,7 +475,12 @@
         const settings = this.ui.getSettings();
         this.username = settings.playerName;
         this.targetPeerId = this.urlParams.get('targetPeerId') || '';
-        this.sessionMode = this.urlParams.get('mode') || 'stage';
+        this.sessionMode = this.normalizeSessionMode(this.urlParams.get('mode') || 'combat');
+        const savedProgress = this.loadProgress();
+        this.worldProgress = savedProgress.worldProgress;
+        this.questState = savedProgress.questState;
+        this.contractState = savedProgress.contractState;
+        this.progressSettings = savedProgress.settings;
         this.spectateMode = this.urlParams.get('spectate') === 'true' || this.urlParams.get('observe') === 'true';
         this.playerColor = this.getRandomColor();
 
@@ -313,10 +520,44 @@
           bossDefeated: 0,
           keys: keys,
           spawnTimer: 0,
+          sessionMode: this.sessionMode,
+          worldProgress: this.worldProgress,
+          questState: this.questState,
+          contractState: this.contractState,
           lastFrameAt: performance.now(),
           story: createInitialStoryState(performance.now()),
           gameOver: false
         };
+      }
+
+      loadProgress() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || '{}');
+          this.progressMeta = progressMeta(raw);
+          const questState = mergeQuestState(raw.questState);
+          const worldProgress = applyQuestUnlocks(mergeWorldProgress(raw.worldProgress), questState);
+          const contractState = mergeContractState(raw.contractState);
+          const settings = createProgressSettings(raw.settings);
+          return { worldProgress, questState, contractState, settings };
+        } catch {
+          this.progressMeta = { schemaVersion: 1, savedAt: null };
+          return { worldProgress: createWorldProgress(), questState: createQuestState(), contractState: createContractState(), settings: createProgressSettings() };
+        }
+      }
+
+      saveProgress() {
+        try {
+          const save = createProgressSave({
+            worldProgress: this.worldProgress,
+            questState: this.questState,
+            contractState: this.contractState,
+            settings: this.progressSettings,
+          });
+          localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(save));
+          this.progressMeta = save.meta;
+        } catch {
+          // Progress persistence is best-effort so private browsing/storage errors do not break play.
+        }
       }
 
       getUsername() {
@@ -334,8 +575,22 @@
         return colors[Math.floor(Math.random() * colors.length)];
       }
 
+      normalizeSessionMode(mode) {
+        return ['combat', 'explore', 'world-map', 'puzzle'].includes(mode) ? mode : 'combat';
+      }
+
+      isCombatActive() {
+        return this.sessionMode === 'combat' && !this.state.local.gameOver && isContractActive(this.contractState);
+      }
+
+      currentWorld() {
+        return findWorld(this.worldProgress?.currentWorldId);
+      }
+
       getStageTheme() {
-        return STAGE_THEMES[(this.state.local.stage - 1) % STAGE_THEMES.length];
+        const world = this.currentWorld?.();
+        const worldThemeIndex = Math.max(0, (world?.stage || this.state.local.stage || 1) - 1);
+        return STAGE_THEMES[worldThemeIndex % STAGE_THEMES.length];
       }
 
       alphaColor(hex, alpha = 1) {
@@ -437,6 +692,46 @@
         document.getElementById('repairBtn').onclick = () => this.buyRepair();
         document.getElementById('upgradeBtn').onclick = () => this.buyWeaponUpgrade();
         document.getElementById('boostBtn').onclick = () => this.buyBooster();
+        document.getElementById('exploreBtn').onclick = () => this.setSessionMode('explore');
+        document.getElementById('combatBtn').onclick = () => this.setSessionMode('combat');
+        document.getElementById('worldLandingBtn').onclick = () => this.toggleWorldLanding();
+        document.getElementById('worldLandingCloseBtn').onclick = () => this.toggleWorldLanding(false);
+        document.getElementById('landingSignalsBtn').onclick = () => this.toggleLocalSignals(true);
+        document.getElementById('landingPuzzleBtn').onclick = () => this.openSignalPuzzle();
+        document.getElementById('landingQuestBtn').onclick = () => this.toggleQuestLog(true);
+        document.getElementById('landingRoutesBtn').onclick = () => this.toggleRouteIntel(true);
+        document.getElementById('landingIntelBtn').onclick = () => this.toggleIntelArchive(true);
+        document.getElementById('landingChapterBtn').onclick = () => this.toggleChapterLog(true);
+        document.getElementById('landingProgressBtn').onclick = () => this.toggleProgressPanel(true);
+        document.getElementById('landingMilestonesBtn').onclick = () => this.toggleMilestones(true);
+        document.getElementById('landingPatrolTier').onchange = () => this.setSelectedPatrolTier(document.getElementById('landingPatrolTier').value);
+        document.getElementById('landingPatrolLogBtn').onclick = () => this.togglePatrolLog(true);
+        document.getElementById('landingNextStepBtn').onclick = () => this.followCurrentObjective();
+        document.getElementById('landingCombatBtn').onclick = () => this.launchPatrolContract();
+        document.getElementById('worldMapBtn').onclick = () => this.toggleWorldMap();
+        document.getElementById('worldMapCloseBtn').onclick = () => this.toggleWorldMap(false);
+        document.getElementById('routeIntelBtn').onclick = () => this.toggleRouteIntel();
+        document.getElementById('routeIntelCloseBtn').onclick = () => this.toggleRouteIntel(false);
+        document.getElementById('intelArchiveBtn').onclick = () => this.toggleIntelArchive();
+        document.getElementById('intelArchiveCloseBtn').onclick = () => this.toggleIntelArchive(false);
+        document.getElementById('chapterLogBtn').onclick = () => this.toggleChapterLog();
+        document.getElementById('chapterLogCloseBtn').onclick = () => this.toggleChapterLog(false);
+        document.getElementById('progressBtn').onclick = () => this.toggleProgressPanel();
+        document.getElementById('progressCloseBtn').onclick = () => this.toggleProgressPanel(false);
+        document.getElementById('milestonesBtn').onclick = () => this.toggleMilestones();
+        document.getElementById('milestonesCloseBtn').onclick = () => this.toggleMilestones(false);
+        document.getElementById('patrolLogBtn').onclick = () => this.togglePatrolLog();
+        document.getElementById('patrolLogCloseBtn').onclick = () => this.togglePatrolLog(false);
+        document.getElementById('progressSaveBtn').onclick = () => this.saveProgressNow();
+        document.getElementById('progressResetBtn').onclick = () => this.resetStoryProgress();
+        document.getElementById('signalPuzzleBtn').onclick = () => this.openSignalPuzzle();
+        document.getElementById('localSignalsBtn').onclick = () => this.toggleLocalSignals();
+        document.getElementById('localSignalsCloseBtn').onclick = () => this.toggleLocalSignals(false);
+        document.getElementById('questLogBtn').onclick = () => this.toggleQuestLog();
+        document.getElementById('questLogCloseBtn').onclick = () => this.toggleQuestLog(false);
+        document.getElementById('signalPuzzleCloseBtn').onclick = () => this.closeSignalPuzzle();
+        document.getElementById('signalPuzzleCheckBtn').onclick = () => this.checkSignalPuzzle();
+        document.getElementById('signalPuzzleAutoFillBtn').onclick = () => this.fillSignalPuzzleClue();
         document.getElementById('shipyardBtn').onclick = () => this.toggleShipyard();
         document.getElementById('shipyardCloseBtn').onclick = () => this.toggleShipyard(false);
         document.getElementById('multiplayerBtn').onclick = () => this.toggleMultiplayer();
@@ -453,6 +748,10 @@
         };
         document.getElementById('enemyAmount').oninput = syncFaders;
         document.getElementById('enemyPower').oninput = syncFaders;
+        const syncPuzzleInputs = () => this.previewSignalPuzzle();
+        document.getElementById('signalFrequency').oninput = syncPuzzleInputs;
+        document.getElementById('signalPhase').oninput = syncPuzzleInputs;
+        document.getElementById('signalGlyph').oninput = syncPuzzleInputs;
         syncFaders();
 
         // Hide multiplayer button in embedded mode
@@ -504,6 +803,9 @@
         // Reset story manager for new game
         this.storyManager.reset();
 
+        this.state.local.sessionMode = this.sessionMode;
+        this.state.local.worldProgress = this.worldProgress;
+        this.renderWorldMap();
         this.updateHUD();
         this.ui.hideGameOverScreen();
 
@@ -771,6 +1073,641 @@
         }
       }
 
+      normalizePatrolTierId(tierId) {
+        return getPatrolTier(tierId).id;
+      }
+
+      selectedPatrolTierId() {
+        return this.normalizePatrolTierId(this.progressSettings?.selectedPatrolTierId || DEFAULT_PATROL_TIER_ID);
+      }
+
+      setSelectedPatrolTier(tierId) {
+        this.progressSettings = {
+          ...createProgressSettings(this.progressSettings),
+          selectedPatrolTierId: this.normalizePatrolTierId(tierId),
+        };
+        this.saveProgress();
+        this.renderWorldLanding();
+        this.renderProgressPanel();
+      }
+
+      launchPatrolContract() {
+        const world = this.currentWorld();
+        const contract = getPatrolContractForWorld(world.id);
+        const tierId = this.selectedPatrolTierId();
+        this.contractState = startPatrolContract(world.id, this.contractState, Date.now(), tierId);
+        this.state.local.contractState = this.contractState;
+        this.state.local.stageKills = 0;
+        this.state.local.stageGoal = adjustedKillGoal(contract, tierId);
+        this.state.local.bossActive = false;
+        this.state.local.enemies = [];
+        this.state.local.enemyProjectiles = [];
+        document.getElementById('worldLandingPanel').style.display = 'none';
+        this.setSessionMode('combat');
+        this.showNotification(`PATROL STARTED: ${contract.title}`);
+        this.updateHUD();
+      }
+
+      completeActivePatrolContract() {
+        const result = completePatrolContract(this.contractState);
+        if (!result.contract) return false;
+        this.contractState = result.state;
+        this.state.local.contractState = this.contractState;
+        this.state.local.money += result.reward.money;
+        this.state.local.score += result.reward.score;
+        this.state.local.stageKills = 0;
+        this.state.local.stageGoal = adjustedKillGoal(getPatrolContractForWorld(this.currentWorld().id), DEFAULT_PATROL_TIER_ID);
+        this.state.local.enemies = [];
+        this.state.local.enemyProjectiles = [];
+        this.saveProgress();
+        this.sessionMode = 'explore';
+        this.state.local.sessionMode = this.sessionMode;
+        this.state.local.spawnTimer = 0;
+        this.renderPatrolLog();
+        this.renderProgressPanel();
+        this.toggleWorldLanding(true);
+        this.showNotification(`${result.kind === 'first-clear' ? 'PATROL COMPLETE' : 'PATROL REPLAY COMPLETE'} +¤${result.reward.money}`);
+        return true;
+      }
+
+      setSessionMode(mode) {
+        this.sessionMode = this.normalizeSessionMode(mode);
+        this.state.local.sessionMode = this.sessionMode;
+        document.getElementById('worldMapPanel').style.display = this.sessionMode === 'world-map' ? 'block' : 'none';
+        if (this.sessionMode === 'explore') {
+          this.state.local.spawnTimer = 0;
+          if (isContractActive(this.contractState)) this.contractState = cancelActivePatrolContract(this.contractState);
+          this.state.local.contractState = this.contractState;
+          this.showNotification('EXPLORE MODE: enemy pressure paused');
+        } else if (this.sessionMode === 'combat') {
+          this.showNotification(isContractActive(this.contractState) ? 'COMBAT MODE: patrol pressure resumed' : 'NO ACTIVE PATROL: dock to launch one');
+        }
+        this.updateHUD();
+        this.renderWorldMap();
+      }
+
+      followCurrentObjective() {
+        const objective = currentWorldObjective(this.worldProgress, this.questState);
+        const hideLanding = () => { document.getElementById('worldLandingPanel').style.display = 'none'; };
+        if (objective.actionTarget === 'local-signals') { hideLanding(); return this.toggleLocalSignals(true); }
+        if (objective.actionTarget === 'signal-puzzle') return this.openSignalPuzzle();
+        if (objective.actionTarget === 'world-map') { hideLanding(); return this.toggleWorldMap(true); }
+        if (objective.actionTarget === 'route-intel') { hideLanding(); return this.toggleRouteIntel(true); }
+        if (objective.actionTarget === 'combat') { hideLanding(); return this.setSessionMode('combat'); }
+        return this.toggleWorldLanding(true);
+      }
+
+      toggleWorldLanding(forceOpen) {
+        const panel = document.getElementById('worldLandingPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) {
+          this.setSessionMode('explore');
+          this.renderWorldLanding();
+        }
+        this.updateHUD();
+      }
+
+      renderWorldLanding() {
+        const panel = document.getElementById('worldLandingPanel');
+        if (!panel) return;
+        const world = this.currentWorld();
+        const puzzle = this.currentSignalPuzzle();
+        const puzzleSolved = isPuzzleSolved(this.worldProgress, puzzle.id);
+        const worldQuests = questsForWorld(world.id);
+        const completeQuests = worldQuests.filter((quest) => questProgress(this.questState, quest).status === 'complete').length;
+        const signalCount = signalsForWorld(world.id).length;
+        const openRoutes = (this.worldProgress.unlockedRouteIds || []).length;
+        const contract = getPatrolContractForWorld(world.id);
+        const tierSelect = document.getElementById('landingPatrolTier');
+        const selectedTierId = this.selectedPatrolTierId();
+        if (tierSelect) tierSelect.value = selectedTierId;
+        const contractState = activeContract(this.contractState);
+        const activeTier = activePatrolTier(this.contractState);
+        const previewTier = contractState?.id === contract.id ? activeTier.id : selectedTierId;
+        const rewardSummary = contractRewardSummary(contract, this.contractState, previewTier);
+        document.getElementById('landingPatrolTierHint').textContent = getPatrolTier(selectedTierId).description;
+        const contractLabel = contractState?.id === contract.id
+          ? `${activeTier.label} active · ${contractProgress(this.state.local.stageKills, contract, activeTier.id).label}`
+          : `${rewardSummary.killGoal} hostiles · ${rewardSummary.label}`;
+        document.getElementById('worldLandingTitle').textContent = world.title;
+        document.getElementById('worldLandingSubtitle').textContent = `Safe dock · ${world.themeName} · Stage ${world.stage}`;
+        document.getElementById('worldLandingObjective').textContent = world.objective;
+        document.getElementById('worldLandingLandmark').innerHTML = renderDockLandmark(world.id);
+        document.getElementById('worldLandingStatus').innerHTML = [
+          ['Signals', `${signalCount}`, signalCount ? '#bcf' : '#789'],
+          ['Quest', `${completeQuests}/${worldQuests.length}`, completeQuests === worldQuests.length && worldQuests.length ? '#7f9' : '#fc8'],
+          ['Puzzle', puzzleSolved ? 'solved' : 'open', puzzleSolved ? '#7f9' : '#8ff'],
+          ['Patrol', contractLabel, contractState?.id === contract.id ? '#fc8' : '#8ff'],
+        ].map(([label, value, color]) => `
+          <div style="border:1px solid rgba(0,255,255,.16);border-radius:10px;padding:8px;background:rgba(255,255,255,.04)">
+            <div style="font-size:10px;color:#9df;text-transform:uppercase">${label}</div>
+            <div style="font-size:16px;color:${color};font-weight:bold">${value}</div>
+          </div>
+        `).join('');
+        const routeText = `${openRoutes}/${WORLD_ROUTES.length} routes plotted`;
+        document.getElementById('worldLandingBrief').textContent = `${routeText}. ${puzzleSolved ? 'The local signal is archived; check Route Intel for newly plotted corridors.' : 'Use Explore time to listen to local signals, solve the signal puzzle, and open route intel before combat.'}`;
+        const nextObjective = currentWorldObjective(this.worldProgress, this.questState);
+        document.getElementById('worldLandingNextStep').innerHTML = `<strong style="display:block;color:#fc8;margin-bottom:3px">Next Step: ${nextObjective.title}</strong><span>${nextObjective.detail}</span>`;
+        document.getElementById('landingNextStepBtn').textContent = nextObjective.actionLabel;
+      }
+
+      toggleRouteIntel(forceOpen) {
+        const panel = document.getElementById('routeIntelPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderRouteIntel();
+        this.updateHUD();
+      }
+
+      renderRouteIntel() {
+        const list = document.getElementById('routeIntelList');
+        if (!list) return;
+        const unlocked = new Set(this.worldProgress.unlockedRouteIds || []);
+        document.getElementById('routeIntelSummary').textContent = `${unlocked.size} / ${WORLD_ROUTES.length} corridors discovered`;
+        list.innerHTML = WORLD_ROUTES.map((route) => {
+          const isOpen = unlocked.has(route.id);
+          const from = findWorld(route.from);
+          const to = findWorld(route.to);
+          return `
+            <article style="border:1px solid ${isOpen ? 'rgba(0,255,120,.45)' : 'rgba(255,200,80,.24)'};border-radius:10px;padding:10px;background:${isOpen ? 'rgba(0,255,120,.08)' : 'rgba(255,200,80,.06)'}">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#fff">${route.label}</strong>
+                <span style="font-size:10px;color:${isOpen ? '#7f9' : '#fc8'};text-transform:uppercase">${isOpen ? 'open' : 'locked'}</span>
+              </div>
+              <div style="font-size:11px;color:#fdc;margin-top:4px">${from.title} → ${to.title}</div>
+              <div style="font-size:11px;color:#ffd;margin-top:6px">${isOpen ? 'Shortcut plotted in the nav computer.' : `Missing intel: ${route.unlock || 'none'}`}</div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      togglePatrolLog(forceOpen) {
+        const panel = document.getElementById('patrolLogPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderPatrolLog();
+        this.updateHUD();
+      }
+
+      renderPatrolLog() {
+        const list = document.getElementById('patrolLogList');
+        if (!list) return;
+        const completed = new Set(this.contractState.completedContractIds || []);
+        const progress = contractLogProgress(this.contractState);
+        document.getElementById('patrolLogSummary').textContent = `${progress.completed} / ${progress.total} patrols complete`;
+        list.innerHTML = PATROL_CONTRACTS.map((contract) => {
+          const done = completed.has(contract.id);
+          const active = this.contractState.activeContractId === contract.id;
+          const rewardSummary = contractRewardSummary(contract, this.contractState, DEFAULT_PATROL_TIER_ID);
+          return `
+            <article style="border:1px solid ${done ? 'rgba(0,255,120,.40)' : active ? 'rgba(255,200,80,.55)' : 'rgba(255,150,90,.20)'};border-radius:10px;padding:10px;background:${done ? 'rgba(0,255,120,.08)' : active ? 'rgba(255,200,80,.08)' : 'rgba(255,255,255,.035)'}">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#fff">${contract.title}</strong>
+                <span style="font-size:10px;color:${done ? '#7f9' : active ? '#fc8' : '#fba'};text-transform:uppercase">${done ? 'complete' : active ? 'active' : 'open'}</span>
+              </div>
+              <div style="font-size:11px;color:#fdb;margin:2px 0 6px">${findWorld(contract.worldId).title} · ${contract.killGoal} hostiles</div>
+              <p style="font-size:12px;line-height:1.35;margin:0;color:#fed">${contract.summary}</p>
+              <div style="font-size:11px;color:#fc8;margin-top:6px">Next reward: ${rewardSummary.label}</div>
+              <div style="font-size:10px;color:#dba;margin-top:3px">First clear: ¤${rewardSummary.firstClearReward.money} · ${rewardSummary.firstClearReward.score} score · Repeat: ¤${rewardSummary.repeatReward.money} · ${rewardSummary.repeatReward.score} score</div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      toggleMilestones(forceOpen) {
+        const panel = document.getElementById('milestonesPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderMilestones();
+        this.updateHUD();
+      }
+
+      renderMilestones() {
+        const list = document.getElementById('milestonesList');
+        if (!list) return;
+        const progress = milestoneProgress(this.worldProgress, this.questState);
+        const unlocked = unlockedMilestones(this.worldProgress, this.questState);
+        const locked = lockedMilestones(this.worldProgress, this.questState);
+        document.getElementById('milestonesSummary').textContent = `${progress.unlocked} / ${progress.total} unlocked`;
+        list.innerHTML = [
+          ...unlocked.map((milestone) => `
+            <article style="border:1px solid rgba(255,230,120,.42);border-radius:10px;padding:10px;background:rgba(255,230,120,.10)">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#fff">${milestone.title}</strong>
+                <span style="font-size:10px;color:#ffdf7a;text-transform:uppercase">unlocked</span>
+              </div>
+              <p style="font-size:12px;line-height:1.38;margin:6px 0 0;color:#ffd">${milestone.description}</p>
+            </article>
+          `),
+          ...locked.map((milestone) => `
+            <article style="border:1px solid rgba(255,230,120,.15);border-radius:10px;padding:10px;background:rgba(255,255,255,.035);opacity:.72">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#aa9">${milestone.title}</strong>
+                <span style="font-size:10px;color:#aa9;text-transform:uppercase">locked</span>
+              </div>
+              <p style="font-size:12px;line-height:1.38;margin:6px 0 0;color:#ccb">${milestone.description}</p>
+            </article>
+          `),
+        ].join('');
+      }
+
+      toggleProgressPanel(forceOpen) {
+        const panel = document.getElementById('progressPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderProgressPanel();
+        this.updateHUD();
+      }
+
+      renderProgressPanel() {
+        const stats = document.getElementById('progressStats');
+        if (!stats) return;
+        const chapters = chapterProgress(this.worldProgress, this.questState);
+        const intel = intelProgress(this.questState);
+        const summary = summarizeProgress({
+          worldProgress: this.worldProgress,
+          questState: this.questState,
+          routeTotal: WORLD_ROUTES.length,
+          intelTotal: intel.total,
+          chapterTotal: chapters.total,
+        });
+        const world = this.currentWorld();
+        document.getElementById('progressSummary').textContent = `Last save: ${formatSaveTime(this.progressMeta?.savedAt)}`;
+        stats.innerHTML = [
+          ['Worlds', `${summary.discoveredWorlds}/${WORLD_NODES.length}`],
+          ['Routes', `${summary.unlockedRoutes}/${summary.routeTotal}`],
+          ['Intel', `${summary.decodedIntel}/${summary.intelTotal}`],
+          ['Quests', `${summary.completedQuests}/${Object.keys(this.questState.questStatusById || {}).length}`],
+          ['Patrols', `${contractLogProgress(this.contractState).completed}/${PATROL_CONTRACTS.length}`],
+        ].map(([label, value]) => `
+          <div style="border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px;background:rgba(255,255,255,.04)">
+            <div style="font-size:10px;color:#9df;text-transform:uppercase">${label}</div>
+            <div style="font-size:16px;color:#fff;font-weight:bold">${value}</div>
+          </div>
+        `).join('');
+        document.getElementById('progressDetails').textContent = `Current world: ${world.title}. Chapters complete: ${chapters.complete}/${chapters.total}. Patrol tier: ${getPatrolTier(this.selectedPatrolTierId()).label}. Save schema: v${this.progressMeta?.schemaVersion || 1}.`;
+      }
+
+      saveProgressNow() {
+        this.saveProgress();
+        this.renderProgressPanel();
+        this.showNotification('PROGRESS SAVED');
+      }
+
+      resetStoryProgress() {
+        this.worldProgress = createWorldProgress();
+        this.questState = createQuestState();
+        this.state.local.worldProgress = this.worldProgress;
+        this.state.local.questState = this.questState;
+        this.state.local.stage = 1;
+        this.state.local.stageKills = 0;
+        this.state.local.stageGoal = 8;
+        this.state.local.bossActive = false;
+        this.state.local.enemies = [];
+        this.state.local.enemyProjectiles = [];
+        this.saveProgress();
+        this.setSessionMode('explore');
+        this.renderProgressPanel();
+        this.renderMilestones();
+        this.renderWorldMap();
+        this.renderRouteIntel();
+        this.renderIntelArchive();
+        this.renderChapterLog();
+        this.renderWorldLanding();
+        this.renderQuestLog();
+        this.renderLocalSignals();
+        this.showNotification('STORY PROGRESS RESET');
+      }
+
+      toggleChapterLog(forceOpen) {
+        const panel = document.getElementById('chapterLogPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderChapterLog();
+        this.updateHUD();
+      }
+
+      renderChapterLog() {
+        const list = document.getElementById('chapterLogList');
+        if (!list) return;
+        const progress = chapterProgress(this.worldProgress, this.questState);
+        document.getElementById('chapterLogSummary').textContent = `${progress.complete} / ${progress.total} chapters complete · ${progress.discovered} discovered`;
+        list.innerHTML = progress.chapters.map((chapter) => `
+          <article style="border:1px solid ${chapter.status === 'complete' ? 'rgba(0,255,120,.40)' : chapter.status === 'current' ? 'rgba(110,170,255,.62)' : 'rgba(110,170,255,.18)'};border-radius:10px;padding:10px;background:${chapter.status === 'complete' ? 'rgba(0,255,120,.08)' : chapter.status === 'locked' ? 'rgba(255,255,255,.025)' : 'rgba(110,170,255,.06)'};opacity:${chapter.status === 'locked' ? '.64' : '1'}">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+              <strong style="color:${chapter.status === 'locked' ? '#8aa' : '#fff'}">${chapter.title}</strong>
+              <span style="font-size:10px;color:${chapter.status === 'complete' ? '#7f9' : chapter.status === 'current' ? '#9cf' : '#bdf'};text-transform:uppercase">${chapter.status}</span>
+            </div>
+            <div style="font-size:11px;color:#bdf;margin:2px 0 6px">${chapter.worldId}</div>
+            <p style="font-size:12px;line-height:1.38;margin:0 0 6px;color:#def">${chapter.beat}</p>
+            <div style="font-size:11px;color:#cdf">Goal: ${chapter.goal}</div>
+          </article>
+        `).join('');
+      }
+
+      toggleIntelArchive(forceOpen) {
+        const panel = document.getElementById('intelArchivePanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderIntelArchive();
+        this.updateHUD();
+      }
+
+      renderIntelArchive() {
+        const list = document.getElementById('intelArchiveList');
+        if (!list) return;
+        const progress = intelProgress(this.questState);
+        const unlocked = unlockedIntelEntries(this.questState);
+        const locked = lockedIntelEntries(this.questState);
+        document.getElementById('intelArchiveSummary').textContent = `${progress.unlocked} / ${progress.total} entries decoded`;
+        list.innerHTML = [
+          ...unlocked.map((entry) => `
+            <article style="border:1px solid rgba(120,255,190,.38);border-radius:10px;padding:10px;background:rgba(0,255,120,.08)">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#fff">${entry.title}</strong>
+                <span style="font-size:10px;color:#7fdb;text-transform:uppercase">decoded</span>
+              </div>
+              <div style="font-size:11px;color:#bfe;margin:2px 0 6px">${entry.source} · ${entry.worldId}</div>
+              <p style="font-size:12px;line-height:1.38;margin:0;color:#dfe">${entry.summary}</p>
+            </article>
+          `),
+          ...locked.map((entry) => `
+            <article style="border:1px solid rgba(120,255,190,.16);border-radius:10px;padding:10px;background:rgba(255,255,255,.035);opacity:.76">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#9ab">${entry.title}</strong>
+                <span style="font-size:10px;color:#8aa;text-transform:uppercase">locked</span>
+              </div>
+              <div style="font-size:11px;color:#9bc;margin-top:4px">Decode quest intel: ${entry.id}</div>
+            </article>
+          `),
+        ].join('') || '<div style="font-size:12px;color:#bfe">No archive entries decoded yet.</div>';
+      }
+
+      toggleLocalSignals(forceOpen) {
+        const panel = document.getElementById('localSignalsPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) {
+          this.setSessionMode('explore');
+          this.renderLocalSignals();
+        }
+        this.updateHUD();
+      }
+
+      renderLocalSignals() {
+        const list = document.getElementById('localSignalsList');
+        if (!list) return;
+        const world = this.currentWorld();
+        document.getElementById('localSignalsWorld').textContent = world.title;
+        const signals = signalsForWorld(world.id);
+        list.innerHTML = signals.map((signal) => {
+          const status = signalStatus(signal, this.questState);
+          const lines = signalLinesForState(signal, this.questState);
+          const accept = status === 'available'
+            ? `<button type="button" data-signal-quest="${signal.questId}" style="margin-top:8px">Accept Quest</button>`
+            : '';
+          return `
+            <article style="border:1px solid rgba(190,140,255,.32);border-radius:10px;padding:10px;background:${status === 'complete' ? 'rgba(0,255,120,.10)' : 'rgba(180,120,255,.06)'}">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#fff">${signal.title}</strong>
+                <span style="font-size:10px;color:${status === 'complete' ? '#7f9' : '#cbf'};text-transform:uppercase">${status}</span>
+              </div>
+              <div style="font-size:11px;color:#bcf;margin:2px 0 6px">${signal.speaker}</div>
+              ${lines.map((line) => `<p style="font-size:12px;line-height:1.35;margin:4px 0;color:#eef">“${line}”</p>`).join('')}
+              ${accept}
+            </article>
+          `;
+        }).join('') || '<div style="font-size:12px;color:#bcf">No local signals found.</div>';
+        list.querySelectorAll('[data-signal-quest]').forEach((button) => {
+          button.onclick = () => {
+            this.acceptQuest(button.dataset.signalQuest);
+            this.renderLocalSignals();
+          };
+        });
+      }
+
+      toggleQuestLog(forceOpen) {
+        const panel = document.getElementById('questLogPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        if (shouldOpen) this.renderQuestLog();
+        this.updateHUD();
+      }
+
+      acceptQuest(questId) {
+        this.questState = acceptQuest(this.questState, questId);
+        this.state.local.questState = this.questState;
+        this.saveProgress();
+        this.renderQuestLog();
+        this.renderLocalSignals();
+        this.showNotification('QUEST ACCEPTED');
+      }
+
+      renderQuestLog() {
+        const list = document.getElementById('questLogList');
+        if (!list) return;
+        const currentWorldId = this.worldProgress.currentWorldId;
+        const worldQuestIds = new Set(questsForWorld(currentWorldId).map((quest) => quest.id));
+        const sorted = [...QUESTS].sort((a, b) => {
+          const aw = worldQuestIds.has(a.id) ? 0 : 1;
+          const bw = worldQuestIds.has(b.id) ? 0 : 1;
+          return aw - bw || a.title.localeCompare(b.title);
+        });
+        list.innerHTML = sorted.map((quest) => {
+          const progress = questProgress(this.questState, quest);
+          const current = quest.worldId === currentWorldId;
+          const action = progress.status === 'available'
+            ? `<button type="button" data-quest-accept="${quest.id}" style="margin-top:8px">Accept</button>`
+            : '';
+          return `
+            <article style="border:1px solid ${current ? 'rgba(0,255,255,.55)' : 'rgba(0,255,255,.18)'};border-radius:10px;padding:10px;background:${progress.status === 'complete' ? 'rgba(0,255,120,.10)' : 'rgba(255,255,255,.04)'}">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                <strong style="color:#fff">${quest.title}</strong>
+                <span style="font-size:10px;color:${progress.status === 'complete' ? '#7f9' : '#8ff'};text-transform:uppercase">${progress.status}</span>
+              </div>
+              <div style="font-size:11px;color:#8ff;margin-top:2px">${quest.giver} · ${quest.worldId}</div>
+              <p style="font-size:12px;line-height:1.35;margin:6px 0;color:#cfe">${quest.summary}</p>
+              <div style="font-size:11px;color:#def">${progress.objectiveComplete ? '✓' : '□'} ${quest.objectiveText}</div>
+              <div style="font-size:11px;color:#fc8;margin-top:4px">Reward: ¤${quest.reward.money} · ${quest.reward.unlock}</div>
+              ${action}
+            </article>
+          `;
+        }).join('');
+        list.querySelectorAll('[data-quest-accept]').forEach((button) => {
+          button.onclick = () => this.acceptQuest(button.dataset.questAccept);
+        });
+      }
+
+      toggleWorldMap(forceOpen) {
+        const panel = document.getElementById('worldMapPanel');
+        const shouldOpen = forceOpen ?? panel.style.display !== 'block';
+        panel.style.display = shouldOpen ? 'block' : 'none';
+        this.sessionMode = shouldOpen ? 'world-map' : 'explore';
+        this.state.local.sessionMode = this.sessionMode;
+        this.renderWorldMap();
+        this.updateHUD();
+      }
+
+      currentSignalPuzzle() {
+        return getSignalPuzzleForWorld(this.worldProgress.currentWorldId);
+      }
+
+      closeOverlayPanels() {
+        [
+          'worldLandingPanel',
+          'routeIntelPanel',
+          'intelArchivePanel',
+          'chapterLogPanel',
+          'progressPanel',
+          'milestonesPanel',
+          'patrolLogPanel',
+          'localSignalsPanel',
+          'questLogPanel',
+          'shipyardPanel',
+        ].forEach((id) => {
+          const panel = document.getElementById(id);
+          if (panel) panel.style.display = 'none';
+        });
+      }
+
+      openSignalPuzzle() {
+        this.closeOverlayPanels();
+        const puzzle = this.currentSignalPuzzle();
+        const world = this.currentWorld();
+        const solved = isPuzzleSolved(this.worldProgress, puzzle.id);
+        document.getElementById('signalPuzzleWorld').textContent = world.title;
+        document.getElementById('signalPuzzleTitle').textContent = solved ? `${puzzle.title} · solved` : puzzle.title;
+        document.getElementById('signalPuzzlePrompt').textContent = puzzle.prompt;
+        document.getElementById('signalFrequency').value = solved ? puzzle.target.frequency : Math.max(80, puzzle.target.frequency - 17);
+        document.getElementById('signalPhase').value = solved ? puzzle.target.phase : Math.max(0, puzzle.target.phase - 9);
+        document.getElementById('signalGlyph').value = solved ? puzzle.target.glyph : '';
+        document.getElementById('signalPuzzlePanel').style.display = 'block';
+        this.setSessionMode('puzzle');
+        this.previewSignalPuzzle();
+      }
+
+      closeSignalPuzzle() {
+        document.getElementById('signalPuzzlePanel').style.display = 'none';
+        this.setSessionMode('explore');
+      }
+
+      signalPuzzleInput() {
+        return {
+          frequency: document.getElementById('signalFrequency').value,
+          phase: document.getElementById('signalPhase').value,
+          glyph: document.getElementById('signalGlyph').value,
+        };
+      }
+
+      previewSignalPuzzle() {
+        const puzzle = this.currentSignalPuzzle();
+        const result = evaluateSignalPuzzle(this.signalPuzzleInput(), puzzle);
+        document.getElementById('signalFrequencyValue').textContent = this.signalPuzzleInput().frequency;
+        document.getElementById('signalPhaseValue').textContent = this.signalPuzzleInput().phase;
+        document.getElementById('signalPuzzleReadout').textContent = `${result.hint} · coherence ${Math.round(result.score)}%`;
+        return result;
+      }
+
+      fillSignalPuzzleClue() {
+        const puzzle = this.currentSignalPuzzle();
+        document.getElementById('signalFrequency').value = puzzle.target.frequency;
+        document.getElementById('signalPhase').value = puzzle.target.phase;
+        document.getElementById('signalGlyph').value = puzzle.target.glyph;
+        this.previewSignalPuzzle();
+      }
+
+      checkSignalPuzzle() {
+        const puzzle = this.currentSignalPuzzle();
+        const result = this.previewSignalPuzzle();
+        if (!result.solved) {
+          this.showNotification('SIGNAL UNSTABLE');
+          return false;
+        }
+        if (!isPuzzleSolved(this.worldProgress, puzzle.id)) {
+          this.worldProgress = markPuzzleSolved(this.worldProgress, puzzle.id);
+          this.state.local.worldProgress = this.worldProgress;
+          this.state.local.money += puzzle.reward.money;
+          const questResult = applyPuzzleQuestCompletion(this.questState, puzzle.id);
+          this.questState = questResult.state;
+          this.state.local.questState = this.questState;
+          if (questResult.completedNow) {
+            this.state.local.money += questResult.quest.reward.money;
+            this.worldProgress = applyQuestUnlocks(this.worldProgress, this.questState);
+            this.state.local.worldProgress = this.worldProgress;
+            this.showNotification(`QUEST COMPLETE +¤${puzzle.reward.money + questResult.quest.reward.money}`);
+          } else {
+            this.showNotification(`SIGNAL LOCKED +¤${puzzle.reward.money}`);
+          }
+          this.saveProgress();
+        } else {
+          this.showNotification('SIGNAL ALREADY ARCHIVED');
+        }
+        document.getElementById('signalPuzzleTitle').textContent = `${puzzle.title} · solved`;
+        this.updateHUD();
+        this.renderWorldMap();
+        this.renderRouteIntel();
+        this.renderIntelArchive();
+        this.renderChapterLog();
+        this.renderWorldLanding();
+        this.renderQuestLog();
+        this.renderLocalSignals();
+        return true;
+      }
+
+      travelToWorld(worldId) {
+        const result = visitWorld(this.worldProgress, worldId);
+        if (!result.visited) {
+          this.showNotification(`ROUTE LOCKED: ${routeUnlockHint(worldId)}`);
+          this.renderWorldMap();
+          this.renderRouteIntel();
+          this.renderIntelArchive();
+          return false;
+        }
+        this.worldProgress = result.progress;
+        this.state.local.worldProgress = this.worldProgress;
+        this.state.local.questState = this.questState;
+        this.state.local.stage = result.world.stage;
+        this.state.local.stageKills = 0;
+        this.state.local.stageGoal = 8 + result.world.stage * 4;
+        this.state.local.bossActive = false;
+        this.state.local.enemies = [];
+        this.state.local.enemyProjectiles = [];
+        this.state.local.spawnTimer = 0;
+        this.saveProgress();
+        this.setSessionMode('explore');
+        this.renderWorldMap();
+        this.renderRouteIntel();
+        this.renderIntelArchive();
+        this.renderChapterLog();
+        this.renderWorldLanding();
+        this.renderQuestLog();
+        this.toggleWorldLanding(true);
+        this.showNotification(`ARRIVED: ${result.world.title}`);
+      }
+
+      renderWorldMap() {
+        const list = document.getElementById('worldMapList');
+        if (!list) return;
+        const current = this.currentWorld();
+        list.innerHTML = WORLD_NODES.map((world) => {
+          const isCurrent = world.id === current.id;
+          const discovered = this.worldProgress.discoveredWorldIds.includes(world.id);
+          const hint = discovered ? 'route open' : routeUnlockHint(world.id);
+          return `
+            <button type="button" data-world-id="${world.id}" ${discovered ? '' : 'disabled'} style="text-align:left;border:1px solid ${isCurrent ? 'rgba(0,255,255,.75)' : 'rgba(0,255,255,.22)'};border-radius:10px;padding:10px;background:${isCurrent ? 'rgba(0,255,255,.18)' : discovered ? 'rgba(255,255,255,.04)' : 'rgba(60,60,80,.18)'};color:${discovered ? '#dff' : '#8aa'};cursor:${discovered ? 'pointer' : 'not-allowed'}">
+              <strong style="display:block;color:${discovered ? '#0ff' : '#9aa'}">${world.title}</strong>
+              <span style="display:block;font-size:11px;color:#9df">${world.themeName} · Stage ${world.stage}</span>
+              <span style="display:block;font-size:11px;color:#cfe;margin-top:4px">${world.objective}</span>
+              <span style="display:block;font-size:10px;color:${discovered ? '#7f9' : '#fc8'};margin-top:5px">${discovered ? 'OPEN' : 'LOCKED'} · ${hint}</span>
+            </button>
+          `;
+        }).join('');
+        list.querySelectorAll('[data-world-id]').forEach((button) => {
+          button.onclick = () => this.travelToWorld(button.dataset.worldId);
+        });
+      }
+
       toggleShipyard(forceOpen) {
         const panel = document.getElementById('shipyardPanel');
         const shouldOpen = forceOpen ?? panel.style.display !== 'block';
@@ -940,6 +1877,35 @@
 
       updateHUD() {
         const s = this.state.local;
+        const world = this.currentWorld();
+        document.getElementById('sessionModeLabel').textContent = this.sessionMode === 'world-map' ? 'World Map' : this.sessionMode[0].toUpperCase() + this.sessionMode.slice(1);
+        document.getElementById('currentWorldName').textContent = world.title;
+        document.getElementById('currentObjective').textContent = world.objective;
+        document.getElementById('exploreBtn').classList.toggle('active', this.sessionMode === 'explore');
+        document.getElementById('combatBtn').classList.toggle('active', this.sessionMode === 'combat');
+        document.getElementById('worldLandingBtn').classList.toggle('active', document.getElementById('worldLandingPanel').style.display === 'block');
+        document.getElementById('worldMapBtn').classList.toggle('active', this.sessionMode === 'world-map');
+        document.getElementById('routeIntelBtn').classList.toggle('active', document.getElementById('routeIntelPanel').style.display === 'block');
+        document.getElementById('intelArchiveBtn').classList.toggle('active', document.getElementById('intelArchivePanel').style.display === 'block');
+        document.getElementById('chapterLogBtn').classList.toggle('active', document.getElementById('chapterLogPanel').style.display === 'block');
+        document.getElementById('progressBtn').classList.toggle('active', document.getElementById('progressPanel').style.display === 'block');
+        document.getElementById('milestonesBtn').classList.toggle('active', document.getElementById('milestonesPanel').style.display === 'block');
+        document.getElementById('patrolLogBtn').classList.toggle('active', document.getElementById('patrolLogPanel').style.display === 'block');
+        document.getElementById('signalPuzzleBtn').classList.toggle('active', this.sessionMode === 'puzzle');
+        const intel = intelProgress(this.questState);
+        const chapters = chapterProgress(this.worldProgress, this.questState);
+        const milestones = milestoneProgress(this.worldProgress, this.questState);
+        document.getElementById('routeCount').textContent = this.worldProgress.unlockedRouteIds?.length || 0;
+        document.getElementById('routeTotal').textContent = WORLD_ROUTES.length;
+        document.getElementById('intelCount').textContent = intel.unlocked;
+        document.getElementById('intelTotal').textContent = intel.total;
+        document.getElementById('chapterCount').textContent = chapters.complete;
+        document.getElementById('chapterTotal').textContent = chapters.total;
+        const patrols = contractLogProgress(this.contractState);
+        document.getElementById('patrolCount').textContent = patrols.completed;
+        document.getElementById('patrolTotal').textContent = patrols.total;
+        document.getElementById('milestoneCount').textContent = milestones.unlocked;
+        document.getElementById('milestoneTotal').textContent = milestones.total;
         this.ui.updateHUD({
           score: s.score,
           money: s.money,
@@ -951,6 +1917,7 @@
           turrets: s.turrets
         });
         this.renderShipyard();
+        this.renderQuestLog();
 
         // Notify parent window in embedded mode (with origin check)
         if (this.embedded && window.parent !== window) {
@@ -1173,16 +2140,17 @@
         s.enemyAmountMultiplier = Number(document.getElementById('enemyAmount').value);
         s.enemyPowerMultiplier = Number(document.getElementById('enemyPower').value);
 
-        s.spawnTimer++;
-        if (!s.bossActive && s.stageKills >= s.stageGoal) {
-          this.spawnBoss();
+        const combatActive = this.isCombatActive();
+        if (combatActive) s.spawnTimer++;
+        if (combatActive && !s.bossActive && s.stageKills >= s.stageGoal) {
+          this.completeActivePatrolContract();
         }
 
         const pressureSettings = {
           amount: Math.min(5, s.enemyAmountMultiplier + s.stage * 0.08),
           power: Math.min(5, s.enemyPowerMultiplier + s.stage * 0.08),
         };
-        if (!s.bossActive && s.spawnTimer > getSpawnThreshold(pressureSettings)) {
+        if (combatActive && !s.bossActive && s.spawnTimer > getSpawnThreshold(pressureSettings)) {
           s.spawnTimer = 0;
           const batchSize = getSpawnBatchSize(pressureSettings);
           for (let i = 0; i < batchSize; i++) {
@@ -1291,6 +2259,9 @@
                 this.advanceStage();
               } else {
                 s.stageKills++;
+                if (isContractActive(this.contractState) && s.stageKills >= s.stageGoal) {
+                  this.completeActivePatrolContract();
+                }
               }
 
               if (Math.random() < (e.boss ? 0.5 : 0.08)) {
