@@ -569,6 +569,57 @@
         width: 100%;
         text-align: left;
       }
+      .file-share-panel {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        z-index: 35;
+        display: none;
+        width: min(28rem, calc(100vw - 2rem));
+        max-height: min(80vh, 42rem);
+        overflow: auto;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 35%);
+        background: color-mix(in srgb, var(--hub-panel), #000 18%);
+        box-shadow: 8px 8px 0 rgba(0, 255, 255, 0.18), 0 0 32px rgba(0, 255, 255, 0.12);
+      }
+      .file-share-panel.open { display: grid; }
+      .file-share-url {
+        min-height: 4.5rem;
+        word-break: break-all;
+      }
+      .file-share-qr {
+        display: grid;
+        place-items: center;
+        min-height: 12rem;
+        border: 1px dashed color-mix(in srgb, var(--hub-accent), transparent 55%);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .file-share-qr canvas {
+        image-rendering: pixelated;
+        background: white;
+        padding: 0.35rem;
+        border-radius: 4px;
+      }
+      .qr-fallback {
+        color: var(--hub-muted);
+        padding: 1rem;
+        text-align: center;
+      }
+      .file-share-progress {
+        width: 100%;
+        height: 0.5rem;
+        overflow: hidden;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 65%);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.45);
+      }
+      .file-share-progress span {
+        display: block;
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--hub-accent), var(--hub-secondary));
+      }
       .workspace-pane {
         display: none;
         min-height: 420px;
@@ -1217,7 +1268,26 @@
       <button id="presenceSecondaryAction" type="button" role="menuitem"></button>
       <button id="presenceTertiaryAction" type="button" role="menuitem"></button>
       <button id="presenceQuaternaryAction" type="button" role="menuitem"></button>
+      <button id="presenceFileShareAction" type="button" role="menuitem"></button>
     </div>
+
+    <input id="fileSharePicker" type="file" hidden />
+    <section id="fileSharePanel" class="file-share-panel card stack" aria-label="File sharing panel">
+      <div class="row between">
+        <h2 id="fileShareTitle">File share</h2>
+        <button id="fileShareClose" type="button">close</button>
+      </div>
+      <div id="fileShareStatus" class="muted">No active file share.</div>
+      <textarea id="fileShareUrl" class="file-share-url" readonly placeholder="share link appears here"></textarea>
+      <div class="row">
+        <button id="copyFileShareUrl" type="button">copy link</button>
+        <button id="requestFileShare" type="button">download</button>
+        <button id="denyFileShare" type="button">deny</button>
+      </div>
+      <div class="file-share-progress"><span id="fileShareProgressBar"></span></div>
+      <div id="fileShareQr" class="file-share-qr"></div>
+      <a id="fileShareDownload" class="pill" hidden download>download ready</a>
+    </section>
 
 
     <script type="module">
@@ -1233,6 +1303,8 @@
         soundModule,
         networkModule,
         profileModule,
+        fileShareModule,
+        qrModule,
       ] = await Promise.all([
         import(hubUrl('lib/menu.js')),
         import(hubUrl('lib/launcher.js')),
@@ -1243,6 +1315,8 @@
         import(hubUrl('lib/sound.js')),
         import(hubUrl('lib/network.js')),
         import(hubUrl('lib/profile.js')),
+        import('../peernetjs/peernet-file-share.js'),
+        import(hubUrl('lib/qr.js')),
       ]);
       const {
         buildMenuGroups,
@@ -1267,6 +1341,8 @@
       const { createSoundEffects } = soundModule;
       const { createLobbyNetwork } = networkModule;
       const { avatarInitials, normalizeProfile, profileSummary } = profileModule;
+      const { PeernetFileShare, parseFileShareIntent } = fileShareModule;
+      const { renderShareQr } = qrModule;
 
       const $ = (id) => document.getElementById(id);
       const esc = (value = "") =>
@@ -1306,10 +1382,19 @@
       const peerLastActivity = new Map();
       let activePresenceTarget = null;
       let isLocalHub = false;
+      let pendingFileShareTarget = null;
+      let activeIncomingFileOffer = null;
+      let activeCreatedFileOffer = null;
       const network = createLobbyNetwork({
         username: profile.displayName,
         lobbyId: "nexus-v11-hub-main",
         storageKey: "v11-peernet",
+      });
+      activeIncomingFileOffer = parseFileShareIntent(window.location);
+      const fileShare = new PeernetFileShare({
+        network,
+        profile,
+        lobbyId: "nexus-v11-hub-main",
       });
       if (!Array.isArray(chatChannels)) chatChannels = ["general"];
       if (!channelUnreadCounts || typeof channelUnreadCounts !== "object" || Array.isArray(channelUnreadCounts)) channelUnreadCounts = {};
@@ -1501,6 +1586,32 @@
         rememberArtifactObserverSnapshot(snapshot);
         forwardArtifactObserverSnapshot(snapshot);
       });
+      fileShare.addEventListener("offer:received", (event) => {
+        activeIncomingFileOffer = event.detail;
+        showFileShareIncoming(event.detail);
+        eventLog.info("file offer", event.detail?.name || event.detail?.offerId);
+      });
+      fileShare.addEventListener("transfer:progress", (event) => {
+        const detail = event.detail || {};
+        const direction = detail.direction === "send" ? "sending" : "receiving";
+        updateFileShareStatus(`${direction} ${Math.round((detail.progress || 0) * 100)}%`, detail.progress || 0);
+      });
+      fileShare.addEventListener("transfer:denied", (event) => {
+        updateFileShareStatus(`transfer denied: ${event.detail?.reason || "denied"}`, 0);
+      });
+      fileShare.addEventListener("transfer:complete", (event) => {
+        const detail = event.detail || {};
+        if (detail.direction === "receive" && detail.url) {
+          const link = $("fileShareDownload");
+          link.hidden = false;
+          link.href = detail.url;
+          link.download = detail.name || "download.bin";
+          link.textContent = `download ${detail.name || "file"}`;
+          updateFileShareStatus(`download ready: ${detail.name || "file"}`, 1);
+        } else {
+          updateFileShareStatus(`sent ${detail.totalBytes || 0} bytes`, 1);
+        }
+      });
       window.addEventListener("message", (event) => {
         const data = event.data || {};
         if (data.type === "artifact-observer-snapshot") {
@@ -1570,6 +1681,50 @@
           eventLog.info("peer", "copied id", activePresenceTarget.label || activePresenceTarget.peerId);
         }
         closePresenceMenu();
+      };
+      $("presenceFileShareAction").onclick = () => {
+        if (!activePresenceTarget || activePresenceTarget.self) return closePresenceMenu();
+        pendingFileShareTarget = { ...activePresenceTarget };
+        $("fileSharePicker").value = "";
+        $("fileSharePicker").click();
+        closePresenceMenu();
+      };
+      $("fileSharePicker").onchange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          activeCreatedFileOffer = fileShare.createOffer(file, {
+            targetPeerId: pendingFileShareTarget?.peerId || "",
+            baseUrl: window.location.href,
+          });
+          showFileShareOffer(activeCreatedFileOffer);
+          appendLobbyChat({
+            id: `file-${activeCreatedFileOffer.offerId}`,
+            from: "system",
+            channel: selectedChatChannel,
+            text: `file offer ready: ${activeCreatedFileOffer.name}`,
+            at: new Date().toISOString(),
+            delivery: "local",
+          }, false);
+        } catch (error) {
+          eventLog.warn("file share", error?.message || error);
+        }
+      };
+      $("fileShareClose").onclick = () => $("fileSharePanel").classList.remove("open");
+      $("copyFileShareUrl").onclick = () => {
+        const value = $("fileShareUrl").value;
+        if (value) navigator.clipboard?.writeText(value);
+        eventLog.info("file share", "copied link");
+      };
+      $("requestFileShare").onclick = () => {
+        if (!activeIncomingFileOffer) return;
+        fileShare.request(activeIncomingFileOffer);
+        updateFileShareStatus(`requesting ${activeIncomingFileOffer.name || activeIncomingFileOffer.offerId}…`, 0);
+      };
+      $("denyFileShare").onclick = () => {
+        if (!activeIncomingFileOffer) return;
+        fileShare.deny(activeIncomingFileOffer);
+        updateFileShareStatus("file offer denied", 0);
       };
       document.addEventListener("click", (event) => {
         if (event.target.closest("#presenceMenu")) return;
@@ -1647,6 +1802,7 @@
         });
         writeHubSetting("profile", profile);
         network.setUsername(profile.displayName);
+        fileShare.setProfile(profile);
         renderProfile();
         renderOnlineUsers();
         renderStorage();
@@ -1656,6 +1812,7 @@
         profile = normalizeProfile({});
         writeHubSetting("profile", profile);
         network.setUsername(profile.displayName);
+        fileShare.setProfile(profile);
         renderProfile();
         renderOnlineUsers();
         renderStorage();
@@ -1981,23 +2138,70 @@
           .join("");
         renderLobbySummary();
       }
+      function formatFileSize(bytes = 0) {
+        const size = Number(bytes || 0);
+        if (!size) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        const index = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+        return `${(size / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`;
+      }
+      function updateFileShareStatus(text, progress = null) {
+        $("fileShareStatus").textContent = text;
+        if (progress !== null) $("fileShareProgressBar").style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
+      }
+      function openFileSharePanel() {
+        $("fileSharePanel").classList.add("open");
+      }
+      async function showFileShareOffer(offer) {
+        openFileSharePanel();
+        $("fileShareTitle").textContent = "File offer ready";
+        $("fileShareUrl").value = offer.shareUrl || "";
+        $("requestFileShare").hidden = true;
+        $("denyFileShare").hidden = true;
+        $("copyFileShareUrl").hidden = false;
+        $("fileShareDownload").hidden = true;
+        updateFileShareStatus(`${offer.name} · ${formatFileSize(offer.size)} · keep this tab online`, 0);
+        await renderShareQr($("fileShareQr"), offer.shareUrl, { runtime: window });
+      }
+      async function showFileShareIncoming(offer) {
+        openFileSharePanel();
+        $("fileShareTitle").textContent = "Incoming file offer";
+        $("fileShareUrl").value = offer.shareUrl || window.location.href;
+        $("requestFileShare").hidden = false;
+        $("denyFileShare").hidden = false;
+        $("copyFileShareUrl").hidden = false;
+        $("fileShareDownload").hidden = true;
+        updateFileShareStatus(`${offer.name || "file"} · ${formatFileSize(offer.size)} · from ${offer.fromName || offer.fromPeerId}`, 0);
+        await renderShareQr($("fileShareQr"), $("fileShareUrl").value, { runtime: window });
+      }
+      if (activeIncomingFileOffer) {
+        window.addEventListener("load", () => {
+          showFileShareIncoming(activeIncomingFileOffer);
+          setWorkspaceTab("lobbyChat");
+          eventLog.info("file share", "link intent", activeIncomingFileOffer.offerId);
+        });
+      }
       function openPresenceMenu(x, y) {
         const menu = $("presenceMenu");
         const primary = $("presencePrimaryAction");
         const secondary = $("presenceSecondaryAction");
         const tertiary = $("presenceTertiaryAction");
         const quaternary = $("presenceQuaternaryAction");
+        const fileShareAction = $("presenceFileShareAction");
         if (activePresenceTarget?.self) {
           primary.textContent = "open profile settings";
           secondary.textContent = "exit hub";
           tertiary.textContent = "show status in log";
           quaternary.hidden = true;
+          fileShareAction.hidden = true;
         } else {
           primary.textContent = "spawn personal chat";
           secondary.textContent = "join game";
           tertiary.textContent = "observe game";
           quaternary.hidden = false;
           quaternary.textContent = "copy peer id";
+          fileShareAction.hidden = false;
+          fileShareAction.textContent = "share file";
         }
         menu.style.left = `${x}px`;
         menu.style.top = `${y}px`;

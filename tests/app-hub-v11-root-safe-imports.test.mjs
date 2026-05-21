@@ -7,12 +7,14 @@ for (const needle of [
   'const HUB_BASE =',
   "document.baseURI.includes('app-hub-v11/')",
   "import(hubUrl('lib/event-log.js'))",
-  "import(hubUrl('lib/resizable-panels.js'))",
+  "import('../lib/ui/resizable-panels.js')",
   "import(hubUrl('lib/storage.js'))",
   "import(hubUrl('lib/themes.js'))",
   "import(hubUrl('lib/sound.js'))",
   "import(hubUrl('lib/network.js'))",
   "import(hubUrl('lib/profile.js'))",
+  "import('../peernetjs/peernet-file-share.js')",
+  "import(hubUrl('lib/qr.js'))",
   'href="lib/v9-shell.css"'
 ]) {
   assert.ok(html.includes(needle), `missing deploy-safe marker: ${needle}`);

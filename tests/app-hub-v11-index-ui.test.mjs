@@ -47,7 +47,15 @@ assert.match(html, /filterArtifactsAdvanced/, 'v11 should wire filtering through
 const nonZeroRadii = [...html.matchAll(/border-radius\s*:\s*([^;]+);/g)]
   .map((match) => match[1].trim())
   .filter((value) => !/^0(?:\.0+)?(?:px|rem|em|%)?$/i.test(value));
-assert.ok(nonZeroRadii.length <= 8, 'v11 should keep only a small number of deliberate shell/input radii');
+assert.ok(nonZeroRadii.length <= 12, 'v11 should keep only a small number of deliberate shell/input/file-share radii');
+assert.match(html, /id="fileSharePicker"/, 'v11 should expose a local file picker for Peernet file offers');
+assert.match(html, /id="fileSharePanel"/, 'v11 should include a file share offer/download panel');
+assert.match(html, /id="presenceFileShareAction"/, 'online-user context menu should expose a share-file action');
+assert.match(html, /PeernetFileShare/, 'v11 should wire the reusable Peernet file-share helper');
+assert.match(html, /parseFileShareIntent\(window\.location\)/, 'v11 should bootstrap download panel state from file-share URL parameters');
+assert.match(html, /renderShareQr/, 'v11 should render file-share links as QR codes when possible');
+assert.match(html, /fileShare\.request\(activeIncomingFileOffer\)/, 'download button should request the offered file without a page reload');
+assert.match(html, /fileShare\.deny\(activeIncomingFileOffer\)/, 'deny button should reject an incoming file offer');
 assert.match(html, /id="sidebarResizeHandle"/, 'v11 should expose a draggable border between sidebar and main panel');
 assert.match(html, /id="sidebarSplitResizeHandle"/, 'v11 should expose a draggable border between filter and lobby panels');
 assert.match(html, /createResizablePanels/, 'v11 should wire panel resizing through lib/resizable-panels.js');

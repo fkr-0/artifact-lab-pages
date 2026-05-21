@@ -14,7 +14,13 @@ v11 moves the hub from a hand-written single file toward a small modular shell. 
   - `lib/themes.js` for the theme registry.
   - `lib/storage.js` for namespaced local storage.
   - `lib/sound.js` for optional sound effects.
-  - `lib/network.js` for a replaceable networking adapter boundary.
+  - `lib/network.js` for a replaceable networking adapter boundary with targeted peer sends.
+  - `lib/qr.js` for QR display of file-share links with a visible copy-link fallback.
+- Peernet file sharing:
+  - `../peernetjs/peernet-file-share.js` keeps selected files local/in-memory.
+  - Online-user context menu can create short-lived direct file offers.
+  - Share links bootstrap a small download panel via URL parameters.
+  - Incoming offers support explicit download/deny flow before chunks are streamed.
 
 ## Next implementation tasks
 
@@ -23,7 +29,8 @@ v11 moves the hub from a hand-written single file toward a small modular shell. 
 3. Add a `shellCommand` operation for generated artifacts that must compile before indexing.
 4. Convert root `artifacts-package` and `artifacts-deploy` include lists to consume `artifact-collection.json` instead of duplicated bash arrays.
 5. Add a headless browser smoke test once the environment has a reliable browser runner.
-6. Add a Peernet adapter that wraps `peernetjs/peernet-lib.js` without exposing raw `new Peer(...)` code in the hub.
+6. Harden file sharing for larger files: backpressure, cancellation, checksums, and resumable offsets.
+7. Move the QR helper to a fully vendored/offline encoder if CDN loading is not acceptable for release packaging.
 
 ## Non-goals retained from v10
 

@@ -66,9 +66,20 @@ export function createLobbyNetwork({
     get peers() {
       return peers;
     },
+    get myId() {
+      return lobby.myId || "";
+    },
+    get isHub() {
+      return Boolean(lobby.isHub);
+    },
     setUsername(nextUsername) {
       username = nextUsername || username;
       if (typeof lobby.setUsername === "function") lobby.setUsername(username);
+    },
+    send(peerId, type, payload) {
+      const packet = { type, payload, fromName: username, at: Date.now() };
+      lobby.send(peerId, packet);
+      return { type, payload, peerId, localOnly: false };
     },
     broadcast(type, payload) {
       const packet = { type, payload, fromName: username, at: Date.now() };
