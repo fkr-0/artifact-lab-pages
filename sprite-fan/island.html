@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Alpha Sprite Island Repacker</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #1f2024;
+        color: #eee;
+        padding: 20px;
+      }
+
+      canvas {
+        max-width: 95vw;
+        margin-top: 16px;
+        border: 1px solid #555;
+        image-rendering: pixelated;
+        background: linear-gradient(45deg, #777 25%, transparent 25%),
+          linear-gradient(-45deg, #777 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #777 75%),
+          linear-gradient(-45deg, transparent 75%, #777 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      }
+
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+
+      input {
+        width: 80px;
+      }
+
+      button {
+        padding: 8px 12px;
+        margin: 8px 8px 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Alpha Sprite Island Repacker</h1>
+
+    <p>
+      Load a PNG with real alpha. The tool detects opaque islands, optionally merges nearby islands,
+      then repacks them into a strict grid.
+    </p>
+
+    <input type="file" id="file" accept="image/png,image/*" />
+
+    <label>
+      Columns:
+      <input id="cols" type="number" value="4" min="1" />
+    </label>
+
+    <label>
+      Rows:
+      <input id="rows" type="number" value="5" min="1" />
+    </label>
+
+    <label>
+      Alpha threshold:
+      <input id="alphaThreshold" type="number" value="8" min="1" max="255" />
+    </label>
+
+    <label>
+      Merge distance in pixels:
+      <input id="mergeDistance" type="number" value="24" min="0" />
+    </label>
+
+    <label>
+      Cell padding:
+      <input id="cellPadding" type="number" value="4" min="0" />
+    </label>
+
+    <button id="detect">Detect Islands</button>
+    <button id="repack">Repack Into Grid</button>
+    <button id="download">Download RGBA PNG</button>
+
+    <p id="status"></p>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+      const fileInput = document.getElementById('file')
+      const canvas = document.getElementById('canvas')
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      const statusEl = document.getElementById('status')
+
+      let sourceImageData = null
+      let sourceCanvas = document.createElement('canvas')
+      let sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true })
+
+      let detectedGroups = []
+
+      fileInput.onchange = () => {
+        const file = fileInput.files[0]
+        if (!file) return
+
+        const img = new Image()
+        img.onload = () => {
+          sourceCanvas.width = img.width
+          sourceCanvas.height = img.height
+          sourceCtx.clearRect(0, 0, img.width, img.height)
+          sourceCtx.drawImage(img, 0, 0)
+
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx.clearRect(0, 0, img.width, img.height)
+          ctx.drawImage(img, 0, 0)
+
+          sourceImageData = sourceCtx.getImageData(0, 0, img.width, img.height)
+          detectedGroups = []
+
+          statusEl.textContent = `Loaded ${img.width} x ${img.height}`
+          URL.revokeObjectURL(img.src)
+        }
+
+        img.src = URL.createObjectURL(file)
+      }
+
+      function getAlpha(data, w, x, y) {
+        return data[(y * w + x) * 4 + 3]
+      }
+
+      function findComponents(imageData, alphaThreshold) {
+        const { width: w, height: h, data } = imageData
+        const visited = new Uint8Array(w * h)
+        const components = []
+
+        const stack = []
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const idx = y * w + x
+            if (visited[idx]) continue
+
+            visited[idx] = 1
+
+            if (getAlpha(data, w, x, y) <= alphaThreshold) continue
+
+            let minX = x,
+              maxX = x,
+              minY = y,
+              maxY = y
+            let count = 0
+
+            stack.length = 0
+            stack.push([x, y])
+
+            while (stack.length) {
+              const [cx, cy] = stack.pop()
+              count++
+
+              if (cx < minX) minX = cx
+              if (cx > maxX) maxX = cx
+              if (cy < minY) minY = cy
+              if (cy > maxY) maxY = cy
+
+              const neighbors = [
+                [cx + 1, cy],
+                [cx - 1, cy],
+                [cx, cy + 1],
+                [cx, cy - 1],
+                [cx + 1, cy + 1],
+                [cx - 1, cy - 1],
+                [cx + 1, cy - 1],
+                [cx - 1, cy + 1],
+              ]
+
+              for (const [nx, ny] of neighbors) {
+                if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue
+
+                const nidx = ny * w + nx
+                if (visited[nidx]) continue
+
+                visited[nidx] = 1
+
+                if (getAlpha(data, w, nx, ny) > alphaThreshold) {
+                  stack.push([nx, ny])
+                }
+              }
+            }
+
+            components.push({
+              minX,
+              minY,
+              maxX,
+              maxY,
+              width: maxX - minX + 1,
+              height: maxY - minY + 1,
+              count,
+            })
+          }
+        }
+
+        return components
+      }
+
+      function boxesDistance(a, b) {
+        const dx = Math.max(0, Math.max(a.minX - b.maxX, b.minX - a.maxX))
+        const dy = Math.max(0, Math.max(a.minY - b.maxY, b.minY - a.maxY))
+        return Math.sqrt(dx * dx + dy * dy)
+      }
+
+      function mergeBoxes(a, b) {
+        return {
+          minX: Math.min(a.minX, b.minX),
+          minY: Math.min(a.minY, b.minY),
+          maxX: Math.max(a.maxX, b.maxX),
+          maxY: Math.max(a.maxY, b.maxY),
+          count: (a.count || 0) + (b.count || 0),
+        }
+      }
+
+      function mergeNearbyComponents(components, mergeDistance) {
+        let groups = components.map((c) => ({ ...c }))
+
+        let changed = true
+
+        while (changed) {
+          changed = false
+
+          outer: for (let i = 0; i < groups.length; i++) {
+            for (let j = i + 1; j < groups.length; j++) {
+              if (boxesDistance(groups[i], groups[j]) <= mergeDistance) {
+                groups[i] = mergeBoxes(groups[i], groups[j])
+                groups.splice(j, 1)
+                changed = true
+                break outer
+              }
+            }
+          }
+        }
+
+        for (const g of groups) {
+          g.width = g.maxX - g.minX + 1
+          g.height = g.maxY - g.minY + 1
+          g.cx = (g.minX + g.maxX) / 2
+          g.cy = (g.minY + g.maxY) / 2
+        }
+
+        return groups
+      }
+
+      function sortTopToBottomLeftToRight(groups, expectedCols) {
+        const sorted = [...groups].sort((a, b) => a.cy - b.cy)
+
+        const rows = []
+        for (const g of sorted) {
+          let placed = false
+
+          for (const row of rows) {
+            const avgY = row.reduce((sum, item) => sum + item.cy, 0) / row.length
+            const avgH = row.reduce((sum, item) => sum + item.height, 0) / row.length
+            const tolerance = Math.max(avgH * 0.75, 20)
+
+            if (Math.abs(g.cy - avgY) <= tolerance) {
+              row.push(g)
+              placed = true
+              break
+            }
+          }
+
+          if (!placed) rows.push([g])
+        }
+
+        for (const row of rows) {
+          row.sort((a, b) => a.cx - b.cx)
+        }
+
+        rows.sort((a, b) => {
+          const ay = a.reduce((sum, item) => sum + item.cy, 0) / a.length
+          const by = b.reduce((sum, item) => sum + item.cy, 0) / b.length
+          return ay - by
+        })
+
+        return rows.flat()
+      }
+
+      function drawDetectionOverlay(groups) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.putImageData(sourceImageData, 0, 0)
+
+        ctx.save()
+        ctx.lineWidth = 2
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.95)'
+        ctx.font = '16px system-ui'
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.95)'
+
+        groups.forEach((g, i) => {
+          ctx.strokeRect(g.minX, g.minY, g.width, g.height)
+          ctx.fillText(String(i + 1), g.minX + 3, g.minY + 16)
+        })
+
+        ctx.restore()
+      }
+
+      document.getElementById('detect').onclick = () => {
+        if (!sourceImageData) return
+
+        const alphaThreshold = Number(document.getElementById('alphaThreshold').value)
+        const mergeDistance = Number(document.getElementById('mergeDistance').value)
+        const cols = Number(document.getElementById('cols').value)
+
+        const components = findComponents(sourceImageData, alphaThreshold)
+
+        // Remove tiny noise components.
+        const useful = components.filter((c) => c.count >= 8)
+
+        const groups = mergeNearbyComponents(useful, mergeDistance)
+        detectedGroups = sortTopToBottomLeftToRight(groups, cols)
+
+        drawDetectionOverlay(detectedGroups)
+
+        statusEl.textContent = `Detected ${components.length} raw components, ${detectedGroups.length} merged sprite groups.`
+      }
+
+      document.getElementById('repack').onclick = () => {
+        if (!sourceImageData) return
+
+        if (!detectedGroups.length) {
+          document.getElementById('detect').click()
+        }
+
+        const cols = Number(document.getElementById('cols').value)
+        const rows = Number(document.getElementById('rows').value)
+        const padding = Number(document.getElementById('cellPadding').value)
+        const expected = cols * rows
+
+        const groups = detectedGroups.slice(0, expected)
+
+        if (!groups.length) {
+          statusEl.textContent = 'No sprite groups found.'
+          return
+        }
+
+        const maxW = Math.max(...groups.map((g) => g.width)) + padding * 2
+        const maxH = Math.max(...groups.map((g) => g.height)) + padding * 2
+
+        const outW = maxW * cols
+        const outH = maxH * rows
+
+        const temp = document.createElement('canvas')
+        temp.width = sourceImageData.width
+        temp.height = sourceImageData.height
+        const tempCtx = temp.getContext('2d')
+        tempCtx.putImageData(sourceImageData, 0, 0)
+
+        canvas.width = outW
+        canvas.height = outH
+        ctx.clearRect(0, 0, outW, outH)
+
+        for (let i = 0; i < groups.length; i++) {
+          const g = groups[i]
+
+          const col = i % cols
+          const row = Math.floor(i / cols)
+
+          const dstCellX = col * maxW
+          const dstCellY = row * maxH
+
+          const dstX = dstCellX + Math.floor((maxW - g.width) / 2)
+          const dstY = dstCellY + Math.floor((maxH - g.height) / 2)
+
+          ctx.drawImage(temp, g.minX, g.minY, g.width, g.height, dstX, dstY, g.width, g.height)
+        }
+
+        statusEl.textContent = `Repacked ${groups.length} sprites into ${cols} x ${rows}. Cell size: ${maxW} x ${maxH}. Output: ${outW} x ${outH}.`
+      }
+
+      document.getElementById('download').onclick = () => {
+        const a = document.createElement('a')
+        a.download = 'repacked-sprite-sheet-rgba.png'
+        a.href = canvas.toDataURL('image/png')
+        a.click()
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprite Atlas Studio</title>
+<style>
+:root{
+  --bg-0:#0f1014;--bg-1:#16171d;--bg-2:#1e2028;--bg-3:#272932;--bg-4:#32353f;
+  --border:#3a3d4a;--border-light:#4a4e5c;
+  --text:#e4e5eb;--text-dim:#8b8e9c;--text-muted:#5c5f6e;
+  --accent:#6c7bf0;--accent-hover:#8490f4;--accent-dim:rgba(108,123,240,.12);
+  --success:#4ade80;--success-dim:rgba(74,222,128,.12);
+  --warning:#fbbf24;--warning-dim:rgba(251,191,36,.12);
+  --danger:#f87171;--danger-dim:rgba(248,113,113,.12);
+  --orange:#fb923c;--orange-dim:rgba(251,146,60,.12);
+  --radius:8px;--radius-sm:5px;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono','SF Mono','Cascadia Code',monospace;
+  --tr:.18s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg-0);color:var(--text);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;outline:none;border-radius:var(--radius-sm);transition:var(--tr)}
+input,select,textarea{font-family:inherit;font-size:inherit;color:var(--text);background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 8px;outline:none;transition:var(--tr)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;border:none;padding:0;height:20px}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--bg-4);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);margin-top:-5px;border:2px solid var(--bg-1)}
+input[type=range]::-moz-range-track{height:4px;background:var(--bg-4);border-radius:2px;border:none}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--bg-1)}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-light)}
+
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ── Topbar ── */
+#topbar{display:flex;align-items:center;gap:8px;padding:0 14px;height:46px;min-height:46px;background:var(--bg-1);border-bottom:1px solid var(--border);z-index:100}
+.logo{font-weight:700;font-size:14px;letter-spacing:-.3px;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.topbar-sep{width:1px;height:22px;background:var(--border);margin:0 2px}
+
+.wf-tabs{display:flex;gap:1px;background:var(--bg-2);border-radius:var(--radius-sm);padding:2px}
+.wf-tab{padding:5px 12px;border-radius:4px;color:var(--text-dim);font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
+.wf-tab:hover{color:var(--text);background:var(--bg-3)}
+.wf-tab.active{color:#fff;background:var(--accent)}
+.wf-tab .tab-num{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;font-size:9px;margin-right:4px;background:rgba(255,255,255,.15);font-weight:700}
+.wf-tab.active .tab-num{background:rgba(255,255,255,.25)}
+
+.topbar-actions{display:flex;gap:3px;margin-left:auto;align-items:center}
+.btn-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;color:var(--text-dim);border-radius:var(--radius-sm);font-size:14px}
+.btn-icon:hover{background:var(--bg-3);color:var(--text)}
+.btn-icon:disabled{opacity:.3;cursor:default}
+.btn-icon:disabled:hover{background:transparent;color:var(--text-dim)}
+.btn-icon.active{background:var(--accent-dim);color:var(--accent)}
+.btn{padding:5px 12px;font-weight:500;font-size:12px;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:transparent;color:var(--text-dim)}.btn-ghost:hover{background:var(--bg-3);color:var(--text)}
+.btn-success{background:var(--success);color:#000}.btn-success:hover{background:#5ce890}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#f98a8a}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+#workspace{display:flex;flex:1;overflow:hidden}
+
+/* ── Left Panel ── */
+#left-panel{width:272px;min-width:272px;background:var(--bg-1);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.panel-section{border-bottom:1px solid var(--border)}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;cursor:pointer;user-select:none;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim)}
+.panel-header:hover{color:var(--text)}
+.panel-header .chevron{font-size:9px;transition:transform var(--tr)}
+.panel-header.collapsed .chevron{transform:rotate(-90deg)}
+.panel-body{padding:4px 12px 12px}
+.panel-body.collapsed{display:none}
+.field{margin-bottom:8px}
+.field-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;font-size:11px;color:var(--text-dim)}
+.field-label span:last-child{color:var(--accent);font-family:var(--font-mono);font-size:11px}
+.field-row{display:flex;gap:6px;align-items:center}
+.field-row input[type=range]{flex:1}
+.field-row input[type=number]{width:56px;text-align:center;padding:3px 5px;font-size:11px}
+.field-row select{flex:1;padding:3px 6px;font-size:11px}
+.checkbox-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:12px;color:var(--text-dim);cursor:pointer}
+.checkbox-row:hover{color:var(--text)}
+.btn-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+
+/* ── Canvas Area ── */
+#canvas-area{flex:1;display:flex;flex-direction:column;background:var(--bg-0);position:relative;overflow:hidden}
+#canvas-container{flex:1;position:relative;overflow:hidden;cursor:grab}
+#canvas-container.grabbing{cursor:grabbing}
+#canvas-container.anchor-mode{cursor:crosshair}
+#canvas-container.frame-mode{cursor:move}
+.checker-bg{position:absolute;inset:0;background-image:linear-gradient(45deg,#1a1b22 25%,transparent 25%),linear-gradient(-45deg,#1a1b22 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1b22 75%),linear-gradient(-45deg,transparent 75%,#1a1b22 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;background-color:#121318}
+#main-canvas{position:absolute;top:0;left:0;image-rendering:pixelated;pointer-events:none}
+#onion-canvas{position:absolute;top:0;left:0;image-rendering:pixelated;pointer-events:none;opacity:.3}
+#overlay-canvas{position:absolute;top:0;left:0;pointer-events:none}
+.canvas-info{position:absolute;bottom:8px;left:8px;display:flex;gap:6px;align-items:center;background:rgba(22,23,29,.88);padding:3px 9px;border-radius:var(--radius-sm);font-size:10px;color:var(--text-dim);backdrop-filter:blur(8px);border:1px solid var(--border);user-select:none}
+.canvas-info .zoom-val{color:var(--accent);font-family:var(--font-mono)}
+.drop-zone{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text-muted);pointer-events:none;transition:opacity var(--tr)}
+.drop-zone.hidden{opacity:0}
+.drop-zone svg{opacity:.4}
+.drop-zone p{font-size:14px}
+.drop-zone .sub{font-size:11px;color:var(--text-muted)}
+.drag-over .drop-zone{color:var(--accent)}
+.drag-over .drop-zone svg{opacity:1}
+
+/* ── Right Panel ── */
+#right-panel{width:256px;min-width:256px;background:var(--bg-1);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.preview-box{background:var(--bg-2);border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:1;margin:0 0 8px}
+.preview-box canvas{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.preview-label{position:absolute;top:5px;left:7px;font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* Frame strip */
+.frame-strip{display:flex;gap:3px;padding:4px 0;overflow-x:auto;min-height:60px;align-items:flex-end}
+.frame-strip::-webkit-scrollbar{height:4px}
+.frame-chip{flex-shrink:0;width:52px;border-radius:4px;background:var(--bg-2);cursor:pointer;transition:var(--tr);padding:3px;text-align:center;position:relative}
+.frame-chip:hover{background:var(--bg-3)}
+.frame-chip.selected{background:var(--accent-dim);outline:1px solid rgba(108,123,240,.4)}
+.frame-chip canvas{width:100%;image-rendering:pixelated;border-radius:2px}
+.frame-chip .chip-idx{font-size:9px;color:var(--text-muted);display:block;margin-top:2px;font-family:var(--font-mono)}
+.frame-chip.selected .chip-idx{color:var(--accent)}
+
+/* Anchor list */
+.anchor-list{display:flex;flex-direction:column;gap:3px;max-height:140px;overflow-y:auto}
+.anchor-item{display:flex;align-items:center;gap:5px;padding:4px 7px;border-radius:var(--radius-sm);background:var(--bg-2);font-size:10px;font-family:var(--font-mono)}
+.anchor-item .anchor-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.anchor-item .anchor-pos{color:var(--text-dim)}
+
+/* ── Timeline ── */
+#timeline{background:var(--bg-1);border-top:1px solid var(--border);height:80px;min-height:80px;display:flex;flex-direction:column}
+.tl-header{display:flex;align-items:center;gap:6px;padding:4px 12px;font-size:10px;color:var(--text-dim);border-bottom:1px solid var(--border)}
+.tl-header .tl-label{font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.tl-fps{display:flex;align-items:center;gap:4px}
+.tl-fps input{width:36px;padding:2px 4px;font-size:10px;text-align:center;font-family:var(--font-mono)}
+.tl-controls{display:flex;gap:2px}
+.tl-controls button{width:24px;height:22px;display:flex;align-items:center;justify-content:center;background:var(--bg-2);color:var(--text-dim);font-size:11px;border-radius:3px}
+.tl-controls button:hover{background:var(--bg-3);color:var(--text)}
+.tl-controls button.active{background:var(--accent-dim);color:var(--accent)}
+.tl-body{flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:stretch;padding:4px 12px;gap:2px}
+.tl-frame{flex-shrink:0;width:56px;background:var(--bg-2);border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;padding:3px;transition:var(--tr);border:1px solid transparent}
+.tl-frame:hover{background:var(--bg-3)}
+.tl-frame.selected{border-color:var(--accent);background:var(--accent-dim)}
+.tl-frame canvas{width:48px;image-rendering:pixelated;border-radius:2px}
+.tl-frame .tl-idx{font-size:9px;color:var(--text-muted);font-family:var(--font-mono);margin-top:2px}
+.tl-frame.selected .tl-idx{color:var(--accent)}
+.tl-scrubber{width:2px;background:var(--danger);position:absolute;top:0;bottom:0;pointer-events:none;z-index:5;opacity:.8}
+
+/* ── Status Bar ── */
+#statusbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:26px;min-height:26px;background:var(--bg-1);border-top:1px solid var(--border);font-size:10px;color:var(--text-muted)}
+#statusbar .status-msg{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#statusbar .status-right{display:flex;gap:10px;align-items:center}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--success)}
+
+/* ── Modals ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--bg-1);border:1px solid var(--border);border-radius:12px;width:560px;max-width:90vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px}
+.modal-body{padding:14px 18px;overflow-y:auto;flex:1}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 18px;border-top:1px solid var(--border)}
+textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);font-size:11px;line-height:1.6;background:var(--bg-0);border:1px solid var(--border);border-radius:var(--radius);padding:10px;resize:vertical;color:var(--text)}
+
+/* ── Toast ── */
+.toast-container{position:fixed;top:56px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:2000;pointer-events:none}
+.toast{padding:8px 14px;border-radius:var(--radius);background:var(--bg-2);border:1px solid var(--border);color:var(--text);font-size:12px;box-shadow:var(--shadow);transform:translateX(120%);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:auto;max-width:300px}
+.toast.show{transform:translateX(0)}
+.toast.success{border-color:var(--success);background:var(--success-dim)}
+.toast.warning{border-color:var(--warning);background:var(--warning-dim)}
+.toast.error{border-color:var(--danger);background:var(--danger-dim)}
+
+.dual-file-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.dual-file-row label{font-size:11px;color:var(--text-dim);min-width:44px}
+.dual-file-row input[type=file]{flex:1;font-size:10px}
+
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+.preset-btn{padding:5px 8px;font-size:11px;background:var(--bg-2);color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius-sm);text-align:left;cursor:pointer}
+.preset-btn:hover{background:var(--bg-3);color:var(--text);border-color:var(--border-light)}
+.preset-btn .preset-name{font-weight:600;font-size:11px}
+.preset-btn .preset-size{font-size:10px;color:var(--text-muted);font-family:var(--font-mono)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <span class="logo">Sprite Atlas Studio</span>
+    <span class="topbar-sep"></span>
+    <div class="wf-tabs">
+      <button class="wf-tab active" data-wf="import"><span class="tab-num">1</span>Import</button>
+      <button class="wf-tab" data-wf="align"><span class="tab-num">2</span>Align</button>
+      <button class="wf-tab" data-wf="cleanup"><span class="tab-num">3</span>Cleanup</button>
+      <button class="wf-tab" data-wf="export"><span class="tab-num">4</span>Export</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#x21B6;</button>
+      <button class="btn-icon" id="btn-redo" title="Redo (Ctrl+Y)" disabled>&#x21B7;</button>
+      <span class="topbar-sep"></span>
+      <button class="btn-icon" id="btn-zoom-out" title="Zoom Out">&#x2212;</button>
+      <button class="btn-icon" id="btn-zoom-fit" title="Fit to View (F)">&#x25CE;</button>
+      <button class="btn-icon" id="btn-auto-fit" title="Toggle auto-fit while reviewing frames">AF</button>
+      <button class="btn-icon" id="btn-zoom-in" title="Zoom In">&#x2B;</button>
+      <span class="topbar-sep"></span>
+      <button class="btn-icon" id="btn-onion" title="Onion Skin (O)">&#x25D0;</button>
+      <button class="btn-icon" id="btn-config" title="Config Manager">&#x2699;</button>
+      <button class="btn btn-primary btn-sm" id="btn-export">&#x2B07; Export PNG</button>
+    </div>
+  </div>
+
+  <div id="workspace">
+    <!-- Left Panel -->
+    <div id="left-panel">
+      <!-- SOURCE IMAGE (always visible) -->
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-file"><span>Source Image</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-file">
+          <div id="single-file-input">
+            <input type="file" id="file-input" accept="image/*" style="width:100%;font-size:10px;margin-bottom:6px"/>
+          </div>
+          <div id="dual-file-inputs" style="display:none">
+            <div class="dual-file-row"><label>White:</label><input type="file" id="white-file" accept="image/*"/></div>
+            <div class="dual-file-row"><label>Black:</label><input type="file" id="black-file" accept="image/*"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-load-clip">Clipboard</button>
+            <button class="btn btn-ghost btn-sm" id="btn-dual-toggle">Dual BG Mode</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WF1: IMPORT -->
+      <div class="panel-section wf-panel" data-wf="import">
+        <div class="panel-header" data-toggle="sec-import"><span>Grid Slicing</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-import">
+          <div class="preset-grid">
+            <button class="preset-btn" data-fw="48" data-fh="48"><div class="preset-name">Player</div><div class="preset-size">48x48</div></button>
+            <button class="preset-btn" data-fw="16" data-fh="16"><div class="preset-name">Item</div><div class="preset-size">16x16</div></button>
+            <button class="preset-btn" data-fw="96" data-fh="96"><div class="preset-name">Boss</div><div class="preset-size">96x96</div></button>
+            <button class="preset-btn" data-fw="32" data-fh="32"><div class="preset-name">Tile</div><div class="preset-size">32x32</div></button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Frame Width</span><span id="fw-val">48</span></div>
+            <div class="field-row"><input type="range" id="frame-w" min="1" max="512" value="48"/><input type="number" id="frame-w-num" min="1" max="512" value="48"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Frame Height</span><span id="fh-val">48</span></div>
+            <div class="field-row"><input type="range" id="frame-h" min="1" max="512" value="48"/><input type="number" id="frame-h-num" min="1" max="512" value="48"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Offset X</span><span id="ox-val">0</span></div>
+            <div class="field-row"><input type="range" id="grid-ox" min="0" max="128" value="0"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Offset Y</span><span id="oy-val">0</span></div>
+            <div class="field-row"><input type="range" id="grid-oy" min="0" max="128" value="0"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btn-slice">&#x2702; Slice by Grid</button>
+          </div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="slice-info">-</div>
+        </div>
+      </div>
+
+      <!-- WF2: ALIGN -->
+      <div class="panel-section wf-panel" data-wf="align" style="display:none">
+        <div class="panel-header" data-toggle="sec-align"><span>Anchor Alignment</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-align">
+          <div class="field-label" style="margin-bottom:6px"><span>Anchor Presets</span></div>
+          <div class="preset-grid">
+            <button class="preset-btn" data-ax="24" data-ay="44"><div class="preset-name">Player</div><div class="preset-size">24,44</div></button>
+            <button class="preset-btn" data-ax="16" data-ay="16"><div class="preset-name">Item</div><div class="preset-size">16,16</div></button>
+            <button class="preset-btn" data-ax="48" data-ay="88"><div class="preset-name">Boss</div><div class="preset-size">48,88</div></button>
+            <button class="preset-btn" data-ax="0" data-ay="0"><div class="preset-name">Custom</div><div class="preset-size">click canvas</div></button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Anchor X</span><span id="ancx-val">24</span></div>
+            <div class="field-row"><input type="range" id="anchor-x" min="0" max="256" value="24"/><input type="number" id="anchor-x-num" min="0" max="512" value="24"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Anchor Y</span><span id="ancy-val">44</span></div>
+            <div class="field-row"><input type="range" id="anchor-y" min="0" max="256" value="44"/><input type="number" id="anchor-y-num" min="0" max="512" value="44"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-onion" checked/> Show onion skin</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-snap-anchor"/> Snap to grid</label>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-anchor-place">&#x271A; Place Anchor</button>
+            <button class="btn btn-danger btn-sm" id="btn-anchor-clear">&#x2715; Clear</button>
+          </div>
+          <div class="btn-row" style="margin-top:4px">
+            <button class="btn btn-primary btn-sm" id="btn-stabilize">&#x21BB; Stabilize Frames</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WF3: CLEANUP -->
+      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+        <div class="panel-header" data-toggle="sec-clean"><span>Alpha &amp; Cleanup</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-clean">
+          <div class="field">
+            <div class="field-label"><span>BG Tolerance</span><span id="tol-val">32</span></div>
+            <div class="field-row"><input type="range" id="tolerance" min="5" max="80" value="32"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Max Saturation</span><span id="sat-val">18</span></div>
+            <div class="field-row"><input type="range" id="max-saturation" min="0" max="60" value="18"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-edge-seed" checked/> Edge-only flood fill</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-remove-fringe"/> Remove fringe</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-force-transparent"/> Force transparent BG</label>
+          <div class="btn-row"><button class="btn btn-primary btn-sm" id="btn-clean-run">&#x2715; Remove BG</button></div>
+          <div class="btn-row" id="dual-extract-row" style="display:none"><button class="btn btn-ghost btn-sm" id="btn-dual-extract">&#x2728; Dual BG Extract</button></div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+        <div class="panel-header" data-toggle="sec-cleanup"><span>Per-Frame Cleanup</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-cleanup">
+          <div class="field">
+            <div class="field-label"><span>Stray Pixel Size</span><span id="stray-val">4</span></div>
+            <div class="field-row"><input type="range" id="stray-size" min="1" max="32" value="4"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Jitter Threshold</span><span id="jitter-val">2</span></div>
+            <div class="field-row"><input type="range" id="jitter-thresh" min="0" max="8" value="2"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Outline Normalize</span><span id="outline-val">0</span></div>
+            <div class="field-row"><input type="range" id="outline-radius" min="0" max="4" value="0"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-force-transparent-frame"/> Force transparent BG</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-jitter-shift"/> Shift pixels when fixing jitter</label>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-remove-stray">&#x2715; Remove Stray</button>
+            <button class="btn btn-ghost btn-sm" id="btn-fix-pinholes">&#x25CC; Fix Pinholes</button>
+            <button class="btn btn-ghost btn-sm" id="btn-fix-jitter">&#x21BB; Fix Jitter</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-normalize-outline">&#x25CE; Normalize Outline</button>
+            <button class="btn btn-ghost btn-sm" id="btn-soften">&#x2740; Soften</button>
+          </div>
+          <div class="btn-row" style="margin-top:4px">
+            <button class="btn btn-success btn-sm" id="btn-cleanup-all">&#x26A1; Cleanup All Frames</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+        <div class="panel-header" data-toggle="sec-soften"><span>Softening &amp; Morphology</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-soften">
+          <div class="field">
+            <div class="field-label"><span>Edge Soften</span><span id="soften-val">0</span></div>
+            <div class="field-row"><input type="range" id="soften-radius" min="0" max="4" value="0" step="0.5"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Alpha Erode</span><span id="erode-val">0</span></div>
+            <div class="field-row"><input type="range" id="alpha-erode" min="0" max="8" value="0"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Alpha Dilate</span><span id="dilate-val">0</span></div>
+            <div class="field-row"><input type="range" id="alpha-dilate" min="0" max="8" value="0"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WF4: EXPORT -->
+      <div class="panel-section wf-panel" data-wf="export" style="display:none">
+        <div class="panel-header" data-toggle="sec-export"><span>Sprite Sheet Export</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-export">
+          <div class="field">
+            <div class="field-label"><span>Columns</span><span id="cols-val">8</span></div>
+            <div class="field-row"><input type="range" id="export-cols" min="1" max="32" value="8"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Padding</span><span id="pad-val">0</span></div>
+            <div class="field-row"><input type="range" id="export-pad" min="0" max="16" value="0"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-no-pad"/> No padding (strict)</label>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btn-repack">&#x2B1A; Repack Sheet</button>
+            <button class="btn btn-success btn-sm" id="btn-export-png">&#x2B07; Export PNG</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="export" style="display:none">
+        <div class="panel-header" data-toggle="sec-manifest"><span>Manifest</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-manifest">
+          <div class="field">
+            <div class="field-label"><span>Sprite Name</span></div>
+            <div class="field-row"><input type="text" id="manifest-name" value="sprite" style="flex:1;font-size:11px"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>FPS</span><span id="fps-val">12</span></div>
+            <div class="field-row"><input type="range" id="manifest-fps" min="1" max="60" value="12"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-export-manifest">&#x{1F4C4;} Export sprites.json</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-manifest-full">Export Full Config</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Island detection (shared) -->
+      <div class="panel-section" id="panel-island">
+        <div class="panel-header" data-toggle="sec-island"><span>Island Detection</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-island">
+          <div class="field">
+            <div class="field-label"><span>Alpha Threshold</span><span id="athresh-val">8</span></div>
+            <div class="field-row"><input type="range" id="alpha-threshold" min="1" max="255" value="8"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Merge Distance</span><span id="merge-val">24</span></div>
+            <div class="field-row"><input type="range" id="merge-distance" min="0" max="100" value="24"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-detect">Detect Islands</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div id="canvas-area">
+      <div id="canvas-container">
+        <div class="checker-bg"></div>
+        <canvas id="onion-canvas"></canvas>
+        <canvas id="main-canvas"></canvas>
+        <canvas id="overlay-canvas"></canvas>
+        <div class="drop-zone" id="drop-zone">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+          <p>Drop image here or click to load</p>
+          <span class="sub">PNG, JPG, WebP, BMP</span>
+        </div>
+      </div>
+      <div class="canvas-info">
+        <span id="info-size">No image</span>
+        <span>|</span>
+        <span>Zoom: <span class="zoom-val" id="info-zoom">100%</span></span>
+        <span>|</span>
+        <span id="info-cursor">-</span>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="right-panel">
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-preview"><span>Preview</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-preview">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button class="btn btn-ghost btn-sm" id="btn-preview-cur" style="flex:1">Current</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-orig" style="flex:1">Original</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+            <button class="btn btn-ghost btn-sm" id="btn-preview-stray">Stray</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-pinholes">Pinholes</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-outline">Outline</button>
+          </div>
+          <div class="preview-box"><canvas id="preview-canvas"></canvas><span class="preview-label">CURRENT</span></div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-frames"><span>Frames</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-frames">
+          <div class="frame-strip" id="frame-strip"></div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="frame-count">No frames</div>
+          <div class="field" style="margin-top:8px">
+            <div class="field-label"><span>Max Auto-Fit Zoom</span><span id="fitzoom-val">4</span></div>
+            <div class="field-row"><input type="range" id="max-auto-fit-zoom" min="1" max="16" value="4"/></div>
+          </div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5" id="review-metrics">Review: -</div>
+          <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="btn-prev-issue">Prev Issue</button>
+            <button class="btn btn-ghost btn-sm" id="btn-next-issue">Next Issue</button>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5" id="review-issue-list">Issues: -</div>
+          <div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="btn-export-review-report" style="width:100%">Export Review Report</button></div>
+          <div style="margin-top:8px" class="field">
+            <div class="field-label"><span>Frame Label</span></div>
+            <div class="field-row"><input type="text" id="frame-label" placeholder="optional label" style="flex:1;font-size:11px"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Frame Notes</span></div>
+            <div class="field-row"><textarea id="frame-notes" placeholder="review notes" style="width:100%;min-height:42px;font-size:11px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px"></textarea></div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);line-height:1.45" id="keyboard-help">Keys: ←/→ frame · I next issue · Shift+I prev issue · F fit · O onion · Space play</div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-anchors"><span>Anchor</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-anchors">
+          <div class="anchor-list" id="anchor-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div id="timeline">
+    <div class="tl-header">
+      <span class="tl-label">Timeline</span>
+      <div class="tl-controls">
+        <button id="btn-tl-prev" title="Previous">&#x25C0;</button>
+        <button id="btn-tl-play" title="Play/Pause">&#x25B6;</button>
+        <button id="btn-tl-next" title="Next">&#x25B6;&#xFE0E;</button>
+      </div>
+      <div class="tl-fps"><span>FPS:</span><input type="number" id="tl-fps" value="12" min="1" max="60"/></div>
+      <span id="tl-frame-info" style="margin-left:auto;font-family:var(--font-mono);font-size:10px">0/0</span>
+    </div>
+    <div class="tl-body" id="tl-body"></div>
+  </div>
+
+  <div id="statusbar">
+    <span class="status-dot"></span>
+    <span class="status-msg" id="status-msg">Ready - load an image to begin</span>
+    <div class="status-right">
+      <span id="status-undo">Undo: 0</span>
+      <span id="status-wf">Import</span>
+    </div>
+  </div>
+</div>
+
+<!-- Config Modal -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal">
+    <div class="modal-header"><span>Config Manager</span><button class="btn-icon" id="btn-config-close">&#x2715;</button></div>
+    <div class="modal-body">
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-save-local">Save LocalStorage</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-load-local">Load LocalStorage</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-export">Export JSON</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-import">Import JSON</button>
+        <input type="file" id="cfg-import-file" accept=".json" style="display:none"/>
+      </div>
+      <textarea class="config-editor" id="cfg-editor" spellcheck="false"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-cfg-cancel">Cancel</button>
+      <button class="btn btn-primary" id="btn-cfg-apply">Apply</button>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+const S = {
+  wf: 'import',
+  zoom:1, panX:0, panY:0,
+  isPanning:false, panStartX:0, panStartY:0, panStartPanX:0, panStartPanY:0,
+  anchorMode: false,
+  draggingAnchor: false,
+
+  sourceImg: null,
+  originalImageData: null,
+  currentImageData: null,
+  whiteImg: null, blackImg: null, dualMode: false,
+
+  // Grid slicing
+  frameW: 48, frameH: 48, gridOx: 0, gridOy: 0,
+
+  // Frames - sliced from the grid
+  frames: [],        // [{imgData, anchor:{x,y}, offsetX, offsetY}]
+  selectedFrame: -1,
+
+  // Anchor
+  anchor: {x:24, y:44},
+  showOnionSkin: true,
+  onionOpacity: 0.3,
+
+  // Island detection
+  detectedGroups: [],
+
+  // Timeline playback
+  playing: false, playInterval: null, playFps: 12,
+
+  // Undo
+  undoStack: [], redoStack: [], maxUndo: 40,
+
+  // Repack
+  repackCols: 8, repackPad: 0,
+
+  // Review viewport
+  autoFitFrames: true,
+  maxAutoFitZoom: 4,
+  previewImageData: null,
+  previewMode: 'current',
+  reviewFitReady: false,
+  viewInitialized: false,
+  viewMode: 'source',
+  viewStates: {source:null, frame:null},
+  pendingFrameMeta: [],
+  batchHistory: [],
+  reviewIssues: [],
+};
+
+// ════════════════════════════════════════════
+// DOM
+// ════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const mainCanvas=$('main-canvas'), overlayCanvas=$('overlay-canvas'), onionCanvas=$('onion-canvas');
+const ctx=mainCanvas.getContext('2d',{willReadFrequently:true});
+const ovCtx=overlayCanvas.getContext('2d');
+const onCtx=onionCanvas.getContext('2d');
+const previewCanvas=$('preview-canvas');
+const prevCtx=previewCanvas.getContext('2d');
+const container=$('canvas-container');
+const srcCanvas=document.createElement('canvas');
+const srcCtx=srcCanvas.getContext('2d',{willReadFrequently:true});
+
+// ════════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════════
+function toast(msg,type='info'){const el=document.createElement('div');el.className='toast'+(type!=='info'?' '+type:'');el.textContent=msg;$('toast-container').appendChild(el);requestAnimationFrame(()=>el.classList.add('show'));setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300)},2800)}
+function setStatus(msg){$('status-msg').textContent=msg}
+function cloneImageData(d){return new ImageData(new Uint8ClampedArray(d.data),d.width,d.height)}
+function clamp255(v){return Math.max(0,Math.min(255,Math.round(v)))}
+
+// ════════════════════════════════════════════
+// UNDO / REDO
+// ════════════════════════════════════════════
+function cloneFrame(f){return{imgData:cloneImageData(f.imgData),anchor:{...(f.anchor||S.anchor)},offsetX:f.offsetX||0,offsetY:f.offsetY||0,label:f.label||'',notes:f.notes||''}}
+function clonePlain(v){return JSON.parse(JSON.stringify(v))}
+function makeUndoSnapshot(){return{currentImageData:S.currentImageData?cloneImageData(S.currentImageData):null,frames:S.frames.map(cloneFrame),selectedFrame:S.selectedFrame,anchor:{...S.anchor},detectedGroups:clonePlain(S.detectedGroups),viewMode:S.viewMode,viewStates:clonePlain(S.viewStates),batchHistory:clonePlain(S.batchHistory),pendingFrameMeta:clonePlain(S.pendingFrameMeta)}}
+function restoreUndoSnapshot(snap){S.frames=snap.frames.map(cloneFrame);S.selectedFrame=snap.selectedFrame;S.anchor={...snap.anchor};S.detectedGroups=clonePlain(snap.detectedGroups||[]);S.viewMode=snap.viewMode||'source';S.viewStates=clonePlain(snap.viewStates||{source:null,frame:null});S.batchHistory=clonePlain(snap.batchHistory||[]);S.pendingFrameMeta=clonePlain(snap.pendingFrameMeta||[]);S.currentImageData=snap.currentImageData?cloneImageData(snap.currentImageData):null;if(S.selectedFrame>=0&&S.frames[S.selectedFrame])showFrame(S.selectedFrame);else if(S.currentImageData)applyImageData(S.currentImageData);updateFrameStrip();updateTimeline();updateUndoUI()}
+function pushUndo(){if(!S.currentImageData&&!S.frames.length)return;S.undoStack.push(makeUndoSnapshot());if(S.undoStack.length>S.maxUndo)S.undoStack.shift();S.redoStack=[];updateUndoUI()}
+function undo(){if(!S.undoStack.length)return;S.redoStack.push(makeUndoSnapshot());restoreUndoSnapshot(S.undoStack.pop())}
+function redo(){if(!S.redoStack.length)return;S.undoStack.push(makeUndoSnapshot());restoreUndoSnapshot(S.redoStack.pop())}
+function updateUndoUI(){$('btn-undo').disabled=!S.undoStack.length;$('btn-redo').disabled=!S.redoStack.length;$('status-undo').textContent='Undo: '+S.undoStack.length}
+
+function applyImageData(imgData){
+  mainCanvas.width=imgData.width;mainCanvas.height=imgData.height;
+  ctx.putImageData(imgData,0,0);updateOverlaySize();maybeFitToView(false);updatePreview();updateInfoSize();
+}
+
+// ════════════════════════════════════════════
+// ZOOM / PAN
+// ════════════════════════════════════════════
+function currentViewKey(){return S.viewMode==='frame'?'frame':'source'}
+function saveViewState(key=currentViewKey()){S.viewStates[key]={zoom:S.zoom,panX:S.panX,panY:S.panY,ready:S.reviewFitReady,initialized:S.viewInitialized}}
+function restoreViewState(key=currentViewKey()){const v=S.viewStates[key];if(!v)return false;S.zoom=v.zoom;S.panX=v.panX;S.panY=v.panY;S.reviewFitReady=!!v.ready;S.viewInitialized=!!v.initialized;applyTransform();return true}
+function setViewMode(mode){if(S.viewMode!==mode){saveViewState();S.viewMode=mode;S.reviewFitReady=false;S.viewInitialized=false}}
+function markManualView(){S.reviewFitReady=true;S.viewInitialized=true;saveViewState()}
+function setZoom(z,cx,cy){const o=S.zoom||1;S.zoom=Math.max(.1,Math.min(16,z));if(cx!==undefined&&cy!==undefined){S.panX=cx-(cx-S.panX)*(S.zoom/o);S.panY=cy-(cy-S.panY)*(S.zoom/o)}markManualView();applyTransform()}
+function applyTransform(){const t=`translate(${S.panX}px,${S.panY}px) scale(${S.zoom})`;mainCanvas.style.transform=t;overlayCanvas.style.transform=t;onionCanvas.style.transform=t;$('info-zoom').textContent=Math.round(S.zoom*100)+'%'}
+function fitToView(){if(!mainCanvas.width||!mainCanvas.height)return;const r=container.getBoundingClientRect();const cw=Math.max(1,r.width),ch=Math.max(1,r.height);const p=Math.min(48,Math.max(8,Math.min(cw,ch)*0.1));const sx=Math.max(.1,(cw-p)/mainCanvas.width),sy=Math.max(.1,(ch-p)/mainCanvas.height);const maxZ=Math.max(1,Math.min(16,+S.maxAutoFitZoom||4));const z=Math.max(.1,Math.min(16,Math.min(sx,sy,maxZ)||1));S.zoom=z;S.panX=Math.round((cw-mainCanvas.width*z)/2);S.panY=Math.round((ch-mainCanvas.height*z)/2);S.reviewFitReady=true;S.viewInitialized=true;applyTransform();saveViewState()}
+function maybeFitToView(force){const key=currentViewKey();const shouldAuto=key==='frame'&&S.autoFitFrames;if(!force&&!shouldAuto&&restoreViewState(key))return;if(force||shouldAuto||!S.viewStates[key]||!S.viewInitialized||!S.reviewFitReady)fitToView();else applyTransform()}
+function updateOverlaySize(){overlayCanvas.width=mainCanvas.width;overlayCanvas.height=mainCanvas.height;onionCanvas.width=mainCanvas.width;onionCanvas.height=mainCanvas.height}
+function updateInfoSize(){$('info-size').textContent=mainCanvas.width+'x'+mainCanvas.height}
+
+// ════════════════════════════════════════════
+// IMAGE LOADING
+// ════════════════════════════════════════════
+function loadImageToCanvas(img){
+  S.sourceImg=img;srcCanvas.width=img.width;srcCanvas.height=img.height;
+  srcCtx.clearRect(0,0,img.width,img.height);srcCtx.drawImage(img,0,0);
+  S.originalImageData=srcCtx.getImageData(0,0,img.width,img.height);
+  S.currentImageData=cloneImageData(S.originalImageData);
+  mainCanvas.width=img.width;mainCanvas.height=img.height;
+  ctx.putImageData(S.currentImageData,0,0);updateOverlaySize();
+  S.detectedGroups=[];S.frames=[];S.selectedFrame=-1;S.undoStack=[];S.redoStack=[];S.viewStates={source:null,frame:null};setViewMode('source');updateUndoUI();
+  $('drop-zone').classList.add('hidden');S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();updateFrameStrip();updateTimeline();drawOverlay();
+  setStatus('Loaded '+img.width+'x'+img.height);toast('Image loaded','success');
+}
+
+$('file-input').addEventListener('change',()=>{const f=$('file-input').files[0];if(!f)return;const img=new Image();img.onload=()=>{loadImageToCanvas(img);URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(f)});
+$('white-file').addEventListener('change',()=>{const f=$('white-file').files[0];if(!f)return;const img=new Image();img.onload=()=>{S.whiteImg=img;setStatus('White: '+img.width+'x'+img.height)};img.src=URL.createObjectURL(f)});
+$('black-file').addEventListener('change',()=>{const f=$('black-file').files[0];if(!f)return;const img=new Image();img.onload=()=>{S.blackImg=img;setStatus('Black: '+img.width+'x'+img.height)};img.src=URL.createObjectURL(f)});
+
+$('btn-load-clip').addEventListener('click',async()=>{try{const items=await navigator.clipboard.read();for(const item of items)for(const type of item.types)if(type.startsWith('image/')){const blob=await item.getType(type);const img=new Image();img.onload=()=>{loadImageToCanvas(img);URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(blob);return}toast('No image in clipboard','warning')}catch(e){toast('Clipboard access denied','error')}});
+
+$('btn-dual-toggle').addEventListener('click',()=>{S.dualMode=!S.dualMode;$('single-file-input').style.display=S.dualMode?'none':'';$('dual-file-inputs').style.display=S.dualMode?'':'none';$('dual-extract-row').style.display=S.dualMode?'':'none';toast(S.dualMode?'Dual BG mode on':'Single image mode')});
+
+$('btn-dual-extract').addEventListener('click',()=>{
+  if(!S.whiteImg||!S.blackImg){toast('Load both white & black images first','warning');return}
+  if(S.whiteImg.width!==S.blackImg.width||S.whiteImg.height!==S.blackImg.height){toast('Images must have identical dimensions','error');return}
+  pushUndo();
+  const result=extractDualAlpha(S.whiteImg,S.blackImg,1,true,false);
+  S.sourceImg=S.whiteImg;srcCanvas.width=result.width;srcCanvas.height=result.height;srcCtx.putImageData(result,0,0);
+  S.originalImageData=cloneImageData(result);S.currentImageData=result;
+  mainCanvas.width=result.width;mainCanvas.height=result.height;ctx.putImageData(S.currentImageData,0,0);
+  updateOverlaySize();$('drop-zone').classList.add('hidden');S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();drawOverlay();
+  toast('Dual BG alpha extracted','success');
+});
+
+// Drag & drop
+container.addEventListener('dragover',e=>{e.preventDefault();container.classList.add('drag-over')});
+container.addEventListener('dragleave',()=>container.classList.remove('drag-over'));
+container.addEventListener('drop',e=>{e.preventDefault();container.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(!f||!f.type.startsWith('image/'))return;const img=new Image();img.onload=()=>{loadImageToCanvas(img);URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(f)});
+
+// ════════════════════════════════════════════
+// WORKFLOW SWITCHING
+// ════════════════════════════════════════════
+function setWorkflow(wf){
+  S.wf=wf;
+  if(wf==='import'&&S.originalImageData)showSourceSheet();
+  document.querySelectorAll('.wf-tab').forEach(t=>t.classList.toggle('active',t.dataset.wf===wf));
+  document.querySelectorAll('.wf-panel').forEach(p=>p.style.display=p.dataset.wf===wf?'':'none');
+  $('status-wf').textContent=wf.charAt(0).toUpperCase()+wf.slice(1);
+  drawOverlay();
+}
+document.querySelectorAll('.wf-tab').forEach(t=>t.addEventListener('click',()=>setWorkflow(t.dataset.wf)));
+
+// ════════════════════════════════════════════
+// RANGE SLIDERS
+// ════════════════════════════════════════════
+const rangeDisplays={tolerance:'tol-val','max-saturation':'sat-val','frame-w':'fw-val','frame-h':'fh-val','grid-ox':'ox-val','grid-oy':'oy-val','anchor-x':'ancx-val','anchor-y':'ancy-val','stray-size':'stray-val','jitter-thresh':'jitter-val','outline-radius':'outline-val','soften-radius':'soften-val','alpha-erode':'erode-val','alpha-dilate':'dilate-val','export-cols':'cols-val','export-pad':'pad-val','alpha-threshold':'athresh-val','merge-distance':'merge-val','manifest-fps':'fps-val','max-auto-fit-zoom':'fitzoom-val'};
+Object.entries(rangeDisplays).forEach(([id,valId])=>{const el=$(id);if(el)el.addEventListener('input',()=>{$ (valId).textContent=el.value;if(id==='max-auto-fit-zoom'){S.maxAutoFitZoom=+el.value;if(mainCanvas.width&&S.autoFitFrames)fitToView()}})});
+
+// Sync number inputs with ranges
+['frame-w','frame-h','anchor-x','anchor-y'].forEach(id=>{
+  const r=$(id),n=$(id+'-num');if(!r||!n)return;
+  r.addEventListener('input',()=>{n.value=r.value});
+  n.addEventListener('input',()=>{r.value=n.value;$ (rangeDisplays[id]).textContent=n.value});
+});
+
+// Presets
+document.querySelectorAll('.preset-btn[data-fw]').forEach(b=>b.addEventListener('click',()=>{$('frame-w').value=b.dataset.fw;$('frame-h').value=b.dataset.fh;$('frame-w-num').value=b.dataset.fw;$('frame-h-num').value=b.dataset.fh;$('fw-val').textContent=b.dataset.fw;$('fh-val').textContent=b.dataset.fh}));
+document.querySelectorAll('.preset-btn[data-ax]').forEach(b=>b.addEventListener('click',()=>{$('anchor-x').value=b.dataset.ax;$('anchor-y').value=b.dataset.ay;$('anchor-x-num').value=b.dataset.ax;$('anchor-y-num').value=b.dataset.ay;$('ancx-val').textContent=b.dataset.ax;$('ancy-val').textContent=b.dataset.ay;S.anchor={x:+b.dataset.ax,y:+b.dataset.ay};drawOverlay();updateAnchorList()}));
+
+// Panel collapse
+document.querySelectorAll('.panel-header[data-toggle]').forEach(h=>h.addEventListener('click',()=>{h.classList.toggle('collapsed');$(h.dataset.toggle).classList.toggle('collapsed')}));
+
+// ════════════════════════════════════════════
+// GRID SLICING (WF: Import)
+// ════════════════════════════════════════════
+$('btn-slice').addEventListener('click',()=>{
+  if(!S.currentImageData){toast('Load an image first','warning');return}
+  const fw=+$('frame-w').value, fh=+$('frame-h').value;
+  const ox=+$('grid-ox').value, oy=+$('grid-oy').value;
+  const iw=S.currentImageData.width, ih=S.currentImageData.height;
+  const cols=Math.floor((iw-ox)/fw), rows=Math.floor((ih-oy)/fh);
+  if(cols<1||rows<1){toast('Frame size too large for image','error');return}
+
+  S.frames=[];
+  const tmpC=document.createElement('canvas');tmpC.width=iw;tmpC.height=ih;
+  tmpC.getContext('2d').putImageData(S.currentImageData,0,0);
+
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const sx=ox+c*fw, sy=oy+r*fh;
+      const fd=document.createElement('canvas');fd.width=fw;fd.height=fh;
+      const fctx=fd.getContext('2d',{willReadFrequently:true});
+      fctx.drawImage(tmpC,sx,sy,fw,fh,0,0,fw,fh);
+      S.frames.push({imgData:fctx.getImageData(0,0,fw,fh),anchor:{x:S.anchor.x,y:S.anchor.y},offsetX:0,offsetY:0,label:'',notes:''});
+    }
+  }
+  S.selectedFrame=0;
+  applyPendingFrameMeta();
+  S.reviewFitReady=false;
+  $('slice-info').textContent=cols+'x'+rows+' = '+S.frames.length+' frames';
+  updateFrameStrip();updateTimeline();showFrame(0);
+  toast('Sliced '+S.frames.length+' frames','success');
+  setStatus('Grid sliced: '+cols+'x'+rows);
+});
+
+// ════════════════════════════════════════════
+// FRAME DISPLAY
+// ════════════════════════════════════════════
+function showSourceSheet(){
+  if(!S.originalImageData)return;
+  setViewMode('source');
+  S.selectedFrame=-1;
+  S.currentImageData=cloneImageData(S.originalImageData);
+  mainCanvas.width=S.currentImageData.width;mainCanvas.height=S.currentImageData.height;
+  ctx.putImageData(S.currentImageData,0,0);updateOverlaySize();
+  onionCanvas.style.opacity=0;onCtx.clearRect(0,0,onionCanvas.width,onionCanvas.height);
+  maybeFitToView(false);updatePreview();updateInfoSize();drawOverlay();
+  $('tl-frame-info').textContent=S.frames.length?'source':'0/0';
+  updateFrameStrip();updateTimeline();
+}
+function showFrame(idx){
+  if(idx<0||idx>=S.frames.length){
+    showSourceSheet();
+    return;
+  }
+  setViewMode('frame');
+  S.selectedFrame=idx;
+  const f=S.frames[idx];
+  mainCanvas.width=f.imgData.width;mainCanvas.height=f.imgData.height;
+  ctx.putImageData(f.imgData,0,0);
+  // Also update currentImageData so preview/cleanup work on the selected frame
+  S.currentImageData=f.imgData;
+  updateOverlaySize();
+
+  // Onion skin: show previous frame semi-transparent
+  if(S.showOnionSkin&&idx>0){
+    const pf=S.frames[idx-1];
+    onionCanvas.width=pf.imgData.width;onionCanvas.height=pf.imgData.height;
+    onCtx.clearRect(0,0,onionCanvas.width,onionCanvas.height);
+    onCtx.putImageData(pf.imgData,0,0);
+    onionCanvas.style.opacity=S.onionOpacity;
+  } else {
+    onCtx.clearRect(0,0,onionCanvas.width,onionCanvas.height);
+    onionCanvas.style.opacity=0;
+  }
+
+  maybeFitToView(false);updatePreview();updateInfoSize();drawOverlay();
+  $('tl-frame-info').textContent=(idx+1)+'/'+S.frames.length;
+  updateFrameStrip();
+  updateTimeline();
+}
+
+function updateFrameStrip(){
+  const strip=$('frame-strip');strip.innerHTML='';
+  S.frames.forEach((f,i)=>{
+    const chip=document.createElement('div');chip.className='frame-chip'+(i===S.selectedFrame?' selected':'');
+    const tc=document.createElement('canvas');tc.width=48;tc.height=48;
+    const tctx=tc.getContext('2d');
+    const tmpC=document.createElement('canvas');tmpC.width=f.imgData.width;tmpC.height=f.imgData.height;
+    tmpC.getContext('2d').putImageData(f.imgData,0,0);
+    const sc=Math.min(48/f.imgData.width,48/f.imgData.height);
+    const dw=f.imgData.width*sc,dh=f.imgData.height*sc;
+    tctx.drawImage(tmpC,0,0,f.imgData.width,f.imgData.height,(48-dw)/2,(48-dh)/2,dw,dh);
+    chip.appendChild(tc);
+    const idx=document.createElement('span');idx.className='chip-idx';idx.textContent=i+1;chip.appendChild(idx);
+    chip.addEventListener('click',()=>{S.selectedFrame=i;showFrame(i)});
+    strip.appendChild(chip);
+  });
+  $('frame-count').textContent=S.frames.length+' frame(s)';
+}
+
+// ════════════════════════════════════════════
+// TIMELINE
+// ════════════════════════════════════════════
+function updateTimeline(){
+  const body=$('tl-body');body.innerHTML='';
+  S.frames.forEach((f,i)=>{
+    const div=document.createElement('div');div.className='tl-frame'+(i===S.selectedFrame?' selected':'');
+    const tc=document.createElement('canvas');tc.width=48;tc.height=Math.max(8,Math.round(48*f.imgData.height/f.imgData.width));
+    const tctx=tc.getContext('2d');
+    const tmpC=document.createElement('canvas');tmpC.width=f.imgData.width;tmpC.height=f.imgData.height;
+    tmpC.getContext('2d').putImageData(f.imgData,0,0);
+    tctx.drawImage(tmpC,0,0,tc.width,tc.height);
+    div.appendChild(tc);
+    const idx=document.createElement('span');idx.className='tl-idx';idx.textContent=i+1;div.appendChild(idx);
+    div.addEventListener('click',()=>{S.selectedFrame=i;showFrame(i);updateTimeline()});
+    body.appendChild(div);
+  });
+  $('tl-frame-info').textContent=(S.selectedFrame+1)+'/'+S.frames.length;
+}
+
+// Playback
+$('btn-tl-play').addEventListener('click',()=>{
+  S.playing=!S.playing;
+  $('btn-tl-play').textContent=S.playing?'\u23F8':'\u25B6';
+  $('btn-tl-play').classList.toggle('active',S.playing);
+  if(S.playing){
+    S.playFps=+$('tl-fps').value||12;
+    S.playInterval=setInterval(()=>{
+      if(!S.frames.length)return;
+      S.selectedFrame=(S.selectedFrame+1)%S.frames.length;
+      showFrame(S.selectedFrame);updateTimeline();
+    },1000/S.playFps);
+  } else {
+    clearInterval(S.playInterval);
+  }
+});
+$('btn-tl-prev').addEventListener('click',()=>{if(!S.frames.length)return;S.selectedFrame=(S.selectedFrame-1+S.frames.length)%S.frames.length;showFrame(S.selectedFrame);updateTimeline()});
+$('btn-tl-next').addEventListener('click',()=>{if(!S.frames.length)return;S.selectedFrame=(S.selectedFrame+1)%S.frames.length;showFrame(S.selectedFrame);updateTimeline()});
+function gotoIssue(dir=1){refreshReviewIssues();if(!S.reviewIssues.length){toast('No review issues','success');return}let pos=S.reviewIssues.findIndex(r=>r.index===S.selectedFrame);if(pos<0)pos=dir>0?-1:0;const next=S.reviewIssues[(pos+dir+S.reviewIssues.length)%S.reviewIssues.length];showFrame(next.index);toast('Issue frame '+(next.index+1)+': '+next.issues.join(', '))}
+$('btn-next-issue').addEventListener('click',()=>gotoIssue(1));
+$('btn-prev-issue').addEventListener('click',()=>gotoIssue(-1));
+document.getElementById('btn-export-review-report').addEventListener('click',exportReviewReport);
+$('frame-label').addEventListener('input',()=>{const f=S.frames[S.selectedFrame];if(f)f.label=$('frame-label').value});
+$('frame-notes').addEventListener('input',()=>{const f=S.frames[S.selectedFrame];if(f)f.notes=$('frame-notes').value});
+
+// ════════════════════════════════════════════
+// ANCHOR & ALIGNMENT
+// ════════════════════════════════════════════
+$('btn-anchor-place').addEventListener('click',()=>{S.anchorMode=!S.anchorMode;container.classList.toggle('anchor-mode',S.anchorMode);$('btn-anchor-place').classList.toggle('btn-primary',S.anchorMode);$('btn-anchor-place').classList.toggle('btn-ghost',!S.anchorMode)});
+$('btn-anchor-clear').addEventListener('click',()=>{S.anchor={x:0,y:0};$('anchor-x').value=0;$('anchor-y').value=0;$('anchor-x-num').value=0;$('anchor-y-num').value=0;$('ancx-val').textContent='0';$('ancy-val').textContent='0';drawOverlay();updateAnchorList();toast('Anchor cleared')});
+$('chk-onion').addEventListener('change',()=>{S.showOnionSkin=$('chk-onion').checked;if(S.selectedFrame>=0)showFrame(S.selectedFrame)});
+$('btn-onion').addEventListener('click',()=>{$('chk-onion').checked=!$('chk-onion').checked;$('chk-onion').dispatchEvent(new Event('change'));$('btn-onion').classList.toggle('active',$('chk-onion').checked)});
+
+function updateAnchorList(){
+  const list=$('anchor-list');list.innerHTML='';
+  const item=document.createElement('div');item.className='anchor-item';
+  item.innerHTML='<span class="anchor-dot" style="background:var(--warning)"></span><span>Anchor</span><span class="anchor-pos">('+S.anchor.x+', '+S.anchor.y+')</span>';
+  list.appendChild(item);
+}
+
+// Stabilize: align all frames so anchor point is at the same pixel position
+$('btn-stabilize').addEventListener('click',()=>{
+  if(!S.frames.length){toast('Slice frames first','warning');return}
+  // Find max dimensions needed after offset
+  let maxW=0,maxH=0;
+  S.frames.forEach(f=>{maxW=Math.max(maxW,f.imgData.width+Math.abs(f.offsetX));maxH=Math.max(maxH,f.imgData.height+Math.abs(f.offsetY))});
+  // For each frame, compute offset so anchor aligns to anchor of frame 0
+  const refAnchor=S.frames[0].anchor;
+  S.frames.forEach((f,i)=>{
+    if(i===0)return;
+    const dx=refAnchor.x-f.anchor.x;
+    const dy=refAnchor.y-f.anchor.y;
+    if(dx===0&&dy===0)return;
+    // Create new imgData with offset
+    const nw=f.imgData.width+Math.abs(dx), nh=f.imgData.height+Math.abs(dy);
+    const nd=new ImageData(Math.max(nw,f.imgData.width),Math.max(nh,f.imgData.height));
+    const sd=f.imgData.data, dd=nd.data;
+    const sx=dx>0?dx:0, sy=dy>0?dy:0;
+    for(let y=0;y<f.imgData.height;y++){
+      for(let x=0;x<f.imgData.width;x++){
+        const sp=(y*f.imgData.width+x)*4;
+        const dp=((y+sy)*nd.width+(x+sx))*4;
+        dd[dp]=sd[sp];dd[dp+1]=sd[sp+1];dd[dp+2]=sd[sp+2];dd[dp+3]=sd[sp+3];
+      }
+    }
+    f.imgData=nd;
+    f.anchor={x:refAnchor.x,y:refAnchor.y};
+  });
+  showFrame(S.selectedFrame);updateFrameStrip();updateTimeline();
+  toast('Frames stabilized to anchor','success');
+});
+
+// ════════════════════════════════════════════
+// OVERLAY DRAWING
+// ════════════════════════════════════════════
+function drawOverlay(){
+  ovCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+  const iz=1/S.zoom;
+
+  // Grid lines (import mode) — draw on full source image
+  if(S.wf==='import'&&S.originalImageData){
+    // Ensure overlay matches source, not sliced frame
+    const ow=S.originalImageData.width, oh=S.originalImageData.height;
+    if(overlayCanvas.width!==ow||overlayCanvas.height!==oh){
+      overlayCanvas.width=ow;overlayCanvas.height=oh;
+    }
+    const fw=+$('frame-w').value, fh=+$('frame-h').value;
+    const ox=+$('grid-ox').value, oy=+$('grid-oy').value;
+    ovCtx.save();ovCtx.lineWidth=1*iz;ovCtx.strokeStyle='rgba(108,123,240,0.5)';ovCtx.setLineDash([4*iz,4*iz]);
+    for(let x=ox;x<=overlayCanvas.width;x+=fw){ovCtx.beginPath();ovCtx.moveTo(x,0);ovCtx.lineTo(x,overlayCanvas.height);ovCtx.stroke()}
+    for(let y=oy;y<=overlayCanvas.height;y+=fh){ovCtx.beginPath();ovCtx.moveTo(0,y);ovCtx.lineTo(overlayCanvas.width,y);ovCtx.stroke()}
+    ovCtx.setLineDash([]);ovCtx.restore();
+  }
+
+  // Anchor point (align mode or always if set)
+  if(S.anchor.x>0||S.anchor.y>0){
+    ovCtx.save();
+    const ax=S.anchor.x,ay=S.anchor.y;
+    // Crosshair lines spanning the frame
+    ovCtx.lineWidth=1*iz;
+    ovCtx.strokeStyle='rgba(251,191,36,0.6)';
+    ovCtx.beginPath();ovCtx.moveTo(ax,0);ovCtx.lineTo(ax,overlayCanvas.height);ovCtx.stroke();
+    ovCtx.beginPath();ovCtx.moveTo(0,ay);ovCtx.lineTo(overlayCanvas.width,ay);ovCtx.stroke();
+    // Circle
+    const r=6*iz;
+    ovCtx.beginPath();ovCtx.arc(ax,ay,r,0,Math.PI*2);
+    ovCtx.fillStyle='rgba(251,191,36,0.8)';ovCtx.fill();
+    ovCtx.lineWidth=1.5*iz;ovCtx.strokeStyle='#fff';ovCtx.stroke();
+    // Label
+    ovCtx.font=(10*iz)+'px system-ui';ovCtx.fillStyle='#fff';
+    ovCtx.fillText('A('+ax+','+ay+')',ax+r+2*iz,ay-r);
+    ovCtx.restore();
+  }
+
+  // Detected group outlines
+  if(S.detectedGroups.length){
+    ovCtx.save();ovCtx.lineWidth=2*iz;ovCtx.strokeStyle='rgba(74,222,128,0.8)';
+    ovCtx.font=(14*iz)+'px system-ui';ovCtx.fillStyle='rgba(74,222,128,0.9)';
+    S.detectedGroups.forEach((g,i)=>{ovCtx.strokeRect(g.minX,g.minY,g.width,g.height);ovCtx.fillText(String(i+1),g.minX+3*iz,g.minY+14*iz)});
+    ovCtx.restore();
+  }
+}
+
+// ════════════════════════════════════════════
+// CANVAS INTERACTION
+// ════════════════════════════════════════════
+function screenToCanvas(cx,cy){const r=container.getBoundingClientRect();return{x:(cx-r.left-S.panX)/S.zoom,y:(cy-r.top-S.panY)/S.zoom}}
+
+container.addEventListener('wheel',e=>{e.preventDefault();const r=container.getBoundingClientRect();setZoom(S.zoom*(e.deltaY>0?.9:1.1),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+
+container.addEventListener('mousedown',e=>{
+  const pos=screenToCanvas(e.clientX,e.clientY);
+
+  // Anchor place mode
+  if(S.anchorMode){
+    const snap=$('chk-snap-anchor').checked;
+    let ax=Math.round(pos.x),ay=Math.round(pos.y);
+    if(snap){const fw=+$('frame-w').value,fh=+$('frame-h').value;ax=Math.round(ax/fw)*fw;ay=Math.round(ay/fh)*fh}
+    S.anchor={x:ax,y:ay};
+    $('anchor-x').value=ax;$('anchor-y').value=ay;$('anchor-x-num').value=ax;$('anchor-y-num').value=ay;
+    $('ancx-val').textContent=ax;$('ancy-val').textContent=ay;
+    updateAnchorList();drawOverlay();
+    // Update current frame anchor
+    if(S.selectedFrame>=0&&S.selectedFrame<S.frames.length)S.frames[S.selectedFrame].anchor={x:ax,y:ay};
+    toast('Anchor set at '+ax+','+ay,'success');
+    return;
+  }
+
+  // Default: pan
+  S.isPanning=true;S.panStartX=e.clientX;S.panStartY=e.clientY;S.panStartPanX=S.panX;S.panStartPanY=S.panY;container.classList.add('grabbing');
+});
+
+container.addEventListener('mousemove',e=>{
+  const pos=screenToCanvas(e.clientX,e.clientY);
+  if(S.currentImageData){
+    const px=Math.floor(pos.x),py=Math.floor(pos.y);
+    if(px>=0&&py>=0&&px<mainCanvas.width&&py<mainCanvas.height){
+      const p=(py*mainCanvas.width+px)*4,d=S.currentImageData.data;
+      $('info-cursor').textContent=px+','+py+' rgba('+d[p]+','+d[p+1]+','+d[p+2]+','+d[p+3]+')';
+    }else $('info-cursor').textContent=Math.round(pos.x)+','+Math.round(pos.y);
+  }
+  if(S.isPanning){S.panX=S.panStartPanX+(e.clientX-S.panStartX);S.panY=S.panStartPanY+(e.clientY-S.panStartY);markManualView();applyTransform()}
+});
+window.addEventListener('mouseup',()=>{S.isPanning=false;S.draggingAnchor=false;container.classList.remove('grabbing')});
+
+// Zoom buttons
+$('btn-zoom-in').addEventListener('click',()=>{const r=container.getBoundingClientRect();setZoom(S.zoom*1.25,r.width/2,r.height/2)});
+$('btn-zoom-out').addEventListener('click',()=>{const r=container.getBoundingClientRect();setZoom(S.zoom*.8,r.width/2,r.height/2)});
+$('btn-zoom-fit').addEventListener('click',()=>fitToView());
+$('btn-auto-fit').addEventListener('click',()=>{S.autoFitFrames=!S.autoFitFrames;$('btn-auto-fit').classList.toggle('active',S.autoFitFrames);S.reviewFitReady=false;if(mainCanvas.width)fitToView();toast(S.autoFitFrames?'Auto-fit review on':'Review fit locked')});
+
+// Undo/redo
+$('btn-undo').addEventListener('click',undo);
+$('btn-redo').addEventListener('click',redo);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();redo()}if(e.key==='o'){$('btn-onion').click()}if(e.key==='f'){e.preventDefault();fitToView()}if(e.key==='ArrowLeft'&&S.frames.length){e.preventDefault();$('btn-tl-prev').click()}if(e.key==='ArrowRight'&&S.frames.length){e.preventDefault();$('btn-tl-next').click()}if(e.key.toLowerCase()==='i'&&S.frames.length){e.preventDefault();gotoIssue(e.shiftKey?-1:1)}if(e.key===' '&&S.frames.length){e.preventDefault();$('btn-tl-play').click()}});
+
+// ════════════════════════════════════════════
+// PREVIEW
+// ════════════════════════════════════════════
+function analyzeFramePixels(imgData){if(!imgData)return null;const{width:w,height:h,data}=imgData;let pixels=0,minX=w,minY=h,maxX=-1,maxY=-1,soft=0,sx=0,sy=0,total=0;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const a=data[(y*w+x)*4+3];if(a>0){pixels++;if(a<255)soft++;if(x<minX)minX=x;if(y<minY)minY=y;if(x>maxX)maxX=x;if(y>maxY)maxY=y;sx+=x*a;sy+=y*a;total+=a}}return pixels?{pixels,soft,bbox:{x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1},center:{x:sx/total,y:sy/total}}:{pixels:0,soft:0,bbox:null,center:{x:w/2,y:h/2}}}
+function countTransparentHoles(imgData,maxSize){if(!imgData)return{count:0,pixels:0};const{width:w,height:h,data}=imgData;const visited=new Uint8Array(w*h);const dirs=[[1,0],[-1,0],[0,1],[0,-1]];let count=0,pixels=0;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=y*w+x;if(visited[idx]||data[idx*4+3]>0)continue;const comp=[];let edge=false;const stack=[[x,y]];visited[idx]=1;while(stack.length){const[cx,cy]=stack.pop();const ci=cy*w+cx;comp.push(ci);if(cx===0||cy===0||cx===w-1||cy===h-1)edge=true;for(const[dx,dy]of dirs){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(visited[ni]||data[ni*4+3]>0)continue;visited[ni]=1;stack.push([nx,ny])}}if(!edge&&comp.length<=maxSize){count++;pixels+=comp.length}}return{count,pixels}}
+function hashImageData(imgData){let h=2166136261>>>0;const d=imgData.data;for(let i=0;i<d.length;i++){h^=d[i];h=Math.imul(h,16777619)>>>0}return h.toString(16).padStart(8,'0')}
+function collectFrameReview(i){const f=S.frames[i];if(!f)return null;const m=analyzeFramePixels(f.imgData);const comps=findComponents(f.imgData,0);const stray=comps.filter(c=>c.count<+$('stray-size').value);const holes=countTransparentHoles(f.imgData,+$('stray-size').value);const ref=S.frames[0]?analyzeFramePixels(S.frames[0].imgData):m;const dx=ref&&m?m.center.x-ref.center.x:0,dy=ref&&m?m.center.y-ref.center.y:0;const issues=[];if(stray.length)issues.push('stray '+stray.reduce((a,c)=>a+c.count,0)+'px');if(holes.count)issues.push('holes '+holes.pixels+'px');if(Math.abs(dx)>+$('jitter-thresh').value||Math.abs(dy)>+$('jitter-thresh').value)issues.push('jitter '+dx.toFixed(1)+','+dy.toFixed(1));return{index:i,hash:hashImageData(f.imgData),pixels:m.pixels,soft:m.soft,bbox:m.bbox,center:m.center,anchor:f.anchor,anchorDelta:{x:f.anchor.x-S.frames[0].anchor.x,y:f.anchor.y-S.frames[0].anchor.y},strayCount:stray.length,strayPixels:stray.reduce((a,c)=>a+c.count,0),pinholeCount:holes.count,pinholePixels:holes.pixels,centerDelta:{x:dx,y:dy},issues,label:f.label||'',notes:f.notes||''}}
+function refreshReviewIssues(){S.reviewIssues=S.frames.map((_,i)=>collectFrameReview(i)).filter(r=>r&&r.issues.length);const el=$('review-issue-list');if(el)el.textContent=S.reviewIssues.length?'Issues: '+S.reviewIssues.map(r=>'f'+(r.index+1)+' '+r.issues.join('/')).join(' | '):'Issues: none'}
+function buildReviewReport(){const cols=+$('export-cols').value||1;const pad=+$('chk-no-pad').checked?0:+$('export-pad').value;const fw=S.frames[0]?.imgData.width||0,fh=S.frames[0]?.imgData.height||0;const cellW=fw+pad*2,cellH=fh+pad*2;const rows=Math.ceil((S.frames.length||1)/cols);const frames=S.frames.map((_,i)=>{const r=collectFrameReview(i),col=i%cols,row=Math.floor(i/cols);return{...r,col,row,sheetRect:{x:col*cellW+pad,y:row*cellH+pad,w:fw,h:fh}}}).filter(Boolean);const totals=frames.reduce((acc,r)=>{acc.pixels+=r.pixels;acc.soft+=r.soft;acc.strayPixels+=r.strayPixels;acc.pinholePixels+=r.pinholePixels;acc.issueFrames+=r.issues.length?1:0;return acc},{pixels:0,soft:0,strayPixels:0,pinholePixels:0,issueFrames:0});return{version:1,name:$('manifest-name').value||'sprite',frameCount:S.frames.length,selectedFrame:S.selectedFrame,sheetLayout:{columns:cols,rows,padding:pad,frameWidth:fw,frameHeight:fh,cellWidth:cellW,cellHeight:cellH,sheetWidth:cellW*cols,sheetHeight:cellH*rows},settings:{straySize:+$('stray-size').value,jitterThresh:+$('jitter-thresh').value,outlineRadius:+$('outline-radius').value,softenRadius:+$('soften-radius').value,autoFitFrames:S.autoFitFrames,maxAutoFitZoom:S.maxAutoFitZoom},totals,batchHistory:S.batchHistory.slice(-10),frames}}
+function exportReviewReport(){if(!S.frames.length){toast('Slice frames first','warning');return}const report=buildReviewReport();const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const a=document.createElement('a');a.download=($('manifest-name').value||'sprite')+'_review-report.json';a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);toast('Review report exported','success')}
+function updateFrameMetaInputs(){const f=S.frames[S.selectedFrame];if($('frame-label'))$('frame-label').value=f?(f.label||''):'';if($('frame-notes'))$('frame-notes').value=f?(f.notes||''):''}
+function updateReviewMetrics(){const el=$('review-metrics');if(!el)return;refreshReviewIssues();updateFrameMetaInputs();const m=analyzeFramePixels(S.currentImageData);if(!m){el.textContent='Review: -';return}const frame=S.frames.length&&S.selectedFrame>=0?`f ${S.selectedFrame+1}/${S.frames.length} · `:'';const bbox=m.bbox?`bbox ${m.bbox.x},${m.bbox.y} ${m.bbox.w}x${m.bbox.h}`:'empty';const ctr=`ctr ${m.center.x.toFixed(1)},${m.center.y.toFixed(1)}`;let issue='';if(S.frames.length&&S.selectedFrame>=0){const r=collectFrameReview(S.selectedFrame);issue=r&&r.issues.length?' · '+r.issues.join(' · '):' · ok'}el.textContent=`Review: ${frame}${m.pixels}px · soft ${m.soft}px · ${bbox} · ${ctr}${issue}`}
+function renderPreviewImageData(imgData,label){if(!imgData)return;S.previewImageData=cloneImageData(imgData);S.previewMode=label;const pw=232,ratio=imgData.height/imgData.width;previewCanvas.width=pw;previewCanvas.height=Math.max(1,Math.round(pw*ratio));prevCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);const tc=document.createElement('canvas');tc.width=imgData.width;tc.height=imgData.height;tc.getContext('2d').putImageData(imgData,0,0);prevCtx.drawImage(tc,0,0,previewCanvas.width,previewCanvas.height);document.querySelector('.preview-label').textContent=label}
+function updatePreview(){if(!S.currentImageData&&!mainCanvas.width)return;if(S.currentImageData)renderPreviewImageData(S.currentImageData,'CURRENT');else{const pw=232,ratio=mainCanvas.height/mainCanvas.width;previewCanvas.width=pw;previewCanvas.height=Math.round(pw*ratio);prevCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);prevCtx.drawImage(mainCanvas,0,0,previewCanvas.width,previewCanvas.height);S.previewImageData=null;S.previewMode='CURRENT'}updateReviewMetrics()}
+function showOriginalPreview(){if(!S.originalImageData)return;renderPreviewImageData(S.originalImageData,'ORIGINAL')}
+function showCurrentPreview(){updatePreview();document.querySelector('.preview-label').textContent='CURRENT'}
+function showRepairPreview(kind){if(!S.currentImageData){toast('Load an image first','warning');return}let img=cloneImageData(S.currentImageData),label='PREVIEW';if(kind==='stray'){img=removeStrayPixels(img,+$('stray-size').value);label='PREVIEW STRAY'}else if(kind==='pinholes'){img=fillAlphaPinholes(img,+$('stray-size').value);label='PREVIEW PINHOLES'}else if(kind==='outline'){img=normalizeOutline(img,+$('outline-radius').value);label='PREVIEW OUTLINE'}renderPreviewImageData(img,label);toast(label.toLowerCase().replace('preview ','')+' preview only')}
+$('btn-preview-cur').addEventListener('click',showCurrentPreview);
+$('btn-preview-orig').addEventListener('click',showOriginalPreview);
+$('btn-preview-stray').addEventListener('click',()=>showRepairPreview('stray'));
+$('btn-preview-pinholes').addEventListener('click',()=>showRepairPreview('pinholes'));
+$('btn-preview-outline').addEventListener('click',()=>showRepairPreview('outline'));
+
+// ════════════════════════════════════════════
+// ALPHA CLEANING
+// ════════════════════════════════════════════
+function colorDistance(r,g,b,tr,tg,tb){return Math.sqrt((r-tr)**2+(g-tg)**2+(b-tb)**2)}
+function isBackgroundLike(r,g,b,tol,maxSat){const ts=[[255,255,255],[250,250,250],[245,245,245],[238,238,238],[230,230,230],[224,224,224],[216,216,216]];const mx=Math.max(r,g,b),mn=Math.min(r,g,b);if((mx-mn)>maxSat)return false;return ts.some(([tr,tg,tb])=>colorDistance(r,g,b,tr,tg,tb)<=tol)}
+
+function cleanAlpha(imgData,tolerance,maxSat,edgeOnly,removeFringe){
+  const{width:w,height:h,data}=imgData;const visited=new Uint8Array(w*h);const queue=[];
+  function push(x,y){if(x<0||y<0||x>=w||y>=h)return;const i=y*w+x;if(visited[i])return;visited[i]=1;const p=i*4;if(data[p+3]===0||isBackgroundLike(data[p],data[p+1],data[p+2],tolerance,maxSat))queue.push([x,y])}
+  if(edgeOnly){for(let x=0;x<w;x++){push(x,0);push(x,h-1)}for(let y=0;y<h;y++){push(0,y);push(w-1,y)}}else{for(let y=0;y<h;y++)for(let x=0;x<w;x++)push(x,y)}
+  while(queue.length){const[x,y]=queue.pop();data[(y*w+x)*4+3]=0;push(x+1,y);push(x-1,y);push(x,y+1);push(x,y-1)}
+  if(removeFringe){const copy=new Uint8ClampedArray(data);for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const p=(y*w+x)*4;const a=copy[p+3];if(a>0&&a<128){let tr=0,tg=0,tb=0,tw=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const np=((y+dy)*w+(x+dx))*4;const na=copy[np+3];if(na>128){tr+=copy[np];tg+=copy[np+1];tb+=copy[np+2];tw++}}if(tw>0){data[p]=Math.round(tr/tw);data[p+1]=Math.round(tg/tw);data[p+2]=Math.round(tb/tw)}}}}
+  return imgData;
+}
+
+$('btn-clean-run').addEventListener('click',()=>{
+  if(!S.currentImageData){toast('Load an image first','warning');return}
+  pushUndo();
+  const imgData=cloneImageData(S.currentImageData);
+  cleanAlpha(imgData,+$('tolerance').value,+$('max-saturation').value,$('chk-edge-seed').checked,$('chk-remove-fringe').checked);
+  S.currentImageData=imgData;
+  // Update current frame if sliced
+  if(S.selectedFrame>=0&&S.selectedFrame<S.frames.length)S.frames[S.selectedFrame].imgData=cloneImageData(imgData);
+  applyImageData(S.currentImageData);drawOverlay();updateFrameStrip();toast('Background removed','success');
+});
+
+// ════════════════════════════════════════════
+// ISLAND DETECTION
+// ════════════════════════════════════════════
+function findComponents(imgData,athresh){const{width:w,height:h,data}=imgData;const visited=new Uint8Array(w*h);const comps=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=y*w+x;if(visited[idx])continue;visited[idx]=1;if(data[idx*4+3]<=athresh)continue;let minX=x,maxX=x,minY=y,maxY=y,count=0;const stack=[[x,y]];while(stack.length){const[cx,cy]=stack.pop();count++;if(cx<minX)minX=cx;if(cx>maxX)maxX=cx;if(cy<minY)minY=cy;if(cy>maxY)maxY=cy;for(const[nx,ny]of[[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1],[cx+1,cy+1],[cx-1,cy-1],[cx+1,cy-1],[cx-1,cy+1]]){if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(visited[ni])continue;visited[ni]=1;if(data[ni*4+3]>athresh)stack.push([nx,ny])}}comps.push({minX,minY,maxX,maxY,width:maxX-minX+1,height:maxY-minY+1,count})}return comps}
+function boxesDist(a,b){const dx=Math.max(0,Math.max(a.minX-b.maxX,b.minX-a.maxX)),dy=Math.max(0,Math.max(a.minY-b.maxY,b.minY-a.maxY));return Math.sqrt(dx*dx+dy*dy)}
+function mergeNearby(comps,dist){let groups=comps.map(c=>({...c}));let changed=true;while(changed){changed=false;outer:for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;j++)if(boxesDist(groups[i],groups[j])<=dist){groups[i]={minX:Math.min(groups[i].minX,groups[j].minX),minY:Math.min(groups[i].minY,groups[j].minY),maxX:Math.max(groups[i].maxX,groups[j].maxX),maxY:Math.max(groups[i].maxY,groups[j].maxY),count:(groups[i].count||0)+(groups[j].count||0)};groups.splice(j,1);changed=true;break outer}}for(const g of groups){g.width=g.maxX-g.minX+1;g.height=g.maxY-g.minY+1;g.cx=(g.minX+g.maxX)/2;g.cy=(g.minY+g.maxY)/2}return groups}
+function sortTopLeft(groups){const sorted=[...groups].sort((a,b)=>a.cy-b.cy);const rows=[];for(const g of sorted){let placed=false;for(const row of rows){const avgY=row.reduce((s,it)=>s+it.cy,0)/row.length;const avgH=row.reduce((s,it)=>s+it.height,0)/row.length;if(Math.abs(g.cy-avgY)<=Math.max(avgH*.75,20)){row.push(g);placed=true;break}}if(!placed)rows.push([g])}for(const row of rows)row.sort((a,b)=>a.cx-b.cx);rows.sort((a,b)=>a.reduce((s,it)=>s+it.cy,0)/a.length-b.reduce((s,it)=>s+it.cy,0)/b.length);return rows.flat()}
+
+$('btn-detect').addEventListener('click',()=>{
+  if(!S.currentImageData){toast('Load an image first','warning');return}
+  const comps=findComponents(S.currentImageData,+$('alpha-threshold').value);
+  const useful=comps.filter(c=>c.count>=8);
+  S.detectedGroups=sortTopLeft(mergeNearby(useful,+$('merge-distance').value));
+  drawOverlay();toast('Detected '+S.detectedGroups.length+' groups','success');
+});
+
+// ════════════════════════════════════════════
+// PER-FRAME CLEANUP
+// ════════════════════════════════════════════
+
+// Remove stray pixels outside silhouette
+function removeStrayPixels(imgData,maxSize){
+  const{width:w,height:h,data}=imgData;
+  // Find connected components, remove those with pixel count < maxSize
+  const visited=new Uint8Array(w*h);const toRemove=new Set();
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=y*w+x;if(visited[idx]||data[idx*4+3]===0)continue;const component=[];const stack=[[x,y]];visited[idx]=1;while(stack.length){const[cx,cy]=stack.pop();component.push(cy*w+cx);for(const[nx,ny]of[[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]]){if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(visited[ni]||data[ni*4+3]===0)continue;visited[ni]=1;stack.push([nx,ny])}}if(component.length<maxSize)component.forEach(i=>toRemove.add(i))}
+  toRemove.forEach(i=>{data[i*4+3]=0;data[i*4]=0;data[i*4+1]=0;data[i*4+2]=0});
+  return imgData;
+}
+
+// Fill small transparent holes fully enclosed by opaque pixels.
+function fillAlphaPinholes(imgData,maxSize){
+  const{width:w,height:h,data}=imgData;
+  const visited=new Uint8Array(w*h);
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const idx=y*w+x;if(visited[idx]||data[idx*4+3]>0)continue;
+    const component=[];let touchesEdge=false;const stack=[[x,y]];visited[idx]=1;
+    while(stack.length){const[cx,cy]=stack.pop();const ci=cy*w+cx;component.push(ci);if(cx===0||cy===0||cx===w-1||cy===h-1)touchesEdge=true;for(const[dx,dy]of dirs){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(visited[ni]||data[ni*4+3]>0)continue;visited[ni]=1;stack.push([nx,ny])}}
+    if(!touchesEdge&&component.length<=maxSize){
+      component.forEach(i=>{let r=0,g=0,b=0,a=0,n=0;const cx=i%w,cy=Math.floor(i/w);for(const[dx,dy]of dirs){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const p=(ny*w+nx)*4;if(data[p+3]>0){r+=data[p];g+=data[p+1];b+=data[p+2];a+=data[p+3];n++}}const p=i*4;if(n){data[p]=Math.round(r/n);data[p+1]=Math.round(g/n);data[p+2]=Math.round(b/n);data[p+3]=Math.round(a/n)||255}});
+    }
+  }
+  return imgData;
+}
+
+// Fix jitter: find the center of mass of each frame and shift to align
+function shiftImageData(imgData,dx,dy){const out=new ImageData(imgData.width,imgData.height);const sd=imgData.data,dd=out.data;for(let y=0;y<imgData.height;y++)for(let x=0;x<imgData.width;x++){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=imgData.width||ny>=imgData.height)continue;const sp=(y*imgData.width+x)*4,dp=(ny*imgData.width+nx)*4;dd[dp]=sd[sp];dd[dp+1]=sd[sp+1];dd[dp+2]=sd[sp+2];dd[dp+3]=sd[sp+3]}return out}
+function fixJitter(frames,threshold,shiftPixels=false){
+  if(frames.length<2)return frames;
+  const refFrame=frames[0];
+  const refCenter=centerOfMass(refFrame.imgData);
+  frames.forEach((f,i)=>{
+    if(i===0)return;
+    const c=centerOfMass(f.imgData);
+    const dx=Math.round(refCenter.x-c.x), dy=Math.round(refCenter.y-c.y);
+    if(Math.abs(dx)>threshold||Math.abs(dy)>threshold){
+      if(shiftPixels)f.imgData=shiftImageData(f.imgData,dx,dy);
+      else if(f.anchor){f.anchor.x+=dx;f.anchor.y+=dy;}
+    }
+  });
+  return frames;
+}
+
+function centerOfMass(imgData){
+  const{width:w,height:h,data}=imgData;let sx=0,sy=0,total=0;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const a=data[(y*w+x)*4+3];if(a>0){sx+=x*a;sy+=y*a;total+=a}}
+  return total>0?{x:sx/total,y:sy/total}:{x:w/2,y:h/2};
+}
+
+// Normalize outline thickness
+function normalizeOutline(imgData,radius){
+  if(radius<=0)return imgData;
+  const{width:w,height:h,data}=imgData;
+  // Erode then dilate (opening) to remove thin protrusions, then dilate to restore
+  const eroded=erodeAlpha(imgData,1);
+  const dilated=dilateAlpha(eroded,Math.max(1,radius));
+  // Copy result back
+  const dd=dilated.data;
+  for(let i=0;i<data.length;i+=4){
+    if(data[i+3]>0&&dd[i+3]===0){data[i+3]=Math.min(data[i+3],64)} // thin protrusions fade
+    else if(dd[i+3]>0&&data[i+3]===0){data[i]=dd[i];data[i+1]=dd[i+1];data[i+2]=dd[i+2];data[i+3]=dd[i+3]}
+  }
+  return imgData;
+}
+
+function erodeAlpha(imgData,r){
+  const{width:w,height:h,data}=imgData;const out=new ImageData(w,h);const od=out.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const p=(y*w+x)*4;let minA=255;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w||ny>=h){minA=0;break}const np=(ny*w+nx)*4;if(data[np+3]<minA)minA=data[np+3];if(minA===0)break}od[p+3]=minA;if(minA>0){od[p]=data[p];od[p+1]=data[p+1];od[p+2]=data[p+2]}}
+  return out;
+}
+
+function dilateAlpha(imgData,r){
+  const{width:w,height:h,data}=imgData;const out=new ImageData(w,h);const od=out.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const p=(y*w+x)*4;let maxA=0,bestR=0,bestG=0,bestB=0,bestD=Infinity;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const np=(ny*w+nx)*4;if(data[np+3]>maxA||(data[np+3]===maxA&&data[np+3]>128)){const d=dx*dx+dy*dy;if(data[np+3]>maxA||d<bestD){maxA=data[np+3];bestR=data[np];bestG=data[np+1];bestB=data[np+2];bestD=d}}}od[p]=bestR;od[p+1]=bestG;od[p+2]=bestB;od[p+3]=maxA}
+  return out;
+}
+
+// Soften edges
+function applySoftening(imgData,radius){
+  if(radius<=0)return imgData;const{width:w,height:h,data}=imgData;const r=Math.ceil(radius);
+  const tmp=new Uint8ClampedArray(data);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const p=(y*w+x)*4;if(tmp[p+3]===0)continue;let sR=0,sG=0,sB=0,sA=0,tW=0;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const d=Math.sqrt(dx*dx+dy*dy);if(d>radius)continue;const wt=1-d/(radius+1);const np=(ny*w+nx)*4;sR+=tmp[np]*wt;sG+=tmp[np+1]*wt;sB+=tmp[np+2]*wt;sA+=tmp[np+3]*wt;tW+=wt}if(tW>0){data[p]=Math.round(sR/tW);data[p+1]=Math.round(sG/tW);data[p+2]=Math.round(sB/tW);data[p+3]=Math.round(sA/tW)}}
+  return imgData;
+}
+
+// Button handlers
+$('btn-remove-stray').addEventListener('click',()=>{
+  if(S.selectedFrame<0||!S.frames.length){toast('Slice frames first','warning');return}
+  pushUndo();
+  if(S.frames.length&&S.selectedFrame>=0){
+    const f=S.frames[S.selectedFrame];f.imgData=removeStrayPixels(cloneImageData(f.imgData),+$('stray-size').value);
+    S.currentImageData=f.imgData;applyImageData(S.currentImageData);showFrame(S.selectedFrame);
+  } else if(S.currentImageData){
+    S.currentImageData=removeStrayPixels(cloneImageData(S.currentImageData),+$('stray-size').value);
+    applyImageData(S.currentImageData);
+  }
+  toast('Stray pixels removed','success');
+});
+
+$('btn-fix-pinholes').addEventListener('click',()=>{
+  if(S.selectedFrame<0||!S.frames.length){toast('Slice frames first','warning');return}
+  pushUndo();
+  const f=S.frames[S.selectedFrame];f.imgData=fillAlphaPinholes(cloneImageData(f.imgData),+$('stray-size').value);
+  S.currentImageData=f.imgData;applyImageData(S.currentImageData);showFrame(S.selectedFrame);toast('Pinholes filled','success');
+});
+
+$('btn-fix-jitter').addEventListener('click',()=>{
+  if(!S.frames.length){toast('Slice frames first','warning');return}
+  pushUndo();fixJitter(S.frames,+$('jitter-thresh').value,$('chk-jitter-shift').checked);showFrame(S.selectedFrame);updateFrameStrip();updateTimeline();toast('Jitter fixed','success');
+});
+
+$('btn-normalize-outline').addEventListener('click',()=>{
+  if(S.selectedFrame<0||!S.frames.length){toast('Slice frames first','warning');return}
+  pushUndo();
+  const f=S.frames[S.selectedFrame];f.imgData=normalizeOutline(cloneImageData(f.imgData),+$('outline-radius').value);
+  S.currentImageData=f.imgData;applyImageData(S.currentImageData);showFrame(S.selectedFrame);toast('Outline normalized','success');
+});
+
+$('btn-soften').addEventListener('click',()=>{
+  if(S.selectedFrame<0||!S.frames.length){toast('Slice frames first','warning');return}
+  pushUndo();
+  const f=S.frames[S.selectedFrame];f.imgData=applySoftening(cloneImageData(f.imgData),+$('soften-radius').value);
+  // Also apply erode/dilate
+  const erode=+$('alpha-erode').value,dilate=+$('alpha-dilate').value;
+  if(erode>0){const e=erodeAlpha(f.imgData,erode);f.imgData=new ImageData(new Uint8ClampedArray(e.data),e.width,e.height)}
+  if(dilate>0){const d=dilateAlpha(f.imgData,dilate);f.imgData=new ImageData(new Uint8ClampedArray(d.data),d.width,d.height)}
+  S.currentImageData=f.imgData;applyImageData(S.currentImageData);showFrame(S.selectedFrame);toast('Softening applied','success');
+});
+
+// Cleanup all frames
+$('btn-cleanup-all').addEventListener('click',()=>{
+  if(!S.frames.length){toast('Slice frames first','warning');return}
+  const beforeIssues=S.frames.map((_,i)=>collectFrameReview(i)).filter(r=>r&&r.issues.length);
+  const summary='Cleanup '+S.frames.length+' frame(s). Current issues: '+(beforeIssues.length?beforeIssues.map(r=>'f'+(r.index+1)+' '+r.issues.join('/')).join('; '):'none')+'. Continue?';
+  if(!confirm(summary))return;
+  const beforeReport=buildReviewReport();
+  pushUndo();
+  const stray=+$('stray-size').value,outlineR=+$('outline-radius').value,softenR=+$('soften-radius').value;
+  const erode=+$('alpha-erode').value,dilate=+$('alpha-dilate').value;
+  S.frames.forEach((f,i)=>{
+    let fd=cloneImageData(f.imgData);
+    fd=removeStrayPixels(fd,stray);
+    fd=fillAlphaPinholes(fd,stray);
+    if(outlineR>0)fd=normalizeOutline(fd,outlineR);
+    if(softenR>0)fd=applySoftening(fd,softenR);
+    if(erode>0){const e=erodeAlpha(fd,erode);fd=new ImageData(new Uint8ClampedArray(e.data),e.width,e.height)}
+    if(dilate>0){const d=dilateAlpha(fd,dilate);fd=new ImageData(new Uint8ClampedArray(d.data),d.width,d.height)}
+    if(forceTransparentCleanupEnabled()){const d=fd.data;for(let j=3;j<d.length;j+=4)if(d[j]<8)d[j]=0}
+    f.imgData=fd;
+  });
+  fixJitter(S.frames,+$('jitter-thresh').value,$('chk-jitter-shift').checked);
+  showFrame(S.selectedFrame);updateFrameStrip();updateTimeline();
+  const afterReport=buildReviewReport();
+  S.batchHistory.push({kind:'cleanup-all',at:new Date().toISOString(),before:beforeReport.totals,after:afterReport.totals,delta:{issueFrames:afterReport.totals.issueFrames-beforeReport.totals.issueFrames,strayPixels:afterReport.totals.strayPixels-beforeReport.totals.strayPixels,pinholePixels:afterReport.totals.pinholePixels-beforeReport.totals.pinholePixels}});
+  toast('All frames cleaned up','success');
+});
+
+// ════════════════════════════════════════════
+// EXPORT & REPACK
+// ════════════════════════════════════════════
+function repackSheet(){
+  if(!S.frames.length){toast('Slice frames first','warning');return}
+  const cols=+$('export-cols').value, pad=+$('chk-no-pad').checked?0:+$('export-pad').value;
+  const fw=S.frames[0].imgData.width, fh=S.frames[0].imgData.height;
+  const cellW=fw+pad*2, cellH=fh+pad*2;
+  const rows=Math.ceil(S.frames.length/cols);
+  const outW=cellW*cols, outH=cellH*rows;
+  const outC=document.createElement('canvas');outC.width=outW;outC.height=outH;
+  const outCtx=outC.getContext('2d');outCtx.clearRect(0,0,outW,outH);
+
+  S.frames.forEach((f,i)=>{
+    const col=i%cols, row=Math.floor(i/cols);
+    const dx=col*cellW+pad, dy=row*cellH+pad;
+    const tmpC=document.createElement('canvas');tmpC.width=f.imgData.width;tmpC.height=f.imgData.height;
+    tmpC.getContext('2d').putImageData(f.imgData,0,0);
+    outCtx.drawImage(tmpC,dx,dy);
+  });
+
+  return outC;
+}
+
+$('btn-repack').addEventListener('click',()=>{
+  const outC=repackSheet();if(!outC)return;
+  const imgData=outC.getContext('2d').getImageData(0,0,outC.width,outC.height);
+  S.currentImageData=imgData;mainCanvas.width=outC.width;mainCanvas.height=outC.height;
+  ctx.putImageData(imgData,0,0);updateOverlaySize();S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();drawOverlay();
+  toast('Sheet repacked','success');
+});
+
+$('btn-export-png').addEventListener('click',()=>{
+  const outC=repackSheet();if(!outC){toast('Nothing to export','warning');return}
+  const a=document.createElement('a');a.download=($('manifest-name').value||'sprite')+'_sheet.png';
+  a.href=outC.toDataURL('image/png');a.click();toast('PNG exported','success');
+});
+
+$('btn-export').addEventListener('click',()=>{$('btn-export-png').click()});
+
+// ════════════════════════════════════════════
+// MANIFEST EXPORT
+// ════════════════════════════════════════════
+$('btn-export-manifest').addEventListener('click',()=>{
+  if(!S.frames.length){toast('No frames to manifest','warning');return}
+  const name=$('manifest-name').value||'sprite';
+  const fps=+$('manifest-fps').value||12;
+  const cols=+$('export-cols').value;
+  const pad=+$('chk-no-pad').checked?0:+$('export-pad').value;
+  const fw=S.frames[0].imgData.width, fh=S.frames[0].imgData.height;
+  const cellW=fw+pad*2, cellH=fh+pad*2;
+  const rows=Math.ceil(S.frames.length/cols);
+  const manifest={
+    name, fps, frameWidth:fw, frameHeight:fh,
+    columns:cols, rows, frameCount:S.frames.length,
+    padding:pad, totalFrames:S.frames.length,
+    sheetLayout:{columns:cols,rows,padding:pad,frameWidth:fw,frameHeight:fh,cellWidth:cellW,cellHeight:cellH,sheetWidth:cellW*cols,sheetHeight:cellH*rows},
+    anchor:S.anchor,
+    frames:Array.from({length:S.frames.length},(_,i)=>{const r=collectFrameReview(i),col=i%cols,row=Math.floor(i/cols),cellW=fw+pad*2,cellH=fh+pad*2;return{
+      index:i, col, row,
+      sheetRect:{x:col*cellW+pad,y:row*cellH+pad,w:fw,h:fh},
+      anchor:S.frames[i].anchor||S.anchor,
+      label:S.frames[i].label||'', notes:S.frames[i].notes||'',
+      hash:r.hash, bbox:r.bbox, alphaPixels:r.pixels, softAlphaPixels:r.soft,
+      strayPixels:r.strayPixels, pinholePixels:r.pinholePixels, issues:r.issues
+    }})
+  };
+  const blob=new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.download=name+'_sprites.json';a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);
+  toast('sprites.json exported','success');
+});
+
+$('btn-export-manifest-full').addEventListener('click',()=>{
+  const cfg=getConfig();
+  const blob=new Blob([JSON.stringify(cfg,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.download='sprite-atlas-config.json';a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);
+  toast('Full config exported','success');
+});
+
+// ════════════════════════════════════════════
+// CONFIG SYSTEM
+// ════════════════════════════════════════════
+function getConfig(){
+  return{
+    frameW:+$('frame-w').value,frameH:+$('frame-h').value,gridOx:+$('grid-ox').value,gridOy:+$('grid-oy').value,
+    anchor:S.anchor,tolerance:+$('tolerance').value,maxSaturation:+$('max-saturation').value,
+    alphaThreshold:+$('alpha-threshold').value,mergeDistance:+$('merge-distance').value,
+    straySize:+$('stray-size').value,jitterThresh:+$('jitter-thresh').value,outlineRadius:+$('outline-radius').value,
+    softenRadius:+$('soften-radius').value,alphaErode:+$('alpha-erode').value,alphaDilate:+$('alpha-dilate').value,
+    exportCols:+$('export-cols').value,exportPad:+$('export-pad').value,noPad:$('chk-no-pad').checked,
+    manifestName:$('manifest-name').value,manifestFps:+$('manifest-fps').value,
+    showOnionSkin:S.showOnionSkin,onionOpacity:S.onionOpacity,autoFitFrames:S.autoFitFrames,maxAutoFitZoom:S.maxAutoFitZoom,
+    frameMeta:S.frames.map((f,i)=>({index:i,label:f.label||'',notes:f.notes||'',anchor:f.anchor||S.anchor})),
+    batchHistory:S.batchHistory.slice(-10),
+  };
+}
+
+function applyPendingFrameMeta(){
+  if(!Array.isArray(S.pendingFrameMeta)||!S.pendingFrameMeta.length)return;
+  S.pendingFrameMeta.forEach(m=>{const f=S.frames[m.index];if(f){if(m.label!==undefined)f.label=m.label;if(m.notes!==undefined)f.notes=m.notes;if(m.anchor)f.anchor=m.anchor}});
+  updateFrameMetaInputs();refreshReviewIssues();updateFrameStrip();updateTimeline();
+}
+function applyConfig(c){
+  if(c.frameW!==undefined){$('frame-w').value=c.frameW;$('frame-w-num').value=c.frameW;$('fw-val').textContent=c.frameW}
+  if(c.frameH!==undefined){$('frame-h').value=c.frameH;$('frame-h-num').value=c.frameH;$('fh-val').textContent=c.frameH}
+  if(c.gridOx!==undefined){$('grid-ox').value=c.gridOx;$('ox-val').textContent=c.gridOx}
+  if(c.gridOy!==undefined){$('grid-oy').value=c.gridOy;$('oy-val').textContent=c.gridOy}
+  if(c.anchor){S.anchor=c.anchor;$('anchor-x').value=c.anchor.x;$('anchor-y').value=c.anchor.y;$('anchor-x-num').value=c.anchor.x;$('anchor-y-num').value=c.anchor.y;$('ancx-val').textContent=c.anchor.x;$('ancy-val').textContent=c.anchor.y;updateAnchorList();drawOverlay()}
+  if(c.tolerance!==undefined){$('tolerance').value=c.tolerance;$('tol-val').textContent=c.tolerance}
+  if(c.maxSaturation!==undefined){$('max-saturation').value=c.maxSaturation;$('sat-val').textContent=c.maxSaturation}
+  if(c.alphaThreshold!==undefined){$('alpha-threshold').value=c.alphaThreshold;$('athresh-val').textContent=c.alphaThreshold}
+  if(c.mergeDistance!==undefined){$('merge-distance').value=c.mergeDistance;$('merge-val').textContent=c.mergeDistance}
+  if(c.straySize!==undefined){$('stray-size').value=c.straySize;$('stray-val').textContent=c.straySize}
+  if(c.jitterThresh!==undefined){$('jitter-thresh').value=c.jitterThresh;$('jitter-val').textContent=c.jitterThresh}
+  if(c.outlineRadius!==undefined){$('outline-radius').value=c.outlineRadius;$('outline-val').textContent=c.outlineRadius}
+  if(c.softenRadius!==undefined){$('soften-radius').value=c.softenRadius;$('soften-val').textContent=c.softenRadius}
+  if(c.alphaErode!==undefined){$('alpha-erode').value=c.alphaErode;$('erode-val').textContent=c.alphaErode}
+  if(c.alphaDilate!==undefined){$('alpha-dilate').value=c.alphaDilate;$('dilate-val').textContent=c.alphaDilate}
+  if(c.exportCols!==undefined){$('export-cols').value=c.exportCols;$('cols-val').textContent=c.exportCols}
+  if(c.exportPad!==undefined){$('export-pad').value=c.exportPad;$('pad-val').textContent=c.exportPad}
+  if(c.noPad!==undefined)$('chk-no-pad').checked=c.noPad;
+  if(c.manifestName!==undefined)$('manifest-name').value=c.manifestName;
+  if(c.manifestFps!==undefined){$('manifest-fps').value=c.manifestFps;$('fps-val').textContent=c.manifestFps}
+  if(c.showOnionSkin!==undefined){S.showOnionSkin=c.showOnionSkin;$('chk-onion').checked=c.showOnionSkin}
+  if(c.onionOpacity!==undefined)S.onionOpacity=c.onionOpacity;
+  if(c.autoFitFrames!==undefined){S.autoFitFrames=!!c.autoFitFrames;$('btn-auto-fit').classList.toggle('active',S.autoFitFrames)}
+  if(c.maxAutoFitZoom!==undefined){S.maxAutoFitZoom=+c.maxAutoFitZoom||4;$('max-auto-fit-zoom').value=S.maxAutoFitZoom;$('fitzoom-val').textContent=S.maxAutoFitZoom}
+  if(Array.isArray(c.frameMeta)){S.pendingFrameMeta=c.frameMeta.map(m=>({...m}));applyPendingFrameMeta()}
+  if(Array.isArray(c.batchHistory))S.batchHistory=c.batchHistory.map(h=>({...h}));
+}
+function forceTransparentCleanupEnabled(){return !!(($('chk-force-transparent')&&$('chk-force-transparent').checked)||($('chk-force-transparent-frame')&&$('chk-force-transparent-frame').checked))}
+
+function openConfigModal(){$('cfg-editor').value=JSON.stringify(getConfig(),null,2);$('config-modal').classList.add('open')}
+function closeConfigModal(){$('config-modal').classList.remove('open')}
+$('btn-config').addEventListener('click',openConfigModal);
+$('btn-config-close').addEventListener('click',closeConfigModal);
+$('btn-cfg-cancel').addEventListener('click',closeConfigModal);
+$('config-modal').addEventListener('click',e=>{if(e.target===$('config-modal'))closeConfigModal()});
+$('btn-cfg-save-local').addEventListener('click',()=>{try{localStorage.setItem('sprite-atlas-studio-cfg',JSON.stringify(getConfig()));toast('Config saved','success')}catch(e){toast('Save failed','error')}});
+$('btn-cfg-load-local').addEventListener('click',()=>{try{const r=localStorage.getItem('sprite-atlas-studio-cfg');if(!r){toast('No saved config','warning');return}applyConfig(JSON.parse(r));$('cfg-editor').value=JSON.stringify(getConfig(),null,2);toast('Config loaded','success')}catch(e){toast('Load failed','error')}});
+$('btn-cfg-export').addEventListener('click',()=>{const b=new Blob([JSON.stringify(getConfig(),null,2)],{type:'application/json'});const a=document.createElement('a');a.download='sprite-atlas-config.json';a.href=URL.createObjectURL(b);a.click();URL.revokeObjectURL(a.href);toast('Config exported','success')});
+$('btn-cfg-import').addEventListener('click',()=>$('cfg-import-file').click());
+$('cfg-import-file').addEventListener('change',()=>{const f=$('cfg-import-file').files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('cfg-editor').value=r.result;toast('File loaded','success')};r.readAsText(f)});
+$('btn-cfg-apply').addEventListener('click',()=>{try{applyConfig(JSON.parse($('cfg-editor').value));closeConfigModal();toast('Config applied','success')}catch(e){toast('Invalid JSON: '+e.message,'error')}});
+
+// ════════════════════════════════════════════
+// DUAL BG EXTRACT
+// ════════════════════════════════════════════
+function extractDualAlpha(whiteImg,blackImg,athresh,despill,hardAlpha){
+  const w=whiteImg.width,h=whiteImg.height;
+  const wC=document.createElement('canvas');wC.width=w;wC.height=h;const wCtx=wC.getContext('2d',{willReadFrequently:true});wCtx.clearRect(0,0,w,h);wCtx.drawImage(whiteImg,0,0);const wD=wCtx.getImageData(0,0,w,h);
+  const bC=document.createElement('canvas');bC.width=w;bC.height=h;const bCtx=bC.getContext('2d',{willReadFrequently:true});bCtx.clearRect(0,0,w,h);bCtx.drawImage(blackImg,0,0);const bD=bCtx.getImageData(0,0,w,h);
+  const out=new ImageData(w,h);const wd=wD.data,bd=bD.data,od=out.data;let tc=0,oc=0;
+  for(let i=0;i<wd.length;i+=4){const wr=wd[i],wg=wd[i+1],wb=wd[i+2],br=bd[i],bg=bd[i+1],bb=bd[i+2];let ar=255-(wr-br),ag=255-(wg-bg),ab=255-(wb-bb);ar=Math.max(0,Math.min(255,ar));ag=Math.max(0,Math.min(255,ag));ab=Math.max(0,Math.min(255,ab));let a=(ar+ag+ab)/3;if(hardAlpha)a=a>=128?255:0;if(a<=athresh){od[i]=od[i+1]=od[i+2]=od[i+3]=0;tc++;continue}const an=a/255;let r=br/an,g=bg/an,bl=bb/an;if(despill){const r2=(wr-(1-an)*255)/an,g2=(wg-(1-an)*255)/an,b2=(wb-(1-an)*255)/an;r=(r+r2)/2;g=(g+g2)/2;bl=(bl+b2)/2}od[i]=clamp255(r);od[i+1]=clamp255(g);od[i+2]=clamp255(bl);od[i+3]=clamp255(a);oc++}
+  return out;
+}
+
+// Auto-detect dual mode and extract
+// (accessible from cleanup workflow)
+// We'll add a button in cleanup for this
+// Actually, keep it simple: if dual mode is on and both images loaded, show extract button
+
+// ════════════════════════════════════════════
+// TEST HOOKS (read-only helpers for Playwright contracts)
+// ════════════════════════════════════════════
+window.__spriteFanTest = {
+  getState(){return {wf:S.wf,frames:S.frames.length,selectedFrame:S.selectedFrame,viewMode:S.viewMode,autoFitFrames:S.autoFitFrames,maxAutoFitZoom:S.maxAutoFitZoom,zoom:S.zoom,panX:S.panX,panY:S.panY,detectedGroups:S.detectedGroups.length,previewMode:S.previewMode,viewStates:S.viewStates}},
+  getCanvasSize(){return {width:mainCanvas.width,height:mainCanvas.height}},
+  getCurrentAlpha(x,y){if(!S.currentImageData)return null;const ix=(y*S.currentImageData.width+x)*4+3;return S.currentImageData.data[ix]},
+  getCurrentRgba(x,y){if(!S.currentImageData)return null;const ix=(y*S.currentImageData.width+x)*4;const d=S.currentImageData.data;return [d[ix],d[ix+1],d[ix+2],d[ix+3]]},
+  getPreviewAlpha(x,y){if(!S.previewImageData)return null;const ix=(y*S.previewImageData.width+x)*4+3;return S.previewImageData.data[ix]},
+  getPreviewMode(){return S.previewMode},
+  getFrameAlpha(frameIndex,x,y){const f=S.frames[frameIndex];if(!f)return null;const ix=(y*f.imgData.width+x)*4+3;return f.imgData.data[ix]},
+  getFrameHash(frameIndex){const f=S.frames[frameIndex];return f?hashImageData(f.imgData):null},
+  getFrameMetrics(frameIndex){const f=S.frames[frameIndex];return analyzeFramePixels(f?f.imgData:S.currentImageData)},
+  getDetectedGroups(){return S.detectedGroups.map(g=>({minX:g.minX,minY:g.minY,maxX:g.maxX,maxY:g.maxY,width:g.width,height:g.height,count:g.count}))},
+  getReviewText(){return $('review-metrics')?.textContent||''},
+  getReviewIssues(){refreshReviewIssues();return S.reviewIssues},
+  gotoIssue(dir=1){gotoIssue(dir);return this.getState()},
+  setFrameMeta(i,label,notes){const f=S.frames[i];if(!f)return null;f.label=label;f.notes=notes;if(i===S.selectedFrame)updateFrameMetaInputs();return {label:f.label,notes:f.notes}},
+  getConfig(){return getConfig()},
+  applyConfig(c){applyConfig(c);return getConfig()},
+  selectFrame(i){showFrame(i);return this.getState()},
+};
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+applyTransform();
+$('btn-auto-fit').classList.toggle('active',S.autoFitFrames);
+updateAnchorList();
+try{const saved=localStorage.getItem('sprite-atlas-studio-cfg');if(saved)applyConfig(JSON.parse(saved))}catch(e){}
+
+// Anchor input live update
+['anchor-x','anchor-x-num'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',()=>{S.anchor.x=+el.value;drawOverlay();updateAnchorList()})});
+['anchor-y','anchor-y-num'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',()=>{S.anchor.y=+el.value;drawOverlay();updateAnchorList()})});
+
+// Frame size live update for grid overlay
+['frame-w','frame-h','grid-ox','grid-oy'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',()=>drawOverlay())});
+
+})();
+</script>
+</body>
+</html>

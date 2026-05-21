@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Dual Background Alpha Extractor</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #1f2024;
+      color: #eee;
+      padding: 20px;
+      line-height: 1.45;
+    }
+
+    canvas {
+      max-width: 95vw;
+      margin-top: 16px;
+      border: 1px solid #555;
+      image-rendering: pixelated;
+      background:
+        linear-gradient(45deg, #777 25%, transparent 25%),
+        linear-gradient(-45deg, #777 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #777 75%),
+        linear-gradient(-45deg, transparent 75%, #777 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+
+    input[type="number"] {
+      width: 80px;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin: 8px 8px 8px 0;
+    }
+
+    .panel {
+      background: #2a2b31;
+      padding: 14px;
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+
+    code {
+      color: #d8b4ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dual Background Alpha Extractor</h1>
+
+  <div class="panel">
+    <p>
+      Upload two renders of the exact same image:
+      one composited over pure white, and one composited over pure black.
+      This reconstructs a true RGBA PNG.
+    </p>
+
+    <label>
+      White-background image:
+      <input id="whiteFile" type="file" accept="image/*" />
+    </label>
+
+    <label>
+      Black-background image:
+      <input id="blackFile" type="file" accept="image/*" />
+    </label>
+
+    <label>
+      Alpha threshold:
+      <input id="alphaThreshold" type="number" value="1" min="0" max="255" />
+    </label>
+
+    <label>
+      Despill / edge cleanup:
+      <input id="despill" type="checkbox" checked />
+    </label>
+
+    <label>
+      Pixel-art hard alpha:
+      <input id="hardAlpha" type="checkbox" />
+    </label>
+
+    <button id="extract">Extract Alpha</button>
+    <button id="download">Download RGBA PNG</button>
+  </div>
+
+  <p id="status">Waiting for images.</p>
+
+  <canvas id="canvas"></canvas>
+
+<script>
+const whiteInput = document.getElementById("whiteFile");
+const blackInput = document.getElementById("blackFile");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d", { willReadFrequently: true });
+const statusEl = document.getElementById("status");
+
+let whiteImage = null;
+let blackImage = null;
+
+function clamp255(v) {
+  return Math.max(0, Math.min(255, Math.round(v)));
+}
+
+function loadImageFromInput(input, callback) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const img = new Image();
+  img.onload = () => {
+    callback(img);
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+whiteInput.onchange = () => {
+  loadImageFromInput(whiteInput, img => {
+    whiteImage = img;
+    statusEl.textContent = `Loaded white image: ${img.width} x ${img.height}`;
+  });
+};
+
+blackInput.onchange = () => {
+  loadImageFromInput(blackInput, img => {
+    blackImage = img;
+    statusEl.textContent = `Loaded black image: ${img.width} x ${img.height}`;
+  });
+};
+
+function imageToData(img, width, height) {
+  const c = document.createElement("canvas");
+  c.width = width;
+  c.height = height;
+
+  const cctx = c.getContext("2d", { willReadFrequently: true });
+  cctx.clearRect(0, 0, width, height);
+  cctx.drawImage(img, 0, 0, width, height);
+
+  return cctx.getImageData(0, 0, width, height);
+}
+
+function extractAlpha() {
+  if (!whiteImage || !blackImage) {
+    statusEl.textContent = "Please load both images first.";
+    return;
+  }
+
+  if (whiteImage.width !== blackImage.width || whiteImage.height !== blackImage.height) {
+    statusEl.textContent = "Images must have identical dimensions.";
+    return;
+  }
+
+  const width = whiteImage.width;
+  const height = whiteImage.height;
+
+  const whiteData = imageToData(whiteImage, width, height);
+  const blackData = imageToData(blackImage, width, height);
+
+  const out = ctx.createImageData(width, height);
+
+  const w = whiteData.data;
+  const b = blackData.data;
+  const o = out.data;
+
+  const alphaThreshold = Number(document.getElementById("alphaThreshold").value);
+  const despill = document.getElementById("despill").checked;
+  const hardAlpha = document.getElementById("hardAlpha").checked;
+
+  let transparentCount = 0;
+  let opaqueCount = 0;
+
+  for (let i = 0; i < w.length; i += 4) {
+    const wr = w[i];
+    const wg = w[i + 1];
+    const wb = w[i + 2];
+
+    const br = b[i];
+    const bg = b[i + 1];
+    const bb = b[i + 2];
+
+    // Derive per-channel alpha from the difference between white and black composites.
+    let ar = 255 - (wr - br);
+    let ag = 255 - (wg - bg);
+    let ab = 255 - (wb - bb);
+
+    ar = Math.max(0, Math.min(255, ar));
+    ag = Math.max(0, Math.min(255, ag));
+    ab = Math.max(0, Math.min(255, ab));
+
+    // Average is usually more stable than trusting one color channel.
+    let a = (ar + ag + ab) / 3;
+
+    if (hardAlpha) {
+      // Useful for crisp sprite art when antialiasing is unwanted.
+      a = a >= 128 ? 255 : 0;
+    }
+
+    if (a <= alphaThreshold) {
+      o[i] = 0;
+      o[i + 1] = 0;
+      o[i + 2] = 0;
+      o[i + 3] = 0;
+      transparentCount++;
+      continue;
+    }
+
+    // Original premultiplied color can be recovered from black composite:
+    // blackComposite = sourceColor * alpha
+    const alphaNorm = a / 255;
+
+    let r = br / alphaNorm;
+    let g = bg / alphaNorm;
+    let bl = bb / alphaNorm;
+
+    if (despill) {
+      // Reconstruct again using white-composite estimate and average both.
+      // source = (whiteComposite - (1 - alpha) * 255) / alpha
+      const r2 = (wr - (1 - alphaNorm) * 255) / alphaNorm;
+      const g2 = (wg - (1 - alphaNorm) * 255) / alphaNorm;
+      const b2 = (wb - (1 - alphaNorm) * 255) / alphaNorm;
+
+      r = (r + r2) / 2;
+      g = (g + g2) / 2;
+      bl = (bl + b2) / 2;
+    }
+
+    o[i] = clamp255(r);
+    o[i + 1] = clamp255(g);
+    o[i + 2] = clamp255(bl);
+    o[i + 3] = clamp255(a);
+
+    opaqueCount++;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  ctx.putImageData(out, 0, 0);
+
+  statusEl.textContent =
+    `Extracted RGBA PNG: ${width} x ${height}. Transparent pixels: ${transparentCount}. Non-transparent pixels: ${opaqueCount}.`;
+}
+
+document.getElementById("extract").onclick = extractAlpha;
+
+document.getElementById("download").onclick = () => {
+  if (!canvas.width || !canvas.height) {
+    statusEl.textContent = "Nothing to download yet.";
+    return;
+  }
+
+  const a = document.createElement("a");
+  a.download = "extracted-alpha-rgba.png";
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+};
+</script>
+</body>
+</html>
