@@ -83,23 +83,23 @@ test('direct Fix Jitter can shift frame pixels when enabled', async ({ page }) =
   await page.locator('#chk-jitter-shift').check();
   const before = await page.evaluate(() => ({
     hash: window.__spriteFanTest.getFrameHash(1),
-    alphaBefore: window.__spriteFanTest.getFrameAlpha(1, 4, 2),
+    alphaTrailingEdge: window.__spriteFanTest.getFrameAlpha(1, 6, 2),
     alphaAfterTarget: window.__spriteFanTest.getFrameAlpha(1, 2, 2),
     meta: window.__spriteFanTest.getConfig().frameMeta,
   }));
-  expect(before.alphaBefore).toBe(255);
+  expect(before.alphaTrailingEdge).toBe(255);
   expect(before.alphaAfterTarget).toBe(0);
 
   await page.locator('#btn-fix-jitter').click();
 
   const shifted = await page.evaluate(() => ({
     hash: window.__spriteFanTest.getFrameHash(1),
-    alphaOld: window.__spriteFanTest.getFrameAlpha(1, 4, 2),
+    alphaOldTrailingEdge: window.__spriteFanTest.getFrameAlpha(1, 6, 2),
     alphaNew: window.__spriteFanTest.getFrameAlpha(1, 2, 2),
     meta: window.__spriteFanTest.getConfig().frameMeta,
   }));
   expect(shifted.hash).not.toBe(before.hash);
-  expect(shifted.alphaOld).toBe(0);
+  expect(shifted.alphaOldTrailingEdge).toBe(0);
   expect(shifted.alphaNew).toBe(255);
   expect(shifted.meta[1].anchor).toEqual(before.meta[1].anchor);
 

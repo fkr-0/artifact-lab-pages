@@ -41,7 +41,7 @@ test('atlas studio review mode tracks issues, metadata, and pixel-shift jitter f
     el.dispatchEvent(new Event('input', { bubbles: true }));
   });
   await page.locator('#jitter-thresh').evaluate((el) => {
-    el.value = '8';
+    el.value = '0';
     el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 
