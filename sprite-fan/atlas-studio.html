@@ -142,6 +142,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:po
 .tl-frame{flex-shrink:0;width:56px;background:var(--bg-2);border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;padding:3px;transition:var(--tr);border:1px solid transparent}
 .tl-frame:hover{background:var(--bg-3)}
 .tl-frame.selected{border-color:var(--accent);background:var(--accent-dim)}
+.tl-frame.preview-selected{box-shadow:inset 0 0 0 2px var(--warning);background:rgba(255,196,87,.10)}
 .tl-frame canvas{width:48px;image-rendering:pixelated;border-radius:2px}
 .tl-frame .tl-idx{font-size:9px;color:var(--text-muted);font-family:var(--font-mono);margin-top:2px}
 .tl-frame.selected .tl-idx{color:var(--accent)}
@@ -504,8 +505,11 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
         <button id="btn-tl-prev" title="Previous">&#x25C0;</button>
         <button id="btn-tl-play" title="Play/Pause">&#x25B6;</button>
         <button id="btn-tl-next" title="Next">&#x25B6;&#xFE0E;</button>
+        <button id="btn-tl-mark" title="Mark current frame for preview subset">★</button>
+        <button id="btn-tl-clear" title="Clear preview subset">×</button>
       </div>
       <div class="tl-fps"><span>FPS:</span><input type="number" id="tl-fps" value="12" min="1" max="60"/></div>
+      <span id="tl-preview-info" style="font-family:var(--font-mono);font-size:10px">Preview: all</span>
       <span id="tl-frame-info" style="margin-left:auto;font-family:var(--font-mono);font-size:10px">0/0</span>
     </div>
     <div class="tl-body" id="tl-body"></div>
@@ -578,7 +582,7 @@ const S = {
   detectedGroups: [],
 
   // Timeline playback
-  playing: false, playInterval: null, playFps: 12,
+  playing: false, playInterval: null, playFps: 12, previewFrames: [], previewCursor: 0,
 
   // Undo
   undoStack: [], redoStack: [], maxUndo: 40,
@@ -627,8 +631,8 @@ function clamp255(v){return Math.max(0,Math.min(255,Math.round(v)))}
 // ════════════════════════════════════════════
 function cloneFrame(f){return{imgData:cloneImageData(f.imgData),anchor:{...(f.anchor||S.anchor)},offsetX:f.offsetX||0,offsetY:f.offsetY||0,label:f.label||'',notes:f.notes||''}}
 function clonePlain(v){return JSON.parse(JSON.stringify(v))}
-function makeUndoSnapshot(){return{currentImageData:S.currentImageData?cloneImageData(S.currentImageData):null,frames:S.frames.map(cloneFrame),selectedFrame:S.selectedFrame,anchor:{...S.anchor},detectedGroups:clonePlain(S.detectedGroups),viewMode:S.viewMode,viewStates:clonePlain(S.viewStates),batchHistory:clonePlain(S.batchHistory),pendingFrameMeta:clonePlain(S.pendingFrameMeta)}}
-function restoreUndoSnapshot(snap){S.frames=snap.frames.map(cloneFrame);S.selectedFrame=snap.selectedFrame;S.anchor={...snap.anchor};S.detectedGroups=clonePlain(snap.detectedGroups||[]);S.viewMode=snap.viewMode||'source';S.viewStates=clonePlain(snap.viewStates||{source:null,frame:null});S.batchHistory=clonePlain(snap.batchHistory||[]);S.pendingFrameMeta=clonePlain(snap.pendingFrameMeta||[]);S.currentImageData=snap.currentImageData?cloneImageData(snap.currentImageData):null;if(S.selectedFrame>=0&&S.frames[S.selectedFrame])showFrame(S.selectedFrame);else if(S.currentImageData)applyImageData(S.currentImageData);updateFrameStrip();updateTimeline();updateUndoUI()}
+function makeUndoSnapshot(){return{currentImageData:S.currentImageData?cloneImageData(S.currentImageData):null,frames:S.frames.map(cloneFrame),selectedFrame:S.selectedFrame,anchor:{...S.anchor},detectedGroups:clonePlain(S.detectedGroups),viewMode:S.viewMode,viewStates:clonePlain(S.viewStates),batchHistory:clonePlain(S.batchHistory),pendingFrameMeta:clonePlain(S.pendingFrameMeta),previewFrames:clonePlain(S.previewFrames)}}
+function restoreUndoSnapshot(snap){S.frames=snap.frames.map(cloneFrame);S.selectedFrame=snap.selectedFrame;S.anchor={...snap.anchor};S.detectedGroups=clonePlain(snap.detectedGroups||[]);S.viewMode=snap.viewMode||'source';S.viewStates=clonePlain(snap.viewStates||{source:null,frame:null});S.batchHistory=clonePlain(snap.batchHistory||[]);S.pendingFrameMeta=clonePlain(snap.pendingFrameMeta||[]);S.previewFrames=Array.isArray(snap.previewFrames)?clonePlain(snap.previewFrames):[];S.currentImageData=snap.currentImageData?cloneImageData(snap.currentImageData):null;if(S.selectedFrame>=0&&S.frames[S.selectedFrame])showFrame(S.selectedFrame);else if(S.currentImageData)applyImageData(S.currentImageData);updateFrameStrip();updateTimeline();updateUndoUI()}
 function pushUndo(){if(!S.currentImageData&&!S.frames.length)return;S.undoStack.push(makeUndoSnapshot());if(S.undoStack.length>S.maxUndo)S.undoStack.shift();S.redoStack=[];updateUndoUI()}
 function undo(){if(!S.undoStack.length)return;S.redoStack.push(makeUndoSnapshot());restoreUndoSnapshot(S.undoStack.pop())}
 function redo(){if(!S.redoStack.length)return;S.undoStack.push(makeUndoSnapshot());restoreUndoSnapshot(S.redoStack.pop())}
@@ -664,7 +668,7 @@ function loadImageToCanvas(img){
   S.currentImageData=cloneImageData(S.originalImageData);
   mainCanvas.width=img.width;mainCanvas.height=img.height;
   ctx.putImageData(S.currentImageData,0,0);updateOverlaySize();
-  S.detectedGroups=[];S.frames=[];S.selectedFrame=-1;S.undoStack=[];S.redoStack=[];S.viewStates={source:null,frame:null};setViewMode('source');updateUndoUI();
+  S.detectedGroups=[];S.frames=[];S.selectedFrame=-1;S.previewFrames=[];S.previewCursor=0;S.undoStack=[];S.redoStack=[];S.viewStates={source:null,frame:null};setViewMode('source');updateUndoUI();
   $('drop-zone').classList.add('hidden');S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();updateFrameStrip();updateTimeline();drawOverlay();
   setStatus('Loaded '+img.width+'x'+img.height);toast('Image loaded','success');
 }
@@ -738,7 +742,7 @@ $('btn-slice').addEventListener('click',()=>{
   const cols=Math.floor((iw-ox)/fw), rows=Math.floor((ih-oy)/fh);
   if(cols<1||rows<1){toast('Frame size too large for image','error');return}
 
-  S.frames=[];
+  S.frames=[];S.previewFrames=[];S.previewCursor=0;
   const tmpC=document.createElement('canvas');tmpC.width=iw;tmpC.height=ih;
   tmpC.getContext('2d').putImageData(S.currentImageData,0,0);
 
@@ -829,10 +833,14 @@ function updateFrameStrip(){
 // ════════════════════════════════════════════
 // TIMELINE
 // ════════════════════════════════════════════
+function getPreviewSequence(){return S.previewFrames.filter(i=>i>=0&&i<S.frames.length).sort((a,b)=>a-b)}
+function updatePreviewSelectionInfo(){const seq=getPreviewSequence();const el=$('tl-preview-info');if(el)el.textContent=seq.length?'Preview: '+seq.map(i=>i+1).join(','):'Preview: all';const mark=$('btn-tl-mark');if(mark)mark.classList.toggle('active',S.selectedFrame>=0&&S.previewFrames.includes(S.selectedFrame))}
+function togglePreviewFrame(i){if(i<0||i>=S.frames.length)return;const pos=S.previewFrames.indexOf(i);if(pos>=0)S.previewFrames.splice(pos,1);else S.previewFrames.push(i);S.previewFrames=[...new Set(S.previewFrames)].sort((a,b)=>a-b);S.previewCursor=0;updateTimeline()}
+function clearPreviewFrames(){S.previewFrames=[];S.previewCursor=0;updateTimeline();toast('Preview subset cleared','success')}
 function updateTimeline(){
   const body=$('tl-body');body.innerHTML='';
   S.frames.forEach((f,i)=>{
-    const div=document.createElement('div');div.className='tl-frame'+(i===S.selectedFrame?' selected':'');
+    const div=document.createElement('div');div.className='tl-frame'+(i===S.selectedFrame?' selected':'')+(S.previewFrames.includes(i)?' preview-selected':'');
     const tc=document.createElement('canvas');tc.width=48;tc.height=Math.max(8,Math.round(48*f.imgData.height/f.imgData.width));
     const tctx=tc.getContext('2d');
     const tmpC=document.createElement('canvas');tmpC.width=f.imgData.width;tmpC.height=f.imgData.height;
@@ -840,10 +848,11 @@ function updateTimeline(){
     tctx.drawImage(tmpC,0,0,tc.width,tc.height);
     div.appendChild(tc);
     const idx=document.createElement('span');idx.className='tl-idx';idx.textContent=i+1;div.appendChild(idx);
-    div.addEventListener('click',()=>{S.selectedFrame=i;showFrame(i);updateTimeline()});
+    div.addEventListener('click',e=>{if(e.ctrlKey||e.metaKey){togglePreviewFrame(i);return}S.selectedFrame=i;showFrame(i);updateTimeline()});
     body.appendChild(div);
   });
   $('tl-frame-info').textContent=(S.selectedFrame+1)+'/'+S.frames.length;
+  updatePreviewSelectionInfo();
 }
 
 // Playback
@@ -855,7 +864,9 @@ $('btn-tl-play').addEventListener('click',()=>{
     S.playFps=+$('tl-fps').value||12;
     S.playInterval=setInterval(()=>{
       if(!S.frames.length)return;
-      S.selectedFrame=(S.selectedFrame+1)%S.frames.length;
+      const seq=getPreviewSequence();
+      if(seq.length){const pos=seq.indexOf(S.selectedFrame);S.previewCursor=pos>=0?(pos+1)%seq.length:(S.previewCursor%seq.length);S.selectedFrame=seq[S.previewCursor];}
+      else S.selectedFrame=(S.selectedFrame+1)%S.frames.length;
       showFrame(S.selectedFrame);updateTimeline();
     },1000/S.playFps);
   } else {
@@ -864,6 +875,8 @@ $('btn-tl-play').addEventListener('click',()=>{
 });
 $('btn-tl-prev').addEventListener('click',()=>{if(!S.frames.length)return;S.selectedFrame=(S.selectedFrame-1+S.frames.length)%S.frames.length;showFrame(S.selectedFrame);updateTimeline()});
 $('btn-tl-next').addEventListener('click',()=>{if(!S.frames.length)return;S.selectedFrame=(S.selectedFrame+1)%S.frames.length;showFrame(S.selectedFrame);updateTimeline()});
+$('btn-tl-mark').addEventListener('click',()=>togglePreviewFrame(S.selectedFrame));
+$('btn-tl-clear').addEventListener('click',clearPreviewFrames);
 function gotoIssue(dir=1){refreshReviewIssues();if(!S.reviewIssues.length){toast('No review issues','success');return}let pos=S.reviewIssues.findIndex(r=>r.index===S.selectedFrame);if(pos<0)pos=dir>0?-1:0;const next=S.reviewIssues[(pos+dir+S.reviewIssues.length)%S.reviewIssues.length];showFrame(next.index);toast('Issue frame '+(next.index+1)+': '+next.issues.join(', '))}
 $('btn-next-issue').addEventListener('click',()=>gotoIssue(1));
 $('btn-prev-issue').addEventListener('click',()=>gotoIssue(-1));
@@ -1020,7 +1033,7 @@ $('btn-auto-fit').addEventListener('click',()=>{S.autoFitFrames=!S.autoFitFrames
 // Undo/redo
 $('btn-undo').addEventListener('click',undo);
 $('btn-redo').addEventListener('click',redo);
-document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();redo()}if(e.key==='o'){$('btn-onion').click()}if(e.key==='f'){e.preventDefault();fitToView()}if(e.key==='ArrowLeft'&&S.frames.length){e.preventDefault();$('btn-tl-prev').click()}if(e.key==='ArrowRight'&&S.frames.length){e.preventDefault();$('btn-tl-next').click()}if(e.key.toLowerCase()==='i'&&S.frames.length){e.preventDefault();gotoIssue(e.shiftKey?-1:1)}if(e.key===' '&&S.frames.length){e.preventDefault();$('btn-tl-play').click()}});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();redo()}if(e.key==='o'){$('btn-onion').click()}if(e.key==='f'){e.preventDefault();fitToView()}if(e.key==='ArrowLeft'&&S.frames.length){e.preventDefault();$('btn-tl-prev').click()}if(e.key==='ArrowRight'&&S.frames.length){e.preventDefault();$('btn-tl-next').click()}if(e.key.toLowerCase()==='i'&&S.frames.length){e.preventDefault();gotoIssue(e.shiftKey?-1:1)}if(e.key==='m'&&S.frames.length){e.preventDefault();togglePreviewFrame(S.selectedFrame)}if(e.key==='Escape'&&S.previewFrames.length){e.preventDefault();clearPreviewFrames()}if(e.key===' '&&S.frames.length){e.preventDefault();$('btn-tl-play').click()}});
 
 // ════════════════════════════════════════════
 // PREVIEW
@@ -1420,7 +1433,7 @@ function extractDualAlpha(whiteImg,blackImg,athresh,despill,hardAlpha){
 // TEST HOOKS (read-only helpers for Playwright contracts)
 // ════════════════════════════════════════════
 window.__spriteFanTest = {
-  getState(){return {wf:S.wf,frames:S.frames.length,selectedFrame:S.selectedFrame,viewMode:S.viewMode,autoFitFrames:S.autoFitFrames,maxAutoFitZoom:S.maxAutoFitZoom,zoom:S.zoom,panX:S.panX,panY:S.panY,detectedGroups:S.detectedGroups.length,previewMode:S.previewMode,viewStates:S.viewStates}},
+  getState(){return {wf:S.wf,frames:S.frames.length,selectedFrame:S.selectedFrame,viewMode:S.viewMode,autoFitFrames:S.autoFitFrames,maxAutoFitZoom:S.maxAutoFitZoom,zoom:S.zoom,panX:S.panX,panY:S.panY,detectedGroups:S.detectedGroups.length,previewMode:S.previewMode,previewFrames:S.previewFrames.slice(),playing:S.playing,viewStates:S.viewStates}},
   getCanvasSize(){return {width:mainCanvas.width,height:mainCanvas.height}},
   getCurrentAlpha(x,y){if(!S.currentImageData)return null;const ix=(y*S.currentImageData.width+x)*4+3;return S.currentImageData.data[ix]},
   getCurrentRgba(x,y){if(!S.currentImageData)return null;const ix=(y*S.currentImageData.width+x)*4;const d=S.currentImageData.data;return [d[ix],d[ix+1],d[ix+2],d[ix+3]]},
@@ -1437,6 +1450,8 @@ window.__spriteFanTest = {
   getConfig(){return getConfig()},
   applyConfig(c){applyConfig(c);return getConfig()},
   selectFrame(i){showFrame(i);return this.getState()},
+  togglePreviewFrame(i){togglePreviewFrame(i);return this.getState()},
+  getPreviewSequence(){return getPreviewSequence()},
 };
 
 // ════════════════════════════════════════════
