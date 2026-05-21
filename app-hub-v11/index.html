@@ -1970,10 +1970,12 @@
             return `<span class="pill tag-pill ${tagClass}" style="${colorStyle}">${esc(tag)}</span>`;
           })
           .join("");
+        const timestamp = formatArtifactTimestamp(item);
+        const timestampDisplay = timestamp ? `<div class="muted" style="font-size: 0.7rem;">🕒 ${esc(timestamp)}</div>` : "";
         const icons = `<div class="launch-icons"><button class="icon-btn" title="inline" data-launch="inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow">↗</button></div>`;
         return viewMode === "list"
-          ? `<article class="artifact-row" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
-          : `<article class="artifact-card" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div><p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
+          ? `<article class="artifact-row" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="row between">${timestampDisplay}<span class="pill">${esc(item.kind)}</span></div><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
+          : `<article class="artifact-card" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div>${timestampDisplay}<p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
       }
       function openSelected(mode, action = null) {
         if (!selected) return;
