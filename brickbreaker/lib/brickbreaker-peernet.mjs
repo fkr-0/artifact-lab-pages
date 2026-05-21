@@ -51,7 +51,6 @@ export function createBrickbreakerPeernetNetwork({
     },
     broadcast(type, payload) {
       lobby.broadcast({ type, payload });
-      emit(type, payload);
     },
     destroy() {
       lobby.destroy();

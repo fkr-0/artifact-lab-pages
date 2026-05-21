@@ -20,6 +20,32 @@ function normalizePeers(input) {
   return new Map();
 }
 
+export function createNoopNetwork() {
+  const emitter = createEmitter();
+  return {
+    on: emitter.on,
+    get status() {
+      return "offline";
+    },
+    get peers() {
+      return new Map();
+    },
+    get myId() {
+      return "local";
+    },
+    get isHub() {
+      return true;
+    },
+    send(peerId, type, payload) {
+      return { peerId, type, payload, localOnly: true };
+    },
+    broadcast(type, payload) {
+      return { type, payload, localOnly: true };
+    },
+    destroy() {},
+  };
+}
+
 export function createLobbyNetwork({
   lobbyId = "nexus-v11-hub-main",
   username = "pilot",
