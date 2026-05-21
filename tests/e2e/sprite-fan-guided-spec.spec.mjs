@@ -62,7 +62,7 @@ test('guided spec mode reports unfinished reqs and persists through config impor
   await page.locator('#btn-spec-check').click();
   await expect(page.locator('#spec-guide-summary')).toHaveText('Spec: 8/8 done');
   await expect(page.locator('#spec-guide-list')).toContainText('✓ Prompt/goals captured');
-  await expect(page.locator('#spec-guide-list')).toContainText('✓ Animation metadata exportable');
+  await expect(page.locator('#spec-guide-list')).toContainText('✓ Animation timing metadata exportable');
 
   const specState = await exportJson(page, '#btn-export-spec-state');
   expect(specState).toMatchObject({

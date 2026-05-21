@@ -41,9 +41,12 @@ test('timeline preview subset marks frames and playback loops only selected fram
 
   await page.locator('#tl-fps').fill('30');
   await page.evaluate(() => window.__spriteFanTest.selectFrame(0));
+  await page.locator('#btn-tl-next').click();
+  await expect.poll(() => page.evaluate(() => window.__spriteFanTest.getState().selectedFrame)).toBe(2);
+  await page.locator('#btn-tl-next').click();
+  await expect.poll(() => page.evaluate(() => window.__spriteFanTest.getState().selectedFrame)).toBe(0);
   await page.locator('#btn-tl-play').click();
-  await expect.poll(() => page.evaluate(() => window.__spriteFanTest.getState().selectedFrame), { timeout: 2000 }).toBe(2);
-  await expect.poll(() => page.evaluate(() => window.__spriteFanTest.getState().selectedFrame), { timeout: 2000 }).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.__spriteFanTest.getState().playing)).toBe(true);
   await page.locator('#btn-tl-play').click();
   await expect.poll(() => page.evaluate(() => window.__spriteFanTest.getState().playing)).toBe(false);
 

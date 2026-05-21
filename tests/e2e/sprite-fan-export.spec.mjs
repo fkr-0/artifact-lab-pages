@@ -35,6 +35,7 @@ async function prepareExportFrames(page) {
     el.value = '10';
     el.dispatchEvent(new Event('input', { bubbles: true }));
   });
+  await page.locator('#manifest-loop').fill('3');
   await page.locator('#export-cols').evaluate((el) => {
     el.value = '2';
     el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -97,8 +98,11 @@ test('atlas studio exports sprites.json with frame metadata', async ({ page }) =
       id: 'hero-idle',
       frames: 2,
       fps: 10,
+      frameDurationMs: 100,
+      frameDurationsMs: [100, 100],
       order: [0, 1],
-      loop: true,
+      loop: false,
+      loopCount: 3,
       tags: ['sprite-fan', 'postprocessed', 'atlas-grid'],
       events: [],
       hitboxes: [],
@@ -108,8 +112,11 @@ test('atlas studio exports sprites.json with frame metadata', async ({ page }) =
       'hero-idle': {
         frames: 2,
         fps: 10,
+        frameDurationMs: 100,
+        frameDurationsMs: [100, 100],
         order: [0, 1],
-        loop: true,
+        loop: false,
+        loopCount: 3,
         tags: ['sprite-fan', 'postprocessed', 'atlas-grid'],
         events: [],
         hitboxes: [],
@@ -145,6 +152,7 @@ test('atlas studio exports full config with review and fitting preferences', asy
   for await (const chunk of stream) chunks.push(chunk);
   const config = JSON.parse(Buffer.concat(chunks).toString('utf8'));
   expect(config.manifestName).toBe('hero-idle');
+  expect(config.manifestLoop).toBe(3);
   expect(config.maxAutoFitZoom).toBe(3);
   expect(config.frameMeta[0]).toMatchObject({ label: 'idle-a', notes: 'first frame' });
   expect(config.frameMeta[1]).toMatchObject({ label: 'idle-b', notes: 'second frame' });

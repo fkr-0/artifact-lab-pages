@@ -220,6 +220,7 @@
 - [x] Added jitterFrames review-report totals and cleanup-all batch deltas, with e2e coverage for pixel-shift jitter cleanup.
 - [x] Added Sprite Fan Atlas Studio to the v11 hub manifest/deploy catalog with reachability regression coverage.
 - [x] Added sprites.json generationContract and animation metadata aligned with sprite-fan/reqs atlas-grid requirements.
+- [x] Added sprites.json animation timing metadata: frameDurationMs, frameDurationsMs, loop, and loopCount persistence/export coverage as a prerequisite for future GIF metadata tests.
 - [x] Add guided spec mode: Manifest panel now has prompt/checklist guidance based on sprite-fan/reqs requirements, exports spec-state JSON, embeds specGuide in sprites.json/full config, and re-imports/persists checklist state through Config Manager.
 - [x] adapt ../badger-sprawl-runner to the Sprite Fan spec via `docs/sprite-fan/compat.yml`, mapping Badger's atlas runtime contract to Sprite Fan grid/animations/frame metadata fields.
 - [x] adapt ../ethic-brawl to the Sprite Fan spec via `docs/sprite-fan/compat.yml`, mapping its 4x4 roster sheets to Sprite Fan grid/animations/frame metadata fields.
