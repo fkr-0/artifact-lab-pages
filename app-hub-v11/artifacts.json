@@ -24,21 +24,24 @@
     "includeDirs": [
       "app-hub-v11",
       "peernetjs",
-      "lib"
+      "lib",
+      "sprite-fan"
     ]
   },
   "items": [
     {
-      "id": "markdown-viewer",
-      "title": "Markdown Viewer",
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
       "kind": "html-path",
-      "href": "../markdown-viewer/index.html",
-      "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
       "tags": [
-        "docs",
-        "markdown",
-        "viewer",
-        "v11"
+        "tool",
+        "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
       ],
       "operations": [
         "validate",
@@ -53,7 +56,7 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": 1779136206
+      "modifiedAt": 1779356149
     },
     {
       "id": "brickbreaker",
@@ -83,22 +86,20 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": 1779136188
+      "modifiedAt": 1779330297
     },
     {
-      "id": "pdf-forge-nexus",
-      "title": "PDF Forge Nexus",
+      "id": "hyperblast-shooter",
+      "title": "Hyperblast Shooter",
       "kind": "html-path",
-      "href": "../pdf-forge-nexus.html",
-      "description": "Client-side PDF manipulator with merge, split, and conversion capabilities. Features drag-and-drop PDF/image loading, page reordering, rotation, multi-page merge, PDF splitting (by N pages, at page, range, or each page), PDF to text extraction, image to PDF conversion, and preview. All processing happens locally with no server upload.",
+      "href": "../hyperblast-shooter/index.html",
+      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
       "tags": [
-        "tool",
-        "pdf",
-        "converter",
-        "editor",
-        "graphics",
-        "utility",
-        "v11"
+        "game",
+        "shooter",
+        "space",
+        "multiplayer",
+        "cyberpunk"
       ],
       "operations": [
         "validate",
@@ -108,12 +109,65 @@
         "modes": [
           "inline",
           "floating",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": 1779241751
+    },
+    {
+      "id": "v11-peer-daw",
+      "title": "V11 Peer DAW",
+      "kind": "html-path",
+      "href": "../v11-peer-daw/index.html",
+      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
+      "tags": [
+        "audio",
+        "daw",
+        "peernet",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "v11-peer-daw",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "v11-peer-daw/dist",
+        "targetPath": "v11-peer-daw"
+      },
+      "launch": {
+        "modes": [
+          "inline",
           "fullscreen",
           "newWindow"
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": 1779124765
+      "modifiedAt": 1779209813
     },
     {
       "id": "sexy-love-chat",
@@ -144,7 +198,64 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": 1779118334
+      "modifiedAt": 1779197713
+    },
+    {
+      "id": "markdown-viewer",
+      "title": "Markdown Viewer",
+      "kind": "html-path",
+      "href": "../markdown-viewer/index.html",
+      "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
+      "tags": [
+        "docs",
+        "markdown",
+        "viewer",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": 1779136206
+    },
+    {
+      "id": "pdf-forge-nexus",
+      "title": "PDF Forge Nexus",
+      "kind": "html-path",
+      "href": "../pdf-forge-nexus.html",
+      "description": "Client-side PDF manipulator with merge, split, and conversion capabilities. Features drag-and-drop PDF/image loading, page reordering, rotation, multi-page merge, PDF splitting (by N pages, at page, range, or each page), PDF to text extraction, image to PDF conversion, and preview. All processing happens locally with no server upload.",
+      "tags": [
+        "tool",
+        "pdf",
+        "converter",
+        "editor",
+        "graphics",
+        "utility",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": 1779124765
     },
     {
       "id": "prompt-forge-nexus",
@@ -729,51 +840,6 @@
       "modifiedAt": 1778956721
     },
     {
-      "id": "hyperblast-shooter",
-      "title": "Hyperblast Shooter",
-      "kind": "html-path",
-      "href": "../hyperblast-shooter/index.html",
-      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
-      "tags": [
-        "game",
-        "shooter",
-        "space",
-        "multiplayer",
-        "cyberpunk"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "floating-panel",
-            "title": "Floating Panel",
-            "mode": "floating"
-          },
-          {
-            "id": "multiplayer",
-            "title": "Multiplayer",
-            "mode": "floating",
-            "multiplayer": true
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": 1778956721
-    },
-    {
       "id": "bomberman-v10",
       "title": "Gridblast Bomberman",
       "kind": "html-path",
@@ -917,42 +983,6 @@
         "defaultAction": "inline"
       },
       "modifiedAt": 1778956721
-    },
-    {
-      "id": "v11-peer-daw",
-      "title": "v11 Peer DAW",
-      "kind": "html-path",
-      "href": "../v11-peer-daw/index.html",
-      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
-      "tags": [
-        "audio",
-        "daw",
-        "peernet",
-        "built",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "build": {
-          "cwd": "v11-peer-daw",
-          "command": "npm run build",
-          "dist": "dist"
-        },
-        "includePath": "v11-peer-daw/dist",
-        "targetPath": "v11-peer-daw"
-      },
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": 1778779615
     },
     {
       "id": "peer-mod-groove",
@@ -1242,7 +1272,7 @@
       "modifiedAt": "2026-05-01T12:00:00.000Z"
     }
   ],
-  "builtAt": "2026-05-18T20:40:20.829Z",
+  "builtAt": "2026-05-21T15:57:52.919Z",
   "buildType": "git-ordered",
-  "artifactCount": 40
+  "artifactCount": 41
 }

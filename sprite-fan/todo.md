@@ -95,7 +95,7 @@
   - optional frame offset smoothing,
   - sheet download parity only if it improves the current export panel.
 - [x] Added `tests/sprite-fan-gif-merge-decision.test.mjs` so the decision remains explicit and the GIF creator feature surface stays discoverable.
-- [ ] If GIF support is added, create tests around frame count, duration preservation, transparency, and exported file metadata.
+- [x] Added focused GIF export and e2e coverage around frame count, duration preservation, transparency flag, and exported GIF loop/file metadata.
 
 
 ## E2E export coverage added
