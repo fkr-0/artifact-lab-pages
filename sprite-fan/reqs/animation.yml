@@ -1,0 +1,363 @@
+schema_version: 1.0.0
+project: badger-sprawl-runner
+purpose: >-
+  Canonical sprite, texture, and animation production plan for turning the
+  current placeholder/vector prototype into sprite-sheet driven gameplay.
+
+source_of_truth:
+  runtime_sprite_manifest: data/sprites.json
+  sprite_requirements_doc: docs/SPRITES.md
+  story_content_source: docs/story-flavour.yml
+  generated_story_content: data/story-content.generated.ts
+  runtime_animation_state: apps/runner/src/renderer/AnimationState.ts
+  runtime_sprite_renderer: apps/runner/src/renderer/SpriteRenderer.ts
+  runtime_pickup_system: apps/runner/src/systems/ItemSystem.ts
+  current_stage_pickup_placement: apps/runner/src/scenes/StageRunScene.ts
+  prompt_manifests_dir: llm-sprite-generation/
+  generated_source_sprites_dir: generated/sprites/
+  extracted_components_dir: generated/extracted/
+
+production_decisions:
+  frames_grid_vs_individual_pngs:
+    recommendation: use_grids_or_texture_atlases_for_animation_frames
+    rationale:
+      - Fewer image loads and fewer browser texture uploads than many tiny PNGs.
+      - Fewer draw-state changes and easier batching for Canvas/WebGL-style renderers.
+      - Consistent frame dimensions make drawImage source-rect math simple and stable.
+      - Easier preloading: one character sheet can be ready or missing as a unit.
+      - Easier contract validation: frameSize, frame count, fps, and order live in one manifest entry.
+    use_individual_pngs_when:
+      - The image is a rare one-off illustration, title card, or large parallax plate.
+      - The asset is streamed per scene and never animated.
+      - The file is too large to share a sheet without wasting most atlas space.
+    current_project_evidence:
+      - data/sprites.json already models sheets with frameSize plus animation frame counts.
+      - moss_badger, items_core, vfx_combat, and lower_sprawl_tiles are sheet-oriented.
+      - comfy_badger_run_grid already records a generated 4x2 grid with explicit frame order.
+    implementation_rule: >-
+      Keep animation frames in atlas/grid PNGs. Keep metadata in data/sprites.json or a future
+      generated runtime manifest. Do not rely on filename ordering alone.
+
+  item_pickup_model:
+    recommendation: stage_entities_drive_pickups_not_per_frame_annotations
+    current_runtime_model:
+      - StageRunScene owns pickup entities with id, x, y, kind, and taken fields.
+      - ItemSystem checks player distance against each untaken pickup every tick.
+      - collect() applies gameplay effects such as hasRocket, hasRailgun, hasKatana, and stims.
+      - Renderer renders pickups before player/enemies and can hide taken pickups.
+    answer_to_annotation_question: >-
+      No, we do not annotate every movement frame with x/y item locations. Item x/y belongs to
+      stage layout or encounter data. Item visual state belongs to the item entity and sprite
+      animation state. Player movement frames remain independent from world placement.
+    required_entity_fields:
+      stable_id: unique pickup instance id for save/load and tests
+      item_id: data/items.json id when inventory/economy integration is needed
+      kind: runtime effect key used by ItemSystem
+      x_y: world-space spawn point
+      hitbox_or_radius: pickup collision bounds; current prototype uses a distance threshold
+      visual_state: available | magnetized | collecting | collected | respawn_pending
+      animation: idle_loop | sparkle_loop | collected_burst
+      persistence: ephemeral | story_payload | saved_once
+    next_runtime_tasks:
+      - DONE: Move hard-coded StageRunScene pickups into stage/layout data.
+      - DONE: Add pickup radius to the Pickup contract instead of using a hard-coded threshold.
+      - DONE: Add visualState and collection timing to pickups for a first data-driven collect burst.
+      - DONE: Map pickup kind/layout entries to items_core animation names such as rocket_backpack_pickup.
+      - Persist story payload pickups through the save store so collected story items do not respawn.
+
+  pose_and_animation_requirements:
+    answer: partially_encoded_and_partially_todo
+    already_encoded:
+      - docs/SPRITES.md lists Moss player animation requirements and frame counts.
+      - data/sprites.json encodes Moss, item, tile, VFX, and one generated run-grid animation contract.
+      - AnimationState can play named animations and advance frames from manifest fps.
+      - SpriteRenderer can draw atlas frames by sheet id, animation name, and frame index.
+    gaps:
+            - Enemy, boss, companion, NPC, merchant, and UI pose matrices are not yet canonicalized.
+      - Animation metadata does not yet include anchors, hitboxes, hurtboxes, action windows, cancel windows, or event markers.
+      - Pickup and VFX animation state is not yet modelled as a first-class entity component.
+      - Texture/tile atlases are listed, but per-world tile collision/material metadata is not complete.
+    policy: >-
+      Treat Moss base locomotion/combat poses as encoded draft contracts. Treat all non-player
+      characters, bosses, pickups, VFX event markers, and per-frame gameplay boxes as active TODOs.
+
+runtime_contracts_to_converge:
+  sprite_sheet_contract:
+    image_format: png
+    background: transparent_for_entities_vfx_items
+    max_prompt_grid: 4x4
+    metadata_fields:
+      required_now:
+        - id
+        - file
+        - frameSize
+        - animations.frames
+        - animations.fps
+      add_next:
+        - grid.columns
+        - grid.rows
+        - animations.order
+        - animations.loop
+        - animations.anchor
+        - animations.hitboxes
+        - animations.hurtboxes
+        - animations.events
+        - animations.tags
+  naming:
+    sheet_id: snake_case_entity_or_category
+    animation_id: verb_or_state_name
+    pickup_animation_id: item_slug_pickup
+    vfx_animation_id: effect_slug
+  runtime_animation_names_aligned:
+    jump:
+      manifest_name: jump_up
+      status: done
+    attack:
+      manifest_selection:
+        default: melee_claws
+        katana_equipped: melee_katana
+      status: done
+
+asset_categories:
+  player_moss:
+    status: encoded_draft
+    frame_size: [48, 48]
+    required_animations:
+      idle: { frames: 6, status: encoded }
+      run: { frames: 8, status: encoded }
+      skid: { frames: 3, status: encoded }
+      jump_up: { frames: 3, status: encoded }
+      fall: { frames: 3, status: encoded }
+      land: { frames: 2, status: encoded }
+      melee_claws: { frames: 5, status: encoded }
+      melee_katana: { frames: 7, status: encoded }
+      shoot_railgun: { frames: 5, status: encoded }
+      rocket_boost: { frames: 6, status: encoded }
+      hit: { frames: 3, status: encoded }
+      hack: { frames: 4, status: encoded }
+      victory: { frames: 8, status: encoded }
+      pickup_react: { frames: 3, status: encoded }
+      interact: { frames: 4, status: encoded }
+      death_or_down: { frames: 6, status: encoded }
+      parry: { frames: 4, status: encoded }
+  item_icons:
+    status: encoded_draft
+    frame_size: [32, 32]
+    grid: [4, 4]
+    rule: Every data/items.json item declares iconAnimation and must have a matching one-frame animation in item_icons.
+  items_core:
+    status: encoded_draft
+    frame_size: [32, 32]
+    required_animations:
+      rocket_backpack_pickup: { frames: 4, status: encoded }
+      railgun_pickup: { frames: 4, status: encoded }
+      stim_pack_pickup: { frames: 4, status: encoded }
+      katana_pickup: { frames: 4, status: encoded }
+      signal_jammer_pickup: { frames: 4, status: encoded }
+      dub_shield_pickup: { frames: 4, status: encoded }
+      wafer_key_pickup: { frames: 4, status: encoded }
+      elevator_seed_pickup: { frames: 4, status: encoded }
+      mirror_pass_pickup: { frames: 4, status: encoded }
+      bass_reactor_core_pickup: { frames: 4, status: encoded }
+      debt_ledger_shard_pickup: { frames: 4, status: encoded }
+      cargo_reversal_key_pickup: { frames: 4, status: encoded }
+      asteroid_transmitter_root_pickup: { frames: 4, status: encoded }
+  vfx_combat:
+    status: encoded_draft
+    frame_size: [32, 32]
+    required_animations:
+      claw_arc: { frames: 4, status: encoded }
+      katana_smear: { frames: 6, status: encoded }
+      rail_muzzle: { frames: 4, status: encoded }
+      rail_trail: { frames: 3, status: encoded }
+      emp_spark: { frames: 6, status: encoded }
+      rocket_flame: { frames: 6, status: encoded }
+      landing_dust: { frames: 5, status: encoded }
+      parry_flash: { frames: 3, status: encoded }
+      code_gate_unlock: { frames: 8, status: encoded }
+      pickup_burst: { frames: 6, status: encoded }
+      story_payload_reveal: { frames: 8, status: encoded }
+  world_textures:
+    status: encoded_draft
+    frame_size: [32, 32]
+    required_worlds:
+      lower_sprawl: encoded
+      chrome_arcology: encoded
+      straylight_mirage: encoded
+      dub_colony: encoded
+      antenna_barrens: encoded
+      orbital_lift: encoded
+      asteroid_redoubt: encoded
+    rule: >-
+      Every campaign world must provide a 32x32 tile atlas with solid/collision_safe,
+      decorative, animated_prop, hazard, and material tags plus a 3-layer parallax atlas.
+  enemies_and_bosses:
+    status: encoded_draft
+    source: docs/story-flavour.yml
+    enemy_count: 16
+    boss_count: 8
+    enemy_frame_size: [48, 48]
+    boss_frame_size: [96, 96]
+    baseline_required_animations:
+      idle: { frames: 4, status: encoded }
+      patrol_or_move: { frames: 6, status: encoded }
+      windup: { frames: 3, status: encoded }
+      attack: { frames: 5, status: encoded }
+      hurt: { frames: 2, status: encoded }
+      stun_or_parried: { frames: 3, status: encoded }
+      death: { frames: 6, status: encoded }
+    boss_extra_required_animations:
+      phase_intro: { frames: 8, status: encoded }
+      phase_transition: { frames: 8, status: encoded }
+      signature_attack: { frames: 8, status: encoded }
+      defeat: { frames: 10, status: encoded }
+  companions_and_npcs:
+    status: encoded_draft
+    source: docs/story-flavour.yml
+    character_count: 20
+    frame_size: [48, 48]
+    roles:
+      - companion
+      - npc
+      - merchant
+      - npc_boss_context
+    baseline_required_animations:
+      idle: { frames: 4, status: encoded }
+      talk: { frames: 6, status: encoded }
+      assist: { frames: 6, status: encoded }
+      react: { frames: 4, status: encoded }
+      exit: { frames: 4, status: encoded }
+
+placeholder_sprite_pipeline:
+  status: implemented
+  generator: scripts/generate-placeholder-sprites.mjs
+  check: tests/public-sprite-assets.mjs
+  served_manifest: apps/runner/public/data/sprites.json
+  served_asset_root: apps/runner/public/assets/sprites
+  purpose: >-
+    Generate deterministic placeholder PNG atlases for every data/sprites.json sheet so the
+    runner can load the complete sprite manifest before final production art is available.
+  scripts:
+    generate: pnpm run sprites:placeholder
+    verify: pnpm run sprites:check
+
+process_tasks:
+  - id: anim_001_audit_current_assets
+    status: done
+    owner: art_engineering
+    description: Compare data/sprites.json, docs/SPRITES.md, generated sprites, and runtime renderer names.
+    acceptance:
+      - animation.yml records current encoded Moss, item, VFX, tile, and generated grid contracts.
+      - known runtime name mismatches are listed.
+
+  - id: anim_002_define_runtime_metadata_schema
+    status: done
+    owner: engineering
+    description: Extend sprite-contracts types beyond frameSize, frames, and fps.
+    outputs:
+      - DONE: packages/sprite-contracts schema update
+      - DONE: validator coverage for grid/order/loop/anchor/events/hitboxes
+      - DONE: normalize project data/sprites.json spriteSheets shape for runtime loading
+    acceptance:
+      - invalid frame order or missing frameSize fails validation.
+      - action animation events can be read without inspecting pixels.
+
+  - id: anim_003_align_animation_names
+    status: done
+    owner: gameplay_engineering
+    description: Align StageRunScene animation calls with manifest names.
+    subtasks:
+      - Replace jump with jump_up or add manifest alias support.
+      - Replace generic attack with melee_claws or melee_katana based on equipped weapon.
+      - Add parry and pickup_react animation triggers.
+    acceptance:
+      - No runtime animation call references an animation absent from data/sprites.json.
+
+  - id: anim_004_build_stage_pickup_layout_schema
+    status: done
+    owner: gameplay_engineering
+    description: Move pickup placement out of StageRunScene hard-coded arrays.
+    proposed_file: data/stages/lower-sprawl.layout.json
+    required_fields:
+      - id
+      - itemId
+      - kind
+      - x
+      - y
+      - radius_or_hitbox
+      - visualState
+      - persistence
+    acceptance:
+      - StageRunScene can load pickups from data.
+      - ItemSystem no longer needs magic center offsets for pickup collision.
+
+  - id: anim_005_item_visual_state_machine
+    status: done
+    owner: art_engineering
+    description: Give pickups independent animation state.
+    visual_states:
+      available: idle loop or sparkle loop
+      magnetized: optional pull-to-player animation
+      collecting: pickup_burst VFX plus sound hook
+      collected: hidden or respawn timer
+    acceptance:
+      - Taken pickups are hidden.
+      - Collecting pickups can play a burst before disappearing.
+      - Story payload pickups persist across save/load.
+
+  - id: anim_006_generate_moss_sheet_v1
+    status: done
+    owner: art
+    description: Produce a clean Moss atlas matching the encoded draft requirements.
+    constraints:
+      - 48x48 logical frame contract unless deliberately migrated.
+      - Transparent background.
+      - Readable silhouette at gameplay scale.
+      - At most 4x4 prompt grids per generated batch.
+    acceptance:
+      - DONE: All encoded Moss animations exist in the sprite manifest and generated placeholder atlas.
+      - DONE: Runtime can load a served placeholder moss_badger sheet for idle/run/jump_up/fall/land/melee/shoot/rocket/hit/hack/victory.
+      - TODO: Replace placeholder atlas with final hand/AI-produced production art.
+
+  - id: anim_007_generate_items_and_story_payloads
+    status: done
+    owner: art
+    description: Complete item pickup atlas for gameplay upgrades and story heist payloads.
+    acceptance:
+      - DONE: Every current items_core pickup and campaign heist payload has a pickup animation contract in data/sprites.json.
+      - DONE: Current runtime pickup animations map to ItemSystem kind/itemId values.
+      - DONE: Add deterministic item_icons UI icon animation contracts for every data/items.json item.
+
+  - id: anim_008_generate_world_texture_atlases
+    status: done
+    owner: environment_art
+    description: Create tile/texture atlases per world, starting with Lower Sprawl then campaign order.
+    acceptance:
+      - DONE: Each world has collision-safe tiles, decorative tiles, animated props, hazards, and parallax plates in data/sprites.json.
+      - DONE: Tiles record material tags where gameplay/material behavior can depend on them.
+
+  - id: anim_009_enemy_boss_pose_matrix
+    status: done
+    owner: gameplay_art
+    description: Create one required-pose matrix for every enemy and boss before generation.
+    acceptance:
+      - DONE: Every story enemy has idle/patrol_or_move/windup/attack/hurt/stun_or_parried/death contracts.
+      - DONE: Every story boss has phase_intro/phase_transition/signature_attack/defeat contracts.
+      - DONE: Boss contracts record phaseCount and source prompt metadata from docs/story-flavour.yml.
+
+  - id: anim_010_animation_runtime_tests
+    status: done
+    owner: testing
+    description: Add contract tests that validate animation.yml against data/sprites.json and runtime animation names.
+    acceptance:
+      - DONE: Missing manifest animations fail tests through tests/animation-contracts.mjs.
+      - DONE: StageRunScene animation names are covered by real manifest entries.
+      - DONE: Pickup kind values, item icons, world sheets, characters, enemies, and bosses are mapped to sprite animations.
+
+immediate_next_steps:
+  - Replace deterministic placeholder PNG atlases with final production sprite art.
+  - Add save-store persistence for story_payload pickups.
+  - DONE: Add renderer support for item_icons UI drawing.
+  - Add renderer support for character/NPC dialogue portraits.
+  - Add runtime animation events for hitboxes, hurtboxes, action windows, and cancel windows.
+  - Widen runner typecheck coverage once the pre-existing excluded scene/system backlog is addressed.
