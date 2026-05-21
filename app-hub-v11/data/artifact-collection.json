@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-19T21:08:11.265Z",
+  "generatedAt": "2026-05-21T08:46:24.034Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -25,7 +25,8 @@
     "includeDirs": [
       "app-hub-v11",
       "peernetjs",
-      "lib"
+      "lib",
+      "sprite-fan"
     ]
   },
   "operations": {
@@ -40,15 +41,19 @@
     }
   },
   "summary": {
-    "total": 40,
+    "total": 41,
     "byKind": {
-      "html-path": 36,
+      "html-path": 37,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
-      "tool": 17,
-      "graphics": 10,
+      "tool": 18,
+      "graphics": 11,
+      "sprite": 4,
+      "postprocessing": 1,
+      "atlas": 1,
+      "game-dev": 2,
       "generative": 1,
       "node-based": 1,
       "visual": 1,
@@ -83,10 +88,8 @@
       "cyberpunk": 3,
       "qr-code": 2,
       "export": 2,
-      "sprite": 3,
       "animator": 1,
       "pixel-art": 1,
-      "game-dev": 1,
       "automation": 1,
       "workflow": 1,
       "palette": 1,
@@ -140,6 +143,38 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "modifiedAt": "2026-05-21T12:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
     {
       "kind": "html-path",
       "tags": [

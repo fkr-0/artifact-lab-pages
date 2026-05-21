@@ -24,7 +24,8 @@
     "includeDirs": [
       "app-hub-v11",
       "peernetjs",
-      "lib"
+      "lib",
+      "sprite-fan"
     ]
   },
   "items": [
@@ -423,6 +424,35 @@
         "defaultAction": "inline"
       },
       "modifiedAt": "2026-05-02T12:00:00.000Z"
+    },
+    {
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
+      "kind": "html-path",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-05-21T12:00:00.000Z"
     },
     {
       "id": "hyperblast-shooter",
