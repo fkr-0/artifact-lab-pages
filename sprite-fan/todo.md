@@ -216,3 +216,13 @@
 - [x] Added cleanup-history undo/redo e2e proving batchHistory rolls back and returns with frame/report hashes.
 - [x] Added sprites.json sheetLayout metadata and e2e assertions matching review-report layout.
 - [x] Added soft-alpha export e2e proving edge-softened partial alpha appears in review report, sprites.json, and downloaded PNG bytes.
+- [x] Fixed direct jitter threshold logic and added e2e coverage for anchor-adjust and pixel-shift jitter repair modes.
+- [x] Added jitterFrames review-report totals and cleanup-all batch deltas, with e2e coverage for pixel-shift jitter cleanup.
+- [x] Added Sprite Fan Atlas Studio to the v11 hub manifest/deploy catalog with reachability regression coverage.
+- [x] Added sprites.json generationContract and animation metadata aligned with sprite-fan/reqs atlas-grid requirements.
+- [ ] Add some guided mode that follows the reqs/ spec requirements, reads them, and yields list of unfinished stuff, while leading from prompt to working atlas through the process. importing and exporting specs and reading+persisting their state is therefore necessary
+- [ ] adapt the animation spec ymls in ../badger-sprawl-runner/ to the sprite-fan spec
+- [ ] adapt the animation spec ymls in ../ethic-brawl/ to the sprite-fan spec
+- [ ] add post-processing-animation preview: when done, it should be possible to select a set of frames in a sprite atlas (by click-selecting, e.g.) and preview the animation resulting of them being played back - add a preview + optional gif export for this, primarily the preview should be intuitive and triggerable while optimizing, because it seems to be the strongest form of quality control in progress, so maybe a distinct toggle-able overlay or some suitable opinionated ui widget/component easily triggerable through shortcuts
+- [ ] make sure to adapt the ../badger-sprawl-runner project to the spec exported from sprite-fan
+- [ ] make sure to adapt the ../ethic-brawl animation project rsystem to the spec exported from sprite-fan

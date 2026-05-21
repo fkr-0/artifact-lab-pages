@@ -75,6 +75,47 @@ test('atlas studio exports sprites.json with frame metadata', async ({ page }) =
     rows: 1,
     frameCount: 2,
     padding: 0,
+    generationContract: {
+      source: 'sprite-fan/reqs/animation.yml',
+      gridVsIndividual: 'atlas-grid',
+      maxPromptGrid: { columns: 4, rows: 4, frames: 16 },
+      transparentBackground: true,
+      stableFrameSize: true,
+    },
+    grid: {
+      columns: 2,
+      rows: 1,
+      padding: 0,
+      frameWidth: 8,
+      frameHeight: 8,
+      cellWidth: 8,
+      cellHeight: 8,
+      sheetWidth: 16,
+      sheetHeight: 8,
+    },
+    animation: {
+      id: 'hero-idle',
+      frames: 2,
+      fps: 10,
+      order: [0, 1],
+      loop: true,
+      tags: ['sprite-fan', 'postprocessed', 'atlas-grid'],
+      events: [],
+      hitboxes: [],
+      hurtboxes: [],
+    },
+    animations: {
+      'hero-idle': {
+        frames: 2,
+        fps: 10,
+        order: [0, 1],
+        loop: true,
+        tags: ['sprite-fan', 'postprocessed', 'atlas-grid'],
+        events: [],
+        hitboxes: [],
+        hurtboxes: [],
+      },
+    },
   });
   expect(manifest.frames[0]).toMatchObject({ index: 0, col: 0, row: 0, label: 'idle-a', notes: 'first frame' });
   expect(manifest.frames[1]).toMatchObject({ index: 1, col: 1, row: 0, label: 'idle-b', notes: 'second frame' });

@@ -1301,10 +1301,15 @@ $('btn-export-manifest').addEventListener('click',()=>{
   const fw=S.frames[0].imgData.width, fh=S.frames[0].imgData.height;
   const cellW=fw+pad*2, cellH=fh+pad*2;
   const rows=Math.ceil(S.frames.length/cols);
+  const order=Array.from({length:S.frames.length},(_,i)=>i);
   const manifest={
     name, fps, frameWidth:fw, frameHeight:fh,
     columns:cols, rows, frameCount:S.frames.length,
     padding:pad, totalFrames:S.frames.length,
+    generationContract:{source:'sprite-fan/reqs/animation.yml',gridVsIndividual:'atlas-grid',maxPromptGrid:{columns:4,rows:4,frames:16},transparentBackground:true,stableFrameSize:true,metadataPolicy:'export-grid-animations-order-loop-anchor-empty-gameplay-slots'},
+    grid:{columns:cols,rows,padding:pad,frameWidth:fw,frameHeight:fh,cellWidth:cellW,cellHeight:cellH,sheetWidth:cellW*cols,sheetHeight:cellH*rows},
+    animation:{id:name,frames:S.frames.length,fps,order,loop:true,tags:['sprite-fan','postprocessed','atlas-grid'],anchor:S.anchor,events:[],hitboxes:[],hurtboxes:[]},
+    animations:{[name]:{frames:S.frames.length,fps,order,loop:true,anchor:S.anchor,tags:['sprite-fan','postprocessed','atlas-grid'],events:[],hitboxes:[],hurtboxes:[]}},
     sheetLayout:{columns:cols,rows,padding:pad,frameWidth:fw,frameHeight:fh,cellWidth:cellW,cellHeight:cellH,sheetWidth:cellW*cols,sheetHeight:cellH*rows},
     anchor:S.anchor,
     frames:Array.from({length:S.frames.length},(_,i)=>{const r=collectFrameReview(i),col=i%cols,row=Math.floor(i/cols),cellW=fw+pad*2,cellH=fh+pad*2;return{
