@@ -79,7 +79,7 @@ commands:
     shellCommand: "cd badger-sprawl-runner && pnpm run test && pnpm run typecheck && pnpm run build && pnpm run smoke:runner && pnpm run lint && pnpm run test:e2e --project=chromium"
   test:sprite-fan:
     description: Run focused Sprite Fan postprocessing contracts plus syntax checks.
-    run: "node --test tests/sprite-fan-atlas-contract.test.mjs tests/sprite-fan-postprocess.test.mjs tests/sprite-fan-gif-merge-decision.test.mjs tests/sprite-fan-architecture-decision.test.mjs tests/sprite-fan-generation-contract.test.mjs && node tests/extract-sprite-fan-script.mjs sprite-fan/atlas-studio.html /tmp/atlas-studio-script.js && node --check /tmp/atlas-studio-script.js"
+    run: "node --test tests/sprite-fan-atlas-contract.test.mjs tests/sprite-fan-postprocess.test.mjs tests/sprite-fan-gif-merge-decision.test.mjs tests/sprite-fan-architecture-decision.test.mjs tests/sprite-fan-generation-contract.test.mjs tests/badger-sprite-fan-compat.test.mjs tests/ethic-sprite-fan-compat.test.mjs && node tests/extract-sprite-fan-script.mjs sprite-fan/atlas-studio.html /tmp/atlas-studio-script.js && node --check /tmp/atlas-studio-script.js"
     track: test
     timeoutMs: 20000
   e2e:sprite-fan:

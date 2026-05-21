@@ -222,7 +222,7 @@
 - [x] Added sprites.json generationContract and animation metadata aligned with sprite-fan/reqs atlas-grid requirements.
 - [x] Add guided spec mode: Manifest panel now has prompt/checklist guidance based on sprite-fan/reqs requirements, exports spec-state JSON, embeds specGuide in sprites.json/full config, and re-imports/persists checklist state through Config Manager.
 - [x] adapt ../badger-sprawl-runner to the Sprite Fan spec via `docs/sprite-fan/compat.yml`, mapping Badger's atlas runtime contract to Sprite Fan grid/animations/frame metadata fields.
-- [ ] adapt the animation spec ymls in ../ethic-brawl/ to the sprite-fan spec
+- [x] adapt ../ethic-brawl to the Sprite Fan spec via `docs/sprite-fan/compat.yml`, mapping its 4x4 roster sheets to Sprite Fan grid/animations/frame metadata fields.
 - [x] add post-processing-animation preview: selectable timeline subset can be marked with Ctrl/Meta-click or `M`, preview playback loops only marked frames, and Escape/clear resets to all frames. GIF export remains a future optional extension.
 - [x] adapt ../badger-sprawl-runner project to the spec exported from Sprite Fan through a checked compatibility overlay and root contract test
-- [ ] make sure to adapt the ../ethic-brawl animation project rsystem to the spec exported from sprite-fan
+- [x] adapt ../ethic-brawl animation project system to the spec exported from Sprite Fan through a checked compatibility overlay and root contract test
