@@ -78,7 +78,7 @@
   - palette / dithering options,
   - sprite-sheet-to-GIF workflow.
 - [x] Prefer adding only focused GIF import/export modules at first, not copying the whole UI.
-- [ ] If GIF support is added, create tests around frame count, duration preservation, transparency, and exported file metadata.
+- [x] Added focused GIF export and e2e coverage around frame count, duration preservation, transparency flag, and exported GIF loop/file metadata.
 
 
 

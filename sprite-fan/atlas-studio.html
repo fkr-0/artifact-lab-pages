@@ -381,6 +381,7 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" id="btn-repack">&#x2B1A; Repack Sheet</button>
             <button class="btn btn-success btn-sm" id="btn-export-png">&#x2B07; Export PNG</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-gif">Export GIF</button>
           </div>
         </div>
       </div>
@@ -1326,6 +1327,37 @@ $('btn-export-png').addEventListener('click',()=>{
   a.href=outC.toDataURL('image/png');a.click();toast('PNG exported','success');
 });
 
+function pushAscii(out,str){for(let i=0;i<str.length;i++)out.push(str.charCodeAt(i))}
+function pushU16(out,n){out.push(n&255,(n>>8)&255)}
+function writeGifSubBlocks(out,bytes){let off=0;while(off<bytes.length){const n=Math.min(255,bytes.length-off);out.push(n);for(let i=0;i<n;i++)out.push(bytes[off+i]);off+=n}out.push(0)}
+function bitPackGifCodes(codes,minCodeSize){let cur=0,bits=0;const out=[];const write=(code,size)=>{cur|=code<<bits;bits+=size;while(bits>=8){out.push(cur&255);cur>>=8;bits-=8}};for(const c of codes)write(c,minCodeSize+1);if(bits>0)out.push(cur&255);return out}
+function lzwEncodeFlatIndices(indices,minCodeSize){const clear=1<<minCodeSize,end=clear+1;const codes=[clear];for(const idx of indices)codes.push(idx);codes.push(end);return bitPackGifCodes(codes,minCodeSize)}
+function collectGifPalette(frames){const colors=new Map();let transparent=false;for(const f of frames){const d=f.imgData.data;for(let i=0;i<d.length;i+=4){const a=d[i+3];if(a<128){transparent=true;continue}const r=Math.round(d[i]/51)*51,g=Math.round(d[i+1]/51)*51,b=Math.round(d[i+2]/51)*51;const key=`${r},${g},${b}`;if(!colors.has(key)&&colors.size<255)colors.set(key,[r,g,b])}}const palette=[[0,0,0],...colors.values()];while(palette.length<256)palette.push([0,0,0]);return{palette,transparent}}
+function encodeGifBlob(){
+  if(!S.frames.length){toast('Slice frames first','warning');return null}
+  const fw=S.frames[0].imgData.width,fh=S.frames[0].imgData.height;
+  if(!S.frames.every(f=>f.imgData.width===fw&&f.imgData.height===fh)){toast('GIF export requires stable frame size','error');return null}
+  const fps=+$('manifest-fps').value||12,delayCs=Math.max(1,Math.round(100/fps));
+  const loopCount=Math.max(0,+$('manifest-loop').value||0);
+  const {palette,transparent}=collectGifPalette(S.frames),out=[];
+  pushAscii(out,'GIF89a');pushU16(out,fw);pushU16(out,fh);out.push(0xF7,0,0); // global 256-color table
+  palette.forEach(([r,g,b])=>out.push(r,g,b));
+  // Netscape loop extension; 0 means infinite, otherwise finite loop count.
+  out.push(0x21,0xFF,11);pushAscii(out,'NETSCAPE2.0');out.push(3,1);pushU16(out,loopCount);out.push(0);
+  for(const f of S.frames){
+    out.push(0x21,0xF9,4,transparent?0x09:0x08);pushU16(out,delayCs);out.push(0,0);
+    out.push(0x2C);pushU16(out,0);pushU16(out,0);pushU16(out,fw);pushU16(out,fh);out.push(0);
+    const d=f.imgData.data,idx=[];
+    const colorToIndex=new Map();palette.forEach((c,i)=>{if(i>0)colorToIndex.set(c.join(','),i)});
+    for(let i=0;i<d.length;i+=4){if(d[i+3]<128){idx.push(0);continue}const r=Math.round(d[i]/51)*51,g=Math.round(d[i+1]/51)*51,b=Math.round(d[i+2]/51)*51;idx.push(colorToIndex.get(`${r},${g},${b}`)||1)}
+    out.push(8);writeGifSubBlocks(out,lzwEncodeFlatIndices(idx,8));
+  }
+  out.push(0x3B);return new Blob([new Uint8Array(out)],{type:'image/gif'})
+}
+function exportGif(){const blob=encodeGifBlob();if(!blob)return;const a=document.createElement('a');a.download=($('manifest-name').value||'sprite')+'.gif';a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);toast('GIF exported','success')}
+
+$('btn-export-gif').addEventListener('click',exportGif);
+
 $('btn-export').addEventListener('click',()=>{$('btn-export-png').click()});
 
 // ════════════════════════════════════════════
@@ -1509,6 +1541,7 @@ window.__spriteFanTest = {
   selectFrame(i){showFrame(i);return this.getState()},
   togglePreviewFrame(i){togglePreviewFrame(i);return this.getState()},
   getPreviewSequence(){return getPreviewSequence()},
+  async encodeGifBytes(){const b=encodeGifBlob();return b?Array.from(new Uint8Array(await b.arrayBuffer())):null},
   refreshSpecGuide(){return refreshSpecGuide()},
   getSpecGuide(){return S.specGuide},
 };
