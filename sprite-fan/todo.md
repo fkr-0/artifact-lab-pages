@@ -221,8 +221,8 @@
 - [x] Added Sprite Fan Atlas Studio to the v11 hub manifest/deploy catalog with reachability regression coverage.
 - [x] Added sprites.json generationContract and animation metadata aligned with sprite-fan/reqs atlas-grid requirements.
 - [x] Add guided spec mode: Manifest panel now has prompt/checklist guidance based on sprite-fan/reqs requirements, exports spec-state JSON, embeds specGuide in sprites.json/full config, and re-imports/persists checklist state through Config Manager.
-- [ ] adapt the animation spec ymls in ../badger-sprawl-runner/ to the sprite-fan spec
+- [x] adapt ../badger-sprawl-runner to the Sprite Fan spec via `docs/sprite-fan/compat.yml`, mapping Badger's atlas runtime contract to Sprite Fan grid/animations/frame metadata fields.
 - [ ] adapt the animation spec ymls in ../ethic-brawl/ to the sprite-fan spec
 - [x] add post-processing-animation preview: selectable timeline subset can be marked with Ctrl/Meta-click or `M`, preview playback loops only marked frames, and Escape/clear resets to all frames. GIF export remains a future optional extension.
-- [ ] make sure to adapt the ../badger-sprawl-runner project to the spec exported from sprite-fan
+- [x] adapt ../badger-sprawl-runner project to the spec exported from Sprite Fan through a checked compatibility overlay and root contract test
 - [ ] make sure to adapt the ../ethic-brawl animation project rsystem to the spec exported from sprite-fan
