@@ -12,13 +12,13 @@ env:
 
 commands:
   compile:app-hub-v11:
-    run: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
-    description: "Compile the v11 app-hub artifact source list into a clean browser catalog."
-    timeoutMs: 10000
+    run: "node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
+    description: "Generate git-based artifact timestamps and compile the v11 app-hub artifact source list into a clean browser catalog."
+    timeoutMs: 15000
     track: build
-    shellCommand: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
+    shellCommand: "node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
   static:app-hub-v11:
-    run: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node scripts/extract-html-module.mjs app-hub-v11/index.html /tmp/app-hub-v11-index-module.mjs && node --check /tmp/app-hub-v11-index-module.mjs && node --check app-hub-v11/lib/launcher.js && node --check app-hub-v11/lib/network.js && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs && node --test tests/app-hub-v11-index-ui.test.mjs tests/app-hub-v11-root-safe-imports.test.mjs tests/app-hub-v11-shared-v9-shell-css.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-links-settings.test.mjs"
+    run: "node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node scripts/extract-html-module.mjs app-hub-v11/index.html /tmp/app-hub-v11-index-module.mjs && node --check /tmp/app-hub-v11-index-module.mjs && node --check app-hub-v11/lib/launcher.js && node --check app-hub-v11/lib/network.js && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs && node --test tests/app-hub-v11-index-ui.test.mjs tests/app-hub-v11-root-safe-imports.test.mjs tests/app-hub-v11-shared-v9-shell-css.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-links-settings.test.mjs"
     description: "Run app-hub-v11 static verification: compile catalog, extract/check index module, check core JS, and run focused UI/root-safe contracts."
     timeoutMs: 30000
     track: test

@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.mjs",
+    "health:sprite-fan": "node scripts/sprite-fan-health.mjs",
+    "build:sprite-fan": "node sprite-fan/build-atlas-studio.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui"

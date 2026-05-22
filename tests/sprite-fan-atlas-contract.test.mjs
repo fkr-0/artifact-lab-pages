@@ -30,11 +30,34 @@ for (const expectedId of [
   'btn-cleanup-all',
   'review-metrics',
   'btn-auto-fit',
+  'btn-reset-layout',
+  'left-resizer',
+  'right-resizer',
+  'timeline-resizer',
 ]) {
   assert.ok(ids.includes(expectedId), `atlas-studio should include #${expectedId}`);
 }
 
 const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1] ?? '';
 assert.doesNotMatch(script, /TODO:|FIXME:/, 'atlas-studio script should not ship local TODO/FIXME markers');
+
+const unsafeInnerHtmlAssignments = [...script.matchAll(/\.innerHTML\s*=\s*([^;]+)/g)]
+  .map((match) => match[1].trim())
+  .filter((rhs) => rhs !== "''" && rhs !== '""');
+assert.deepEqual(unsafeInnerHtmlAssignments, [], 'atlas-studio should not assign non-empty innerHTML from dynamic content');
+
+for (const expected of [
+  'cleanConfig',
+  'cleanSpecGuide',
+  'loadObjectUrlImage',
+  'createTextNode',
+  'startLayoutResize',
+  'applyLayout',
+  'resetLayout',
+  'viewStates',
+  'layout',
+]) {
+  assert.match(script, new RegExp(expected), `atlas-studio should include ${expected}`);
+}
 
 console.log('sprite fan atlas contract OK');

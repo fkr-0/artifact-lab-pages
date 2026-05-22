@@ -9,7 +9,9 @@ assert.match(architecture, /Do \*\*not\*\* split/i);
 assert.match(architecture, /Split criteria/i);
 assert.match(architecture, /compile step must/i);
 assert.match(architecture, /single standalone HTML artifact/i);
-assert.match(architecture, /GIF features should be added later as focused import\/export modules/i);
+assert.match(architecture, /Focused GIF export is now merged/i);
+assert.match(architecture, /does not by itself trigger a split/i);
+assert.match(architecture, /Future GIF work should continue as focused import\/export modules/i);
 assert.match(todo, /Do not split immediately/i);
 assert.match(todo, /Re-evaluate split after tests exist/i);
 

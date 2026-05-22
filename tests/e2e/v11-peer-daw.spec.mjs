@@ -40,6 +40,9 @@ test.describe('v11-peer-daw app', () => {
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
+    await expect(page.locator('#sessionCode')).toHaveText('V11-OPEN-STUDIO');
+    await expect(page.locator('#workspaceMainView')).toContainText('Shared session');
+    await expect(page.locator('#workspaceMainView')).toContainText('V11-OPEN-STUDIO');
     await expect(page.locator('#patchCanvas')).toBeVisible();
     await expect.poll(async () => page.locator('#routes li').count()).toBeGreaterThan(1);
     await expect.poll(async () => page.locator('#mixerStrip .strip').count()).toBeGreaterThan(0);
@@ -54,6 +57,47 @@ test.describe('v11-peer-daw app', () => {
     }));
     expect(state).toMatchObject({ moduleCount: 9, packetRouteCount: 7, hasClock: true, hasMixer: true });
     expect(state.canvasNodes).toBeGreaterThanOrEqual(9);
+    expect(seriousErrors(errors)).toEqual([]);
+  });
+
+  test('shows serious workspace views for session, clips, arrangement, mixer, and module detail', async ({ page }) => {
+    const errors = await bootDaw(page);
+
+    await expect(page.locator('#workspaceMainView')).toContainText('Shared session');
+    await page.locator('[data-workspace-view="clips"]').click();
+    await expect(page.locator('#workspaceMainView')).toContainText('CREATE CLIP');
+    await expect(page.locator('#workspaceMainView .clip-slot-row')).toHaveCount(4);
+    await page.locator('[data-clip-action="create"]').click();
+    await expect(page.locator('#workspaceMainView .clip-slot-row')).toHaveCount(5);
+    await page.locator('[data-clip-action="launch"]').first().click();
+    await expect(page.locator('#eventLog')).toContainText('clip launched');
+    await page.locator('[data-clip-action="place"]').first().click();
+    await expect(page.locator('#eventLog')).toContainText('clip placed on arrangement');
+    await page.locator('[data-workspace-view="arrangement"]').click();
+    await expect(page.locator('#workspaceMainView .timeline-lane')).toHaveCount(1);
+    await expect(page.locator('#workspaceMainView .timeline-clip')).toHaveCount(1);
+    await page.locator('[data-workspace-view="mixer"]').click();
+    await expect(page.locator('#workspaceMainView')).toContainText('Master');
+    await expect(page.locator('#workspaceMainView .mixer-channel')).toHaveCount(6);
+    await page.locator('[data-module-input="master-volume"]').fill('0.55');
+    await page.locator('#workspaceMainView [data-module-action="toggle-mute"]').first().click();
+    await expect(page.locator('#workspaceMainView .mixer-channel.muted')).toHaveCount(1);
+    await page.locator('#workspaceMainView [data-module-action="toggle-solo"]').first().click();
+    await expect(page.locator('#workspaceMainView .mixer-channel.solo')).toHaveCount(1);
+    const mixerState = await page.evaluate(() => window.v11PeerDAW.serializeMixerState());
+    expect(mixerState.masterVolume).toBeCloseTo(0.55);
+    expect(Object.values(mixerState.channels).some((channel) => channel.muted && channel.solo)).toBe(true);
+    await page.locator('[data-workspace-view="module"]').click();
+    await expect(page.locator('#workspaceMainView')).toContainText('full-pane editor');
+    await expect(page.locator('#workspaceMainView .piano-cell.on').first()).toBeVisible();
+    const noteCountBefore = await page.evaluate(() => window.v11PeerDAW.patchBay.modules.get('piano-roll')?.notes.length);
+    await page.locator('#workspaceMainView .piano-cell:not(.on)').first().click();
+    const noteCountAfter = await page.evaluate(() => window.v11PeerDAW.patchBay.modules.get('piano-roll')?.notes.length);
+    expect(noteCountAfter).toBe(noteCountBefore + 1);
+    await page.locator('#workspaceMainView [data-module-action="clear-notes"]').click();
+    await expect(page.locator('#workspaceMainView')).toContainText('No notes yet');
+    await page.locator('#btnWorkspaceReset').click();
+    await expect(page.locator('[data-workspace-view="session"]')).toHaveClass(/active/);
     expect(seriousErrors(errors)).toEqual([]);
   });
 
@@ -117,10 +161,17 @@ test.describe('v11-peer-daw app', () => {
   test('exports a project, clears routes, and imports the project back from JSON', async ({ page }) => {
     const errors = await bootDaw(page);
 
+    await page.locator('[data-workspace-view="clips"]').click();
+    await page.locator('[data-clip-action="create"]').click();
+    await page.locator('[data-clip-action="place"]').first().click();
+
     await page.locator('#btnCopyProject').click();
     await expect(page.locator('#projectIoText')).toHaveValue(/"modules"/);
     const exported = await page.locator('#projectIoText').inputValue();
-    expect(JSON.parse(exported).modules.length).toBe(9);
+    const exportedProject = JSON.parse(exported);
+    expect(exportedProject.modules.length).toBe(9);
+    expect(exportedProject.clips.slots.length).toBeGreaterThanOrEqual(5);
+    expect(exportedProject.arrangement.clips.length).toBeGreaterThanOrEqual(1);
 
     await page.locator('#btnClearRoutes').click();
     await expect(page.locator('#routeCount')).toContainText('0 packet');
@@ -130,6 +181,10 @@ test.describe('v11-peer-daw app', () => {
     await page.locator('#btnPasteProject').click();
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
+    await page.locator('[data-workspace-view="clips"]').click();
+    await expect(page.locator('#workspaceMainView .clip-slot-row')).toHaveCount(exportedProject.clips.slots.length);
+    await page.locator('[data-workspace-view="arrangement"]').click();
+    await expect(page.locator('#workspaceMainView .timeline-clip')).toHaveCount(exportedProject.arrangement.clips.length);
     expect(seriousErrors(errors)).toEqual([]);
   });
 

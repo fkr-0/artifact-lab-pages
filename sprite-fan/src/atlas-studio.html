@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprite Atlas Studio</title>
+<style>{{SPRITE_FAN_CSS}}</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <span class="logo">Sprite Atlas Studio</span>
+    <span class="topbar-sep"></span>
+    <div class="wf-tabs">
+      <button class="wf-tab active" data-wf="import"><span class="tab-num">1</span>Import</button>
+      <button class="wf-tab" data-wf="align"><span class="tab-num">2</span>Align</button>
+      <button class="wf-tab" data-wf="cleanup"><span class="tab-num">3</span>Cleanup</button>
+      <button class="wf-tab" data-wf="export"><span class="tab-num">4</span>Export</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#x21B6;</button>
+      <button class="btn-icon" id="btn-redo" title="Redo (Ctrl+Y)" disabled>&#x21B7;</button>
+      <span class="topbar-sep"></span>
+      <button class="btn-icon" id="btn-zoom-out" title="Zoom Out">&#x2212;</button>
+      <button class="btn-icon" id="btn-zoom-fit" title="Fit to View (F)">&#x25CE;</button>
+      <button class="btn-icon" id="btn-auto-fit" title="Toggle auto-fit while reviewing frames">AF</button>
+      <button class="btn-icon" id="btn-reset-layout" title="Reset panel layout">&#x21A4;</button>
+      <button class="btn-icon" id="btn-zoom-in" title="Zoom In">&#x2B;</button>
+      <span class="topbar-sep"></span>
+      <button class="btn-icon" id="btn-onion" title="Onion Skin (O)">&#x25D0;</button>
+      <button class="btn-icon" id="btn-config" title="Config Manager">&#x2699;</button>
+      <button class="btn btn-primary btn-sm" id="btn-export">&#x2B07; Export PNG</button>
+    </div>
+  </div>
+
+  <div id="workspace">
+    <!-- Left Panel -->
+    <div id="left-panel">
+      <!-- SOURCE IMAGE (always visible) -->
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-file"><span>Source Image</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-file">
+          <div id="single-file-input">
+            <input type="file" id="file-input" accept="image/*" style="width:100%;font-size:10px;margin-bottom:6px"/>
+          </div>
+          <div id="dual-file-inputs" style="display:none">
+            <div class="dual-file-row"><label>White:</label><input type="file" id="white-file" accept="image/*"/></div>
+            <div class="dual-file-row"><label>Black:</label><input type="file" id="black-file" accept="image/*"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-load-clip">Clipboard</button>
+            <button class="btn btn-ghost btn-sm" id="btn-dual-toggle">Dual BG Mode</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WF1: IMPORT -->
+      <div class="panel-section wf-panel" data-wf="import">
+        <div class="panel-header" data-toggle="sec-import"><span>Grid Slicing</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-import">
+          <div class="preset-grid">
+            <button class="preset-btn" data-fw="48" data-fh="48"><div class="preset-name">Player</div><div class="preset-size">48x48</div></button>
+            <button class="preset-btn" data-fw="16" data-fh="16"><div class="preset-name">Item</div><div class="preset-size">16x16</div></button>
+            <button class="preset-btn" data-fw="96" data-fh="96"><div class="preset-name">Boss</div><div class="preset-size">96x96</div></button>
+            <button class="preset-btn" data-fw="32" data-fh="32"><div class="preset-name">Tile</div><div class="preset-size">32x32</div></button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Frame Width</span><span id="fw-val">48</span></div>
+            <div class="field-row"><input type="range" id="frame-w" min="1" max="512" value="48"/><input type="number" id="frame-w-num" min="1" max="512" value="48"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Frame Height</span><span id="fh-val">48</span></div>
+            <div class="field-row"><input type="range" id="frame-h" min="1" max="512" value="48"/><input type="number" id="frame-h-num" min="1" max="512" value="48"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Offset X</span><span id="ox-val">0</span></div>
+            <div class="field-row"><input type="range" id="grid-ox" min="0" max="128" value="0"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Offset Y</span><span id="oy-val">0</span></div>
+            <div class="field-row"><input type="range" id="grid-oy" min="0" max="128" value="0"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btn-slice">&#x2702; Slice by Grid</button>
+          </div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="slice-info">-</div>
+        </div>
+      </div>
+
+      <!-- WF2: ALIGN -->
+      <div class="panel-section wf-panel" data-wf="align" style="display:none">
+        <div class="panel-header" data-toggle="sec-align"><span>Anchor Alignment</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-align">
+          <div class="field-label" style="margin-bottom:6px"><span>Anchor Presets</span></div>
+          <div class="preset-grid">
+            <button class="preset-btn" data-ax="24" data-ay="44"><div class="preset-name">Player</div><div class="preset-size">24,44</div></button>
+            <button class="preset-btn" data-ax="16" data-ay="16"><div class="preset-name">Item</div><div class="preset-size">16,16</div></button>
+            <button class="preset-btn" data-ax="48" data-ay="88"><div class="preset-name">Boss</div><div class="preset-size">48,88</div></button>
+            <button class="preset-btn" data-ax="0" data-ay="0"><div class="preset-name">Custom</div><div class="preset-size">click canvas</div></button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Anchor X</span><span id="ancx-val">24</span></div>
+            <div class="field-row"><input type="range" id="anchor-x" min="0" max="256" value="24"/><input type="number" id="anchor-x-num" min="0" max="512" value="24"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Anchor Y</span><span id="ancy-val">44</span></div>
+            <div class="field-row"><input type="range" id="anchor-y" min="0" max="256" value="44"/><input type="number" id="anchor-y-num" min="0" max="512" value="44"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-onion" checked/> Show onion skin</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-snap-anchor"/> Snap to grid</label>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-anchor-place">&#x271A; Place Anchor</button>
+            <button class="btn btn-danger btn-sm" id="btn-anchor-clear">&#x2715; Clear</button>
+          </div>
+          <div class="btn-row" style="margin-top:4px">
+            <button class="btn btn-primary btn-sm" id="btn-stabilize">&#x21BB; Stabilize Frames</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WF3: CLEANUP -->
+      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+        <div class="panel-header" data-toggle="sec-clean"><span>Alpha &amp; Cleanup</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-clean">
+          <div class="field">
+            <div class="field-label"><span>BG Tolerance</span><span id="tol-val">32</span></div>
+            <div class="field-row"><input type="range" id="tolerance" min="5" max="80" value="32"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Max Saturation</span><span id="sat-val">18</span></div>
+            <div class="field-row"><input type="range" id="max-saturation" min="0" max="60" value="18"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-edge-seed" checked/> Edge-only flood fill</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-remove-fringe"/> Remove fringe</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-force-transparent"/> Force transparent BG</label>
+          <div class="btn-row"><button class="btn btn-primary btn-sm" id="btn-clean-run">&#x2715; Remove BG</button></div>
+          <div class="btn-row" id="dual-extract-row" style="display:none"><button class="btn btn-ghost btn-sm" id="btn-dual-extract">&#x2728; Dual BG Extract</button></div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+        <div class="panel-header" data-toggle="sec-cleanup"><span>Per-Frame Cleanup</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-cleanup">
+          <div class="field">
+            <div class="field-label"><span>Stray Pixel Size</span><span id="stray-val">4</span></div>
+            <div class="field-row"><input type="range" id="stray-size" min="1" max="32" value="4"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Jitter Threshold</span><span id="jitter-val">2</span></div>
+            <div class="field-row"><input type="range" id="jitter-thresh" min="0" max="8" value="2"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Outline Normalize</span><span id="outline-val">0</span></div>
+            <div class="field-row"><input type="range" id="outline-radius" min="0" max="4" value="0"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-force-transparent-frame"/> Force transparent BG</label>
+          <label class="checkbox-row"><input type="checkbox" id="chk-jitter-shift"/> Shift pixels when fixing jitter</label>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-remove-stray">&#x2715; Remove Stray</button>
+            <button class="btn btn-ghost btn-sm" id="btn-fix-pinholes">&#x25CC; Fix Pinholes</button>
+            <button class="btn btn-ghost btn-sm" id="btn-fix-jitter">&#x21BB; Fix Jitter</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-normalize-outline">&#x25CE; Normalize Outline</button>
+            <button class="btn btn-ghost btn-sm" id="btn-soften">&#x2740; Soften</button>
+          </div>
+          <div class="btn-row" style="margin-top:4px">
+            <button class="btn btn-success btn-sm" id="btn-cleanup-all">&#x26A1; Cleanup All Frames</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+        <div class="panel-header" data-toggle="sec-soften"><span>Softening &amp; Morphology</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-soften">
+          <div class="field">
+            <div class="field-label"><span>Edge Soften</span><span id="soften-val">0</span></div>
+            <div class="field-row"><input type="range" id="soften-radius" min="0" max="4" value="0" step="0.5"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Alpha Erode</span><span id="erode-val">0</span></div>
+            <div class="field-row"><input type="range" id="alpha-erode" min="0" max="8" value="0"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Alpha Dilate</span><span id="dilate-val">0</span></div>
+            <div class="field-row"><input type="range" id="alpha-dilate" min="0" max="8" value="0"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WF4: EXPORT -->
+      <div class="panel-section wf-panel" data-wf="export" style="display:none">
+        <div class="panel-header" data-toggle="sec-export"><span>Sprite Sheet Export</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-export">
+          <div class="field">
+            <div class="field-label"><span>Columns</span><span id="cols-val">8</span></div>
+            <div class="field-row"><input type="range" id="export-cols" min="1" max="32" value="8"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Padding</span><span id="pad-val">0</span></div>
+            <div class="field-row"><input type="range" id="export-pad" min="0" max="16" value="0"/></div>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-no-pad"/> No padding (strict)</label>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btn-repack">&#x2B1A; Repack Sheet</button>
+            <button class="btn btn-success btn-sm" id="btn-export-png">&#x2B07; Export PNG</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-gif">Export GIF</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="export" style="display:none">
+        <div class="panel-header" data-toggle="sec-manifest"><span>Manifest</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-manifest">
+          <div class="field">
+            <div class="field-label"><span>Sprite Name</span></div>
+            <div class="field-row"><input type="text" id="manifest-name" value="sprite" style="flex:1;font-size:11px"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>FPS</span><span id="fps-val">12</span></div>
+            <div class="field-row"><input type="range" id="manifest-fps" min="1" max="60" value="12"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Loop Count</span><span id="loop-val">∞</span></div>
+            <div class="field-row"><input type="number" id="manifest-loop" min="0" max="999" value="0" style="width:70px"/><span style="font-size:10px;color:var(--text-muted)">0 = infinite</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Spec Prompt</span></div>
+            <div class="field-row"><textarea id="spec-prompt" placeholder="Describe the sprite/animation goal" style="width:100%;min-height:42px;font-size:11px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px"></textarea></div>
+          </div>
+          <div style="margin:8px 0;font-size:10px;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5" id="spec-guide-summary">Spec: not checked</div>
+          <div style="margin:6px 0;font-size:10px;color:var(--text-muted);line-height:1.5" id="spec-guide-list">Open export workflow and click Check Spec.</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-spec-check">Check Spec</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-spec-state">Export Spec State</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-export-manifest">&#x{1F4C4;} Export sprites.json</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-manifest-full">Export Full Config</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Island detection (shared) -->
+      <div class="panel-section" id="panel-island">
+        <div class="panel-header" data-toggle="sec-island"><span>Island Detection</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-island">
+          <div class="field">
+            <div class="field-label"><span>Alpha Threshold</span><span id="athresh-val">8</span></div>
+            <div class="field-row"><input type="range" id="alpha-threshold" min="1" max="255" value="8"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Merge Distance</span><span id="merge-val">24</span></div>
+            <div class="field-row"><input type="range" id="merge-distance" min="0" max="100" value="24"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-detect">Detect Islands</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-handle resize-handle-x" id="left-resizer" data-resize="left" title="Drag to resize left pane"></div>
+
+    <!-- Canvas Area -->
+    <div id="canvas-area">
+      <div id="canvas-container">
+        <div class="checker-bg"></div>
+        <canvas id="onion-canvas"></canvas>
+        <canvas id="main-canvas"></canvas>
+        <canvas id="overlay-canvas"></canvas>
+        <div class="drop-zone" id="drop-zone">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+          <p>Drop image here or click to load</p>
+          <span class="sub">PNG, JPG, WebP, BMP</span>
+        </div>
+      </div>
+      <div class="canvas-info">
+        <span id="info-size">No image</span>
+        <span>|</span>
+        <span>Zoom: <span class="zoom-val" id="info-zoom">100%</span></span>
+        <span>|</span>
+        <span id="info-cursor">-</span>
+      </div>
+    </div>
+
+    <div class="resize-handle resize-handle-x" id="right-resizer" data-resize="right" title="Drag to resize right pane"></div>
+
+    <!-- Right Panel -->
+    <div id="right-panel">
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-preview"><span>Preview</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-preview">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button class="btn btn-ghost btn-sm" id="btn-preview-cur" style="flex:1">Current</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-orig" style="flex:1">Original</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+            <button class="btn btn-ghost btn-sm" id="btn-preview-stray">Stray</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-pinholes">Pinholes</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-outline">Outline</button>
+          </div>
+          <div class="preview-box"><canvas id="preview-canvas"></canvas><span class="preview-label">CURRENT</span></div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-frames"><span>Frames</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-frames">
+          <div class="frame-strip" id="frame-strip"></div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="frame-count">No frames</div>
+          <div class="field" style="margin-top:8px">
+            <div class="field-label"><span>Max Auto-Fit Zoom</span><span id="fitzoom-val">4</span></div>
+            <div class="field-row"><input type="range" id="max-auto-fit-zoom" min="1" max="16" value="4"/></div>
+          </div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5" id="review-metrics">Review: -</div>
+          <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="btn-prev-issue">Prev Issue</button>
+            <button class="btn btn-ghost btn-sm" id="btn-next-issue">Next Issue</button>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono);line-height:1.5" id="review-issue-list">Issues: -</div>
+          <div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="btn-export-review-report" style="width:100%">Export Review Report</button></div>
+          <div style="margin-top:8px" class="field">
+            <div class="field-label"><span>Frame Label</span></div>
+            <div class="field-row"><input type="text" id="frame-label" placeholder="optional label" style="flex:1;font-size:11px"/></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Frame Notes</span></div>
+            <div class="field-row"><textarea id="frame-notes" placeholder="review notes" style="width:100%;min-height:42px;font-size:11px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px"></textarea></div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);line-height:1.45" id="keyboard-help">Keys: ←/→ frame · I next issue · Shift+I prev issue · F fit · O onion · Space play</div>
+          <div class="layout-help" id="layout-help">Tip: drag pane handles to resize · double-click a handle or press ↤ to reset layout.</div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-anchors"><span>Anchor</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-anchors">
+          <div class="anchor-list" id="anchor-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="resize-handle resize-handle-y" id="timeline-resizer" data-resize="timeline" title="Drag to resize timeline"></div>
+
+  <!-- Timeline -->
+  <div id="timeline">
+    <div class="tl-header">
+      <span class="tl-label">Timeline</span>
+      <div class="tl-controls">
+        <button id="btn-tl-prev" title="Previous">&#x25C0;</button>
+        <button id="btn-tl-play" title="Play/Pause">&#x25B6;</button>
+        <button id="btn-tl-next" title="Next">&#x25B6;&#xFE0E;</button>
+        <button id="btn-tl-mark" title="Mark current frame for preview subset">★</button>
+        <button id="btn-tl-clear" title="Clear preview subset">×</button>
+      </div>
+      <div class="tl-fps"><span>FPS:</span><input type="number" id="tl-fps" value="12" min="1" max="60"/></div>
+      <span id="tl-preview-info" style="font-family:var(--font-mono);font-size:10px">Preview: all</span>
+      <span id="tl-frame-info" style="margin-left:auto;font-family:var(--font-mono);font-size:10px">0/0</span>
+    </div>
+    <div class="tl-body" id="tl-body"></div>
+  </div>
+
+  <div id="statusbar">
+    <span class="status-dot"></span>
+    <span class="status-msg" id="status-msg">Ready - load an image to begin</span>
+    <div class="status-right">
+      <span id="status-undo">Undo: 0</span>
+      <span id="status-wf">Import</span>
+    </div>
+  </div>
+</div>
+
+<!-- Config Modal -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal">
+    <div class="modal-header"><span>Config Manager</span><button class="btn-icon" id="btn-config-close">&#x2715;</button></div>
+    <div class="modal-body">
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-save-local">Save LocalStorage</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-load-local">Load LocalStorage</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-export">Export JSON</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cfg-import">Import JSON</button>
+        <input type="file" id="cfg-import-file" accept=".json" style="display:none"/>
+      </div>
+      <textarea class="config-editor" id="cfg-editor" spellcheck="false"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-cfg-cancel">Cancel</button>
+      <button class="btn btn-primary" id="btn-cfg-apply">Apply</button>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script>{{SPRITE_FAN_JS}}</script>
+</body>
+</html>

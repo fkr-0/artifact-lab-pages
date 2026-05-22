@@ -2418,7 +2418,7 @@
       }
       function buildTickerContent() {
         const commitHash = $("buildCommitShort").textContent || "--";
-        const artifactCount = catalog.summary.total || 0;
+        const artifactCount = catalog.summary?.total || catalog.items?.length || 0;
         const buildDate = $("buildDate").textContent || "--";
         const commitMsg = $("buildCommitShort").textContent ?
           `NEXUS v11 HUB ACTIVE // ALL SYSTEMS NOMINAL` :

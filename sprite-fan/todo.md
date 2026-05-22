@@ -11,6 +11,14 @@
 
 ## Remaining tasks
 
+- 1. preview window is ridiculous mini, either zoomable, or just toggle the main window with a key between regular + preview state
+- 2. the "enforcement" of pixels needs to go, what matters from the json specs is the relative locations(!!!!)
+     that means: on export we can shrink it along the spec, until then allow much more free adjustment of grid
+- 3. allow to "reassemble" frames. we should be able to export rows, columns / partial. with json describing their state
+     so we could e.g. have 2 5x4 grids, but bad ordered, we could anyways assemble maybe 3x4 and 1x3 from it, save it (in their position)
+     and later take other cutouts to assemble another 4x4
+ - 4. the alpha filtering either dont works or preview is broken fix this
+
 ### Reliability and pixel correctness
 
 - [x] Add browser-level regression tests for:
