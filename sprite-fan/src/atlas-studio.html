@@ -15,7 +15,8 @@
       <button class="wf-tab active" data-wf="import"><span class="tab-num">1</span>Import</button>
       <button class="wf-tab" data-wf="align"><span class="tab-num">2</span>Align</button>
       <button class="wf-tab" data-wf="cleanup"><span class="tab-num">3</span>Cleanup</button>
-      <button class="wf-tab" data-wf="export"><span class="tab-num">4</span>Export</button>
+      <button class="wf-tab" data-wf="repair"><span class="tab-num">4</span>Cleanup by Frame</button>
+      <button class="wf-tab" data-wf="export"><span class="tab-num">5</span>Export</button>
     </div>
     <div class="topbar-actions">
       <button class="btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#x21B6;</button>
@@ -30,6 +31,17 @@
       <button class="btn-icon" id="btn-onion" title="Onion Skin (O)">&#x25D0;</button>
       <button class="btn-icon" id="btn-config" title="Config Manager">&#x2699;</button>
       <button class="btn btn-primary btn-sm" id="btn-export">&#x2B07; Export PNG</button>
+    </div>
+  </div>
+  <div id="quick-guide">
+    <div class="guide-copy">
+      <strong id="quick-guide-title">Quick Start:</strong>
+      <span id="quick-guide-text">1) Load an image. 2) Remove background in Cleanup. 3) Return to Import and slice grid.</span>
+    </div>
+    <div id="workflow-progress" aria-label="Workflow progress"></div>
+    <div class="guide-actions">
+      <button class="btn btn-primary btn-sm" id="btn-quick-primary">Load Image</button>
+      <button class="btn btn-ghost btn-sm" id="btn-quick-secondary">Clipboard</button>
     </div>
   </div>
 
@@ -80,6 +92,26 @@
             <div class="field-label"><span>Offset Y</span><span id="oy-val">0</span></div>
             <div class="field-row"><input type="range" id="grid-oy" min="0" max="128" value="0"/></div>
           </div>
+          <div class="field">
+            <div class="field-label"><span>Grid Edit Mode</span></div>
+            <div class="field-row">
+              <select id="grid-edit-mode" style="width:100%">
+                <option value="grid">Whole grid</option>
+                <option value="cell">Single cell</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>Selected Cell</span></div>
+            <div class="field-row"><input type="number" id="grid-cell-index" min="0" value="0" style="width:100%"/></div>
+          </div>
+          <div class="layout-help" id="grid-cell-info">No cell overrides</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-reset-cell-override">Reset Cell</button>
+            <button class="btn btn-ghost btn-sm" id="btn-clear-cell-overrides">Clear Overrides</button>
+          </div>
+          <label class="checkbox-row"><input type="checkbox" id="chk-show-anchor-overlay" checked/> Show anchor crosshair overlay</label>
+          <div class="layout-help">Import mouse interop: Grid mode = drag move grid, Shift+drag resize cells. Cell mode = drag selected cell, Shift+drag resize selected cell. Double-click canvas to reset selected cell override. Space+drag always pans.</div>
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" id="btn-slice">&#x2702; Slice by Grid</button>
           </div>
@@ -133,12 +165,17 @@
           <label class="checkbox-row"><input type="checkbox" id="chk-edge-seed" checked/> Edge-only flood fill</label>
           <label class="checkbox-row"><input type="checkbox" id="chk-remove-fringe"/> Remove fringe</label>
           <label class="checkbox-row"><input type="checkbox" id="chk-force-transparent"/> Force transparent BG</label>
-          <div class="btn-row"><button class="btn btn-primary btn-sm" id="btn-clean-run">&#x2715; Remove BG</button></div>
+          <div class="layout-help">Preview is non-destructive and appears directly over the main canvas. Use Apply to commit.</div>
+          <div class="btn-row"><button class="btn btn-primary btn-sm" id="btn-clean-run">&#x2715; Apply Remove BG</button></div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-reset-original">Reset to Original</button>
+            <button class="btn btn-ghost btn-sm" id="btn-commit-base">Commit Current as New Base</button>
+          </div>
           <div class="btn-row" id="dual-extract-row" style="display:none"><button class="btn btn-ghost btn-sm" id="btn-dual-extract">&#x2728; Dual BG Extract</button></div>
         </div>
       </div>
 
-      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+      <div class="panel-section wf-panel" data-wf="repair" style="display:none">
         <div class="panel-header" data-toggle="sec-cleanup"><span>Per-Frame Cleanup</span><span class="chevron">&#x25BC;</span></div>
         <div class="panel-body" id="sec-cleanup">
           <div class="field">
@@ -170,7 +207,7 @@
         </div>
       </div>
 
-      <div class="panel-section wf-panel" data-wf="cleanup" style="display:none">
+      <div class="panel-section wf-panel" data-wf="repair" style="display:none">
         <div class="panel-header" data-toggle="sec-soften"><span>Softening &amp; Morphology</span><span class="chevron">&#x25BC;</span></div>
         <div class="panel-body" id="sec-soften">
           <div class="field">
@@ -201,11 +238,53 @@
             <div class="field-row"><input type="range" id="export-pad" min="0" max="16" value="0"/></div>
           </div>
           <label class="checkbox-row"><input type="checkbox" id="chk-no-pad"/> No padding (strict)</label>
+          <div class="layout-help" id="export-layout-info">Generic sheet export. Choose a contract below for 4x4 pages.</div>
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" id="btn-repack">&#x2B1A; Repack Sheet</button>
             <button class="btn btn-success btn-sm" id="btn-export-png">&#x2B07; Export PNG</button>
             <button class="btn btn-ghost btn-sm" id="btn-export-gif">Export GIF</button>
           </div>
+        </div>
+      </div>
+
+      <div class="panel-section wf-panel" data-wf="export" style="display:none">
+        <div class="panel-header" data-toggle="sec-reassembly"><span>Reassembly Target</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-reassembly">
+          <div class="field">
+            <div class="field-label"><span>Target Contract</span></div>
+            <div class="field-row">
+              <select id="target-contract" style="width:100%">
+                <option value="generic">Generic atlas</option>
+                <option value="badger-runner">Badger Runner 4x4 pages</option>
+                <option value="ethic-brawl-core">Ethic Brawl core_4x4</option>
+                <option value="ethic-brawl-extended">Ethic Brawl extended_4x4</option>
+              </select>
+            </div>
+          </div>
+          <div class="layout-help" id="reassembly-guide">Choose a target to get exact grid rules.</div>
+          <div class="contract-presets">
+            <button class="preset-btn" id="btn-target-badger" type="button"><div class="preset-name">Badger</div><div class="preset-size">4x4 pages</div></button>
+            <button class="preset-btn" id="btn-target-ethic-core" type="button"><div class="preset-name">Ethic Core</div><div class="preset-size">core_4x4</div></button>
+            <button class="preset-btn" id="btn-target-ethic-ext" type="button"><div class="preset-name">Ethic Ext</div><div class="preset-size">extended_4x4</div></button>
+          </div>
+          <div class="contract-checklist" id="reassembly-checklist">No target checks yet.</div>
+          <div class="field">
+            <div class="field-label"><span>Frame Order</span></div>
+            <div class="field-row"><textarea id="frame-order" placeholder="1,2,3,4..." style="width:100%;min-height:44px;font-size:11px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px"></textarea></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-order-current">Use Current</button>
+            <button class="btn btn-ghost btn-sm" id="btn-apply-order">Apply Order</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-frame-up">Move Selected Up</button>
+            <button class="btn btn-ghost btn-sm" id="btn-frame-down">Move Selected Down</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btn-contract-4x4">Set 4x4 Contract Layout</button>
+            <button class="btn btn-success btn-sm" id="btn-export-contract">Export Contract Pages</button>
+          </div>
+          <div class="layout-help" id="contract-page-info">No frames sliced yet.</div>
         </div>
       </div>
 
@@ -256,6 +335,7 @@
           <div class="btn-row">
             <button class="btn btn-ghost btn-sm" id="btn-detect">Detect Islands</button>
           </div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="island-info">No island analysis yet.</div>
         </div>
       </div>
     </div>
@@ -268,6 +348,7 @@
         <div class="checker-bg"></div>
         <canvas id="onion-canvas"></canvas>
         <canvas id="main-canvas"></canvas>
+        <canvas id="preview-canvas"></canvas>
         <canvas id="overlay-canvas"></canvas>
         <div class="drop-zone" id="drop-zone">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
@@ -281,7 +362,12 @@
         <span>Zoom: <span class="zoom-val" id="info-zoom">100%</span></span>
         <span>|</span>
         <span id="info-cursor">-</span>
+        <span>|</span>
+        <span id="info-tool">tool: idle</span>
+        <span>|</span>
+        <span id="info-stage">stage: empty</span>
       </div>
+      <div id="overlay-legend" class="overlay-legend">Overlay: Grid (blue) · Anchor (yellow) · Islands (green)</div>
     </div>
 
     <div class="resize-handle resize-handle-x" id="right-resizer" data-resize="right" title="Drag to resize right pane"></div>
@@ -291,8 +377,25 @@
       <div class="panel-section">
         <div class="panel-header" data-toggle="sec-preview"><span>Preview</span><span class="chevron">&#x25BC;</span></div>
         <div class="panel-body" id="sec-preview">
+          <div class="field" style="margin-bottom:8px">
+            <div class="field-label"><span>Preview Mode</span></div>
+            <div class="field-row">
+              <select id="preview-mode" style="width:100%">
+                <option value="current">Current</option>
+                <option value="original">Original</option>
+                <option value="alpha-clean">Alpha clean (live)</option>
+                <option value="stray">Stray cleanup</option>
+                <option value="pinholes">Pinholes cleanup</option>
+                <option value="outline">Outline normalize</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <div class="field-label"><span>Overlay Opacity</span><span id="preview-opacity-val">70%</span></div>
+            <div class="field-row"><input type="range" id="preview-opacity" min="15" max="100" value="70"/></div>
+          </div>
           <div style="display:flex;gap:6px;margin-bottom:8px">
-            <button class="btn btn-ghost btn-sm" id="btn-preview-cur" style="flex:1">Current</button>
+            <button class="btn btn-ghost btn-sm" id="btn-preview-cur" style="flex:1">Hide Preview</button>
             <button class="btn btn-ghost btn-sm" id="btn-preview-orig" style="flex:1">Original</button>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
@@ -300,7 +403,7 @@
             <button class="btn btn-ghost btn-sm" id="btn-preview-pinholes">Pinholes</button>
             <button class="btn btn-ghost btn-sm" id="btn-preview-outline">Outline</button>
           </div>
-          <div class="preview-box"><canvas id="preview-canvas"></canvas><span class="preview-label">CURRENT</span></div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)">Preview renders as full on-canvas overlay.</div>
         </div>
       </div>
       <div class="panel-section">
@@ -308,6 +411,7 @@
         <div class="panel-body" id="sec-frames">
           <div class="frame-strip" id="frame-strip"></div>
           <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="frame-count">No frames</div>
+          <div class="layout-help">Drag frame thumbnails to reorder. Export contracts use this order.</div>
           <div class="field" style="margin-top:8px">
             <div class="field-label"><span>Max Auto-Fit Zoom</span><span id="fitzoom-val">4</span></div>
             <div class="field-row"><input type="range" id="max-auto-fit-zoom" min="1" max="16" value="4"/></div>
