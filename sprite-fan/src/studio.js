@@ -131,6 +131,33 @@ function refreshWorkflowProgress(model=workflowModel()){
     t.classList.toggle('done',done);t.classList.toggle('blocked',blocked);
   });
 }
+function taskOrderModel(){
+  const model=workflowModel(), info=targetContractInfo(), checks=contractReadiness(info);
+  const hasTarget=info.id!=='generic', hardFails=checks.filter(c=>!c.ok&&!c.warn), reviewWarn=checks.find(c=>c.id==='review'&&c.warn);
+  const orderOk=checks.find(c=>c.id==='order')?.ok;
+  return[
+    {id:'load',title:'Load',meta:model.hasImage?'image ready':'source sheet',done:model.hasImage,active:!model.hasImage,run:()=>$('file-input')?.click()},
+    {id:'clean',title:'Clean',meta:model.cleaned?'alpha changed':'optional alpha',done:model.cleaned,active:model.hasImage&&!model.hasFrames&&!model.cleaned,blocked:!model.hasImage,run:()=>setWorkflow('cleanup')},
+    {id:'slice',title:'Slice',meta:model.hasFrames?`${S.frames.length} frames`:'grid cells',done:model.hasFrames,active:model.hasImage&&!model.hasFrames,blocked:!model.hasImage,run:()=>setWorkflow('import')},
+    {id:'align',title:'Align',meta:'anchors',done:model.hasFrames&&S.frames.every(f=>f.anchor),active:model.hasFrames&&!S.frames.every(f=>f.anchor),blocked:!model.hasFrames,run:()=>setWorkflow('align')},
+    {id:'review',title:'Review',meta:reviewWarn?reviewWarn.msg:'issues',done:model.hasFrames&&!reviewWarn,active:!!reviewWarn,blocked:!model.hasFrames,run:()=>setWorkflow('repair')},
+    {id:'target',title:'Target',meta:hasTarget?info.label:'Badger/Ethic',done:hasTarget,active:model.hasFrames&&!hasTarget,blocked:!model.hasFrames,run:()=>setWorkflow('export')},
+    {id:'order',title:'Order',meta:orderOk?'covered':'reorder',done:!!orderOk&&hasTarget,active:model.hasFrames&&hasTarget&&!orderOk,blocked:!model.hasFrames,run:()=>setWorkflow('export')},
+    {id:'export',title:'Export',meta:hardFails.length?hardFails[0].id:'ready grid',done:false,active:model.hasFrames&&hasTarget&&!hardFails.length,blocked:!model.hasFrames||!hasTarget||!!hardFails.length,run:exportContractPages},
+  ];
+}
+function renderTaskOrder(){
+  const strip=$('task-order-strip');if(!strip)return;
+  strip.textContent='';
+  taskOrderModel().forEach((task,i)=>{
+    const card=document.createElement('button');card.type='button';card.className='task-card'+(task.done?' done':'')+(task.active?' active':'')+(task.blocked?' blocked':'');card.disabled=!!task.blocked;
+    const num=document.createElement('span');num.className='task-num';num.textContent=task.done?'✓':String(i+1);
+    const copy=document.createElement('span');copy.className='task-copy';
+    const title=document.createElement('span');title.className='task-title';title.textContent=task.title;
+    const meta=document.createElement('span');meta.className='task-meta';meta.textContent=task.meta;
+    copy.append(title,meta);card.append(num,copy);card.title=task.blocked?'Complete previous steps first':task.title+' — '+task.meta;card.addEventListener('click',task.run);strip.appendChild(card);
+  });
+}
 function refreshQuickGuide(){
   const el=$('quick-guide-text'),title=$('quick-guide-title'),stage=$('info-stage');if(!el)return;
   const model=workflowModel();
@@ -147,6 +174,7 @@ function refreshQuickGuide(){
   setQuickButton($('btn-quick-primary'),primaryLabel,primary,false,'primary');
   setQuickButton($('btn-quick-secondary'),secondaryLabel,secondary,false,'ghost');
   refreshWorkflowProgress(model);
+  if(typeof updateReassemblyHud==='function')updateReassemblyHud();
 }
 function cloneImageData(d){return new ImageData(new Uint8ClampedArray(d.data),d.width,d.height)}
 function clamp255(v){return Math.max(0,Math.min(255,Math.round(v)))}
@@ -224,7 +252,7 @@ function refreshWorkflowAvailability(){
   const hasFrames=S.frames.length>0;
   document.querySelectorAll('.wf-tab').forEach(t=>{
     const wf=t.dataset.wf;
-    const disabled=(wf==='align'||wf==='repair'||wf==='export')&&!hasFrames;
+    const disabled=(wf==='align'||wf==='repair')&&!hasFrames;
     t.disabled=disabled;
     t.classList.toggle('disabled',disabled);
     if(wf==='cleanup')t.disabled=!hasSheet;
@@ -291,12 +319,13 @@ $('btn-dual-extract').addEventListener('click',()=>{
 container.addEventListener('dragover',e=>{e.preventDefault();container.classList.add('drag-over')});
 container.addEventListener('dragleave',()=>container.classList.remove('drag-over'));
 container.addEventListener('drop',e=>{e.preventDefault();container.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(!f||!f.type.startsWith('image/'))return;loadObjectUrlImage(f,loadImageToCanvas)});
+$('drop-zone')?.addEventListener('click',()=>$('file-input')?.click());
 
 // ════════════════════════════════════════════
 // WORKFLOW SWITCHING
 // ════════════════════════════════════════════
 function setWorkflow(wf){
-  if((wf==='align'||wf==='repair'||wf==='export')&&!S.frames.length){toast('Slice frames first','warning');wf=S.sheetImageData?'import':'cleanup'}
+  if((wf==='align'||wf==='repair')&&!S.frames.length){toast('Slice frames first','warning');wf=S.sheetImageData?'import':'cleanup'}
   if(wf==='cleanup'&&S.sheetImageData){setViewMode('source');S.selectedFrame=-1;S.currentImageData=cloneImageData(S.sheetImageData);applyImageData(S.currentImageData)}
   S.wf=wf;
   if(wf==='import'&&S.sheetImageData)showSourceSheet();
@@ -421,10 +450,12 @@ function showFrame(idx){
 
 function syncFrameOrderText(){const el=$('frame-order');if(el)el.value=S.frames.map((_,i)=>i+1).join(',')}
 function updateContractPageInfo(){
-  const el=$('contract-page-info');if(!el)return;
-  if(!S.frames.length){el.textContent='No frames sliced yet.';return}
-  const pages=Math.ceil(S.frames.length/16);
-  el.textContent=`${S.frames.length} frame(s) → ${pages} 4x4 page(s). Frames ${S.frames.length>16?'will be split into multiple compatible sheets':'fit one compatible sheet'}.`;
+  const el=$('contract-page-info');
+  if(el){
+    if(!S.frames.length)el.textContent='No frames sliced yet.';
+    else {const info=targetContractInfo(),pageSize=info.pageSize||Math.max(1,+$('export-cols').value||1),pages=Math.ceil(S.frames.length/pageSize);el.textContent=`${S.frames.length} frame(s) → ${pages} ${info.pageSize?'4x4 contract':'generic'} page(s). ${S.frames.length>16&&info.pageSize?'Split into numbered downstream-compatible sheets.':S.frames.length>16?'Pick a target for safe 4x4 paging.':'Ready for one page.'}`;}
+  }
+  if($('assistant-status'))renderReassemblyAssistant();
 }
 function moveFrame(from,to){
   if(from<0||from>=S.frames.length||to<0||to>=S.frames.length||from===to)return;
@@ -774,8 +805,8 @@ function buildPreviewForMode(mode){
   if(mode==='current')return{img:S.currentImageData,label:'CURRENT'};
   let img=cloneImageData(S.currentImageData),label='PREVIEW';
   if(mode==='alpha-clean'){img=cleanAlpha(img,+$('tolerance').value,+$('max-saturation').value,$('chk-edge-seed').checked,$('chk-remove-fringe').checked);label='ALPHA CLEAN PREVIEW'}
-  else if(mode==='stray'){img=removeStrayPixels(img,+$('stray-size').value);label='STRAY PREVIEW'}
-  else if(mode==='pinholes'){img=fillAlphaPinholes(img,+$('stray-size').value);label='PINHOLES PREVIEW'}
+  else if(mode==='stray'){img=removeStrayPixels(img,+$('stray-size').value);label='PREVIEW STRAY'}
+  else if(mode==='pinholes'){img=fillAlphaPinholes(img,+$('stray-size').value);label='PREVIEW PINHOLES'}
   else if(mode==='outline'){img=normalizeOutline(img,+$('outline-radius').value);label='OUTLINE PREVIEW'}
   return{img,label};
 }
@@ -1111,15 +1142,92 @@ function contractReadiness(info=targetContractInfo()){
     {id:'review',label:'No unresolved review issues',ok:S.frames.length>0&&reviewIssues===0,warn:S.frames.length>0&&reviewIssues>0,msg:reviewIssues?`${reviewIssues} issue frame(s)`:'clean'},
   ];
 }
-function renderReassemblyChecklist(info=targetContractInfo()){
-  const box=$('reassembly-checklist');if(!box)return;
+function renderCheckRows(box,checks,cls='contract-check'){
+  if(!box)return;
   box.textContent='';
-  contractReadiness(info).forEach(check=>{
+  checks.forEach(check=>{
     const row=document.createElement('div');
-    row.className='contract-check '+(check.ok?'done':check.warn?'warn':'fail');
+    row.className=cls+' '+(check.ok?'done':check.warn?'warn':'fail');
     row.textContent=(check.ok?'✓ ':check.warn?'! ':'□ ')+check.label+' — '+check.msg;
     box.appendChild(row);
   });
+}
+function nextReassemblyAction(info=targetContractInfo()){
+  const checks=contractReadiness(info);
+  const firstFail=checks.find(c=>!c.ok&&!c.warn);
+  if(!S.currentImageData&&!S.sheetImageData)return{label:'Load Image',run:()=>$('file-input')?.click(),detail:'Start by loading or dropping a source sheet.'};
+  if(!S.frames.length)return{label:'Slice Frames',run:()=>setWorkflow('import'),detail:'Set the grid, then slice frames.'};
+  if(info.id==='generic')return{label:'Pick Target',run:()=>setWorkflow('export'),detail:'Choose Badger or Ethic for directly usable pages.'};
+  if(firstFail?.id==='stable')return{label:'Review Frame Sizes',run:()=>setWorkflow('repair'),detail:firstFail.msg};
+  if(firstFail?.id==='layout')return{label:'Apply 4x4 Layout',run:setContract4x4Layout,detail:firstFail.msg};
+  if(firstFail?.id==='order')return{label:'Fix Order',run:()=>setWorkflow('export'),detail:firstFail.msg};
+  const warn=checks.find(c=>c.warn);
+  if(warn?.id==='review')return{label:'Review Issues',run:()=>setWorkflow('repair'),detail:warn.msg};
+  return{label:'Export Ready Grid',run:exportContractPages,detail:'All hard checks pass.'};
+}
+function renderReassemblyChecklist(info=targetContractInfo()){
+  const checks=contractReadiness(info);
+  renderCheckRows($('reassembly-checklist'),checks,'contract-check');
+  renderReassemblyAssistant(info,checks);
+}
+function setPill(id,text,state){const el=$(id);if(!el)return;el.textContent=text;el.classList.remove('ok','warn','fail');if(state)el.classList.add(state)}
+function updateReassemblyHud(info=targetContractInfo(),checks=contractReadiness(info)){
+  const pageSize=info.pageSize||Math.max(1,+$('export-cols').value||1);
+  const pages=S.frames.length?Math.ceil(S.frames.length/pageSize):0;
+  const hardFails=checks.filter(c=>!c.ok&&!c.warn),warns=checks.filter(c=>c.warn);
+  setPill('info-target','target: '+(info.id==='generic'?'generic':info.label),info.id==='generic'?'warn':'ok');
+  setPill('info-pages','pages: '+(pages||'-'),S.frames.length?info.pageSize?'ok':'warn':'fail');
+  setPill('info-ready','ready: '+(!hardFails.length&&S.frames.length?'yes':hardFails.length?hardFails[0].id:'no'),!S.frames.length?'fail':hardFails.length?'fail':warns.length?'warn':'ok');
+  if($('task-order-strip'))renderTaskOrder();
+}
+function renderExportPreview(info=targetContractInfo(),checks=contractReadiness(info)){
+  const el=$('export-preview');if(!el)return;
+  el.classList.remove('ready','warn','fail');
+  if(!S.frames.length){el.textContent='Export preview appears after slicing frames.';el.classList.add('fail');return}
+  const name=$('manifest-name')?.value||'sprite',hardFails=checks.filter(c=>!c.ok&&!c.warn),warns=checks.filter(c=>c.warn);
+  const pageSize=info.pageSize||Math.max(1,+$('export-cols').value||1),pages=Math.ceil(S.frames.length/pageSize);
+  const files=info.pageSize?Array.from({length:pages},(_,i)=>`${name}_${info.id}_p${String(i+1).padStart(2,'0')}.png`).concat(`${name}_${info.id}_manifest.json`):[`${name}_sheet.png`,`${name}_sprites.json`];
+  el.textContent=`Target: ${info.label}\nFrames: ${S.frames.length} → ${pages} page(s)\nFiles:\n- ${files.join('\n- ')}`;
+  el.classList.add(hardFails.length?'fail':warns.length?'warn':'ready');
+}
+function renderPageMap(container,info=targetContractInfo(),compact=false){
+  const box=typeof container==='string'?$(container):container;if(!box)return;
+  box.textContent='';
+  if(!S.frames.length){box.textContent='No frames to page yet.';return}
+  const pageSize=info.pageSize||Math.max(1,+$('export-cols').value||1),cols=info.pageSize?4:Math.max(1,+$('export-cols').value||1),pages=Math.ceil(S.frames.length/pageSize);
+  for(let p=0;p<pages;p++){
+    const card=document.createElement('div');card.className='page-card'+(S.selectedFrame>=p*pageSize&&S.selectedFrame<Math.min(S.frames.length,(p+1)*pageSize)?' active':'');
+    const title=document.createElement('div');title.className='page-title';
+    const name=document.createElement('span');name.textContent='Page '+(p+1);
+    const count=document.createElement('span');const start=p*pageSize,end=Math.min(S.frames.length,start+pageSize);count.textContent=(start+1)+'-'+end;
+    title.append(name,count);card.appendChild(title);
+    const cells=document.createElement('div');cells.className='page-cells';cells.style.gridTemplateColumns='repeat('+Math.min(4,cols)+',1fr)';
+    const shown=info.pageSize?16:Math.min(pageSize,S.frames.length-start);
+    for(let i=0;i<shown;i++){
+      const idx=start+i,cell=document.createElement('button');cell.type='button';cell.className='page-cell '+(idx<S.frames.length?'filled':'empty')+(idx===S.selectedFrame?' selected':'');cell.textContent=idx<S.frames.length?String(idx+1):'';cell.disabled=idx>=S.frames.length;
+      if(idx<S.frames.length){cell.title='Show frame '+(idx+1);cell.addEventListener('click',()=>showFrame(idx))}
+      cells.appendChild(cell);
+    }
+    card.appendChild(cells);box.appendChild(card);
+    if(compact&&p>=2&&pages>3){const more=document.createElement('div');more.className='page-card';more.textContent='+'+(pages-p-1)+' more';box.appendChild(more);break}
+  }
+}
+function renderReassemblyAssistant(info=targetContractInfo(),checks=contractReadiness(info)){
+  updateReassemblyHud(info,checks);
+  renderExportPreview(info,checks);
+  renderPageMap('assistant-pages',info,true);renderPageMap('contract-page-map',info,false);
+  const status=$('assistant-status'),box=$('assistant-checks'),next=$('btn-assist-next'),exportBtn=$('btn-assist-export');
+  if(status){
+    const pages=info.pageSize?Math.max(1,Math.ceil((S.frames.length||0)/info.pageSize)):Math.max(1,Math.ceil((S.frames.length||0)/Math.max(1,+$('export-cols').value||1)));
+    status.textContent=!S.frames.length?'Load → cleanup → slice → target → reorder → export.':`${info.label}: ${S.frames.length} frame(s), ${pages} page(s), ${checks.filter(c=>c.ok).length}/${checks.length} checks ready.`;
+  }
+  renderCheckRows(box,checks.slice(0,4),'assistant-check-row');
+  document.querySelectorAll('#btn-assist-badger,#btn-assist-ethic-core,#btn-assist-ethic-ext').forEach(b=>b.classList.remove('active'));
+  const activeId=info.id==='badger-runner'?'btn-assist-badger':info.id==='ethic-brawl-core'?'btn-assist-ethic-core':info.id==='ethic-brawl-extended'?'btn-assist-ethic-ext':'';
+  if(activeId&&$(activeId))$(activeId).classList.add('active');
+  const action=nextReassemblyAction(info);
+  if(next){next.textContent=action.label;next.onclick=action.run}
+  if(exportBtn){const hardFails=checks.filter(c=>!c.ok&&!c.warn);exportBtn.disabled=!!hardFails.length;exportBtn.onclick=exportContractPages;exportBtn.title=hardFails.length?'Blocked: '+hardFails[0].label:'Export contract pages'}
 }
 function updateReassemblyGuide(){
   const info=targetContractInfo();
@@ -1178,6 +1286,9 @@ $('target-contract')?.addEventListener('change',updateReassemblyGuide);
 $('btn-target-badger')?.addEventListener('click',()=>chooseTargetContract('badger-runner'));
 $('btn-target-ethic-core')?.addEventListener('click',()=>chooseTargetContract('ethic-brawl-core'));
 $('btn-target-ethic-ext')?.addEventListener('click',()=>chooseTargetContract('ethic-brawl-extended'));
+$('btn-assist-badger')?.addEventListener('click',()=>chooseTargetContract('badger-runner'));
+$('btn-assist-ethic-core')?.addEventListener('click',()=>chooseTargetContract('ethic-brawl-core'));
+$('btn-assist-ethic-ext')?.addEventListener('click',()=>chooseTargetContract('ethic-brawl-extended'));
 $('btn-contract-4x4')?.addEventListener('click',setContract4x4Layout);
 $('btn-export-contract')?.addEventListener('click',exportContractPages);
 $('btn-order-current')?.addEventListener('click',()=>{syncFrameOrderText();toast('Current order copied','success')});
@@ -1243,14 +1354,13 @@ const SPEC_REQUIREMENTS=[
   {id:'prompt',label:'Prompt/goals captured',check:()=>($('spec-prompt')?.value||'').trim().length>0,action:'Write the intended sprite or animation prompt.'},
   {id:'frames',label:'Frames sliced from atlas',check:()=>S.frames.length>0,action:'Load an atlas and slice frames.'},
   {id:'grid',label:'4x4 contract export is page-safe',check:()=>S.frames.length>0&&(targetContractInfo().pageSize?+$('export-cols').value===4&&($('chk-no-pad').checked||+$('export-pad').value===0):S.frames.length<=16&&(+$('export-cols').value||1)<=4&&Math.ceil(S.frames.length/(+$('export-cols').value||1))<=4),action:'Choose Badger/Ethic target to split larger sets into strict 4x4 pages, or keep generic exports within one 4x4.'},
-  {id:'target-contract',label:'Badger/Ethic target selected when needed',check:()=>S.frames.length>0&&(S.frames.length<=16||targetContractInfo().pageSize),action:'Pick Badger Runner or Ethic Brawl target for multi-page downstream-ready export.'},
   {id:'stable-size',label:'Stable frame size present',check:()=>S.frames.length>0&&S.frames.every(f=>f.imgData.width===S.frames[0].imgData.width&&f.imgData.height===S.frames[0].imgData.height),action:'Slice or repack so every frame has the same dimensions.'},
   {id:'anchor',label:'Anchor metadata present',check:()=>S.frames.length>0&&S.frames.every(f=>f.anchor&&Number.isFinite(f.anchor.x)&&Number.isFinite(f.anchor.y)),action:'Set an anchor before slicing or apply anchors through config.'},
   {id:'review',label:'No unresolved review issues',check:()=>S.frames.length>0&&buildReviewReport().totals.issueFrames===0,action:'Use cleanup/review tools until issueFrames is zero.'},
   {id:'animation',label:'Animation timing metadata exportable',check:()=>S.frames.length>0&&+$('manifest-fps').value>0&&($('manifest-name').value||'').trim().length>0,action:'Set sprite name, FPS, and loop metadata.'},
   {id:'preview',label:'Animation preview subset selected or all-frame preview available',check:()=>S.frames.length>0,action:'Use timeline preview; optionally mark frames with M or Ctrl/Meta-click.'},
 ];
-function buildSpecGuide(){const items=SPEC_REQUIREMENTS.map(r=>{let done=false;try{done=!!r.check()}catch(e){}return{id:r.id,label:r.label,done,action:r.action}});const target=targetContractInfo();const checks=contractReadiness(target).map(c=>({id:'contract-'+c.id,label:c.label,done:!!c.ok,action:c.ok?'':c.msg}));return{version:2,source:'sprite-fan/reqs/animation.yml',target:{id:target.id,label:target.label,namespace:target.namespace,gridKey:target.gridKey},prompt:$('spec-prompt')?.value||'',checkedAt:new Date().toISOString(),summary:{done:items.concat(checks).filter(i=>i.done).length,total:items.length+checks.length},items:items.concat(checks)}}
+function buildSpecGuide(){const items=SPEC_REQUIREMENTS.map(r=>{let done=false;try{done=!!r.check()}catch(e){}return{id:r.id,label:r.label,done,action:r.action}});return{version:1,source:'sprite-fan/reqs/animation.yml',prompt:$('spec-prompt')?.value||'',checkedAt:new Date().toISOString(),summary:{done:items.filter(i=>i.done).length,total:items.length},items}}
 function renderSpecGuide(guide=S.specGuide){const safeGuide=cleanSpecGuide(guide)||{items:[]};const items=safeGuide.items;const done=items.filter(i=>i.done).length,total=items.length;const summary=$('spec-guide-summary');if(summary)summary.textContent=total?`Spec: ${done}/${total} done`:'Spec: not checked';const list=$('spec-guide-list');if(!list)return;list.textContent='';if(!items.length){list.textContent='Open export workflow and click Check Spec.';return}items.forEach((i,idx)=>{if(idx>0)list.appendChild(document.createElement('br'));list.appendChild(document.createTextNode((i.done?'✓ ':'□ ')+i.label+(i.done?'':' — '+i.action)))})}
 function refreshSpecGuide(){S.specGuide=buildSpecGuide();renderSpecGuide();return S.specGuide}
 function exportSpecState(){const guide=refreshSpecGuide();const b=new Blob([JSON.stringify(guide,null,2)],{type:'application/json'});const a=document.createElement('a');a.download=($('manifest-name').value||'sprite')+'_spec-state.json';a.href=URL.createObjectURL(b);a.click();URL.revokeObjectURL(a.href);toast('Spec state exported','success')}
@@ -1333,7 +1443,10 @@ $('cfg-import-file').addEventListener('change',()=>{const f=$('cfg-import-file')
 $('btn-cfg-apply').addEventListener('click',()=>{try{applyConfig(JSON.parse($('cfg-editor').value));closeConfigModal();toast('Config applied','success')}catch(e){toast('Invalid JSON: '+e.message,'error')}});
 $('btn-spec-check').addEventListener('click',()=>{refreshSpecGuide();toast('Spec checklist refreshed','success')});
 $('btn-export-spec-state').addEventListener('click',exportSpecState);
-$('manifest-loop').addEventListener('input',()=>{$('loop-val').textContent=+$('manifest-loop').value===0?'∞':$('manifest-loop').value});
+function refreshExportUi(){if(typeof renderReassemblyAssistant==='function')renderReassemblyAssistant();if(typeof refreshSpecGuide==='function')refreshSpecGuide()}
+$('manifest-name')?.addEventListener('input',refreshExportUi);
+$('manifest-fps')?.addEventListener('input',()=>{$('fps-val').textContent=$('manifest-fps').value;refreshExportUi()});
+$('manifest-loop').addEventListener('input',()=>{$('loop-val').textContent=+$('manifest-loop').value===0?'∞':$('manifest-loop').value;refreshExportUi()});
 $('spec-prompt').addEventListener('input',()=>{S.specGuide.prompt=$('spec-prompt').value;renderSpecGuide(S.specGuide)});
 
 // ════════════════════════════════════════════

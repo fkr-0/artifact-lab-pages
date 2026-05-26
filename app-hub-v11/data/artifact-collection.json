@@ -25,7 +25,8 @@
       "app-hub-v11",
       "peernetjs",
       "lib",
-      "sprite-fan"
+      "sprite-fan",
+      "git-recipe-book"
     ]
   },
   "items": [
@@ -57,6 +58,37 @@
         "defaultAction": "inline"
       },
       "modifiedAt": 1779356149
+    },
+    {
+      "id": "git-recipe-book",
+      "title": "Git Recipe Book",
+      "kind": "html-path",
+      "href": "../git-recipe-book/dist/index.html",
+      "description": "Interactive visual learning tool for Git concepts and commands through a recipe book repository with graph exploration. Features v11 cyberpunk theme, real-time terminal simulation, branch visualization, and step-by-step tutorials.",
+      "tags": [
+        "tool",
+        "education",
+        "git",
+        "documentation",
+        "developer-tools",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "changedAt": "2026-05-26T18:50:00Z",
+      "version": "1.0.0",
+      "author": "Git Recipe Book Team"
     },
     {
       "id": "brickbreaker",

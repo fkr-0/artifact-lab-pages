@@ -44,6 +44,7 @@
       <button class="btn btn-ghost btn-sm" id="btn-quick-secondary">Clipboard</button>
     </div>
   </div>
+  <div id="task-order-strip" aria-label="Reassembly task order"></div>
 
   <div id="workspace">
     <!-- Left Panel -->
@@ -285,6 +286,8 @@
             <button class="btn btn-success btn-sm" id="btn-export-contract">Export Contract Pages</button>
           </div>
           <div class="layout-help" id="contract-page-info">No frames sliced yet.</div>
+          <div class="export-preview" id="export-preview">Export preview appears after slicing frames.</div>
+          <div class="page-map" id="contract-page-map"></div>
         </div>
       </div>
 
@@ -366,6 +369,10 @@
         <span id="info-tool">tool: idle</span>
         <span>|</span>
         <span id="info-stage">stage: empty</span>
+        <span>|</span>
+        <span class="status-pill" id="info-target">target: generic</span>
+        <span class="status-pill" id="info-pages">pages: -</span>
+        <span class="status-pill" id="info-ready">ready: no</span>
       </div>
       <div id="overlay-legend" class="overlay-legend">Overlay: Grid (blue) · Anchor (yellow) · Islands (green)</div>
     </div>
@@ -374,6 +381,23 @@
 
     <!-- Right Panel -->
     <div id="right-panel">
+      <div class="panel-section assistant-card">
+        <div class="panel-header" data-toggle="sec-reassembly-assistant"><span>Reassembly Assistant</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-reassembly-assistant">
+          <div class="assistant-status" id="assistant-status">Load and slice a sheet to begin.</div>
+          <div class="assistant-targets">
+            <button class="btn btn-ghost btn-sm" id="btn-assist-badger">Badger</button>
+            <button class="btn btn-ghost btn-sm" id="btn-assist-ethic-core">Ethic Core</button>
+            <button class="btn btn-ghost btn-sm" id="btn-assist-ethic-ext">Ethic Ext</button>
+          </div>
+          <div class="assistant-checks" id="assistant-checks"></div>
+          <div class="assistant-pages" id="assistant-pages"></div>
+          <div class="assistant-actions">
+            <button class="btn btn-primary btn-sm" id="btn-assist-next">Next Step</button>
+            <button class="btn btn-success btn-sm" id="btn-assist-export">Export Ready Grid</button>
+          </div>
+        </div>
+      </div>
       <div class="panel-section">
         <div class="panel-header" data-toggle="sec-preview"><span>Preview</span><span class="chevron">&#x25BC;</span></div>
         <div class="panel-body" id="sec-preview">
@@ -431,7 +455,7 @@
             <div class="field-label"><span>Frame Notes</span></div>
             <div class="field-row"><textarea id="frame-notes" placeholder="review notes" style="width:100%;min-height:42px;font-size:11px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px"></textarea></div>
           </div>
-          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);line-height:1.45" id="keyboard-help">Keys: ←/→ frame · I next issue · Shift+I prev issue · F fit · O onion · Space play</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);line-height:1.45" id="keyboard-help">Keys: ←/→ frame · I next issue · Shift+I prev issue · F fit · O onion · Space+drag pan</div>
           <div class="layout-help" id="layout-help">Tip: drag pane handles to resize · double-click a handle or press ↤ to reset layout.</div>
         </div>
       </div>
