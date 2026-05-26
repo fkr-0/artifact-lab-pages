@@ -745,7 +745,7 @@
       "title": "Git Recipe Book",
       "kind": "html-path",
       "href": "../git-recipe-book/index.html",
-      "description": "Built Vite artifact for an interactive Git learning app; package/deploy copies dist output only.",
+      "description": "Static HTML artifact for an interactive Git learning app; deploy copies dist output only.",
       "tags": [
         "tool",
         "education",
@@ -759,11 +759,6 @@
         "index"
       ],
       "deploy": {
-        "build": {
-          "cwd": "git-recipe-book",
-          "command": "pnpm build",
-          "dist": "dist"
-        },
         "includePath": "git-recipe-book/dist",
         "targetPath": "git-recipe-book"
       },
