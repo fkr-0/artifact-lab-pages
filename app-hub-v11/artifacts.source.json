@@ -741,6 +741,44 @@
       "modifiedAt": "2026-05-01T12:00:00.000Z"
     },
     {
+      "id": "git-recipe-book",
+      "title": "Git Recipe Book",
+      "kind": "html-path",
+      "href": "../git-recipe-book/index.html",
+      "description": "Built Vite artifact for an interactive Git learning app; package/deploy copies dist output only.",
+      "tags": [
+        "tool",
+        "education",
+        "git",
+        "developer-tools",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "git-recipe-book",
+          "command": "pnpm build",
+          "dist": "dist"
+        },
+        "includePath": "git-recipe-book/dist",
+        "targetPath": "git-recipe-book"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-05-26T12:00:00.000Z"
+    },
+    {
       "id": "server-guide",
       "title": "Server Guide",
       "kind": "info",

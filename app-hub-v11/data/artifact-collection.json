@@ -25,8 +25,7 @@
       "app-hub-v11",
       "peernetjs",
       "lib",
-      "sprite-fan",
-      "git-recipe-book"
+      "sprite-fan"
     ]
   },
   "items": [
@@ -63,20 +62,29 @@
       "id": "git-recipe-book",
       "title": "Git Recipe Book",
       "kind": "html-path",
-      "href": "../git-recipe-book/dist/index.html",
-      "description": "Interactive visual learning tool for Git concepts and commands through a recipe book repository with graph exploration. Features v11 cyberpunk theme, real-time terminal simulation, branch visualization, and step-by-step tutorials.",
+      "href": "../git-recipe-book/index.html",
+      "description": "Built Vite artifact for an interactive Git learning app; package/deploy copies dist output only.",
       "tags": [
         "tool",
         "education",
         "git",
-        "documentation",
         "developer-tools",
+        "built",
         "v11"
       ],
       "operations": [
         "validate",
         "index"
       ],
+      "deploy": {
+        "build": {
+          "cwd": "git-recipe-book",
+          "command": "pnpm build",
+          "dist": "dist"
+        },
+        "includePath": "git-recipe-book/dist",
+        "targetPath": "git-recipe-book"
+      },
       "launch": {
         "modes": [
           "inline",
@@ -86,9 +94,7 @@
         ],
         "defaultAction": "inline"
       },
-      "changedAt": "2026-05-26T18:50:00Z",
-      "version": "1.0.0",
-      "author": "Git Recipe Book Team"
+      "modifiedAt": "2026-05-26T12:00:00.000Z"
     },
     {
       "id": "brickbreaker",
