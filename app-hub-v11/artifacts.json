@@ -25,7 +25,8 @@
       "app-hub-v11",
       "peernetjs",
       "lib",
-      "sprite-fan"
+      "sprite-fan",
+      "reveal-peer-plugin"
     ]
   },
   "items": [
@@ -1162,6 +1163,38 @@
       "modifiedAt": 1777847901
     },
     {
+      "id": "reveal-peer-plugin",
+      "title": "RevealPeerJS",
+      "kind": "html-path",
+      "href": "../reveal-peer-plugin/index.html",
+      "description": "Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong challenges, and a top-down arena shooter mini-game.",
+      "tags": [
+        "plugin",
+        "presentation",
+        "multiplayer",
+        "peernet",
+        "game",
+        "chat",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "reveal-peer-plugin",
+        "targetPath": "reveal-peer-plugin"
+      },
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "fullscreen"
+      },
+      "modifiedAt": 1780099200
+    },
+    {
       "id": "ethic-brawl",
       "title": "Ethic Brawl",
       "kind": "html-path",
@@ -1307,5 +1340,5 @@
   ],
   "builtAt": "2026-05-21T16:00:02.199Z",
   "buildType": "git-ordered",
-  "artifactCount": 41
+  "artifactCount": 42
 }
