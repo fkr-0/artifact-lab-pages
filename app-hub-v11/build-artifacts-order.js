@@ -22,7 +22,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DEFAULT_ARTIFACTS_SOURCE = path.join(__dirname, 'artifacts.source.json');
-const DEFAULT_ARTIFACTS_OUTPUT = path.join(__dirname, 'artifacts.json');
 const REPO_ROOT = path.resolve(__dirname, '..');
 
 function gitLastCommitTimestamp(paths) {
@@ -105,7 +104,7 @@ function isoOrNull(timestampMs) {
 
 function buildArtifactsOrder(options = {}) {
   const sourcePath = path.resolve(options.sourcePath || DEFAULT_ARTIFACTS_SOURCE);
-  const outputPath = path.resolve(options.outputPath || DEFAULT_ARTIFACTS_OUTPUT);
+  const outputPath = path.resolve(options.outputPath || sourcePath);
   console.log('🔨 Building git-based artifact order for v11...');
 
   const sourceData = JSON.parse(fs.readFileSync(sourcePath, 'utf-8'));
@@ -146,9 +145,6 @@ function buildArtifactsOrder(options = {}) {
 
   const outputData = {
     ...sourceData,
-    builtAt: new Date().toISOString(),
-    buildType: 'git-ordered',
-    artifactCount: sortedArtifacts.length,
     items: sortedArtifacts.map(({
       _gitPath,
       _gitPaths,
@@ -159,7 +155,7 @@ function buildArtifactsOrder(options = {}) {
   };
 
   fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
-  console.log(`\n✅ Built ${outputPath} with ${sortedArtifacts.length} artifacts`);
+  console.log(`\n✅ Ordered ${outputPath} with ${sortedArtifacts.length} artifacts`);
 
   return outputData;
 }

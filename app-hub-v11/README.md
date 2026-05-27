@@ -2,8 +2,11 @@
 
 v11 is a data-driven successor to the v10 portal. It keeps the v10 idea of a lightweight launcher/runtime and extracts reusable behavior into small libs.
 
-## Compile the artifact list
+## Refresh and compile the artifact list
 
+`artifacts.source.json` is the single editable catalog. Refresh git-derived ordering/dates, then compile the browser runtime catalog:
+
+    node app-hub-v11/build-artifacts-order.js
     node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data
 
 ## Open
@@ -17,7 +20,7 @@ Serve the repository root, then open:
 | Path | Purpose |
 | --- | --- |
 | `artifacts.source.json` | Server-side editable source catalog. |
-| `data/artifact-collection.json` | Clean compiled list consumed by the browser hub. |
+| `data/artifact-collection.json` | Generated runtime catalog consumed by the browser hub; do not edit by hand. |
 | `server/artifact-catalog.mjs` | Compiler and extensible operation registry. |
 | `lib/*.js` | Small browser/server-testable runtime libraries. |
 | `docs/ROADMAP.md` | Specs and TODOs for deeper modularization. |

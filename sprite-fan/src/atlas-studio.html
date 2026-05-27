@@ -112,8 +112,9 @@
             <button class="btn btn-ghost btn-sm" id="btn-clear-cell-overrides">Clear Overrides</button>
           </div>
           <label class="checkbox-row"><input type="checkbox" id="chk-show-anchor-overlay" checked/> Show anchor crosshair overlay</label>
-          <div class="layout-help">Import mouse interop: Grid mode = drag move grid, Shift+drag resize cells. Cell mode = drag selected cell, Shift+drag resize selected cell. Double-click canvas to reset selected cell override. Space+drag always pans.</div>
+          <div class="layout-help">Canvas drag: plain = move grid offset, Shift = resize cells, Alt = adjust gap, Ctrl = adjust margin. Cell mode: drag = move cell, Shift = resize cell. Double-click = reset cell. Space+drag = pan.</div>
           <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-auto-fit-grid">Auto-fit Grid</button>
             <button class="btn btn-primary btn-sm" id="btn-slice">&#x2702; Slice by Grid</button>
           </div>
           <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="slice-info">-</div>
@@ -141,6 +142,7 @@
           </div>
           <label class="checkbox-row"><input type="checkbox" id="chk-onion" checked/> Show onion skin</label>
           <label class="checkbox-row"><input type="checkbox" id="chk-snap-anchor"/> Snap to grid</label>
+          <div class="layout-help">Drag on the canvas to shift the frame content so feet/hands align to the anchor crosshair. Use Place Anchor to reposition the reference point first.</div>
           <div class="btn-row">
             <button class="btn btn-ghost btn-sm" id="btn-anchor-place">&#x271A; Place Anchor</button>
             <button class="btn btn-danger btn-sm" id="btn-anchor-clear">&#x2715; Clear</button>
@@ -239,7 +241,11 @@
             <div class="field-row"><input type="range" id="export-pad" min="0" max="16" value="0"/></div>
           </div>
           <label class="checkbox-row"><input type="checkbox" id="chk-no-pad"/> No padding (strict)</label>
-          <div class="layout-help" id="export-layout-info">Generic sheet export. Choose a contract below for 4x4 pages.</div>
+          <div class="field">
+            <div class="field-label"><span>Export Scale %</span><span id="export-scale-val">100</span></div>
+            <div class="field-row"><input type="range" id="export-scale" min="10" max="400" value="100" step="10"/></div>
+          </div>
+          <div class="layout-help" id="export-layout-info">Scale applies at export only (cleanup runs at full resolution). Anchors are exported as normalized ratios.</div>
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" id="btn-repack">&#x2B1A; Repack Sheet</button>
             <button class="btn btn-success btn-sm" id="btn-export-png">&#x2B07; Export PNG</button>
@@ -337,8 +343,9 @@
           </div>
           <div class="btn-row">
             <button class="btn btn-ghost btn-sm" id="btn-detect">Detect Islands</button>
+            <button class="btn btn-primary btn-sm" id="btn-slice-islands" disabled>Slice by Islands</button>
           </div>
-          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="island-info">No island analysis yet.</div>
+          <div style="margin-top:6px;font-size:10px;color:var(--text-muted)" id="island-info">No island analysis yet. Detect finds sprite bounding boxes; Slice creates frames from them (bottom-center aligned, uniform size).</div>
         </div>
       </div>
     </div>

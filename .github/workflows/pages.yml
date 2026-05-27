@@ -72,9 +72,7 @@ jobs:
           NODE
 
       - name: Refresh v11 git artifact ordering
-        run: |
-          node app-hub-v11/build-artifacts-order.js
-          node app-hub-v11/build-artifacts-order.js --source .artifacts.source.ci.json --out .artifacts.source.ci.json
+        run: node app-hub-v11/build-artifacts-order.js --source .artifacts.source.ci.json --out .artifacts.source.ci.json
 
       - name: Materialize deploy stage
         run: node app-hub-v11/server/artifact-build.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage
