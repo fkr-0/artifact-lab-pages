@@ -182,7 +182,10 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     if (iframeNode) {
       panel.appendChild(iframeNode);
     } else if (launch.url === '#') {
-      panel.innerHTML = `<div class="app-deck-empty">No launchable content for ${escapeHtml(artifact.title || artifact.id)}</div>`;
+      const empty = documentRef.createElement('div');
+      empty.className = 'app-deck-empty';
+      empty.textContent = `No launchable content for ${artifact.title || artifact.id}`;
+      panel.appendChild(empty);
     } else {
       const iframe = documentRef.createElement('iframe');
       iframe.className = 'app-deck-inline-frame';
@@ -285,17 +288,40 @@ export function createFloatingPanel({ title, url, iframeNode = null, dockLabel =
   panel.style.top = panel.style.top || '10vh';
   panel.style.width = panel.style.width || 'min(900px, 82vw)';
   panel.style.height = panel.style.height || 'min(680px, 76vh)';
-  const dockButton = onDock ? `<button type="button" data-dock>${escapeHtml(dockLabel || 'dock inline')}</button>` : '';
-  panel.innerHTML = `<header data-floating-drag-handle><strong>${escapeHtml(title)}</strong><span data-floating-resize-handle aria-hidden="true">↘</span>${dockButton}<button type="button" data-close-floating>close</button></header>`;
+  const header = documentRef.createElement('header');
+  header.dataset.floatingDragHandle = '';
+  const titleNode = documentRef.createElement('strong');
+  titleNode.textContent = title || 'Floating app';
+  const resizeHint = documentRef.createElement('span');
+  resizeHint.dataset.floatingResizeHandle = '';
+  resizeHint.setAttribute('aria-hidden', 'true');
+  resizeHint.textContent = '↘';
+  header.append(titleNode, resizeHint);
+  if (onDock) {
+    const dockControl = documentRef.createElement('button');
+    dockControl.type = 'button';
+    dockControl.dataset.dock = '';
+    dockControl.textContent = dockLabel || 'dock inline';
+    dockControl.onclick = () => onDock?.(panel);
+    header.appendChild(dockControl);
+  }
+  const closeButton = documentRef.createElement('button');
+  closeButton.type = 'button';
+  closeButton.dataset.closeFloating = '';
+  closeButton.textContent = 'close';
+  closeButton.onclick = () => panel.remove();
+  header.appendChild(closeButton);
+  panel.appendChild(header);
   if (iframeNode) {
     panel.appendChild(iframeNode);
   } else {
-    panel.innerHTML += `<iframe src="${escapeHtml(url)}" title="${escapeHtml(title)}"></iframe>`;
+    const iframe = documentRef.createElement('iframe');
+    iframe.src = url || '#';
+    iframe.title = title || 'Floating app';
+    iframe.setAttribute?.('allow', 'autoplay; fullscreen; clipboard-read; clipboard-write; gamepad');
+    iframe.setAttribute?.('allowfullscreen', '');
+    panel.appendChild(iframe);
   }
-  const dockControl = panel.querySelector('button[data-dock]');
-  if (dockControl) dockControl.onclick = () => onDock?.(panel);
-  const closeButton = panel.querySelector('button[data-close-floating]') || panel.querySelector('button');
-  if (closeButton) closeButton.onclick = () => panel.remove();
   makeFloatingPanelMovable(panel, runtime);
   (runtime.body || documentRef.body)?.append(panel);
   return panel;

@@ -3,16 +3,19 @@
 /**
  * Git-based Artifact Ordering Build Script
  *
- * This script analyzes git commit history to determine artifact modification times,
- * then updates artifacts.source.json with automatically ordered artifacts based on
- * their last-changed timestamp from git.
+ * Uses git commit history as the automatic source of truth for artifact
+ * freshness. Filesystem mtimes are intentionally NOT used: generated files,
+ * local rebuilds, and CI materialization would otherwise make everything look
+ * like it changed "today".
  *
- * Usage: node build-artifacts-order.js
+ * Usage:
+ *   node build-artifacts-order.js
+ *   node build-artifacts-order.js --source .artifacts.source.ci.json --out .artifacts.source.ci.json
  */
 
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,108 +25,125 @@ const DEFAULT_ARTIFACTS_SOURCE = path.join(__dirname, 'artifacts.source.json');
 const DEFAULT_ARTIFACTS_OUTPUT = path.join(__dirname, 'artifacts.json');
 const REPO_ROOT = path.resolve(__dirname, '..');
 
+function gitLastCommitTimestamp(paths) {
+  const candidates = unique((Array.isArray(paths) ? paths : [paths]).filter(Boolean));
+  for (const filePath of candidates) {
+    try {
+      const output = execFileSync(
+        'git',
+        ['log', '-1', '--format=%ct', '--', filePath],
+        { encoding: 'utf8', cwd: REPO_ROOT }
+      ).trim();
+      const timestamp = Number.parseInt(output, 10);
+      if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+    } catch {
+      // Try next candidate. No filesystem fallback by design.
+    }
+  }
+  return 0;
+}
+
 /**
- * Get the last modification time for a file from git history
- * Falls back to filesystem mtime for files not in git
- * @param {string} filePath - Relative path to the file
- * @returns {number} Unix timestamp of last modification
+ * Backwards-compatible export used by tests/importers.
+ * @param {string|string[]} filePath
+ * @returns {number} Unix timestamp from git commit history, or 0.
  */
 function getGitLastModified(filePath) {
-  try {
-    const output = execSync(
-      `git log -1 --format="%ct" -- "${filePath}"`,
-      { encoding: 'utf-8', cwd: REPO_ROOT }
-    ).trim();
-    if (output) {
-      return parseInt(output, 10);
-    }
-  } catch (error) {
-    // File not in git history, fall back to filesystem
+  return gitLastCommitTimestamp(filePath);
+}
+
+function cleanRelativeHref(value) {
+  if (!value || /^https?:\/\//.test(value) || value.startsWith('#')) return null;
+  const clean = String(value).split(/[?#]/)[0];
+  if (!clean) return null;
+  if (clean.startsWith('../')) return clean.slice(3);
+  if (clean.startsWith('./')) return path.join('app-hub-v11', clean.slice(2));
+  return path.join('app-hub-v11', clean);
+}
+
+function topLevelPath(filePath) {
+  if (!filePath) return null;
+  const parts = path.normalize(filePath).split(path.sep).filter(Boolean);
+  return parts[0] || null;
+}
+
+function artifactGitPathCandidates(artifact) {
+  const candidates = [];
+
+  if (artifact.deploy?.build?.cwd) candidates.push(artifact.deploy.build.cwd);
+  if (artifact.deploy?.includePath) candidates.push(artifact.deploy.includePath);
+  if (artifact.source) candidates.push(cleanRelativeHref(artifact.source) || artifact.source);
+
+  const hrefPath = cleanRelativeHref(artifact.href || artifact.hubHref || artifact.id);
+  if (hrefPath) {
+    candidates.push(hrefPath);
+    const top = topLevelPath(hrefPath);
+    if (top && !hrefPath.startsWith('app-hub-v11/')) candidates.push(top);
   }
 
-  // Fallback: use filesystem modification time
-  try {
-    const fullPath = path.join(REPO_ROOT, filePath);
-    const stats = fs.statSync(fullPath);
-    return Math.floor(stats.mtimeMs / 1000);
-  } catch (error) {
-    return 0; // File doesn't exist
-  }
+  return unique(candidates.map((candidate) => path.normalize(candidate).replaceAll('\\', '/')));
 }
 
 /**
- * Extract file path from artifact href/id
- * @param {object} artifact - Artifact object from manifest
- * @returns {string} Resolved file path relative to git root
+ * Extract primary artifact path from artifact metadata.
+ * @param {object} artifact
+ * @returns {string|null}
  */
 function getArtifactPath(artifact) {
-  const href = artifact.href || artifact.id;
-  if (!href) return null;
-
-  // Skip external URLs
-  if (href.startsWith('http://') || href.startsWith('https://')) {
-    return null;
-  }
-
-  // Remove query parameters and hash fragments
-  const cleanHref = href.split(/[?#]/)[0];
-
-  // Convert href to relative path from git root
-  // Handles both "../artifact.html" and "artifact.html" patterns
-  if (cleanHref.startsWith('../')) {
-    // Remove the "../" to get path from git root
-    return cleanHref.substring(3);
-  } else if (cleanHref.startsWith('./')) {
-    return path.join('app-hub-v11', cleanHref.substring(2));
-  } else {
-    // Assume it's relative to app-hub-v11
-    return path.join('app-hub-v11', cleanHref);
-  }
+  return artifactGitPathCandidates(artifact)[0] || null;
 }
 
-/**
- * Main build function
- */
+function manualTimestamp(artifact) {
+  const raw = artifact.changedAt || artifact.modifiedAt || artifact.updatedAt || artifact.lastChanged || artifact.generatedAt || artifact.createdAt || '';
+  const parsed = raw ? Date.parse(raw) : 0;
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isoOrNull(timestampMs) {
+  return timestampMs ? new Date(timestampMs).toISOString() : null;
+}
+
 function buildArtifactsOrder(options = {}) {
   const sourcePath = path.resolve(options.sourcePath || DEFAULT_ARTIFACTS_SOURCE);
   const outputPath = path.resolve(options.outputPath || DEFAULT_ARTIFACTS_OUTPUT);
   console.log('🔨 Building git-based artifact order for v11...');
 
-  // Read source manifest
   const sourceData = JSON.parse(fs.readFileSync(sourcePath, 'utf-8'));
   const artifacts = sourceData.items || sourceData.artifacts || [];
 
   console.log(`📦 Processing ${artifacts.length} artifacts...`);
 
-  // Enrich artifacts with git timestamps
-  const enrichedArtifacts = artifacts.map(artifact => {
-    const artifactPath = getArtifactPath(artifact);
-    const gitTimestamp = artifactPath ? getGitLastModified(artifactPath) : 0;
+  const enrichedArtifacts = artifacts.map((artifact) => {
+    const gitPaths = artifactGitPathCandidates(artifact);
+    const gitTimestampSeconds = gitLastCommitTimestamp(gitPaths);
+    const gitTimestampMs = gitTimestampSeconds * 1000;
+    const fallbackTimestampMs = manualTimestamp(artifact);
+    const sortTimestampMs = gitTimestampMs || fallbackTimestampMs;
+    const changedAt = gitTimestampMs ? isoOrNull(gitTimestampMs) : (artifact.changedAt || artifact.modifiedAt || artifact.updatedAt || artifact.lastChanged || null);
 
     return {
       ...artifact,
-      _gitPath: artifactPath,
-      _gitTimestamp: gitTimestamp,
-      changedAt: gitTimestamp ? new Date(gitTimestamp * 1000).toISOString() : (artifact.changedAt || artifact.modifiedAt || artifact.updatedAt || artifact.lastChanged || null),
-      modifiedAt: gitTimestamp ? new Date(gitTimestamp * 1000).toISOString() : (artifact.modifiedAt || artifact.updatedAt || artifact.changedAt || artifact.lastChanged || null)
+      _gitPath: gitPaths[0] || null,
+      _gitPaths: gitPaths,
+      _gitTimestamp: gitTimestampSeconds,
+      _sortTimestamp: sortTimestampMs,
+      changedAt,
+      modifiedAt: changedAt,
     };
   });
 
-  // Sort by timestamp (newest first), with stable title/id fallback.
   const sortedArtifacts = enrichedArtifacts.sort((a, b) => {
-    return b._gitTimestamp - a._gitTimestamp || String(a.title || a.id).localeCompare(String(b.title || b.id));
+    return b._sortTimestamp - a._sortTimestamp || String(a.title || a.id).localeCompare(String(b.title || b.id));
   });
 
-  // Log artifacts with git timestamps
-  console.log('\n📊 Artifact order by git modification time:');
+  console.log('\n📊 Artifact order by git commit time:');
   sortedArtifacts.forEach((artifact, index) => {
     const date = artifact._gitTimestamp
       ? new Date(artifact._gitTimestamp * 1000).toISOString().split('T')[0]
-      : 'unknown';
+      : 'manual/unknown';
     console.log(`  ${index + 1}. ${artifact.title} (${date})`);
   });
 
-  // Build output manifest
   const outputData = {
     ...sourceData,
     builtAt: new Date().toISOString(),
@@ -131,16 +151,21 @@ function buildArtifactsOrder(options = {}) {
     artifactCount: sortedArtifacts.length,
     items: sortedArtifacts.map(({
       _gitPath,
+      _gitPaths,
       _gitTimestamp,
+      _sortTimestamp,
       ...cleanArtifact
-    }) => cleanArtifact)
+    }) => cleanArtifact),
   };
 
-  // Write output
   fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
   console.log(`\n✅ Built ${outputPath} with ${sortedArtifacts.length} artifacts`);
 
   return outputData;
+}
+
+function unique(values) {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function parseArgs(args) {
@@ -153,7 +178,6 @@ function parseArgs(args) {
   return parsed;
 }
 
-// Run build
 if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     buildArtifactsOrder(parseArgs(process.argv.slice(2)));
@@ -163,4 +187,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 }
 
-export { buildArtifactsOrder, getGitLastModified, getArtifactPath };
+export { buildArtifactsOrder, getGitLastModified, getArtifactPath, artifactGitPathCandidates };
