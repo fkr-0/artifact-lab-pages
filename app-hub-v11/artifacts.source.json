@@ -25,7 +25,8 @@
       "app-hub-v11",
       "peernetjs",
       "lib",
-      "sprite-fan"
+      "sprite-fan",
+      "reveal-peer-plugin"
     ]
   },
   "items": [
@@ -321,6 +322,33 @@
         "defaultAction": "inline"
       },
       "modifiedAt": "2026-05-06T12:00:00.000Z"
+    },
+    {
+      "id": "root-multitext-viewer",
+      "title": "Root Multitext Viewer",
+      "kind": "html-path",
+      "href": "../index_multitext.html",
+      "description": "Repository-root multitext viewer utility exposed in v11 for legacy text/document browsing workflows.",
+      "tags": [
+        "editor",
+        "viewer",
+        "text",
+        "legacy"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-05-05T12:30:00.000Z"
     },
     {
       "id": "v8-collab-pad-lite",
@@ -1303,6 +1331,38 @@
         "defaultAction": "inline"
       },
       "modifiedAt": "2026-05-18T00:00:00.000Z"
+    },
+    {
+      "id": "reveal-peer-plugin",
+      "title": "RevealPeerJS",
+      "kind": "html-path",
+      "href": "../reveal-peer-plugin/index.html",
+      "description": "Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong challenges, and a top-down arena shooter mini-game.",
+      "tags": [
+        "plugin",
+        "presentation",
+        "multiplayer",
+        "peernet",
+        "game",
+        "chat",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "reveal-peer-plugin",
+        "targetPath": "reveal-peer-plugin"
+      },
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "fullscreen"
+      },
+      "modifiedAt": "2026-05-27T00:00:00.000Z"
     }
   ]
 }

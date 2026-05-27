@@ -20,6 +20,8 @@ const __dirname = path.dirname(__filename);
 
 const ARTIFACTS_SOURCE = path.join(__dirname, 'artifacts.source.json');
 const ARTIFACTS_OUTPUT = path.join(__dirname, 'artifacts.json');
+const HUB_DIR = __dirname;
+const REPO_ROOT = path.resolve(__dirname, '..');
 
 /**
  * Get the last modification time for a file from git history
@@ -31,7 +33,7 @@ function getGitLastModified(filePath) {
   try {
     const output = execSync(
       `git log -1 --format="%ct" -- "${filePath}"`,
-      { encoding: 'utf-8', cwd: path.dirname(ARTIFACTS_SOURCE) }
+      { encoding: 'utf-8', cwd: REPO_ROOT }
     ).trim();
     if (output) {
       return parseInt(output, 10);
@@ -42,7 +44,7 @@ function getGitLastModified(filePath) {
 
   // Fallback: use filesystem modification time
   try {
-    const fullPath = path.join(path.dirname(ARTIFACTS_SOURCE), '..', filePath);
+    const fullPath = path.join(REPO_ROOT, filePath);
     const stats = fs.statSync(fullPath);
     return Math.floor(stats.mtimeMs / 1000);
   } catch (error) {
@@ -101,14 +103,14 @@ function buildArtifactsOrder() {
       ...artifact,
       _gitPath: artifactPath,
       _gitTimestamp: gitTimestamp,
-      // Keep manual modifiedAt as fallback
-      modifiedAt: gitTimestamp || artifact.modifiedAt || Date.now()
+      changedAt: gitTimestamp ? new Date(gitTimestamp * 1000).toISOString() : (artifact.changedAt || artifact.modifiedAt || artifact.updatedAt || artifact.lastChanged || null),
+      modifiedAt: gitTimestamp ? new Date(gitTimestamp * 1000).toISOString() : (artifact.modifiedAt || artifact.updatedAt || artifact.changedAt || artifact.lastChanged || null)
     };
   });
 
-  // Sort by timestamp (newest first)
+  // Sort by timestamp (newest first), with stable title/id fallback.
   const sortedArtifacts = enrichedArtifacts.sort((a, b) => {
-    return b._gitTimestamp - a._gitTimestamp;
+    return b._gitTimestamp - a._gitTimestamp || String(a.title || a.id).localeCompare(String(b.title || b.id));
   });
 
   // Log artifacts with git timestamps
