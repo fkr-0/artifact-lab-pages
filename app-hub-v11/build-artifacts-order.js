@@ -18,9 +18,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ARTIFACTS_SOURCE = path.join(__dirname, 'artifacts.source.json');
-const ARTIFACTS_OUTPUT = path.join(__dirname, 'artifacts.json');
-const HUB_DIR = __dirname;
+const DEFAULT_ARTIFACTS_SOURCE = path.join(__dirname, 'artifacts.source.json');
+const DEFAULT_ARTIFACTS_OUTPUT = path.join(__dirname, 'artifacts.json');
 const REPO_ROOT = path.resolve(__dirname, '..');
 
 /**
@@ -85,11 +84,13 @@ function getArtifactPath(artifact) {
 /**
  * Main build function
  */
-function buildArtifactsOrder() {
+function buildArtifactsOrder(options = {}) {
+  const sourcePath = path.resolve(options.sourcePath || DEFAULT_ARTIFACTS_SOURCE);
+  const outputPath = path.resolve(options.outputPath || DEFAULT_ARTIFACTS_OUTPUT);
   console.log('🔨 Building git-based artifact order for v11...');
 
   // Read source manifest
-  const sourceData = JSON.parse(fs.readFileSync(ARTIFACTS_SOURCE, 'utf-8'));
+  const sourceData = JSON.parse(fs.readFileSync(sourcePath, 'utf-8'));
   const artifacts = sourceData.items || sourceData.artifacts || [];
 
   console.log(`📦 Processing ${artifacts.length} artifacts...`);
@@ -136,16 +137,26 @@ function buildArtifactsOrder() {
   };
 
   // Write output
-  fs.writeFileSync(ARTIFACTS_OUTPUT, JSON.stringify(outputData, null, 2));
-  console.log(`\n✅ Built ${ARTIFACTS_OUTPUT} with ${sortedArtifacts.length} artifacts`);
+  fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
+  console.log(`\n✅ Built ${outputPath} with ${sortedArtifacts.length} artifacts`);
 
   return outputData;
+}
+
+function parseArgs(args) {
+  const parsed = {};
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--source') parsed.sourcePath = args[++i];
+    else if (arg === '--out') parsed.outputPath = args[++i];
+  }
+  return parsed;
 }
 
 // Run build
 if (import.meta.url === `file://${process.argv[1]}`) {
   try {
-    buildArtifactsOrder();
+    buildArtifactsOrder(parseArgs(process.argv.slice(2)));
   } catch (error) {
     console.error('❌ Build failed:', error.message);
     process.exit(1);
