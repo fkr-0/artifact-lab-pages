@@ -26,6 +26,7 @@
       "peernetjs",
       "lib",
       "sprite-fan",
+      "meme-lab",
       "reveal-peer-plugin"
     ]
   },
@@ -1383,6 +1384,37 @@
       },
       "modifiedAt": "2026-05-04T22:51:57.000Z",
       "changedAt": "2026-05-04T22:51:57.000Z"
+    },
+    {
+      "id": "meme-lab",
+      "title": "Meme Lab",
+      "kind": "html-path",
+      "href": "../meme-lab/meme-lab.html",
+      "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
+      "tags": [
+        "tool",
+        "graphics",
+        "meme",
+        "generator",
+        "image",
+        "template",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-01T07:26:00.000Z",
+      "changedAt": "2026-06-01T07:26:00.000Z"
     },
     {
       "id": "external-openai-docs",
