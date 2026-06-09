@@ -8,7 +8,10 @@
     "build:sprite-fan": "node sprite-fan/build-atlas-studio.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:hyperblast": "node --test hyperblast-shooter/lib/shooter-balance.test.mjs tests/hyperblast-*.mjs tests/shooter-*.mjs",
+    "test:hyperblast:e2e": "playwright test tests/e2e/hub-and-shooter.spec.mjs tests/e2e/hyperblast-offline.spec.mjs tests/e2e/hyperblast-safe-rendering.spec.mjs tests/e2e/hyperblast-keybindings.spec.mjs tests/e2e/hyperblast-peerjs-coop.spec.mjs tests/e2e/hyperblast-storage.spec.mjs --project=chromium",
+    "check:hyperblast": "npm run test:hyperblast && npm run test:hyperblast:e2e"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0"

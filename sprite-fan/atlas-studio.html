@@ -258,6 +258,14 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
 .preset-btn .preset-size{font-size:10px;color:var(--text-muted);font-family:var(--font-mono)}
 
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* Batch Queue */
+.batch-strip{display:flex;gap:4px;flex-wrap:wrap;max-height:80px;overflow-y:auto;padding:2px 0}
+.batch-chip{padding:3px 8px;font-size:10px;background:var(--bg-3);color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;transition:var(--tr)}
+.batch-chip:hover{background:var(--bg-4);color:var(--text)}
+.batch-chip.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.batch-chip.done{border-color:var(--success);background:var(--success-dim);color:var(--success)}
+.batch-chip.error{border-color:var(--danger);background:var(--danger-dim);color:var(--danger)}
 </style>
 </head>
 <body>
@@ -318,6 +326,30 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
             <button class="btn btn-ghost btn-sm" id="btn-load-clip">Clipboard</button>
             <button class="btn btn-ghost btn-sm" id="btn-dual-toggle">Dual BG Mode</button>
           </div>
+        </div>
+      </div>
+
+      <!-- BATCH QUEUE -->
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-batch"><span>Batch Queue</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-batch">
+          <input type="file" id="batch-file-input" accept="image/*" multiple style="display:none"/>
+          <input type="file" id="batch-manifest-input" accept=".json" style="display:none"/>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-batch-add">+ Add Sprites</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-load-manifest">Load Manifest</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-clear">Clear</button>
+          </div>
+          <div id="batch-info" style="font-size:10px;color:var(--text-muted);margin:4px 0">No sprites queued</div>
+          <div id="batch-queue-strip" class="batch-strip"></div>
+          <div id="batch-nav" class="btn-row" style="display:none;margin-top:6px">
+            <button class="btn btn-ghost btn-sm" id="btn-batch-prev">&larr; Prev</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-done">Mark Done</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-skip">Skip</button>
+            <button class="btn btn-primary btn-sm" id="btn-batch-next">Next &rarr;</button>
+          </div>
+          <label class="checkbox-row" style="margin-top:4px"><input type="checkbox" id="chk-batch-auto-detect" checked/> Auto-detect dimensions</label>
+          <div class="layout-help">Load multiple sprites to iterate through them. Dimensions are auto-detected from the manifest or image name. Adjust frame size in Grid Slicing, then click Next to proceed.</div>
         </div>
       </div>
 
@@ -495,7 +527,11 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
             <div class="field-row"><input type="range" id="export-pad" min="0" max="16" value="0"/></div>
           </div>
           <label class="checkbox-row"><input type="checkbox" id="chk-no-pad"/> No padding (strict)</label>
-          <div class="layout-help" id="export-layout-info">Generic sheet export. Choose a contract below for 4x4 pages.</div>
+          <div class="field">
+            <div class="field-label"><span>Export Scale %</span><span id="export-scale-val">100</span></div>
+            <div class="field-row"><input type="range" id="export-scale" min="10" max="400" value="100" step="10"/></div>
+          </div>
+          <div class="layout-help" id="export-layout-info">Scale applies at export only (cleanup runs at full resolution). Anchors are exported as normalized ratios.</div>
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" id="btn-repack">&#x2B1A; Repack Sheet</button>
             <button class="btn btn-success btn-sm" id="btn-export-png">&#x2B07; Export PNG</button>
@@ -845,6 +881,12 @@ const S = {
   spacePanKey: false,
   frameDragIndex: null,
   alphaCleanupBaseImageData: null,
+
+  // Batch queue
+  batchQueue: [],        // [{name, file, blob?, frameW, frameH, anchor, status}]
+  batchIndex: -1,
+  batchManifest: null,   // parsed sprites.json manifest
+  batchAutoDetect: true,
 };
 
 // ════════════════════════════════════════════
@@ -1119,7 +1161,7 @@ document.querySelectorAll('.wf-tab').forEach(t=>t.addEventListener('click',()=>s
 // ════════════════════════════════════════════
 // RANGE SLIDERS
 // ════════════════════════════════════════════
-const rangeDisplays={tolerance:'tol-val','max-saturation':'sat-val','frame-w':'fw-val','frame-h':'fh-val','grid-ox':'ox-val','grid-oy':'oy-val','anchor-x':'ancx-val','anchor-y':'ancy-val','stray-size':'stray-val','jitter-thresh':'jitter-val','outline-radius':'outline-val','soften-radius':'soften-val','alpha-erode':'erode-val','alpha-dilate':'dilate-val','export-cols':'cols-val','export-pad':'pad-val','alpha-threshold':'athresh-val','merge-distance':'merge-val','manifest-fps':'fps-val','max-auto-fit-zoom':'fitzoom-val'};
+const rangeDisplays={tolerance:'tol-val','max-saturation':'sat-val','frame-w':'fw-val','frame-h':'fh-val','grid-ox':'ox-val','grid-oy':'oy-val','anchor-x':'ancx-val','anchor-y':'ancy-val','stray-size':'stray-val','jitter-thresh':'jitter-val','outline-radius':'outline-val','soften-radius':'soften-val','alpha-erode':'erode-val','alpha-dilate':'dilate-val','export-cols':'cols-val','export-pad':'pad-val','alpha-threshold':'athresh-val','merge-distance':'merge-val','manifest-fps':'fps-val','max-auto-fit-zoom':'fitzoom-val','export-scale':'export-scale-val'};
 Object.entries(rangeDisplays).forEach(([id,valId])=>{const el=$(id);if(el)el.addEventListener('input',()=>{$ (valId).textContent=el.value;if(id==='max-auto-fit-zoom'){S.maxAutoFitZoom=+el.value;if(mainCanvas.width&&S.autoFitFrames)fitToView()}})});
 
 // Sync number inputs with ranges
@@ -1969,22 +2011,35 @@ $('btn-cleanup-all').addEventListener('click',()=>{
 // ════════════════════════════════════════════
 // EXPORT & REPACK
 // ════════════════════════════════════════════
+function getExportScale(){return Math.max(0.1,Math.min(4,(+$('export-scale')?.value||100)/100))}
+
+function scaleCanvas(srcCanvas,scale){
+  if(Math.abs(scale-1)<0.001)return srcCanvas;
+  const sw=Math.round(srcCanvas.width*scale),sh=Math.round(srcCanvas.height*scale);
+  const out=document.createElement('canvas');out.width=sw;out.height=sh;
+  const ctx=out.getContext('2d');ctx.imageSmoothingEnabled=scale<1;ctx.imageSmoothingQuality='high';
+  ctx.drawImage(srcCanvas,0,0,sw,sh);
+  return out;
+}
+
 function repackSheet(){
   if(!S.frames.length){toast('Slice frames first','warning');return}
   const cols=+$('export-cols').value, pad=+$('chk-no-pad').checked?0:+$('export-pad').value;
-  const fw=S.frames[0].imgData.width, fh=S.frames[0].imgData.height;
+  const scale=getExportScale();
+  const fw=Math.round(S.frames[0].imgData.width*scale), fh=Math.round(S.frames[0].imgData.height*scale);
   const cellW=fw+pad*2, cellH=fh+pad*2;
   const rows=Math.ceil(S.frames.length/cols);
   const outW=cellW*cols, outH=cellH*rows;
   const outC=document.createElement('canvas');outC.width=outW;outC.height=outH;
   const outCtx=outC.getContext('2d');outCtx.clearRect(0,0,outW,outH);
+  outCtx.imageSmoothingEnabled=scale<1;outCtx.imageSmoothingQuality='high';
 
   S.frames.forEach((f,i)=>{
     const col=i%cols, row=Math.floor(i/cols);
     const dx=col*cellW+pad, dy=row*cellH+pad;
     const tmpC=document.createElement('canvas');tmpC.width=f.imgData.width;tmpC.height=f.imgData.height;
     tmpC.getContext('2d').putImageData(f.imgData,0,0);
-    outCtx.drawImage(tmpC,dx,dy);
+    outCtx.drawImage(tmpC,0,0,f.imgData.width,f.imgData.height,dx,dy,fw,fh);
   });
 
   return outC;
@@ -2162,12 +2217,13 @@ function setContract4x4Layout(){
   $('export-cols').value=4;$('cols-val').textContent='4';$('export-pad').value=0;$('pad-val').textContent='0';$('chk-no-pad').checked=true;
   syncFrameOrderText();updateReassemblyGuide();toast('4x4 contract layout set','success');
 }
-function buildSheetCanvasForFrames(frames,cols,pad){
+function buildSheetCanvasForFrames(frames,cols,pad,scale=1){
   if(!frames.length)return null;
-  const fw=frames[0].imgData.width,fh=frames[0].imgData.height,cellW=fw+pad*2,cellH=fh+pad*2;
+  const fw=Math.round(frames[0].imgData.width*scale),fh=Math.round(frames[0].imgData.height*scale),cellW=fw+pad*2,cellH=fh+pad*2;
   const rows=Math.ceil(frames.length/cols),out=document.createElement('canvas');out.width=cellW*cols;out.height=cellH*rows;
   const outCtx=out.getContext('2d');outCtx.clearRect(0,0,out.width,out.height);
-  frames.forEach((f,i)=>{const c=i%cols,r=Math.floor(i/cols),tmp=document.createElement('canvas');tmp.width=f.imgData.width;tmp.height=f.imgData.height;tmp.getContext('2d').putImageData(f.imgData,0,0);outCtx.drawImage(tmp,c*cellW+pad,r*cellH+pad)});
+  outCtx.imageSmoothingEnabled=scale<1;outCtx.imageSmoothingQuality='high';
+  frames.forEach((f,i)=>{const c=i%cols,r=Math.floor(i/cols),tmp=document.createElement('canvas');tmp.width=f.imgData.width;tmp.height=f.imgData.height;tmp.getContext('2d').putImageData(f.imgData,0,0);outCtx.drawImage(tmp,0,0,f.imgData.width,f.imgData.height,c*cellW+pad,r*cellH+pad,fw,fh)});
   return out;
 }
 function exportContractPages(){
@@ -2368,8 +2424,229 @@ $('manifest-loop').addEventListener('input',()=>{$('loop-val').textContent=+$('m
 $('spec-prompt').addEventListener('input',()=>{S.specGuide.prompt=$('spec-prompt').value;renderSpecGuide(S.specGuide)});
 
 // ════════════════════════════════════════════
-// DUAL BG EXTRACT
+// BATCH QUEUE
 // ════════════════════════════════════════════
+
+// Known dimension contracts from reqs/animation.yml
+const DIMENSION_CONTRACTS = {
+  player:    { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  item:      { fw: 32, fh: 32, anchor: {x:16, y:16} },
+  vfx:       { fw: 32, fh: 32, anchor: {x:16, y:16} },
+  tile:      { fw: 32, fh: 32, anchor: {x:16, y:16} },
+  enemy:     { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  boss:      { fw: 96, fh: 96, anchor: {x:48, y:88} },
+  companion: { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  npc:       { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  parallax:  { fw: 320, fh: 180, anchor: {x:160, y:90} },
+};
+
+// Auto-detect frame dimensions from image size and ID patterns
+function autoDetectDimensions(name, imgW, imgH) {
+  const lower = name.toLowerCase();
+  // Match known contracts by ID pattern
+  if (lower.includes('boss'))     return DIMENSION_CONTRACTS.boss;
+  if (lower.includes('enemy'))    return DIMENSION_CONTRACTS.enemy;
+  if (lower.includes('parallax')) return DIMENSION_CONTRACTS.parallax;
+  if (lower.includes('tile'))     return DIMENSION_CONTRACTS.tile;
+  if (lower.includes('item'))     return DIMENSION_CONTRACTS.item;
+  if (lower.includes('vfx'))      return DIMENSION_CONTRACTS.vfx;
+  if (lower.includes('companion') || lower.includes('character') || lower.includes('npc'))
+    return DIMENSION_CONTRACTS.companion;
+  // Fallback: assume 4x4 grid, pick dimensions that divide evenly
+  for (const fw of [48, 32, 96, 64, 24]) {
+    if (imgW % fw === 0) {
+      const cols = imgW / fw;
+      const rows = imgH / fw; // assume square frames
+      if (rows >= 1 && imgH % fw === 0) return { fw, fh: fw, anchor: {x: Math.floor(fw/2), y: fw - 4} };
+    }
+  }
+  // Last resort: try to fit 4 columns
+  const fw = Math.floor(imgW / 4);
+  const fh = Math.floor(imgH / Math.ceil((imgW / fw) * (imgH / imgW)));
+  return { fw: Math.max(1, fw), fh: Math.max(1, fh || fw), anchor: {x: Math.floor(fw/2), y: fh - 4} };
+}
+
+function renderBatchQueue() {
+  const strip = $('batch-queue-strip');
+  const info = $('batch-info');
+  const nav = $('batch-nav');
+  if (!strip) return;
+
+  strip.textContent = '';
+  if (!S.batchQueue.length) {
+    if (info) info.textContent = 'No sprites queued';
+    if (nav) nav.style.display = 'none';
+    return;
+  }
+
+  if (nav) nav.style.display = S.batchQueue.length > 1 ? '' : 'none';
+
+  S.batchQueue.forEach((item, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'batch-chip' + (i === S.batchIndex ? ' active' : '') + (item.status === 'done' ? ' done' : item.status === 'error' ? ' error' : '');
+    chip.title = item.name;
+    chip.textContent = item.name.replace(/\.[^.]+$/, '').slice(0, 16);
+    chip.addEventListener('click', () => loadBatchItem(i));
+    strip.appendChild(chip);
+  });
+
+  if (info) {
+    const current = S.batchIndex >= 0 ? S.batchQueue[S.batchIndex] : null;
+    const done = S.batchQueue.filter(i => i.status === 'done').length;
+    info.textContent = `${done}/${S.batchQueue.length} done` + (current ? ` · ${current.name.slice(0, 24)}` : '');
+  }
+}
+
+function addFilesToBatch(fileList) {
+  const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if (!files.length) { toast('No image files', 'warning'); return; }
+  
+  files.forEach(f => {
+    const detected = autoDetectDimensions(f.name, 0, 0);
+    S.batchQueue.push({
+      name: f.name,
+      file: f,
+      blob: f,
+      frameW: detected.fw,
+      frameH: detected.fh,
+      anchor: { ...detected.anchor },
+      status: 'pending',
+      dimsLocked: false,
+    });
+  });
+
+  renderBatchQueue();
+  toast(`Added ${files.length} sprite(s) to queue`, 'success');
+}
+
+function loadBatchItem(index) {
+  if (index < 0 || index >= S.batchQueue.length) return;
+  const item = S.batchQueue[index];
+  S.batchIndex = index;
+
+  // Apply saved dimensions
+  $('frame-w').value = item.frameW;
+  $('frame-w-num').value = item.frameW;
+  $('fw-val').textContent = item.frameW;
+  $('frame-h').value = item.frameH;
+  $('frame-h-num').value = item.frameH;
+  $('fh-val').textContent = item.frameH;
+  S.anchor = { ...item.anchor };
+  $('anchor-x').value = item.anchor.x;
+  $('anchor-y').value = item.anchor.y;
+  $('anchor-x-num').value = item.anchor.x;
+  $('anchor-y-num').value = item.anchor.y;
+  $('ancx-val').textContent = item.anchor.x;
+  $('ancy-val').textContent = item.anchor.y;
+
+  // Update manifest name
+  const baseName = item.name.replace(/\.[^.]+$/, '');
+  if ($('manifest-name')) $('manifest-name').value = baseName;
+
+  // Load image
+  loadObjectUrlImage(item.blob, loadImageToCanvas);
+
+  renderBatchQueue();
+}
+
+function markBatchDone(success) {
+  if (S.batchIndex < 0 || S.batchIndex >= S.batchQueue.length) return;
+  S.batchQueue[S.batchIndex].status = success ? 'done' : 'error';
+  // Save current dimensions back to queue item
+  const item = S.batchQueue[S.batchIndex];
+  item.frameW = +$('frame-w').value;
+  item.frameH = +$('frame-h').value;
+  item.anchor = { ...S.anchor };
+  renderBatchQueue();
+}
+
+function nextBatchItem() {
+  if (S.batchIndex < S.batchQueue.length - 1) {
+    markBatchDone(true);
+    loadBatchItem(S.batchIndex + 1);
+  } else {
+    markBatchDone(true);
+    toast('Batch queue complete!', 'success');
+  }
+}
+
+function prevBatchItem() {
+  if (S.batchIndex > 0) loadBatchItem(S.batchIndex - 1);
+}
+
+// Load manifest (sprites.json) and populate batch queue from it
+function loadManifestBatch(manifestJson) {
+  try {
+    const manifest = typeof manifestJson === 'string' ? JSON.parse(manifestJson) : manifestJson;
+    const sheets = manifest.spriteSheets || manifest.sheets || [];
+    if (!sheets.length) { toast('No sheets in manifest', 'warning'); return; }
+
+    S.batchManifest = manifest;
+    S.batchQueue = [];
+
+    sheets.forEach(sheet => {
+      const fw = sheet.frameSize?.[0] || 48;
+      const fh = sheet.frameSize?.[1] || 48;
+      const ax = sheet.animations ? Object.values(sheet.animations)[0]?.anchor?.[0] : Math.floor(fw / 2);
+      const ay = sheet.animations ? Object.values(sheet.animations)[0]?.anchor?.[1] : fh - 4;
+
+      S.batchQueue.push({
+        name: sheet.id + '.png',
+        file: null,
+        blob: null,
+        frameW: fw,
+        frameH: fh,
+        anchor: { x: ax ?? Math.floor(fw / 2), y: ay ?? fh - 4 },
+        status: 'pending',
+        dimsLocked: true,
+        manifestEntry: sheet,
+      });
+    });
+
+    renderBatchQueue();
+    toast(`Loaded ${S.batchQueue.length} sheets from manifest`, 'success');
+  } catch (e) {
+    toast('Invalid manifest: ' + e.message, 'error');
+  }
+}
+
+// Wire up batch queue UI
+$('btn-batch-add')?.addEventListener('click', () => $('batch-file-input')?.click());
+$('batch-file-input')?.addEventListener('change', () => {
+  addFilesToBatch($('batch-file-input').files);
+  $('batch-file-input').value = '';
+});
+$('btn-batch-next')?.addEventListener('click', nextBatchItem);
+$('btn-batch-prev')?.addEventListener('click', prevBatchItem);
+$('btn-batch-done')?.addEventListener('click', () => markBatchDone(true));
+$('btn-batch-skip')?.addEventListener('click', () => {
+  markBatchDone(false);
+  nextBatchItem();
+});
+$('btn-batch-load-manifest')?.addEventListener('click', () => $('batch-manifest-input')?.click());
+$('batch-manifest-input')?.addEventListener('change', () => {
+  const f = $('batch-manifest-input').files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => loadManifestBatch(r.result);
+  r.readAsText(f);
+  $('batch-manifest-input').value = '';
+});
+$('btn-batch-clear')?.addEventListener('click', () => {
+  S.batchQueue = [];
+  S.batchIndex = -1;
+  renderBatchQueue();
+  toast('Batch queue cleared', 'info');
+});
+$('chk-batch-auto-detect')?.addEventListener('change', (e) => {
+  S.batchAutoDetect = e.target.checked;
+});
+
+// Override export to mark batch done
+const _origExportPng = $('btn-export-png')?.onclick;
+$('btn-export-png')?.addEventListener('click', () => {
+  if (S.batchIndex >= 0) markBatchDone(true);
+});
 function extractDualAlpha(whiteImg,blackImg,athresh,despill,hardAlpha){
   const w=whiteImg.width,h=whiteImg.height;
   const wC=document.createElement('canvas');wC.width=w;wC.height=h;const wCtx=wC.getContext('2d',{willReadFrequently:true});wCtx.clearRect(0,0,w,h);wCtx.drawImage(whiteImg,0,0);const wD=wCtx.getImageData(0,0,w,h);

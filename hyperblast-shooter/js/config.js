@@ -10,8 +10,17 @@ export const GAME_CONFIG = {
 
   // Player settings
   PLAYER_INITIAL_X: 50,
+  PLAYER_MIN_X: 24,
   PLAYER_MIN_Y: 20,
+  PLAYER_MAX_X_RATIO: 0.42,
   PLAYER_FRICTION: 0.9,
+  PLAYER_FLIGHT_DRAG: 0.9,
+  PLAYER_IDLE_DRAG: 0.82,
+  PLAYER_LATERAL_THRUST_RATIO: 0.68,
+  PLAYER_MAX_VERTICAL_SPEED: 8.25,
+  PLAYER_MAX_LATERAL_SPEED: 5.25,
+  PLAYER_TILT_RESPONSE: 0.24,
+  PLAYER_MAX_TILT: 0.55,
   BASE_THRUST: 0.8,
   THRUST_PER_BOOST_LEVEL: 0.18,
 
@@ -199,7 +208,8 @@ export const ROOM_TYPES = {
   PUBLIC: 'public',
   PRIVATE: 'private',
   RANKED: 'ranked',
-  COOP: 'coop'
+  COOP: 'coop',
+  VS: 'vs'
 };
 
 // Player stats and progression

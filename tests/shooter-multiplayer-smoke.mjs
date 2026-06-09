@@ -35,7 +35,8 @@ assert.match(startMultiplayerBlock, /type: 'shooter-join-request'/, 'startMultip
 assert.match(startMultiplayerBlock, /if \(!this\.spectateMode\) \{\s*this\.networkUpdateInterval\s*=\s*setInterval/s, 'spectate mode should not broadcast a playable state loop');
 assert.match(startMultiplayerBlock, /this\.networkUpdateInterval\s*=\s*setInterval\(\(\) => \{\s*this\.broadcastGameState\(\);\s*\}, GAME_CONFIG\.NETWORK_UPDATE_INTERVAL\)/s, 'startMultiplayer should broadcast state at the configured 20Hz interval');
 assert.match(startMultiplayerBlock, /this\.broadcastPresence\(\)/, 'startMultiplayer should announce local presence after connecting');
-assert.match(startMultiplayerBlock, /this\.toggleMultiplayer\(\)/, 'startMultiplayer should roll back mode on connection failure');
+assert.match(startMultiplayerBlock, /this\.markMultiplayerUnavailable\('Multiplayer unavailable'\)/, 'startMultiplayer should mark multiplayer unavailable on connection failure without recursive toggling');
+assert.match(startMultiplayerBlock, /typeof window\.Peer !== 'function'/, 'startMultiplayer should detect a missing PeerJS dependency before creating a lobby');
 
 const stopMultiplayerBlock = block('stopMultiplayer() {', 'broadcastGameState() {');
 assert.match(stopMultiplayerBlock, /clearInterval\(this\.networkUpdateInterval\)/, 'stopMultiplayer should stop periodic state broadcasts');

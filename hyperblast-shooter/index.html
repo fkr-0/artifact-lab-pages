@@ -411,11 +411,11 @@
     <button onclick="game.restart()">Play Again</button>
   </div>
 
-  <div id="achievementPanel" style="position:fixed;top:70px;right:10px;max-width:320px;z-index:100;display:none"></div>
+  <div id="achievementPanel" style="position:fixed;top:70px;right:10px;max-width:320px;z-index:100;display:none;pointer-events:none"></div>
 
   <script type="module">
     import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
-    import { GAME_CONFIG, STAGE_THEMES } from './js/config.js';
+    import { GAME_CONFIG, ROOM_TYPES, STAGE_THEMES } from './js/config.js';
     import { StoryManager, createInitialStoryState, updateStoryMode } from './js/story.js';
     import { MultiplayerManager } from './js/multiplayer.js';
     import { UIManager } from './js/ui.js';
@@ -430,6 +430,9 @@
     import { PROGRESS_STORAGE_KEY, createProgressSave, createProgressSettings, formatSaveTime, progressMeta, summarizeProgress } from './js/progress.js';
     import { MILESTONES, lockedMilestones, milestoneProgress, unlockedMilestones } from './js/milestones.js';
     import { DEFAULT_PATROL_TIER_ID, PATROL_CONTRACTS, PATROL_TIERS, activeContract, activePatrolTier, adjustedKillGoal, cancelActivePatrolContract, completePatrolContract, contractLogProgress, contractProgress, contractRewardSummary, createContractState, getPatrolContractForWorld, getPatrolTier, isContractActive, mergeContractState, startPatrolContract } from './js/contracts.js';
+    import { applyPlayerFlight } from './js/flight.js';
+    import { actionForKeyCode, bindingsForControlScheme, normalizeKeyBindings } from './js/input.js';
+    import { escapeHtml, safeCssColor, safeInteger } from './js/render-safe.js';
     import {
       ALLY_MODELS,
       BOOSTER_MODELS,
@@ -471,10 +474,13 @@
 
         this.urlParams = new URLSearchParams(window.location.search);
         this.multiplayer = false;
+        this.multiplayerUnavailable = false;
         this.lobby = null;
         const settings = this.ui.getSettings();
-        this.username = settings.playerName;
+        this.username = this.urlParams.get('username') || settings.playerName;
+        this.keyBindings = normalizeKeyBindings(settings.keyBindings || bindingsForControlScheme(settings.controlScheme));
         this.targetPeerId = this.urlParams.get('targetPeerId') || '';
+        this.matchMode = this.normalizeMatchMode(this.urlParams.get('matchMode') || this.urlParams.get('roomType') || settings.preferredRoomType || ROOM_TYPES.COOP);
         this.sessionMode = this.normalizeSessionMode(this.urlParams.get('mode') || 'combat');
         const savedProgress = this.loadProgress();
         this.worldProgress = savedProgress.worldProgress;
@@ -579,6 +585,17 @@
         return ['combat', 'explore', 'world-map', 'puzzle'].includes(mode) ? mode : 'combat';
       }
 
+      normalizeMatchMode(mode) {
+        return [ROOM_TYPES.COOP, ROOM_TYPES.VS].includes(mode) ? mode : ROOM_TYPES.COOP;
+      }
+
+      refreshSettingsFromUi() {
+        const settings = this.ui.getSettings();
+        this.username = this.urlParams.get('username') || settings.playerName;
+        this.keyBindings = normalizeKeyBindings(settings.keyBindings || bindingsForControlScheme(settings.controlScheme));
+        this.matchMode = this.normalizeMatchMode(this.urlParams.get('matchMode') || this.urlParams.get('roomType') || settings.preferredRoomType || ROOM_TYPES.COOP);
+      }
+
       isCombatActive() {
         return this.sessionMode === 'combat' && !this.state.local.gameOver && isContractActive(this.contractState);
       }
@@ -645,6 +662,7 @@
           if (startButton) {
             startButton.onclick = () => {
               this.ui.hideSetupMenu();
+              this.refreshSettingsFromUi();
               this.start();
             };
           }
@@ -652,6 +670,7 @@
           if (multiplayerButton) {
             multiplayerButton.onclick = () => {
               this.ui.hideSetupMenu();
+              this.refreshSettingsFromUi();
               this.toggleMultiplayer();
               this.start();
             };
@@ -762,24 +781,26 @@
 
       setupKeyboard() {
         this.keyHandler = (e) => {
-          this.state.local.keys[e.code] = true;
-          if (e.code === 'KeyT' && !e.repeat) {
+          const action = actionForKeyCode(e.code, this.keyBindings);
+          if (!action) return;
+
+          this.state.local.keys[action] = true;
+          if (action === 'turret' && !e.repeat) {
             this.deployTurret();
           }
-          if (e.code === 'KeyQ' && !e.repeat) {
+          if (action === 'weapon' && !e.repeat) {
             this.state.local.player.weaponType = cycleWeaponType(this.state.local.player.weaponType);
             this.showNotification(`WEAPON: ${this.state.local.player.weaponType.toUpperCase()}`);
             this.updateHUD();
           }
 
-          if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyT', 'KeyQ'].includes(e.code)) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
+          e.preventDefault();
+          e.stopPropagation();
         };
 
         this.keyUpHandler = (e) => {
-          this.state.local.keys[e.code] = false;
+          const action = actionForKeyCode(e.code, this.keyBindings);
+          if (action) this.state.local.keys[action] = false;
         };
 
         document.addEventListener('keydown', this.keyHandler);
@@ -817,6 +838,11 @@
       }
 
       toggleMultiplayer() {
+        if (this.multiplayerUnavailable) {
+          this.showNotification('Multiplayer unavailable');
+          return;
+        }
+
         this.multiplayer = !this.multiplayer;
         const btn = document.getElementById('multiplayerBtn');
 
@@ -831,8 +857,29 @@
         }
       }
 
+      markMultiplayerUnavailable(message = 'Multiplayer unavailable') {
+        this.multiplayerUnavailable = true;
+        this.multiplayer = false;
+        this.stopMultiplayer();
+
+        const btn = document.getElementById('multiplayerBtn');
+        if (btn) {
+          btn.textContent = 'Multiplayer: UNAVAILABLE';
+          btn.classList.remove('active');
+          btn.disabled = true;
+          btn.setAttribute('aria-label', message);
+        }
+
+        this.showNotification(message);
+      }
+
       async startMultiplayer() {
         try {
+          if (typeof window.Peer !== 'function') {
+            this.markMultiplayerUnavailable('Multiplayer unavailable: PeerJS failed to load');
+            return;
+          }
+
           this.lobby = new PeernetLobby(SHOOTER_LOBBY_ID, {
             storageKey: 'shooter-lobby',
             debug: false
@@ -855,7 +902,7 @@
           if (this.targetPeerId) {
             this.lobby.send?.(this.targetPeerId, {
               type: 'shooter-join-request',
-              payload: { username: this.username, targetPeerId: this.targetPeerId, mode: this.sessionMode, spectate: this.spectateMode, at: Date.now() }
+              payload: { username: this.username, targetPeerId: this.targetPeerId, mode: this.sessionMode, matchMode: this.matchMode, spectate: this.spectateMode, at: Date.now() }
             });
           }
 
@@ -872,9 +919,8 @@
           this.showNotification('Connected to multiplayer arena!');
 
         } catch (err) {
-          console.error('Failed to connect to lobby:', err);
-          this.showNotification('Failed to connect to multiplayer');
-          this.toggleMultiplayer();
+          console.warn('Multiplayer unavailable:', err);
+          this.markMultiplayerUnavailable('Multiplayer unavailable');
         }
       }
 
@@ -906,10 +952,12 @@
           payload: {
             player: { x: state.player.x, y: state.player.y },
             bullets: state.bullets.map(b => ({ x: b.x, y: b.y })),
+            username: this.username,
             score: state.score,
             lives: state.player.lives,
             stage: state.stage,
             mode: this.sessionMode,
+            matchMode: this.matchMode,
             gameOver: state.gameOver
           }
         });
@@ -924,7 +972,9 @@
             playing: playing,
             observing: this.spectateMode,
             targetPeerId: this.targetPeerId,
+            username: this.username,
             mode: this.sessionMode,
+            matchMode: this.matchMode,
             score: this.state.local.score,
             color: this.playerColor
           }
@@ -953,7 +1003,7 @@
         if (!this.state.remote.has(peerId)) {
           // New player joined
           this.state.remote.set(peerId, {
-            username: `Peer-${peerId.slice(0, 4)}`,
+            username: payload.username || `Peer-${peerId.slice(0, 4)}`,
             color: this.getRandomColor(),
             ...payload,
             lastUpdate: now
@@ -963,10 +1013,12 @@
           const remote = this.state.remote.get(peerId);
           remote.player = payload.player;
           remote.bullets = payload.bullets;
+          remote.username = payload.username || remote.username;
           remote.score = payload.score;
           remote.lives = payload.lives;
           remote.stage = payload.stage;
           remote.mode = payload.mode;
+          remote.matchMode = payload.matchMode || remote.matchMode;
           remote.lastUpdate = now;
         }
 
@@ -984,6 +1036,21 @@
       updateRemotePresence(peerId, payload) {
         if (payload?.playing === false) {
           this.state.remote.delete(peerId);
+          this.updateMultiplayerPanel();
+          return;
+        }
+        if (payload?.playing) {
+          const existing = this.state.remote.get(peerId) || {};
+          this.state.remote.set(peerId, {
+            username: payload.username || existing.username || `Peer-${peerId.slice(0, 4)}`,
+            color: payload.color || existing.color || this.getRandomColor(),
+            score: payload.score ?? existing.score ?? 0,
+            mode: payload.mode || existing.mode,
+            matchMode: payload.matchMode || existing.matchMode || ROOM_TYPES.COOP,
+            player: existing.player || { x: 0, y: 0 },
+            bullets: existing.bullets || [],
+            lastUpdate: Date.now(),
+          });
           this.updateMultiplayerPanel();
         }
       }
@@ -1005,22 +1072,27 @@
         panel.classList.add('visible');
 
         const players = [
-          { username: this.username + ' (you)', score: this.state.local.score, color: this.playerColor, isYou: true },
+          { username: `${this.username} (you)`, score: this.state.local.score, color: this.playerColor, isYou: true },
           ...Array.from(this.state.remote.values()).map(p => ({
             username: p.username,
             score: p.score,
             color: p.color,
             isYou: false
           }))
-        ].sort((a, b) => b.score - a.score);
+        ].sort((a, b) => safeInteger(b.score, 0) - safeInteger(a.score, 0));
 
-        list.innerHTML = players.map(p => `
-          <div class="player ${p.isYou ? 'you' : ''}">
-            <div class="player-dot" style="background: ${p.color}; box-shadow: 0 0 8px ${p.color}"></div>
-            <span class="player-name">${p.username}</span>
-            <span class="player-score">${p.score}</span>
-          </div>
-        `).join('');
+        list.innerHTML = players.map((player) => {
+          const color = safeCssColor(player.color, '#8cf');
+          const username = escapeHtml(player.username || 'Peer');
+          const score = safeInteger(player.score, 0);
+          return `
+            <div class="player ${player.isYou ? 'you' : ''}">
+              <div class="player-dot" style="background: ${color}; box-shadow: 0 0 8px ${color}"></div>
+              <span class="player-name">${username}</span>
+              <span class="player-score">${score}</span>
+            </div>
+          `;
+        }).join('');
       }
 
       showNotification(text) {
@@ -2104,21 +2176,28 @@
         const s = this.state.local;
         const p = s.player;
 
+        const now = performance.now();
+        const deltaMs = Math.min(GAME_CONFIG.MAX_DELTA_MS, Math.max(0, now - (s.lastFrameAt || now)));
+        s.lastFrameAt = now;
+
         // Player movement
         p.weaponType ||= 'bullet';
         p.shipModel ||= 'interceptor';
         p.boosterModel ||= 'ion';
         const booster = BOOSTER_MODELS[p.boosterModel] || BOOSTER_MODELS.ion;
         const ship = SHIP_MODELS[p.shipModel] || SHIP_MODELS.interceptor;
-        const thrust = GAME_CONFIG.BASE_THRUST + (p.boostLevel - 1) * GAME_CONFIG.THRUST_PER_BOOST_LEVEL + booster.thrustBonus + ship.speedBonus;
-        if (s.keys['ArrowUp'] || s.keys['KeyW']) p.vy -= thrust;
-        if (s.keys['ArrowDown'] || s.keys['KeyS']) p.vy += thrust;
-        p.vy *= GAME_CONFIG.PLAYER_FRICTION;
-        p.y += p.vy;
-        p.y = Math.max(GAME_CONFIG.PLAYER_MIN_Y, Math.min(this.canvas.height - GAME_CONFIG.PLAYER_MIN_Y, p.y));
+        applyPlayerFlight({
+          player: p,
+          keys: s.keys,
+          bounds: { width: this.canvas.width, height: this.canvas.height },
+          config: GAME_CONFIG,
+          ship,
+          booster,
+          deltaMs,
+        });
 
         // Shooting
-        if (s.keys['Space'] && s.bullets.filter(b => Date.now() - b.time < GAME_CONFIG.MAX_BULLET_AGE).length < GAME_CONFIG.BULLET_SPREAD_MAX + p.weaponLevel) {
+        if (s.keys.fire && s.bullets.filter(b => Date.now() - b.time < GAME_CONFIG.MAX_BULLET_AGE).length < GAME_CONFIG.BULLET_SPREAD_MAX + p.weaponLevel) {
           const spread = Math.min(GAME_CONFIG.BULLET_SPREAD_MAX, p.weaponLevel);
           for (let i = 0; i < spread; i++) {
             s.bullets.push({
@@ -2182,9 +2261,6 @@
         });
 
         // Turrets decay over time, lose health on collisions, and auto-aim precisely.
-        const now = performance.now();
-        const deltaMs = Math.min(GAME_CONFIG.MAX_DELTA_MS, Math.max(0, now - (s.lastFrameAt || now)));
-        s.lastFrameAt = now;
         this.updateStory(now);
         const turretUpdate = updateTurrets({
           turrets: s.turrets,
@@ -2456,19 +2532,42 @@
       drawPlayer(ctx, player, color) {
         if (!ctx || !player || !color) return;
 
+        const tilt = Number(player.tilt || 0);
+        const throttle = Math.max(0, Math.min(1, Number(player.throttle || 0)));
+
         // Ensure canvas state is clean
         ctx.save();
         ctx.globalAlpha = 1;
+        ctx.translate(player.x, player.y);
+        ctx.rotate(tilt);
+
+        // Engine flare grows with active thrust and residual speed.
+        ctx.fillStyle = 'rgba(255,180,80,0.75)';
+        ctx.shadowColor = '#f90';
+        ctx.shadowBlur = 8 + throttle * 12;
+        ctx.beginPath();
+        ctx.moveTo(-12, 0);
+        ctx.lineTo(-24 - throttle * 16, -4 - throttle * 5);
+        ctx.lineTo(-20 - throttle * 10, 0);
+        ctx.lineTo(-24 - throttle * 16, 4 + throttle * 5);
+        ctx.closePath();
+        ctx.fill();
+
         ctx.fillStyle = color;
         ctx.shadowColor = color;
         ctx.shadowBlur = GAME_CONFIG.SHADOW_BLUR_PLAYER;
-
         ctx.beginPath();
-        ctx.moveTo(player.x + 20, player.y);
-        ctx.lineTo(player.x - 10, player.y - 10);
-        ctx.lineTo(player.x - 5, player.y);
-        ctx.lineTo(player.x - 10, player.y + 10);
+        ctx.moveTo(22, 0);
+        ctx.lineTo(-12, -11);
+        ctx.lineTo(-5, 0);
+        ctx.lineTo(-12, 11);
         ctx.closePath();
+        ctx.fill();
+
+        // Cockpit glint reinforces banking direction.
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.beginPath();
+        ctx.arc(3, -3, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();

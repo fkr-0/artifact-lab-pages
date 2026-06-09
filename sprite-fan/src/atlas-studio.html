@@ -67,6 +67,30 @@
         </div>
       </div>
 
+      <!-- BATCH QUEUE -->
+      <div class="panel-section">
+        <div class="panel-header" data-toggle="sec-batch"><span>Batch Queue</span><span class="chevron">&#x25BC;</span></div>
+        <div class="panel-body" id="sec-batch">
+          <input type="file" id="batch-file-input" accept="image/*" multiple style="display:none"/>
+          <input type="file" id="batch-manifest-input" accept=".json" style="display:none"/>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" id="btn-batch-add">+ Add Sprites</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-load-manifest">Load Manifest</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-clear">Clear</button>
+          </div>
+          <div id="batch-info" style="font-size:10px;color:var(--text-muted);margin:4px 0">No sprites queued</div>
+          <div id="batch-queue-strip" class="batch-strip"></div>
+          <div id="batch-nav" class="btn-row" style="display:none;margin-top:6px">
+            <button class="btn btn-ghost btn-sm" id="btn-batch-prev">&larr; Prev</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-done">Mark Done</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-skip">Skip</button>
+            <button class="btn btn-primary btn-sm" id="btn-batch-next">Next &rarr;</button>
+          </div>
+          <label class="checkbox-row" style="margin-top:4px"><input type="checkbox" id="chk-batch-auto-detect" checked/> Auto-detect dimensions</label>
+          <div class="layout-help">Load multiple sprites to iterate through them. Dimensions are auto-detected from the manifest or image name. Adjust frame size in Grid Slicing, then click Next to proceed.</div>
+        </div>
+      </div>
+
       <!-- WF1: IMPORT -->
       <div class="panel-section wf-panel" data-wf="import">
         <div class="panel-header" data-toggle="sec-import"><span>Grid Slicing</span><span class="chevron">&#x25BC;</span></div>

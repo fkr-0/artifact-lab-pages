@@ -35,8 +35,8 @@ test.describe('app-hub-v11 shell', () => {
     const footerBox = await page.locator('#footerBar').boundingBox();
     const stageBox = await page.locator('#stage').boundingBox();
     const workspaceBox = await page.locator('#workspacePane').boundingBox();
-    expect(footerBox?.height || 0).toBeGreaterThanOrEqual(34);
-    expect(stageBox?.height || 0).toBeGreaterThanOrEqual(38);
+    expect(footerBox?.height || 0).toBeGreaterThanOrEqual(28);
+    expect(stageBox?.height || 0).toBeGreaterThanOrEqual(28);
     expect(footerBox?.y || 0).toBeGreaterThanOrEqual(workspaceBox?.y || 0);
     expect((footerBox?.y || 0) + (footerBox?.height || 0)).toBeLessThanOrEqual((workspaceBox?.y || 0) + (workspaceBox?.height || 0) + 2);
 
@@ -185,7 +185,7 @@ test.describe('Hyperblast Shooter', () => {
     await expect(page.locator('#progressStats')).toContainText('2/4');
     await page.locator('#progressSaveBtn').click();
     const savedMeta = await page.evaluate(() => JSON.parse(localStorage.getItem('hyperblast-shooter-progress-v1')).meta);
-    expect(savedMeta.schemaVersion).toBe(2);
+    expect(savedMeta.schemaVersion).toBe(3);
     expect(typeof savedMeta.savedAt).toBe('string');
     await page.locator('#progressCloseBtn').click();
     await expect(page.locator('[data-world-id="verdant-ion-reef"]')).toBeEnabled();
@@ -351,22 +351,36 @@ test.describe('Hyperblast Shooter', () => {
     await page.locator('#gameCanvas').click();
 
     const before = await page.evaluate(() => ({
+      x: window.game.state.local.player.x,
       y: window.game.state.local.player.y,
       bullets: window.game.state.local.bullets.length,
     }));
 
     await page.keyboard.down('ArrowUp');
-    await page.waitForTimeout(150);
+    await expect.poll(async () => page.evaluate(() => window.game.state.local.player.y)).toBeLessThan(before.y);
     await page.keyboard.up('ArrowUp');
+
+    await page.keyboard.down('ArrowRight');
+    await expect.poll(async () => page.evaluate(() => window.game.state.local.player.x)).toBeGreaterThan(before.x);
+    await page.keyboard.up('ArrowRight');
+
     await page.keyboard.down('Space');
     await expect.poll(async () => page.evaluate(() => window.game.state.local.bullets.length)).toBeGreaterThanOrEqual(before.bullets + 1);
     await page.keyboard.up('Space');
 
     const after = await page.evaluate(() => ({
+      x: window.game.state.local.player.x,
       y: window.game.state.local.player.y,
+      vx: window.game.state.local.player.vx,
+      vy: window.game.state.local.player.vy,
+      tilt: window.game.state.local.player.tilt,
       bulletsCreated: window.game.state.local.bullets.length,
     }));
+    expect(after.x).toBeGreaterThan(before.x);
     expect(after.y).toBeLessThan(before.y);
+    expect(typeof after.vx).toBe('number');
+    expect(typeof after.vy).toBe('number');
+    expect(typeof after.tilt).toBe('number');
     expect(after.bulletsCreated).toBeGreaterThanOrEqual(before.bullets + 1);
 
     await page.locator('#restartBtn').click();

@@ -1,4 +1,6 @@
 import { GAME_CONFIG, STAGE_THEMES, PLAYER_LEVELS, ROOM_TYPES } from './config.js';
+import { prependHtml, renderAchievementToast, renderStoryMessage } from './render-safe.js';
+import { ACTION_LABELS, ACTION_ORDER, bindingsForControlScheme, keyBindingsSummary, normalizeKeyBindings, rebindKey } from './input.js';
 
 export class UIManager {
   constructor(canvas) {
@@ -10,8 +12,16 @@ export class UIManager {
   }
 
   loadSettings() {
-    const saved = localStorage.getItem('shooter-settings');
-    return saved ? JSON.parse(saved) : this.getDefaultSettings();
+    const defaults = this.getDefaultSettings();
+    try {
+      const saved = JSON.parse(localStorage.getItem('shooter-settings') || 'null');
+      if (!saved || typeof saved !== 'object') return defaults;
+      const merged = { ...defaults, ...saved };
+      merged.keyBindings = normalizeKeyBindings(saved.keyBindings || bindingsForControlScheme(merged.controlScheme));
+      return merged;
+    } catch {
+      return defaults;
+    }
   }
 
   getDefaultSettings() {
@@ -25,7 +35,8 @@ export class UIManager {
       autoMultiplayer: true,
       preferredRoomType: ROOM_TYPES.PUBLIC,
       maxPlayers: 4,
-      controlScheme: 'wasd'
+      controlScheme: 'wasd',
+      keyBindings: normalizeKeyBindings()
     };
   }
 
@@ -52,8 +63,7 @@ export class UIManager {
       panel.style.display = 'block';
 
       messages.forEach(msg => {
-        const formattedMessage = this.formatStoryMessage(msg);
-        list.innerHTML = formattedMessage + list.innerHTML;
+        prependHtml(list, this.formatStoryMessage(msg));
       });
 
       // Clear existing timeout and set new one
@@ -68,44 +78,39 @@ export class UIManager {
   }
 
   formatStoryMessage(message) {
-    const speakerStyle = message.speakerColor
-      ? `color: ${message.speakerColor}`
-      : 'color: #8cf';
-
-    const roleText = message.role
-      ? `<span style="opacity: 0.6; font-size: 11px;">[${message.role}]</span>`
-      : '';
-
-    return `
-      <div style="opacity: 0.92; margin: 2px 0;">
-        <span style="opacity: 0.45; ${speakerStyle}">${message.speakerName}&gt;</span>
-        ${roleText}
-        <span style="margin-left: 4px;">${message.text}</span>
-      </div>
-    `;
+    return renderStoryMessage(message);
   }
 
   showAchievement(achievement) {
     const achievementPanel = document.getElementById('achievementPanel');
     if (achievementPanel && achievement) {
-      const achievementHTML = `
-        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,140,0,0.1)); border: 2px solid rgba(255,215,0,0.3); border-radius: 8px; margin-bottom: 8px;">
-          <div style="font-size: 24px;">🏆</div>
-          <div style="flex: 1;">
-            <div style="color: #ffd700; font-weight: bold; font-size: 14px;">${achievement.name}</div>
-            <div style="color: #fff; font-size: 12px; opacity: 0.8;">${achievement.description}</div>
-            <div style="color: #8f8; font-size: 11px;">+${achievement.xp} XP</div>
-          </div>
-        </div>
-      `;
+      const achievementHTML = renderAchievementToast(achievement);
 
-      achievementPanel.innerHTML = achievementHTML + achievementPanel.innerHTML;
+      prependHtml(achievementPanel, achievementHTML);
       achievementPanel.style.display = 'block';
 
       setTimeout(() => {
         achievementPanel.style.display = 'none';
       }, 4000);
     }
+  }
+
+  renderKeyBindingRows() {
+    const summary = keyBindingsSummary(this.settings.keyBindings);
+    return ACTION_ORDER.map((action) => `
+      <button id="binding-${action}" type="button" data-bind-action="${action}" style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(0,255,255,.24);background:rgba(0,255,255,.06);color:#dff;cursor:pointer;font-family:inherit">
+        <span>${ACTION_LABELS[action]}</span>
+        <strong data-binding-label="${action}" style="color:#ff9">${summary[action]}</strong>
+      </button>
+    `).join('');
+  }
+
+  updateKeyBindingButtons(menu) {
+    const summary = keyBindingsSummary(this.settings.keyBindings);
+    ACTION_ORDER.forEach((action) => {
+      const label = menu.querySelector(`[data-binding-label="${action}"]`);
+      if (label) label.textContent = summary[action];
+    });
   }
 
   createSetupMenu() {
@@ -151,7 +156,12 @@ export class UIManager {
             <option value="wasd" ${this.settings.controlScheme === 'wasd' ? 'selected' : ''}>WASD + Space</option>
             <option value="arrows" ${this.settings.controlScheme === 'arrows' ? 'selected' : ''}>Arrow Keys + Space</option>
             <option value="ijkl" ${this.settings.controlScheme === 'ijkl' ? 'selected' : ''}>IJKL + Space</option>
+            <option value="custom" ${this.settings.controlScheme === 'custom' ? 'selected' : ''}>Custom Bindings</option>
           </select>
+          <div id="keyBindingGrid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">
+            ${this.renderKeyBindingRows()}
+          </div>
+          <button id="resetBindings" type="button" style="margin-top:8px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);color:#dff;cursor:pointer;font-family:inherit">Reset Bindings</button>
         </div>
 
         <div class="setup-section" style="margin-bottom: 24px;">
@@ -182,6 +192,7 @@ export class UIManager {
             <option value="public" ${this.settings.preferredRoomType === 'public' ? 'selected' : ''}>Public Room</option>
             <option value="private" ${this.settings.preferredRoomType === 'private' ? 'selected' : ''}>Private Room</option>
             <option value="coop" ${this.settings.preferredRoomType === 'coop' ? 'selected' : ''}>Co-op Mode</option>
+            <option value="vs" ${this.settings.preferredRoomType === 'vs' ? 'selected' : ''}>Versus Mode</option>
             <option value="ranked" ${this.settings.preferredRoomType === 'ranked' ? 'selected' : ''}>Ranked Match</option>
           </select>
         </div>
@@ -210,6 +221,8 @@ export class UIManager {
     const difficultySlider = menu.querySelector('#setupDifficulty');
     const difficultyValue = menu.querySelector('#setupDifficultyValue');
     const playerNameInput = menu.querySelector('#setupPlayerName');
+    const controls = menu.querySelector('#setupControls');
+    const resetBindings = menu.querySelector('#resetBindings');
     const startButton = menu.querySelector('#setupStart');
     const multiplayerButton = menu.querySelector('#setupMultiplayer');
 
@@ -217,6 +230,43 @@ export class UIManager {
     if (difficultySlider && difficultyValue) {
       difficultySlider.addEventListener('input', () => {
         difficultyValue.textContent = difficultySlider.value;
+      });
+    }
+
+    if (controls) {
+      controls.addEventListener('change', () => {
+        this.settings.controlScheme = controls.value;
+        if (controls.value !== 'custom') {
+          this.settings.keyBindings = bindingsForControlScheme(controls.value);
+          this.updateKeyBindingButtons(menu);
+        }
+      });
+    }
+
+    menu.querySelectorAll('[data-bind-action]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const action = button.getAttribute('data-bind-action');
+        const label = button.querySelector('[data-binding-label]');
+        if (label) label.textContent = 'Press a key';
+        const capture = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          this.settings.controlScheme = 'custom';
+          this.settings.keyBindings = rebindKey(this.settings.keyBindings, action, event.code);
+          if (controls) controls.value = 'custom';
+          this.updateKeyBindingButtons(menu);
+          window.removeEventListener('keydown', capture, true);
+        };
+        window.addEventListener('keydown', capture, true);
+      });
+    });
+
+    if (resetBindings) {
+      resetBindings.addEventListener('click', () => {
+        this.settings.controlScheme = 'custom';
+        this.settings.keyBindings = normalizeKeyBindings();
+        if (controls) controls.value = 'custom';
+        this.updateKeyBindingButtons(menu);
       });
     }
 
@@ -267,6 +317,9 @@ export class UIManager {
     this.settings.playerName = playerName?.value || 'Pilot';
     this.settings.difficulty = parseInt(difficulty?.value) || 2;
     this.settings.controlScheme = controls?.value || 'wasd';
+    this.settings.keyBindings = this.settings.controlScheme === 'custom'
+      ? normalizeKeyBindings(this.settings.keyBindings)
+      : bindingsForControlScheme(this.settings.controlScheme);
     this.settings.autoMultiplayer = autoMultiplayer?.checked || false;
     this.settings.enableMusic = enableMusic?.checked !== false;
     this.settings.enableSound = enableSound?.checked !== false;

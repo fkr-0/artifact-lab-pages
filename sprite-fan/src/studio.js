@@ -66,6 +66,12 @@ const S = {
   spacePanKey: false,
   frameDragIndex: null,
   alphaCleanupBaseImageData: null,
+
+  // Batch queue
+  batchQueue: [],        // [{name, file, blob?, frameW, frameH, anchor, status}]
+  batchIndex: -1,
+  batchManifest: null,   // parsed sprites.json manifest
+  batchAutoDetect: true,
 };
 
 // ════════════════════════════════════════════
@@ -1603,8 +1609,229 @@ $('manifest-loop').addEventListener('input',()=>{$('loop-val').textContent=+$('m
 $('spec-prompt').addEventListener('input',()=>{S.specGuide.prompt=$('spec-prompt').value;renderSpecGuide(S.specGuide)});
 
 // ════════════════════════════════════════════
-// DUAL BG EXTRACT
+// BATCH QUEUE
 // ════════════════════════════════════════════
+
+// Known dimension contracts from reqs/animation.yml
+const DIMENSION_CONTRACTS = {
+  player:    { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  item:      { fw: 32, fh: 32, anchor: {x:16, y:16} },
+  vfx:       { fw: 32, fh: 32, anchor: {x:16, y:16} },
+  tile:      { fw: 32, fh: 32, anchor: {x:16, y:16} },
+  enemy:     { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  boss:      { fw: 96, fh: 96, anchor: {x:48, y:88} },
+  companion: { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  npc:       { fw: 48, fh: 48, anchor: {x:24, y:44} },
+  parallax:  { fw: 320, fh: 180, anchor: {x:160, y:90} },
+};
+
+// Auto-detect frame dimensions from image size and ID patterns
+function autoDetectDimensions(name, imgW, imgH) {
+  const lower = name.toLowerCase();
+  // Match known contracts by ID pattern
+  if (lower.includes('boss'))     return DIMENSION_CONTRACTS.boss;
+  if (lower.includes('enemy'))    return DIMENSION_CONTRACTS.enemy;
+  if (lower.includes('parallax')) return DIMENSION_CONTRACTS.parallax;
+  if (lower.includes('tile'))     return DIMENSION_CONTRACTS.tile;
+  if (lower.includes('item'))     return DIMENSION_CONTRACTS.item;
+  if (lower.includes('vfx'))      return DIMENSION_CONTRACTS.vfx;
+  if (lower.includes('companion') || lower.includes('character') || lower.includes('npc'))
+    return DIMENSION_CONTRACTS.companion;
+  // Fallback: assume 4x4 grid, pick dimensions that divide evenly
+  for (const fw of [48, 32, 96, 64, 24]) {
+    if (imgW % fw === 0) {
+      const cols = imgW / fw;
+      const rows = imgH / fw; // assume square frames
+      if (rows >= 1 && imgH % fw === 0) return { fw, fh: fw, anchor: {x: Math.floor(fw/2), y: fw - 4} };
+    }
+  }
+  // Last resort: try to fit 4 columns
+  const fw = Math.floor(imgW / 4);
+  const fh = Math.floor(imgH / Math.ceil((imgW / fw) * (imgH / imgW)));
+  return { fw: Math.max(1, fw), fh: Math.max(1, fh || fw), anchor: {x: Math.floor(fw/2), y: fh - 4} };
+}
+
+function renderBatchQueue() {
+  const strip = $('batch-queue-strip');
+  const info = $('batch-info');
+  const nav = $('batch-nav');
+  if (!strip) return;
+
+  strip.textContent = '';
+  if (!S.batchQueue.length) {
+    if (info) info.textContent = 'No sprites queued';
+    if (nav) nav.style.display = 'none';
+    return;
+  }
+
+  if (nav) nav.style.display = S.batchQueue.length > 1 ? '' : 'none';
+
+  S.batchQueue.forEach((item, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'batch-chip' + (i === S.batchIndex ? ' active' : '') + (item.status === 'done' ? ' done' : item.status === 'error' ? ' error' : '');
+    chip.title = item.name;
+    chip.textContent = item.name.replace(/\.[^.]+$/, '').slice(0, 16);
+    chip.addEventListener('click', () => loadBatchItem(i));
+    strip.appendChild(chip);
+  });
+
+  if (info) {
+    const current = S.batchIndex >= 0 ? S.batchQueue[S.batchIndex] : null;
+    const done = S.batchQueue.filter(i => i.status === 'done').length;
+    info.textContent = `${done}/${S.batchQueue.length} done` + (current ? ` · ${current.name.slice(0, 24)}` : '');
+  }
+}
+
+function addFilesToBatch(fileList) {
+  const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if (!files.length) { toast('No image files', 'warning'); return; }
+  
+  files.forEach(f => {
+    const detected = autoDetectDimensions(f.name, 0, 0);
+    S.batchQueue.push({
+      name: f.name,
+      file: f,
+      blob: f,
+      frameW: detected.fw,
+      frameH: detected.fh,
+      anchor: { ...detected.anchor },
+      status: 'pending',
+      dimsLocked: false,
+    });
+  });
+
+  renderBatchQueue();
+  toast(`Added ${files.length} sprite(s) to queue`, 'success');
+}
+
+function loadBatchItem(index) {
+  if (index < 0 || index >= S.batchQueue.length) return;
+  const item = S.batchQueue[index];
+  S.batchIndex = index;
+
+  // Apply saved dimensions
+  $('frame-w').value = item.frameW;
+  $('frame-w-num').value = item.frameW;
+  $('fw-val').textContent = item.frameW;
+  $('frame-h').value = item.frameH;
+  $('frame-h-num').value = item.frameH;
+  $('fh-val').textContent = item.frameH;
+  S.anchor = { ...item.anchor };
+  $('anchor-x').value = item.anchor.x;
+  $('anchor-y').value = item.anchor.y;
+  $('anchor-x-num').value = item.anchor.x;
+  $('anchor-y-num').value = item.anchor.y;
+  $('ancx-val').textContent = item.anchor.x;
+  $('ancy-val').textContent = item.anchor.y;
+
+  // Update manifest name
+  const baseName = item.name.replace(/\.[^.]+$/, '');
+  if ($('manifest-name')) $('manifest-name').value = baseName;
+
+  // Load image
+  loadObjectUrlImage(item.blob, loadImageToCanvas);
+
+  renderBatchQueue();
+}
+
+function markBatchDone(success) {
+  if (S.batchIndex < 0 || S.batchIndex >= S.batchQueue.length) return;
+  S.batchQueue[S.batchIndex].status = success ? 'done' : 'error';
+  // Save current dimensions back to queue item
+  const item = S.batchQueue[S.batchIndex];
+  item.frameW = +$('frame-w').value;
+  item.frameH = +$('frame-h').value;
+  item.anchor = { ...S.anchor };
+  renderBatchQueue();
+}
+
+function nextBatchItem() {
+  if (S.batchIndex < S.batchQueue.length - 1) {
+    markBatchDone(true);
+    loadBatchItem(S.batchIndex + 1);
+  } else {
+    markBatchDone(true);
+    toast('Batch queue complete!', 'success');
+  }
+}
+
+function prevBatchItem() {
+  if (S.batchIndex > 0) loadBatchItem(S.batchIndex - 1);
+}
+
+// Load manifest (sprites.json) and populate batch queue from it
+function loadManifestBatch(manifestJson) {
+  try {
+    const manifest = typeof manifestJson === 'string' ? JSON.parse(manifestJson) : manifestJson;
+    const sheets = manifest.spriteSheets || manifest.sheets || [];
+    if (!sheets.length) { toast('No sheets in manifest', 'warning'); return; }
+
+    S.batchManifest = manifest;
+    S.batchQueue = [];
+
+    sheets.forEach(sheet => {
+      const fw = sheet.frameSize?.[0] || 48;
+      const fh = sheet.frameSize?.[1] || 48;
+      const ax = sheet.animations ? Object.values(sheet.animations)[0]?.anchor?.[0] : Math.floor(fw / 2);
+      const ay = sheet.animations ? Object.values(sheet.animations)[0]?.anchor?.[1] : fh - 4;
+
+      S.batchQueue.push({
+        name: sheet.id + '.png',
+        file: null,
+        blob: null,
+        frameW: fw,
+        frameH: fh,
+        anchor: { x: ax ?? Math.floor(fw / 2), y: ay ?? fh - 4 },
+        status: 'pending',
+        dimsLocked: true,
+        manifestEntry: sheet,
+      });
+    });
+
+    renderBatchQueue();
+    toast(`Loaded ${S.batchQueue.length} sheets from manifest`, 'success');
+  } catch (e) {
+    toast('Invalid manifest: ' + e.message, 'error');
+  }
+}
+
+// Wire up batch queue UI
+$('btn-batch-add')?.addEventListener('click', () => $('batch-file-input')?.click());
+$('batch-file-input')?.addEventListener('change', () => {
+  addFilesToBatch($('batch-file-input').files);
+  $('batch-file-input').value = '';
+});
+$('btn-batch-next')?.addEventListener('click', nextBatchItem);
+$('btn-batch-prev')?.addEventListener('click', prevBatchItem);
+$('btn-batch-done')?.addEventListener('click', () => markBatchDone(true));
+$('btn-batch-skip')?.addEventListener('click', () => {
+  markBatchDone(false);
+  nextBatchItem();
+});
+$('btn-batch-load-manifest')?.addEventListener('click', () => $('batch-manifest-input')?.click());
+$('batch-manifest-input')?.addEventListener('change', () => {
+  const f = $('batch-manifest-input').files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => loadManifestBatch(r.result);
+  r.readAsText(f);
+  $('batch-manifest-input').value = '';
+});
+$('btn-batch-clear')?.addEventListener('click', () => {
+  S.batchQueue = [];
+  S.batchIndex = -1;
+  renderBatchQueue();
+  toast('Batch queue cleared', 'info');
+});
+$('chk-batch-auto-detect')?.addEventListener('change', (e) => {
+  S.batchAutoDetect = e.target.checked;
+});
+
+// Override export to mark batch done
+const _origExportPng = $('btn-export-png')?.onclick;
+$('btn-export-png')?.addEventListener('click', () => {
+  if (S.batchIndex >= 0) markBatchDone(true);
+});
 function extractDualAlpha(whiteImg,blackImg,athresh,despill,hardAlpha){
   const w=whiteImg.width,h=whiteImg.height;
   const wC=document.createElement('canvas');wC.width=w;wC.height=h;const wCtx=wC.getContext('2d',{willReadFrequently:true});wCtx.clearRect(0,0,w,h);wCtx.drawImage(whiteImg,0,0);const wD=wCtx.getImageData(0,0,w,h);

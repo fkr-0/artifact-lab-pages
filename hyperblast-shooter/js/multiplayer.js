@@ -12,6 +12,7 @@ export class MultiplayerManager {
     this.isHost = false;
     this.roomSettings = {
       type: ROOM_TYPES.PUBLIC,
+      matchMode: ROOM_TYPES.COOP,
       maxPlayers: 4,
       friendlyFire: false,
       allowSpectators: true,
@@ -332,7 +333,10 @@ export class MultiplayerManager {
       currentRoom: this.currentRoom,
       isHost: this.isHost,
       memberCount: this.roomMembers.size,
-      maxPlayers: this.roomSettings.maxPlayers
+      maxPlayers: this.roomSettings.maxPlayers,
+      roomType: this.roomSettings.type,
+      matchMode: this.roomSettings.matchMode || this.roomSettings.type || ROOM_TYPES.COOP,
+      friendlyFire: Boolean(this.roomSettings.friendlyFire)
     };
   }
 

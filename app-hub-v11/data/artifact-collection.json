@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-05-27T07:50:28.886Z",
+  "generatedAt": "2026-06-06T06:49:33.118Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -27,6 +27,7 @@
       "peernetjs",
       "lib",
       "sprite-fan",
+      "meme-lab",
       "reveal-peer-plugin"
     ]
   },
@@ -42,26 +43,30 @@
     }
   },
   "summary": {
-    "total": 44,
+    "total": 45,
     "byKind": {
-      "html-path": 40,
+      "html-path": 41,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
+      "tool": 20,
+      "graphics": 12,
+      "meme": 1,
+      "generator": 7,
+      "image": 2,
+      "template": 3,
+      "v11": 20,
       "plugin": 1,
       "presentation": 1,
       "multiplayer": 4,
       "peernet": 7,
       "game": 7,
       "chat": 2,
-      "v11": 19,
-      "tool": 19,
       "education": 1,
       "git": 1,
       "developer-tools": 1,
       "built": 3,
-      "graphics": 11,
       "sprite": 4,
       "postprocessing": 1,
       "atlas": 1,
@@ -95,7 +100,6 @@
       "prompts": 2,
       "creative": 3,
       "writing": 2,
-      "generator": 6,
       "qr-code": 2,
       "export": 2,
       "server": 1,
@@ -110,7 +114,6 @@
       "legacy": 3,
       "compatibility": 2,
       "tooling": 2,
-      "image": 1,
       "gif": 2,
       "preprocessor": 1,
       "transparency": 1,
@@ -139,7 +142,6 @@
       "node-based": 1,
       "visual": 1,
       "programming": 1,
-      "template": 2,
       "procedural": 1,
       "automation": 1,
       "workflow": 1,
@@ -149,6 +151,40 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "meme",
+        "generator",
+        "image",
+        "template",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "meme-lab",
+      "title": "Meme Lab",
+      "href": "../meme-lab/meme-lab.html",
+      "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
+      "modifiedAt": "2026-06-01T07:26:00.000Z",
+      "changedAt": "2026-06-01T07:26:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
     {
       "kind": "html-path",
       "tags": [
