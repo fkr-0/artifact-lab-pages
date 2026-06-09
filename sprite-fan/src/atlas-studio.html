@@ -80,6 +80,12 @@
           </div>
           <div id="batch-info" style="font-size:10px;color:var(--text-muted);margin:4px 0">No sprites queued</div>
           <div id="batch-queue-strip" class="batch-strip"></div>
+          <div id="batch-status" class="batch-status" style="display:none">
+            <div class="batch-status-row"><span class="batch-label">File:</span><span id="batch-file-name">-</span></div>
+            <div class="batch-status-row"><span class="batch-label">Image:</span><span id="batch-img-size">-</span></div>
+            <div class="batch-status-row"><span class="batch-label">Frame:</span><span id="batch-frame-size">-</span></div>
+            <div class="batch-status-row"><span class="batch-label">Grid:</span><span id="batch-grid-info">-</span></div>
+          </div>
           <div id="batch-nav" class="btn-row" style="display:none;margin-top:6px">
             <button class="btn btn-ghost btn-sm" id="btn-batch-prev">&larr; Prev</button>
             <button class="btn btn-ghost btn-sm" id="btn-batch-done">Mark Done</button>
@@ -87,7 +93,11 @@
             <button class="btn btn-primary btn-sm" id="btn-batch-next">Next &rarr;</button>
           </div>
           <label class="checkbox-row" style="margin-top:4px"><input type="checkbox" id="chk-batch-auto-detect" checked/> Auto-detect dimensions</label>
-          <div class="layout-help">Load multiple sprites to iterate through them. Dimensions are auto-detected from the manifest or image name. Adjust frame size in Grid Slicing, then click Next to proceed.</div>
+          <div class="btn-row" style="margin-top:4px">
+            <button class="btn btn-ghost btn-sm" id="btn-batch-save-dims" title="Save current frame size for this pattern">Save Dims</button>
+            <button class="btn btn-ghost btn-sm" id="btn-batch-apply-dims" title="Apply saved dimensions to all matching items">Apply Saved</button>
+          </div>
+          <div class="layout-help">Load multiple sprites to iterate through them. Dimensions are auto-detected from the manifest or image name. Adjust frame size in Grid Slicing, then click Next to proceed. Keyboard: N=next, P=prev, D=done, S=skip.</div>
         </div>
       </div>
 

@@ -260,3 +260,6 @@ textarea.config-editor{width:100%;min-height:220px;font-family:var(--font-mono);
 .batch-chip.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
 .batch-chip.done{border-color:var(--success);background:var(--success-dim);color:var(--success)}
 .batch-chip.error{border-color:var(--danger);background:var(--danger-dim);color:var(--danger)}
+.batch-status{margin-top:6px;padding:6px 8px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:10px;font-family:var(--font-mono)}
+.batch-status-row{display:flex;justify-content:space-between;padding:1px 0}
+.batch-label{color:var(--text-muted)}

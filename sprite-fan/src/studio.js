@@ -882,7 +882,14 @@ $('btn-reset-layout').addEventListener('click',()=>resetLayout('all'));
 // Undo/redo
 $('btn-undo').addEventListener('click',undo);
 $('btn-redo').addEventListener('click',redo);
-document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if(e.code==='Space'){S.spacePanKey=true;e.preventDefault();setActiveTool(S.isPanning?'pan':'space-pan-ready');return}if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();redo()}if(e.key==='o'){$('btn-onion').click()}if(e.key==='f'){e.preventDefault();fitToView()}if(e.key==='ArrowLeft'&&S.frames.length){e.preventDefault();$('btn-tl-prev').click()}if(e.key==='ArrowRight'&&S.frames.length){e.preventDefault();$('btn-tl-next').click()}if(e.key.toLowerCase()==='i'&&S.frames.length){e.preventDefault();gotoIssue(e.shiftKey?-1:1)}if(e.key==='m'&&S.frames.length){e.preventDefault();togglePreviewFrame(S.selectedFrame)}if(e.key==='Escape'&&S.previewFrames.length){e.preventDefault();clearPreviewFrames()}});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if(e.code==='Space'){S.spacePanKey=true;e.preventDefault();setActiveTool(S.isPanning?'pan':'space-pan-ready');return}if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();redo()}if(e.key==='o'){$('btn-onion').click()}if(e.key==='f'){e.preventDefault();fitToView()}if(e.key==='ArrowLeft'&&S.frames.length){e.preventDefault();$('btn-tl-prev').click()}if(e.key==='ArrowRight'&&S.frames.length){e.preventDefault();$('btn-tl-next').click()}if(e.key.toLowerCase()==='i'&&S.frames.length){e.preventDefault();gotoIssue(e.shiftKey?-1:1)}if(e.key==='m'&&S.frames.length){e.preventDefault();togglePreviewFrame(S.selectedFrame)}if(e.key==='Escape'&&S.previewFrames.length){e.preventDefault();clearPreviewFrames()}
+// Batch queue shortcuts
+if(S.batchQueue.length){
+  if(e.key==='n'&&!e.ctrlKey&&!e.metaKey){e.preventDefault();nextBatchItem()}
+  if(e.key==='p'&&!e.ctrlKey&&!e.metaKey){e.preventDefault();prevBatchItem()}
+  if(e.key==='d'&&!e.ctrlKey&&!e.metaKey){e.preventDefault();markBatchDone(true);toast('Marked done','success')}
+  if(e.key==='s'&&!e.ctrlKey&&!e.metaKey){e.preventDefault();markBatchDone(false);nextBatchItem()}
+}});
 window.addEventListener('blur',()=>{S.spacePanKey=false;if(!S.isPanning)setActiveTool('idle')});
 window.addEventListener('keyup',e=>{if(e.code==='Space'){S.spacePanKey=false;if(!S.isPanning)setActiveTool('idle');e.preventDefault()}});
 
@@ -1655,12 +1662,14 @@ function renderBatchQueue() {
   const strip = $('batch-queue-strip');
   const info = $('batch-info');
   const nav = $('batch-nav');
+  const status = $('batch-status');
   if (!strip) return;
 
   strip.textContent = '';
   if (!S.batchQueue.length) {
     if (info) info.textContent = 'No sprites queued';
     if (nav) nav.style.display = 'none';
+    if (status) status.style.display = 'none';
     return;
   }
 
@@ -1669,7 +1678,7 @@ function renderBatchQueue() {
   S.batchQueue.forEach((item, i) => {
     const chip = document.createElement('div');
     chip.className = 'batch-chip' + (i === S.batchIndex ? ' active' : '') + (item.status === 'done' ? ' done' : item.status === 'error' ? ' error' : '');
-    chip.title = item.name;
+    chip.title = item.name + ' (' + item.frameW + 'x' + item.frameH + ')';
     chip.textContent = item.name.replace(/\.[^.]+$/, '').slice(0, 16);
     chip.addEventListener('click', () => loadBatchItem(i));
     strip.appendChild(chip);
@@ -1679,6 +1688,27 @@ function renderBatchQueue() {
     const current = S.batchIndex >= 0 ? S.batchQueue[S.batchIndex] : null;
     const done = S.batchQueue.filter(i => i.status === 'done').length;
     info.textContent = `${done}/${S.batchQueue.length} done` + (current ? ` · ${current.name.slice(0, 24)}` : '');
+  }
+
+  // Update status bar
+  if (status) {
+    const item = S.batchIndex >= 0 ? S.batchQueue[S.batchIndex] : null;
+    if (item) {
+      status.style.display = '';
+      $('batch-file-name').textContent = item.name;
+      $('batch-img-size').textContent = S.sourceImg ? S.sourceImg.width + 'x' + S.sourceImg.height : 'loading...';
+      $('batch-frame-size').textContent = item.frameW + 'x' + item.frameH;
+      const source = S.sheetImageData || S.currentImageData;
+      if (source) {
+        const cols = Math.floor((source.width - (+$('grid-ox').value || 0)) / item.frameW);
+        const rows = Math.floor((source.height - (+$('grid-oy').value || 0)) / item.frameH);
+        $('batch-grid-info').textContent = cols + 'x' + rows + ' = ' + (cols * rows) + ' frames';
+      } else {
+        $('batch-grid-info').textContent = '-';
+      }
+    } else {
+      status.style.display = 'none';
+    }
   }
 }
 
@@ -1729,7 +1759,11 @@ function loadBatchItem(index) {
   if ($('manifest-name')) $('manifest-name').value = baseName;
 
   // Load image
-  loadObjectUrlImage(item.blob, loadImageToCanvas);
+  loadObjectUrlImage(item.blob, (img) => {
+    loadImageToCanvas(img);
+    // Update batch status after image loads
+    renderBatchQueue();
+  });
 
   renderBatchQueue();
 }
@@ -1825,6 +1859,65 @@ $('btn-batch-clear')?.addEventListener('click', () => {
 });
 $('chk-batch-auto-detect')?.addEventListener('change', (e) => {
   S.batchAutoDetect = e.target.checked;
+});
+
+// Save/apply dimension patterns
+const DIM_PATTERNS_KEY = 'sprite-fan-dim-patterns';
+function loadDimPatterns() {
+  try { return JSON.parse(localStorage.getItem(DIM_PATTERNS_KEY) || '{}'); } catch { return {}; }
+}
+function saveDimPatterns(patterns) {
+  try { localStorage.setItem(DIM_PATTERNS_KEY, JSON.stringify(patterns)); } catch {}
+}
+$('btn-batch-save-dims')?.addEventListener('click', () => {
+  if (S.batchIndex < 0) { toast('Select a batch item first', 'warning'); return; }
+  const item = S.batchQueue[S.batchIndex];
+  const name = item.name.toLowerCase();
+  const patterns = loadDimPatterns();
+  // Extract pattern key (e.g., "boss", "enemy", "character")
+  let key = 'generic';
+  if (name.includes('boss')) key = 'boss';
+  else if (name.includes('enemy')) key = 'enemy';
+  else if (name.includes('character') || name.includes('companion') || name.includes('npc')) key = 'character';
+  else if (name.includes('parallax')) key = 'parallax';
+  else if (name.includes('tile')) key = 'tile';
+  else if (name.includes('item')) key = 'item';
+  else if (name.includes('vfx')) key = 'vfx';
+  patterns[key] = {
+    fw: +$('frame-w').value,
+    fh: +$('frame-h').value,
+    anchor: { ...S.anchor },
+    ox: +$('grid-ox').value,
+    oy: +$('grid-oy').value,
+  };
+  saveDimPatterns(patterns);
+  toast(`Saved dimensions for "${key}" pattern`, 'success');
+});
+$('btn-batch-apply-dims')?.addEventListener('click', () => {
+  if (!S.batchQueue.length) { toast('Batch queue is empty', 'warning'); return; }
+  const patterns = loadDimPatterns();
+  let applied = 0;
+  S.batchQueue.forEach(item => {
+    if (item.status === 'done') return;
+    const name = item.name.toLowerCase();
+    let key = 'generic';
+    if (name.includes('boss')) key = 'boss';
+    else if (name.includes('enemy')) key = 'enemy';
+    else if (name.includes('character') || name.includes('companion') || name.includes('npc')) key = 'character';
+    else if (name.includes('parallax')) key = 'parallax';
+    else if (name.includes('tile')) key = 'tile';
+    else if (name.includes('item')) key = 'item';
+    else if (name.includes('vfx')) key = 'vfx';
+    if (patterns[key]) {
+      item.frameW = patterns[key].fw;
+      item.frameH = patterns[key].fh;
+      item.anchor = { ...patterns[key].anchor };
+      item.dimsLocked = true;
+      applied++;
+    }
+  });
+  renderBatchQueue();
+  toast(`Applied dimensions to ${applied} item(s)`, 'success');
 });
 
 // Override export to mark batch done
