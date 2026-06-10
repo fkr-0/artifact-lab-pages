@@ -1075,7 +1075,9 @@ function loadImageToCanvas(img){
   mainCanvas.width=img.width;mainCanvas.height=img.height;
   ctx.putImageData(S.currentImageData,0,0);updateOverlaySize();
   S.detectedGroups=[];S.frames=[];S.selectedFrame=-1;S.cellOverrides={};S.previewFrames=[];S.previewCursor=0;S.undoStack=[];S.redoStack=[];S.viewStates={source:null,frame:null};setViewMode('source');updateUndoUI();refreshWorkflowAvailability();
-  $('drop-zone').classList.add('hidden');S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();updateFrameStrip();updateTimeline();drawOverlay();
+  $('drop-zone').classList.add('hidden');S.reviewFitReady=false;
+  // Defer fitToView to next frame so container dimensions are settled
+  requestAnimationFrame(()=>{fitToView();updatePreview();updateInfoSize();updateFrameStrip();updateTimeline();drawOverlay()});
   setStatus('Loaded '+img.width+'x'+img.height);toast('Image loaded','success');refreshQuickGuide();
 }
 function renderPreviewEmpty(label='PREVIEW'){
@@ -1146,7 +1148,8 @@ $('btn-dual-extract').addEventListener('click',()=>{
   S.sourceImg=S.whiteImg;srcCanvas.width=result.width;srcCanvas.height=result.height;srcCtx.putImageData(result,0,0);
   S.originalImageData=cloneImageData(result);S.sheetImageData=cloneImageData(result);S.currentImageData=cloneImageData(result);S.alphaCleanupBaseImageData=cloneImageData(result);
   mainCanvas.width=result.width;mainCanvas.height=result.height;ctx.putImageData(S.currentImageData,0,0);
-  updateOverlaySize();$('drop-zone').classList.add('hidden');S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();drawOverlay();
+  updateOverlaySize();$('drop-zone').classList.add('hidden');S.reviewFitReady=false;
+  requestAnimationFrame(()=>{fitToView();updatePreview();updateInfoSize();drawOverlay()});
   toast('Dual BG alpha extracted','success');
 });
 
@@ -2069,7 +2072,8 @@ $('btn-repack').addEventListener('click',()=>{
   const outC=repackSheet();if(!outC)return;
   const imgData=outC.getContext('2d').getImageData(0,0,outC.width,outC.height);
   S.currentImageData=imgData;mainCanvas.width=outC.width;mainCanvas.height=outC.height;
-  ctx.putImageData(imgData,0,0);updateOverlaySize();S.reviewFitReady=false;fitToView();updatePreview();updateInfoSize();drawOverlay();
+  ctx.putImageData(imgData,0,0);updateOverlaySize();S.reviewFitReady=false;
+  requestAnimationFrame(()=>{fitToView();updatePreview();updateInfoSize();drawOverlay()});
   toast('Sheet repacked','success');
 });
 

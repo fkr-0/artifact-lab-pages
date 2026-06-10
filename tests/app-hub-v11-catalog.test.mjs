@@ -126,6 +126,15 @@ assert.deepEqual(
   'Solitaire should expose v10-style launcher actions'
 );
 
+const badgerSprawlRunner = shooterCatalog.items.find((item) => item.id === 'badger-sprawl-runner');
+assert.ok(badgerSprawlRunner, 'expected Badger Sprawl Runner artifact in v11 catalog');
+assert.equal(badgerSprawlRunner.href, '../badger-sprawl-runner/dist/index.html');
+assert.equal(badgerSprawlRunner.launch.defaultAction, 'newWindow');
+assert.deepEqual(
+  badgerSprawlRunner.launch.actions.map((action) => action.id),
+  ['play-new-window', 'fullscreen'],
+  'Badger Sprawl Runner should expose a safe built-artifact launch path'
+);
 
 assert.ok(
   shooterCatalog.items.every((item) => item.launch?.defaultAction || item.kind === 'external-link'),

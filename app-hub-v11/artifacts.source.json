@@ -32,6 +32,198 @@
   },
   "items": [
     {
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
+      "kind": "html-path",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-09T10:22:18.000Z",
+      "changedAt": "2026-06-09T10:22:18.000Z"
+    },
+    {
+      "id": "v11-peer-daw",
+      "title": "V11 Peer DAW",
+      "kind": "html-path",
+      "href": "../v11-peer-daw/index.html",
+      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
+      "tags": [
+        "audio",
+        "daw",
+        "peernet",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "v11-peer-daw",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "v11-peer-daw/dist",
+        "targetPath": "v11-peer-daw"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-09T10:11:44.000Z",
+      "changedAt": "2026-06-09T10:11:44.000Z"
+    },
+    {
+      "id": "badger-sprawl-runner",
+      "title": "Badger Sprawl Runner",
+      "kind": "html-path",
+      "href": "../badger-sprawl-runner/dist/index.html",
+      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
+      "tags": [
+        "game",
+        "runner",
+        "platformer",
+        "sprite",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "badger-sprawl-runner",
+          "command": "pnpm run build",
+          "dist": "apps/runner/dist"
+        },
+        "includePath": "badger-sprawl-runner/apps/runner/dist",
+        "targetPath": "badger-sprawl-runner/dist"
+      },
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow",
+        "actions": [
+          {
+            "id": "play-new-window",
+            "label": "Open game",
+            "mode": "newWindow"
+          },
+          {
+            "id": "fullscreen",
+            "label": "Fullscreen",
+            "mode": "fullscreen"
+          }
+        ]
+      },
+      "modifiedAt": "2026-06-09T09:59:14.000Z",
+      "changedAt": "2026-06-09T09:59:14.000Z"
+    },
+    {
+      "id": "hyperblast-shooter",
+      "title": "Hyperblast Shooter",
+      "kind": "html-path",
+      "href": "../hyperblast-shooter/index.html",
+      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
+      "tags": [
+        "game",
+        "shooter",
+        "space",
+        "multiplayer",
+        "cyberpunk"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-09T09:59:14.000Z",
+      "changedAt": "2026-06-09T09:59:14.000Z"
+    },
+    {
+      "id": "meme-lab",
+      "title": "Meme Lab",
+      "kind": "html-path",
+      "href": "../meme-lab/meme-lab.html",
+      "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
+      "tags": [
+        "tool",
+        "graphics",
+        "meme",
+        "generator",
+        "image",
+        "template",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-01T07:56:21.000Z",
+      "changedAt": "2026-06-01T07:56:21.000Z"
+    },
+    {
       "id": "reveal-peer-plugin",
       "title": "RevealPeerJS",
       "kind": "html-path",
@@ -99,36 +291,6 @@
       "changedAt": "2026-05-26T21:18:51.000Z"
     },
     {
-      "id": "sprite-fan-atlas-studio",
-      "title": "Sprite Fan Atlas Studio",
-      "kind": "html-path",
-      "href": "../sprite-fan/atlas-studio.html",
-      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite",
-        "postprocessing",
-        "atlas",
-        "game-dev"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-26T18:52:27.000Z",
-      "changedAt": "2026-05-26T18:52:27.000Z"
-    },
-    {
       "id": "ethic-brawl",
       "title": "Ethic Brawl",
       "kind": "html-path",
@@ -163,89 +325,6 @@
       },
       "modifiedAt": "2026-05-25T20:48:56.000Z",
       "changedAt": "2026-05-25T20:48:56.000Z"
-    },
-    {
-      "id": "v11-peer-daw",
-      "title": "V11 Peer DAW",
-      "kind": "html-path",
-      "href": "../v11-peer-daw/index.html",
-      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
-      "tags": [
-        "audio",
-        "daw",
-        "peernet",
-        "built",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "build": {
-          "cwd": "v11-peer-daw",
-          "command": "npm run build",
-          "dist": "dist"
-        },
-        "includePath": "v11-peer-daw/dist",
-        "targetPath": "v11-peer-daw"
-      },
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-25T20:16:06.000Z",
-      "changedAt": "2026-05-25T20:16:06.000Z"
-    },
-    {
-      "id": "hyperblast-shooter",
-      "title": "Hyperblast Shooter",
-      "kind": "html-path",
-      "href": "../hyperblast-shooter/index.html",
-      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
-      "tags": [
-        "game",
-        "shooter",
-        "space",
-        "multiplayer",
-        "cyberpunk"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "floating-panel",
-            "title": "Floating Panel",
-            "mode": "floating"
-          },
-          {
-            "id": "multiplayer",
-            "title": "Multiplayer",
-            "mode": "floating",
-            "multiplayer": true
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-21T06:01:20.000Z",
-      "changedAt": "2026-05-21T06:01:20.000Z"
     },
     {
       "id": "brickbreaker",
@@ -1300,34 +1379,6 @@
       "changedAt": "2026-05-04T22:51:57.000Z"
     },
     {
-      "id": "root-multitext-viewer",
-      "title": "Root Multitext Viewer",
-      "kind": "html-path",
-      "href": "../index_multitext.html",
-      "description": "Repository-root multitext viewer utility exposed in v11 for legacy text/document browsing workflows.",
-      "tags": [
-        "editor",
-        "viewer",
-        "text",
-        "legacy"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-04T22:51:57.000Z",
-      "changedAt": "2026-05-04T22:51:57.000Z"
-    },
-    {
       "id": "spc-template-engine",
       "title": "Template Engine",
       "kind": "html-path",
@@ -1384,37 +1435,6 @@
       },
       "modifiedAt": "2026-05-04T22:51:57.000Z",
       "changedAt": "2026-05-04T22:51:57.000Z"
-    },
-    {
-      "id": "meme-lab",
-      "title": "Meme Lab",
-      "kind": "html-path",
-      "href": "../meme-lab/meme-lab.html",
-      "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
-      "tags": [
-        "tool",
-        "graphics",
-        "meme",
-        "generator",
-        "image",
-        "template",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-01T07:26:00.000Z",
-      "changedAt": "2026-06-01T07:26:00.000Z"
     },
     {
       "id": "external-openai-docs",

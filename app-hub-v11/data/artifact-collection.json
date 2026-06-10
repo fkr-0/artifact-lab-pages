@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-06-06T06:49:33.118Z",
+  "generatedAt": "2026-06-09T13:12:49.886Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -52,31 +52,33 @@
     "byTag": {
       "tool": 20,
       "graphics": 12,
+      "sprite": 5,
+      "postprocessing": 1,
+      "atlas": 1,
+      "game-dev": 2,
+      "audio": 2,
+      "daw": 1,
+      "peernet": 7,
+      "built": 4,
+      "v11": 20,
+      "game": 8,
+      "runner": 1,
+      "platformer": 1,
+      "shooter": 1,
+      "space": 1,
+      "multiplayer": 4,
+      "cyberpunk": 3,
       "meme": 1,
       "generator": 7,
       "image": 2,
       "template": 3,
-      "v11": 20,
       "plugin": 1,
       "presentation": 1,
-      "multiplayer": 4,
-      "peernet": 7,
-      "game": 7,
       "chat": 2,
       "education": 1,
       "git": 1,
       "developer-tools": 1,
-      "built": 3,
-      "sprite": 4,
-      "postprocessing": 1,
-      "atlas": 1,
-      "game-dev": 2,
       "brawler": 1,
-      "cyberpunk": 3,
-      "audio": 2,
-      "daw": 1,
-      "shooter": 1,
-      "space": 1,
       "arcade": 1,
       "p2p": 3,
       "collaborative": 5,
@@ -86,7 +88,7 @@
       "catalog": 1,
       "docs": 4,
       "markdown": 4,
-      "viewer": 5,
+      "viewer": 4,
       "font": 1,
       "palette": 1,
       "theme": 1,
@@ -94,7 +96,7 @@
       "design": 3,
       "pdf": 1,
       "converter": 1,
-      "editor": 11,
+      "editor": 10,
       "utility": 4,
       "ai": 2,
       "prompts": 2,
@@ -111,7 +113,7 @@
       "cards": 1,
       "hub": 4,
       "v9": 3,
-      "legacy": 3,
+      "legacy": 2,
       "compatibility": 2,
       "tooling": 2,
       "gif": 2,
@@ -126,7 +128,7 @@
       "floating": 1,
       "notepad": 3,
       "local-first": 3,
-      "text": 2,
+      "text": 1,
       "notes": 1,
       "v4": 1,
       "console": 1,
@@ -156,6 +158,175 @@
       "tags": [
         "tool",
         "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "modifiedAt": "2026-06-09T10:22:18.000Z",
+      "changedAt": "2026-06-09T10:22:18.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "audio",
+        "daw",
+        "peernet",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v11-peer-daw",
+      "title": "V11 Peer DAW",
+      "href": "../v11-peer-daw/index.html",
+      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
+      "deploy": {
+        "build": {
+          "cwd": "v11-peer-daw",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "v11-peer-daw/dist",
+        "targetPath": "v11-peer-daw",
+        "include": true
+      },
+      "modifiedAt": "2026-06-09T10:11:44.000Z",
+      "changedAt": "2026-06-09T10:11:44.000Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "runner",
+        "platformer",
+        "sprite",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow",
+        "actions": [
+          {
+            "id": "play-new-window",
+            "label": "Open game",
+            "mode": "newWindow"
+          },
+          {
+            "id": "fullscreen",
+            "label": "Fullscreen",
+            "mode": "fullscreen"
+          }
+        ]
+      },
+      "id": "badger-sprawl-runner",
+      "title": "Badger Sprawl Runner",
+      "href": "../badger-sprawl-runner/dist/index.html",
+      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
+      "deploy": {
+        "build": {
+          "cwd": "badger-sprawl-runner",
+          "command": "pnpm run build",
+          "dist": "apps/runner/dist"
+        },
+        "includePath": "badger-sprawl-runner/apps/runner/dist",
+        "targetPath": "badger-sprawl-runner/dist",
+        "include": true
+      },
+      "modifiedAt": "2026-06-09T09:59:14.000Z",
+      "changedAt": "2026-06-09T09:59:14.000Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "shooter",
+        "space",
+        "multiplayer",
+        "cyberpunk"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "hyperblast-shooter",
+      "title": "Hyperblast Shooter",
+      "href": "../hyperblast-shooter/index.html",
+      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
+      "modifiedAt": "2026-06-09T09:59:14.000Z",
+      "changedAt": "2026-06-09T09:59:14.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
         "meme",
         "generator",
         "image",
@@ -179,8 +350,8 @@
       "title": "Meme Lab",
       "href": "../meme-lab/meme-lab.html",
       "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
-      "modifiedAt": "2026-06-01T07:26:00.000Z",
-      "changedAt": "2026-06-01T07:26:00.000Z",
+      "modifiedAt": "2026-06-01T07:56:21.000Z",
+      "changedAt": "2026-06-01T07:56:21.000Z",
       "deploy": {
         "include": true
       }
@@ -257,39 +428,6 @@
     {
       "kind": "html-path",
       "tags": [
-        "tool",
-        "graphics",
-        "sprite",
-        "postprocessing",
-        "atlas",
-        "game-dev"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "sprite-fan-atlas-studio",
-      "title": "Sprite Fan Atlas Studio",
-      "href": "../sprite-fan/atlas-studio.html",
-      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
-      "modifiedAt": "2026-05-26T18:52:27.000Z",
-      "changedAt": "2026-05-26T18:52:27.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
         "game",
         "brawler",
         "cyberpunk",
@@ -323,93 +461,6 @@
       },
       "modifiedAt": "2026-05-25T20:48:56.000Z",
       "changedAt": "2026-05-25T20:48:56.000Z"
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "audio",
-        "daw",
-        "peernet",
-        "built",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v11-peer-daw",
-      "title": "V11 Peer DAW",
-      "href": "../v11-peer-daw/index.html",
-      "description": "Built Vite artifact for the modular peer-to-peer audio workstation; package/deploy copies dist output only.",
-      "deploy": {
-        "build": {
-          "cwd": "v11-peer-daw",
-          "command": "npm run build",
-          "dist": "dist"
-        },
-        "includePath": "v11-peer-daw/dist",
-        "targetPath": "v11-peer-daw",
-        "include": true
-      },
-      "modifiedAt": "2026-05-25T20:16:06.000Z",
-      "changedAt": "2026-05-25T20:16:06.000Z"
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "game",
-        "shooter",
-        "space",
-        "multiplayer",
-        "cyberpunk"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "floating-panel",
-            "title": "Floating Panel",
-            "mode": "floating"
-          },
-          {
-            "id": "multiplayer",
-            "title": "Multiplayer",
-            "mode": "floating",
-            "multiplayer": true
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "hyperblast-shooter",
-      "title": "Hyperblast Shooter",
-      "href": "../hyperblast-shooter/index.html",
-      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
-      "modifiedAt": "2026-05-21T06:01:20.000Z",
-      "changedAt": "2026-05-21T06:01:20.000Z",
-      "deploy": {
-        "include": true
-      }
     },
     {
       "kind": "html-path",
@@ -1559,37 +1610,6 @@
       "title": "Procedural Sharepic Studio",
       "href": "../spc/procedural_sharepic_studio.html",
       "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
-      "modifiedAt": "2026-05-04T22:51:57.000Z",
-      "changedAt": "2026-05-04T22:51:57.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "editor",
-        "viewer",
-        "text",
-        "legacy"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "root-multitext-viewer",
-      "title": "Root Multitext Viewer",
-      "href": "../index_multitext.html",
-      "description": "Repository-root multitext viewer utility exposed in v11 for legacy text/document browsing workflows.",
       "modifiedAt": "2026-05-04T22:51:57.000Z",
       "changedAt": "2026-05-04T22:51:57.000Z",
       "deploy": {

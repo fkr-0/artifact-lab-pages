@@ -74,7 +74,7 @@ console.log('app-hub v11 index UI contract OK');
 
 assert.match(html, /id="workspacePane"/, 'v11 should include a bottom split workspace pane for inline apps and logs');
 assert.match(html, /id="workspaceResizeHandle"/, 'workspace pane should be height-resizable');
-assert.match(html, /--workspace-height:\s*66vh/, 'workspace pane should default tall enough for inline apps');
+assert.match(html, /--workspace-height:\s*64vh/, 'workspace pane should keep its compact resizable default height');
 assert.match(html, /--workspace-height/, 'workspace pane height should persist as a CSS variable');
 assert.match(html, /id="workspaceTabs"/, 'workspace pane should expose shared tabs');
 assert.doesNotMatch(html, /data-workspace-tab="appDeck"/, 'workspace tabs should not include a wrapper inline-tabs tab');
@@ -101,7 +101,7 @@ assert.match(html, /if \(activeAppId\) setWorkspaceTab\(activeAppId\)/, 'opening
 assert.match(html, /setWorkspaceTab\("eventLog"\)/, 'Event Log should be the permanent default tab');
 assert.match(html, /setWorkspaceTab/, 'v11 should switch the single workspace tab strip');
 assert.match(html, /workspacePane\.classList\.add\(["']active["']\)/, 'opening inline apps should show the split workspace pane');
-assert.match(html, /grid-template-rows:\s*minmax\(100px, 1fr\) 10px minmax\(420px, var\(--workspace-height\)\)/, 'workspace pane should keep a useful lower-pane height budget');
+assert.match(html, /grid-template-rows:\s*minmax\(100px, 1fr\) var\(--workspace-splitter-size\) minmax\(0, var\(--workspace-height\)\)/, 'workspace pane should not impose a lower-pane min-height floor');
 assert.match(html, /\.app-deck-panel\.active[\s\S]*grid-template-rows:\s*minmax\(0, 1fr\)[\s\S]*height:\s*100%/, 'inline app panels should fill the app-deck lane');
 assert.match(html, /\.app-deck-panel\.active \.app-deck-inline-frame,[\s\S]*min-height:\s*0/, 'inline app iframes should not force a short fixed-height floor');
 assert.match(html, /id="defaultAction"/, 'v11 should expose a default artifact action selector');
@@ -115,11 +115,12 @@ assert.doesNotMatch(html, /<section id="appDeck" class="card app-deck">/, 'app d
 assert.doesNotMatch(html, /<section class="card stack"><div class="row between"><strong>Event log<\/strong>/, 'event log should not be a standalone section below results');
 
 assert.match(html, /id="stage" class="card stack"[\s\S]*class="footer-bar" id="footerBar"/, 'v11 should place the bottom status band inside the lower stage pane');
-assert.match(html, /class="badger-runner"/, 'v11 should show the badger runner inside the status band');
-assert.match(html, /\.footer-bar[\s\S]*min-height:\s*38px/, 'bottom status band should be slightly larger than the old fixed ticker');
-assert.match(html, /\.badger-runner[\s\S]*width:\s*156px[\s\S]*height:\s*30px/, 'badger runner should be slightly larger in the lower pane');
+assert.doesNotMatch(html, /class="badger-runner"/, 'temporary badger runner remnant should stay out of the footer band until the GIF is restored');
+assert.match(html, /\.footer-bar[\s\S]*min-height:\s*24px/, 'bottom status band should stay compact without the temporary runner sprite');
+assert.doesNotMatch(html, /\.badger-runner/, 'temporary badger runner CSS should be removed from the footer band');
 assert.doesNotMatch(html, /\.footer-bar[\s\S]*position:\s*fixed/, 'footer should no longer be a fixed body-level overlay');
-assert.match(html, /\.workspace-pane[\s\S]*min-height:\s*420px[\s\S]*overflow:\s*hidden/, 'workspace pane should keep a usable floor while clipping only its shell');
+assert.match(html, /\.workspace-pane[\s\S]*overflow:\s*hidden/, 'workspace pane should clip only its shell');
+assert.doesNotMatch(html, /\.workspace-pane\s*\{(?:(?!\}).)*min-height:/s, 'workspace pane should not enforce a CSS min-height floor');
 assert.match(html, /\.workspace-panel[\s\S]*overflow:\s*auto/, 'workspace tab panels should scroll instead of clipping content');
 assert.match(html, /\.app-deck-panel[\s\S]*overflow:\s*hidden/, 'inline app panels should maximize iframe space instead of showing nested scrollbars');
 assert.match(html, /\.results-panel[\s\S]*overflow:\s*auto/, 'filtered results panel should remain scrollable');
