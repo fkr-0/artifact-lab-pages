@@ -32,6 +32,37 @@
   },
   "items": [
     {
+      "id": "club-ledger",
+      "title": "Club Ledger",
+      "kind": "html-path",
+      "href": "../club-ledger.html",
+      "description": "Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting updated JSON.",
+      "tags": [
+        "tool",
+        "finance",
+        "club",
+        "ledger",
+        "accounting",
+        "json",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-15T00:00:00.000Z",
+      "changedAt": "2026-06-15T00:00:00.000Z"
+    },
+    {
       "id": "sprite-fan-atlas-studio",
       "title": "Sprite Fan Atlas Studio",
       "kind": "html-path",

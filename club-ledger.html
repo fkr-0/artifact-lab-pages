@@ -1,0 +1,2617 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Club Ledger · Client-only account tracker</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a1020;
+        --panel: rgba(18, 27, 51, 0.82);
+        --panel-2: rgba(26, 38, 71, 0.72);
+        --line: rgba(165, 180, 252, 0.18);
+        --text: #eef2ff;
+        --muted: #aab4d4;
+        --good: #7dd3fc;
+        --green: #8ee6a8;
+        --warn: #f8d47a;
+        --bad: #ff9a9a;
+        --accent: #a78bfa;
+        --accent-2: #22d3ee;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at 10% 0%, rgba(34, 211, 238, 0.16), transparent 32rem),
+          radial-gradient(circle at 90% 12%, rgba(167, 139, 250, 0.2), transparent 34rem),
+          linear-gradient(145deg, #070b17, var(--bg) 45%, #11152a);
+        color: var(--text);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button {
+        border: 0;
+        padding: 0.72rem 1rem;
+        color: #08111f;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 12px 30px rgba(34, 211, 238, 0.13);
+      }
+      button.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+      button:hover {
+        transform: translateY(-1px);
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: rgba(8, 13, 27, 0.76);
+        color: var(--text);
+        padding: 0.72rem 0.82rem;
+        outline: none;
+      }
+      textarea {
+        min-height: 14rem;
+        resize: vertical;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.86rem;
+        line-height: 1.45;
+      }
+      label {
+        display: grid;
+        gap: 0.35rem;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+      small {
+        color: var(--muted);
+        display: block;
+      }
+      .container {
+        max-width: 1420px;
+        margin: 0 auto;
+        padding: 1.25rem;
+      }
+      .hero-main,
+      .card,
+      .metric,
+      .wallet-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+      .hero-main {
+        padding: 0.95rem 1rem;
+        margin-bottom: 0.85rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-title-row {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .hero-copy {
+        min-width: 0;
+      }
+      .actor-control {
+        min-width: min(18rem, 32vw);
+        max-width: 22rem;
+      }
+      .hero-main::after {
+        content: '';
+        position: absolute;
+        inset: auto -5rem -8rem auto;
+        width: 18rem;
+        height: 18rem;
+        background: rgba(34, 211, 238, 0.12);
+        filter: blur(8px);
+      }
+      h1 {
+        margin: 0 0 0.35rem;
+        font-size: clamp(1.7rem, 3.8vw, 3.1rem);
+        line-height: 1;
+        letter-spacing: -0.06em;
+      }
+      .subtitle {
+        max-width: 86ch;
+        color: var(--muted);
+        line-height: 1.45;
+        margin: 0;
+      }
+      .steps {
+        display: grid;
+        gap: 0.7rem;
+        padding: 1rem;
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 2rem 1fr;
+        gap: 0.7rem;
+        align-items: start;
+        padding: 0.75rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--line);
+      }
+      .step b {
+        width: 2rem;
+        height: 2rem;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: rgba(34, 211, 238, 0.14);
+        color: var(--good);
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+      }
+      .data-panel-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        align-items: start;
+      }
+      .status-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      .card h2,
+      .card h3 {
+        margin: 0 0 0.8rem;
+        letter-spacing: -0.03em;
+      }
+      .stack {
+        display: grid;
+        gap: 0.75rem;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+      }
+      .row > * {
+        flex: 1 1 auto;
+      }
+      .chip,
+      .pill,
+      .type {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        padding: 0.32rem 0.58rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .chip-warn {
+        color: #1a1300;
+        background: var(--warn);
+        border-color: transparent;
+      }
+      #message {
+        flex: 1 1 22rem;
+        margin: 0;
+        padding: 0.62rem 0.75rem;
+        border-radius: 8px;
+        background: rgba(125, 211, 252, 0.1);
+        color: var(--good);
+        border: 1px solid rgba(125, 211, 252, 0.24);
+      }
+      #message[data-tone='warn'] {
+        color: var(--warn);
+        background: rgba(248, 212, 122, 0.1);
+        border-color: rgba(248, 212, 122, 0.25);
+      }
+      #message[data-tone='bad'] {
+        color: var(--bad);
+        background: rgba(255, 154, 154, 0.1);
+        border-color: rgba(255, 154, 154, 0.25);
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.85rem;
+        margin-bottom: 1rem;
+      }
+      .metric {
+        padding: 1rem;
+        box-shadow: none;
+        background: var(--panel-2);
+      }
+      .metric span {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .metric strong {
+        display: block;
+        font-size: clamp(1.5rem, 3vw, 2.2rem);
+        margin: 0.2rem 0;
+        letter-spacing: -0.05em;
+      }
+      .metric.danger strong,
+      .bad {
+        color: var(--bad);
+      }
+      .good {
+        color: var(--green);
+      }
+      .wallet-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.85rem;
+      }
+      .wallet-card {
+        padding: 1rem;
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.045);
+      }
+      .wallet-card header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+      }
+      .wallet-card header b {
+        color: var(--good);
+      }
+      dl {
+        display: grid;
+        gap: 0.3rem;
+        margin: 0.7rem 0 0;
+      }
+      dl div {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        border-top: 1px solid var(--line);
+        padding-top: 0.35rem;
+      }
+      dt {
+        color: var(--muted);
+      }
+      dd {
+        margin: 0;
+      }
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+      }
+      th,
+      td {
+        padding: 0.7rem 0.75rem;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 0.78rem;
+        background: rgba(255, 255, 255, 0.04);
+        position: sticky;
+        top: 0;
+      }
+      td small {
+        margin-top: 0.15rem;
+      }
+      .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .forms {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+      .action-chooser {
+        max-width: 24rem;
+      }
+      .mutation-action-panel[hidden] {
+        display: none !important;
+      }
+      .form-panel {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.045);
+        border-radius: 12px;
+        padding: 0.9rem;
+        display: grid;
+        gap: 0.65rem;
+      }
+      .form-panel h3 {
+        margin-bottom: 0.1rem;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+      }
+      .mini {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin: 0.55rem 0 0;
+      }
+      .schema {
+        font-size: 0.83rem;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .collapsible-panel {
+        padding: 0;
+        overflow: hidden;
+      }
+      .collapsible-panel summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.65rem;
+        min-height: 2.75rem;
+        padding: 0.62rem 0.75rem;
+        cursor: pointer;
+        font-weight: 850;
+        letter-spacing: -0.02em;
+        list-style: none;
+      }
+      .summary-title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .summary-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-left: auto;
+      }
+      .icon-button {
+        appearance: none;
+        width: 2rem;
+        height: 2rem;
+        display: inline-grid;
+        place-items: center;
+        padding: 0;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: none;
+        font-size: 0.98rem;
+      }
+      .icon-button:hover {
+        border-color: rgba(125, 211, 252, 0.55);
+        background: rgba(125, 211, 252, 0.12);
+      }
+      .collapsible-panel summary::-webkit-details-marker {
+        display: none;
+      }
+      .collapsible-panel summary::after {
+        content: '+';
+        flex: 0 0 auto;
+        display: inline-grid;
+        place-items: center;
+        width: 1.6rem;
+        height: 1.6rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--good);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .collapsible-panel[open] summary::after {
+        content: '−';
+      }
+      .collapsible-panel:not([open]) .collapsible-body {
+        display: none;
+      }
+      .collapsible-body {
+        padding: 0 1rem 1rem;
+      }
+      .collapsible-body .steps {
+        padding: 0;
+      }
+      .wallet-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-bottom: 0.85rem;
+      }
+      .wallet-tab {
+        flex: 0 1 auto;
+        display: grid;
+        gap: 0.15rem;
+        min-width: min(100%, 11rem);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.62rem 0.78rem;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.055);
+        box-shadow: none;
+        text-align: left;
+      }
+      .wallet-tab strong {
+        color: var(--good);
+        font-size: 0.88rem;
+      }
+      .wallet-tab[aria-selected='true'] {
+        color: #08111f;
+        border-color: transparent;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      }
+      .wallet-tab[aria-selected='true'] strong {
+        color: #08111f;
+      }
+      .wallet-panel[hidden] {
+        display: none;
+      }
+      .view-panel[hidden] {
+        display: none;
+      }
+      .app-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin: 0 0 1rem;
+      }
+      .app-tab {
+        flex: 0 1 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.65rem 0.9rem;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.065);
+        box-shadow: none;
+      }
+      .app-tab[aria-selected='true'] {
+        color: #08111f;
+        border-color: transparent;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      }
+      .app-tab .count {
+        min-width: 1.6rem;
+        min-height: 1.25rem;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 999px;
+        padding: 0.05rem 0.45rem;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 0.78rem;
+        font-variant-numeric: tabular-nums;
+      }
+      tbody tr:hover td {
+        background: rgba(125, 211, 252, 0.045);
+      }
+      .table-wrap table th:first-child,
+      .table-wrap table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background: rgba(13, 20, 39, 0.96);
+      }
+      .table-wrap table th:first-child {
+        z-index: 2;
+      }
+      .log-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        align-items: end;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+      }
+      .log-toolbar label {
+        flex: 1 1 22rem;
+      }
+      .log-toolbar button {
+        flex: 0 0 auto;
+      }
+      .audit-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin: 0.2rem 0 0.85rem;
+      }
+      .audit-detail {
+        max-width: 34rem;
+      }
+      .audit-detail summary {
+        cursor: pointer;
+        color: var(--good);
+      }
+      .audit-detail pre {
+        overflow: auto;
+        max-width: 100%;
+        max-height: 14rem;
+        margin: 0.4rem 0 0;
+        padding: 0.65rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.18);
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+      .wallet-total-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.65rem;
+        margin-top: 0.75rem;
+      }
+      .wallet-total-grid div {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.045);
+        padding: 0.7rem;
+      }
+      .wallet-total-grid dt,
+      .wallet-total-grid dd {
+        margin: 0;
+      }
+      .wallet-total-grid dd {
+        font-weight: 850;
+        color: var(--good);
+        margin-top: 0.2rem;
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 0.8rem;
+      }
+      .section-head h2 {
+        margin-bottom: 0.2rem;
+      }
+      .transaction-search {
+        flex: 1 1 18rem;
+      }
+      .view-actions {
+        display: flex;
+        flex: 0 1 32rem;
+        align-items: end;
+        gap: 0.6rem;
+      }
+      .view-actions .transaction-search {
+        flex: 1 1 18rem;
+      }
+      .view-actions button {
+        flex: 0 0 auto;
+        white-space: nowrap;
+      }
+      .transaction-search input {
+        min-width: 16rem;
+      }
+      .empty-row {
+        color: var(--muted);
+        text-align: center;
+      }
+      footer {
+        color: var(--muted);
+        text-align: center;
+        padding: 2rem 0 0.8rem;
+      }
+      @media (max-width: 1100px) {
+        .hero,
+        .grid,
+        .summary,
+        .wallet-grid,
+        .forms {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .container {
+          padding: 0.7rem;
+        }
+        .two {
+          grid-template-columns: 1fr;
+        }
+        .hero-main,
+        .card {
+          border-radius: 12px;
+        }
+        .hero-title-row,
+        .section-head {
+          display: grid;
+        }
+        .transaction-search,
+        .transaction-search input {
+          min-width: 0;
+          width: 100%;
+        }
+        .wallet-total-grid {
+          grid-template-columns: 1fr;
+        }
+        .actor-control {
+          min-width: 0;
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="hero-main">
+        <div class="hero-title-row">
+          <div class="hero-copy">
+            <h1 id="clubName">Club Ledger</h1>
+            <p class="subtitle">
+              A self-contained one-page financial account tracker for a small club. Paste JSON from the
+              previous round, inspect member obligations and wallet balances, let a trusted user log
+              mutations, then export the new JSON to keep the chain moving.
+            </p>
+          </div>
+          <label class="actor-control">
+            Acting user
+            <select id="actorSelect"></select>
+          </label>
+        </div>
+      </div>
+
+      <main class="grid">
+        <section class="data-panel-row" aria-label="JSON data controls">
+          <input id="fileInput" type="file" accept="application/json,.json" hidden />
+          <details id="importPanel" class="card collapsible-panel action-panel">
+            <summary>
+              <span class="summary-title">Import JSON</span>
+              <span class="summary-actions" aria-label="Quick import actions">
+                <button
+                  id="readClipboardQuick"
+                  class="icon-button"
+                  type="button"
+                  aria-label="Import JSON from clipboard"
+                  title="Import from clipboard"
+                >
+                  ⧉
+                </button>
+                <button
+                  id="openImportFileQuick"
+                  class="icon-button"
+                  type="button"
+                  aria-label="Open import file dialog"
+                  title="Open JSON file"
+                >
+                  ☰
+                </button>
+              </span>
+            </summary>
+            <div class="collapsible-body stack">
+              <textarea id="jsonInput" spellcheck="false" aria-label="Input JSON"></textarea>
+              <div class="row">
+                <button id="loadJson">Load pasted JSON</button>
+                <button id="readClipboard" class="secondary">Read clipboard</button>
+                <button id="openImportFile" class="secondary">Open file</button>
+                <button id="loadSample" class="secondary">Restore sample</button>
+              </div>
+            </div>
+          </details>
+
+          <details id="exportPanel" class="card collapsible-panel action-panel">
+            <summary>
+              <span class="summary-title">Export JSON</span>
+              <span class="summary-actions" aria-label="Quick export actions">
+                <button
+                  id="copyJsonQuick"
+                  class="icon-button"
+                  type="button"
+                  aria-label="Export JSON to clipboard"
+                  title="Copy export JSON"
+                >
+                  ⧉
+                </button>
+                <button
+                  id="downloadJsonQuick"
+                  class="icon-button"
+                  type="button"
+                  aria-label="Open export download dialog"
+                  title="Download export JSON"
+                >
+                  ⇩
+                </button>
+              </span>
+            </summary>
+            <div class="collapsible-body stack">
+              <textarea
+                id="jsonOutput"
+                spellcheck="false"
+                aria-label="Export JSON"
+                readonly
+              ></textarea>
+              <div class="row">
+                <button id="copyJson">Copy JSON</button>
+                <button id="downloadJson" class="secondary">Download file</button>
+              </div>
+            </div>
+          </details>
+
+          <details id="schemaPanel" class="card collapsible-panel text-panel schema">
+            <summary><span class="summary-title">JSON data</span></summary>
+            <div class="collapsible-body">
+              <p>
+                <strong>users</strong> hold <code>id</code>, <code>name</code>,
+                <code>monthlyFee</code>, <code>activeFrom</code>, optional <code>activeUntil</code>.
+              </p>
+              <p>
+                <strong>wallets</strong> hold <code>id</code>, <code>name</code>,
+                <code>currency</code>, <code>openingBalance</code>, optional
+                <code>currentAmount</code>, optional <code>exchangeRateToBase</code>, and
+                <code>transactions</code>.
+              </p>
+              <p>
+                <strong>membership</strong> transactions use <code>type: "membership"</code>,
+                <code>userId</code>, <code>month</code>, and positive <code>amount</code>. Wallet
+                conversions create linked <code>transfer-out</code> and
+                <code>transfer-in</code> rows with one <code>transferId</code>.
+              </p>
+              <p>
+                <strong>auditLog</strong> is now part of the exported data. It records
+                <code>import</code>, trusted mutations, and explicit <code>export</code> actions with
+                date/time, actor, operation, target, and details.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <div class="status-strip" hidden>
+          <div id="message" data-tone="ok"></div>
+        </div>
+
+        <nav class="app-tabs" role="tablist" aria-label="Main ledger views">
+          <button
+            id="view-tab-ledger"
+            class="app-tab"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="ledgerView"
+            data-main-view="ledger"
+          >
+            Ledger workspace
+          </button>
+          <button
+            id="view-tab-global"
+            class="app-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="globalLogView"
+            data-main-view="global"
+          >
+            Global log <span id="globalLogCount" class="count">0</span>
+          </button>
+        </nav>
+
+        <section
+          id="ledgerView"
+          class="view-panel"
+          role="tabpanel"
+          aria-labelledby="view-tab-ledger"
+        >
+          <div id="summaryCards" class="summary"></div>
+
+          <section class="card">
+            <h2>Trusted mutation console</h2>
+            <div class="stack">
+              <label class="action-chooser">
+                Mutation action
+                <select id="mutationAction">
+                  <option value="membership">Add membership fee</option>
+                  <option value="transaction">Log transaction</option>
+                  <option value="conversion">Convert wallet → wallet</option>
+                </select>
+              </label>
+              <div class="forms">
+                <form id="membershipForm" class="form-panel mutation-action-panel" data-action="membership">
+                  <h3>Add membership fee</h3>
+                  <label
+                    >Member
+                    <select id="feeUser"></select
+                  ></label>
+                  <div class="two">
+                    <label
+                      >Wallet
+                      <select id="feeWallet"></select
+                    ></label>
+                    <label>Month <input id="feeMonth" type="month" /></label>
+                  </div>
+                  <div class="two">
+                    <label>Date <input id="feeDate" type="date" /></label>
+                    <label
+                      >Amount override
+                      <input
+                        id="feeAmount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="auto fee"
+                    /></label>
+                  </div>
+                  <label>Note <input id="feeNote" placeholder="optional" /></label>
+                  <button type="submit">Log fee</button>
+                </form>
+
+                <form id="transactionForm" class="form-panel mutation-action-panel" data-action="transaction" hidden>
+                  <h3>Log transaction</h3>
+                  <div class="two">
+                    <label
+                      >Wallet
+                      <select id="txWallet"></select
+                    ></label>
+                    <label
+                      >On behalf of
+                      <select id="txUser"></select
+                    ></label>
+                  </div>
+                  <div class="two">
+                    <label>Date <input id="txDate" type="date" /></label>
+                    <label
+                      >Type
+                      <select id="txType">
+                        <option value="income">income</option>
+                        <option value="expense">expense</option>
+                        <option value="donation">donation</option>
+                        <option value="adjustment">adjustment</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label
+                    >Signed amount
+                    <input
+                      id="txAmount"
+                      type="number"
+                      step="0.01"
+                      placeholder="-12.50 or 40"
+                      required
+                  /></label>
+                  <label
+                    >Note <input id="txNote" placeholder="room rent, donation, correction…"
+                  /></label>
+                  <button type="submit">Log transaction</button>
+                </form>
+
+                <form id="conversionForm" class="form-panel mutation-action-panel" data-action="conversion" hidden>
+                  <h3>Convert wallet → wallet</h3>
+                  <label
+                    >On behalf of
+                    <select id="convertUser"></select
+                  ></label>
+                  <div class="two">
+                    <label
+                      >From
+                      <select id="fromWallet"></select
+                    ></label>
+                    <label
+                      >To
+                      <select id="toWallet"></select
+                    ></label>
+                  </div>
+                  <div class="two">
+                    <label>Date <input id="convertDate" type="date" /></label>
+                    <label
+                      >Source amount
+                      <input id="convertAmount" type="number" step="0.01" min="0" required
+                    /></label>
+                  </div>
+                  <label
+                    >Exchange rate
+                    <input
+                      id="exchangeRate"
+                      type="number"
+                      step="0.000001"
+                      min="0"
+                      placeholder="target per 1 source"
+                      required
+                  /></label>
+                  <label
+                    >Note <input id="convertNote" placeholder="cash deposit, FX move…"
+                  /></label>
+                  <p id="conversionPreview" class="mini"></p>
+                  <button type="submit">Log conversion</button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Membership obligations</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Member</th>
+                    <th>Fee</th>
+                    <th>Months</th>
+                    <th>Due</th>
+                    <th>Paid</th>
+                    <th>Open</th>
+                    <th>Missing months</th>
+                  </tr>
+                </thead>
+                <tbody id="obligationsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Wallets</h2>
+            <div
+              id="walletTabs"
+              class="wallet-tabs"
+              role="tablist"
+              aria-label="Wallet accounts"
+            ></div>
+            <div id="walletPanels" class="wallet-panels"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <div>
+                <h2>Transfer log</h2>
+                <p id="transactionFilterLabel" class="mini">Showing all wallet transactions.</p>
+              </div>
+              <div class="view-actions">
+                <label class="transaction-search"
+                  >Search columns
+                  <input
+                    id="transactionSearch"
+                    type="search"
+                    placeholder="date, wallet, member, note, amount…"
+                    autocomplete="off"
+                  />
+                </label>
+                <button id="exportViewCsv" class="secondary" type="button">Export CSV</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Wallet</th>
+                    <th class="num">Amount</th>
+                    <th>Member</th>
+                    <th>Actor</th>
+                    <th>Month</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section
+          id="globalLogView"
+          class="view-panel"
+          role="tabpanel"
+          aria-labelledby="view-tab-global"
+          hidden
+        >
+          <section class="card">
+            <div class="section-head">
+              <div>
+                <h2>Global mutation log</h2>
+                <p id="auditLogLabel" class="mini">
+                  Showing the import → mutation → export chain encoded in this ledger JSON.
+                </p>
+              </div>
+            </div>
+            <div id="auditStats" class="audit-stats"></div>
+            <div class="log-toolbar">
+              <label>
+                Search log
+                <input
+                  id="auditSearch"
+                  type="search"
+                  placeholder="date, actor, operation, target, details…"
+                  autocomplete="off"
+                />
+              </label>
+              <button id="exportAuditCsv" class="secondary" type="button">Export log CSV</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Operation</th>
+                    <th>Actor</th>
+                    <th>Target</th>
+                    <th>Summary</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody id="auditLogBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+      <footer>
+        Single HTML file · all data stays in the browser · export JSON after every mutation round.
+      </footer>
+    </div>
+    <script type="module">
+      export function normalizeLedger(raw = {}) {
+        const todayMonth = toMonth(new Date().toISOString().slice(0, 10))
+        const setup = {
+          periodStart: raw.setup?.periodStart || todayMonth,
+          baseCurrency: raw.setup?.baseCurrency || 'EUR',
+          defaultMembershipFee: Number(raw.setup?.defaultMembershipFee ?? 10),
+          ...raw.setup,
+        }
+        setup.defaultMembershipFee = Number(setup.defaultMembershipFee || 0)
+
+        const users = (raw.users || []).map((user) => {
+          const name = String(user.name || user.id || 'Unnamed member').trim()
+          return {
+            ...user,
+            id: safeId(user.id || name),
+            name,
+            monthlyFee: Number(user.monthlyFee ?? user.membershipFee ?? setup.defaultMembershipFee),
+            activeFrom: user.activeFrom || setup.periodStart,
+            activeUntil: user.activeUntil || null,
+            notes: user.notes || '',
+          }
+        })
+
+        const wallets = (raw.wallets || []).map((wallet) => {
+          const name = String(wallet.name || wallet.id || 'Wallet').trim()
+          return {
+            ...wallet,
+            id: safeId(wallet.id || name),
+            name,
+            currency: wallet.currency || setup.baseCurrency,
+            openingBalance: Number(wallet.openingBalance ?? wallet.initialAmount ?? 0),
+            currentAmount:
+              wallet.currentAmount === undefined ||
+              wallet.currentAmount === null ||
+              wallet.currentAmount === ''
+                ? undefined
+                : Number(wallet.currentAmount),
+            exchangeRateToBase:
+              wallet.exchangeRateToBase === undefined ||
+              wallet.exchangeRateToBase === null ||
+              wallet.exchangeRateToBase === ''
+                ? undefined
+                : Number(wallet.exchangeRateToBase),
+            transactions: (wallet.transactions || wallet.transferLog || []).map(
+              normalizeTransaction
+            ),
+          }
+        })
+
+        return {
+          meta: {
+            version: 1,
+            clubName: 'Small Club Ledger',
+            updatedAt: new Date().toISOString(),
+            ...(raw.meta || {}),
+          },
+          setup,
+          users,
+          wallets,
+          auditLog: normalizeAuditLog(raw.auditLog || raw.mutationLog || raw.log || []),
+        }
+      }
+
+      export function monthRange(startMonth, endMonth) {
+        const start = parseMonth(startMonth)
+        const end = parseMonth(endMonth)
+        if (!start || !end) return []
+        const months = []
+        let year = start.year
+        let month = start.month
+        while (year < end.year || (year === end.year && month <= end.month)) {
+          months.push(`${year}-${String(month).padStart(2, '0')}`)
+          month += 1
+          if (month === 13) {
+            month = 1
+            year += 1
+          }
+        }
+        return months
+      }
+
+      export function computeAllWalletBalances(rawLedger) {
+        const ledger = normalizeLedger(rawLedger)
+        return Object.fromEntries(
+          ledger.wallets.map((wallet) => {
+            const transactionTotal = wallet.transactions.reduce(
+              (sum, tx) => sum + Number(tx.amount || 0),
+              0
+            )
+            const current = roundMoney(Number(wallet.openingBalance || 0) + transactionTotal)
+            const declaredDifference =
+              wallet.currentAmount === undefined
+                ? null
+                : roundMoney(current - Number(wallet.currentAmount))
+            return [
+              wallet.id,
+              {
+                walletId: wallet.id,
+                name: wallet.name,
+                currency: wallet.currency,
+                openingBalance: Number(wallet.openingBalance || 0),
+                transactionTotal: roundMoney(transactionTotal),
+                current,
+                declaredCurrentAmount: wallet.currentAmount,
+                declaredDifference,
+                exchangeRateToBase: wallet.exchangeRateToBase,
+              },
+            ]
+          })
+        )
+      }
+
+      export function computeMemberObligations(
+        rawLedger,
+        currentDate = new Date().toISOString().slice(0, 10)
+      ) {
+        const ledger = normalizeLedger(rawLedger)
+        const currentMonth = toMonth(currentDate)
+        const paidByUserMonth = new Map()
+
+        for (const wallet of ledger.wallets) {
+          for (const tx of wallet.transactions) {
+            if (tx.type !== 'membership' || !tx.userId || !tx.month) continue
+            const key = `${tx.userId}::${tx.month}`
+            paidByUserMonth.set(
+              key,
+              roundMoney((paidByUserMonth.get(key) || 0) + Number(tx.amount || 0))
+            )
+          }
+        }
+
+        return Object.fromEntries(
+          ledger.users.map((user) => {
+            const from = maxMonth(
+              user.activeFrom || ledger.setup.periodStart,
+              ledger.setup.periodStart
+            )
+            const until = minMonth(user.activeUntil || currentMonth, currentMonth)
+            const months = monthRange(from, until)
+            const paidMonths = []
+            const missingMonths = []
+            let paid = 0
+
+            for (const month of months) {
+              const amount = Number(paidByUserMonth.get(`${user.id}::${month}`) || 0)
+              if (amount > 0) paidMonths.push(month)
+              if (amount < Number(user.monthlyFee || 0)) missingMonths.push(month)
+              paid += amount
+            }
+
+            const due = roundMoney(months.length * Number(user.monthlyFee || 0))
+            paid = roundMoney(paid)
+            return [
+              user.id,
+              {
+                userId: user.id,
+                name: user.name,
+                monthlyFee: Number(user.monthlyFee || 0),
+                months,
+                due,
+                paid,
+                balance: roundMoney(due - paid),
+                paidMonths,
+                missingMonths,
+              },
+            ]
+          })
+        )
+      }
+
+      export function addMembershipPayment(rawLedger, input) {
+        const ledger = cloneLedger(normalizeLedger(rawLedger))
+        const member = findById(ledger.users, input.userId, 'member')
+        const actor = findById(ledger.users, input.actorId, 'actor')
+        const wallet = findById(ledger.wallets, input.walletId, 'wallet')
+        const amount = Number(
+          input.amount ?? member.monthlyFee ?? ledger.setup.defaultMembershipFee ?? 0
+        )
+        assertPositive(amount, 'Membership amount')
+        const month = input.month || toMonth(input.date || new Date().toISOString().slice(0, 10))
+        wallet.transactions.push(
+          normalizeTransaction({
+            id: input.id || makeId('fee'),
+            date: input.date || new Date().toISOString().slice(0, 10),
+            type: 'membership',
+            actorId: actor.id,
+            actorName: actor.name,
+            userId: member.id,
+            userName: member.name,
+            month,
+            amount: roundMoney(amount),
+            currency: wallet.currency,
+            note: input.note || `Membership fee ${month}: ${member.name}`,
+          })
+        )
+        return appendAuditEvent(ledger, 'membership-payment', {
+          actorId: actor.id,
+          targetType: 'membership',
+          targetId: `${member.id}:${month}`,
+          summary: `Logged ${member.name} membership fee for ${month}.`,
+          details: {
+            userId: member.id,
+            userName: member.name,
+            walletId: wallet.id,
+            walletName: wallet.name,
+            month,
+            date: input.date || new Date().toISOString().slice(0, 10),
+            amount: roundMoney(amount),
+            currency: wallet.currency,
+          },
+        })
+      }
+
+      export function addLoggedTransaction(rawLedger, input) {
+        const ledger = cloneLedger(normalizeLedger(rawLedger))
+        const actor = findById(ledger.users, input.actorId, 'actor')
+        const wallet = findById(ledger.wallets, input.walletId, 'wallet')
+        const member = input.userId ? findById(ledger.users, input.userId, 'on-behalf-of member') : null
+        const amount = Number(input.amount || 0)
+        if (!Number.isFinite(amount) || amount === 0)
+          throw new Error('Transaction amount must be a non-zero number')
+        wallet.transactions.push(
+          normalizeTransaction({
+            id: input.id || makeId('tx'),
+            date: input.date || new Date().toISOString().slice(0, 10),
+            type: input.type || (amount >= 0 ? 'income' : 'expense'),
+            actorId: actor.id,
+            actorName: actor.name,
+            userId: member?.id,
+            userName: member?.name,
+            amount: roundMoney(amount),
+            currency: wallet.currency,
+            note: input.note || '',
+          })
+        )
+        return appendAuditEvent(ledger, 'transaction', {
+          actorId: actor.id,
+          targetType: 'wallet-transaction',
+          targetId: wallet.id,
+          summary: `Logged ${input.type || (amount >= 0 ? 'income' : 'expense')} in ${wallet.name}.`,
+          details: {
+            walletId: wallet.id,
+            walletName: wallet.name,
+            userId: member?.id || '',
+            userName: member?.name || '',
+            date: input.date || new Date().toISOString().slice(0, 10),
+            type: input.type || (amount >= 0 ? 'income' : 'expense'),
+            amount: roundMoney(amount),
+            currency: wallet.currency,
+            note: input.note || '',
+          },
+        })
+      }
+
+      export function addTransferConversion(rawLedger, input) {
+        const ledger = cloneLedger(normalizeLedger(rawLedger))
+        const actor = findById(ledger.users, input.actorId, 'actor')
+        const member = input.userId ? findById(ledger.users, input.userId, 'on-behalf-of member') : null
+        const fromWallet = findById(ledger.wallets, input.fromWalletId, 'source wallet')
+        const toWallet = findById(ledger.wallets, input.toWalletId, 'target wallet')
+        if (fromWallet.id === toWallet.id)
+          throw new Error('Choose two different wallets for a conversion')
+        const amount = Number(input.amount || 0)
+        const exchangeRate = Number(input.exchangeRate || 0)
+        assertPositive(amount, 'Source amount')
+        assertPositive(exchangeRate, 'Exchange rate')
+        const targetAmount = roundMoney(amount * exchangeRate)
+        const transferId = input.transferId || makeId('move')
+        const date = input.date || new Date().toISOString().slice(0, 10)
+        const note = input.note || `${fromWallet.name} → ${toWallet.name}`
+
+        fromWallet.transactions.push(
+          normalizeTransaction({
+            id: makeId('out'),
+            date,
+            type: 'transfer-out',
+            actorId: actor.id,
+            actorName: actor.name,
+            userId: member?.id,
+            userName: member?.name,
+            amount: roundMoney(-amount),
+            currency: fromWallet.currency,
+            exchangeRate,
+            transferId,
+            linkedWalletId: toWallet.id,
+            note,
+          })
+        )
+        toWallet.transactions.push(
+          normalizeTransaction({
+            id: makeId('in'),
+            date,
+            type: 'transfer-in',
+            actorId: actor.id,
+            actorName: actor.name,
+            userId: member?.id,
+            userName: member?.name,
+            amount: targetAmount,
+            currency: toWallet.currency,
+            exchangeRate,
+            transferId,
+            linkedWalletId: fromWallet.id,
+            note,
+          })
+        )
+        return appendAuditEvent(ledger, 'wallet-conversion', {
+          actorId: actor.id,
+          targetType: 'wallet-transfer',
+          targetId: transferId,
+          summary: `Converted ${fromWallet.name} to ${toWallet.name}.`,
+          details: {
+            transferId,
+            fromWalletId: fromWallet.id,
+            fromWalletName: fromWallet.name,
+            toWalletId: toWallet.id,
+            toWalletName: toWallet.name,
+            userId: member?.id || '',
+            userName: member?.name || '',
+            date,
+            sourceAmount: roundMoney(amount),
+            sourceCurrency: fromWallet.currency,
+            targetAmount,
+            targetCurrency: toWallet.currency,
+            exchangeRate,
+            note,
+          },
+        })
+      }
+
+      export function sampleLedger() {
+        return normalizeLedger({
+          meta: { clubName: 'Tiny Chess Club', version: 1 },
+          setup: { periodStart: '2026-01', baseCurrency: 'EUR', defaultMembershipFee: 10 },
+          users: [
+            { id: 'ada', name: 'Ada Lovelace', monthlyFee: 12, activeFrom: '2026-01' },
+            { id: 'ben', name: 'Ben Noether', monthlyFee: 8, activeFrom: '2026-02' },
+            { id: 'cora', name: 'Cora Turing', monthlyFee: 10, activeFrom: '2026-01' },
+          ],
+          wallets: [
+            {
+              id: 'cash',
+              name: 'Cash Box',
+              currency: 'EUR',
+              openingBalance: 30,
+              currentAmount: 37,
+              transactions: [
+                {
+                  id: 't1',
+                  date: '2026-01-05',
+                  type: 'membership',
+                  actorId: 'ada',
+                  userId: 'ada',
+                  month: '2026-01',
+                  amount: 12,
+                  note: 'Ada January dues',
+                },
+                {
+                  id: 't2',
+                  date: '2026-02-01',
+                  type: 'expense',
+                  actorId: 'ben',
+                  amount: -5,
+                  note: 'Tea and biscuits',
+                },
+              ],
+            },
+            {
+              id: 'bank',
+              name: 'Bank Account',
+              currency: 'EUR',
+              openingBalance: 100,
+              transactions: [
+                {
+                  id: 't3',
+                  date: '2026-01-10',
+                  type: 'membership',
+                  actorId: 'cora',
+                  userId: 'cora',
+                  month: '2026-01',
+                  amount: 10,
+                  note: 'Cora January dues',
+                },
+              ],
+            },
+            {
+              id: 'usd-wallet',
+              name: 'USD Donation Wallet',
+              currency: 'USD',
+              openingBalance: 50,
+              exchangeRateToBase: 0.92,
+              transactions: [],
+            },
+          ],
+        })
+      }
+
+      function normalizeTransaction(tx = {}) {
+        return {
+          id: tx.id || makeId('tx'),
+          date: tx.date || new Date().toISOString().slice(0, 10),
+          type: tx.type || 'transaction',
+          amount: Number(tx.amount || 0),
+          note: tx.note || '',
+          ...tx,
+          amount: Number(tx.amount || 0),
+        }
+      }
+
+      function normalizeAuditLog(entries = []) {
+        return entries.map(normalizeAuditLogEntry).sort((a, b) => {
+          const byTime = String(b.at).localeCompare(String(a.at))
+          return byTime || String(b.id).localeCompare(String(a.id))
+        })
+      }
+
+      function normalizeAuditLogEntry(entry = {}) {
+        const operation = entry.operation || entry.type || 'mutation'
+        const at = entry.at || entry.dateTime || entry.timestamp || entry.date || new Date().toISOString()
+        return {
+          id: entry.id || makeId('log'),
+          at,
+          operation,
+          actorId: entry.actorId || entry.userId || entry.actor?.id || '',
+          actorName: entry.actorName || entry.userName || entry.actor?.name || '',
+          targetType: entry.targetType || entry.entityType || entry.target?.type || '',
+          targetId: entry.targetId || entry.entityId || entry.target?.id || '',
+          summary: entry.summary || entry.description || entry.note || humanizeOperation(operation),
+          details: normalizeAuditDetails(entry.details ?? entry.payload ?? entry.metadata ?? {}),
+        }
+      }
+
+      function normalizeAuditDetails(details) {
+        if (details === null || details === undefined || details === '') return {}
+        if (typeof details === 'object' && !Array.isArray(details)) return details
+        return { value: details }
+      }
+
+      function humanizeOperation(value) {
+        return String(value || 'mutation')
+          .replace(/[-_]+/g, ' ')
+          .replace(/\b\w/g, (letter) => letter.toUpperCase())
+      }
+
+      function appendAuditEvent(rawLedger, operation, input = {}) {
+        const ledger = cloneLedger(normalizeLedger(rawLedger))
+        const actor = resolveAuditActor(ledger, input.actorId)
+        const event = normalizeAuditLogEntry({
+          id: input.id || makeId('log'),
+          at: input.at || new Date().toISOString(),
+          operation,
+          actorId: actor.id,
+          actorName: actor.name,
+          targetType: input.targetType || '',
+          targetId: input.targetId || '',
+          summary: input.summary || humanizeOperation(operation),
+          details: input.details || {},
+        })
+        ledger.auditLog = normalizeAuditLog([event, ...(ledger.auditLog || [])])
+        ledger.meta.updatedAt = event.at
+        return ledger
+      }
+
+      function resolveAuditActor(ledger, actorId) {
+        const found = actorId ? ledger.users.find((user) => user.id === actorId) : null
+        if (found) return { id: found.id, name: found.name }
+        return { id: actorId || 'system', name: actorId ? `Unknown actor ${actorId}` : 'System / import' }
+      }
+
+      function cloneLedger(ledger) {
+        return JSON.parse(JSON.stringify(ledger))
+      }
+
+      function safeId(value) {
+        return (
+          String(value || 'item')
+            .trim()
+            .toLowerCase()
+            .normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'item'
+        )
+      }
+
+      function parseMonth(value) {
+        const match = String(value || '').match(/^(\d{4})-(\d{2})/)
+        if (!match) return null
+        const year = Number(match[1])
+        const month = Number(match[2])
+        if (!Number.isInteger(year) || month < 1 || month > 12) return null
+        return { year, month }
+      }
+
+      function toMonth(dateLike) {
+        return String(dateLike || new Date().toISOString()).slice(0, 7)
+      }
+
+      function compareMonth(a, b) {
+        const ma = parseMonth(a)
+        const mb = parseMonth(b)
+        if (!ma || !mb) return 0
+        return ma.year === mb.year ? ma.month - mb.month : ma.year - mb.year
+      }
+
+      function maxMonth(a, b) {
+        return compareMonth(a, b) >= 0 ? a : b
+      }
+
+      function minMonth(a, b) {
+        return compareMonth(a, b) <= 0 ? a : b
+      }
+
+      function findById(items, id, label) {
+        const found = items.find((item) => item.id === id)
+        if (!found) throw new Error(`Unknown ${label}: ${id}`)
+        return found
+      }
+
+      function assertPositive(value, label) {
+        if (!Number.isFinite(value) || value <= 0)
+          throw new Error(`${label} must be greater than zero`)
+      }
+
+      function roundMoney(value) {
+        return Math.round((Number(value) + Number.EPSILON) * 100) / 100
+      }
+
+      function makeId(prefix) {
+        const random = Math.random().toString(36).slice(2, 8)
+        return `${prefix}-${Date.now().toString(36)}-${random}`
+      }
+
+      const state = {
+        ledger: sampleLedger(),
+        dirty: false,
+        activeMainView: 'ledger',
+        activeWalletId: 'all',
+        activePersonId: '',
+        lastMessage: '',
+      }
+
+      const $ = (selector) => document.querySelector(selector)
+      const $$ = (selector) => Array.from(document.querySelectorAll(selector))
+
+      function today() {
+        return new Date().toISOString().slice(0, 10)
+      }
+      function currentMonth() {
+        return new Date().toISOString().slice(0, 7)
+      }
+      function money(value, currency = '') {
+        const number = Number(value || 0).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+        return `${number}${currency ? ' ' + currency : ''}`
+      }
+      function escapeHtml(value) {
+        return String(value ?? '').replace(
+          /[&<>'"]/g,
+          (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char])
+        )
+      }
+      function showMessage(message, tone = 'ok') {
+        state.lastMessage = message
+        const text = String(message || '').trim()
+        const strip = $('.status-strip')
+        const node = $('#message')
+        strip.hidden = !text
+        node.textContent = text
+        node.dataset.tone = tone
+      }
+      function getExportJson() {
+        return JSON.stringify(normalizeLedger(state.ledger), null, 2)
+      }
+      function setLedger(
+        raw,
+        {
+          dirty = false,
+          message = 'Ledger loaded.',
+          logImport = false,
+          importSource = 'manual',
+          importName = '',
+        } = {}
+      ) {
+        const previousActorId = $('#actorSelect')?.value || ''
+        let ledger = normalizeLedger(raw)
+        if (logImport) {
+          ledger = appendAuditEvent(ledger, 'import', {
+            actorId: previousActorId,
+            targetType: 'ledger-json',
+            targetId: ledger.meta.clubName || 'club-ledger',
+            summary: `Imported ledger data from ${importName || importSource}.`,
+            details: {
+              source: importSource,
+              name: importName || '',
+              members: ledger.users.length,
+              wallets: ledger.wallets.length,
+              transactions: getAllTransactions(ledger).length,
+            },
+          })
+        }
+        state.ledger = ledger
+        state.dirty = dirty || logImport
+        $('#jsonInput').value = JSON.stringify(state.ledger, null, 2)
+        render()
+        showMessage(message, 'ok')
+      }
+      function markMutation(nextLedger, message) {
+        state.ledger = normalizeLedger(nextLedger)
+        state.dirty = true
+        render()
+        showMessage(message, 'warn')
+      }
+      function selectedActorId() {
+        const actorId = $('#actorSelect').value
+        if (!actorId) throw new Error('Choose who is performing the mutation.')
+        return actorId
+      }
+      function walletOptions(selected = '') {
+        return state.ledger.wallets
+          .map(
+            (wallet) =>
+              `<option value="${escapeHtml(wallet.id)}" ${
+                wallet.id === selected ? 'selected' : ''
+              }>${escapeHtml(wallet.name)} · ${escapeHtml(wallet.currency)}</option>`
+          )
+          .join('')
+      }
+      function userOptions(selected = '') {
+        return state.ledger.users
+          .map(
+            (user) =>
+              `<option value="${escapeHtml(user.id)}" ${
+                user.id === selected ? 'selected' : ''
+              }>${escapeHtml(user.name)} · ${money(
+                user.monthlyFee,
+                state.ledger.setup.baseCurrency
+              )}/mo</option>`
+          )
+          .join('')
+      }
+
+      function optionalUserOptions(selected = '') {
+        return `<option value="" ${selected ? '' : 'selected'}>Club / no member</option>${userOptions(selected)}`
+      }
+
+      function optionalUserId(selector) {
+        const value = $(selector)?.value || ''
+        return value || undefined
+      }
+
+      function ensureActiveWallet(ledger) {
+        if (!ledger.users.some((user) => user.id === state.activePersonId)) {
+          state.activePersonId = ''
+        }
+        if (!ledger.wallets.length) {
+          state.activeWalletId = 'all'
+          return 'all'
+        }
+        if (
+          state.activeWalletId !== 'all' &&
+          !ledger.wallets.some((wallet) => wallet.id === state.activeWalletId)
+        ) {
+          state.activeWalletId = 'all'
+        }
+        return state.activeWalletId || 'all'
+      }
+
+      function setActiveWallet(walletId) {
+        state.activePersonId = ''
+        state.activeWalletId = walletId || 'all'
+        render()
+      }
+
+      function setActivePerson(personId) {
+        state.activePersonId = personId || ''
+        state.activeWalletId = 'all'
+        render()
+      }
+
+      function walletBaseRate(wallet, ledger) {
+        if (wallet.currency === ledger.setup.baseCurrency) return 1
+        const rate = Number(wallet.exchangeRateToBase)
+        return Number.isFinite(rate) && rate > 0 ? rate : null
+      }
+
+      function computeWalletOverview(ledger, balances) {
+        const byCurrency = new Map()
+        let baseTotal = 0
+        let unconvertedCount = 0
+        const wallets = ledger.wallets.map((wallet) => {
+          const balance = balances[wallet.id]
+          const rate = walletBaseRate(wallet, ledger)
+          if (rate === null) {
+            unconvertedCount += 1
+          } else {
+            baseTotal += balance.current * rate
+          }
+          byCurrency.set(
+            wallet.currency,
+            roundMoney((byCurrency.get(wallet.currency) || 0) + balance.current)
+          )
+          return { wallet, balance, baseRate: rate }
+        })
+        const currencyTotals = Array.from(byCurrency.entries()).map(([currency, total]) => ({
+          currency,
+          total,
+        }))
+        return {
+          wallets,
+          baseTotal: roundMoney(baseTotal),
+          currencyTotals,
+          transactionCount: ledger.wallets.reduce(
+            (sum, wallet) => sum + wallet.transactions.length,
+            0
+          ),
+          unconvertedCount,
+        }
+      }
+
+      function transactionSearchText(tx) {
+        return [
+          tx.date,
+          tx.type,
+          tx.walletName,
+          tx.walletCurrency,
+          tx.amount,
+          tx.userName,
+          tx.userId,
+          tx.actorName,
+          tx.actorId,
+          tx.month,
+          tx.note,
+        ]
+          .map((value) => String(value ?? '').toLowerCase())
+          .join(' ')
+      }
+
+      function getAllTransactions(ledger = state.ledger) {
+        const normalized = normalizeLedger(ledger)
+        const rows = normalized.wallets.flatMap((wallet) =>
+          wallet.transactions.map((tx) => ({
+            ...tx,
+            walletId: wallet.id,
+            walletName: wallet.name,
+            walletCurrency: wallet.currency,
+          }))
+        )
+        rows.sort(
+          (a, b) =>
+            String(b.date).localeCompare(String(a.date)) || String(b.id).localeCompare(String(a.id))
+        )
+        return rows
+      }
+
+      function getVisibleTransactions(allTx) {
+        const activeWalletId = state.activeWalletId || 'all'
+        const activePersonId = state.activePersonId || ''
+        const query = ($('#transactionSearch')?.value || '').trim().toLowerCase()
+        return allTx.filter((tx) => {
+          const walletMatches = activeWalletId === 'all' || tx.walletId === activeWalletId
+          const personMatches =
+            !activePersonId || tx.userId === activePersonId || tx.actorId === activePersonId
+          const searchMatches = !query || transactionSearchText(tx).includes(query)
+          return walletMatches && personMatches && searchMatches
+        })
+      }
+
+      function transactionCsvRows(transactions) {
+        return [
+          ['Date', 'Type', 'Wallet', 'Currency', 'Amount', 'Member', 'Actor', 'Month', 'Note', 'Transfer ID'],
+          ...transactions.map((tx) => [
+            tx.date || '',
+            tx.type || '',
+            tx.walletName || '',
+            tx.walletCurrency || tx.currency || '',
+            tx.amount ?? '',
+            tx.userName || tx.userId || '',
+            tx.actorName || tx.actorId || '',
+            tx.month || '',
+            tx.note || '',
+            tx.transferId || '',
+          ]),
+        ]
+      }
+
+      function csvEscape(value) {
+        const text = String(value ?? '')
+        const needsQuoting =
+          text.includes('"') || text.includes(',') || text.includes('\n') || text.includes('\r')
+        return needsQuoting ? `"${text.replaceAll('"', '""')}"` : text
+      }
+
+      function toCsv(rows) {
+        const newline = String.fromCharCode(10)
+        return rows.map((row) => row.map(csvEscape).join(',')).join(newline) + newline
+      }
+
+      function currentViewSlug() {
+        const ledger = normalizeLedger(state.ledger)
+        if (state.activePersonId) {
+          const user = ledger.users.find((item) => item.id === state.activePersonId)
+          return `person-${safeFileName(user?.name || state.activePersonId)}`
+        }
+        if (state.activeWalletId && state.activeWalletId !== 'all') {
+          const wallet = ledger.wallets.find((item) => item.id === state.activeWalletId)
+          return `wallet-${safeFileName(wallet?.name || state.activeWalletId)}`
+        }
+        return 'all-wallets'
+      }
+
+      function exportVisibleCsv() {
+        const ledger = normalizeLedger(state.ledger)
+        const allTx = getAllTransactions(ledger)
+        const visibleTx = getVisibleTransactions(allTx)
+        const blob = new Blob([toCsv(transactionCsvRows(visibleTx))], { type: 'text/csv;charset=utf-8' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${safeFileName(ledger.meta.clubName || 'club-ledger')}-${currentViewSlug()}-${today()}.csv`
+        a.click()
+        URL.revokeObjectURL(a.href)
+        registerCsvExport('transfer-view', visibleTx.length, {
+          walletFilter: state.activeWalletId || 'all',
+          personFilter: state.activePersonId || '',
+          search: $('#transactionSearch')?.value || '',
+        })
+        showMessage(`CSV export prepared for ${visibleTx.length} visible row(s).`, 'ok')
+      }
+
+      function setMainView(view) {
+        state.activeMainView = view === 'global' ? 'global' : 'ledger'
+        renderMainTabs()
+      }
+
+      function renderMainTabs() {
+        const active = state.activeMainView === 'global' ? 'global' : 'ledger'
+        $$('[data-main-view]').forEach((tab) => {
+          const selected = tab.dataset.mainView === active
+          tab.setAttribute('aria-selected', String(selected))
+          tab.tabIndex = selected ? 0 : -1
+        })
+        $('#ledgerView').hidden = active !== 'ledger'
+        $('#globalLogView').hidden = active !== 'global'
+      }
+
+      function auditSearchText(entry) {
+        return [
+          entry.at,
+          entry.operation,
+          entry.actorName,
+          entry.actorId,
+          entry.targetType,
+          entry.targetId,
+          entry.summary,
+          JSON.stringify(entry.details || {}),
+        ]
+          .map((value) => String(value ?? '').toLowerCase())
+          .join(' ')
+      }
+
+      function getVisibleAuditLog(ledger = state.ledger) {
+        const normalized = normalizeLedger(ledger)
+        const query = ($('#auditSearch')?.value || '').trim().toLowerCase()
+        return normalized.auditLog.filter((entry) => !query || auditSearchText(entry).includes(query))
+      }
+
+      function auditCsvRows(entries) {
+        return [
+          ['Date', 'Operation', 'Actor', 'Actor ID', 'Target Type', 'Target ID', 'Summary', 'Details'],
+          ...entries.map((entry) => [
+            entry.at || '',
+            entry.operation || '',
+            entry.actorName || '',
+            entry.actorId || '',
+            entry.targetType || '',
+            entry.targetId || '',
+            entry.summary || '',
+            JSON.stringify(entry.details || {}),
+          ]),
+        ]
+      }
+
+      function operationCounts(entries) {
+        const counts = new Map()
+        entries.forEach((entry) => counts.set(entry.operation, (counts.get(entry.operation) || 0) + 1))
+        return Array.from(counts.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+      }
+
+      function renderAuditLog(ledger) {
+        const entries = normalizeLedger(ledger).auditLog
+        const visible = getVisibleAuditLog(ledger)
+        $('#globalLogCount').textContent = String(entries.length)
+        $('#auditLogLabel').textContent = `Showing ${visible.length} of ${entries.length} audit event(s). Explicit JSON exports are logged before the exported JSON is generated.`
+        $('#auditStats').innerHTML = entries.length
+          ? operationCounts(entries)
+              .map(([operation, count]) => `<span class="chip">${escapeHtml(humanizeOperation(operation))}: ${count}</span>`)
+              .join('')
+          : '<span class="chip chip-warn">No audit entries yet</span>'
+        $('#auditLogBody').innerHTML =
+          visible
+            .map((entry) => {
+              const details = JSON.stringify(entry.details || {}, null, 2)
+              const target = [entry.targetType, entry.targetId].filter(Boolean).join(' · ') || '—'
+              return `
+    <tr>
+      <td><strong>${escapeHtml(formatAuditDate(entry.at))}</strong><small>${escapeHtml(entry.id)}</small></td>
+      <td><span class="type">${escapeHtml(humanizeOperation(entry.operation))}</span></td>
+      <td>${escapeHtml(entry.actorName || entry.actorId || '—')}<small>${escapeHtml(entry.actorId || '')}</small></td>
+      <td>${escapeHtml(target)}</td>
+      <td>${escapeHtml(entry.summary || '')}</td>
+      <td><details class="audit-detail"><summary>view details</summary><pre>${escapeHtml(details)}</pre></details></td>
+    </tr>
+  `
+            })
+            .join('') || '<tr><td colspan="6" class="empty-row">No audit events match the current search.</td></tr>'
+      }
+
+      function formatAuditDate(value) {
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) return String(value || '—')
+        return date.toLocaleString(undefined, {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      }
+
+      function selectedExportActorId() {
+        return $('#actorSelect')?.value || ''
+      }
+
+      function prepareJsonExport(method) {
+        state.ledger = appendAuditEvent(state.ledger, 'export', {
+          actorId: selectedExportActorId(),
+          targetType: 'ledger-json',
+          targetId: state.ledger.meta.clubName || 'club-ledger',
+          summary: `Exported ledger JSON via ${method}.`,
+          details: {
+            method,
+            format: 'json',
+            members: state.ledger.users.length,
+            wallets: state.ledger.wallets.length,
+            transactions: getAllTransactions(state.ledger).length,
+            auditEventsBeforeExport: state.ledger.auditLog.length,
+          },
+        })
+        state.dirty = false
+        render()
+        return getExportJson()
+      }
+
+      function registerCsvExport(kind, rowCount, details = {}) {
+        state.ledger = appendAuditEvent(state.ledger, 'export-csv', {
+          actorId: selectedExportActorId(),
+          targetType: kind,
+          targetId: currentViewSlug(),
+          summary: `Exported ${rowCount} ${kind} row(s) as CSV.`,
+          details: { format: 'csv', rows: rowCount, ...details },
+        })
+        state.dirty = true
+        render()
+      }
+
+      function exportAuditCsv() {
+        const ledger = normalizeLedger(state.ledger)
+        const visibleLog = getVisibleAuditLog(ledger)
+        const blob = new Blob([toCsv(auditCsvRows(visibleLog))], { type: 'text/csv;charset=utf-8' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${safeFileName(ledger.meta.clubName || 'club-ledger')}-global-log-${today()}.csv`
+        a.click()
+        URL.revokeObjectURL(a.href)
+        registerCsvExport('audit-log', visibleLog.length, { search: $('#auditSearch')?.value || '' })
+        showMessage(`Audit log CSV prepared for ${visibleLog.length} visible row(s).`, 'ok')
+      }
+
+      function render() {
+        const ledger = normalizeLedger(state.ledger)
+        state.ledger = ledger
+        const balances = computeAllWalletBalances(ledger)
+        const activeWalletId = ensureActiveWallet(ledger)
+        const obligations = computeMemberObligations(ledger, today())
+        const totalOutstanding = Object.values(obligations).reduce(
+          (sum, item) => sum + item.balance,
+          0
+        )
+        const totalDue = Object.values(obligations).reduce((sum, item) => sum + item.due, 0)
+        const totalPaid = Object.values(obligations).reduce((sum, item) => sum + item.paid, 0)
+        const allTx = getAllTransactions(ledger)
+        const walletOverview = computeWalletOverview(ledger, balances)
+        const visibleTx = getVisibleTransactions(allTx)
+        const activeWallet = ledger.wallets.find((wallet) => wallet.id === activeWalletId)
+        const activePerson = ledger.users.find((user) => user.id === state.activePersonId)
+
+        $('#clubName').textContent = ledger.meta.clubName || 'Small Club Ledger'
+        $('#summaryCards').innerHTML = `
+    <article class="metric"><span>Members</span><strong>${ledger.users.length}</strong><small>${
+          ledger.setup.defaultMembershipFee
+        } ${ledger.setup.baseCurrency} default monthly fee</small></article>
+    <article class="metric"><span>Wallets</span><strong>${ledger.wallets.length}</strong><small>${
+          ledger.wallets.map((w) => escapeHtml(w.currency)).join(' · ') || 'no currencies'
+        }</small></article>
+    <article class="metric"><span>Dues paid</span><strong>${money(
+      totalPaid,
+      ledger.setup.baseCurrency
+    )}</strong><small>${money(
+          totalDue,
+          ledger.setup.baseCurrency
+        )} due through ${currentMonth()}</small></article>
+    <article class="metric danger"><span>Outstanding</span><strong>${money(
+      totalOutstanding,
+      ledger.setup.baseCurrency
+    )}</strong><small>${
+          Object.values(obligations).filter((o) => o.balance > 0).length
+        } member(s) with open dues</small></article>
+  `
+
+        $('#actorSelect').innerHTML = `<option value="">Choose actor…</option>${userOptions(
+          $('#actorSelect').value
+        )}`
+        $('#feeUser').innerHTML = userOptions($('#feeUser').value)
+        $('#feeWallet').innerHTML = walletOptions($('#feeWallet').value)
+        $('#txWallet').innerHTML = walletOptions($('#txWallet').value)
+        $('#txUser').innerHTML = optionalUserOptions($('#txUser').value)
+        $('#fromWallet').innerHTML = walletOptions($('#fromWallet').value)
+        $('#toWallet').innerHTML = walletOptions($('#toWallet').value)
+        $('#convertUser').innerHTML = optionalUserOptions($('#convertUser').value)
+        if (!$('#feeMonth').value) $('#feeMonth').value = currentMonth()
+        if (!$('#feeDate').value) $('#feeDate').value = today()
+        if (!$('#txDate').value) $('#txDate').value = today()
+        if (!$('#convertDate').value) $('#convertDate').value = today()
+
+        $('#obligationsBody').innerHTML =
+          Object.values(obligations)
+            .map(
+              (item) => `
+    <tr>
+      <td><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.userId)}</small></td>
+      <td>${money(item.monthlyFee, ledger.setup.baseCurrency)}</td>
+      <td>${item.months.length}</td>
+      <td>${money(item.due, ledger.setup.baseCurrency)}</td>
+      <td>${money(item.paid, ledger.setup.baseCurrency)}</td>
+      <td class="${item.balance > 0 ? 'bad' : 'good'}">${money(
+                item.balance,
+                ledger.setup.baseCurrency
+              )}</td>
+      <td>${
+        item.missingMonths.length
+          ? item.missingMonths.map((m) => `<span class="pill">${m}</span>`).join(' ')
+          : '<span class="good">complete</span>'
+      }</td>
+    </tr>
+  `
+            )
+            .join('') || '<tr><td colspan="7">No users encoded in JSON yet.</td></tr>'
+
+        const allViewSelected = activeWalletId === 'all' && !state.activePersonId
+        $('#walletTabs').innerHTML = ledger.wallets.length || ledger.users.length
+          ? [
+              `
+      <button
+        type="button"
+        id="wallet-tab-all"
+        class="wallet-tab"
+        role="tab"
+        aria-selected="${allViewSelected}"
+        aria-controls="wallet-panel-all"
+        tabindex="${allViewSelected ? '0' : '-1'}"
+        data-view-kind="all"
+        data-wallet-id="all"
+      ><span>All wallets</span><strong>base total ${money(
+        walletOverview.baseTotal,
+        ledger.setup.baseCurrency
+      )}</strong></button>
+    `,
+              ...ledger.wallets.map((wallet) => {
+                const balance = balances[wallet.id]
+                const selected = !state.activePersonId && wallet.id === activeWalletId
+                return `
+      <button
+        type="button"
+        id="wallet-tab-${escapeHtml(wallet.id)}"
+        class="wallet-tab"
+        role="tab"
+        aria-selected="${selected}"
+        aria-controls="wallet-panel-${escapeHtml(wallet.id)}"
+        tabindex="${selected ? '0' : '-1'}"
+        data-view-kind="wallet"
+        data-wallet-id="${escapeHtml(wallet.id)}"
+      ><span>${escapeHtml(wallet.name)}</span><strong>${money(
+                  balance.current,
+                  wallet.currency
+                )}</strong></button>
+    `
+              }),
+              ...ledger.users.map((user) => {
+                const selected = state.activePersonId === user.id
+                const personTxCount = allTx.filter(
+                  (tx) => tx.userId === user.id || tx.actorId === user.id
+                ).length
+                return `
+      <button
+        type="button"
+        id="person-tab-${escapeHtml(user.id)}"
+        class="wallet-tab person-tab"
+        role="tab"
+        aria-selected="${selected}"
+        aria-controls="person-panel-${escapeHtml(user.id)}"
+        tabindex="${selected ? '0' : '-1'}"
+        data-view-kind="person"
+        data-person-id="${escapeHtml(user.id)}"
+      ><span>Person · ${escapeHtml(user.name)}</span><strong>${personTxCount} tx</strong></button>
+    `
+              }),
+            ].join('')
+          : '<p>No wallets or people encoded yet.</p>'
+
+        $('#walletPanels').innerHTML = ledger.wallets.length || ledger.users.length
+          ? [
+              `
+      <article
+        id="wallet-panel-all"
+        class="wallet-card wallet-panel"
+        role="tabpanel"
+        aria-labelledby="wallet-tab-all"
+        ${allViewSelected ? '' : 'hidden'}
+      >
+        <header><span>All wallets</span><b>base total ${money(
+          walletOverview.baseTotal,
+          ledger.setup.baseCurrency
+        )}</b></header>
+        <dl class="wallet-total-grid">
+          <div><dt>Transfer log</dt><dd>${walletOverview.transactionCount} item(s)</dd></div>
+          <div><dt>Wallets</dt><dd>${ledger.wallets.length} account(s)</dd></div>
+          <div><dt>Currency totals</dt><dd>${
+            walletOverview.currencyTotals
+              .map((item) => `${money(item.total, item.currency)}`)
+              .join(' · ') || '—'
+          }</dd></div>
+        </dl>
+        <p class="mini">All-wallet mode sums wallets with an exchange rate into ${escapeHtml(
+          ledger.setup.baseCurrency
+        )}.${
+          walletOverview.unconvertedCount
+            ? ` ${walletOverview.unconvertedCount} wallet(s) without a base exchange rate are listed in currency totals but excluded from the base total.`
+            : ''
+        }</p>
+      </article>
+    `,
+              ...ledger.wallets.map((wallet) => {
+                const balance = balances[wallet.id]
+                const discrepancy = balance.declaredDifference
+                const selected = !state.activePersonId && wallet.id === activeWalletId
+                return `
+      <article
+        id="wallet-panel-${escapeHtml(wallet.id)}"
+        class="wallet-card wallet-panel"
+        role="tabpanel"
+        aria-labelledby="wallet-tab-${escapeHtml(wallet.id)}"
+        ${selected ? '' : 'hidden'}
+      >
+        <header><span>${escapeHtml(wallet.name)}</span><b>${money(
+                  balance.current,
+                  wallet.currency
+                )}</b></header>
+        <dl>
+          <div><dt>Opening</dt><dd>${money(balance.openingBalance, wallet.currency)}</dd></div>
+          <div><dt>Transfer log</dt><dd>${wallet.transactions.length} item(s)</dd></div>
+          <div><dt>Rate to base</dt><dd>${
+            wallet.exchangeRateToBase ??
+            (wallet.currency === ledger.setup.baseCurrency ? 1 : 'not set')
+          }</dd></div>
+        </dl>
+        ${
+          wallet.currentAmount === undefined
+            ? ''
+            : `<p class="mini ${
+                Math.abs(discrepancy || 0) > 0.009 ? 'bad' : 'good'
+              }">Declared current amount: ${money(
+                wallet.currentAmount,
+                wallet.currency
+              )} · delta ${money(discrepancy || 0, wallet.currency)}</p>`
+        }
+      </article>
+    `
+              }),
+              ...ledger.users.map((user) => {
+                const selected = state.activePersonId === user.id
+                const item = obligations[user.id]
+                const personTx = allTx.filter(
+                  (tx) => tx.userId === user.id || tx.actorId === user.id
+                )
+                const actedCount = allTx.filter((tx) => tx.actorId === user.id).length
+                const behalfCount = allTx.filter((tx) => tx.userId === user.id).length
+                return `
+      <article
+        id="person-panel-${escapeHtml(user.id)}"
+        class="wallet-card wallet-panel person-panel"
+        role="tabpanel"
+        aria-labelledby="person-tab-${escapeHtml(user.id)}"
+        ${selected ? '' : 'hidden'}
+      >
+        <header><span>${escapeHtml(user.name)}</span><b>${money(
+                  item?.balance || 0,
+                  ledger.setup.baseCurrency
+                )} open</b></header>
+        <dl>
+          <div><dt>Monthly fee</dt><dd>${money(user.monthlyFee, ledger.setup.baseCurrency)}</dd></div>
+          <div><dt>Due / paid</dt><dd>${money(item?.due || 0, ledger.setup.baseCurrency)} · ${money(
+                  item?.paid || 0,
+                  ledger.setup.baseCurrency
+                )}</dd></div>
+          <div><dt>Transactions</dt><dd>${personTx.length} involving · ${behalfCount} on behalf · ${actedCount} as actor</dd></div>
+        </dl>
+        <p class="mini">Person view filters the transfer log to rows this person acted on or rows booked on their behalf.</p>
+      </article>
+    `
+              }),
+            ].join('')
+          : ''
+
+        $('#transactionFilterLabel').textContent = state.activePersonId
+          ? `Showing ${visibleTx.length} of ${allTx.length} transaction(s) involving ${
+              activePerson?.name || 'selected person'
+            }.`
+          : activeWalletId === 'all'
+          ? `Showing ${visibleTx.length} of ${allTx.length} transaction(s) across all wallets.`
+          : `Showing ${visibleTx.length} of ${allTx.length} transaction(s) for ${
+              activeWallet?.name || 'selected wallet'
+            }.`
+        $('#transactionBody').innerHTML =
+          visibleTx
+            .map((tx) => {
+              const searchable = transactionSearchText(tx)
+              return `
+    <tr data-wallet-id="${escapeHtml(tx.walletId)}" data-search-text="${escapeHtml(searchable)}">
+      <td>${escapeHtml(tx.date)}</td>
+      <td><span class="type">${escapeHtml(tx.type)}</span></td>
+      <td>${escapeHtml(tx.walletName)}</td>
+      <td class="num ${Number(tx.amount) < 0 ? 'bad' : 'good'}">${money(
+                tx.amount,
+                tx.walletCurrency
+              )}</td>
+      <td>${escapeHtml(tx.userName || tx.userId || '—')}</td>
+      <td>${escapeHtml(tx.actorName || tx.actorId || '—')}</td>
+      <td>${escapeHtml(tx.month || '—')}</td>
+      <td>${escapeHtml(tx.note || '')}</td>
+    </tr>
+  `
+            })
+            .join('') ||
+          `<tr><td colspan="8" class="empty-row">${
+            allTx.length
+              ? 'No transactions match the selected wallet/search filter.'
+              : 'No transactions yet.'
+          }</td></tr>`
+
+        renderAuditLog(ledger)
+        renderMainTabs()
+        $('#jsonOutput').value = getExportJson()
+        updateConversionPreview()
+        updateMutationAction()
+      }
+
+      function handleError(error) {
+        console.error(error)
+        showMessage(error.message || String(error), 'bad')
+      }
+
+      $('#loadJson').addEventListener('click', () => {
+        try {
+          setLedger(JSON.parse($('#jsonInput').value), {
+            dirty: false,
+            message: 'JSON loaded and import event recorded. Inspect or perform trusted mutations.',
+            logImport: true,
+            importSource: 'pasted-json',
+          })
+        } catch (error) {
+          handleError(error)
+        }
+      })
+      $('#loadSample').addEventListener('click', () =>
+        setLedger(sampleLedger(), {
+          dirty: false,
+          message: 'Sample ledger restored and import event recorded.',
+          logImport: true,
+          importSource: 'built-in-sample',
+        })
+      )
+
+      function bindSummaryButton(button, action) {
+        button.addEventListener('click', (event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          action()
+        })
+      }
+
+      function openImportFileDialog() {
+        $('#fileInput').click()
+      }
+
+      async function readClipboardJson() {
+        try {
+          const text = await navigator.clipboard.readText()
+          $('#jsonInput').value = text
+          setLedger(JSON.parse(text), {
+            dirty: false,
+            message: 'Clipboard JSON loaded and import event recorded.',
+            logImport: true,
+            importSource: 'clipboard',
+          })
+        } catch (error) {
+          handleError(new Error('Clipboard read failed or did not contain valid JSON.'))
+        }
+      }
+
+      async function copyExportJson() {
+        try {
+          const exportJson = prepareJsonExport('clipboard')
+          await navigator.clipboard.writeText(exportJson)
+          showMessage('Export JSON copied to clipboard and export event recorded.', 'ok')
+        } catch (error) {
+          $('#jsonOutput').focus()
+          $('#jsonOutput').select()
+          showMessage('Clipboard write failed. Export JSON is selected for manual copy.', 'warn')
+        }
+      }
+
+      function downloadExportJson() {
+        const exportJson = prepareJsonExport('download')
+        const blob = new Blob([exportJson], { type: 'application/json' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${safeFileName(state.ledger.meta.clubName || 'club-ledger')}-${today()}.json`
+        a.click()
+        URL.revokeObjectURL(a.href)
+        showMessage('JSON download prepared and export event recorded.', 'ok')
+      }
+
+      $('#fileInput').addEventListener('change', async (event) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+        const text = await file.text()
+        $('#jsonInput').value = text
+        try {
+          setLedger(JSON.parse(text), {
+            dirty: false,
+            message: `Loaded ${file.name} and recorded the import event.`,
+            logImport: true,
+            importSource: 'file',
+            importName: file.name,
+          })
+        } catch (error) {
+          handleError(error)
+        } finally {
+          event.target.value = ''
+        }
+      })
+      $('#readClipboard').addEventListener('click', readClipboardJson)
+      $('#openImportFile').addEventListener('click', openImportFileDialog)
+      $('#copyJson').addEventListener('click', copyExportJson)
+      $('#downloadJson').addEventListener('click', downloadExportJson)
+      $('#exportViewCsv').addEventListener('click', exportVisibleCsv)
+      $('#exportAuditCsv').addEventListener('click', exportAuditCsv)
+      $('#auditSearch').addEventListener('input', render)
+      $('.app-tabs').addEventListener('click', (event) => {
+        const tab = event.target.closest('[data-main-view]')
+        if (!tab) return
+        setMainView(tab.dataset.mainView)
+      })
+      $('.app-tabs').addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+        const tabs = $$('.app-tabs [role="tab"]')
+        if (!tabs.length) return
+        event.preventDefault()
+        const current = Math.max(
+          0,
+          tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true')
+        )
+        const next =
+          event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+            ? tabs.length - 1
+            : event.key === 'ArrowLeft'
+            ? (current - 1 + tabs.length) % tabs.length
+            : (current + 1) % tabs.length
+        setMainView(tabs[next].dataset.mainView)
+        requestAnimationFrame(() => tabs[next].focus())
+      })
+      bindSummaryButton($('#readClipboardQuick'), readClipboardJson)
+      bindSummaryButton($('#openImportFileQuick'), () => $('#fileInput').click())
+      bindSummaryButton($('#copyJsonQuick'), copyExportJson)
+      bindSummaryButton($('#downloadJsonQuick'), () => $('#downloadJson').click())
+      $('#mutationAction').addEventListener('change', updateMutationAction)
+      $('#transactionSearch').addEventListener('input', render)
+
+      $('#membershipForm').addEventListener('submit', (event) => {
+        event.preventDefault()
+        try {
+          const amountText = $('#feeAmount').value.trim()
+          markMutation(
+            addMembershipPayment(state.ledger, {
+              actorId: selectedActorId(),
+              userId: $('#feeUser').value,
+              walletId: $('#feeWallet').value,
+              month: $('#feeMonth').value,
+              date: $('#feeDate').value,
+              amount: amountText ? Number(amountText) : undefined,
+              note: $('#feeNote').value,
+            }),
+            'Membership fee logged. Export JSON when finished.'
+          )
+          $('#feeAmount').value = ''
+          $('#feeNote').value = ''
+        } catch (error) {
+          handleError(error)
+        }
+      })
+      $('#transactionForm').addEventListener('submit', (event) => {
+        event.preventDefault()
+        try {
+          const signedAmount = Number($('#txAmount').value || 0)
+          markMutation(
+            addLoggedTransaction(state.ledger, {
+              actorId: selectedActorId(),
+              walletId: $('#txWallet').value,
+              userId: optionalUserId('#txUser'),
+              date: $('#txDate').value,
+              amount: signedAmount,
+              type: $('#txType').value || undefined,
+              note: $('#txNote').value,
+            }),
+            'Transaction logged. Export JSON when finished.'
+          )
+          $('#txAmount').value = ''
+          $('#txNote').value = ''
+        } catch (error) {
+          handleError(error)
+        }
+      })
+      $('#walletTabs').addEventListener('click', (event) => {
+        const tab = event.target.closest('[data-view-kind]')
+        if (!tab) return
+        if (tab.dataset.viewKind === 'person') {
+          setActivePerson(tab.dataset.personId)
+        } else {
+          setActiveWallet(tab.dataset.walletId)
+        }
+      })
+      $('#walletTabs').addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+        const tabs = $$('#walletTabs [role="tab"]')
+        if (!tabs.length) return
+        event.preventDefault()
+        const current = Math.max(
+          0,
+          tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true')
+        )
+        const next =
+          event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+            ? tabs.length - 1
+            : event.key === 'ArrowLeft'
+            ? (current - 1 + tabs.length) % tabs.length
+            : (current + 1) % tabs.length
+        const nextTab = tabs[next]
+        if (nextTab.dataset.viewKind === 'person') {
+          setActivePerson(nextTab.dataset.personId)
+        } else {
+          setActiveWallet(nextTab.dataset.walletId)
+        }
+        requestAnimationFrame(() => nextTab.focus())
+      })
+
+      $('#conversionForm').addEventListener('submit', (event) => {
+        event.preventDefault()
+        try {
+          markMutation(
+            addTransferConversion(state.ledger, {
+              actorId: selectedActorId(),
+              fromWalletId: $('#fromWallet').value,
+              toWalletId: $('#toWallet').value,
+              userId: optionalUserId('#convertUser'),
+              amount: Number($('#convertAmount').value || 0),
+              exchangeRate: Number($('#exchangeRate').value || 0),
+              date: $('#convertDate').value,
+              note: $('#convertNote').value,
+            }),
+            'Wallet conversion logged as linked transfer-out and transfer-in rows.'
+          )
+          $('#convertAmount').value = ''
+          $('#exchangeRate').value = ''
+          $('#convertNote').value = ''
+        } catch (error) {
+          handleError(error)
+        }
+      })
+      ;['#convertAmount', '#exchangeRate', '#fromWallet', '#toWallet'].forEach((selector) =>
+        $(selector).addEventListener('input', updateConversionPreview)
+      )
+
+      function updateMutationAction() {
+        const selected = $('#mutationAction')?.value || 'membership'
+        $$('.mutation-action-panel').forEach((panel) => {
+          panel.hidden = panel.dataset.action !== selected
+        })
+      }
+
+      function updateConversionPreview() {
+        const amount = Number($('#convertAmount')?.value || 0)
+        const rate = Number($('#exchangeRate')?.value || 0)
+        const from = state.ledger.wallets.find((w) => w.id === $('#fromWallet')?.value)
+        const to = state.ledger.wallets.find((w) => w.id === $('#toWallet')?.value)
+        const target = amount > 0 && rate > 0 ? amount * rate : 0
+        $('#conversionPreview').textContent =
+          from && to && target
+            ? `${money(amount, from.currency)} leaves ${from.name}; ${money(
+                target,
+                to.currency
+              )} enters ${to.name}.`
+            : 'Enter amount and exchange rate to preview the converted deposit.'
+      }
+      function safeFileName(value) {
+        return (
+          String(value)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'club-ledger'
+        )
+      }
+
+      $('#jsonInput').value = JSON.stringify(state.ledger, null, 2)
+      render()
+    </script>
+  </body>
+</html>

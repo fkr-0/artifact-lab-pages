@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-06-09T13:12:49.886Z",
+  "generatedAt": "2026-06-15T01:31:49.214Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -43,14 +43,20 @@
     }
   },
   "summary": {
-    "total": 45,
+    "total": 46,
     "byKind": {
-      "html-path": 41,
+      "html-path": 42,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
-      "tool": 20,
+      "tool": 21,
+      "finance": 1,
+      "club": 1,
+      "ledger": 1,
+      "accounting": 1,
+      "json": 1,
+      "local-first": 4,
       "graphics": 12,
       "sprite": 5,
       "postprocessing": 1,
@@ -127,7 +133,6 @@
       "sound": 1,
       "floating": 1,
       "notepad": 3,
-      "local-first": 3,
       "text": 1,
       "notes": 1,
       "v4": 1,
@@ -153,6 +158,40 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "finance",
+        "club",
+        "ledger",
+        "accounting",
+        "json",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "club-ledger",
+      "title": "Club Ledger",
+      "href": "../club-ledger.html",
+      "description": "Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting updated JSON.",
+      "modifiedAt": "2026-06-15T00:00:00.000Z",
+      "changedAt": "2026-06-15T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
     {
       "kind": "html-path",
       "tags": [
