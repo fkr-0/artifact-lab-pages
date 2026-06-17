@@ -32,6 +32,9 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Enable Corepack package-manager shims
+        run: corepack enable
+
       - name: Install dependencies (ethic-brawl)
         run: npm install
         working-directory: ethic-brawl
@@ -47,6 +50,10 @@ jobs:
       - name: Build (v11-peer-daw)
         run: npm run build
         working-directory: v11-peer-daw
+
+      - name: Install dependencies (badger-sprawl-runner)
+        run: pnpm install --frozen-lockfile
+        working-directory: badger-sprawl-runner
 
       - name: Prepare CI source catalog
         run: |
