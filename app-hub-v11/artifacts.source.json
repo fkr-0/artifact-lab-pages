@@ -27,24 +27,28 @@
       "lib",
       "sprite-fan",
       "meme-lab",
-      "reveal-peer-plugin"
+      "reveal-peer-plugin",
+      "storyboard-studio"
     ]
   },
   "items": [
     {
-      "id": "club-ledger",
-      "title": "Club Ledger",
+      "id": "clausewitz-on-war-interactive",
+      "title": "Clausewitz: On War Interactive Atlas",
       "kind": "html-path",
-      "href": "../club-ledger.html",
-      "description": "Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting updated JSON.",
+      "href": "../clausewitz-on-war-interactive/index.html",
+      "description": "Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter compartments, concept maps, friction and culminating-point simulations, scenario sliders, and retrieval prompts.",
       "tags": [
         "tool",
-        "finance",
-        "club",
-        "ledger",
-        "accounting",
-        "json",
-        "local-first"
+        "education",
+        "strategy",
+        "history",
+        "philosophy",
+        "military-theory",
+        "interactive",
+        "visualization",
+        "local-first",
+        "v11"
       ],
       "operations": [
         "validate",
@@ -59,22 +63,24 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": "2026-06-15T00:00:00.000Z",
-      "changedAt": "2026-06-15T00:00:00.000Z"
+      "modifiedAt": "2026-06-21T21:30:00.000Z",
+      "changedAt": "2026-06-21T21:30:00.000Z"
     },
     {
-      "id": "sprite-fan-atlas-studio",
-      "title": "Sprite Fan Atlas Studio",
+      "id": "storyboard-studio",
+      "title": "Storyboard Studio",
       "kind": "html-path",
-      "href": "../sprite-fan/atlas-studio.html",
-      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "href": "../storyboard-studio/index.html",
+      "description": "Client-side illustration and text document builder for arranging imported images, prose, captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard artifacts.",
       "tags": [
         "tool",
         "graphics",
-        "sprite",
-        "postprocessing",
-        "atlas",
-        "game-dev"
+        "storyboard",
+        "illustration",
+        "writing",
+        "html",
+        "local-first",
+        "print"
       ],
       "operations": [
         "validate",
@@ -89,8 +95,8 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": "2026-06-09T10:22:18.000Z",
-      "changedAt": "2026-06-09T10:22:18.000Z"
+      "modifiedAt": "2026-06-20T00:00:00.000Z",
+      "changedAt": "2026-06-20T00:00:00.000Z"
     },
     {
       "id": "v11-peer-daw",
@@ -126,8 +132,168 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": "2026-06-09T10:11:44.000Z",
-      "changedAt": "2026-06-09T10:11:44.000Z"
+      "modifiedAt": "2026-06-17T14:31:36.000Z",
+      "changedAt": "2026-06-17T14:31:36.000Z"
+    },
+    {
+      "id": "reveal-peer-plugin",
+      "title": "RevealPeerJS",
+      "kind": "html-path",
+      "href": "../reveal-peer-plugin/index.html",
+      "description": "Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong challenges, and a top-down arena shooter mini-game.",
+      "tags": [
+        "plugin",
+        "presentation",
+        "multiplayer",
+        "peernet",
+        "game",
+        "chat",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "reveal-peer-plugin",
+        "targetPath": "reveal-peer-plugin"
+      },
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "fullscreen"
+      },
+      "modifiedAt": "2026-06-17T11:01:53.000Z",
+      "changedAt": "2026-06-17T11:01:53.000Z"
+    },
+    {
+      "id": "club-ledger",
+      "title": "Club Ledger",
+      "kind": "html-path",
+      "href": "../club-ledger.html",
+      "description": "Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting updated JSON.",
+      "tags": [
+        "tool",
+        "finance",
+        "club",
+        "ledger",
+        "accounting",
+        "json",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-16T19:32:11.000Z",
+      "changedAt": "2026-06-16T19:32:11.000Z"
+    },
+    {
+      "id": "git-recipe-book",
+      "title": "Git Recipe Book",
+      "kind": "html-path",
+      "href": "../git-recipe-book/index.html",
+      "description": "Static HTML artifact for an interactive Git learning app; deploy copies dist output only.",
+      "tags": [
+        "tool",
+        "education",
+        "git",
+        "developer-tools",
+        "built",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "git-recipe-book/dist",
+        "targetPath": "git-recipe-book"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-10T20:30:28.000Z",
+      "changedAt": "2026-06-10T20:30:28.000Z"
+    },
+    {
+      "id": "spc-procedural-sharepic-studio",
+      "title": "Procedural Sharepic Studio",
+      "kind": "html-path",
+      "href": "../spc/procedural_sharepic_studio.html",
+      "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
+      "tags": [
+        "tool",
+        "graphics",
+        "social",
+        "template",
+        "procedural",
+        "generator",
+        "design",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-10T20:30:28.000Z",
+      "changedAt": "2026-06-10T20:30:28.000Z"
+    },
+    {
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
+      "kind": "html-path",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-10T20:30:28.000Z",
+      "changedAt": "2026-06-10T20:30:28.000Z"
     },
     {
       "id": "badger-sprawl-runner",
@@ -253,73 +419,6 @@
       },
       "modifiedAt": "2026-06-01T07:56:21.000Z",
       "changedAt": "2026-06-01T07:56:21.000Z"
-    },
-    {
-      "id": "reveal-peer-plugin",
-      "title": "RevealPeerJS",
-      "kind": "html-path",
-      "href": "../reveal-peer-plugin/index.html",
-      "description": "Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong challenges, and a top-down arena shooter mini-game.",
-      "tags": [
-        "plugin",
-        "presentation",
-        "multiplayer",
-        "peernet",
-        "game",
-        "chat",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "includePath": "reveal-peer-plugin",
-        "targetPath": "reveal-peer-plugin"
-      },
-      "launch": {
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "fullscreen"
-      },
-      "modifiedAt": "2026-05-27T05:17:15.000Z",
-      "changedAt": "2026-05-27T05:17:15.000Z"
-    },
-    {
-      "id": "git-recipe-book",
-      "title": "Git Recipe Book",
-      "kind": "html-path",
-      "href": "../git-recipe-book/index.html",
-      "description": "Static HTML artifact for an interactive Git learning app; deploy copies dist output only.",
-      "tags": [
-        "tool",
-        "education",
-        "git",
-        "developer-tools",
-        "built",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "includePath": "git-recipe-book/dist",
-        "targetPath": "git-recipe-book"
-      },
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-26T21:18:51.000Z",
-      "changedAt": "2026-05-26T21:18:51.000Z"
     },
     {
       "id": "ethic-brawl",
@@ -896,7 +995,7 @@
     },
     {
       "id": "gif-white-to-transparent",
-      "title": "GIF White→Alpha Preprocessor",
+      "title": "GIF White\u2192Alpha Preprocessor",
       "kind": "html-path",
       "href": "../gif-white-to-transparent.html",
       "description": "Browser-based GIF preprocessor that removes white backgrounds and replaces with transparency. Upload animated GIF, adjust white threshold with live preview, and download cleaned GIF with proper alpha channel.",
@@ -1359,38 +1458,6 @@
         "visual",
         "programming",
         "creative",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-04T22:51:57.000Z",
-      "changedAt": "2026-05-04T22:51:57.000Z"
-    },
-    {
-      "id": "spc-procedural-sharepic-studio",
-      "title": "Procedural Sharepic Studio",
-      "kind": "html-path",
-      "href": "../spc/procedural_sharepic_studio.html",
-      "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
-      "tags": [
-        "tool",
-        "graphics",
-        "social",
-        "template",
-        "procedural",
-        "generator",
-        "design",
         "v11"
       ],
       "operations": [

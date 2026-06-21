@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clausewitz: On War Interactive Atlas</title>
+<style>
+:root{--bg:#0d1117;--panel:#151b23;--panel2:#1d2632;--text:#e8edf2;--muted:#a5b1c2;--accent:#e0a84f;--line:#2f3b4c;--danger:#e45d5d;--ok:#5ed69f;--blue:#78a6ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#243045,#0d1117 42%,#080b10);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}header{padding:42px 5vw 30px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(224,168,79,.18),rgba(120,166,255,.08),transparent)}h1{font-size:clamp(2rem,5vw,4.6rem);line-height:1;margin:0 0 14px}h2,h3{line-height:1.15}.lede{max-width:980px;color:#cbd5e1;font-size:1.15rem}.pill{display:inline-flex;gap:.4rem;align-items:center;border:1px solid #3d4857;background:#111822;border-radius:999px;padding:.35rem .65rem;color:#d9e2ee;margin:.2rem}.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:22px;padding:22px 5vw}.sidebar{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;border:1px solid var(--line);background:rgba(13,17,23,.78);backdrop-filter:blur(14px);border-radius:20px;padding:16px}.main{display:grid;gap:22px}.panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(29,38,50,.95),rgba(15,21,31,.96));border-radius:22px;padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.22)}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #485568;background:#182231;color:var(--text);border-radius:12px;padding:.65rem .85rem}button:hover,button.active{border-color:var(--accent);background:#2a2115}.nav button{display:block;width:100%;text-align:left;margin:.35rem 0}.search{width:100%;border:1px solid #425066;background:#101722;color:var(--text);border-radius:12px;padding:.7rem}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.book-card{border:1px solid #344153;border-radius:18px;background:rgba(255,255,255,.035);padding:15px;transition:.18s transform,.18s border}.book-card:hover{transform:translateY(-3px);border-color:var(--accent)}.book-card h3{margin:.2rem 0}.muted{color:var(--muted)}.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.chapter-list{display:grid;gap:8px;max-height:430px;overflow:auto;padding-right:4px}.chapter{border:1px solid #303b4c;background:#111923;border-radius:14px;padding:12px}.chapter strong{color:#fff}.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.concept{border:1px solid #394557;border-radius:16px;padding:12px;background:#101722}.meter{height:14px;border:1px solid #475568;background:#0b1119;border-radius:999px;overflow:hidden}.meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--accent),var(--danger));width:50%}.slider-row{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;margin:10px 0}input[type=range]{width:100%}svg,canvas{width:100%;border:1px solid #334052;border-radius:18px;background:#0c121b}.diagram text{fill:#e6edf3;font-size:12px}.diagram .mutedText{fill:#aab6c6}.arc{transition:.2s opacity}.arc:hover{opacity:.72}.quote{border-left:4px solid var(--accent);padding-left:14px;color:#d9e2ee}.quiz-options{display:grid;gap:10px}.result{min-height:1.4rem}.toc{display:grid;gap:7px}.toc details{border:1px solid #303b4c;border-radius:12px;padding:.6rem;background:#101722}.badge{font-size:.8rem;color:#101722;background:var(--accent);border-radius:999px;padding:.12rem .45rem}.footer{padding:25px 5vw 60px;color:var(--muted)}@media(max-width:900px){.layout,.split{grid-template-columns:1fr}.sidebar{position:relative;max-height:none}}
+</style>
+</head>
+<body>
+<header>
+  <p><span class="pill">No external libraries</span><span class="pill">self contained HTML</span><span class="pill">8 books / 125 chapter compartments</span></p>
+  <h1>Clausewitz: On War Interactive Atlas</h1>
+  <p class="lede">A hands-on translation of <em>Vom Kriege</em> into maps, sliders, diagrams, scenario experiments, and plain-language compartments. The original book is blunt, repetitive, and written inside nineteenth-century military theory; this atlas keeps the conceptual architecture while making every part explorable.</p>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <input id="search" class="search" placeholder="Search books, concepts, chapters…">
+    <h3>Explore</h3>
+    <div class="nav" id="bookNav"></div>
+    <h3>Reading paths</h3>
+    <button data-path="beginner">Low-barrier path</button>
+    <button data-path="systems">Systems path</button>
+    <button data-path="strategy">Strategic path</button>
+    <button data-path="critical">Critical-reading path</button>
+  </aside>
+  <main class="main">
+    <section class="panel">
+      <h2>Orientation: what the whole book is trying to do</h2>
+      <div class="split">
+        <div>
+          <p><strong>One sentence:</strong> war is a political act carried out through violent collision, uncertainty, moral force, organization, chance, and limited means.</p>
+          <p class="quote">The usable modern reading is not “war is good”; it is “organized conflict cannot be understood as pure math, pure heroism, or pure policy. It is a coupled system.”</p>
+          <div class="concept-grid" id="topConcepts"></div>
+        </div>
+        <svg class="diagram" viewBox="0 0 520 350" role="img" aria-label="Clausewitz trinity diagram">
+          <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#e0a84f"/></marker></defs>
+          <polygon points="260,35 65,305 455,305" fill="rgba(224,168,79,.08)" stroke="#e0a84f" stroke-width="3"/>
+          <circle cx="260" cy="35" r="30" fill="#1d2632" stroke="#78a6ff"/><text x="260" y="40" text-anchor="middle">Policy</text>
+          <circle cx="65" cy="305" r="34" fill="#1d2632" stroke="#e45d5d"/><text x="65" y="300" text-anchor="middle">Passion</text><text x="65" y="315" text-anchor="middle" class="mutedText">people</text>
+          <circle cx="455" cy="305" r="34" fill="#1d2632" stroke="#5ed69f"/><text x="455" y="300" text-anchor="middle">Chance</text><text x="455" y="315" text-anchor="middle" class="mutedText">army</text>
+          <line x1="242" y1="62" x2="83" y2="276" stroke="#e0a84f" marker-end="url(#arrow)"/><line x1="278" y1="62" x2="435" y2="276" stroke="#e0a84f" marker-end="url(#arrow)"/><line x1="100" y1="305" x2="420" y2="305" stroke="#e0a84f" marker-end="url(#arrow)"/>
+          <text x="260" y="185" text-anchor="middle" font-size="20">remarkable trinity</text>
+          <text x="260" y="208" text-anchor="middle" class="mutedText">not a slogan: a diagnostic triangle</text>
+        </svg>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Book tree</h2>
+      <div hidden data-book-id="book-1"></div>
+      <div hidden data-book-id="book-8"></div>
+      <div class="cards" id="cards"></div>
+    </section>
+    <section class="panel" id="selectedPanel">
+      <h2 id="selectedTitle">Book I — On the Nature of War</h2>
+      <p id="selectedPlain" class="lede"></p>
+      <div class="split">
+        <div><h3>Chapter compartments</h3><div class="chapter-list" id="chapters"></div></div>
+        <div><h3>Concept weight</h3><svg id="radial" class="diagram" viewBox="0 0 420 420"></svg><h3>Plain interpretation</h3><p id="selectedInterpretation"></p></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Friction lab</h2>
+      <p class="muted">Clausewitz treats plans as degraded by uncertainty, fatigue, terrain, miscommunication, fear, weather, distance, and luck. Drag the sliders: the effective force is never the paper force.</p>
+      <div id="frictionLab">
+        <div class="slider-row"><label>Information fog</label><input type="range" min="0" max="100" value="35" data-friction="fog"><output>35</output></div>
+        <div class="slider-row"><label>Physical strain</label><input type="range" min="0" max="100" value="42" data-friction="strain"><output>42</output></div>
+        <div class="slider-row"><label>Coordination</label><input type="range" min="0" max="100" value="55" data-friction="coord"><output>55</output></div>
+        <div class="slider-row"><label>Moral cohesion</label><input type="range" min="0" max="100" value="68" data-friction="morale"><output>68</output></div>
+        <div class="meter"><i id="frictionMeter"></i></div><p id="frictionText"></p>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Scenario lab: limited war vs. overthrow logic</h2>
+      <div id="scenarioLab" class="split">
+        <div>
+          <div class="slider-row"><label>Political value</label><input type="range" min="0" max="100" value="55" data-scenario="value"><output>55</output></div>
+          <div class="slider-row"><label>Enemy resistance</label><input type="range" min="0" max="100" value="62" data-scenario="resistance"><output>62</output></div>
+          <div class="slider-row"><label>Available means</label><input type="range" min="0" max="100" value="46" data-scenario="means"><output>46</output></div>
+          <div class="slider-row"><label>Risk tolerance</label><input type="range" min="0" max="100" value="36" data-scenario="risk"><output>36</output></div>
+          <p id="scenarioText" class="quote"></p>
+        </div>
+        <svg id="culminating" class="diagram" viewBox="0 0 560 330"></svg>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Concept map</h2>
+      <canvas id="conceptMap" width="1000" height="520"></canvas>
+    </section>
+    <section class="panel">
+      <h2>Full expandable table of contents</h2>
+      <div class="toc" id="toc"></div>
+    </section>
+    <section class="panel">
+      <h2>Retrieval quiz</h2>
+      <p id="quizPrompt"></p><div class="quiz-options" id="quizOptions"></div><p id="quizResult" class="result"></p><button id="nextQuiz">Next question</button>
+    </section>
+  </main>
+</div>
+<footer class="footer">Built as a teaching artifact: diagrams are interpretations, not claims of military endorsement. Source basis: public-domain structure of the Graham/Maude English edition and the eight-book organization of <em>Vom Kriege</em>.</footer>
+<script>
+const books = [
+ {id:'book-1',title:'Book I — On the Nature of War',chapters:8,weight:[90,85,75,95,70],plain:'War is introduced as a political instrument shaped by violence, chance, emotion, friction, danger, and human judgment.',interpretation:'Start here. Clausewitz is not defining war as mere fighting; he is building a model where policy gives direction, but reality distorts every clean plan.',topics:['politics','violence','chance','friction','genius'],chapterTitles:['What is war?','End and means','Military genius','Danger','Bodily effort','Information','Friction','Concluding remarks']},
+ {id:'book-2',title:'Book II — On the Theory of War',chapters:6,weight:[72,60,82,45,80],plain:'A theory of war must guide judgment without pretending to be a mechanical recipe.',interpretation:'This book is Clausewitz arguing against bad doctrine. Theory should sharpen perception, not replace decision-making.',topics:['theory','criticism','method','judgment','examples'],chapterTitles:['Branches of the art','On theory','Art or science','Method and routine','Criticism','Historical examples']},
+ {id:'book-3',title:'Book III — Of Strategy in General',chapters:18,weight:[86,76,88,70,74],plain:'Strategy uses engagements as instruments toward political and military aims.',interpretation:'Here the book becomes a dashboard of strategic factors: moral forces, numbers, surprise, time, space, reserves, economy, and pauses.',topics:['strategy','morale','numbers','surprise','time'],chapterTitles:['Strategy','Elements','Moral forces','Principal moral powers','Military virtue','Boldness','Perseverance','Superiority of numbers','Surprise','Stratagem','Concentration in space','Concentration in time','Strategic reserve','Economy of force','Geometrical element','Suspension of action','Modern war','Tension and rest']},
+ {id:'book-4',title:'Book IV — The Combat',chapters:14,weight:[88,72,82,66,92],plain:'Combat is the central transaction of war, but its value depends on context, timing, consequence, and aftermath.',interpretation:'The battle is not just a clash. It is a decision mechanism that can open, close, or transform strategic possibility.',topics:['combat','battle','decision','victory','retreat'],chapterTitles:['Introductory','Character of battle','Combat in general','Combat continued','Meaning of combat','Duration','Decision','Mutual understanding','The battle','Effects of victory','Use of battle','Strategic use of victory','Retreat','Night fighting']},
+ {id:'book-5',title:'Book V — Military Forces',chapters:18,weight:[62,80,58,74,65],plain:'Forces are not abstract numbers; they are arranged, supplied, moved, protected, and limited by terrain and logistics.',interpretation:'This book turns the army into a system of maintenance, marches, camps, bases, communications, and ground.',topics:['forces','logistics','movement','terrain','base'],chapterTitles:['General survey','Theatre of war','Maintenance','Relation of forces','Order of battle','Disposition','Advanced guard','Advanced corps','Camps','Marches','Marches continued','More marches','Cantonments','Subsistence','Base of operations','Lines of communication','Country and ground','Command of ground']},
+ {id:'book-6',title:'Book VI — Defence',chapters:30,weight:[82,92,70,64,78],plain:'Defence is the stronger form of war, but only as a means to regain initiative.',interpretation:'Clausewitz treats defence as active: terrain, forts, people, waiting, counter-stroke, and operational depth all form a strategic machine.',topics:['defence','terrain','fortress','people','counterattack'],chapterTitles:['Attack and defence','Relation of attack and defence','Defensive battle','Concentration','Strategic defensive','Extent of means','Interaction','Resistance','Defensive battle continued','Fortresses','Fortresses continued','Defensive position','Strong positions','Flank positions','Mountain defence','Mountain defence continued','Mountain defence conclusion','Cordons','Defence of rivers','Rivers continued','Defence of swamps','Defence of forests','Key of country','Operating on flank','Retreat interior','People in arms','Theatre defence','Theatre defence continued','Strategic defence plan','When decision is sought']},
+ {id:'book-7',title:'Book VII — Attack',chapters:22,weight:[84,78,65,82,76],plain:'Attack seeks positive gains but becomes weaker as it advances, spends force, and approaches a culminating point.',interpretation:'The offensive looks energetic, but Clausewitz keeps asking: when does movement stop creating advantage and start producing vulnerability?',topics:['attack','culmination','pursuit','advance','decision'],chapterTitles:['Attack in relation to defence','Nature of attack','Object of attack','Diminishing force','Culminating point','Destruction of enemy forces','Offensive battle','Passage of rivers','Attack on defensive positions','Attack on entrenched camps','Attack on mountains','Attack on cordons','Manoeuvre','Attack on swamps and forests','Attack on theatre','Invasion','Culminating point of victory','Diversion','Invasion continued','Insurrection','The people','Decision in attack']},
+ {id:'book-8',title:'Book VIII — Plan of War',chapters:9,weight:[96,86,88,72,91],plain:'The war plan connects political purpose, enemy character, available means, risk, scale, and the desired end state.',interpretation:'The final book is the strategic synthesis: limited aims, overthrow aims, centres of gravity, and the need to subordinate military action to political meaning.',topics:['war plan','policy','centre of gravity','limited aim','end state'],chapterTitles:['Introduction','Absolute and real war','Interdependence','Magnitude of object','Closer definition','Political object','Limited aim','Overthrow of enemy','Plan of war']}
+];
+const conceptDefs=[['Policy','War has meaning only through political purpose.'],['Friction','Small difficulties compound until plans become hard.'],['Moral forces','Fear, courage, trust, hatred, and resolve alter material strength.'],['Chance','War is a probabilistic field, not a clockwork machine.'],['Centre of gravity','The main source of cohesion or power that action should address.'],['Culminating point','The moment advance stops adding strength and starts creating exposure.'],['Defence','The stronger form, used to preserve, absorb, and prepare a counterstroke.'],['Attack','The positive form, seeking gain while consuming its own momentum.']];
+let selected=books[0];
+function el(id){return document.getElementById(id)}
+function renderNav(){el('bookNav').innerHTML=books.map((b,i)=>`<button data-book="${b.id}">${i+1}. ${b.title.replace('Book ','')}</button>`).join('')}
+function chapterSummary(book,i,title){const lens={ 'book-1':'nature layer','book-2':'theory layer','book-3':'strategy layer','book-4':'combat layer','book-5':'force-organization layer','book-6':'defensive layer','book-7':'offensive layer','book-8':'war-plan layer'}[book.id];return `${lens}: ${title} is treated as a compartment in the wider system. Read it as a practical diagnostic: what does this factor make possible, what does it distort, and when does it stop being useful?`}
+function renderCards(){el('cards').innerHTML=books.map(b=>`<article class="book-card" data-book-id="${b.id}"><span class="badge">${b.chapters} chapters</span><h3>${b.title}</h3><p>${b.plain}</p><p class="muted">${b.topics.join(' · ')}</p></article>`).join('')}
+function renderConcepts(){el('topConcepts').innerHTML=conceptDefs.slice(0,6).map(c=>`<div class="concept"><strong>${c[0]}</strong><br><span class="muted">${c[1]}</span></div>`).join('')}
+function selectBook(id){selected=books.find(b=>b.id===id)||books[0];document.querySelectorAll('[data-book]').forEach(b=>b.classList.toggle('active',b.dataset.book===selected.id));el('selectedTitle').textContent=selected.title;el('selectedPlain').textContent=selected.plain;el('selectedInterpretation').textContent=selected.interpretation;el('chapters').innerHTML=selected.chapterTitles.map((t,i)=>`<div class="chapter"><strong>${i+1}. ${t}</strong><p>${chapterSummary(selected,i,t)}</p></div>`).join('');drawRadial(selected)}
+function drawRadial(book){const svg=el('radial');const labels=['policy','moral','material','chance','friction'];let out='<circle cx="210" cy="210" r="145" fill="none" stroke="#263242"/>';book.weight.forEach((w,i)=>{const a=(-90+i*72)*Math.PI/180;const r=40+w*1.15;const x=210+Math.cos(a)*r,y=210+Math.sin(a)*r;out+=`<line x1="210" y1="210" x2="${x}" y2="${y}" stroke="#e0a84f" stroke-width="5"/><circle cx="${x}" cy="${y}" r="9" fill="#78a6ff"/><text x="${210+Math.cos(a)*170}" y="${210+Math.sin(a)*170}" text-anchor="middle">${labels[i]}</text>`});out+='<text x="210" y="214" text-anchor="middle" font-size="20">weight</text>';svg.innerHTML=out}
+function renderToc(){el('toc').innerHTML=books.map(b=>`<details><summary>${b.title} <span class="badge">${b.chapters}</span></summary>${b.chapterTitles.map((t,i)=>`<p><strong>${i+1}. ${t}</strong> — ${chapterSummary(b,i,t)}</p>`).join('')}</details>`).join('')}
+function updateFriction(){const vals=[...document.querySelectorAll('[data-friction]')].map(r=>{r.nextElementSibling.value=r.value;return +r.value});const [fog,strain,coord,morale]=vals;const penalty=(fog*.32+strain*.28+(100-coord)*.25+(100-morale)*.3);const effective=Math.max(5,100-penalty);el('frictionMeter').style.width=effective+'%';el('frictionText').textContent=effective>70?'Plan still has usable momentum.':effective>42?'The plan survives only through adaptation and command judgment.':'Friction dominates: pause, simplify, shorten lines, or change the aim.'}
+function updateScenario(){const values=Object.fromEntries([...document.querySelectorAll('[data-scenario]')].map(r=>{r.nextElementSibling.value=r.value;return [r.dataset.scenario,+r.value]}));const pressure=values.value+values.risk-values.resistance*.55-values.means*.25;el('scenarioText').textContent=pressure>55?'Logic points toward an ambitious overthrow aim, but only if means and political endurance remain real.':pressure>20?'Logic points toward a limited positive aim: gain leverage without pretending total decision is cheap.':'Logic points toward defence, delay, bargaining, or a narrower political object.';drawCulminating(values)}
+function drawCulminating(v){const svg=el('culminating');let path='';for(let i=0;i<=100;i++){const x=40+i*4.8;const y=260-(Math.sin(i/100*Math.PI)*(120+v.means*.8)-i*.55-v.resistance*.35+v.risk*.2);path+=(i?'L':'M')+x+' '+Math.max(50,Math.min(285,y))+' '}svg.innerHTML=`<line x1="40" y1="285" x2="530" y2="285" stroke="#425066"/><line x1="40" y1="40" x2="40" y2="285" stroke="#425066"/><path d="${path}" fill="none" stroke="#e0a84f" stroke-width="4"/><text x="270" y="35" text-anchor="middle">culminating-point curve</text><text x="55" y="310">advance</text><text x="8" y="60" transform="rotate(-90 8 60)">net advantage</text>`}
+function drawConceptMap(){const c=el('conceptMap'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);const nodes=conceptDefs.map((d,i)=>({name:d[0],desc:d[1],x:120+(i%4)*250,y:110+Math.floor(i/4)*250}));ctx.strokeStyle='#334052';ctx.lineWidth=3;[[0,1],[0,4],[1,3],[2,6],[2,7],[4,5],[5,7],[6,7],[3,5]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(nodes[a].x,nodes[a].y);ctx.lineTo(nodes[b].x,nodes[b].y);ctx.stroke()});nodes.forEach(n=>{ctx.beginPath();ctx.fillStyle='#182231';ctx.strokeStyle='#e0a84f';ctx.arc(n.x,n.y,54,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#e8edf2';ctx.font='18px system-ui';ctx.textAlign='center';ctx.fillText(n.name,n.x,n.y+6)})}
+const quiz=[['Which idea says clean plans degrade in reality?','Friction'],['Which form is stronger because it can use waiting and terrain?','Defence'],['What joins military action to purpose?','Policy'],['What marks the point where attack starts losing net advantage?','Culminating point']];let qi=0;function quizRender(){const q=quiz[qi%quiz.length];el('quizPrompt').textContent=q[0];const opts=['Friction','Defence','Policy','Culminating point','Chance'].sort(()=>Math.random()-.5);el('quizOptions').innerHTML=opts.map(o=>`<button data-answer="${o}">${o}</button>`).join('');el('quizResult').textContent=''}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-book],.book-card');if(b){selectBook(b.dataset.book||b.dataset.bookId);document.getElementById('selectedPanel').scrollIntoView({behavior:'smooth'})}if(e.target.dataset.path){const paths={beginner:'Read Book I, then the friction lab, then Book VIII.',systems:'Read Books II, V, VI, and the concept map.',strategy:'Read Books III, VII, VIII with the culminating-point curve.',critical:'Compare policy, violence, and moral forces; ask where the model breaks.'};alert(paths[e.target.dataset.path])}if(e.target.dataset.answer){const ok=e.target.dataset.answer===quiz[qi%quiz.length][1];el('quizResult').textContent=ok?'Correct: now connect it to a book compartment.':'Not this one. Reopen the concept map and try the relation again.'}});
+el('nextQuiz').onclick=()=>{qi++;quizRender()};document.querySelectorAll('input[type=range]').forEach(r=>r.addEventListener('input',()=>{updateFriction();updateScenario()}));el('search').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('.chapter,.book-card,.toc details').forEach(n=>n.style.display=n.textContent.toLowerCase().includes(q)?'':'none')});renderNav();renderCards();renderConcepts();renderToc();selectBook('book-1');updateFriction();updateScenario();drawConceptMap();quizRender();
+</script>
+</body>
+</html>
