@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-06-21T21:58:19.359Z",
+  "generatedAt": "2026-06-22T19:57:33.548Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -29,7 +29,8 @@
       "sprite-fan",
       "meme-lab",
       "reveal-peer-plugin",
-      "storyboard-studio"
+      "storyboard-studio",
+      "chado-zen-tea"
     ]
   },
   "operations": {
@@ -44,23 +45,31 @@
     }
   },
   "summary": {
-    "total": 48,
+    "total": 49,
     "byKind": {
-      "html-path": 44,
+      "html-path": 45,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
-      "tool": 23,
-      "education": 2,
+      "tool": 24,
+      "education": 3,
+      "tea": 1,
+      "japanese-culture": 1,
+      "zen": 1,
+      "chadō": 1,
+      "chanoyu": 1,
+      "ceremony": 1,
+      "interactive": 2,
+      "guide": 1,
+      "meditative": 1,
+      "local-first": 7,
+      "v11": 22,
       "strategy": 1,
       "history": 1,
       "philosophy": 1,
       "military-theory": 1,
-      "interactive": 1,
       "visualization": 1,
-      "local-first": 6,
-      "v11": 21,
       "graphics": 13,
       "storyboard": 1,
       "illustration": 1,
@@ -174,6 +183,46 @@
       "tags": [
         "tool",
         "education",
+        "tea",
+        "japanese-culture",
+        "zen",
+        "chadō",
+        "chanoyu",
+        "ceremony",
+        "interactive",
+        "guide",
+        "meditative",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "chado-zen-tea",
+      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+      "href": "../chado-zen-tea/index.html",
+      "description": "Self-contained interactive guide to chanoyu / chadō with a meditative step-by-step ceremony path, animated tea-room illustrations, wa-kei-sei-jaku interpretation lenses, practice timer, etiquette quiz, glossary, and embedded source notes.",
+      "modifiedAt": "2026-06-22T00:00:00.000Z",
+      "changedAt": "2026-06-22T00:00:00.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "education",
         "strategy",
         "history",
         "philosophy",
@@ -200,8 +249,8 @@
       "title": "Clausewitz: On War Interactive Atlas",
       "href": "../clausewitz-on-war-interactive/index.html",
       "description": "Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter compartments, concept maps, friction and culminating-point simulations, scenario sliders, and retrieval prompts.",
-      "modifiedAt": "2026-06-21T21:30:00.000Z",
-      "changedAt": "2026-06-21T21:30:00.000Z",
+      "modifiedAt": "2026-06-21T22:02:45.000Z",
+      "changedAt": "2026-06-21T22:02:45.000Z",
       "deploy": {
         "include": true
       }
@@ -235,8 +284,8 @@
       "title": "Storyboard Studio",
       "href": "../storyboard-studio/index.html",
       "description": "Client-side illustration and text document builder for arranging imported images, prose, captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard artifacts.",
-      "modifiedAt": "2026-06-20T00:00:00.000Z",
-      "changedAt": "2026-06-20T00:00:00.000Z",
+      "modifiedAt": "2026-06-21T22:02:45.000Z",
+      "changedAt": "2026-06-21T22:02:45.000Z",
       "deploy": {
         "include": true
       }

@@ -28,10 +28,48 @@
       "sprite-fan",
       "meme-lab",
       "reveal-peer-plugin",
-      "storyboard-studio"
+      "storyboard-studio",
+      "chado-zen-tea"
     ]
   },
   "items": [
+    {
+      "id": "chado-zen-tea",
+      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+      "kind": "html-path",
+      "href": "../chado-zen-tea/index.html",
+      "description": "Self-contained interactive guide to chanoyu / chadō with a meditative step-by-step ceremony path, animated tea-room illustrations, wa-kei-sei-jaku interpretation lenses, practice timer, etiquette quiz, glossary, and embedded source notes.",
+      "tags": [
+        "tool",
+        "education",
+        "tea",
+        "japanese-culture",
+        "zen",
+        "chadō",
+        "chanoyu",
+        "ceremony",
+        "interactive",
+        "guide",
+        "meditative",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-22T00:00:00.000Z",
+      "changedAt": "2026-06-22T00:00:00.000Z"
+    },
     {
       "id": "clausewitz-on-war-interactive",
       "title": "Clausewitz: On War Interactive Atlas",
@@ -63,8 +101,8 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": "2026-06-21T21:30:00.000Z",
-      "changedAt": "2026-06-21T21:30:00.000Z"
+      "modifiedAt": "2026-06-21T22:02:45.000Z",
+      "changedAt": "2026-06-21T22:02:45.000Z"
     },
     {
       "id": "storyboard-studio",
@@ -95,8 +133,8 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": "2026-06-20T00:00:00.000Z",
-      "changedAt": "2026-06-20T00:00:00.000Z"
+      "modifiedAt": "2026-06-21T22:02:45.000Z",
+      "changedAt": "2026-06-21T22:02:45.000Z"
     },
     {
       "id": "v11-peer-daw",
@@ -995,7 +1033,7 @@
     },
     {
       "id": "gif-white-to-transparent",
-      "title": "GIF White\u2192Alpha Preprocessor",
+      "title": "GIF White→Alpha Preprocessor",
       "kind": "html-path",
       "href": "../gif-white-to-transparent.html",
       "description": "Browser-based GIF preprocessor that removes white backgrounds and replaces with transparency. Upload animated GIF, adjust white threshold with live preview, and download cleaned GIF with proper alpha channel.",
