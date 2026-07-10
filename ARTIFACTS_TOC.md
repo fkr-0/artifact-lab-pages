@@ -254,3 +254,13 @@ Sci-fi spaceship interface for indexing all artifacts.
 ---
 
 *Generated automatically from artifacts directory structure*
+
+---
+
+### 📷 OVERLAY CAM
+**Path:** `overlay-cam/`
+
+Android debug APK for a camera freeze, image overlay, adjustment, and save workflow.
+
+- `index.html` — download page
+- `overlay-cam-intuitive-ux-debug.apk` — verified debug APK
