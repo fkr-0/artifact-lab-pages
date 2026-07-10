@@ -34,6 +34,38 @@
   },
   "items": [
     {
+      "id": "overlay-cam-apk",
+      "title": "Overlay Cam — Intuitive UX APK",
+      "kind": "html-path",
+      "href": "../overlay-cam/index.html",
+      "description": "Android debug APK with a simplified freeze-camera, add-overlay, direct gesture adjustment, fine-tuning, and save workflow.",
+      "tags": [
+        "android",
+        "camera",
+        "overlay",
+        "image",
+        "utility",
+        "apk",
+        "download"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "overlay-cam",
+        "targetPath": "overlay-cam"
+      },
+      "launch": {
+        "modes": [
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "modifiedAt": "2026-07-10T14:49:16.000Z",
+      "changedAt": "2026-07-10T14:49:16.000Z"
+    },
+    {
       "id": "chado-zen-tea",
       "title": "Chadō: Interactive Zen Tea Ceremony Guide",
       "kind": "html-path",
