@@ -51,16 +51,32 @@ const floatingRuntime = {
         tagName,
         className: '',
         innerHTML: '',
+        textContent: '',
+        dataset: {},
+        children: [],
         removed: false,
         events: {},
         style: {},
+        attributes: {},
+        append(...children) {
+          this.children.push(...children);
+          children.forEach((child) => { child.parentNode = this; });
+        },
+        appendChild(child) {
+          this.append(child);
+          return child;
+        },
+        setAttribute(name, value) {
+          this.attributes[name] = value;
+          this[name] = value;
+        },
         querySelector(selector) {
-          if (selector === 'button[data-dock]') return {
-            set onclick(handler) { node.events.dock = handler; },
-          };
-          if (selector === 'button[data-close-floating]' || selector === 'button') return {
-            set onclick(handler) { node.events.close = handler; },
-          };
+          const descendants = this.children.flatMap(function collect(child) {
+            return [child, ...(child.children || []).flatMap(collect)];
+          });
+          if (selector === 'button[data-dock]') return descendants.find((child) => child.tagName === 'button' && 'dock' in child.dataset) || null;
+          if (selector === 'button[data-close-floating]' || selector === 'button') return descendants.find((child) => child.tagName === 'button' && 'closeFloating' in child.dataset) || null;
+          if (selector === 'iframe') return descendants.find((child) => child.tagName === 'iframe') || null;
           return null;
         },
         getBoundingClientRect() { return { left: 10, top: 20 }; },
@@ -79,20 +95,21 @@ floatingRuntime.existingPanel = { removed: false, remove() { this.removed = true
 const panel = createFloatingPanel({ title: 'Hyperblast Shooter', url: '../hyperblast-shooter/index.html?embedded=true' }, floatingRuntime);
 assert.equal(floatingRuntime.existingPanel.removed, true);
 assert.equal(panel.className, 'floating');
-assert.match(panel.innerHTML, /Hyperblast Shooter/);
-assert.match(panel.innerHTML, /..\/hyperblast-shooter\/index.html\?embedded=true/);
-assert.match(panel.innerHTML, /data-floating-drag-handle/, 'floating panel should expose a drag handle');
-assert.match(panel.innerHTML, /data-floating-resize-handle/, 'floating panel should expose a resize handle');
+assert.equal(panel.children[0].children[0].textContent, 'Hyperblast Shooter');
+assert.equal(panel.querySelector('iframe').src, '../hyperblast-shooter/index.html?embedded=true');
+assert.ok('floatingDragHandle' in panel.children[0].dataset, 'floating panel should expose a drag handle');
+assert.ok('floatingResizeHandle' in panel.children[0].children[1].dataset, 'floating panel should expose a resize handle');
 const docked = [];
 const dockPanel = createFloatingPanel({ title: 'Dockable', url: 'dock.html', dockLabel: 'dock inline', onDock: () => docked.push('dock') }, floatingRuntime);
-assert.match(dockPanel.innerHTML, /data-dock/, 'dockable floating panels should expose a dock control');
-dockPanel.events.dock();
+const dockControl = dockPanel.querySelector('button[data-dock]');
+assert.ok(dockControl, 'dockable floating panels should expose a dock control');
+dockControl.onclick();
 assert.deepEqual(docked, ['dock'], 'dock control should call the provided dock callback');
 assert.equal(panel.style.position, 'fixed');
 assert.equal(panel.style.resize, 'both', 'floating panel should be browser-resizable');
 assert.equal(floatingRuntime.body.appended[0], panel);
 assert.equal(typeof panel.events.pointerdown, 'function', 'floating panel should register pointer drag handlers');
-panel.events.close();
+panel.querySelector('button[data-close-floating]').onclick();
 assert.equal(panel.removed, true);
 
 

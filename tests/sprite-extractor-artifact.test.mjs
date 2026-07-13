@@ -60,6 +60,11 @@ assert.match(html, /id="backgroundMode"/, 'artifact should expose background rem
 assert.match(html, /id="backgroundTolerance"/, 'artifact should expose color distance tolerance');
 assert.match(html, /id="backgroundFeather"/, 'artifact should expose feather/soft-alpha controls');
 assert.match(html, /id="backgroundPickBtn"/, 'artifact should allow picking background color from the sheet');
+assert.match(html, /id="backgroundOriginalCanvas"/, 'artifact should preview the immutable original sprite');
+assert.match(html, /id="backgroundPreviewCanvas"/, 'artifact should preview the pending background removal');
+assert.match(html, /id="backgroundLivePreview"[^>]*checked/, 'background removal should preview live by default');
+assert.match(html, /id="undoBackgroundBtn"/, 'artifact should expose background-edit undo');
+assert.match(html, /id="redoBackgroundBtn"/, 'artifact should expose background-edit redo');
 assert.match(html, /id="applyBackgroundToActiveBtn"/, 'artifact should apply background removal to active sprite');
 assert.match(html, /id="applyBackgroundToAllBtn"/, 'artifact should apply background removal to all sprites');
 assert.match(html, /id="restoreAlphaBtn"/, 'artifact should restore the active sprite alpha/source image');
@@ -70,6 +75,11 @@ assert.match(html, /removeBackgroundByCornerFlood/, 'artifact should support flo
 assert.match(html, /removeBackgroundByLuminance/, 'artifact should support luminance-based matte cleanup');
 assert.match(html, /colorDistance/, 'artifact should use color distance for background matching');
 assert.match(html, /softAlphaFromDistance/, 'artifact should support feathered alpha falloff');
+assert.match(html, /renderBackgroundPreview/, 'artifact should render a non-destructive background preview');
+assert.match(html, /commitBackgroundEdit/, 'artifact should record reversible background edits');
+assert.match(html, /undoBackgroundEdit/, 'artifact should undo background edits');
+assert.match(html, /redoBackgroundEdit/, 'artifact should redo background edits');
+assert.match(html, /applyBackgroundAlphaTool\(sprite\.originalCanvas/, 'background changes should be recalculated from the immutable source instead of compounding');
 
 const catalog = await readFile(new URL('../app-hub-v11/artifacts.source.json', import.meta.url), 'utf8');
 assert.match(catalog, /"id": "sprite-extractor"/, 'v11 artifact catalog should include the extractor');

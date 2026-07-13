@@ -4606,6 +4606,58 @@
           return `hsl(${Math.round(hue * 360)}, ${Math.round(sat * 100)}%, ${Math.round(lit * 100)}%)`;
         }
 
+        let generatedRoles = null;
+        let imagePaletteApi = null;
+        async function loadImagePaletteApi() {
+          imagePaletteApi ||= await import("../lib/ui/image-palette.mjs");
+          return imagePaletteApi;
+        }
+        function luminance(hex) {
+          return imagePaletteApi?.relativeLuminance(hex) ?? 0;
+        }
+        async function derivePaletteFromImage(file) {
+          const api = await loadImagePaletteApi();
+          return api.derivePaletteFromImage(file, { maxColors: 8 });
+        }
+        function pickTastefulRoles(colors = []) {
+          return imagePaletteApi?.pickTastefulRoles(colors) || null;
+        }
+        function rolePaletteCss(roles = generatedRoles) {
+          return roles && imagePaletteApi ? imagePaletteApi.rolePaletteCss(roles) : "";
+        }
+        function renderDerivedPalette(colors = []) {
+          derivedPalette.innerHTML = colors
+            .map(
+              (color) =>
+                `<span title="${color}" style="display:inline-grid;place-items:center;min-width:64px;height:42px;background:${color};color:${luminance(color) < 0.36 ? "#fff" : "#07101d"};border:1px solid rgba(255,255,255,.22);">${color}</span>`,
+            )
+            .join("");
+          rolePalette.innerHTML = generatedRoles
+            ? Object.entries(generatedRoles)
+                .map(
+                  ([role, color]) =>
+                    `<span style="display:inline-grid;place-items:center;min-width:92px;height:48px;background:${color};color:${luminance(color) < 0.36 ? "#fff" : "#07101d"};border:1px solid rgba(255,255,255,.22);">${role}<br>${color}</span>`,
+                )
+                .join("")
+            : "";
+          roleCss.value = rolePaletteCss();
+        }
+        async function copyRolePaletteCss() {
+          const css = rolePaletteCss();
+          if (!css) return;
+          roleCss.value = css;
+          await navigator.clipboard?.writeText(css);
+        }
+        function applyRolePaletteToTheme() {
+          if (!generatedRoles) return;
+          const root = document.documentElement;
+          root.style.setProperty("--fg-primary", generatedRoles.primary);
+          root.style.setProperty("--fg-secondary", generatedRoles.secondary);
+          root.style.setProperty("--accent", generatedRoles.accent);
+          root.style.setProperty("--bg-primary", generatedRoles["dark-font"]);
+          root.style.setProperty("--bg-secondary", generatedRoles["dark-font"]);
+        }
+
         function renderPalette() {
           const cols = getSavedColors();
           palette.innerHTML = cols.length
@@ -4653,6 +4705,19 @@
           <button class="cp-clear" style="margin-top:auto;padding:.3rem;background:rgba(255,0,0,0.08);border:1px solid rgba(255,0,0,0.3);color:rgba(255,80,80,0.8);font-family:'Share Tech Mono',monospace;font-size:0.65rem;cursor:pointer;border-radius:3px;">Clear palette</button>
         </div>
       </div>
+      <div style="display:grid;gap:.5rem;border-top:1px solid rgba(255,0,255,.18);padding-top:.75rem;">
+        <label style="font-size:.7rem;display:grid;gap:.35rem;">IMAGE PALETTE
+          <input type="file" class="cp-image-input" accept="image/*" style="width:100%;padding:.35rem;background:rgba(0,0,0,.28);border:1px solid rgba(255,0,255,.24);color:var(--fg-primary);">
+        </label>
+        <div class="cp-derived-palette" style="display:flex;gap:.35rem;flex-wrap:wrap;"></div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--fg-secondary);">SEMANTIC ROLES · primary · secondary · accent · dark-font · light-font</div>
+        <div class="cp-role-palette" style="display:flex;gap:.35rem;flex-wrap:wrap;"></div>
+        <textarea class="cp-role-css" readonly rows="6" style="width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,0,255,.2);color:var(--fg-primary);padding:.4rem;"></textarea>
+        <div style="display:flex;gap:.4rem;">
+          <button class="cp-copy-role-css" style="flex:1;padding:.4rem;background:rgba(255,0,255,.1);border:1px solid var(--fg-secondary);color:var(--fg-primary);">Copy role CSS</button>
+          <button class="cp-apply-role-theme" style="flex:1;padding:.4rem;background:rgba(0,255,136,.1);border:1px solid var(--accent);color:var(--fg-primary);">Apply theme preview</button>
+        </div>
+      </div>
     </div>`;
 
         const picker = container.querySelector(".cp-picker");
@@ -4663,6 +4728,12 @@
         const palette = container.querySelector(".cp-palette");
         const saveBtn = container.querySelector(".cp-save");
         const clearBtn = container.querySelector(".cp-clear");
+        const imageInput = container.querySelector(".cp-image-input");
+        const derivedPalette = container.querySelector(".cp-derived-palette");
+        const rolePalette = container.querySelector(".cp-role-palette");
+        const roleCss = container.querySelector(".cp-role-css");
+        const copyRoleButton = container.querySelector(".cp-copy-role-css");
+        const applyRoleButton = container.querySelector(".cp-apply-role-theme");
 
         // Wire up events
         picker.addEventListener("input", syncColor);
@@ -4688,9 +4759,19 @@
           localStorage.removeItem("v9-colors");
           renderPalette();
         });
+        imageInput.addEventListener("change", async (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          const colors = await derivePaletteFromImage(file);
+          generatedRoles = pickTastefulRoles(colors);
+          renderDerivedPalette(colors);
+        });
+        copyRoleButton.addEventListener("click", copyRolePaletteCss);
+        applyRoleButton.addEventListener("click", applyRolePaletteToTheme);
 
         syncColor();
         renderPalette();
+        renderDerivedPalette([]);
       }
 
       // ============================================

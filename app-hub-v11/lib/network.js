@@ -22,6 +22,17 @@ function normalizePeers(input) {
 
 export function createNoopNetwork() {
   const emitter = createEmitter();
+  const health = Object.freeze({
+    state: "offline",
+    connected: false,
+    role: "local",
+    lobbyId: null,
+    myId: "local",
+    peerCount: 0,
+    reconnectAttempts: 0,
+    lastError: null,
+    changedAt: Date.now(),
+  });
   return {
     on: emitter.on,
     get status() {
@@ -35,6 +46,9 @@ export function createNoopNetwork() {
     },
     get isHub() {
       return true;
+    },
+    get health() {
+      return health;
     },
     send(peerId, type, payload) {
       return { peerId, type, payload, localOnly: true };
@@ -56,6 +70,7 @@ export function createLobbyNetwork({
   const lobby = new PeernetLobby(lobbyId, { storageKey, debug });
   let status = "connecting";
   let peers = new Map();
+  let health = lobby.health;
 
   lobby.addEventListener("status", (event) => {
     const detail = event.detail || {};
@@ -65,6 +80,10 @@ export function createLobbyNetwork({
   lobby.addEventListener("peers", (event) => {
     peers = normalizePeers(event.detail);
     emitter.emit("peers", peers);
+  });
+  lobby.addEventListener("health", (event) => {
+    health = event.detail || lobby.health;
+    emitter.emit("health", health);
   });
   lobby.addEventListener("data", (event) => {
     const detail = event.detail || {};
@@ -98,6 +117,9 @@ export function createLobbyNetwork({
     get isHub() {
       return Boolean(lobby.isHub);
     },
+    get health() {
+      return health || lobby.health;
+    },
     setUsername(nextUsername) {
       username = nextUsername || username;
       if (typeof lobby.setUsername === "function") lobby.setUsername(username);
@@ -109,8 +131,11 @@ export function createLobbyNetwork({
     },
     broadcast(type, payload) {
       const packet = { type, payload, fromName: username, at: Date.now() };
-      lobby.broadcast(packet);
-      return { type, payload, localOnly: false };
+      const delivered = lobby.broadcast(packet);
+      return { type, payload, delivered, localOnly: false };
+    },
+    reconnect() {
+      return lobby.reconnect();
     },
     destroy() {
       lobby.destroy();

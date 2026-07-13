@@ -619,7 +619,96 @@
     .doc.theme-zine { --paper: #f1ead7; --ink: #17130e; }
     .doc.theme-zine .block { border-style: dashed; transform: rotate(-0.15deg); }
 
+    /* Portable document design systems */
+    .doc { --display-font: "Arial Black", "Helvetica Neue", Arial, sans-serif; --body-font: ui-sans-serif, system-ui, sans-serif; --type-leading: 1.46; --image-filter: contrast(1.06) saturate(.9); --image-blend: normal; font-family: var(--body-font); }
+    .doc .doc-title, .doc .hero-caption, .doc .type-slogan .block-body, .doc .type-quote .block-body, .doc .scene-copy h2, .doc .character-copy h3 { font-family: var(--display-font); }
+    .doc .rendered p { line-height: var(--type-leading); }
+    .doc.type-impact { --display-font: "Arial Black", Impact, "Helvetica Neue", Arial, sans-serif; --body-font: "Trebuchet MS", ui-sans-serif, sans-serif; }
+    .doc.type-editorial { --display-font: Baskerville, "Iowan Old Style", Georgia, serif; --body-font: Charter, Georgia, serif; }
+    .doc.type-editorial .doc-title { text-transform:none; letter-spacing:-.045em; line-height:.92; max-width:15ch; }
+    .doc.type-editorial .doc-subtitle, .doc.type-editorial .type-quote .block-body { text-transform:none; letter-spacing:-.015em; }
+    .doc.type-condensed { --display-font: "Arial Narrow", "Roboto Condensed", "Liberation Sans Narrow", Arial, sans-serif; --body-font: ui-sans-serif, system-ui, sans-serif; }
+    .doc.type-condensed .doc-title { max-width:16ch; letter-spacing:-.045em; }
+    .doc.type-technical { --display-font: SFMono-Regular, Consolas, "Liberation Mono", monospace; --body-font: SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+    .doc.type-technical .doc-title { letter-spacing:-.035em; }
+    .doc.type-technical .block::after, .doc.type-technical .pill, .doc.type-technical .stamp { letter-spacing:.12em; }
+    .doc.type-humanist { --display-font: "Trebuchet MS", Candara, Calibri, sans-serif; --body-font: "Trebuchet MS", Candara, Calibri, sans-serif; }
+    .doc.type-humanist .doc-title { letter-spacing:-.055em; }
+    .doc.rhythm-compact { --type-leading:1.3; }
+    .doc.rhythm-compact .doc-inner { padding:calc(var(--doc-pad,3.2rem) * .82); }
+    .doc.rhythm-compact .blocks { gap:calc(var(--block-gap,1.1rem) * .72); }
+    .doc.rhythm-generous { --type-leading:1.62; }
+    .doc.rhythm-generous .doc-inner { padding:calc(var(--doc-pad,3.2rem) * 1.16); }
+    .doc.rhythm-generous .blocks { gap:calc(var(--block-gap,1.1rem) * 1.28); }
+    .doc.image-natural img { filter:none; }
+    .doc.image-punchy img { filter:contrast(1.18) saturate(1.16); }
+    .doc.image-mono img { filter:grayscale(1) contrast(1.18); }
+    .doc.image-duotone .hero-media, .doc.image-duotone .image-frame, .doc.image-duotone .scene-media, .doc.image-duotone .character-portrait { background:var(--blue); }
+    .doc.image-duotone img { filter:grayscale(1) contrast(1.35); mix-blend-mode:screen; opacity:.82; }
+    .design-preset-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.5rem; }
+    .design-summary { margin:.6rem 0 0; padding:.6rem .7rem; border-left:3px solid var(--focus); background:rgba(243,234,209,.055); border-radius:0 .65rem .65rem 0; color:rgba(243,234,209,.62); font-size:.73rem; line-height:1.42; }
+    .design-summary strong { color:var(--cream); }
+
+    /* Production workflow and accessibility */
+    .skip-link {
+      position: fixed; left: 1rem; top: 1rem; z-index: 100;
+      translate: 0 -180%; padding: .65rem .85rem; border-radius: .65rem;
+      background: var(--focus); color: #16110a; font-weight: 900;
+    }
+    .skip-link:focus { translate: 0 0; }
+    button:focus-visible, .button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid var(--focus); outline-offset: 2px;
+    }
+    button:disabled { opacity: .38; cursor: not-allowed; transform: none !important; }
+    .doc-identity { display: grid; gap: .4rem; min-width: 0; }
+    .doc-health { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; color: rgba(243,234,209,.58); font-size: .73rem; }
+    .health-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .5rem; border: 1px solid rgba(243,234,209,.13); border-radius: 999px; background: rgba(0,0,0,.14); }
+    .health-pill::before { content: ''; width: .42rem; height: .42rem; border-radius: 50%; background: #72d6a0; }
+    .health-pill.warn::before { background: #f3c75f; }
+    .health-pill.error::before { background: #e27a67; }
+    .toolbar-divider { width: 1px; height: 1.8rem; background: rgba(243,234,209,.13); margin-inline: .1rem; }
+    .icon-button { width: 2.25rem; height: 2.25rem; display: inline-grid; place-items: center; padding: 0; }
+    .icon-button svg { width: 1rem; height: 1rem; }
+    .template-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .5rem; }
+    .block-filter { position: sticky; top: -.1rem; z-index: 2; padding-bottom: .65rem; background: linear-gradient(var(--panel), var(--panel) 72%, transparent); }
+    .block-filter input { padding-left: 2.1rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='rgba(243,234,209,.52)' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:.7rem center; }
+    .block-row[draggable="true"] { user-select: none; }
+    .block-row.dragging { opacity: .42; }
+    .block-row.drop-target { border-color: var(--focus); box-shadow: 0 0 0 2px rgba(243,199,95,.14); }
+    .stage-canvas { width: 100%; min-width: 100%; display: flex; justify-content: center; align-items: flex-start; transition: height 150ms ease; }
+    .doc { transform-origin: top center; transition: transform 150ms ease; }
+    body.preview-mode .app { grid-template-columns: minmax(0,1fr); }
+    body.preview-mode .rail, body.preview-mode .inspector { display: none; }
+    body.preview-mode .workspace { max-width: 1500px; width: 100%; margin: 0 auto; }
+    body.preview-mode .topbar { position: sticky; top: 1rem; z-index: 10; }
+    .type-scene { grid-column: 1 / -1; background: rgba(255,255,255,.2); }
+    .scene-grid { display: grid; grid-template-columns: minmax(12rem,.82fr) 1.18fr; min-height: 18rem; }
+    .scene-copy { padding: 1.2rem; display: flex; flex-direction: column; justify-content: center; }
+    .scene-kicker, .character-role { color: var(--red); font-size: .72rem; font-weight: 950; text-transform: uppercase; letter-spacing: .12em; }
+    .scene-copy h2 { color: inherit; font-size: clamp(1.8rem,4vw,4rem); line-height: .9; letter-spacing: -.055em; margin: .35rem 0 .8rem; }
+    .scene-media { min-height: 18rem; background: var(--ink); color: var(--cream); display: grid; place-items: center; overflow: hidden; }
+    .scene-media img { width:100%; height:100%; object-fit:cover; }
+    .type-character .block-body { display: grid; grid-template-columns: 8rem 1fr; gap: 1rem; align-items: start; }
+    .character-portrait { aspect-ratio: 1; background: var(--ink); color: var(--cream); display: grid; place-items: center; overflow: hidden; border-radius: 50%; }
+    .character-portrait img { width:100%; height:100%; object-fit:cover; }
+    .character-copy h3 { font-size: 1.55rem; text-transform: uppercase; margin: .2rem 0 .5rem; }
+    .type-divider { grid-column: 1 / -1; min-height: 0; border: 0; box-shadow: none; background: transparent; }
+    .type-divider .block-body { display:flex; align-items:center; gap:.8rem; padding:.4rem 0; font-weight:950; text-transform:uppercase; letter-spacing:.12em; }
+    .type-divider .block-body::before, .type-divider .block-body::after { content:''; height:4px; flex:1; background:var(--ink); }
+    .modal[aria-hidden="false"] { display: grid; }
+    .status[role="status"] { min-height: 1.6rem; }
+    .shortcut-hint { font: .7rem/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; color: rgba(243,234,209,.48); }
     .print-only { display: none; }
+    @media (max-width: 720px) {
+      .topbar-actions { justify-content:flex-start; overflow-x:auto; flex-wrap:nowrap; padding-bottom:.2rem; }
+      .toolbar-divider { flex:0 0 1px; }
+      .scene-grid, .type-character .block-body { grid-template-columns:1fr; }
+      .character-portrait { width:8rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+    }
+
 
     @media (max-width: 1180px) {
       body { overflow: auto; }
@@ -641,13 +730,15 @@
       .app { display: block; padding: 0; height: auto; }
       .workspace { display: block; }
       .stage-wrap { overflow: visible; padding: 0; border: 0; background: white; }
-      .doc { width: 100%; min-height: auto; box-shadow: none; border: 0; }
+      .stage-canvas { height:auto !important; }
+      .doc { width: 100%; min-height: auto; box-shadow: none; border: 0; transform:none !important; }
       .block.selected { outline: none; }
       .print-only { display: block; }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#documentPreview">Skip to document preview</a>
   <div class="app" id="app">
     <aside class="rail" aria-label="Storyboard controls">
       <header>
@@ -659,16 +750,26 @@
           </div>
         </div>
         <div class="tool-grid">
+          <button class="primary" data-action="add-scene">+ Scene</button>
           <button class="primary" data-action="add-image">+ Image</button>
-          <button class="primary" data-action="add-text">+ Text</button>
+          <button data-action="add-character">+ Character</button>
+          <button data-action="add-text">+ Text</button>
           <button data-action="add-quote">+ Quote</button>
           <button data-action="add-blueprint">+ Plan</button>
           <button data-action="add-slogan">+ Slogan</button>
-          <button data-action="load-sample">Sample</button>
+          <button data-action="add-divider">+ Divider</button>
         </div>
       </header>
 
       <div class="scroll">
+        <div class="section">
+          <h3>Start from a structure</h3>
+          <div class="template-row">
+            <select id="templateSelect" aria-label="Storyboard structure template"></select>
+            <button data-action="apply-template">Apply</button>
+          </div>
+          <p class="hint" id="templateHint" style="margin:.55rem 0 0"></p>
+        </div>
         <div class="section">
           <h3>Document</h3>
           <div class="field"><label>Title</label><input id="titleInput" /></div>
@@ -691,6 +792,7 @@
 
         <div class="section">
           <h3>Blocks <small id="blockCount"></small></h3>
+          <div class="block-filter"><input id="blockSearchInput" type="search" placeholder="Filter blocks…" aria-label="Filter blocks"></div>
           <div class="block-list" id="blockList"></div>
         </div>
       </div>
@@ -698,17 +800,24 @@
 
     <main class="workspace">
       <div class="topbar">
-        <input id="docNameInput" aria-label="Document filename" />
+        <div class="doc-identity">
+          <input id="docNameInput" aria-label="Document filename" />
+          <div class="doc-health" id="docHealth" aria-live="polite"></div>
+        </div>
         <div class="topbar-actions">
+          <button class="icon-button" data-action="undo" title="Undo (Ctrl/⌘ Z)" aria-label="Undo" id="undoButton" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a6 6 0 0 1 6 6"/></svg></button>
+          <button class="icon-button" data-action="redo" title="Redo (Ctrl/⌘ Shift Z)" aria-label="Redo" id="redoButton" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 7 5 5-5 5"/><path d="M20 12h-9a6 6 0 0 0-6 6"/></svg></button>
+          <span class="toolbar-divider" aria-hidden="true"></span>
           <button data-action="save-local">Save</button>
-          <button data-action="export-json">JSON</button>
           <button data-action="import-json">Import</button>
           <button class="primary" data-action="export-html">Export HTML</button>
+          <button data-action="toggle-focus" id="focusButton" aria-pressed="false">Focus</button>
           <button data-action="print">Print</button>
         </div>
       </div>
       <div class="stage-wrap" id="stageWrap">
-        <article class="doc layout-poster theme-paper" id="documentPreview">
+        <div class="stage-canvas" id="stageCanvas">
+        <article class="doc layout-poster theme-paper" id="documentPreview" tabindex="-1">
           <div class="doc-inner">
             <header class="doc-header">
               <div>
@@ -721,6 +830,7 @@
             <div class="blocks" id="previewBlocks"></div>
           </div>
         </article>
+        </div>
       </div>
     </main>
 
@@ -731,9 +841,26 @@
       </header>
       <div class="scroll">
         <div class="section">
+          <h3>Design system</h3>
+          <div class="design-preset-row">
+            <select id="designPresetSelect" aria-label="Document design preset"></select>
+            <button data-action="apply-design-preset">Apply</button>
+          </div>
+          <div class="design-summary" id="designPresetHint"></div>
+          <div class="split" style="margin-top:.72rem">
+            <div class="field"><label>Typography</label><select id="typeSystemSelect"><option value="impact">Impact poster</option><option value="editorial">Editorial serif</option><option value="condensed">Condensed display</option><option value="technical">Technical mono</option><option value="humanist">Humanist sans</option></select></div>
+            <div class="field"><label>Color system</label><select id="colorSystemSelect"></select></div>
+          </div>
+          <div class="split">
+            <div class="field"><label>Image treatment</label><select id="imageTreatmentSelect"><option value="natural">Natural</option><option value="punchy">Punchy</option><option value="mono">Monochrome</option><option value="duotone">Duotone</option></select></div>
+            <div class="field"><label>Rhythm</label><select id="rhythmSelect"><option value="compact">Compact</option><option value="balanced">Balanced</option><option value="generous">Generous</option></select></div>
+          </div>
+        </div>
+        <div class="section">
           <h3>Layout</h3>
           <div class="field"><label>Flow</label><select id="layoutSelect"><option value="poster">Poster</option><option value="grid">Grid</option><option value="zine">Zine spread</option><option value="manual">Blueprint manual</option></select></div>
           <div class="field"><label>Theme</label><select id="themeSelect"><option value="paper">Kraft graffiti</option><option value="noir">Noir poster</option><option value="blueprint">Blueprint</option><option value="zine">Zine paper</option></select></div>
+          <div class="field"><label>Preview zoom</label><select id="zoomSelect"><option value="55">55%</option><option value="70">70%</option><option value="85">85%</option><option value="100">100%</option></select></div>
           <div class="split">
             <div class="field"><label>Padding</label><input id="padInput" type="range" min="16" max="90" step="2" /></div>
             <div class="field"><label>Gap</label><input id="gapInput" type="range" min="8" max="42" step="1" /></div>
@@ -743,10 +870,12 @@
 
         <div class="section" id="blockInspector">
           <h3>Selected block</h3>
-          <div class="field"><label>Type</label><select id="blockTypeInput"><option value="hero">Hero image</option><option value="image">Image</option><option value="text">Text</option><option value="quote">Quote</option><option value="blueprint">Blueprint</option><option value="slogan">Slogan</option><option value="note">Note</option></select></div>
+          <div class="field"><label>Type</label><select id="blockTypeInput"><option value="scene">Scene</option><option value="character">Character</option><option value="hero">Hero image</option><option value="image">Image</option><option value="text">Text</option><option value="quote">Quote</option><option value="blueprint">Blueprint</option><option value="slogan">Slogan</option><option value="divider">Divider</option><option value="note">Note</option></select></div>
           <div class="field"><label>Title</label><input id="blockTitleInput" /></div>
+          <div class="field"><label>Meta / role / location</label><input id="blockMetaInput" placeholder="Scene 03 · exterior · dusk" /></div>
           <div class="field"><label>Body / caption</label><textarea id="blockTextInput"></textarea></div>
           <div class="field"><label>Image URL or data URL</label><textarea id="blockImageInput" placeholder="Drop image or paste URL/data URL"></textarea></div>
+          <div class="field"><label>Image description</label><input id="blockAltInput" placeholder="Describe the image for accessibility" /></div>
           <div class="tool-grid">
             <button data-action="move-up">↑ Up</button>
             <button data-action="move-down">↓ Down</button>
@@ -760,15 +889,18 @@
           <p class="hint">Export HTML writes a single self-contained document with the current JSON state embedded. Imported images stay inside as data URLs.</p>
           <div class="tool-grid">
             <button data-action="copy-html">Copy HTML</button>
+            <button data-action="download-json">Download JSON</button>
+            <button data-action="export-markdown">Export Markdown</button>
             <button data-action="copy-json">Copy JSON</button>
           </div>
-          <div class="status" id="status"></div>
+          <p class="shortcut-hint" style="margin:.7rem 0 0">Ctrl/⌘ S save · Z undo · Shift Z redo · D duplicate · / filter · Esc exit focus</p>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
         </div>
       </div>
     </aside>
   </div>
 
-  <div class="modal" id="modal">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
     <div class="modal-card">
       <div class="row" style="justify-content:space-between;margin-bottom:.7rem">
         <h2 id="modalTitle">Data</h2>
@@ -783,9 +915,25 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'storyboard-studio-state-v1';
+    const STORAGE_KEY = 'storyboard-studio-state-v3';
+    const LEGACY_STORAGE_KEYS = ['storyboard-studio-state-v2', 'storyboard-studio-state-v1'];
+    const colorSystems = {
+      resistance: { name:'Resistance red / blueprint blue', red:'#8b2f22', blue:'#174a75', focus:'#f3c75f' },
+      signal: { name:'Signal orange / electric blue', red:'#e95420', blue:'#176b9b', focus:'#ffd35a' },
+      neon: { name:'Neon magenta / cyan', red:'#e8328a', blue:'#00a6bf', focus:'#d8f04c' },
+      forest: { name:'Forest / clay / straw', red:'#a6472b', blue:'#315d50', focus:'#e0b95b' },
+      violet: { name:'Violet / cobalt / lavender', red:'#7a3fa1', blue:'#304f9d', focus:'#e1b9ff' },
+      monochrome: { name:'Ink / graphite / paper', red:'#222222', blue:'#686868', focus:'#d4aa49' }
+    };
+    const designPresets = [
+      { name:'Editorial storyboard', description:'Measured serif hierarchy, natural images, generous pacing, and a warm publication palette.', typeSystem:'editorial', colorSystem:'forest', imageTreatment:'natural', rhythm:'generous', layout:'zine', theme:'paper', pad:54, gap:22 },
+      { name:'Campaign signal', description:'Condensed display type, punchy imagery, tight rhythm, and high-contrast social campaign color.', typeSystem:'condensed', colorSystem:'signal', imageTreatment:'punchy', rhythm:'compact', layout:'poster', theme:'zine', pad:38, gap:14 },
+      { name:'Neon pitch deck', description:'Impact typography, duotone images, balanced spacing, and a vivid presentation-ready palette.', typeSystem:'impact', colorSystem:'neon', imageTreatment:'duotone', rhythm:'balanced', layout:'grid', theme:'noir', pad:44, gap:18 },
+      { name:'Technical dossier', description:'Monospaced information hierarchy, monochrome imagery, compact density, and blueprint structure.', typeSystem:'technical', colorSystem:'monochrome', imageTreatment:'mono', rhythm:'compact', layout:'manual', theme:'blueprint', pad:36, gap:12 },
+      { name:'Humanist field notes', description:'Friendly sans typography, natural imagery, balanced pacing, and a grounded field-record palette.', typeSystem:'humanist', colorSystem:'resistance', imageTreatment:'natural', rhythm:'balanced', layout:'zine', theme:'paper', pad:48, gap:18 }
+    ];
     const sample = {
-      version: 1,
+      version: 3,
       filename: 'bakery-illustrated-document.html',
       title: 'The Philosophical Resistance Bakery',
       subtitle: 'illustration + text sheet / build the myth, export the artifact',
@@ -794,8 +942,13 @@
       layout: 'zine',
       theme: 'paper',
       accent: '#8b2f22',
+      typeSystem: 'impact',
+      colorSystem: 'resistance',
+      imageTreatment: 'punchy',
+      rhythm: 'balanced',
       pad: 46,
       gap: 18,
+      zoom: 85,
       blocks: [
         { id: uid(), type: 'hero', title: 'Hero panel', text: 'BREAD IS ARGUMENT. COMMUNITY IS DEFENSE.', image: '' },
         { id: uid(), type: 'text', title: 'Scene text', text: '# One page, one document\nDrop illustrations into the app, arrange them with text blocks, export a single self-contained HTML sheet.\n\n- client-side only\n- JSON import/export\n- printable poster layout\n- embedded data-url images' },
@@ -805,9 +958,70 @@
       ]
     };
 
+    const templates = [
+      {
+        name: 'Visual narrative',
+        description: 'A paced opening, three scenes, a quote beat, and a closing note.',
+        layout: 'zine',
+        blocks: [
+          { type:'hero', title:'Opening image', meta:'Opening beat', text:'A STORY BEGINS WITH PRESSURE.', image:'', alt:'' },
+          { type:'scene', title:'Arrival', meta:'Scene 01 · exterior · morning', text:'# What changes here?\nEstablish place, desire, and the first visible obstacle.', image:'', alt:'' },
+          { type:'scene', title:'Confrontation', meta:'Scene 02 · interior · afternoon', text:'# Raise the cost\nMake the conflict visual. Give every frame a decision.', image:'', alt:'' },
+          { type:'quote', title:'Voice beat', meta:'Narration', text:'The quiet choice still changes the room.' },
+          { type:'scene', title:'Aftermath', meta:'Scene 03 · exterior · dusk', text:'# Show the new reality\nResolve the image, not every question.', image:'', alt:'' },
+          { type:'note', title:'Production note', meta:'Continuity', text:'Track weather, wardrobe, props, and emotional continuity.' }
+        ]
+      },
+      {
+        name: 'Character dossier',
+        description: 'A compact cast bible for roles, visual identity, relationships, and voice.',
+        layout: 'grid',
+        blocks: [
+          { type:'slogan', title:'Dossier title', meta:'Cast', text:'PEOPLE / PRESSURE / CHANGE' },
+          { type:'character', title:'Protagonist', meta:'Wants change · fears exposure', text:'# Core contradiction\nWhat they say, what they need, and what the camera notices.', image:'', alt:'' },
+          { type:'character', title:'Counterforce', meta:'Protects the old order', text:'# Tactics\nHow they apply pressure and why they believe they are right.', image:'', alt:'' },
+          { type:'character', title:'Witness', meta:'Knows more than they admit', text:'# Leverage\nThe detail only this person can reveal.', image:'', alt:'' },
+          { type:'quote', title:'Voice sample', meta:'Dialogue test', text:'I did not come here to be understood.' }
+        ]
+      },
+      {
+        name: 'Campaign carousel',
+        description: 'A message-first sequence for social storytelling and campaign handoff.',
+        layout: 'poster',
+        blocks: [
+          { type:'hero', title:'Campaign cover', meta:'Slide 01', text:'MAKE THE FIRST FRAME IMPOSSIBLE TO IGNORE.', image:'', alt:'' },
+          { type:'divider', title:'Problem', meta:'Slide 02', text:'THE PROBLEM' },
+          { type:'text', title:'Context', meta:'Slide 02', text:'# One clear claim\nExplain the stakes in language that survives a screenshot.' },
+          { type:'image', title:'Evidence', meta:'Slide 03', text:'Caption the evidence, source, or human moment.', image:'', alt:'' },
+          { type:'quote', title:'Proof point', meta:'Slide 04', text:'Specific beats impressive.' },
+          { type:'slogan', title:'Call to action', meta:'Slide 05', text:'SEE IT / SHARE IT / CHANGE IT' }
+        ]
+      },
+      {
+        name: 'Field manual',
+        description: 'An explanatory artifact with plan, steps, evidence, and operational notes.',
+        layout: 'manual',
+        blocks: [
+          { type:'blueprint', title:'System map', meta:'Overview', text:'Entry / preparation / action / fallback / exit' },
+          { type:'text', title:'Purpose', meta:'01', text:'# Purpose\nWhat this system enables, who it serves, and the constraints it respects.' },
+          { type:'divider', title:'Procedure', meta:'02', text:'PROCEDURE' },
+          { type:'text', title:'Steps', meta:'02', text:'- Prepare the environment\n- Run the primary flow\n- Verify the outcome\n- Record exceptions' },
+          { type:'note', title:'Failure modes', meta:'03', text:'# Watch for\nDocument recovery paths and stop conditions.' }
+        ]
+      }
+    ];
+
     let state = loadState();
     let selectedId = state.blocks[0]?.id || null;
     let modalMode = null;
+    let blockQuery = '';
+    let draggedBlockId = null;
+    let focusMode = false;
+    let historyTimer = null;
+    let statusTimer = null;
+    let historyStack = [];
+    let historyIndex = -1;
+    const HISTORY_LIMIT = 80;
 
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -823,9 +1037,24 @@
       theme: $('#themeSelect'),
       pad: $('#padInput'),
       gap: $('#gapInput'),
+      zoom: $('#zoomSelect'),
+      template: $('#templateSelect'),
+      templateHint: $('#templateHint'),
+      designPreset: $('#designPresetSelect'),
+      designPresetHint: $('#designPresetHint'),
+      typeSystem: $('#typeSystemSelect'),
+      colorSystem: $('#colorSystemSelect'),
+      imageTreatment: $('#imageTreatmentSelect'),
+      rhythm: $('#rhythmSelect'),
+      blockSearch: $('#blockSearchInput'),
       blockList: $('#blockList'),
       blockCount: $('#blockCount'),
       preview: $('#documentPreview'),
+      stageCanvas: $('#stageCanvas'),
+      docHealth: $('#docHealth'),
+      undoButton: $('#undoButton'),
+      redoButton: $('#redoButton'),
+      focusButton: $('#focusButton'),
       previewTitle: $('#previewTitle'),
       previewSubtitle: $('#previewSubtitle'),
       previewStamp: $('#previewStamp'),
@@ -835,8 +1064,10 @@
       selectedHint: $('#selectedHint'),
       blockType: $('#blockTypeInput'),
       blockTitle: $('#blockTitleInput'),
+      blockMeta: $('#blockMetaInput'),
       blockText: $('#blockTextInput'),
       blockImage: $('#blockImageInput'),
+      blockAlt: $('#blockAltInput'),
       imagePicker: $('#imagePicker'),
       dropzone: $('#dropzone'),
       status: $('#status'),
@@ -849,22 +1080,96 @@
     init();
 
     function init() {
+      populateTemplates();
+      populateDesignSystems();
       setupEvents();
+      initializeHistory();
       render();
-      setStatus('Ready. Everything stays in your browser until export.');
+      setStatus('Ready. Changes autosave locally; exports stay self-contained.');
+    }
+
+    function normalizeState(value) {
+      const normalized = { ...structuredClone(sample), ...(value || {}), version: 3 };
+      normalized.blocks = Array.isArray(value?.blocks) ? value.blocks.map(block => ({
+        id: block.id || uid(),
+        type: block.type || 'text',
+        title: block.title || block.type || 'Untitled block',
+        text: block.text || '',
+        image: block.image || '',
+        meta: block.meta || '',
+        alt: block.alt || ''
+      })) : structuredClone(sample.blocks);
+      normalized.zoom = Number(normalized.zoom) || 85;
+      normalized.typeSystem = ['impact','editorial','condensed','technical','humanist'].includes(normalized.typeSystem) ? normalized.typeSystem : 'impact';
+      normalized.colorSystem = colorSystems[normalized.colorSystem] ? normalized.colorSystem : 'resistance';
+      normalized.imageTreatment = ['natural','punchy','mono','duotone'].includes(normalized.imageTreatment) ? normalized.imageTreatment : 'punchy';
+      normalized.rhythm = ['compact','balanced','generous'].includes(normalized.rhythm) ? normalized.rhythm : 'balanced';
+      return normalized;
     }
 
     function loadState() {
       try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-        if (saved?.blocks?.length) return saved;
+        const legacy = LEGACY_STORAGE_KEYS.map(key => localStorage.getItem(key)).find(Boolean);
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || legacy || 'null');
+        if (saved?.blocks?.length) return normalizeState(saved);
       } catch (_) {}
-      return structuredClone(sample);
+      return normalizeState(sample);
     }
 
     function saveState() {
       state.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderSaveHealth();
+    }
+
+    function historySnapshot() {
+      const value = structuredClone(state);
+      delete value.updatedAt;
+      return JSON.stringify(value);
+    }
+
+    function initializeHistory() {
+      historyStack = [historySnapshot()];
+      historyIndex = 0;
+      updateHistoryButtons();
+    }
+
+    function scheduleHistoryCommit() {
+      clearTimeout(historyTimer);
+      historyTimer = setTimeout(() => commitHistory(), 380);
+    }
+
+    function commitHistory(message) {
+      clearTimeout(historyTimer);
+      const next = historySnapshot();
+      if (historyStack[historyIndex] !== next) {
+        historyStack = historyStack.slice(0, historyIndex + 1);
+        historyStack.push(next);
+        if (historyStack.length > HISTORY_LIMIT) historyStack.shift();
+        historyIndex = historyStack.length - 1;
+      }
+      saveState();
+      updateHistoryButtons();
+      if (message) setStatus(message);
+    }
+
+    function restoreHistory(index, message) {
+      if (index < 0 || index >= historyStack.length) return;
+      historyIndex = index;
+      state = normalizeState(JSON.parse(historyStack[index]));
+      selectedId = state.blocks.some(block => block.id === selectedId) ? selectedId : state.blocks[0]?.id || null;
+      saveState();
+      render();
+      updateHistoryButtons();
+      setStatus(message);
+    }
+
+    function undo() { restoreHistory(historyIndex - 1, 'Undid the last change.'); }
+    function redo() { restoreHistory(historyIndex + 1, 'Redid the change.'); }
+
+    function updateHistoryButtons() {
+      if (els.undoButton) els.undoButton.disabled = historyIndex <= 0;
+      if (els.redoButton) els.redoButton.disabled = historyIndex >= historyStack.length - 1;
     }
 
     function setupEvents() {
@@ -874,21 +1179,29 @@
         doAction(target.dataset.action, target);
       });
 
-      ['input', 'change'].forEach((eventName) => {
-        els.title.addEventListener(eventName, () => updateDoc('title', els.title.value));
-        els.subtitle.addEventListener(eventName, () => updateDoc('subtitle', els.subtitle.value));
-        els.stamp.addEventListener(eventName, () => updateDoc('stamp', els.stamp.value));
-        els.tags.addEventListener(eventName, () => updateDoc('tags', els.tags.value.split(',').map(s => s.trim()).filter(Boolean)));
-        els.filename.addEventListener(eventName, () => updateDoc('filename', els.filename.value));
-        els.layout.addEventListener(eventName, () => updateDoc('layout', els.layout.value));
-        els.theme.addEventListener(eventName, () => updateDoc('theme', els.theme.value));
-        els.pad.addEventListener(eventName, () => updateDoc('pad', Number(els.pad.value)));
-        els.gap.addEventListener(eventName, () => updateDoc('gap', Number(els.gap.value)));
-        els.blockType.addEventListener(eventName, updateSelectedFromInspector);
-        els.blockTitle.addEventListener(eventName, updateSelectedFromInspector);
-        els.blockText.addEventListener(eventName, updateSelectedFromInspector);
-        els.blockImage.addEventListener(eventName, updateSelectedFromInspector);
-      });
+      const liveDocumentFields = [
+        [els.title, 'title', () => els.title.value],
+        [els.subtitle, 'subtitle', () => els.subtitle.value],
+        [els.stamp, 'stamp', () => els.stamp.value],
+        [els.tags, 'tags', () => els.tags.value.split(',').map(s => s.trim()).filter(Boolean)],
+        [els.filename, 'filename', () => els.filename.value],
+        [els.pad, 'pad', () => Number(els.pad.value)],
+        [els.gap, 'gap', () => Number(els.gap.value)]
+      ];
+      liveDocumentFields.forEach(([element, key, value]) => element.addEventListener('input', () => updateDoc(key, value())));
+      [
+        [els.layout, 'layout'],
+        [els.theme, 'theme'],
+        [els.zoom, 'zoom'],
+        [els.typeSystem, 'typeSystem'],
+        [els.colorSystem, 'colorSystem'],
+        [els.imageTreatment, 'imageTreatment'],
+        [els.rhythm, 'rhythm']
+      ].forEach(([element, key]) => element.addEventListener('change', () => updateDoc(key, key === 'zoom' ? Number(element.value) : element.value)));
+
+      els.blockType.addEventListener('change', updateSelectedFromInspector);
+      [els.blockTitle, els.blockMeta, els.blockText, els.blockImage, els.blockAlt]
+        .forEach(element => element.addEventListener('input', updateSelectedFromInspector));
 
       els.imagePicker.addEventListener('change', (event) => handleFiles(event.target.files));
       ['dragenter', 'dragover'].forEach(name => els.dropzone.addEventListener(name, (event) => {
@@ -900,6 +1213,10 @@
         els.dropzone.classList.remove('dragover');
       }));
       els.dropzone.addEventListener('drop', (event) => handleFiles(event.dataTransfer.files));
+      els.blockSearch.addEventListener('input', () => { blockQuery = els.blockSearch.value.trim().toLowerCase(); renderBlockList(); });
+      els.template.addEventListener('change', renderTemplateHint);
+      els.designPreset.addEventListener('change', renderDesignPresetHint);
+      els.modal.addEventListener('click', (event) => { if (event.target === els.modal) closeModal(); });
 
       els.swatches.innerHTML = ['#8b2f22', '#174a75', '#15120d', '#d2b98a', '#f3c75f'].map(color => `<button class="swatch" data-action="set-accent" data-color="${color}" style="background:${color}" aria-label="Set accent ${color}"></button>`).join('');
     }
@@ -907,18 +1224,26 @@
     function doAction(action, target) {
       const selected = getSelected();
       const map = {
+        'add-scene': () => addBlock('scene'),
         'add-image': () => addBlock('image'),
+        'add-character': () => addBlock('character'),
         'add-text': () => addBlock('text'),
         'add-quote': () => addBlock('quote'),
         'add-blueprint': () => addBlock('blueprint'),
         'add-slogan': () => addBlock('slogan'),
-        'load-sample': () => { state = structuredClone(sample); selectedId = state.blocks[0]?.id; saveAndRender('Sample loaded.'); },
-        'save-local': () => { saveState(); setStatus('Saved to localStorage.'); },
-        'export-json': () => openModal('Export JSON', JSON.stringify(state, null, 2), 'json-export'),
+        'add-divider': () => addBlock('divider'),
+        'apply-template': applyTemplate,
+        'apply-design-preset': applyDesignPreset,
+        'save-local': () => commitHistory('Saved locally.'),
+        'undo': undo,
+        'redo': redo,
+        'toggle-focus': toggleFocusMode,
         'import-json': () => openModal('Import JSON', JSON.stringify(state, null, 2), 'json-import'),
         'export-html': () => downloadText(filename('html'), standaloneHtml(state), 'text/html'),
         'copy-html': () => copyText(standaloneHtml(state), 'HTML copied.'),
         'copy-json': () => copyText(JSON.stringify(state, null, 2), 'JSON copied.'),
+        'download-json': () => downloadText(filename('json'), JSON.stringify(state, null, 2), 'application/json'),
+        'export-markdown': () => downloadText(filename('md'), storyboardMarkdown(state), 'text/markdown'),
         'print': () => window.print(),
         'move-up': () => selected && moveBlock(selected.id, -1),
         'move-down': () => selected && moveBlock(selected.id, 1),
@@ -927,27 +1252,33 @@
         'close-modal': closeModal,
         'modal-copy': () => copyText(els.modalText.value, 'Modal text copied.'),
         'modal-apply': applyModal,
-        'set-accent': () => { state.accent = target.dataset.color; saveAndRender('Accent updated.'); }
+        'set-accent': () => { state.accent = target.dataset.color; saveAndRender('Custom accent updated.'); }
       };
       if (map[action]) map[action]();
     }
 
     function updateDoc(key, value) {
       state[key] = value;
-      saveAndRender();
+      if (key === 'colorSystem' && colorSystems[value]) state.accent = colorSystems[value].red;
+      saveState();
+      render();
+      scheduleHistoryCommit();
     }
 
     function addBlock(type, extra = {}) {
       const defaults = {
-        hero: { title: 'Hero image', text: 'Big poster caption', image: '' },
-        image: { title: 'Illustration', text: 'Caption or context note.', image: '' },
+        scene: { title: 'New scene', meta: 'Scene · location · time', text: '# Story beat\nDescribe the visible action, turning point, and continuity note.', image: '', alt: '' },
+        character: { title: 'New character', meta: 'Role · want · contradiction', text: '# Character note\nDefine voice, visual motif, relationship, and pressure point.', image: '', alt: '' },
+        hero: { title: 'Hero image', meta: 'Opening beat', text: 'Big poster caption', image: '', alt: '' },
+        image: { title: 'Illustration', meta: 'Visual reference', text: 'Caption or context note.', image: '', alt: '' },
         text: { title: 'Text block', text: '# Heading\nWrite your prose here. Use **strong** and *emphasis*.' },
         quote: { title: 'Quote', text: 'Bread is not silence.' },
         blueprint: { title: 'Blueprint', text: 'Oven / counter / threshold / street / cellar' },
-        slogan: { title: 'Slogan', text: 'BREAD BEFORE BROOMS' },
+        slogan: { title: 'Slogan', meta: 'Display line', text: 'BREAD BEFORE BROOMS' },
+        divider: { title: 'Section divider', meta: 'Structure', text: 'NEW SECTION' },
         note: { title: 'Note', text: 'Short production note.' }
       };
-      const block = { id: uid(), type, ...(defaults[type] || defaults.text), ...extra };
+      const block = { id: uid(), meta: '', alt: '', type, ...(defaults[type] || defaults.text), ...extra };
       state.blocks.push(block);
       selectedId = block.id;
       saveAndRender('Block added.');
@@ -962,9 +1293,13 @@
       if (!block) return;
       block.type = els.blockType.value;
       block.title = els.blockTitle.value;
+      block.meta = els.blockMeta.value;
       block.text = els.blockText.value;
       block.image = els.blockImage.value;
-      saveAndRender();
+      block.alt = els.blockAlt.value;
+      saveState();
+      render();
+      scheduleHistoryCommit();
     }
 
     function moveBlock(id, delta) {
@@ -1020,6 +1355,10 @@
       renderBlockList();
       renderPreview();
       renderInspector();
+      updateHistoryButtons();
+      renderTemplateHint();
+      renderDesignPresetHint();
+      els.focusButton.setAttribute('aria-pressed', focusMode ? 'true' : 'false');
     }
 
     function bindControls() {
@@ -1030,53 +1369,99 @@
       els.filename.value = state.filename || 'storyboard.html';
       els.layout.value = state.layout || 'poster';
       els.theme.value = state.theme || 'paper';
+      els.typeSystem.value = state.typeSystem || 'impact';
+      els.colorSystem.value = state.colorSystem || 'resistance';
+      els.imageTreatment.value = state.imageTreatment || 'punchy';
+      els.rhythm.value = state.rhythm || 'balanced';
       els.pad.value = state.pad ?? 46;
       els.gap.value = state.gap ?? 18;
+      els.zoom.value = state.zoom ?? 85;
       els.blockCount.textContent = `${state.blocks.length}`;
     }
 
     function renderBlockList() {
-      els.blockList.innerHTML = state.blocks.map((block, index) => `
-        <div class="block-row ${block.id === selectedId ? 'active' : ''}" data-id="${block.id}">
-          <span class="drag-handle">${index + 1}</span>
-          <div class="block-row-title"><strong>${escapeHtml(block.title || block.type)}</strong><span>${escapeHtml(block.type)}</span></div>
-          <div class="mini-actions"><button data-action="select-block" data-id="${block.id}">Edit</button></div>
+      const entries = state.blocks
+        .map((block, index) => ({ block, index }))
+        .filter(({ block }) => !blockQuery || [block.title, block.type, block.meta, block.text].join(' ').toLowerCase().includes(blockQuery));
+      els.blockCount.textContent = blockQuery ? `${entries.length} / ${state.blocks.length}` : `${state.blocks.length}`;
+      els.blockList.innerHTML = entries.length ? entries.map(({ block, index }) => `
+        <div class="block-row ${block.id === selectedId ? 'active' : ''}" data-id="${block.id}" draggable="true" tabindex="0" aria-label="${escapeAttr(`${index + 1}. ${block.title || block.type}`)}">
+          <span class="drag-handle" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>
+          <div class="block-row-title"><strong>${escapeHtml(block.title || block.type)}</strong><span>${escapeHtml([block.type, block.meta].filter(Boolean).join(' · '))}</span></div>
+          <div class="mini-actions"><button type="button" data-action="select-block" data-id="${block.id}">Edit</button></div>
         </div>
-      `).join('');
-      $$('.block-row').forEach(row => row.addEventListener('click', () => { selectedId = row.dataset.id; render(); }));
+      `).join('') : '<div class="hint" style="padding:.6rem 0">No blocks match this filter.</div>';
+      $$('.block-row').forEach(row => {
+        row.addEventListener('click', () => { selectedId = row.dataset.id; render(); });
+        row.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectedId = row.dataset.id; render(); }
+        });
+        row.addEventListener('dragstart', event => {
+          draggedBlockId = row.dataset.id;
+          row.classList.add('dragging');
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', draggedBlockId);
+        });
+        row.addEventListener('dragend', () => {
+          draggedBlockId = null;
+          $$('.block-row').forEach(item => item.classList.remove('dragging', 'drop-target'));
+        });
+        row.addEventListener('dragover', event => { event.preventDefault(); row.classList.add('drop-target'); });
+        row.addEventListener('dragleave', () => row.classList.remove('drop-target'));
+        row.addEventListener('drop', event => {
+          event.preventDefault();
+          row.classList.remove('drop-target');
+          reorderBlock(draggedBlockId || event.dataTransfer.getData('text/plain'), row.dataset.id);
+        });
+      });
     }
 
     function renderPreview() {
-      els.preview.className = `doc layout-${state.layout || 'poster'} theme-${state.theme || 'paper'}`;
+      const palette = colorSystems[state.colorSystem] || colorSystems.resistance;
+      els.preview.className = `doc layout-${state.layout || 'poster'} theme-${state.theme || 'paper'} type-${state.typeSystem || 'impact'} image-${state.imageTreatment || 'punchy'} rhythm-${state.rhythm || 'balanced'}`;
       els.preview.style.setProperty('--doc-pad', `${state.pad ?? 46}px`);
       els.preview.style.setProperty('--block-gap', `${state.gap ?? 18}px`);
-      els.preview.style.setProperty('--red', state.accent || '#8b2f22');
+      els.preview.style.setProperty('--red', state.accent || palette.red);
+      els.preview.style.setProperty('--blue', palette.blue);
+      els.preview.style.setProperty('--focus', palette.focus);
       els.previewTitle.textContent = state.title || 'Untitled storyboard';
       els.previewSubtitle.textContent = state.subtitle || '';
       els.previewStamp.textContent = state.stamp || 'draft';
       els.previewTags.innerHTML = (state.tags || []).map(tag => `<span class="pill">${escapeHtml(tag)}</span>`).join('');
       els.previewBlocks.innerHTML = state.blocks.map(renderBlock).join('');
       $$('.block').forEach(node => node.addEventListener('click', () => { selectedId = node.dataset.id; render(); }));
+      applyPreviewZoom();
+      renderDocumentHealth();
     }
 
     function renderBlock(block) {
       const selected = block.id === selectedId ? ' selected' : '';
       const label = block.title || block.type;
+      const data = `data-id="${escapeAttr(block.id)}" data-label="${escapeAttr(label)}"`;
+      if (block.type === 'scene') {
+        return `<section class="block type-scene${selected}" ${data}><div class="scene-grid"><div class="scene-media">${imageOrPlaceholder(block.image, block.alt)}</div><div class="scene-copy"><div class="scene-kicker">${escapeHtml(block.meta || 'Scene')}</div><h2>${escapeHtml(block.title || 'Untitled scene')}</h2><div class="rendered">${renderMarkdownish(block.text || '')}</div></div></div></section>`;
+      }
+      if (block.type === 'character') {
+        return `<section class="block type-character${selected}" ${data}><div class="block-body"><div class="character-portrait">${imageOrPlaceholder(block.image, block.alt)}</div><div class="character-copy"><div class="character-role">${escapeHtml(block.meta || 'Character')}</div><h3>${escapeHtml(block.title || 'Untitled character')}</h3><div class="rendered">${renderMarkdownish(block.text || '')}</div></div></div></section>`;
+      }
       if (block.type === 'hero') {
-        return `<section class="block type-hero${selected}" data-id="${block.id}" data-label="${escapeHtml(label)}"><div class="hero-media">${imageOrPlaceholder(block.image)}<div class="hero-caption">${escapeHtml(block.text || block.title || '')}</div></div></section>`;
+        return `<section class="block type-hero${selected}" ${data}><div class="hero-media">${imageOrPlaceholder(block.image, block.alt)}<div class="hero-caption">${escapeHtml(block.text || block.title || '')}</div></div></section>`;
       }
       if (block.type === 'image') {
-        return `<section class="block type-image${selected}" data-id="${block.id}" data-label="${escapeHtml(label)}"><div class="block-body"><div class="image-frame">${imageOrPlaceholder(block.image)}</div><div class="caption">${escapeHtml(block.text || '')}</div></div></section>`;
+        return `<section class="block type-image${selected}" ${data}><div class="block-body"><div class="image-frame">${imageOrPlaceholder(block.image, block.alt)}</div><div class="caption">${escapeHtml(block.text || '')}</div></div></section>`;
       }
       if (block.type === 'blueprint') {
-        return `<section class="block type-blueprint${selected}" data-id="${block.id}" data-label="${escapeHtml(label)}"><div class="block-body">${blueprintSvg(block.text || '')}<div class="caption">${escapeHtml(block.text || '')}</div></div></section>`;
+        return `<section class="block type-blueprint${selected}" ${data}><div class="block-body">${blueprintSvg(block.text || '')}<div class="caption">${escapeHtml(block.text || '')}</div></div></section>`;
+      }
+      if (block.type === 'divider') {
+        return `<section class="block type-divider${selected}" ${data}><div class="block-body">${escapeHtml(block.text || block.title || 'Section')}</div></section>`;
       }
       const cls = `type-${block.type || 'text'}`;
-      return `<section class="block ${cls}${selected}" data-id="${block.id}" data-label="${escapeHtml(label)}"><div class="block-body rendered">${renderMarkdownish(block.text || '')}</div></section>`;
+      return `<section class="block ${cls}${selected}" ${data}><div class="block-body rendered">${renderMarkdownish(block.text || '')}</div></section>`;
     }
 
-    function imageOrPlaceholder(src) {
-      return src ? `<img alt="" src="${escapeAttr(src)}" />` : '<div class="media-placeholder">Drop image<br />or paste data URL</div>';
+    function imageOrPlaceholder(src, alt = '') {
+      return src ? `<img alt="${escapeAttr(alt)}" src="${escapeAttr(src)}" />` : '<div class="media-placeholder">Drop image<br />or paste data URL</div>';
     }
 
     function renderInspector() {
@@ -1086,8 +1471,10 @@
       if (!block) return;
       els.blockType.value = block.type || 'text';
       els.blockTitle.value = block.title || '';
+      els.blockMeta.value = block.meta || '';
       els.blockText.value = block.text || '';
       els.blockImage.value = block.image || '';
+      els.blockAlt.value = block.alt || '';
     }
 
     function renderMarkdownish(text) {
@@ -1125,14 +1512,14 @@
     }
 
     function saveAndRender(message) {
-      saveState();
       render();
-      if (message) setStatus(message);
+      commitHistory(message);
     }
 
     function setStatus(message) {
       els.status.textContent = message || '';
-      if (message) setTimeout(() => { if (els.status.textContent === message) els.status.textContent = ''; }, 4000);
+      clearTimeout(statusTimer);
+      if (message) statusTimer = setTimeout(() => { if (els.status.textContent === message) els.status.textContent = ''; }, 4200);
     }
 
     function openModal(title, content, mode) {
@@ -1140,10 +1527,13 @@
       els.modalTitle.textContent = title;
       els.modalText.value = content;
       els.modal.classList.add('open');
+      els.modal.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(() => els.modalText.focus());
     }
 
     function closeModal() {
       els.modal.classList.remove('open');
+      els.modal.setAttribute('aria-hidden', 'true');
       modalMode = null;
     }
 
@@ -1152,7 +1542,7 @@
         try {
           const imported = JSON.parse(els.modalText.value);
           if (!Array.isArray(imported.blocks)) throw new Error('Imported JSON needs a blocks array.');
-          state = { ...structuredClone(sample), ...imported, version: 1 };
+          state = normalizeState(imported);
           selectedId = state.blocks[0]?.id || null;
           closeModal();
           saveAndRender('Imported JSON.');
@@ -1163,6 +1553,143 @@
         closeModal();
       }
     }
+
+    function populateTemplates() {
+      els.template.innerHTML = templates.map((template, index) => `<option value="${index}">${escapeHtml(template.name)}</option>`).join('');
+      renderTemplateHint();
+    }
+
+    function populateDesignSystems() {
+      els.designPreset.innerHTML = designPresets.map((preset, index) => `<option value="${index}">${escapeHtml(preset.name)}</option>`).join('');
+      els.colorSystem.innerHTML = Object.entries(colorSystems).map(([key, palette]) => `<option value="${key}">${escapeHtml(palette.name)}</option>`).join('');
+      renderDesignPresetHint();
+    }
+
+    function renderTemplateHint() {
+      const template = templates[Number(els.template?.value) || 0];
+      if (els.templateHint && template) els.templateHint.textContent = template.description;
+    }
+
+    function renderDesignPresetHint() {
+      const preset = designPresets[Number(els.designPreset?.value) || 0];
+      if (!els.designPresetHint || !preset) return;
+      els.designPresetHint.innerHTML = `<strong>${escapeHtml(preset.name)}</strong><br>${escapeHtml(preset.description)}`;
+    }
+
+    function applyTemplate() {
+      const template = templates[Number(els.template.value) || 0];
+      if (!template) return;
+      state.layout = template.layout || state.layout;
+      state.blocks = template.blocks.map(block => ({ id: uid(), image:'', alt:'', meta:'', ...structuredClone(block) }));
+      selectedId = state.blocks[0]?.id || null;
+      blockQuery = '';
+      els.blockSearch.value = '';
+      saveAndRender(`${template.name} structure applied. Undo is available.`);
+    }
+
+    function applyDesignPreset() {
+      const preset = designPresets[Number(els.designPreset.value) || 0];
+      if (!preset) return;
+      ['typeSystem','colorSystem','imageTreatment','rhythm','layout','theme','pad','gap'].forEach(key => { state[key] = preset[key]; });
+      state.accent = colorSystems[preset.colorSystem]?.red || state.accent;
+      saveAndRender(`${preset.name} design system applied. Undo is available.`);
+    }
+
+    function reorderBlock(sourceId, targetId) {
+      if (!sourceId || !targetId || sourceId === targetId) return;
+      const sourceIndex = state.blocks.findIndex(block => block.id === sourceId);
+      const targetIndex = state.blocks.findIndex(block => block.id === targetId);
+      if (sourceIndex < 0 || targetIndex < 0) return;
+      const [block] = state.blocks.splice(sourceIndex, 1);
+      const insertionIndex = state.blocks.findIndex(item => item.id === targetId);
+      state.blocks.splice(Math.max(0, insertionIndex), 0, block);
+      selectedId = sourceId;
+      saveAndRender('Block reordered.');
+    }
+
+    function toggleFocusMode(force) {
+      focusMode = typeof force === 'boolean' ? force : !focusMode;
+      document.body.classList.toggle('preview-mode', focusMode);
+      els.focusButton.setAttribute('aria-pressed', focusMode ? 'true' : 'false');
+      els.focusButton.textContent = focusMode ? 'Exit focus' : 'Focus';
+      requestAnimationFrame(applyPreviewZoom);
+      setStatus(focusMode ? 'Focus preview enabled. Press Escape to exit.' : 'Focus preview closed.');
+    }
+
+    function applyPreviewZoom() {
+      const zoom = Math.max(.45, Math.min(1, Number(state.zoom || 85) / 100));
+      els.preview.style.transform = `scale(${zoom})`;
+      requestAnimationFrame(() => {
+        els.stageCanvas.style.height = `${Math.ceil(els.preview.offsetHeight * zoom)}px`;
+      });
+    }
+
+    function textWordCount(value) {
+      return String(value || '').trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    function documentMetrics() {
+      const words = textWordCount([state.title, state.subtitle, ...state.blocks.flatMap(block => [block.title, block.meta, block.text])].join(' '));
+      const imageBlocks = state.blocks.filter(block => ['hero','image','scene','character'].includes(block.type));
+      const images = imageBlocks.filter(block => block.image).length;
+      const missingAlt = imageBlocks.filter(block => block.image && !String(block.alt || '').trim()).length;
+      const emptyBlocks = state.blocks.filter(block => !String(block.text || '').trim() && !String(block.image || '').trim()).length;
+      return { words, images, missingAlt, emptyBlocks };
+    }
+
+    function renderDocumentHealth() {
+      const metrics = documentMetrics();
+      const readiness = metrics.missingAlt || metrics.emptyBlocks ? 'Needs review' : 'Ready to export';
+      const readinessClass = metrics.missingAlt || metrics.emptyBlocks ? 'warn' : '';
+      const savedTime = state.updatedAt ? new Date(state.updatedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'now';
+      els.docHealth.innerHTML = `
+        <span class="health-pill ${readinessClass}">${readiness}</span>
+        <span>${state.blocks.length} blocks · ${metrics.words} words · ${metrics.images} images</span>
+        ${metrics.missingAlt ? `<span>${metrics.missingAlt} image description${metrics.missingAlt === 1 ? '' : 's'} missing</span>` : ''}
+        ${metrics.emptyBlocks ? `<span>${metrics.emptyBlocks} empty block${metrics.emptyBlocks === 1 ? '' : 's'}</span>` : ''}
+        <span>${state.typeSystem} type · ${state.imageTreatment} images · ${state.rhythm} rhythm</span>
+        <span>saved ${savedTime}</span>`;
+    }
+
+    function renderSaveHealth() {
+      if (els?.docHealth && state?.blocks) renderDocumentHealth();
+    }
+
+    function storyboardMarkdown(currentState) {
+      const lines = [
+        `# ${currentState.title || 'Untitled storyboard'}`,
+        currentState.subtitle ? `_${currentState.subtitle}_` : '',
+        currentState.tags?.length ? currentState.tags.map(tag => `#${String(tag).replace(/\s+/g, '-')}`).join(' ') : '',
+        ''
+      ];
+      currentState.blocks.forEach((block, index) => {
+        lines.push(`## ${String(index + 1).padStart(2, '0')} · ${block.title || block.type}`);
+        if (block.meta) lines.push(`_${block.meta}_`);
+        if (block.image) lines.push(`![${block.alt || block.title || ''}](${block.image})`);
+        if (block.text) lines.push(block.text);
+        lines.push('');
+      });
+      return lines.join('\n');
+    }
+
+    function isTypingTarget(target) {
+      return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
+    }
+
+    document.addEventListener('keydown', event => {
+      const command = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
+      if (command && key === 'z') { event.preventDefault(); event.shiftKey ? redo() : undo(); return; }
+      if (command && key === 's') { event.preventDefault(); commitHistory('Saved locally.'); return; }
+      if (command && key === 'd' && !isTypingTarget(event.target)) { event.preventDefault(); const selected = getSelected(); if (selected) duplicateBlock(selected.id); return; }
+      if (event.key === '/' && !isTypingTarget(event.target)) { event.preventDefault(); els.blockSearch.focus(); return; }
+      if ((event.key === 'Delete' || event.key === 'Backspace') && !isTypingTarget(event.target)) { const selected = getSelected(); if (selected) { event.preventDefault(); deleteBlock(selected.id); } return; }
+      if (event.key === 'Escape') {
+        if (els.modal.classList.contains('open')) closeModal();
+        else if (focusMode) toggleFocusMode(false);
+      }
+    });
+    window.addEventListener('resize', () => requestAnimationFrame(applyPreviewZoom));
 
     async function copyText(text, message) {
       try {

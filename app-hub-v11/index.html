@@ -452,6 +452,43 @@
         outline: 2px solid var(--swatch-accent);
         outline-offset: 2px;
       }
+      .palette-drop-zone {
+        display: grid;
+        gap: 0.35rem;
+        padding: 0.75rem;
+        border: 1px dashed color-mix(in srgb, var(--hub-accent), transparent 42%);
+        background: color-mix(in srgb, var(--hub-accent), transparent 94%);
+        cursor: pointer;
+      }
+      .palette-drop-zone.dragover {
+        border-style: solid;
+        border-color: var(--hub-accent);
+        box-shadow: 0 0 18px color-mix(in srgb, var(--hub-accent), transparent 72%);
+      }
+      .palette-role-card {
+        display: grid;
+        gap: 0.35rem;
+        min-height: 6.1rem;
+      }
+      .palette-role-card input[type="color"] {
+        width: 100%;
+        min-height: 2.2rem;
+        padding: 0.1rem;
+      }
+      .palette-contrast-report {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+        gap: 0.35rem;
+      }
+      .palette-metric {
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 74%);
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .palette-metric strong {
+        display: block;
+        color: var(--hub-accent);
+      }
       .storage-meter {
         height: 0.65rem;
         border-radius: 0;
@@ -891,6 +928,139 @@
           38% 35%
         );
       }
+      .command-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-width: 8.4rem;
+        justify-content: space-between;
+        border-color: color-mix(in srgb, var(--hub-accent), transparent 58%);
+        background: color-mix(in srgb, var(--hub-accent), transparent 91%);
+      }
+      kbd {
+        padding: 0.12rem 0.35rem;
+        border: 1px solid color-mix(in srgb, var(--hub-text), transparent 72%);
+        border-bottom-width: 2px;
+        border-radius: 0;
+        background: rgba(0, 0, 0, 0.35);
+        color: var(--hub-muted);
+        font: 0.65rem/1.2 var(--hub-font, "Share Tech Mono", monospace);
+      }
+      .command-center {
+        position: fixed;
+        inset: 0;
+        z-index: 220;
+        display: grid;
+        place-items: start center;
+        padding: min(12vh, 7rem) 1rem 1rem;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 140ms ease;
+      }
+      .command-center.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+      .command-center-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(10px);
+      }
+      .command-center-dialog {
+        position: relative;
+        width: min(760px, 100%);
+        max-height: min(72vh, 680px);
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 0.65rem;
+        padding: 0.85rem;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 28%);
+        border-radius: 0;
+        background: color-mix(in srgb, var(--hub-background), transparent 4%);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.72), 0 0 40px var(--hub-glow);
+        overflow: hidden;
+      }
+      .command-center-head,
+      .command-center-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+      .command-center-input {
+        font-size: 1rem;
+        border-color: color-mix(in srgb, var(--hub-accent), transparent 38%);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hub-accent), transparent 88%);
+      }
+      .command-results {
+        display: grid;
+        gap: 0.3rem;
+        min-height: 5rem;
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+      .command-result {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.65rem 0.75rem;
+        text-align: left;
+        border-color: transparent;
+        background: color-mix(in srgb, var(--hub-card-bg, var(--hub-surface)), transparent 12%);
+        box-shadow: none;
+      }
+      .command-result.active,
+      .command-result[aria-selected="true"] {
+        border-color: var(--hub-accent);
+        background: color-mix(in srgb, var(--hub-accent), transparent 86%);
+        transform: none;
+        box-shadow: inset 3px 0 0 var(--hub-accent), 0 0 18px color-mix(in srgb, var(--hub-accent), transparent 78%);
+      }
+      .command-result-main {
+        min-width: 0;
+      }
+      .command-result-title,
+      .command-result-detail {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .command-result-detail {
+        margin-top: 0.18rem;
+        color: var(--hub-muted);
+        font-size: 0.72rem;
+      }
+      .command-result-kind {
+        color: var(--hub-accent);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .command-empty {
+        padding: 1rem;
+        text-align: center;
+        color: var(--hub-muted);
+      }
+      .command-network-health[data-state="connected"],
+      .command-network-health[data-state="hosting"] {
+        color: var(--hub-accent-green);
+        border-color: color-mix(in srgb, var(--hub-accent-green), transparent 55%);
+      }
+      .command-network-health[data-state="offline"],
+      .command-network-health[data-state="destroyed"] {
+        color: #ff8d8d;
+        border-color: rgba(255, 90, 90, 0.48);
+      }
+      :focus-visible {
+        outline: 2px solid var(--hub-accent);
+        outline-offset: 2px;
+      }
       /* ══════════════════════════════════════
          FOOTER STATUS BAR (v9-style ticker)
       ══════════════════════════════════════ */
@@ -1070,6 +1240,9 @@
               </div>
             </div>
             <div class="row">
+              <button id="openCommandCenter" class="command-trigger" type="button" aria-haspopup="dialog" aria-controls="commandCenter">
+                <span>command</span><kbd>Ctrl K</kbd>
+              </button>
               <label class="row"
                 >launch
                 <select id="defaultAction">
@@ -1253,6 +1426,41 @@
         </div>
         <div id="themeGrid" class="theme-grid"></div>
       </section>
+      <section id="paletteGenerator" class="card stack" aria-labelledby="paletteGeneratorTitle">
+        <div class="row between">
+          <div>
+            <h3 id="paletteGeneratorTitle">Palette Generator</h3>
+            <div class="muted">Extract dominant image colors, infer readable semantic roles, and preview them on the hub.</div>
+          </div>
+          <span id="paletteGeneratorStatus" class="pill" role="status" aria-live="polite">waiting for image</span>
+        </div>
+        <label id="paletteDropZone" class="palette-drop-zone">
+          <strong>Drop or choose a source image</strong>
+          <span class="muted">Analysis stays local in this browser.</span>
+          <input id="paletteImageInput" type="file" accept="image/*" />
+        </label>
+        <canvas id="paletteSampleCanvas" width="96" height="96" hidden></canvas>
+        <div class="stack">
+          <strong>Derived image palette</strong>
+          <div id="derivedPalette" class="theme-grid" aria-live="polite"></div>
+        </div>
+        <div class="stack">
+          <strong>Semantic role palette</strong>
+          <div id="rolePalette" class="theme-grid" aria-live="polite"></div>
+        </div>
+        <div class="stack">
+          <strong>Contrast and separation</strong>
+          <div id="paletteContrastReport" class="palette-contrast-report" aria-live="polite"></div>
+          <div id="paletteWarnings" class="muted" role="status" aria-live="polite"></div>
+        </div>
+        <textarea id="rolePaletteCss" rows="8" readonly placeholder="Generated CSS variables appear here"></textarea>
+        <div class="row">
+          <button id="regenerateRolePalette" type="button">Regenerate roles</button>
+          <button id="copyRolePalette" type="button">Copy role CSS</button>
+          <button id="applyRolePalette" type="button">Apply palette preview</button>
+          <button id="resetRolePalette" type="button">Reset preview</button>
+        </div>
+      </section>
       <section class="card stack">
         <div class="row between">
           <h3>Local storage visualization</h3>
@@ -1311,6 +1519,26 @@
       <a id="fileShareDownload" class="pill" hidden download>download ready</a>
     </section>
 
+    <div id="commandCenter" class="command-center" role="dialog" aria-modal="true" aria-labelledby="commandCenterTitle" aria-hidden="true">
+      <div class="command-center-backdrop" data-command-close></div>
+      <section class="command-center-dialog">
+        <div class="command-center-head">
+          <div>
+            <strong id="commandCenterTitle">NEXUS command center</strong>
+            <div class="muted">Launch artifacts and navigate the hub without leaving the keyboard.</div>
+          </div>
+          <span id="commandNetworkHealth" class="pill command-network-health" data-state="connecting">connecting</span>
+        </div>
+        <input id="commandCenterInput" class="command-center-input" type="search" placeholder="Search artifacts, tags, views, and actions…" autocomplete="off" aria-label="Command search" aria-controls="commandCenterResults" aria-describedby="commandCenterStatus" />
+        <div id="commandCenterStatus" class="muted" role="status" aria-live="polite">Type to search all commands.</div>
+        <div id="commandCenterResults" class="command-results" role="listbox" aria-label="Available commands"></div>
+        <div class="command-center-foot muted">
+          <span><kbd>↑</kbd> <kbd>↓</kbd> select · <kbd>Home</kbd> <kbd>End</kbd> jump · <kbd>Enter</kbd> run · <kbd>Esc</kbd> close</span>
+          <button type="button" data-command-close>close</button>
+        </div>
+      </section>
+    </div>
+
 
     <script type="module">
       const HUB_BASE = document.baseURI.includes('app-hub-v11/') ? './' : 'app-hub-v11/';
@@ -1327,6 +1555,7 @@
         profileModule,
         fileShareModule,
         qrModule,
+        paletteModule,
       ] = await Promise.all([
         import(hubUrl('lib/menu.js')),
         import(hubUrl('lib/launcher.js')),
@@ -1339,6 +1568,7 @@
         import(hubUrl('lib/profile.js')),
         import('../peernetjs/peernet-file-share.js'),
         import(hubUrl('lib/qr.js')),
+        import('../lib/ui/image-palette.mjs'),
       ]);
       const {
         buildMenuGroups,
@@ -1365,6 +1595,14 @@
       const { avatarInitials, normalizeProfile, profileSummary } = profileModule;
       const { PeernetFileShare, parseFileShareIntent } = fileShareModule;
       const { renderShareQr } = qrModule;
+      const {
+        contrastRatio: paletteContrast,
+        derivePaletteFromImage,
+        evaluateRolePalette,
+        pickTastefulRoles,
+        relativeLuminance: paletteLuminance,
+        rolePaletteCss,
+      } = paletteModule;
 
       const $ = (id) => document.getElementById(id);
       const esc = (value = "") =>
@@ -1412,6 +1650,16 @@
         lobbyId: "nexus-v11-hub-main",
         storageKey: "v11-peernet",
       });
+      let commandCenterIndex = 0;
+      let commandCenterMatches = [];
+      let commandCenterReturnFocus = null;
+      let lastNetworkHealth = network.health;
+      let recentArtifactIds = readHubSetting("recentArtifactIds", []);
+      let generatedRolePalette = readHubSetting("generatedPalette", null);
+      let generatedPaletteColors = generatedRolePalette
+        ? Object.values(generatedRolePalette)
+        : [];
+      if (!Array.isArray(recentArtifactIds)) recentArtifactIds = [];
       activeIncomingFileOffer = parseFileShareIntent(window.location);
       const fileShare = new PeernetFileShare({
         network,
@@ -1537,6 +1785,7 @@
       setTheme(readHubSetting("theme", "nexus"), false);
       renderProfile();
       renderThemeGrid();
+      renderPaletteGenerator();
       renderLobbyChat();
       renderChatChannels();
       renderOnlineUsers();
@@ -1559,6 +1808,10 @@
         $("lobbyTabStatus").textContent = text;
         renderLobbySummary();
         eventLog.info("network", text);
+      });
+      network.on("health", (health) => {
+        lastNetworkHealth = health || network.health;
+        renderCommandNetworkHealth();
       });
       network.on("peers", (peers) => {
         connectedPeers = peers || new Map();
@@ -1839,6 +2092,28 @@
         renderOnlineUsers();
         renderStorage();
       };
+      $("paletteImageInput").onchange = (event) => analyzePaletteFile(event.target.files?.[0]);
+      $("paletteDropZone").addEventListener("dragover", (event) => {
+        event.preventDefault();
+        $("paletteDropZone").classList.add("dragover");
+      });
+      $("paletteDropZone").addEventListener("dragleave", () =>
+        $("paletteDropZone").classList.remove("dragover"),
+      );
+      $("paletteDropZone").addEventListener("drop", (event) => {
+        event.preventDefault();
+        $("paletteDropZone").classList.remove("dragover");
+        analyzePaletteFile(event.dataTransfer?.files?.[0]);
+      });
+      $("regenerateRolePalette").onclick = () => {
+        if (!generatedPaletteColors.length) return;
+        generatedRolePalette = pickTastefulRoles(generatedPaletteColors);
+        renderPaletteGenerator();
+        $("paletteGeneratorStatus").textContent = "roles regenerated";
+      };
+      $("copyRolePalette").onclick = copyRolePaletteCss;
+      $("applyRolePalette").onclick = applyRolePaletteToTheme;
+      $("resetRolePalette").onclick = resetRolePalettePreview;
       $("refreshStorage").onclick = renderStorage;
       $("exportStorage").onclick = () => {
         $("storageExport").value = exportHubSettings();
@@ -2006,8 +2281,192 @@
           ? `<article class="artifact-row" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="row between">${timestampDisplay}<span class="pill">${esc(item.kind)}</span></div><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
           : `<article class="artifact-card" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div>${timestampDisplay}<p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
       }
+      function rememberRecentArtifact(item) {
+        if (!item?.id) return;
+        recentArtifactIds = [item.id, ...recentArtifactIds.filter((id) => id !== item.id)].slice(0, 12);
+        writeHubSetting("recentArtifactIds", recentArtifactIds);
+      }
+      function commandSearchScore(entry, query) {
+        const normalized = String(query || "").trim().toLowerCase();
+        const recentIndex = entry.artifact ? recentArtifactIds.indexOf(entry.artifact.id) : -1;
+        if (!normalized) return (recentIndex >= 0 ? 120 - recentIndex : 0) + (entry.kind === "navigate" ? 18 : 0);
+        const terms = normalized.split(/\s+/).filter(Boolean);
+        const title = entry.title.toLowerCase();
+        const haystack = `${entry.title} ${entry.detail || ""} ${entry.keywords || ""}`.toLowerCase();
+        if (!terms.every((term) => haystack.includes(term))) return -1;
+        let score = terms.reduce((total, term) => total + (title.startsWith(term) ? 32 : title.includes(term) ? 18 : 7), 0);
+        if (title === normalized) score += 80;
+        if (recentIndex >= 0) score += 14 - recentIndex;
+        return score;
+      }
+      function hubCommandEntries() {
+        const navigation = [
+          {
+            id: "navigate:lobby",
+            title: "Open Lobby / Chat",
+            detail: "Presence, channels, peer sessions, and file sharing",
+            kind: "navigate",
+            keywords: "network peers chat presence",
+            run: () => setWorkspaceTab("lobbyChat"),
+          },
+          {
+            id: "navigate:event-log",
+            title: "Open Event Log",
+            detail: "Inspect launches, network events, and runtime activity",
+            kind: "navigate",
+            keywords: "events diagnostics log",
+            run: () => setWorkspaceTab("eventLog"),
+          },
+          {
+            id: "navigate:profile",
+            title: "Open Profile & Settings",
+            detail: "Identity, themes, sound, and local storage",
+            kind: "settings",
+            keywords: "profile theme appearance storage sound",
+            run: () => $("profileMenu").classList.add("open"),
+          },
+          {
+            id: "view:cards",
+            title: "Switch to Card View",
+            detail: "Use the visual artifact matrix",
+            kind: "view",
+            keywords: "layout cards grid",
+            run: () => setViewMode("cards"),
+          },
+          {
+            id: "view:list",
+            title: "Switch to Compact List View",
+            detail: "Scan more artifacts at once",
+            kind: "view",
+            keywords: "layout list compact",
+            run: () => setViewMode("list"),
+          },
+          {
+            id: "network:reconnect",
+            title: "Reconnect Peernet Lobby",
+            detail: "Restart the lobby connection and refresh health state",
+            kind: "network",
+            keywords: "peer reconnect retry health",
+            run: () => network.reconnect?.().catch((error) => eventLog.warn("network reconnect", error?.message || error)),
+          },
+          {
+            id: "search:focus",
+            title: "Focus Artifact Filters",
+            detail: "Close the command center and search the catalog sidebar",
+            kind: "navigate",
+            keywords: "filter tags search catalog",
+            run: () => $("search").focus(),
+          },
+        ];
+        const artifacts = catalog.items.map((artifact) => ({
+          id: `artifact:${artifact.id}`,
+          title: artifact.title || artifact.id,
+          detail: artifact.description || artifact.note || (artifact.tags || []).join(" · "),
+          kind: artifact.kind || "artifact",
+          keywords: `${artifact.id} ${(artifact.tags || []).join(" ")}`,
+          artifact,
+          run: () => {
+            selected = artifact;
+            openSelected(artifactDefaultAction(artifact));
+          },
+        }));
+        return [...navigation, ...artifacts];
+      }
+      function renderCommandNetworkHealth() {
+        const health = lastNetworkHealth || network.health || {};
+        const state = health.state || "connecting";
+        const role = health.role || "offline";
+        const peerCount = Number(health.peerCount || 0);
+        const label = `${state} · ${role} · ${peerCount} peer${peerCount === 1 ? "" : "s"}`;
+        const badge = $("commandNetworkHealth");
+        badge.textContent = label;
+        badge.dataset.state = state;
+        badge.title = health.lastError ? `last error: ${health.lastError}` : `lobby ${health.lobbyId || "local"}`;
+        $("openCommandCenter").title = `Command center · network ${label}`;
+      }
+      function setCommandCenterIndex(index) {
+        if (!commandCenterMatches.length) {
+          commandCenterIndex = 0;
+          $("commandCenterInput").removeAttribute("aria-activedescendant");
+          return;
+        }
+        commandCenterIndex = (index + commandCenterMatches.length) % commandCenterMatches.length;
+        $("commandCenterResults").querySelectorAll("[data-command-index]").forEach((node) => {
+          const active = Number(node.dataset.commandIndex) === commandCenterIndex;
+          node.classList.toggle("active", active);
+          node.setAttribute("aria-selected", String(active));
+          if (active) {
+            $("commandCenterInput").setAttribute("aria-activedescendant", node.id);
+            node.scrollIntoView({ block: "nearest" });
+          }
+        });
+      }
+      function renderCommandCenter() {
+        const query = $("commandCenterInput").value;
+        commandCenterMatches = hubCommandEntries()
+          .map((entry) => ({ entry, score: commandSearchScore(entry, query) }))
+          .filter(({ score }) => score >= 0)
+          .sort((a, b) => b.score - a.score || a.entry.title.localeCompare(b.entry.title))
+          .slice(0, 18)
+          .map(({ entry }) => entry);
+        commandCenterIndex = Math.min(commandCenterIndex, Math.max(0, commandCenterMatches.length - 1));
+        $("commandCenterResults").innerHTML = commandCenterMatches.length
+          ? commandCenterMatches
+              .map(
+                (entry, index) =>
+                  `<button id="command-option-${index}" class="command-result ${index === commandCenterIndex ? "active" : ""}" type="button" role="option" aria-selected="${index === commandCenterIndex}" data-command-index="${index}"><span class="command-result-main"><strong class="command-result-title">${esc(entry.title)}</strong><span class="command-result-detail">${esc(entry.detail || entry.keywords || "")}</span></span><span class="command-result-kind">${esc(entry.kind)}</span></button>`,
+              )
+              .join("")
+          : '<div class="command-empty">No matching artifact or command.</div>';
+        $("commandCenterStatus").textContent = commandCenterMatches.length
+          ? `${commandCenterMatches.length} result${commandCenterMatches.length === 1 ? "" : "s"}${query.trim() ? ` for “${query.trim()}”` : ""}.`
+          : `No results${query.trim() ? ` for “${query.trim()}”` : ""}.`;
+        $("commandCenterResults").querySelectorAll("[data-command-index]").forEach((node) => {
+          node.addEventListener("pointerenter", () => setCommandCenterIndex(Number(node.dataset.commandIndex)));
+          node.addEventListener("click", () => runCommandCenterEntry(Number(node.dataset.commandIndex)));
+        });
+        setCommandCenterIndex(commandCenterIndex);
+      }
+      function openCommandCenter(initialQuery = "") {
+        const center = $("commandCenter");
+        commandCenterReturnFocus = document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : $("openCommandCenter");
+        center.classList.add("open");
+        center.setAttribute("aria-hidden", "false");
+        $("commandCenterInput").value = initialQuery;
+        commandCenterIndex = 0;
+        renderCommandNetworkHealth();
+        renderCommandCenter();
+        const focusInput = () => $("commandCenterInput").focus({ preventScroll: true });
+        focusInput();
+        const openingAnimations = center.getAnimations?.() || [];
+        if (openingAnimations.length) {
+          Promise.allSettled(openingAnimations.map((animation) => animation.finished)).then(() => {
+            if (center.classList.contains("open")) focusInput();
+          });
+        }
+      }
+      function closeCommandCenter() {
+        const center = $("commandCenter");
+        if (!center.classList.contains("open")) return;
+        center.classList.remove("open");
+        center.setAttribute("aria-hidden", "true");
+        $("commandCenterInput").removeAttribute("aria-activedescendant");
+        commandCenterReturnFocus?.focus?.();
+        commandCenterReturnFocus = null;
+      }
+      function runCommandCenterEntry(index = commandCenterIndex) {
+        const entry = commandCenterMatches[index];
+        if (!entry) return;
+        closeCommandCenter();
+        entry.run?.();
+        sounds.play("click");
+        eventLog.info("command", entry.title);
+      }
       function openSelected(mode, action = null) {
         if (!selected) return;
+        rememberRecentArtifact(selected);
         if (mode === "details") return openDetails(selected);
         const launch = launchArtifact(selected, mode, window, action);
         sounds.play("success");
@@ -2392,6 +2851,130 @@
             };
           });
       }
+      async function analyzePaletteFile(file) {
+        if (!file) return;
+        if (!String(file.type || "").startsWith("image/")) {
+          $("paletteGeneratorStatus").textContent = "choose an image file";
+          return;
+        }
+        $("paletteGeneratorStatus").textContent = "analyzing image";
+        try {
+          generatedPaletteColors = await derivePaletteFromImage(file, {
+            canvas: $("paletteSampleCanvas"),
+            maxColors: 10,
+          });
+          generatedRolePalette = pickTastefulRoles(generatedPaletteColors);
+          renderPaletteGenerator();
+          $("paletteGeneratorStatus").textContent = `${generatedPaletteColors.length} colors derived`;
+          eventLog.success("palette", `derived from ${file.name}`);
+        } catch (error) {
+          $("paletteGeneratorStatus").textContent = "image analysis failed";
+          eventLog.error("palette", error?.message || error);
+        }
+      }
+      function renderPaletteGenerator() {
+        const derived = generatedPaletteColors || [];
+        $("derivedPalette").innerHTML = derived.length
+          ? derived
+              .map(
+                (color, index) =>
+                  `<button type="button" class="theme-card" data-derived-color="${esc(color)}" style="background:${esc(color)};color:${paletteContrast(color, "#ffffff") >= 4.5 ? "#ffffff" : "#07101d"}"><strong>${index + 1}</strong><br><span>${esc(color)}</span></button>`,
+              )
+              .join("")
+          : '<span class="muted">Upload an image to extract dominant colors.</span>';
+        $("derivedPalette").querySelectorAll("[data-derived-color]").forEach((button) => {
+          button.onclick = () => {
+            const color = button.dataset.derivedColor;
+            generatedPaletteColors = [color, ...generatedPaletteColors.filter((candidate) => candidate !== color)];
+            generatedRolePalette = pickTastefulRoles(generatedPaletteColors);
+            renderPaletteGenerator();
+          };
+        });
+        const roles = generatedRolePalette;
+        $("rolePalette").innerHTML = roles
+          ? Object.entries(roles)
+              .map(
+                ([role, color]) =>
+                  `<label class="theme-card palette-role-card" style="--swatch-accent:${esc(color)};--swatch-secondary:${esc(color)};--swatch-tertiary:${esc(color)};background:${esc(color)};color:${paletteContrast(color, "#ffffff") >= 4.5 ? "#ffffff" : "#07101d"}"><strong>${esc(role)}</strong><input type="color" value="${esc(color)}" data-palette-role="${esc(role)}" aria-label="${esc(role)} color"><span>${esc(color)}</span></label>`,
+              )
+              .join("")
+          : '<span class="muted">Semantic roles appear after image analysis.</span>';
+        $("rolePalette").querySelectorAll("[data-palette-role]").forEach((input) => {
+          input.onchange = () => {
+            generatedRolePalette = {
+              ...generatedRolePalette,
+              [input.dataset.paletteRole]: input.value,
+            };
+            renderPaletteGenerator();
+            $("paletteGeneratorStatus").textContent = `${input.dataset.paletteRole} adjusted`;
+          };
+        });
+        const evaluation = roles ? evaluateRolePalette(roles) : null;
+        $("paletteContrastReport").innerHTML = evaluation
+          ? [
+              ["Text contrast", evaluation.metrics.lightOnDark, "ratio"],
+              ["Primary contrast", evaluation.metrics.primaryOnDark, "ratio"],
+              ["Secondary contrast", evaluation.metrics.secondaryOnDark, "ratio"],
+              ["Accent contrast", evaluation.metrics.accentOnDark, "ratio"],
+              ["Role separation", evaluation.metrics.roleSeparation, "distance"],
+            ]
+              .map(
+                ([label, value, kind]) =>
+                  `<div class="palette-metric"><strong>${esc(label)}</strong><span>${kind === "ratio" ? `${Number(value).toFixed(2)}:1` : Math.round(value)}</span></div>`,
+              )
+              .join("")
+          : '<span class="muted">Contrast metrics appear with generated roles.</span>';
+        $("paletteWarnings").textContent = evaluation
+          ? evaluation.ok
+            ? "Palette checks passed for body-text contrast and role separation."
+            : evaluation.warnings.join(" ")
+          : "";
+        $("rolePaletteCss").value = roles ? rolePaletteCss(roles) : "";
+      }
+      async function copyRolePaletteCss() {
+        const css = generatedRolePalette ? rolePaletteCss(generatedRolePalette) : "";
+        if (!css) return;
+        $("rolePaletteCss").value = css;
+        await navigator.clipboard?.writeText(css);
+        $("paletteGeneratorStatus").textContent = "CSS copied";
+        eventLog.success("palette", "role CSS copied");
+      }
+      function applyRolePaletteToTheme() {
+        if (!generatedRolePalette) return;
+        const root = document.documentElement;
+        const roles = evaluateRolePalette(generatedRolePalette).roles;
+        generatedRolePalette = roles;
+        root.style.setProperty("--generated-primary", roles.primary);
+        root.style.setProperty("--generated-secondary", roles.secondary);
+        root.style.setProperty("--generated-accent", roles.accent);
+        root.style.setProperty("--generated-dark-font", roles["dark-font"]);
+        root.style.setProperty("--generated-light-font", roles["light-font"]);
+        root.style.setProperty("--hub-accent", roles.primary);
+        root.style.setProperty("--hub-secondary", roles.secondary);
+        root.style.setProperty("--hub-tertiary", roles.accent);
+        root.style.setProperty("--hub-background", roles["dark-font"]);
+        root.style.setProperty("--hub-text", roles["light-font"]);
+        writeHubSetting("generatedPalette", roles);
+        $("paletteGeneratorStatus").textContent = "preview applied";
+        eventLog.success("palette", "generated theme preview applied");
+      }
+      function resetRolePalettePreview() {
+        const root = document.documentElement;
+        [
+          "--generated-primary",
+          "--generated-secondary",
+          "--generated-accent",
+          "--generated-dark-font",
+          "--generated-light-font",
+          "--hub-accent",
+          "--hub-secondary",
+          "--hub-tertiary",
+          "--hub-background",
+          "--hub-text",
+        ].forEach((name) => root.style.removeProperty(name));
+        setTheme(readHubSetting("theme", "nexus"), false);
+        $("paletteGeneratorStatus").textContent = "preview reset";
+      }
       function renderThemeGrid() {
         const current = themeById(
           readHubSetting(
@@ -2483,6 +3066,71 @@
         rebuild();
         setInterval(rebuild, 30000);
       }
+      $("openCommandCenter").addEventListener("pointerdown", (event) => event.preventDefault());
+      $("openCommandCenter").addEventListener("click", () => openCommandCenter());
+      $("commandCenterInput").addEventListener("input", () => {
+        commandCenterIndex = 0;
+        renderCommandCenter();
+      });
+      $("commandCenterInput").addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          setCommandCenterIndex(commandCenterIndex + 1);
+        }
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          setCommandCenterIndex(commandCenterIndex - 1);
+        }
+        if (event.key === "Home") {
+          event.preventDefault();
+          setCommandCenterIndex(0);
+        }
+        if (event.key === "End") {
+          event.preventDefault();
+          setCommandCenterIndex(commandCenterMatches.length - 1);
+        }
+        if (event.key === "PageDown") {
+          event.preventDefault();
+          setCommandCenterIndex(commandCenterIndex + 6);
+        }
+        if (event.key === "PageUp") {
+          event.preventDefault();
+          setCommandCenterIndex(commandCenterIndex - 6);
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          runCommandCenterEntry();
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeCommandCenter();
+        }
+      });
+      $("commandCenter").querySelectorAll("[data-command-close]").forEach((node) =>
+        node.addEventListener("click", closeCommandCenter),
+      );
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Tab" && $("commandCenter").classList.contains("open")) {
+          const focusable = [...$("commandCenter").querySelectorAll("input, button, [href], [tabindex]:not([tabindex='-1'])")]
+            .filter((node) => !node.disabled && node.offsetParent !== null);
+          const first = focusable[0];
+          const last = focusable.at(-1);
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last?.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+          }
+        }
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+          event.preventDefault();
+          $("commandCenter").classList.contains("open") ? closeCommandCenter() : openCommandCenter();
+          return;
+        }
+        if (event.key === "Escape") closeCommandCenter();
+      });
+      renderCommandNetworkHealth();
       loadBuildStats();
       startTicker();
       eventLog.success("v11 hub ready");
