@@ -22,7 +22,7 @@ function seriousErrors(errors) {
 test.describe('Hyperblast configurable controls', () => {
   test('setup menu can rebind move-right and the rebound key moves horizontally', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?noAutoMultiplayer=true');
+    await page.goto('/hyperblast-shooter/index.html?multiplayer=false');
 
     await expect(page.locator('#setupMenu')).toBeVisible();
     await expect(page.locator('#binding-moveRight')).toContainText('D');
@@ -57,7 +57,7 @@ test.describe('Hyperblast configurable controls', () => {
 
   test('setup menu exposes VS mode and stores it as the match mode', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?noAutoMultiplayer=true');
+    await page.goto('/hyperblast-shooter/index.html?multiplayer=false');
 
     await expect(page.locator('#setupMenu')).toBeVisible();
     await expect(page.locator('#setupRoomType option[value="vs"]')).toHaveText(/versus/i);
@@ -71,7 +71,7 @@ test.describe('Hyperblast configurable controls', () => {
   });
   test('custom bindings persist across reload and reset restores horizontal defaults', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?noAutoMultiplayer=true');
+    await page.goto('/hyperblast-shooter/index.html?multiplayer=false');
 
     await expect(page.locator('#setupMenu')).toBeVisible();
     await page.locator('#binding-moveRight').click();

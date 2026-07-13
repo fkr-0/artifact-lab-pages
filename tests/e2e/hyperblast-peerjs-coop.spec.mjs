@@ -54,7 +54,7 @@ async function installFakePeerNetwork(context) {
     contentType: 'application/javascript',
     body: fakePeerJsScript,
   }));
-  await context.route('**/lib/peernet/peernet-lib.js', (route) => route.fulfill({
+  await context.route('**/vendor/peernet-lib.js', (route) => route.fulfill({
     status: 200,
     contentType: 'application/javascript',
     body: fakePeernetModule,

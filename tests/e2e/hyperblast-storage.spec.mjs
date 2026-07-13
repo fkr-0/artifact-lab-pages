@@ -22,7 +22,7 @@ function seriousErrors(errors) {
 test.describe('Hyperblast corrupt storage resilience', () => {
   test('boots with safe defaults when progress and settings localStorage are corrupt', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&noAutoMultiplayer=true', {
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false', {
       waitUntil: 'domcontentloaded',
     });
     await page.evaluate(() => {

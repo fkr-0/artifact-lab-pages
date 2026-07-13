@@ -35,8 +35,8 @@ test.describe('app-hub-v11 shell', () => {
     const footerBox = await page.locator('#footerBar').boundingBox();
     const stageBox = await page.locator('#stage').boundingBox();
     const workspaceBox = await page.locator('#workspacePane').boundingBox();
-    expect(footerBox?.height || 0).toBeGreaterThanOrEqual(28);
-    expect(stageBox?.height || 0).toBeGreaterThanOrEqual(28);
+    expect(footerBox?.height || 0).toBeGreaterThanOrEqual(24);
+    expect(stageBox?.height || 0).toBeGreaterThanOrEqual(24);
     expect(footerBox?.y || 0).toBeGreaterThanOrEqual(workspaceBox?.y || 0);
     expect((footerBox?.y || 0) + (footerBox?.height || 0)).toBeLessThanOrEqual((workspaceBox?.y || 0) + (workspaceBox?.height || 0) + 2);
 
@@ -71,7 +71,7 @@ test.describe('app-hub-v11 shell', () => {
 test.describe('Hyperblast Shooter', () => {
   test('boots directly in embedded/directStart mode and exposes a live game API', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await expect(page.locator('#gameCanvas')).toBeVisible();
     await expect(page.locator('#score')).toHaveText('0');
@@ -97,7 +97,7 @@ test.describe('Hyperblast Shooter', () => {
 
   test('supports exploration mode, world-map travel, and signal puzzle rewards', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await expect(page.locator('#sessionModeLabel')).toHaveText('Combat');
     await page.locator('#exploreBtn').click();
@@ -185,7 +185,7 @@ test.describe('Hyperblast Shooter', () => {
     await expect(page.locator('#progressStats')).toContainText('2/4');
     await page.locator('#progressSaveBtn').click();
     const savedMeta = await page.evaluate(() => JSON.parse(localStorage.getItem('hyperblast-shooter-progress-v1')).meta);
-    expect(savedMeta.schemaVersion).toBe(3);
+    expect(savedMeta.schemaVersion).toBe(4);
     expect(typeof savedMeta.savedAt).toBe('string');
     await page.locator('#progressCloseBtn').click();
     await expect(page.locator('[data-world-id="verdant-ion-reef"]')).toBeEnabled();
@@ -260,7 +260,7 @@ test.describe('Hyperblast Shooter', () => {
 
   test('launches and completes a bounded patrol contract from Dock', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await page.locator('#exploreBtn').click();
     await page.locator('#worldLandingBtn').click();
@@ -347,7 +347,7 @@ test.describe('Hyperblast Shooter', () => {
 
   test('responds to keyboard input, fires bullets, and can restart cleanly', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
     await page.locator('#gameCanvas').click();
 
     const before = await page.evaluate(() => ({

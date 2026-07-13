@@ -7,3 +7,6 @@
 [submodule "v11-peer-daw"]
 	path = v11-peer-daw
 	url = git@github.com:fkr-0/v11-peer-daw.git
+[submodule "hyperblast-shooter"]
+	path = hyperblast-shooter
+	url = ../hyperblast-shooter

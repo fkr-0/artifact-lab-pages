@@ -9,8 +9,8 @@
     "test:e2e": "npx playwright test",
     "test:e2e:headed": "npx playwright test --headed",
     "test:e2e:ui": "npx playwright test --ui",
-    "test:hyperblast": "node --test hyperblast-shooter/lib/shooter-balance.test.mjs tests/hyperblast-*.mjs tests/shooter-*.mjs",
-    "test:hyperblast:e2e": "npx playwright test tests/e2e/hub-and-shooter.spec.mjs tests/e2e/hyperblast-offline.spec.mjs tests/e2e/hyperblast-safe-rendering.spec.mjs tests/e2e/hyperblast-keybindings.spec.mjs tests/e2e/hyperblast-peerjs-coop.spec.mjs tests/e2e/hyperblast-storage.spec.mjs --project=chromium",
+    "test:hyperblast": "npm --prefix hyperblast-shooter test && node --test tests/hyperblast-*.mjs tests/shooter-*.mjs",
+    "test:hyperblast:e2e": "npm --prefix hyperblast-shooter run test:e2e && npx playwright test tests/e2e/hub-and-shooter.spec.mjs tests/e2e/hyperblast-offline.spec.mjs tests/e2e/hyperblast-safe-rendering.spec.mjs tests/e2e/hyperblast-keybindings.spec.mjs tests/e2e/hyperblast-peerjs-coop.spec.mjs tests/e2e/hyperblast-storage.spec.mjs --project=chromium",
     "check:hyperblast": "npm run test:hyperblast",
     "check:hyperblast:full": "npm run test:hyperblast && npm run test:hyperblast:e2e"
   },

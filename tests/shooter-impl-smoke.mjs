@@ -1,100 +1,69 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const html = await readFile('hyperblast-shooter/index.html', 'utf8');
+const [html, game, styles] = await Promise.all([
+  readFile('hyperblast-shooter/index.html', 'utf8'),
+  readFile('hyperblast-shooter/js/game.js', 'utf8'),
+  readFile('hyperblast-shooter/styles.css', 'utf8'),
+]);
 
-const constructorBlock = html.slice(
-  html.indexOf('constructor() {'),
-  html.indexOf('this.gameLoop = null;')
-);
-const localStateKeys = [
-  'player',
-  'ownedShips',
-  'ownedBoosters',
-  'ownedWeapons',
-  'bullets',
-  'enemies',
-  'particles',
-  'turrets',
-  'allies',
-  'shields',
-  'enemyProjectiles',
-  'score',
-  'money',
-  'enemyAmountMultiplier',
-  'enemyPowerMultiplier',
-  'stage',
-  'stageKills',
-  'stageGoal',
-  'bossActive',
-  'bossDefeated',
-  'keys',
-  'spawnTimer',
-  'sessionMode',
-  'worldProgress',
-  'lastFrameAt',
-  'story',
-  'gameOver',
-];
-const requiredCombatArrays = ['allies', 'shields', 'enemyProjectiles'];
+assert.match(html, /src="\.\/js\/game\.js"/, 'HTML should load the extracted game runtime');
+assert.match(html, /href="\.\/styles\.css"/, 'HTML should load the extracted style sheet');
+assert.doesNotMatch(html, /class ShooterGame/, 'HTML should no longer embed the runtime class');
+assert.match(html, /src="\.\/vendor\/peerjs\.min\.js"/, 'standalone build should vendor PeerJS');
+assert.match(game, /import \{ PeernetLobby \} from '\.\.\/vendor\/peernet-lib\.js'/, 'runtime should use the vendored lobby adapter');
+
+function block(startNeedle, endNeedle, from = 0) {
+  const start = game.indexOf(startNeedle, from);
+  assert.notEqual(start, -1, `missing block start: ${startNeedle}`);
+  const end = game.indexOf(endNeedle, start + startNeedle.length);
+  assert.notEqual(end, -1, `missing block end after ${startNeedle}: ${endNeedle}`);
+  return game.slice(start, end);
+}
+
+const constructorBlock = block('constructor() {', 'this.init();');
 assert.match(constructorBlock, /local:\s*this\.createInitialLocalState\(\{ y: 0 \}\)/, 'constructor should initialize local state through createInitialLocalState');
+assert.match(constructorBlock, /this\.stageStoryState = savedProgress\.stageStoryState/, 'constructor should hydrate stage story state');
+assert.match(constructorBlock, /this\.versusState = createVersusState\(\)/, 'constructor should initialize deterministic versus state');
+assert.match(constructorBlock, /this\.paused = false/, 'runtime should own an explicit pause state');
 
-const initialLocalStateBlock = html.slice(
-  html.indexOf('createInitialLocalState('),
-  html.indexOf('getUsername() {')
-);
-assert.match(initialLocalStateBlock, /createInitialLocalState\(\{ y = 0, keys = \{\}, enemyAmount = 2, enemyPower = 2 \} = \{\}\)/, 'ShooterGame should centralize local-state construction with safe defaults');
-for (const key of localStateKeys) {
-  assert.match(initialLocalStateBlock, new RegExp(`\\b${key}:`), `createInitialLocalState should initialize ${key}`);
+const initialStateBlock = block('createInitialLocalState(', 'loadProgress() {');
+for (const key of [
+  'player', 'ownedShips', 'ownedBoosters', 'ownedWeapons', 'bullets', 'enemies',
+  'particles', 'turrets', 'allies', 'shields', 'enemyProjectiles', 'score', 'money',
+  'enemyAmountMultiplier', 'enemyPowerMultiplier', 'stage', 'stageKills', 'stageGoal',
+  'bossActive', 'bossDefeated', 'storyComplete', 'keys', 'spawnTimer', 'sessionMode',
+  'worldProgress', 'questState', 'contractState', 'lastFrameAt', 'story', 'gameOver',
+]) {
+  assert.match(initialStateBlock, new RegExp(`\\b${key}:`), `createInitialLocalState should initialize ${key}`);
 }
-for (const key of requiredCombatArrays) {
-  const matches = initialLocalStateBlock.match(new RegExp(`${key}: \\[\\]`, 'g')) || [];
-  assert.equal(matches.length, 1, `createInitialLocalState should initialize ${key} exactly once`);
-}
+assert.match(initialStateBlock, /stageGoal: storyStageKillGoal/, 'story stage goals should come from the campaign model');
 
-const resizeBlock = html.slice(
-  html.indexOf('resize() {'),
-  html.indexOf('setupControls() {')
-);
-assert.match(resizeBlock, /Math\.max\(GAME_CONFIG\.MIN_CANVAS_WIDTH, container\.clientWidth\)/, 'embedded resize should keep a playable minimum canvas width');
-assert.match(resizeBlock, /Math\.max\(GAME_CONFIG\.MIN_CANVAS_WIDTH, window\.innerWidth\)/, 'standalone resize should keep a playable minimum canvas width');
-assert.match(resizeBlock, /Math\.max\(GAME_CONFIG\.MIN_CANVAS_HEIGHT, window\.innerHeight\)/, 'standalone resize should keep a playable minimum canvas height');
+const combatBlock = block('isCombatActive() {', 'currentWorld() {');
+assert.match(combatBlock, /this\.combatRunMode === 'story' \|\| isContractActive/, 'default story combat should run without requiring a patrol contract');
+assert.match(combatBlock, /this\.versusState\.phase === 'active'/, 'versus combat should require an active duel');
 
-const startBlock = html.slice(
-  html.indexOf('start() {'),
-  html.indexOf('this.updateHUD();', html.indexOf('start() {'))
-);
-assert.match(startBlock, /this\.resize\(\)/, 'start should refresh canvas dimensions before spawning the player');
-assert.match(startBlock, /this\.state\.local\s*=\s*this\.createInitialLocalState\(/, 'start should reset through createInitialLocalState');
-assert.doesNotMatch(startBlock, /this\.state\.local\s*=\s*\{/, 'start should not duplicate the local-state object literal');
-assert.match(startBlock, /keys:\s*this\.state\.local\.keys/, 'start should preserve the live keyboard state object across restart');
-assert.match(startBlock, /enemyAmount:\s*document\.getElementById\('enemyAmount'\)\?\.value \|\| 2/, 'start should preserve the enemy amount fader value');
-assert.match(startBlock, /enemyPower:\s*document\.getElementById\('enemyPower'\)\?\.value \|\| 2/, 'start should preserve the enemy power fader value');
+const updateBlock = block('update() {', 'draw() {');
+assert.match(updateBlock, /const pveCombatActive = combatActive && !\(this\.matchMode === ROOM_TYPES\.VS/, 'PVE spawns should be disabled during 1v1');
+assert.match(updateBlock, /this\.spawnBoss\(\)/, 'story kill goals should expose a stage boss');
+assert.match(updateBlock, /this\.completeActivePatrolContract\(\)/, 'patrol runs should retain bounded completion');
+assert.match(updateBlock, /this\.updateVersusCombat\(Date\.now\(\)\)/, 'the live loop should evaluate network duel hits');
 
-const updateBlock = html.slice(
-  html.indexOf('update() {'),
-  html.indexOf('// Turrets decay over time')
-);
-assert.match(updateBlock, /s\.enemyProjectiles\s*=\s*s\.enemyProjectiles\.filter/, 'update should filter initialized enemy projectiles');
-assert.match(updateBlock, /const combatActive = this\.isCombatActive\(\)/, 'update should centralize combat-active checks for exploration pacing');
-assert.match(updateBlock, /if \(combatActive\) s\.spawnTimer\+\+/, 'exploration mode should pause spawn timer advancement');
-assert.match(updateBlock, /if \(combatActive && !s\.bossActive && s\.spawnTimer > getSpawnThreshold/, 'enemy spawning should only run during combat mode');
+const advanceBlock = block('advanceStage() {', 'update() {');
+assert.match(advanceBlock, /completeStoryStage/, 'boss clears should advance the serializable story campaign');
+assert.match(advanceBlock, /STORY CAMPAIGN COMPLETE/, 'final-stage completion should have a campaign conclusion');
+assert.match(advanceBlock, /this\.saveProgress\(\)/, 'story stage advancement should persist');
 
-const stopBlock = html.slice(
-  html.indexOf('stopMultiplayer() {'),
-  html.indexOf('broadcastGameState() {')
-);
-assert.match(stopBlock, /this\.lobby\.destroy\?\.\(\)/, 'stopMultiplayer should destroy the PeernetLobby instance');
-assert.match(stopBlock, /this\.lobby\s*=\s*null/, 'stopMultiplayer should clear lobby reference');
+const loopBlock = block('loop() {', 'spendMoney(');
+assert.match(loopBlock, /if \(!this\.paused\) this\.update\(\)/, 'pause should halt simulation updates');
+assert.match(loopBlock, /this\.draw\(\)/, 'pause should keep the rendered scene visible');
 
-const destroyBlock = html.slice(
-  html.indexOf('destroy() {'),
-  html.indexOf('loop() {')
-);
-assert.match(destroyBlock, /this\.stopMultiplayer\(\)/, 'destroy should reuse stopMultiplayer cleanup');
-assert.match(html, /window\.addEventListener\('beforeunload', \(\) => game\.destroy\(\)\)/, 'window unload should destroy the shooter runtime');
-assert.match(html, /const DEFAULT_MULTIPLAYER = true;/, 'shooter should default to multiplayer mode');
-assert.match(html, /if \(DEFAULT_MULTIPLAYER \|\| urlParams\.get\('multiplayer'\) === 'true'\)/, 'startup should auto-enable multiplayer by default');
-assert.match(html, /if \(!game\.multiplayer\) game\.toggleMultiplayer\(\)/, 'startup multiplayer enable should be idempotent');
+const destroyBlock = block('destroy() {', 'loop() {');
+assert.match(destroyBlock, /this\.stopMultiplayer\(\)/, 'destroy should reuse network cleanup');
+assert.match(game, /window\.addEventListener\('beforeunload', \(\) => game\.destroy\(\)\)/, 'window unload should destroy the runtime');
+
+assert.match(styles, /prefers-reduced-motion/, 'visual style should respect reduced-motion preferences');
+assert.match(styles, /:focus-visible/, 'visual style should expose keyboard focus');
+assert.match(styles, /story-stage-card/, 'visual style should include campaign stage presentation');
 
 console.log('shooter implementation smoke checks passed');

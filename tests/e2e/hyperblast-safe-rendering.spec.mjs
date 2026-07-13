@@ -22,7 +22,7 @@ async function collectPageErrors(page) {
 test.describe('Hyperblast safe rendering', () => {
   test('story messages render dynamic content as text, not executable DOM', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await page.evaluate(() => {
       window.__hyperblastInjected = false;
@@ -46,7 +46,7 @@ test.describe('Hyperblast safe rendering', () => {
 
   test('achievement toasts render dynamic content as text, not executable DOM', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await page.evaluate(() => {
       window.__hyperblastAchievementInjected = false;
@@ -66,7 +66,7 @@ test.describe('Hyperblast safe rendering', () => {
   });
   test('multiplayer player list renders remote usernames and colors safely', async ({ page }) => {
     const errors = await collectPageErrors(page);
-    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&noAutoMultiplayer=true');
+    await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await page.evaluate(() => {
       window.__hyperblastPeerInjected = false;
