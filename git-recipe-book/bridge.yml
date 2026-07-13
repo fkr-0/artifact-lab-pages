@@ -1,0 +1,29 @@
+version: 1
+name: git-recipe-book
+description: Interactive Git learning artifact
+agent:
+  notes: Educational React/Vite TypeScript artifact for learning Git. Keep lesson content beginner-first: explain tools before asking for commands, preserve interactive tests, and verify with Vitest/build.
+  tasks:
+    - Improve pedagogy without raising entry barrier.
+    - Keep lesson UI explicit about tool terms, expected outcomes, and checkpoints.
+commands:
+  test:
+    run: ["pnpm", "test"]
+    timeoutMs: 120000
+    category: test
+  test:lesson-provider:
+    run: ["pnpm", "vitest", "run", "src/lib/__tests__/lesson-provider.test.ts"]
+    timeoutMs: 120000
+    category: test
+  test:lesson-panel:
+    run: ["pnpm", "vitest", "run", "src/components/git/__tests__/GitLessonPanel.integration.test.tsx"]
+    timeoutMs: 120000
+    category: test
+  build:
+    run: ["pnpm", "build"]
+    timeoutMs: 120000
+    category: build
+  lint:
+    run: ["pnpm", "lint"]
+    timeoutMs: 120000
+    category: lint

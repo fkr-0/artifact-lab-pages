@@ -1,0 +1,358 @@
+/* V11 Cyberpunk Theme for Git Recipe Book */
+/* Based on NEXUS v11 App Hub aesthetic */
+
+@layer base {
+  :root {
+    /* V11 Color Palette */
+    --v11-accent: #00ffff;
+    --v11-secondary: #ff00ff;
+    --v11-accent-green: #00ff88;
+    --v11-background: #0a0a12;
+    --v11-surface: rgba(18, 18, 31, 0.92);
+    --v11-panel: rgba(10, 10, 18, 0.88);
+    --v11-text: #eaeaed;
+    --v11-muted: rgba(234, 234, 237, 0.58);
+    --v11-glow: rgba(0, 255, 255, 0.5);
+    --v11-glow-secondary: rgba(255, 0, 255, 0.5);
+    --v11-border: rgba(0, 255, 255, 0.15);
+    --v11-border-hover: rgba(0, 255, 255, 0.4);
+
+    /* Override theme variables for cyberpunk look */
+    --background: var(--v11-background);
+    --foreground: var(--v11-text);
+    --card: var(--v11-surface);
+    --card-foreground: var(--v11-text);
+    --popover: var(--v11-panel);
+    --popover-foreground: var(--v11-text);
+    --primary: var(--v11-accent);
+    --primary-foreground: #001018;
+    --secondary: var(--v11-secondary);
+    --secondary-foreground: #001018;
+    --muted: rgba(255, 255, 255, 0.05);
+    --muted-foreground: var(--v11-muted);
+    --accent: var(--v11-accent-green);
+    --accent-foreground: #001018;
+    --destructive: #ef4444;
+    --border: var(--v11-border);
+    --input: rgba(0, 255, 255, 0.1);
+    --ring: var(--v11-accent);
+  }
+
+  body[data-theme="v11-cyberpunk"] {
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    background:
+      radial-gradient(circle at 14% 8%, var(--v11-glow), transparent 28rem),
+      radial-gradient(circle at 90% 22%, color-mix(in srgb, var(--v11-accent), transparent 70%), transparent 24rem),
+      linear-gradient(color-mix(in srgb, var(--v11-accent), transparent 92%) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--v11-accent), transparent 92%) 1px, transparent 1px),
+      var(--v11-background);
+    background-size: auto, auto, 32px 32px, 32px 32px, auto;
+    image-rendering: pixelated;
+  }
+
+  body[data-theme="v11-cyberpunk"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 14% 8%, var(--v11-glow), transparent 28rem),
+      radial-gradient(circle at 90% 22%, color-mix(in srgb, var(--v11-accent), transparent 70%), transparent 24rem);
+    opacity: 0.18;
+  }
+
+  body[data-theme="v11-cyberpunk"]::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--v11-accent), transparent 96%) 0 1px,
+        transparent 1px 3px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--v11-accent), transparent 98%) 0 1px,
+        transparent 1px 5px
+      );
+    opacity: 0.24;
+    mix-blend-mode: screen;
+  }
+
+  /* Pixel noise overlay */
+  body[data-theme="v11-cyberpunk"] .pixel-noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 4px 4px;
+    opacity: 0.25;
+  }
+
+  /* Enhanced button styles */
+  body[data-theme="v11-cyberpunk"] button {
+    border: 1px solid color-mix(in srgb, var(--v11-accent), transparent 80%);
+    border-radius: 6px;
+    padding: 0.5rem 0.7rem;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--v11-text);
+    font: inherit;
+    transition: all 0.18s ease;
+    box-shadow: 0 2px 8px rgba(0, 255, 255, 0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  body[data-theme="v11-cyberpunk"] button:hover {
+    border-color: var(--v11-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 255, 255, 0.25);
+  }
+
+  body[data-theme="v11-cyberpunk"] button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 255, 255, 0.2);
+  }
+
+  /* Enhanced card/panel styles */
+  body[data-theme="v11-cyberpunk"] .bg-card {
+    border: 1px solid var(--v11-border);
+    border-radius: 8px;
+    background: var(--v11-surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Header styling */
+  body[data-theme="v11-cyberpunk"] header {
+    background: var(--v11-panel);
+    border-bottom: 1px solid var(--v11-accent);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Input styling */
+  body[data-theme="v11-cyberpunk"] input,
+  body[data-theme="v11-cyberpunk"] textarea {
+    border: 1px solid color-mix(in srgb, var(--v11-accent), transparent 80%);
+    border-radius: 6px;
+    padding: 0.5rem 0.7rem;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--v11-text);
+    font: inherit;
+  }
+
+  body[data-theme="v11-cyberpunk"] input:focus,
+  body[data-theme="v11-cyberpunk"] textarea:focus {
+    border-color: var(--v11-accent);
+    outline: none;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+  }
+
+  /* Tab styling */
+  body[data-theme="v11-cyberpunk"] [role="tablist"] {
+    background: var(--v11-panel);
+    border-bottom: 1px solid var(--v11-border);
+  }
+
+  body[data-theme="v11-cyberpunk"] [role="tab"][aria-selected="true"] {
+    background: var(--v11-accent);
+    color: #001018;
+  }
+
+  /* React Flow customizations for V11 theme */
+  body[data-theme="v11-cyberpunk"] .react-flow__background {
+    background: transparent !important;
+  }
+
+  body[data-theme="v11-cyberpunk"] .react-flow__controls button {
+    background: var(--v11-surface) !important;
+    border-color: var(--v11-border) !important;
+    color: var(--v11-text) !important;
+    fill: var(--v11-text) !important;
+    border-radius: 6px !important;
+  }
+
+  body[data-theme="v11-cyberpunk"] .react-flow__controls button:hover {
+    background: color-mix(in srgb, var(--v11-accent), transparent 92%) !important;
+    border-color: var(--v11-accent) !important;
+  }
+
+  body[data-theme="v11-cyberpunk"] .react-flow__minimap {
+    background: var(--v11-surface) !important;
+    border: 1px solid var(--v11-border) !important;
+    border-radius: 8px !important;
+  }
+
+  body[data-theme="v11-cyberpunk"] .react-flow__edge-path {
+    stroke: var(--v11-accent) !important;
+    stroke-width: 2 !important;
+  }
+
+  body[data-theme="v11-cyberpunk"] .react-flow__edge.selected .react-flow__edge-path {
+    stroke: var(--v11-secondary) !important;
+    stroke-width: 3 !important;
+  }
+
+  /* Scrollbar styling */
+  body[data-theme="v11-cyberpunk"] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  body[data-theme="v11-cyberpunk"] ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  body[data-theme="v11-cyberpunk"] ::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  body[data-theme="v11-cyberpunk"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.5);
+  }
+
+  /* Status badges */
+  body[data-theme="v11-cyberpunk"] .status-badge {
+    border: 1px solid color-mix(in srgb, var(--v11-accent), transparent 75%);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--v11-accent);
+    background: color-mix(in srgb, var(--v11-accent), transparent 92%);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Glowing text effects */
+  body[data-theme="v11-cyberpunk"] .glow-text {
+    color: var(--v11-accent);
+    text-shadow: 0 0 10px var(--v11-glow), 0 0 30px var(--v11-glow);
+  }
+
+  body[data-theme="v11-cyberpunk"] .glow-text-secondary {
+    color: var(--v11-secondary);
+    text-shadow: 0 0 10px var(--v11-glow-secondary), 0 0 30px var(--v11-glow-secondary);
+  }
+
+  /* Terminal styling */
+  body[data-theme="v11-cyberpunk"] .terminal-container {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--v11-border);
+    border-radius: 8px;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+  }
+
+  body[data-theme="v11-cyberpunk"] .terminal-output {
+    color: var(--v11-accent);
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  }
+
+  body[data-theme="v11-cyberpunk"] .terminal-prompt {
+    color: var(--v11-accent-green);
+  }
+
+  /* Lesson panel styling */
+  body[data-theme="v11-cyberpunk"] .lesson-panel {
+    background: var(--v11-panel);
+    border-right: 1px solid var(--v11-accent);
+  }
+
+  body[data-theme="v11-cyberpunk"] .lesson-step {
+    border-left: 2px solid var(--v11-border);
+    padding-left: 1rem;
+  }
+
+  body[data-theme="v11-cyberpunk"] .lesson-step.active {
+    border-left-color: var(--v11-accent);
+    background: color-mix(in srgb, var(--v11-accent), transparent 95%);
+  }
+
+  body[data-theme="v11-cyberpunk"] .lesson-step.completed {
+    border-left-color: var(--v11-accent-green);
+  }
+
+  /* File tree styling */
+  body[data-theme="v11-cyberpunk"] .file-tree-item {
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.15s ease;
+  }
+
+  body[data-theme="v11-cyberpunk"] .file-tree-item:hover {
+    background: color-mix(in srgb, var(--v11-accent), transparent 90%);
+  }
+
+  body[data-theme="v11-cyberpunk"] .file-tree-item.selected {
+    background: color-mix(in srgb, var(--v11-accent), transparent 85%);
+    border: 1px solid var(--v11-accent);
+  }
+
+  /* Commit node styling */
+  body[data-theme="v11-cyberpunk"] .commit-node {
+    background: var(--v11-surface);
+    border: 2px solid var(--v11-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 255, 0.1);
+  }
+
+  body[data-theme="v11-cyberpunk"] .commit-node.selected {
+    border-color: var(--v11-accent);
+    box-shadow: 0 4px 16px rgba(0, 255, 255, 0.3);
+  }
+
+  body[data-theme="v11-cyberpunk"] .commit-node.head {
+    border-color: var(--v11-accent-green);
+  }
+
+  /* Help panel styling */
+  body[data-theme="v11-cyberpunk"] .help-panel {
+    background: var(--v11-panel);
+    border: 1px solid var(--v11-accent);
+    box-shadow: 6px 6px 0 rgba(0, 255, 255, 0.18);
+  }
+
+  /* Toast notifications */
+  body[data-theme="v11-cyberpunk"] .toast {
+    background: var(--v11-surface);
+    border: 1px solid var(--v11-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 255, 0.1);
+  }
+
+  body[data-theme="v11-cyberpunk"] .toast.success {
+    border-color: var(--v11-accent-green);
+  }
+
+  body[data-theme="v11-cyberpunk"] .toast.error {
+    border-color: var(--destructive);
+  }
+
+  /* Animations */
+  @keyframes v11-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px var(--v11-glow);
+    }
+    50% {
+      box-shadow: 0 0 20px var(--v11-glow), 0 0 30px var(--v11-glow);
+    }
+  }
+
+  body[data-theme="v11-cyberpunk"] .animate-v11-glow {
+    animation: v11-glow 2s ease-in-out infinite;
+  }
+
+  /* Ensure proper z-index stacking */
+  body[data-theme="v11-cyberpunk"] .relative-container {
+    position: relative;
+    z-index: 2;
+  }
+}
