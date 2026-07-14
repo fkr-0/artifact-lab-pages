@@ -4,6 +4,26 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.0] - 2026-07-14
+
+### Added
+
+- V11 Peer DAW 1.2.0 with room-scoped project synchronization over Peernet/PeerJS.
+- Request, snapshot, update, and acknowledgement messages shared across remote and local transports.
+- Deterministic browser coverage for remote-only late joining, live project updates, and acknowledgements.
+- A reusable fake low-level PeerJS network for production shared-core browser tests.
+
+### Changed
+
+- The V11 Peer DAW Session dashboard now shows project revision, transport timestamps, delivery counts, and acknowledgement state.
+- Remote Peernet subscriptions are registered before startup and survive transport initialization/reconnection.
+- Project hydration retries when a PeerJS connection becomes available after initial application startup.
+
+### Fixed
+
+- Collaborators on different browsers no longer remain on the default rig unless they also join an App Hub sub-lobby.
+- Duplicate local and remote delivery of the same project message no longer rebuilds the DAW twice.
+
 ## [1.0.1] - 2026-07-14
 
 ### Added
@@ -43,5 +63,6 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[1.1.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/fkr-0/artifact-lab-pages/releases/tag/v1.0.0

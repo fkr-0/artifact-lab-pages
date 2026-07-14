@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { installFakePeerJs } from './fake-peerjs-network.mjs';
 
 async function collectPageErrors(page) {
   const errors = [];
@@ -109,6 +110,44 @@ test.describe('v11-peer-daw app', () => {
     await context.close();
   });
 
+  test('hydrates and acknowledges projects over Peernet when the local bus is disabled', async ({ browser }) => {
+    const context = await browser.newContext();
+    await installFakePeerJs(context);
+    const pilotA = await context.newPage();
+    const pilotB = await context.newPage();
+    const session = isolatedDawSession('remote-hydration');
+    const remoteUrl = (username) =>
+      `${dawUrl({ session, username })}&localSync=false`;
+    const errorsA = await bootDaw(pilotA, remoteUrl('remote-alpha'));
+
+    await expect
+      .poll(() => pilotA.evaluate(() => window.v11PeerDAW.peernet.health().role))
+      .toBe('hub');
+    await pilotA.locator('#addModule').selectOption('cleansynth');
+    await expect(pilotA.locator('#moduleCount')).toHaveText('10 modules');
+
+    const errorsB = await bootDaw(pilotB, remoteUrl('remote-beta'), { moduleCount: 10 });
+    await expect(pilotA.locator('#localPeerCount')).toHaveText('0');
+    await expect(pilotB.locator('#localPeerCount')).toHaveText('0');
+    await expect(pilotB.locator('#eventLog')).toContainText('Peernet room snapshot received');
+    await expect(pilotB.locator('#projectSyncSummary')).toContainText('peernet');
+
+    await pilotA.locator('#addModule').selectOption('fmsynth');
+    await expect(pilotB.locator('#moduleCount')).toHaveText('11 modules');
+    await expect(pilotB.locator('#eventLog')).toContainText('Peernet project update');
+    await expect(pilotA.locator('#projectSyncSummary')).toContainText('ack');
+    await expect
+      .poll(() =>
+        pilotB.evaluate(
+          () => window.v11PeerDAW.projectSync.diagnostics().transports.peernet?.receivedAt || 0
+        )
+      )
+      .toBeGreaterThan(0);
+
+    expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
+    await context.close();
+  });
+
   test('joins a room from the session code control and updates the URL', async ({ browser }) => {
     const context = await browser.newContext();
     const pilotA = await context.newPage();
@@ -184,7 +223,7 @@ test.describe('v11-peer-daw app', () => {
     const session = await page.locator('#sessionCode').textContent();
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
-    await expect(page.locator('#appVersion')).toHaveText('v1.1.1');
+    await expect(page.locator('#appVersion')).toHaveText('v1.2.0');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
     expect(session).toMatch(/^E2E-/);
     await expect(page.locator('#workspaceMainView')).toContainText('Shared session');

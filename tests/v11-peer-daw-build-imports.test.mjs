@@ -12,6 +12,7 @@ await stat(importedPath);
 assert.equal(importedPath, 'v11-peer-daw/vendor/peernet-lib.js');
 
 const app = await readFile('v11-peer-daw/src/app.js', 'utf8');
+const projectSync = await readFile('v11-peer-daw/src/core/project-sync.js', 'utf8');
 assert.match(app, /this\.urlParams = new URLSearchParams\(window\.location\.search\)/, 'v11 DAW should read launch URL params');
 assert.match(app, /this\.targetPeerId = this\.urlParams\.get\('targetPeerId'\)/, 'v11 DAW should consume targetPeerId for hub joins');
 assert.match(app, /this\.spectateMode\s*=\s*this\.urlParams\.get\('spectate'\) === 'true' \|\| this\.urlParams\.get\('observe'\) === 'true'/, 'v11 DAW should support observe mode');
@@ -20,3 +21,10 @@ assert.match(app, /const profile = \{[\s\S]*?username,[\s\S]*?targetPeerId: this
 assert.match(app, /this\.peernet\.start\(profile\)/, 'v11 DAW should start the peernet stack from the shared session profile');
 const autoJoinBody = app.slice(app.indexOf('  autoJoinFromUrl() {'), app.indexOf('  bindPeernetStack() {'));
 assert.doesNotMatch(autoJoinBody, /this\.peernet\.start\(/, 'URL auto-join should not start the peernet stack a second time');
+assert.match(app, /PROJECT_SYNC_CHANNEL/, 'v11 DAW should bind its project protocol to Peernet');
+assert.match(app, /this\.peernet\.onMessage\(PROJECT_SYNC_CHANNEL/, 'v11 DAW should receive remote project messages');
+assert.match(app, /this\.peernet\.send\(PROJECT_SYNC_CHANNEL/, 'v11 DAW should publish remote project messages');
+assert.match(projectSync, /project-request/, 'project sync should support snapshot requests');
+assert.match(projectSync, /project-snapshot/, 'project sync should support snapshot responses');
+assert.match(projectSync, /project-update/, 'project sync should support live updates');
+assert.match(projectSync, /project-ack/, 'project sync should support acknowledgements');
