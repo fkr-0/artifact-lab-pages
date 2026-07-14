@@ -4,6 +4,30 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.0] - 2026-07-14
+
+### Added
+
+- V11 Peer DAW 1.3.0 with persistent focus mode and independently visible setup and monitor panels.
+- Collapsible Patch Canvas and Module Rack surfaces with remembered state.
+- View-specific context headings, direct workspace keyboard shortcuts, and accessible arrow-key tab navigation.
+- Persistent Mixer, Routes, and Packet Monitor drawers with live counts.
+- Non-blocking feedback for transport, synchronization, layout, module, route, and clipboard operations.
+- Browser coverage for persistent layout state, constrained-height operation, mobile overflow, and keyboard navigation.
+
+### Changed
+
+- The Hub now pins the exact V11 Peer DAW 1.3.0 release commit.
+- Collaboration controls use explicit action labels and the central editor can occupy the full available width.
+- Long workspace editors preserve scroll position during same-view rerenders.
+- Arrangement browser coverage separates real pointer dragging, copy-modifier behavior, and rendered-view verification.
+
+### Fixed
+
+- Closed inspector drawers now restore as closed.
+- The DAW inspector no longer forces horizontal overflow on narrow screens.
+- Collaboration refreshes no longer make long editor workflows fail merely because their visible view was replaced between operations.
+
 ## [1.1.0] - 2026-07-14
 
 ### Added
@@ -63,6 +87,7 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[1.2.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/fkr-0/artifact-lab-pages/releases/tag/v1.0.0

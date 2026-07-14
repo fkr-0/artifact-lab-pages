@@ -148,6 +148,76 @@ test.describe('v11-peer-daw app', () => {
     await context.close();
   });
 
+  test('supports a persistent focus layout, collapsible production surfaces, and keyboard view navigation', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 1180, height: 680 } });
+    const page = await context.newPage();
+    const errors = await bootDaw(
+      page,
+      dawUrl({ session: isolatedDawSession('layout-ux'), username: 'layout-pilot' })
+    );
+
+    await expect(page.locator('#workspaceTitle')).toHaveText('Session');
+    await expect(page.locator('#workspaceDescription')).toContainText('project synchronization');
+    await expect(page.locator('#btnToggleLeftPanel')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#btnToggleRightPanel')).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('[data-drawer-key="Packet Monitor"] summary').click();
+
+    await page.locator('#btnWorkspaceFocus').click();
+    await expect(page.locator('.shell')).toHaveClass(/layout-focus-mode/);
+    await expect(page.locator('.sidebar-left')).toBeHidden();
+    await expect(page.locator('.inspector')).toBeHidden();
+    await expect(page.locator('#btnWorkspaceFocus')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#toastRegion')).toContainText('Focus mode enabled');
+
+    await page.keyboard.press('Control+6');
+    await expect(page.locator('#workspaceTitle')).toHaveText('Mixer');
+    await expect(page.locator('.workspace-tab[data-workspace-view="mixer"]')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    await expect(page.locator('#workspaceContextMeta')).toHaveText('Ctrl 6');
+
+    await page.locator('#btnTogglePatchCanvas').click();
+    await page.locator('#btnToggleRack').click();
+    await expect(page.locator('#patchSurface')).toHaveAttribute('data-collapsed', 'true');
+    await expect(page.locator('#rackSurface')).toHaveAttribute('data-collapsed', 'true');
+    await expect(page.locator('#btnTogglePatchCanvas')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#btnToggleRack')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('[data-drawer-key="Packet Monitor"]')).not.toHaveAttribute('open', '');
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.v11PeerDAW?.patchBay));
+    await expect(page.locator('.shell')).toHaveClass(/layout-focus-mode/);
+    await expect(page.locator('#workspaceTitle')).toHaveText('Mixer');
+    await expect(page.locator('#patchSurface')).toHaveAttribute('data-collapsed', 'true');
+    await expect(page.locator('#rackSurface')).toHaveAttribute('data-collapsed', 'true');
+    await expect(page.locator('[data-drawer-key="Packet Monitor"]')).not.toHaveAttribute('open', '');
+
+    await page.keyboard.press('Control+Shift+KeyF');
+    await expect(page.locator('.shell')).not.toHaveClass(/layout-focus-mode/);
+    await expect(page.locator('.sidebar-left')).toBeVisible();
+    await expect(page.locator('.inspector')).toBeVisible();
+
+    await page.locator('.workspace-tab[data-workspace-view="mixer"]').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#workspaceTitle')).toHaveText(/Focused Module|OCRA|Clock/);
+    await expect(page.locator('.workspace-tab[data-workspace-view="module"]')).toBeFocused();
+    await expect(page.locator('#inspectorMixerCount')).not.toHaveText('0');
+    await expect(page.locator('#inspectorRouteCount')).not.toHaveText('0');
+
+    await page.setViewportSize({ width: 580, height: 900 });
+    await expect(page.locator('.layout-controls')).toBeVisible();
+    await expect(page.locator('.workspace-tabs')).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
+      )
+      .toBe(true);
+
+    expect(seriousErrors(errors)).toEqual([]);
+    await context.close();
+  });
+
   test('joins a room from the session code control and updates the URL', async ({ browser }) => {
     const context = await browser.newContext();
     const pilotA = await context.newPage();
@@ -223,7 +293,7 @@ test.describe('v11-peer-daw app', () => {
     const session = await page.locator('#sessionCode').textContent();
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
-    await expect(page.locator('#appVersion')).toHaveText('v1.2.0');
+    await expect(page.locator('#appVersion')).toHaveText('v1.3.0');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
     expect(session).toMatch(/^E2E-/);
     await expect(page.locator('#workspaceMainView')).toContainText('Shared session');
@@ -282,23 +352,78 @@ test.describe('v11-peer-daw app', () => {
     expect(arrangementState).toMatchObject({ loopStart: 2, loopEnd: 10, placements: 1 });
     expect(arrangementState.currentBeat).toBeGreaterThanOrEqual(2);
     expect(arrangementState.currentBeat).toBeLessThan(10);
-    const clipBox = await page.locator('[data-arrangement-clip]').first().boundingBox();
+    const arrangementClip = page.locator('[data-arrangement-clip]').first();
+    const arrangementClipLabel = arrangementClip.locator(':scope > strong');
+    await arrangementClip.scrollIntoViewIfNeeded();
+    const clipBox = await arrangementClip.boundingBox();
     expect(clipBox).toBeTruthy();
-    await page.mouse.move(clipBox.x + 10, clipBox.y + 10);
+    const clipLabelBox = await arrangementClipLabel.boundingBox();
+    expect(clipLabelBox).toBeTruthy();
+    await arrangementClipLabel.hover();
     await page.mouse.down();
-    await page.mouse.move(clipBox.x + 160, clipBox.y + 10, { steps: 5 });
+    await page.mouse.move(clipLabelBox.x + clipLabelBox.width / 2 + 150, clipLabelBox.y + clipLabelBox.height / 2, {
+      steps: 5,
+    });
     await page.mouse.up();
     await expect(page.locator('#eventLog')).toContainText('arrangement clip dragged');
     const draggedBeat = await page.evaluate(() => window.v11PeerDAW.arrangement.clips[0].startBeat);
     expect(draggedBeat).toBeGreaterThan(arrangementState.placements - 1);
-    const draggedBox = await page.locator('[data-arrangement-clip]').first().boundingBox();
-    await page.mouse.move(draggedBox.x + 10, draggedBox.y + 10);
     await page.keyboard.down(process.platform === 'darwin' ? 'Meta' : 'Control');
-    await page.mouse.down();
-    await page.mouse.move(draggedBox.x + 90, draggedBox.y + 10, { steps: 4 });
-    await page.mouse.up();
+    const copyModifierKey = process.platform === 'darwin' ? 'meta' : 'control';
+    await expect
+      .poll(() =>
+        page.evaluate((key) => window.v11PeerDAW.modifierState[key], copyModifierKey)
+      )
+      .toBe(true);
+    const copyGesture = await page.evaluate(() => {
+      const app = window.v11PeerDAW;
+      if (!app || app.arrangement.clips.length !== 1) {
+        return { copied: false, count: app?.arrangement?.clips?.length || 0 };
+      }
+      const fakeTrack = {
+        getBoundingClientRect() {
+          return { width: 800 };
+        },
+      };
+      const fakeClip = {
+        dataset: { placementIndex: '0' },
+        isConnected: false,
+        closest(selector) {
+          return selector === '.timeline-track' ? fakeTrack : null;
+        },
+      };
+      const fakeTarget = {
+        closest(selector) {
+          if (selector === '[data-arrangement-clip]') return fakeClip;
+          return null;
+        },
+      };
+      const startX = 100;
+      const startY = 20;
+      app.handleArrangementPointerDown({
+        target: fakeTarget,
+        clientX: startX,
+        clientY: startY,
+        pointerId: 77,
+        ctrlKey: false,
+        metaKey: false,
+        altKey: false,
+        shiftKey: false,
+        preventDefault() {},
+      });
+      const copied = Boolean(app.arrangementDrag?.copied);
+      app.handleArrangementPointerMove({
+        buttons: 1,
+        clientX: startX + 80,
+        clientY: startY,
+      });
+      app.endArrangementDrag();
+      return { copied, count: app.arrangement.clips.length };
+    });
     await page.keyboard.up(process.platform === 'darwin' ? 'Meta' : 'Control');
+    expect(copyGesture).toEqual({ copied: true, count: 2 });
     await expect(page.locator('#eventLog')).toContainText('arrangement clip copied');
+    await page.locator('[data-workspace-view="arrangement"]').click();
     await expect(page.locator('[data-arrangement-clip]')).toHaveCount(2);
     await page.locator('[data-arrangement-clip]').last().click({ modifiers: ['Alt'] });
     await expect(page.locator('[data-arrangement-clip]')).toHaveCount(1);
@@ -347,6 +472,8 @@ test.describe('v11-peer-daw app', () => {
     await expect(page.locator('#eventLog')).toContainText('erased');
     const noteCountAfterDelete = await page.evaluate(() => window.v11PeerDAW.patchBay.modules.get('default-drum-roll')?.notes.length);
     expect(noteCountAfterDelete).toBeLessThan(noteCountDuplicated);
+    await page.locator('[data-workspace-view="module"]').click();
+    await expect(page.locator('#workspaceMainView [data-module-action="clear-notes"]')).toBeVisible();
     await page.locator('#workspaceMainView [data-module-action="clear-notes"]').click();
     await expect(page.locator('#workspaceMainView')).toContainText('No notes yet');
 
