@@ -481,6 +481,8 @@ var historyStack = [];
 var historyIndex = -1;
 var saveTimer = null;
 var toastTimer = null;
+var storageAvailable = true;
+var historyDirty = false;
 state = loadStudioState(state);
 
 function loadStudioState(defaults) {
@@ -500,18 +502,26 @@ function loadStudioState(defaults) {
 function stateSnapshot() { return JSON.stringify(state); }
 function initializeHistory() { historyStack = [stateSnapshot()]; historyIndex = 0; updateHistoryUi(); }
 function persistState(message) {
-  localStorage.setItem(STORAGE_KEY, stateSnapshot());
   var indicator = document.getElementById('save-state');
-  if (indicator) { indicator.classList.remove('is-dirty'); indicator.textContent = 'Autosaved'; }
+  try {
+    localStorage.setItem(STORAGE_KEY, stateSnapshot());
+    storageAvailable = true;
+    if (indicator) { indicator.classList.remove('is-dirty'); indicator.textContent = 'Autosaved'; }
+  } catch (error) {
+    storageAvailable = false;
+    if (indicator) { indicator.classList.add('is-dirty'); indicator.textContent = 'Local save unavailable'; }
+  }
   if (message) announce(message);
 }
 function markDirty() {
+  historyDirty = true;
   var indicator = document.getElementById('save-state');
   if (indicator) { indicator.classList.add('is-dirty'); indicator.textContent = 'Saving…'; }
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function(){ commitState(); }, 320);
 }
 function commitState(message) {
+  historyDirty = false;
   var next = stateSnapshot();
   if (historyStack[historyIndex] !== next) {
     historyStack = historyStack.slice(0, historyIndex + 1);
@@ -524,6 +534,7 @@ function commitState(message) {
 }
 function restoreHistory(index, message) {
   if (index < 0 || index >= historyStack.length) return;
+  historyDirty = false;
   historyIndex = index;
   state = JSON.parse(historyStack[historyIndex]);
   persistState();
@@ -531,8 +542,13 @@ function restoreHistory(index, message) {
   updateHistoryUi();
   announce(message);
 }
-function undo() { restoreHistory(historyIndex - 1, 'Undid last change.'); }
-function redo() { restoreHistory(historyIndex + 1, 'Redid change.'); }
+function flushPendingHistory() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  if (historyDirty) commitState();
+}
+function undo() { flushPendingHistory(); restoreHistory(historyIndex - 1, 'Undid last change.'); }
+function redo() { flushPendingHistory(); restoreHistory(historyIndex + 1, 'Redid change.'); }
 function updateHistoryUi() {
   var undoButton = document.getElementById('btn-undo');
   var redoButton = document.getElementById('btn-redo');

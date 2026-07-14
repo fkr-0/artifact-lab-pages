@@ -1180,7 +1180,7 @@
                 aria-label="artistic endeavour sprite"
               ></div>
               <div>
-                <h1>NEXUS v11 <span id="headerArtifactCount" class="pill">0 artifacts</span></h1>
+                <h1>NEXUS v11 <span id="headerVersion" class="pill">v--</span> <span id="headerArtifactCount" class="pill">0 artifacts</span></h1>
                 <div class="muted">filter artifacts</div>
               </div>
             </div>
@@ -1236,6 +1236,8 @@
               <h2 id="hubResultsHeadline">NEXUS v11 · artifact matrix</h2>
               <div class="row">
                 <div id="activeTheme" class="pill">theme</div>
+                <div id="headlineBuildVersion" class="pill">v--</div>
+                <div id="headlineBuildCommit" class="pill">commit --</div>
                 <div id="headlineBuildDate" class="pill">build --</div>
               </div>
             </div>
@@ -1352,6 +1354,8 @@
             <footer class="footer-bar" id="footerBar">
               <div class="footer-left">
                 <span style="color: var(--hub-accent); font-weight: bold">READY</span>
+                <span class="footer-sep">│</span>
+                <span id="buildVersion" style="color: var(--hub-accent)">v--</span>
                 <span class="footer-sep">│</span>
                 <span id="buildCommitShort" style="color: var(--hub-text)">--</span>
                 <span class="footer-sep">│</span>
@@ -3020,12 +3024,34 @@
           const response = await fetch("./data/build-stats.json");
           if (!response.ok) return;
           const stats = await response.json();
+          const version = stats.version || "0.0.0";
+          const commitShort = stats.commitShort || String(stats.commitHash || "--").slice(0, 12);
           const buildDate = Number.isFinite(Date.parse(stats.buildDate))
             ? new Date(stats.buildDate).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
             : "--";
-          $("buildCommitShort").textContent = stats.commitHash || "--";
+          const commitDate = Number.isFinite(Date.parse(stats.commitDate))
+            ? new Date(stats.commitDate).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+            : "--";
+          const metadataTitle = [
+            `version ${version}`,
+            `source ${stats.commitHash || commitShort}`,
+            `commit ${commitDate}`,
+            `branch ${stats.branch || "--"}${stats.dirty ? " (dirty build)" : ""}`,
+            stats.commitMessage || "",
+          ].filter(Boolean).join(" · ");
+          $("headerVersion").textContent = `v${version}`;
+          $("buildVersion").textContent = `v${version}`;
+          $("headlineBuildVersion").textContent = `v${version}`;
+          $("buildCommitShort").textContent = commitShort;
+          $("headlineBuildCommit").textContent = `commit ${commitShort}`;
           $("buildDate").textContent = buildDate;
           $("headlineBuildDate").textContent = `build ${buildDate}`;
+          ["headerVersion", "buildVersion", "headlineBuildVersion", "buildCommitShort", "headlineBuildCommit", "buildDate", "headlineBuildDate"].forEach((id) => {
+            $(id).title = metadataTitle;
+          });
+          document.documentElement.dataset.hubVersion = version;
+          document.documentElement.dataset.buildCommit = commitShort;
+          document.documentElement.dataset.buildDirty = String(Boolean(stats.dirty));
           updateArtifactCount();
         } catch (e) {
           console.log("Build stats not available");
@@ -3033,6 +3059,7 @@
       }
       function buildTickerContent() {
         const commitHash = $("buildCommitShort").textContent || "--";
+        const version = $("buildVersion").textContent || "v--";
         const artifactCount = catalog.summary?.total || catalog.items?.length || 0;
         const buildDate = $("buildDate").textContent || "--";
         const snapshot = buildStorageSnapshot();
@@ -3042,7 +3069,7 @@
         const items = [
           commitMsg,
           `${artifactCount} ARTIFACTS INDEXED`,
-          `BUILD: ${commitHash} // ${buildDate}`,
+          `RELEASE: ${version} // BUILD: ${commitHash} // ${buildDate}`,
           `LOCAL STORAGE: ${snapshot.totalKeys} KEYS // ${snapshot.totalBytes} BYTES`,
           `SECTOR: ZETA-8 // NAV-01 PROTOCOL ACTIVE`,
           `CBADGER NODE ONLINE // BADGER PROTOCOL WALKING THE GRID`,

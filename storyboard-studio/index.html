@@ -1021,6 +1021,8 @@
     let statusTimer = null;
     let historyStack = [];
     let historyIndex = -1;
+    let storageAvailable = true;
+    let historyDirty = false;
     const HISTORY_LIMIT = 80;
 
     const $ = (sel) => document.querySelector(sel);
@@ -1118,7 +1120,13 @@
 
     function saveState() {
       state.updatedAt = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        storageAvailable = true;
+      } catch (error) {
+        storageAvailable = false;
+        setStatus('Local autosave is unavailable. Editing and exports still work.');
+      }
       renderSaveHealth();
     }
 
@@ -1135,12 +1143,14 @@
     }
 
     function scheduleHistoryCommit() {
+      historyDirty = true;
       clearTimeout(historyTimer);
       historyTimer = setTimeout(() => commitHistory(), 380);
     }
 
     function commitHistory(message) {
       clearTimeout(historyTimer);
+      historyDirty = false;
       const next = historySnapshot();
       if (historyStack[historyIndex] !== next) {
         historyStack = historyStack.slice(0, historyIndex + 1);
@@ -1155,6 +1165,7 @@
 
     function restoreHistory(index, message) {
       if (index < 0 || index >= historyStack.length) return;
+      historyDirty = false;
       historyIndex = index;
       state = normalizeState(JSON.parse(historyStack[index]));
       selectedId = state.blocks.some(block => block.id === selectedId) ? selectedId : state.blocks[0]?.id || null;
@@ -1164,8 +1175,14 @@
       setStatus(message);
     }
 
-    function undo() { restoreHistory(historyIndex - 1, 'Undid the last change.'); }
-    function redo() { restoreHistory(historyIndex + 1, 'Redid the change.'); }
+    function flushPendingHistory() {
+      clearTimeout(historyTimer);
+      historyTimer = null;
+      if (historyDirty) commitHistory();
+    }
+
+    function undo() { flushPendingHistory(); restoreHistory(historyIndex - 1, 'Undid the last change.'); }
+    function redo() { flushPendingHistory(); restoreHistory(historyIndex + 1, 'Redid the change.'); }
 
     function updateHistoryButtons() {
       if (els.undoButton) els.undoButton.disabled = historyIndex <= 0;
@@ -1644,6 +1661,7 @@
       const savedTime = state.updatedAt ? new Date(state.updatedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'now';
       els.docHealth.innerHTML = `
         <span class="health-pill ${readinessClass}">${readiness}</span>
+        ${storageAvailable ? '' : '<span class="health-pill warn">Local save unavailable</span>'}
         <span>${state.blocks.length} blocks · ${metrics.words} words · ${metrics.images} images</span>
         ${metrics.missingAlt ? `<span>${metrics.missingAlt} image description${metrics.missingAlt === 1 ? '' : 's'} missing</span>` : ''}
         ${metrics.emptyBlocks ? `<span>${metrics.emptyBlocks} empty block${metrics.emptyBlocks === 1 ? '' : 's'}</span>` : ''}

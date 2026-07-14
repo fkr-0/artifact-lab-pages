@@ -1,30 +1,27 @@
 #!/usr/bin/env node
 import { execSync } from 'child_process';
-import { readFile, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '../..');
 
-async function getGitCommitHash() {
+function git(command, fallback = 'unknown') {
   try {
-    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    return execSync(command, { cwd: rootDir, encoding: 'utf8' }).trim();
   } catch {
-    return 'unknown';
+    return fallback;
   }
 }
 
-async function getGitCommitMessage() {
+async function getVersion(packagePath) {
   try {
-    return execSync('git log -1 --pretty=%s', { encoding: 'utf8' }).trim();
+    const pkg = JSON.parse(await readFile(packagePath, 'utf8'));
+    return pkg.version || '0.0.0';
   } catch {
-    return 'unknown commit';
+    return '0.0.0';
   }
-}
-
-async function getBuildDate() {
-  return new Date().toISOString();
 }
 
 async function getArtifactCount(sourcePath) {
@@ -39,22 +36,35 @@ async function getArtifactCount(sourcePath) {
 async function generateBuildStats(options = {}) {
   const sourcePath = options.sourcePath || process.env.SOURCE_PATH || join(rootDir, 'app-hub-v11', 'artifacts.source.json');
   const outputPath = options.outputPath || process.env.OUTPUT_PATH || join(rootDir, 'app-hub-v11', 'data', 'build-stats.json');
+  const packagePath = options.packagePath || process.env.PACKAGE_PATH || join(rootDir, 'package.json');
 
-  const [commitHash, commitMessage, buildDate, artifactCount] = await Promise.all([
-    getGitCommitHash(),
-    getGitCommitMessage(),
-    getBuildDate(),
+  const [artifactCount, version] = await Promise.all([
     getArtifactCount(sourcePath),
+    getVersion(packagePath),
   ]);
+  const builtAt = new Date().toISOString();
+  const commitHash = git('git rev-parse HEAD');
+  const commitShort = git('git rev-parse --short=12 HEAD');
+  const commitMessage = git('git log -1 --pretty=%s', 'unknown commit');
+  const commitDate = git('git log -1 --pretty=%cI');
+  const branch = git('git branch --show-current', 'detached');
+  const dirty = Boolean(git('git status --porcelain', ''));
 
   const buildStats = {
+    schemaVersion: 2,
+    version,
     commitHash,
+    commitShort,
     commitMessage,
-    buildDate,
+    commitDate,
+    branch,
+    dirty,
+    buildDate: builtAt,
     artifactCount,
-    builtAt: new Date().toISOString(),
+    builtAt,
   };
 
+  await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, JSON.stringify(buildStats, null, 2));
 
   console.log(`Build stats generated: ${JSON.stringify(buildStats)}`);
@@ -68,6 +78,7 @@ function parseArgs(args) {
     const arg = args[i];
     if (arg === '--source') parsed.sourcePath = args[++i];
     else if (arg === '--out') parsed.outputPath = args[++i];
+    else if (arg === '--package') parsed.packagePath = args[++i];
   }
   return parsed;
 }

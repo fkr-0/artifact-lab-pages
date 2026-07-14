@@ -819,8 +819,12 @@ input[type='color']::-moz-color-swatch {
 }
 
 #preview {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: block;
   width: 100%;
+  height: 100%;
   aspect-ratio: 1 / 1;
   background: #000;
 }
@@ -852,9 +856,13 @@ input[type='color']::-moz-color-swatch {
 }
 
 .stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 1200px;
+  height: 1200px;
+  transform-origin: top left;
   overflow: visible;
   -webkit-user-select: none;
   user-select: none;
@@ -4370,8 +4378,37 @@ function uid(prefix) {
 
 // ---- HISTORY (Undo / Redo) --------------------------------
 
+function projectSnapshot(source) {
+  source = source || state
+  return {
+    type: source.type,
+    theme: source.theme,
+    seed: source.seed,
+    complexity: source.complexity,
+    density: source.density,
+    scale: source.scale,
+    opacity: source.opacity,
+    disruptFactor: source.disruptFactor,
+    grain: source.grain,
+    bgBrightness: source.bgBrightness,
+    contrast: source.contrast,
+    saturation: source.saturation,
+    frame: clone(source.frame),
+    elements: clone(source.elements),
+    selectedId: source.selectedId,
+    selectedPreset: source.selectedPreset,
+    exportBounds: source.exportBounds,
+    exportPadding: source.exportPadding,
+    exportBorder: source.exportBorder,
+    exportBorderColor: source.exportBorderColor,
+    activeTab: source.activeTab
+  }
+}
+
 function hist(snapshot) {
-  state.h.past.push(clone(snapshot || state))
+  var previous = projectSnapshot(snapshot || state)
+  if (JSON.stringify(previous) === JSON.stringify(projectSnapshot())) return
+  state.h.past.push(previous)
   if (state.h.past.length > HMAX) state.h.past.shift()
   state.h.future = []
 }
@@ -4383,36 +4420,48 @@ function clone(v) {
 function undo() {
   if (!state.h.past.length) return
   var p = state.h.past.pop()
-  state.h.future.unshift(clone(state))
+  state.h.future.unshift(projectSnapshot())
   restoreState(p)
 }
 
 function redo() {
   if (!state.h.future.length) return
   var n = state.h.future.shift()
-  state.h.past.push(clone(state))
+  state.h.past.push(projectSnapshot())
   restoreState(n)
 }
 
 function restoreState(saved) {
-  state.type = saved.type
-  state.theme = saved.theme
-  state.seed = saved.seed
-  state.complexity = saved.complexity
-  state.density = saved.density
-  state.scale = saved.scale
-  state.opacity = saved.opacity
-  state.disruptFactor = saved.disruptFactor
-  state.grain = saved.grain
-  state.bgBrightness = saved.bgBrightness
-  state.contrast = saved.contrast
-  state.saturation = saved.saturation
-  state.frame = clone(saved.frame)
-  state.elements = clone(saved.elements)
-  state.selectedId = saved.selectedId
+  Object.assign(state, projectSnapshot(saved))
   state.editingId = null
   state.cropMode = false
+  state.pointers.clear()
+  state.gesture = null
   render()
+}
+
+var controlHistory = new WeakMap()
+
+function beginControlHistory(control) {
+  if (control && !controlHistory.has(control)) controlHistory.set(control, projectSnapshot())
+}
+
+function commitControlHistory(control) {
+  if (!control || !controlHistory.has(control)) return
+  var before = controlHistory.get(control)
+  controlHistory.delete(control)
+  hist(before)
+  render()
+}
+
+function bindControlHistory(control) {
+  if (!control || control.dataset.historyBound === 'true') return
+  control.dataset.historyBound = 'true'
+  control.addEventListener('pointerdown', function() { beginControlHistory(control) })
+  control.addEventListener('focus', function() { beginControlHistory(control) })
+  control.addEventListener('keydown', function() { beginControlHistory(control) })
+  control.addEventListener('change', function() { commitControlHistory(control) })
+  control.addEventListener('blur', function() { commitControlHistory(control) })
 }
 
 // ---- ELEMENT CRUD -----------------------------------------
@@ -4426,6 +4475,7 @@ function byId(id) {
 }
 
 function addTextElement(text) {
+  var before = projectSnapshot()
   text = text || 'DOUBLE TAP TO EDIT'
   var id = uid('text')
   state.elements.push({
@@ -4440,11 +4490,12 @@ function addTextElement(text) {
   state.selectedId = id
   state.editingId = id
   state.cropMode = false
-  hist()
+  hist(before)
   render()
 }
 
 function addImageElement(dataUrl, name, naturalWidth, naturalHeight) {
+  var before = projectSnapshot()
   var id = uid('image')
   var sc = Math.min(1200 * 0.74 / naturalWidth, 1200 * 0.66 / naturalHeight, 1)
   state.elements.push({
@@ -4458,29 +4509,31 @@ function addImageElement(dataUrl, name, naturalWidth, naturalHeight) {
   state.selectedId = id
   state.editingId = null
   state.cropMode = false
-  hist()
+  hist(before)
   render()
 }
 
 function duplicateElement() {
   var e = sel()
   if (!e) return
+  var before = projectSnapshot()
   var id = uid(e.type)
   state.elements.push(Object.assign({}, clone(e), { id: id, x: e.x + 36, y: e.y + 36 }))
   state.selectedId = id
   state.editingId = null
-  hist()
+  hist(before)
   render()
 }
 
 function deleteElement() {
   if (!state.selectedId) return
+  var before = projectSnapshot()
   var id = state.selectedId
   state.elements = state.elements.filter(function(e) { return e.id !== id })
   state.selectedId = null
   state.editingId = null
   state.cropMode = false
-  hist()
+  hist(before)
   render()
 }
 
@@ -4488,9 +4541,10 @@ function moveLayer(id, dir) {
   var i = state.elements.findIndex(function(e) { return e.id === id })
   var n = i + dir
   if (i < 0 || n < 0 || n >= state.elements.length) return
+  var before = projectSnapshot()
   var item = state.elements.splice(i, 1)[0]
   state.elements.splice(n, 0, item)
-  hist()
+  hist(before)
   render()
 }
 
@@ -4537,7 +4591,7 @@ function startGesture(ev, id, act, handle) {
   state.gesture = {
     type: (e.type === 'image' && act === 'move' && (state.cropMode || ev.ctrlKey || ev.metaKey)) ? 'crop-pan' : act,
     id: id, handle: handle || null,
-    start: pt(ev), startDoc: clone(state), startEl: clone(e),
+    start: pt(ev), startDoc: projectSnapshot(), startEl: clone(e),
     dirty: false, keepRatio: ev.shiftKey, centered: ev.altKey || ev.metaKey,
     startDistance: 0, startMid: { x: 0, y: 0 }
   }
@@ -4637,8 +4691,9 @@ function wheelHandler(ev, id) {
   var e = byId(id)
   if (!e || e.type !== 'image' || state.selectedId !== id || !(state.cropMode || ev.ctrlKey || ev.metaKey)) return
   ev.preventDefault()
+  var before = projectSnapshot()
   e.crop.zoom = clamp((e.crop.zoom || 1) * (ev.deltaY < 0 ? 1.08 : 0.92), 0.1, 8)
-  hist()
+  hist(before)
   render()
 }
 
@@ -4656,7 +4711,7 @@ function renderEl(e) {
       ev.stopPropagation()
       state.selectedId = e.id
       if (e.type === 'text') state.editingId = e.id
-      render()
+      renderLayerEdit()
     }
     n.addEventListener('wheel', function(ev) { wheelHandler(ev, e.id) }, { passive: false })
     stage.appendChild(n)
@@ -4688,6 +4743,7 @@ function renderEl(e) {
     img.style.transform = 'translate(calc(-50% + ' + (e.crop ? e.crop.x : 0) + 'px), calc(-50% + ' + (e.crop ? e.crop.y : 0) + 'px))'
     box.appendChild(img)
   } else if (state.editingId === e.id) {
+    var beforeEdit = projectSnapshot()
     var ta = document.createElement('textarea')
     ta.className = 'text-edit'
     ta.value = e.text || ''
@@ -4699,7 +4755,7 @@ function renderEl(e) {
     }
     ta.onblur = function() {
       state.editingId = null
-      hist()
+      hist(beforeEdit)
       render()
     }
     box.appendChild(ta)
@@ -5035,10 +5091,7 @@ function makeSlider(container, label, key, min, max, desc, options) {
   var input = div.querySelector('input')
   var valDisplay = div.querySelector('#' + valId)
 
-  function updateFill() {
-    var pct = ((parseFloat(input.value) - parseFloat(min)) / (parseFloat(max) - parseFloat(min))) * 100
-    input.style.setProperty('--fill-pct', pct + '%')
-  }
+  function updateFill() { syncRangeFill(input) }
 
   input.addEventListener('input', function() {
     var v = options.isFloat ? parseFloat(this.value) : parseInt(this.value)
@@ -5052,8 +5105,52 @@ function makeSlider(container, label, key, min, max, desc, options) {
   input.value = currentVal
   valDisplay.textContent = options.isFloat ? parseFloat(currentVal).toFixed(2) : currentVal
   updateFill()
+  bindControlHistory(input)
 
   return { input: input, display: valDisplay, updateFill: updateFill }
+}
+
+function syncRangeFill(input) {
+  if (!input || input.type !== 'range') return
+  var min = parseFloat(input.min || 0)
+  var max = parseFloat(input.max || 100)
+  var value = parseFloat(input.value || min)
+  var pct = max === min ? 0 : ((value - min) / (max - min)) * 100
+  input.style.setProperty('--fill-pct', clamp(pct, 0, 100) + '%')
+}
+
+function updateSelectionSummary() {
+  var e = sel()
+  var selInfo = document.getElementById('sel-info')
+  if (selInfo) selInfo.textContent = e ? e.type + ' · ' + Math.round(e.w) + '×' + Math.round(e.h) : 'No selection'
+}
+
+function renderStage() {
+  var stage = document.getElementById('stage')
+  var container = document.getElementById('stage-container')
+  if (!stage || !container) return
+
+  var width = container.clientWidth || 1200
+  state.uiScale = width / 1200
+  stage.style.transform = 'scale(' + state.uiScale + ')'
+
+  var liveIds = new Set(state.elements.map(function(e) { return e.id }))
+  stage.querySelectorAll('.el').forEach(function(node) {
+    if (!liveIds.has(node.dataset.id)) node.remove()
+  })
+
+  state.elements.forEach(function(e) {
+    renderEl(e)
+    var node = stage.querySelector('.el[data-id="' + CSS.escape(e.id) + '"]')
+    if (node) stage.appendChild(node)
+  })
+}
+
+function renderLayerEdit(options) {
+  options = options || {}
+  renderStage()
+  updateSelectionSummary()
+  if (options.layers) renderLayers()
 }
 
 // ---- MAIN RENDER ------------------------------------------
@@ -5111,14 +5208,14 @@ function render() {
   var seedDisp = document.getElementById('seed-display')
   if (seedDisp) seedDisp.textContent = state.seed
 
+  renderStage()
   renderLayers()
   renderInspector()
   renderStatusBar()
   renderExportInfo()
 
   var e = sel()
-  var selInfo = document.getElementById('sel-info')
-  if (selInfo) selInfo.textContent = e ? e.type + ' \u00b7 ' + Math.round(e.w) + '\u00d7' + Math.round(e.h) : 'No selection'
+  updateSelectionSummary()
   var canInfo = document.getElementById('can-info')
   if (canInfo) canInfo.textContent = '1200\u00d71200'
 
@@ -5202,7 +5299,12 @@ function renderInspector() {
   if (imageProps) imageProps.style.display = e && e.type === 'image' ? 'block' : 'none'
   if (!e) return
 
-  var setVal = function(id, v) { var el = document.getElementById(id); if (el) el.value = v }
+  var setVal = function(id, v) {
+    var el = document.getElementById(id)
+    if (!el) return
+    el.value = v
+    syncRangeFill(el)
+  }
   var setCheck = function(id, v) { var el = document.getElementById(id); if (el) el.checked = !!v }
 
   setVal('inp-x', Math.round(e.x))
@@ -5569,33 +5671,33 @@ function initUI() {
   var inpY = document.getElementById('inp-y')
   var inpW = document.getElementById('inp-w')
   var inpH = document.getElementById('inp-h')
-  if (inpX) inpX.addEventListener('change', function() { var e = sel(); if (e) { e.x = parseInt(this.value) || 0; render() } })
-  if (inpY) inpY.addEventListener('change', function() { var e = sel(); if (e) { e.y = parseInt(this.value) || 0; render() } })
-  if (inpW) inpW.addEventListener('change', function() { var e = sel(); if (e) { e.w = Math.max(16, parseInt(this.value) || 16); render() } })
-  if (inpH) inpH.addEventListener('change', function() { var e = sel(); if (e) { e.h = Math.max(16, parseInt(this.value) || 16); render() } })
+  if (inpX) inpX.addEventListener('change', function() { var e = sel(); if (e) { e.x = parseInt(this.value) || 0; renderLayerEdit({ layers: true }) } })
+  if (inpY) inpY.addEventListener('change', function() { var e = sel(); if (e) { e.y = parseInt(this.value) || 0; renderLayerEdit({ layers: true }) } })
+  if (inpW) inpW.addEventListener('change', function() { var e = sel(); if (e) { e.w = Math.max(16, parseInt(this.value) || 16); renderLayerEdit({ layers: true }) } })
+  if (inpH) inpH.addEventListener('change', function() { var e = sel(); if (e) { e.h = Math.max(16, parseInt(this.value) || 16); renderLayerEdit({ layers: true }) } })
   var inpOp = document.getElementById('inp-opacity')
-  if (inpOp) inpOp.addEventListener('input', function() { var e = sel(); if (e) { e.opacity = parseFloat(this.value); render() } })
+  if (inpOp) inpOp.addEventListener('input', function() { var e = sel(); if (e) { e.opacity = parseFloat(this.value); syncRangeFill(this); renderLayerEdit() } })
   var inpRad = document.getElementById('inp-radius')
-  if (inpRad) inpRad.addEventListener('input', function() { var e = sel(); if (e) { e.radius = parseInt(this.value) || 0; render() } })
+  if (inpRad) inpRad.addEventListener('input', function() { var e = sel(); if (e) { e.radius = parseInt(this.value) || 0; syncRangeFill(this); renderLayerEdit() } })
   var inpSh = document.getElementById('inp-shadow')
-  if (inpSh) inpSh.addEventListener('change', function() { var e = sel(); if (e) { e.shadow = this.checked; render() } })
+  if (inpSh) inpSh.addEventListener('change', function() { var e = sel(); if (e) { e.shadow = this.checked; renderLayerEdit() } })
   // Text props
   var inpText = document.getElementById('inp-text')
-  if (inpText) inpText.addEventListener('input', function() { var e = sel(); if (e && e.type === 'text') { e.text = this.value; render() } })
+  if (inpText) inpText.addEventListener('input', function() { var e = sel(); if (e && e.type === 'text') { e.text = this.value; renderLayerEdit({ layers: true }) } })
   var inpFont = document.getElementById('inp-font')
-  if (inpFont) inpFont.addEventListener('change', function() { var e = sel(); if (e) { e.fontFamily = this.value; render() } })
+  if (inpFont) inpFont.addEventListener('change', function() { var e = sel(); if (e) { e.fontFamily = this.value; renderLayerEdit() } })
   var inpFontsize = document.getElementById('inp-fontsize')
-  if (inpFontsize) inpFontsize.addEventListener('change', function() { var e = sel(); if (e) { e.fontSize = parseInt(this.value) || 72; render() } })
+  if (inpFontsize) inpFontsize.addEventListener('change', function() { var e = sel(); if (e) { e.fontSize = parseInt(this.value) || 72; renderLayerEdit() } })
   var inpFontweight = document.getElementById('inp-fontweight')
-  if (inpFontweight) inpFontweight.addEventListener('change', function() { var e = sel(); if (e) { e.fontWeight = parseInt(this.value) || 900; render() } })
+  if (inpFontweight) inpFontweight.addEventListener('change', function() { var e = sel(); if (e) { e.fontWeight = parseInt(this.value) || 900; renderLayerEdit() } })
   var inpColor = document.getElementById('inp-color')
-  if (inpColor) inpColor.addEventListener('input', function() { var e = sel(); if (e) { e.color = this.value; render() } })
+  if (inpColor) inpColor.addEventListener('input', function() { var e = sel(); if (e) { e.color = this.value; renderLayerEdit() } })
   var inpStrokeColor = document.getElementById('inp-stroke-color')
-  if (inpStrokeColor) inpStrokeColor.addEventListener('input', function() { var e = sel(); if (e) { e.stroke = this.value; render() } })
+  if (inpStrokeColor) inpStrokeColor.addEventListener('input', function() { var e = sel(); if (e) { e.stroke = this.value; renderLayerEdit() } })
   var inpStrokeW = document.getElementById('inp-stroke-width')
-  if (inpStrokeW) inpStrokeW.addEventListener('input', function() { var e = sel(); if (e) { e.strokeWidth = parseInt(this.value) || 0; render() } })
+  if (inpStrokeW) inpStrokeW.addEventListener('input', function() { var e = sel(); if (e) { e.strokeWidth = parseInt(this.value) || 0; syncRangeFill(this); renderLayerEdit() } })
   var inpTextShadow = document.getElementById('inp-text-shadow')
-  if (inpTextShadow) inpTextShadow.addEventListener('change', function() { var e = sel(); if (e) { e.textShadow = this.checked; render() } })
+  if (inpTextShadow) inpTextShadow.addEventListener('change', function() { var e = sel(); if (e) { e.textShadow = this.checked; renderLayerEdit() } })
   // Alignment buttons
   var alignBtns = document.querySelectorAll('#align-btns .btn')
   alignBtns.forEach(function(b) {
@@ -5608,11 +5710,16 @@ function initUI() {
   })
   // Image crop props
   var inpCz = document.getElementById('inp-crop-zoom')
-  if (inpCz) inpCz.addEventListener('input', function() { var e = sel(); if (e && e.crop) { e.crop.zoom = clamp(parseFloat(this.value) || 1, 0.1, 8); render() } })
+  if (inpCz) inpCz.addEventListener('input', function() { var e = sel(); if (e && e.crop) { e.crop.zoom = clamp(parseFloat(this.value) || 1, 0.1, 8); syncRangeFill(this); renderLayerEdit() } })
   var inpCx = document.getElementById('inp-crop-x')
-  if (inpCx) inpCx.addEventListener('change', function() { var e = sel(); if (e && e.crop) { e.crop.x = parseFloat(this.value) || 0; render() } })
+  if (inpCx) inpCx.addEventListener('change', function() { var e = sel(); if (e && e.crop) { e.crop.x = parseFloat(this.value) || 0; renderLayerEdit() } })
   var inpCy = document.getElementById('inp-crop-y')
-  if (inpCy) inpCy.addEventListener('change', function() { var e = sel(); if (e && e.crop) { e.crop.y = parseFloat(this.value) || 0; render() } })
+  if (inpCy) inpCy.addEventListener('change', function() { var e = sel(); if (e && e.crop) { e.crop.y = parseFloat(this.value) || 0; renderLayerEdit() } })
+  ;[
+    inpX, inpY, inpW, inpH, inpOp, inpRad, inpSh,
+    inpText, inpFont, inpFontsize, inpFontweight, inpColor,
+    inpStrokeColor, inpStrokeW, inpTextShadow, inpCz, inpCx, inpCy
+  ].forEach(bindControlHistory)
 
   // --- Palette Tools buttons ---
   var psPrimary = document.getElementById('ps-primary')

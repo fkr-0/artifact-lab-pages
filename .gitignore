@@ -22,5 +22,6 @@ Thumbs.db
 brawl/ethic-brawl/
 
 .artifacts-deploy-stage/
+app-hub-v11/data/build-stats.json
 
 *.sha256

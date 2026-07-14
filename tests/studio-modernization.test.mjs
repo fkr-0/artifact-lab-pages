@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const sharepicPath = new URL('../procedural-sharepic-studio.html', import.meta.url);
+const layeredSharepicPath = new URL('../spc/procedural_sharepic_studio.html', import.meta.url);
 const storyboardPath = new URL('../storyboard-studio/index.html', import.meta.url);
 
 test('procedural sharepic studio exposes a reversible, portable production workflow', async () => {
@@ -13,6 +14,8 @@ test('procedural sharepic studio exposes a reversible, portable production workf
     'LEGACY_STORAGE_KEY',
     'function undo()',
     'function redo()',
+    'function flushPendingHistory()',
+    'Local save unavailable',
     'studioRecipes',
     'paletteAdapters',
     'typographyPresets',
@@ -39,6 +42,27 @@ test('procedural sharepic studio exposes a reversible, portable production workf
   }
 });
 
+test('catalog sharepic studio renders its editable layer stage and keeps inspector ranges live', async () => {
+  const html = await readFile(layeredSharepicPath, 'utf8');
+
+  for (const marker of [
+    'function renderStage()',
+    'state.elements.forEach(function(e)',
+    'renderEl(e)',
+    "stage.style.transform = 'scale(' + state.uiScale + ')'",
+    'renderStage()\n  renderLayers()',
+    'function renderLayerEdit(options)',
+    'function syncRangeFill(input)',
+    'function projectSnapshot(source)',
+    'function bindControlHistory(control)',
+    "renderLayerEdit({ layers: true })",
+    'width: 1200px;',
+    'transform-origin: top left;',
+  ]) {
+    assert.match(html, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+});
+
 test('storyboard studio exposes narrative authoring, history, focus, and accessible export controls', async () => {
   const html = await readFile(storyboardPath, 'utf8');
 
@@ -57,6 +81,8 @@ test('storyboard studio exposes narrative authoring, history, focus, and accessi
     "'add-character'",
     'function undo()',
     'function redo()',
+    'function flushPendingHistory()',
+    'Local save unavailable',
     'function reorderBlock(',
     'function toggleFocusMode(',
     'function storyboardMarkdown(',

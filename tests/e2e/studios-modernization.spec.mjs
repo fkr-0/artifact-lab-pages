@@ -1,6 +1,131 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('modernized authoring studios', () => {
+  test('catalog sharepic text layers and inspector sliders update the visible composition', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+
+    await page.goto('/spc/procedural_sharepic_studio.html');
+    await expect(page.locator('#preview')).toBeVisible();
+
+    const geometry = await page.evaluate(() => {
+      const preview = document.getElementById('preview').getBoundingClientRect();
+      const stage = document.getElementById('stage').getBoundingClientRect();
+      return {
+        preview: { x: preview.x, y: preview.y, width: preview.width, height: preview.height },
+        stage: { x: stage.x, y: stage.y, width: stage.width, height: stage.height },
+      };
+    });
+    expect(geometry.stage.x).toBeCloseTo(geometry.preview.x, 1);
+    expect(geometry.stage.y).toBeCloseTo(geometry.preview.y, 1);
+    expect(geometry.stage.width).toBeCloseTo(geometry.preview.width, 1);
+    expect(geometry.stage.height).toBeCloseTo(geometry.preview.height, 1);
+
+    await page.click('[data-tab="layers"]');
+    await page.click('#btn-add-text');
+    await expect(page.locator('#stage .el.text')).toHaveCount(1);
+    await expect(page.locator('#stage .text-edit')).toBeVisible();
+    await page.locator('#stage .text-edit').fill('INLINE TEXT WORKS');
+    await page.locator('#stage .text-edit').blur();
+
+    await page.click('[data-tab="inspector"]');
+    const textInput = page.locator('#inp-text');
+    await expect(textInput).toHaveValue('INLINE TEXT WORKS');
+    await textInput.fill('SHAREPIC');
+    await textInput.press('Home');
+    await textInput.type('LIVE ');
+    await expect(textInput).toHaveValue('LIVE SHAREPIC');
+    await expect(page.locator('#stage .text-display')).toHaveText('LIVE SHAREPIC');
+    await expect.poll(() => page.evaluate(() => sel().text)).toBe('LIVE SHAREPIC');
+
+    await page.locator('#inp-opacity').fill('0.35');
+    await expect.poll(() => page.evaluate(() => sel().opacity)).toBe(0.35);
+    await expect(page.locator('#stage .el')).toHaveCSS('opacity', '0.35');
+
+    await page.locator('#inp-radius').fill('55');
+    await expect.poll(() => page.evaluate(() => sel().radius)).toBe(55);
+    await expect(page.locator('#stage .box')).toHaveCSS('border-radius', '55px');
+
+    await page.locator('#inp-stroke-width').fill('12');
+    await expect.poll(() => page.evaluate(() => sel().strokeWidth)).toBe(12);
+    await expect.poll(() => page.evaluate(() => document.querySelector('#stage .text-display').style.webkitTextStroke)).toContain('12px');
+    await expect.poll(() => page.evaluate(() => document.getElementById('inp-stroke-width').style.getPropertyValue('--fill-pct'))).toBe('50%');
+
+    await page.click('[data-tab="tune"]');
+    await page.locator('#slider-disruptFactor').fill('65');
+    await expect.poll(() => page.evaluate(() => state.disruptFactor)).toBe(65);
+    await expect.poll(() => page.evaluate(() => document.getElementById('slider-disruptFactor').style.getPropertyValue('--fill-pct'))).toBe('65%');
+
+    expect(errors).toEqual([]);
+  });
+
+  test('procedural sharepic flushes pending text edits before undo and survives unavailable local storage', async ({ browser }) => {
+    const normalPage = await browser.newPage();
+    await normalPage.goto('/procedural-sharepic-studio.html');
+    await normalPage.click('[data-tab="content"]');
+    await normalPage.locator('label:has(#content-enabled)').click();
+    await normalPage.locator('#content-heading').fill('BEFORE');
+    await normalPage.waitForTimeout(400);
+    await normalPage.locator('#content-heading').fill('AFTER');
+    await normalPage.keyboard.press(process.platform === 'darwin' ? 'Meta+Z' : 'Control+Z');
+    await expect.poll(() => normalPage.evaluate(() => state.content.heading)).toBe('BEFORE');
+    await normalPage.keyboard.press(process.platform === 'darwin' ? 'Meta+Shift+Z' : 'Control+Shift+Z');
+    await expect.poll(() => normalPage.evaluate(() => state.content.heading)).toBe('AFTER');
+    await normalPage.close();
+
+    const blockedPage = await browser.newPage();
+    const errors = [];
+    blockedPage.on('pageerror', error => errors.push(error.message));
+    await blockedPage.addInitScript(() => {
+      Storage.prototype.setItem = function setItem() {
+        throw new DOMException('Storage denied for test', 'SecurityError');
+      };
+    });
+    await blockedPage.goto('/procedural-sharepic-studio.html');
+    await blockedPage.click('[data-tab="content"]');
+    await blockedPage.locator('label:has(#content-enabled)').click();
+    await blockedPage.locator('#content-heading').fill('STILL EDITABLE');
+    await expect.poll(() => blockedPage.evaluate(() => state.content.heading)).toBe('STILL EDITABLE');
+    await expect(blockedPage.locator('#save-state')).toContainText('Local save unavailable');
+    expect(errors).toEqual([]);
+    await blockedPage.close();
+  });
+
+  test('catalog sharepic undo and redo cover layer creation, text edits, and inspector sliders', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+
+    await page.goto('/spc/procedural_sharepic_studio.html');
+    await page.click('[data-tab="layers"]');
+    await page.click('#btn-add-text');
+    await expect(page.locator('#stage .el.text')).toHaveCount(1);
+
+    await page.click('#btn-undo');
+    await expect(page.locator('#stage .el')).toHaveCount(0);
+    await expect.poll(() => page.evaluate(() => state.elements.length)).toBe(0);
+    await page.click('#btn-redo');
+    await expect(page.locator('#stage .el.text')).toHaveCount(1);
+
+    await page.click('[data-tab="inspector"]');
+    await page.locator('#inp-text').fill('UNDOABLE SHAREPIC');
+    await page.locator('#inp-text').blur();
+    await expect(page.locator('#stage .text-display')).toHaveText('UNDOABLE SHAREPIC');
+    await page.click('#btn-undo');
+    await expect.poll(() => page.evaluate(() => sel().text)).toBe('DOUBLE TAP TO EDIT');
+    await page.click('#btn-redo');
+    await expect.poll(() => page.evaluate(() => sel().text)).toBe('UNDOABLE SHAREPIC');
+
+    await page.locator('#inp-opacity').fill('0.4');
+    await page.locator('#inp-opacity').blur();
+    await expect.poll(() => page.evaluate(() => sel().opacity)).toBe(0.4);
+    await page.click('#btn-undo');
+    await expect.poll(() => page.evaluate(() => sel().opacity)).toBe(1);
+    await page.click('#btn-redo');
+    await expect.poll(() => page.evaluate(() => sel().opacity)).toBe(0.4);
+
+    expect(errors).toEqual([]);
+  });
+
   test('procedural sharepic supports recipes, reversible edits, preview aids, and export configuration', async ({ page }) => {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
@@ -98,9 +223,14 @@ test.describe('modernized authoring studios', () => {
     await page.fill('#blockSearchInput', '');
 
     await page.click('[data-action="undo"]');
+    await expect(page.locator('.type-scene')).toHaveCount(1);
+    await expect(page.locator('.scene-kicker')).not.toContainText('rooftop');
+    await page.click('[data-action="undo"]');
     await expect(page.locator('.type-scene')).toHaveCount(0);
     await page.click('[data-action="redo"]');
     await expect(page.locator('.type-scene')).toHaveCount(1);
+    await page.click('[data-action="redo"]');
+    await expect(page.locator('.scene-kicker')).toContainText('rooftop');
 
     await page.click('[data-action="toggle-focus"]');
     await expect(page.locator('body')).toHaveClass(/preview-mode/);
@@ -109,5 +239,33 @@ test.describe('modernized authoring studios', () => {
     await expect(page.locator('body')).not.toHaveClass(/preview-mode/);
 
     expect(errors).toEqual([]);
+  });
+
+  test('storyboard flushes pending edits before undo and remains editable without local storage', async ({ browser }) => {
+    const normalPage = await browser.newPage();
+    await normalPage.goto('/storyboard-studio/');
+    await normalPage.locator('#titleInput').fill('BEFORE');
+    await normalPage.waitForTimeout(450);
+    await normalPage.locator('#titleInput').fill('AFTER');
+    await normalPage.keyboard.press(process.platform === 'darwin' ? 'Meta+Z' : 'Control+Z');
+    await expect.poll(() => normalPage.evaluate(() => state.title)).toBe('BEFORE');
+    await normalPage.keyboard.press(process.platform === 'darwin' ? 'Meta+Shift+Z' : 'Control+Shift+Z');
+    await expect.poll(() => normalPage.evaluate(() => state.title)).toBe('AFTER');
+    await normalPage.close();
+
+    const blockedPage = await browser.newPage();
+    const errors = [];
+    blockedPage.on('pageerror', error => errors.push(error.message));
+    await blockedPage.addInitScript(() => {
+      Storage.prototype.setItem = function setItem() {
+        throw new DOMException('Storage denied for test', 'SecurityError');
+      };
+    });
+    await blockedPage.goto('/storyboard-studio/');
+    await blockedPage.locator('#titleInput').fill('STILL EDITABLE');
+    await expect(blockedPage.locator('#previewTitle')).toHaveText('STILL EDITABLE');
+    await expect(blockedPage.locator('#docHealth')).toContainText('Local save unavailable');
+    expect(errors).toEqual([]);
+    await blockedPage.close();
   });
 });

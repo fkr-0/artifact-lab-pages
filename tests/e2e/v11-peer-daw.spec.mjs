@@ -24,7 +24,29 @@ function seriousErrors(errors) {
   });
 }
 
-async function bootDaw(page, url = '/v11-peer-daw/index.html') {
+let dawSessionSequence = 0;
+
+function isolatedDawSession(label = 'case') {
+  return `E2E-${process.pid}-${label}-${dawSessionSequence++}`;
+}
+
+function dawUrl({ session = isolatedDawSession(), username = 'e2e' } = {}) {
+  return `/v11-peer-daw/index.html?session=${encodeURIComponent(session)}&username=${encodeURIComponent(username)}`;
+}
+
+async function openDrawerFor(page, selector) {
+  const drawer = page.locator(`details:has(${selector})`);
+  if (!(await drawer.evaluate((element) => element.open))) {
+    await drawer.evaluate((element) => {
+      element.open = true;
+      element.dispatchEvent(new Event('toggle'));
+    });
+  }
+  await drawer.scrollIntoViewIfNeeded();
+  return drawer;
+}
+
+async function bootDaw(page, url = dawUrl()) {
   const errors = await collectPageErrors(page);
   await page.goto(url);
   await expect(page.locator('h1')).toContainText('V11 Peer DAW');
@@ -35,17 +57,22 @@ async function bootDaw(page, url = '/v11-peer-daw/index.html') {
 }
 
 test.describe('v11-peer-daw app', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test('converges two default V11 Open Studio clients through the local session bus', async ({ browser }) => {
     const context = await browser.newContext();
     const pilotA = await context.newPage();
     const pilotB = await context.newPage();
-    const errorsA = await bootDaw(pilotA, '/v11-peer-daw/index.html?username=alpha');
-    const errorsB = await bootDaw(pilotB, '/v11-peer-daw/index.html?username=beta');
+    const session = isolatedDawSession('convergence');
+    const errorsA = await bootDaw(pilotA, dawUrl({ session, username: 'alpha' }));
+    const errorsB = await bootDaw(pilotB, dawUrl({ session, username: 'beta' }));
 
-    await expect(pilotA.locator('#sessionCode')).toHaveText('V11-OPEN-STUDIO');
-    await expect(pilotB.locator('#sessionCode')).toHaveText('V11-OPEN-STUDIO');
+    await expect(pilotA.locator('#sessionCode')).toHaveText(session);
+    await expect(pilotB.locator('#sessionCode')).toHaveText(session);
     await expect(pilotA.locator('#workspaceMainView')).toContainText('Participants');
     await expect(pilotB.locator('#workspaceMainView')).toContainText('Participants');
+    await expect(pilotA.locator('#localPeerCount')).toHaveText('1');
+    await expect(pilotB.locator('#localPeerCount')).toHaveText('1');
 
     await pilotA.locator('#addModule').selectOption('cleansynth');
     await expect(pilotA.locator('#moduleCount')).toHaveText('10 modules');
@@ -57,18 +84,60 @@ test.describe('v11-peer-daw app', () => {
     await context.close();
   });
 
+  test('resolves simultaneous local-session edits deterministically on every client', async ({ browser }) => {
+    const context = await browser.newContext();
+    const pilotA = await context.newPage();
+    const pilotB = await context.newPage();
+    const session = isolatedDawSession('conflict');
+    const errorsA = await bootDaw(pilotA, dawUrl({ session, username: 'alpha' }));
+    const errorsB = await bootDaw(pilotB, dawUrl({ session, username: 'beta' }));
+    await expect(pilotA.locator('#localPeerCount')).toHaveText('1');
+    await expect(pilotB.locator('#localPeerCount')).toHaveText('1');
+
+    const clients = await Promise.all([
+      pilotA.evaluate(() => window.v11PeerDAW.clientId),
+      pilotB.evaluate(() => window.v11PeerDAW.clientId),
+    ]);
+    const expectedBpm = clients[0].localeCompare(clients[1]) > 0 ? 111 : 222;
+    const startAt = Date.now() + 250;
+    await Promise.all([
+      pilotA.evaluate(async ({ startAt: at }) => {
+        while (Date.now() < at) await new Promise((resolve) => setTimeout(resolve, 5));
+        window.v11PeerDAW.localProjectVersion = 0;
+        window.v11PeerDAW.lastAppliedProjectStamp = { version: 0, clientId: '' };
+        window.v11PeerDAW.clock.bpm = 111;
+        window.v11PeerDAW.publishLocalSessionProject('simultaneous-alpha');
+      }, { startAt }),
+      pilotB.evaluate(async ({ startAt: at }) => {
+        while (Date.now() < at) await new Promise((resolve) => setTimeout(resolve, 5));
+        window.v11PeerDAW.localProjectVersion = 0;
+        window.v11PeerDAW.lastAppliedProjectStamp = { version: 0, clientId: '' };
+        window.v11PeerDAW.clock.bpm = 222;
+        window.v11PeerDAW.publishLocalSessionProject('simultaneous-beta');
+      }, { startAt }),
+    ]);
+
+    await expect.poll(() => pilotA.evaluate(() => window.v11PeerDAW.clock.bpm)).toBe(expectedBpm);
+    await expect.poll(() => pilotB.evaluate(() => window.v11PeerDAW.clock.bpm)).toBe(expectedBpm);
+    expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
+    await context.close();
+  });
+
   test('boots the default modular rig with canvas, routes, mixer, and packet monitor', async ({ page }) => {
     const errors = await bootDaw(page);
+    const session = await page.locator('#sessionCode').textContent();
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
+    await expect(page.locator('#appVersion')).toHaveText('v1.1.0');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
-    await expect(page.locator('#sessionCode')).toHaveText('V11-OPEN-STUDIO');
+    expect(session).toMatch(/^E2E-/);
     await expect(page.locator('#workspaceMainView')).toContainText('Shared session');
-    await expect(page.locator('#workspaceMainView')).toContainText('V11-OPEN-STUDIO');
+    await expect(page.locator('#workspaceMainView')).toContainText(session);
     await expect(page.locator('#patchCanvas')).toBeVisible();
     await expect.poll(async () => page.locator('#routes li').count()).toBeGreaterThan(1);
     await expect.poll(async () => page.locator('#mixerStrip .strip').count()).toBeGreaterThan(0);
     await expect(page.locator('#eventLog')).toBeVisible();
+    await expect(page.locator('#sessionHealthSummary')).not.toContainText('starting');
 
     const state = await page.evaluate(() => ({
       moduleCount: window.v11PeerDAW.patchBay.modules.size,
@@ -224,6 +293,11 @@ test.describe('v11-peer-daw app', () => {
       return { carrierRatio: fm.carrierRatio, modulationIndex: fm.modulationIndex };
     });
     expect(fmState).toMatchObject({ carrierRatio: 1.5, modulationIndex: 5.5 });
+    await page.locator('[data-module-input="synth-param"][data-param-key="modulationIndex"]').fill('0');
+    await expect.poll(() => page.evaluate(() => {
+      const fm = [...window.v11PeerDAW.patchBay.modules.values()].find((module) => module.title === 'FM / Phase Mod Synth');
+      return fm.modulationIndex;
+    })).toBe(0);
 
     await page.locator('#addModule').selectOption('wavetablesynth');
     await page.locator('.module-card:has-text("Wavetable Synth") .focus').last().click();
@@ -369,6 +443,7 @@ test.describe('v11-peer-daw app', () => {
   test('loads and stages bundled example projects for UI operation demos', async ({ page }) => {
     const errors = await bootDaw(page);
 
+    await openDrawerFor(page, '#exampleProjectSelect');
     await expect(page.locator('#exampleProjectSelect')).toBeVisible();
     await page.locator('#exampleProjectSelect').selectOption('detroit-pocket-conant-gardens-study');
     await page.locator('#btnStageExampleProject').click();
@@ -405,6 +480,7 @@ test.describe('v11-peer-daw app', () => {
     await page.locator('[data-clip-action="create"]').click();
     await page.locator('[data-clip-action="place"]').first().click();
 
+    await openDrawerFor(page, '#btnCopyProject');
     await page.locator('#btnCopyProject').click();
     await expect(page.locator('#projectIoText')).toHaveValue(/"modules"/);
     const exported = await page.locator('#projectIoText').inputValue();
@@ -447,6 +523,8 @@ test.describe('v11-peer-daw app', () => {
 });
 
 test.describe('app-hub-v11 integration for v11-peer-daw', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test('launches v11-peer-daw inline from the hub and gives the DAW iframe usable vertical space', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/app-hub-v11/index.html');

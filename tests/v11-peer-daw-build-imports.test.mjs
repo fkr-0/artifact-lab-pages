@@ -16,4 +16,7 @@ assert.match(app, /this\.urlParams = new URLSearchParams\(window\.location\.sear
 assert.match(app, /this\.targetPeerId = this\.urlParams\.get\('targetPeerId'\)/, 'v11 DAW should consume targetPeerId for hub joins');
 assert.match(app, /this\.spectateMode\s*=\s*this\.urlParams\.get\('spectate'\) === 'true' \|\| this\.urlParams\.get\('observe'\) === 'true'/, 'v11 DAW should support observe mode');
 assert.match(app, /autoJoinFromUrl\(\)/, 'v11 DAW should auto-join peer sessions from URL params');
-assert.match(app, /this\.peernet\.start\(\{[\s\S]*?username,[\s\S]*?targetPeerId: this\.targetPeerId,[\s\S]*?spectate: this\.spectateMode,[\s\S]*?sessionCode: this\.sessionCode,?[\s\S]*?\}\)/, 'v11 DAW should pass hub join params into peernet stack');
+assert.match(app, /const profile = \{[\s\S]*?username,[\s\S]*?targetPeerId: this\.targetPeerId,[\s\S]*?spectate: this\.spectateMode,[\s\S]*?sessionCode: this\.defaultSessionCode,?[\s\S]*?\}/, 'v11 DAW should assemble hub join params once');
+assert.match(app, /this\.peernet\.start\(profile\)/, 'v11 DAW should start the peernet stack from the shared session profile');
+const autoJoinBody = app.slice(app.indexOf('  autoJoinFromUrl() {'), app.indexOf('  bindPeernetStack() {'));
+assert.doesNotMatch(autoJoinBody, /this\.peernet\.start\(/, 'URL auto-join should not start the peernet stack a second time');
