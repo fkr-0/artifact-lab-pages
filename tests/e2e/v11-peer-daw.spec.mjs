@@ -27,7 +27,7 @@ function seriousErrors(errors) {
 let dawSessionSequence = 0;
 
 function isolatedDawSession(label = 'case') {
-  return `E2E-${process.pid}-${label}-${dawSessionSequence++}`;
+  return `E2E-${process.pid}-${String(label).toUpperCase()}-${dawSessionSequence++}`;
 }
 
 function dawUrl({ session = isolatedDawSession(), username = 'e2e' } = {}) {
@@ -46,13 +46,13 @@ async function openDrawerFor(page, selector) {
   return drawer;
 }
 
-async function bootDaw(page, url = dawUrl()) {
+async function bootDaw(page, url = dawUrl(), { moduleCount = 9 } = {}) {
   const errors = await collectPageErrors(page);
   await page.goto(url);
   await expect(page.locator('h1')).toContainText('V11 Peer DAW');
   await expect(page.locator('#modules')).toBeVisible();
   await page.waitForFunction(() => Boolean(window.v11PeerDAW?.patchBay));
-  await expect(page.locator('.module-card')).toHaveCount(9);
+  await expect(page.locator('.module-card')).toHaveCount(moduleCount);
   return errors;
 }
 
@@ -79,6 +79,62 @@ test.describe('v11-peer-daw app', () => {
     await expect(pilotB.locator('#moduleCount')).toHaveText('10 modules', { timeout: 10000 });
     await expect(pilotB.locator('.module-card:has-text("Clean Synth")')).toBeVisible();
     await expect(pilotB.locator('#eventLog')).toContainText('local session project update');
+
+    expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
+    await context.close();
+  });
+
+  test('hydrates a late joiner from the current room snapshot without another edit', async ({ browser }) => {
+    const context = await browser.newContext();
+    const pilotA = await context.newPage();
+    const pilotB = await context.newPage();
+    const session = isolatedDawSession('late-join');
+    const errorsA = await bootDaw(pilotA, dawUrl({ session, username: 'alpha' }));
+
+    await pilotA.locator('#addModule').selectOption('cleansynth');
+    await expect(pilotA.locator('#moduleCount')).toHaveText('10 modules');
+
+    const errorsB = await bootDaw(
+      pilotB,
+      dawUrl({ session, username: 'late-beta' }),
+      { moduleCount: 10 }
+    );
+    await expect(pilotB.locator('.module-card:has-text("Clean Synth")')).toBeVisible();
+    await expect(pilotB.locator('#eventLog')).toContainText('local session snapshot received');
+    await expect(pilotB.locator('#projectSyncSummary')).toContainText('synced');
+    await expect(pilotA.locator('#localPeerCount')).toHaveText('1');
+    await expect(pilotB.locator('#localPeerCount')).toHaveText('1');
+
+    expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
+    await context.close();
+  });
+
+  test('joins a room from the session code control and updates the URL', async ({ browser }) => {
+    const context = await browser.newContext();
+    const pilotA = await context.newPage();
+    const pilotB = await context.newPage();
+    const sharedSession = isolatedDawSession('manual-room');
+    const otherSession = isolatedDawSession('other-room');
+    const errorsA = await bootDaw(
+      pilotA,
+      dawUrl({ session: sharedSession, username: 'alpha' })
+    );
+    const errorsB = await bootDaw(
+      pilotB,
+      dawUrl({ session: otherSession, username: 'beta' })
+    );
+
+    await pilotA.locator('#addModule').selectOption('cleansynth');
+    await expect(pilotA.locator('#moduleCount')).toHaveText('10 modules');
+    await pilotB.locator('#sessionCodeInput').fill(sharedSession.toLowerCase());
+    await pilotB.locator('#btnJoinSession').click();
+
+    await expect(pilotB.locator('#sessionCode')).toHaveText(sharedSession);
+    await expect(pilotB).toHaveURL(new RegExp(`session=${encodeURIComponent(sharedSession)}`));
+    await expect(pilotB.locator('#moduleCount')).toHaveText('10 modules');
+    await expect(pilotB.locator('#projectSyncSummary')).toContainText('synced');
+    await expect(pilotA.locator('#localPeerCount')).toHaveText('1');
+    await expect(pilotB.locator('#localPeerCount')).toHaveText('1');
 
     expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
     await context.close();
@@ -128,7 +184,7 @@ test.describe('v11-peer-daw app', () => {
     const session = await page.locator('#sessionCode').textContent();
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
-    await expect(page.locator('#appVersion')).toHaveText('v1.1.0');
+    await expect(page.locator('#appVersion')).toHaveText('v1.1.1');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
     expect(session).toMatch(/^E2E-/);
     await expect(page.locator('#workspaceMainView')).toContainText('Shared session');

@@ -15,6 +15,17 @@ function git(command, fallback = 'unknown') {
   }
 }
 
+function normalizeCommit(value) {
+  const commit = String(value || '').trim();
+  return /^[0-9a-f]{7,40}$/i.test(commit) ? commit : null;
+}
+
+function normalizeBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (value === undefined || value === null || value === '') return fallback;
+  return String(value).toLowerCase() === 'true';
+}
+
 async function getVersion(packagePath) {
   try {
     const pkg = JSON.parse(await readFile(packagePath, 'utf8'));
@@ -43,12 +54,19 @@ async function generateBuildStats(options = {}) {
     getVersion(packagePath),
   ]);
   const builtAt = new Date().toISOString();
-  const commitHash = git('git rev-parse HEAD');
-  const commitShort = git('git rev-parse --short=12 HEAD');
-  const commitMessage = git('git log -1 --pretty=%s', 'unknown commit');
-  const commitDate = git('git log -1 --pretty=%cI');
+  const requestedCommit = normalizeCommit(options.commitHash || process.env.ARTIFACTS_SOURCE_COMMIT);
+  const commitHash = requestedCommit
+    ? git(`git rev-parse ${requestedCommit}`, requestedCommit)
+    : git('git rev-parse HEAD');
+  const commitShort = git(`git rev-parse --short=12 ${commitHash}`, commitHash.slice(0, 12));
+  const commitMessage = git(`git show -s --format=%s ${commitHash}`, 'unknown commit');
+  const commitDate = git(`git show -s --format=%cI ${commitHash}`);
   const branch = git('git branch --show-current', 'detached');
-  const dirty = Boolean(git('git status --porcelain', ''));
+  const detectedDirty = Boolean(git('git status --porcelain', ''));
+  const dirty = normalizeBoolean(
+    options.dirty ?? process.env.ARTIFACTS_SOURCE_DIRTY,
+    detectedDirty
+  );
 
   const buildStats = {
     schemaVersion: 2,
@@ -79,6 +97,8 @@ function parseArgs(args) {
     if (arg === '--source') parsed.sourcePath = args[++i];
     else if (arg === '--out') parsed.outputPath = args[++i];
     else if (arg === '--package') parsed.packagePath = args[++i];
+    else if (arg === '--commit') parsed.commitHash = args[++i];
+    else if (arg === '--dirty') parsed.dirty = args[++i];
   }
   return parsed;
 }

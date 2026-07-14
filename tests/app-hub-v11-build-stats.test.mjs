@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execSync } from 'node:child_process';
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,18 +13,26 @@ test('V11 Hub build stats expose semantic version and source provenance', async 
   const outputPath = join(temp, 'nested', 'build-stats.json');
   await writeFile(sourcePath, JSON.stringify({ items: [{ id: 'one' }, { id: 'two' }] }));
   await writeFile(packagePath, JSON.stringify({ version: '9.8.7' }));
+  const sourceCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 
-  const stats = await generateBuildStats({ sourcePath, packagePath, outputPath });
+  const stats = await generateBuildStats({
+    sourcePath,
+    packagePath,
+    outputPath,
+    commitHash: sourceCommit,
+    dirty: false,
+  });
   const persisted = JSON.parse(await readFile(outputPath, 'utf8'));
 
   assert.equal(stats.schemaVersion, 2);
   assert.equal(stats.version, '9.8.7');
   assert.equal(stats.artifactCount, 2);
+  assert.equal(stats.commitHash, sourceCommit);
   assert.match(stats.commitHash, /^[0-9a-f]{40}$/);
   assert.match(stats.commitShort, /^[0-9a-f]{7,12}$/);
   assert.ok(Number.isFinite(Date.parse(stats.commitDate)));
   assert.ok(Number.isFinite(Date.parse(stats.builtAt)));
-  assert.equal(typeof stats.dirty, 'boolean');
+  assert.equal(stats.dirty, false);
   assert.deepEqual(persisted, stats);
 });
 

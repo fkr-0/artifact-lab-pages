@@ -89,10 +89,10 @@ jobs:
         run: node app-hub-v11/server/artifact-build.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage
 
       - name: Generate build statistics
-        run: node app-hub-v11/server/generate-build-stats.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage/app-hub-v11/data/build-stats.json
+        run: node app-hub-v11/server/generate-build-stats.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage/app-hub-v11/data/build-stats.json --commit "$GITHUB_SHA" --dirty false
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: .artifacts-pages-stage
 
