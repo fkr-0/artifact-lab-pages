@@ -4,6 +4,32 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.0] - 2026-07-14
+
+### Added
+
+- V11 Peer DAW 1.4.0 “Collaboration Confidence” with protocol-v2 typed operations and protocol-1 snapshot compatibility.
+- A persistent per-room collaboration journal with acknowledgements, retry/backoff, reconnect replay, coalescing, deduplication, checkpoints, conflicts, and recovery export.
+- Deterministic reducers for mixer/module parameters, tempo, clips, notes, sequencer steps, arrangement placements/loops, multisampler zones, and atomic batches.
+- Stable project entity IDs with additive migration for legacy slots, notes, placements, and zones.
+- A Sync Center exposing delivery state, human-readable activity, compatibility, conflicts, and recovery controls.
+- Browser coverage for zero-rebuild incremental convergence, payload reduction, offline reload replay, and protocol-v2 simultaneous edits.
+
+### Changed
+
+- The Hub pins the exact V11 Peer DAW 1.4.0 release commit.
+- Frequent DAW edits now synchronize incrementally while module/routing topology, project import, sample binaries, complex presets, bootstrap, and recovery retain complete snapshots.
+- Covered remote edits preserve the active editor and avoid whole-rig reconstruction.
+- The complete DAW Chromium gate now contains 15 scenarios.
+
+### Fixed
+
+- Concurrent unrelated edits no longer overwrite one another through whole-project last-writer-wins updates.
+- Pending edits survive reload and short disconnects instead of being silently lost.
+- Duplicate local and Peernet delivery applies an operation only once.
+- Older adds cannot resurrect notes, placements, or zones deleted by newer operations.
+- Capability accounting no longer treats multiple transport roles for one logical collaborator as an incompatible client.
+
 ## [1.2.0] - 2026-07-14
 
 ### Added
@@ -87,6 +113,7 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[1.3.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.0...v1.0.1

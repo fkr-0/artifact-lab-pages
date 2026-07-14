@@ -74,6 +74,12 @@ test.describe('v11-peer-daw app', () => {
     await expect(pilotB.locator('#workspaceMainView')).toContainText('Participants');
     await expect(pilotA.locator('#localPeerCount')).toHaveText('1');
     await expect(pilotB.locator('#localPeerCount')).toHaveText('1');
+    await expect
+      .poll(() => pilotA.evaluate(() => window.v11PeerDAW.collaboration.compatiblePeerIds().length))
+      .toBe(1);
+    await expect
+      .poll(() => pilotB.evaluate(() => window.v11PeerDAW.collaboration.compatiblePeerIds().length))
+      .toBe(1);
 
     await pilotA.locator('#addModule').selectOption('cleansynth');
     await expect(pilotA.locator('#moduleCount')).toHaveText('10 modules');
@@ -145,6 +151,158 @@ test.describe('v11-peer-daw app', () => {
       .toBeGreaterThan(0);
 
     expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
+    await context.close();
+  });
+
+  test('merges acknowledged incremental operations without rebuilding either rig', async ({ browser }) => {
+    const context = await browser.newContext();
+    const pilotA = await context.newPage();
+    const pilotB = await context.newPage();
+    const session = isolatedDawSession('operation-convergence');
+    const errorsA = await bootDaw(pilotA, dawUrl({ session, username: 'op-alpha' }));
+    const errorsB = await bootDaw(pilotB, dawUrl({ session, username: 'op-beta' }));
+
+    await expect
+      .poll(() => pilotA.evaluate(() => window.v11PeerDAW.collaboration.compatiblePeerIds().length))
+      .toBe(1);
+    await expect
+      .poll(() => pilotB.evaluate(() => window.v11PeerDAW.collaboration.compatiblePeerIds().length))
+      .toBe(1);
+
+    await Promise.all(
+      [pilotA, pilotB].map((page) =>
+        page.evaluate(() => {
+          const app = window.v11PeerDAW;
+          app.__operationTestRebuilds = 0;
+          const original = app.rebuildRigFromProject.bind(app);
+          app.rebuildRigFromProject = async (...args) => {
+            app.__operationTestRebuilds += 1;
+            return original(...args);
+          };
+        })
+      )
+    );
+    await pilotA.waitForTimeout(900);
+    const rebuildBaseline = await Promise.all(
+      [pilotA, pilotB].map((page) =>
+        page.evaluate(() => ({
+          rebuilds: window.v11PeerDAW.__operationTestRebuilds,
+          legacy: window.v11PeerDAW.hasLegacyCollaborationPeers(),
+          compatible: window.v11PeerDAW.collaboration.compatiblePeerIds().length,
+        }))
+      )
+    );
+    expect(rebuildBaseline.map((state) => state.compatible)).toEqual([1, 1]);
+    expect(rebuildBaseline.map((state) => state.legacy)).toEqual([false, false]);
+
+    await pilotA.locator('[data-workspace-view="mixer"]').click();
+    const masterA = pilotA.locator('[data-module-input="master-volume"]');
+    await masterA.focus();
+    await pilotB.evaluate(() => {
+      const app = window.v11PeerDAW;
+      app.focusedModuleId = app.clock.id;
+      app.setWorkspaceView('module');
+    });
+    const bpmB = pilotB.locator('[data-module-input="clock-bpm"]');
+
+    await Promise.all([masterA.fill('0.42'), bpmB.fill('137')]);
+
+    await expect
+      .poll(() => pilotA.evaluate(() => window.v11PeerDAW.clock.bpm))
+      .toBe(137);
+    await expect
+      .poll(() => pilotB.evaluate(() => window.v11PeerDAW.mixerState.masterVolume))
+      .toBeCloseTo(0.42, 5);
+    await expect(masterA).toBeFocused();
+    await expect
+      .poll(() => pilotA.evaluate(() => window.v11PeerDAW.__operationTestRebuilds))
+      .toBe(rebuildBaseline[0].rebuilds);
+    await expect
+      .poll(() => pilotB.evaluate(() => window.v11PeerDAW.__operationTestRebuilds))
+      .toBe(rebuildBaseline[1].rebuilds);
+
+    await expect
+      .poll(() =>
+        pilotA.evaluate(() =>
+          [...window.v11PeerDAW.collaboration.journal.entries.values()].every(
+            (entry) => entry.status === 'acknowledged'
+          )
+        )
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        pilotB.evaluate(() =>
+          [...window.v11PeerDAW.collaboration.journal.entries.values()].every(
+            (entry) => entry.status === 'acknowledged'
+          )
+        )
+      )
+      .toBe(true);
+
+    const payloadRatio = await pilotA.evaluate(() => {
+      const entries = [...window.v11PeerDAW.collaboration.journal.entries.values()];
+      const operation = entries.at(-1)?.operation;
+      return JSON.stringify(operation).length / JSON.stringify(window.v11PeerDAW.serializeRig()).length;
+    });
+    expect(payloadRatio).toBeLessThan(0.1);
+
+    await pilotA.locator('#btnSyncCenter').click();
+    await expect(pilotA.locator('#syncCenter')).toHaveAttribute('aria-hidden', 'false');
+    await expect(pilotA.locator('[data-sync-state]')).toHaveText('SYNCED');
+    await expect(pilotA.locator('[data-sync-activity]')).toContainText(/master|tempo/i);
+    await expect(pilotA.locator('[data-sync-pending]')).toContainText('No pending operations');
+
+    expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
+    await context.close();
+  });
+
+  test('persists and replays the local operation journal across reload', async ({ browser }) => {
+    const context = await browser.newContext();
+    await installFakePeerJs(context);
+    const page = await context.newPage();
+    const session = isolatedDawSession('operation-replay');
+    const errors = await bootDaw(
+      page,
+      `${dawUrl({ session, username: 'offline-editor' })}&localSync=false`
+    );
+
+    await page.locator('[data-workspace-view="mixer"]').click();
+    await page.locator('[data-module-input="master-volume"]').fill('0.36');
+    const before = await page.evaluate(() => {
+      const app = window.v11PeerDAW;
+      const entry = [...app.collaboration.journal.entries.values()].at(-1);
+      return {
+        actorId: app.clientId,
+        opId: entry.operation.opId,
+        attempts: entry.attempts,
+        pending: app.collaboration.diagnostics().pendingCount,
+      };
+    });
+    expect(before.pending).toBeGreaterThan(0);
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.v11PeerDAW?.collaboration));
+    const after = await page.evaluate((opId) => {
+      const app = window.v11PeerDAW;
+      const entry = app.collaboration.journal.entries.get(opId);
+      return {
+        actorId: app.clientId,
+        exists: Boolean(entry),
+        attempts: entry?.attempts || 0,
+        pending: app.collaboration.diagnostics().pendingCount,
+      };
+    }, before.opId);
+
+    expect(after.actorId).toBe(before.actorId);
+    expect(after.exists).toBe(true);
+    expect(after.attempts).toBeGreaterThan(before.attempts);
+    expect(after.pending).toBeGreaterThan(0);
+    await expect(page.locator('#btnSyncCenter')).toContainText(/PENDING|RECONNECTING/);
+    await page.locator('#btnSyncCenter').click();
+    await expect(page.locator('[data-sync-pending]')).toContainText(before.opId);
+
+    expect(seriousErrors(errors)).toEqual([]);
     await context.close();
   });
 
@@ -268,22 +426,44 @@ test.describe('v11-peer-daw app', () => {
     await Promise.all([
       pilotA.evaluate(async ({ startAt: at }) => {
         while (Date.now() < at) await new Promise((resolve) => setTimeout(resolve, 5));
-        window.v11PeerDAW.localProjectVersion = 0;
-        window.v11PeerDAW.lastAppliedProjectStamp = { version: 0, clientId: '' };
-        window.v11PeerDAW.clock.bpm = 111;
-        window.v11PeerDAW.publishLocalSessionProject('simultaneous-alpha');
+        const app = window.v11PeerDAW;
+        app.clock.bpm = 111;
+        app.publishCollaborativeOperation(
+          'clock',
+          'set-bpm',
+          { moduleId: app.clock.id, moduleTitle: app.clock.title, field: 'bpm' },
+          { value: 111 },
+          { reason: 'simultaneous-alpha', coalesce: true }
+        );
       }, { startAt }),
       pilotB.evaluate(async ({ startAt: at }) => {
         while (Date.now() < at) await new Promise((resolve) => setTimeout(resolve, 5));
-        window.v11PeerDAW.localProjectVersion = 0;
-        window.v11PeerDAW.lastAppliedProjectStamp = { version: 0, clientId: '' };
-        window.v11PeerDAW.clock.bpm = 222;
-        window.v11PeerDAW.publishLocalSessionProject('simultaneous-beta');
+        const app = window.v11PeerDAW;
+        app.clock.bpm = 222;
+        app.publishCollaborativeOperation(
+          'clock',
+          'set-bpm',
+          { moduleId: app.clock.id, moduleTitle: app.clock.title, field: 'bpm' },
+          { value: 222 },
+          { reason: 'simultaneous-beta', coalesce: true }
+        );
       }, { startAt }),
     ]);
 
     await expect.poll(() => pilotA.evaluate(() => window.v11PeerDAW.clock.bpm)).toBe(expectedBpm);
     await expect.poll(() => pilotB.evaluate(() => window.v11PeerDAW.clock.bpm)).toBe(expectedBpm);
+    await expect
+      .poll(() => pilotA.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().pendingCount))
+      .toBe(0);
+    await expect
+      .poll(() => pilotB.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().pendingCount))
+      .toBe(0);
+    expect(
+      await pilotA.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().conflictCount)
+    ).toBe(0);
+    expect(
+      await pilotB.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().conflictCount)
+    ).toBe(0);
     expect(seriousErrors([...errorsA, ...errorsB])).toEqual([]);
     await context.close();
   });
@@ -293,7 +473,7 @@ test.describe('v11-peer-daw app', () => {
     const session = await page.locator('#sessionCode').textContent();
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
-    await expect(page.locator('#appVersion')).toHaveText('v1.3.0');
+    await expect(page.locator('#appVersion')).toHaveText('v1.4.0');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
     expect(session).toMatch(/^E2E-/);
     await expect(page.locator('#workspaceMainView')).toContainText('Shared session');
