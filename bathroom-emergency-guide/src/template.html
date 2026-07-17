@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="$lang$" data-print-mode="$print-mode$">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="guide-version" content="$guide-version$">
+  <title>$title$</title>
+  $for(css)$<link rel="stylesheet" href="$css$">$endfor$
+</head>
+<body>
+  <div class="reading-progress" aria-hidden="true"><span></span></div>
+  <header class="app-bar">
+    <a class="brand" href="#00-cover">BEG / $guide-version$</a>
+    <div class="app-actions">
+      <button type="button" id="toc-toggle" aria-controls="TOC" aria-expanded="false">Contents</button>
+      <button type="button" id="theme-toggle" aria-label="Toggle color scheme">Theme</button>
+      <button type="button" id="print-button">Print</button>
+    </div>
+  </header>
+  <div class="app-shell">
+    $if(toc)$
+    <nav id="TOC" aria-label="Guide contents">
+      <p class="toc-kicker">Choose a route</p>
+      $toc$
+      <p class="toc-help"><strong>Red flag?</strong><br>Call 112 before reading.</p>
+    </nav>
+    $endif$
+    <main id="guide">
+      $body$
+    </main>
+  </div>
+  <script>
+  (() => {
+    const root = document.documentElement;
+    const toc = document.getElementById('TOC');
+    const tocButton = document.getElementById('toc-toggle');
+    const themeButton = document.getElementById('theme-toggle');
+    const progress = document.querySelector('.reading-progress span');
+    const saved = localStorage.getItem('beg-theme');
+    if (saved) root.dataset.theme = saved;
+    tocButton?.addEventListener('click', () => {
+      const open = document.body.classList.toggle('toc-open');
+      tocButton.setAttribute('aria-expanded', String(open));
+    });
+    toc?.addEventListener('click', (event) => {
+      if (event.target.closest('a')) {
+        document.body.classList.remove('toc-open');
+        tocButton?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    themeButton?.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('beg-theme', next);
+    });
+    document.getElementById('print-button')?.addEventListener('click', () => window.print());
+    const update = () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      progress.style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + '%';
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+  </script>
+</body>
+</html>

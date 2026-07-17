@@ -1,41 +1,33 @@
 ---
 title: "Bathroom Emergency Guide"
 chapter: 0
-revision: "3.2.0"
-last_updated: "2026-05-03"
+revision: "4.0.0"
+last_updated: "2026-07-17"
 type: cover
 dependencies: []
 ---
 
-# 🚿 Bathroom Emergency Guide
+# Bathroom Emergency Guide
 
-**Version 3.2.0 · 2026-05-03**
+## In case of too much
 
-> *"You're in a bathroom. That's already a good start."*
+> You are in a room with a door, water, and one next action.  
+> That is enough to begin.
 
-A decision-support tool for situations ranging from acute anxiety
-and physical pain to — hypothetically — zombie apocalypses.
-Built with scientific rigor and bathroom-tested pragmatism.
+<div class="emergency-strip">
+  <div><strong>112</strong>life or lasting harm</div>
+  <div><strong>116 117</strong>urgent medical help</div>
+  <div><strong>116 123</strong>a human voice</div>
+  <div><strong>110</strong>police / active threat</div>
+</div>
 
-Deploy strategically. Read when needed. Breathe always.
-The math is optional. The breathing is not.
+**Version 4.0 · Germany edition · 17 July 2026**
 
----
+A small decision system for panic, pain, responsibility, danger, overload,
+bad smells, missing places, and the occasional collapse of civilization.
 
-**Document Control**
+The jokes are optional. The red flags are not.
 
-| Field | Value |
-|-------|-------|
-| Title | Bathroom Emergency Guide |
-| Version | 3.2.0 |
-| Date | 2026-05-03 |
-| Classification | Personal — Bathroom Deployment |
-| Build | markdown → Pandoc → HTML/WeasyPrint PDF/DOCX |
-| Chapters | 11 (00–10) |
-| Diagrams | 6 original + 8 scientific diagrams |
-| Notation | LaTeX math ($...$ / $$...$$), Pandoc footnotes |
-| Scientific enhancements | GAD-7, NRS, HRV, cortisol decay, Dunbar numbers, Ostrom's principles, cognitive load theory, Bayes' triage, physiological sigh research, IASC pyramid |
-
----
-
-*Turn the page to begin.*
+This guide supports decisions; it does not diagnose, replace first-aid
+training, or overrule emergency dispatchers. If life may be in danger or
+lasting harm cannot be excluded, call **112 before reading further**.
