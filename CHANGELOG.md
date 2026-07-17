@@ -4,6 +4,13 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.1] - 2026-07-17
+
+### Fixed
+
+- The pinned Hyperblast checkout now includes its vendored PixiJS runtime and license, allowing clean GitHub Actions checkouts to pass the release gate.
+- Artifact Lab deployment is reproducible from submodule commits rather than depending on untracked local vendor files.
+
 ## [1.4.0] - 2026-07-17
 
 ### Added
@@ -134,6 +141,7 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[1.4.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.1.0...v1.2.0
