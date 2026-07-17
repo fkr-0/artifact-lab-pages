@@ -72,11 +72,47 @@ commands:
     track: test
     shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e --project=chromium"
   verify:badger-sprawl-runner:
-    run: "cd badger-sprawl-runner && pnpm run test && pnpm run typecheck && pnpm run build && pnpm run smoke:runner && pnpm run lint && pnpm run test:e2e --project=chromium"
-    description: "Run the full Badger Sprawl Runner release verification stack through pnpm, including Playwright E2E."
-    timeoutMs: 300000
+    run: "cd badger-sprawl-runner && pnpm run verify:release"
+    description: "Run the complete Badger Sprawl Runner release gate: unit/data contracts, typecheck, build, static and browser smoke, lint, and Chromium E2E."
+    timeoutMs: 600000
     track: test
-    shellCommand: "cd badger-sprawl-runner && pnpm run test && pnpm run typecheck && pnpm run build && pnpm run smoke:runner && pnpm run lint && pnpm run test:e2e --project=chromium"
+    shellCommand: "cd badger-sprawl-runner && pnpm run verify:release"
+  e2e:drainmarket:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run test:e2e:drainmarket"]
+    description: "Run the complete Drainmarket Stage 2 vertical slice in Chromium and Firefox."
+    timeoutMs: 180000
+    track: test
+    shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e:drainmarket"
+  e2e:chrome-arcology:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run test:e2e:chrome-arcology"]
+    description: "Run the complete Chrome Arcology Stage 3 vertical slice in Chromium and Firefox."
+    timeoutMs: 180000
+    track: test
+    shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e:chrome-arcology"
+  e2e:badger-progression:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run test:e2e:progression"]
+    description: "Run the sprite-backed 23-item and four-track skill progression flow in Chromium and Firefox."
+    timeoutMs: 180000
+    track: test
+    shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e:progression"
+  stage:badger-sprawl-runner:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run stage:artifact-lab"]
+    description: "Validate Badger Sprawl Runner and materialize the resulting Artifact Lab deployment stage."
+    timeoutMs: 600000
+    track: build
+    shellCommand: "cd badger-sprawl-runner && pnpm run stage:artifact-lab"
+  deploy:badger-sprawl-runner:dry-run:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run deploy:artifact-lab:dry-run"]
+    description: "Validate Badger Sprawl Runner and preview deployment without transferring files."
+    timeoutMs: 600000
+    track: deploy
+    shellCommand: "cd badger-sprawl-runner && pnpm run deploy:artifact-lab:dry-run"
+  deploy:badger-sprawl-runner:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run deploy:artifact-lab"]
+    description: "Validate, stage, and deploy Badger Sprawl Runner through the curated Artifact Lab deployer."
+    timeoutMs: 600000
+    track: deploy
+    shellCommand: "cd badger-sprawl-runner && pnpm run deploy:artifact-lab"
   test:sprite-fan:
     description: Run focused Sprite Fan postprocessing contracts plus syntax checks.
     run: "node --test tests/sprite-fan-atlas-contract.test.mjs tests/sprite-fan-postprocess.test.mjs tests/sprite-fan-gif-merge-decision.test.mjs tests/sprite-fan-architecture-decision.test.mjs tests/sprite-fan-generation-contract.test.mjs tests/badger-sprite-fan-compat.test.mjs tests/ethic-sprite-fan-compat.test.mjs && node tests/extract-sprite-fan-script.mjs sprite-fan/atlas-studio.html /tmp/atlas-studio-script.js && node --check /tmp/atlas-studio-script.js"
@@ -216,9 +252,12 @@ agent:
     - Split the shared sound module catalog into a reusable JS module if more audio apps become standalone folders.
     - Add browser-level WebAudio smoke tests when a headless browser harness is available.
   changelog:
-    - 2026-05-20: Added root bridge pnpm build/test/typecheck/lint/smoke/e2e/full-verify commands for badger-sprawl-runner.
-    - 2026-05-05: Added bridge commands for serve/open/start/stop/restart/status/package/deploy and sound smoke checks.
-    - 2026-05-05: Fixed lazy AudioContext initialization for modules and removed invalid connect(null) FM synth call.
-    - 2026-05-05: Added a lightweight common peer/rig module catalog and mixer port interface for sound-producing modules.
-    - 2026-05-05: Created PeerModGroove artifact tree with v9-inspired shell, PeernetLobby cargo, modular contracts, patch bay, MIDI-like piano roll, synth, field recorder, peer bridge, and central mixer.
-    - 2026-05-05: Enhanced PeerModGroove UI containment, added clean sampler/synth/OCRA modules, resizable master mixer, contract tests, and the Peernet identity/network/session/storage stack.
+    - "2026-07-14: Added Badger Sprawl Runner progression coverage for 23 items, six item sets, 20 skills, and generated progression atlases."
+    - "2026-07-14: Added verified Chrome Arcology Stage 3 E2E and release-artifact coverage for badger-sprawl-runner."
+    - "2026-07-14: Added verified Drainmarket E2E, release staging, dry-run deployment, and gated deployment commands for badger-sprawl-runner."
+    - "2026-05-20: Added root bridge pnpm build/test/typecheck/lint/smoke/e2e/full-verify commands for badger-sprawl-runner."
+    - "2026-05-05: Added bridge commands for serve/open/start/stop/restart/status/package/deploy and sound smoke checks."
+    - "2026-05-05: Fixed lazy AudioContext initialization for modules and removed invalid connect(null) FM synth call."
+    - "2026-05-05: Added a lightweight common peer/rig module catalog and mixer port interface for sound-producing modules."
+    - "2026-05-05: Created PeerModGroove artifact tree with v9-inspired shell, PeernetLobby cargo, modular contracts, patch bay, MIDI-like piano roll, synth, field recorder, peer bridge, and central mixer."
+    - "2026-05-05: Enhanced PeerModGroove UI containment, added clean sampler/synth/OCRA modules, resizable master mixer, contract tests, and the Peernet identity/network/session/storage stack."
