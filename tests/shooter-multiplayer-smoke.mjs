@@ -34,7 +34,13 @@ assert.match(startBlock, /if \(!this\.spectateMode\)/, 'spectators should not br
 
 const stateBlock = block('broadcastGameState() {', 'broadcastPresence(playing = true) {');
 assert.match(stateBlock, /type: 'shooter-state'/, 'network state should use the shooter-state envelope');
-assert.match(stateBlock, /player: \{ x: state\.player\.x, y: state\.player\.y, lives: state\.player\.lives \}/, 'state should carry player coordinates and hull');
+for (const field of ['x', 'y', 'lives']) {
+  assert.match(
+    stateBlock,
+    new RegExp(`\\b${field}: state\\.player\\.${field}`),
+    `state should carry player ${field}`
+  );
+}
 assert.match(stateBlock, /id: b\.id/, 'state should carry stable projectile IDs');
 assert.match(stateBlock, /versusPublicSnapshot/, 'state should carry serializable duel state');
 

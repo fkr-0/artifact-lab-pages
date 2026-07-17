@@ -4,6 +4,27 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.0] - 2026-07-17
+
+### Added
+
+- Ethic Brawl 1.1.0 “Babylon Release Candidate” with a curated 13-fighter roster, complete normal chains, and four command specials per fighter.
+- Complete core-plus-extended 32-frame animation banks for every release fighter, including normalized legacy sheets and new Deleuze–Guattari, Kierkegaard, and Stirner banks.
+- Production enemy and item atlases covering all 12 story enemy archetypes and all 31 catalog items.
+- Reproducible character-extension generation, release asset validation, and browser-level animation coverage.
+
+### Changed
+
+- The Hub now pins the exact Ethic Brawl 1.1.0 release commit.
+- Ethic Brawl Story Mode presents Babylon as the complete playable three-encounter route and later authored routes as locked previews.
+- Character selection and reward presentation expose complete movesets, command inputs, fighter gimmicks, enemy intel, and illustrated clear rewards.
+
+### Fixed
+
+- Authored special animation identifiers now resolve to dedicated startup, active, and recovery clips rather than collapsing to one generic special pose.
+- The four original large RGB character sheets now deploy through the same transparent 512×512 atlas contract as the newer roster.
+- Deployment validation no longer relies on stale hard-coded roster indices or frame totals.
+
 ## [1.3.0] - 2026-07-14
 
 ### Added
@@ -113,6 +134,7 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[1.4.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.0.1...v1.1.0

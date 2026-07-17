@@ -55,7 +55,11 @@ assert.match(advanceBlock, /STORY CAMPAIGN COMPLETE/, 'final-stage completion sh
 assert.match(advanceBlock, /this\.saveProgress\(\)/, 'story stage advancement should persist');
 
 const loopBlock = block('loop() {', 'spendMoney(');
-assert.match(loopBlock, /if \(!this\.paused\) this\.update\(\)/, 'pause should halt simulation updates');
+assert.match(
+  loopBlock,
+  /if \(!this\.state\.local\.gameOver && !this\.paused && this\.sessionMode !== 'shipyard'\) this\.update\(\)/,
+  'pause, game-over, and shipyard states should halt simulation updates'
+);
 assert.match(loopBlock, /this\.draw\(\)/, 'pause should keep the rendered scene visible');
 
 const destroyBlock = block('destroy() {', 'loop() {');

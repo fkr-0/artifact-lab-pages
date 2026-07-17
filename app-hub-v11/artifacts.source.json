@@ -11,6 +11,7 @@
       "source": "app-hub-v11/index.html"
     },
     "includeFiles": [
+      "CNAME",
       "ARTIFACTS_TOC.md",
       "SERVER_GUIDE.md",
       "SETUP_ALIASES.sh",

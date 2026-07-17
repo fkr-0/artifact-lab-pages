@@ -18,6 +18,7 @@ const DEFAULT_EXCLUDES = new Set([
 ]);
 
 const DEFAULT_INCLUDE_FILES = [
+  'CNAME',
   'ARTIFACTS_TOC.md',
   'SERVER_GUIDE.md',
   'SETUP_ALIASES.sh',
