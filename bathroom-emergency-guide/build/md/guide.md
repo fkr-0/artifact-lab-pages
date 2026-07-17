@@ -5,6 +5,7 @@ lang: "en"
 ---
 
 ::: {#00-cover .chapter .document-cover}
+
 # Bathroom Emergency Guide
 
 ## In case of too much
@@ -29,9 +30,11 @@ The jokes are optional. The red flags are not.
 This guide supports decisions; it does not diagnose, replace first-aid
 training, or overrule emergency dispatchers. If life may be in danger or
 lasting harm cannot be excluded, call **112 before reading further**.
+
 :::
 
 ::: {#01-how-to-use .chapter}
+
 # Start Here — One Question at a Time
 
 ## The override
@@ -121,9 +124,11 @@ This is the guide’s only intentional loop. It prevents both frozen inaction
 and heroic improvisation.
 
 [^who-stress]: World Health Organization, *Doing What Matters in Times of Stress* (2020), an evidence-informed and field-tested guide to grounding, unhooking from difficult thoughts, and values-based small actions: https://www.who.int/publications/i/item/9789240003927
+
 :::
 
 ::: {#02-situation-a .chapter}
+
 # Situation A — I Caused Trouble
 
 Guilt wants a trial. Emergencies need a sequence.
@@ -230,9 +235,11 @@ only increases your suffering while changing nothing for the affected party,
 it may be punishment—but it is not yet repair.
 
 [^caregiver]: gesund.bund.de, “Überlastung bei pflegenden Angehörigen” (updated 2025), including crisis and relief options: https://gesund.bund.de/belastungen-pflegende-angehoerige
+
 :::
 
 ::: {#03-situations-b-g .chapter}
+
 # Situations B–G — Pick the Closest Door
 
 ## B — I feel anxious
@@ -354,9 +361,11 @@ municipal emergency housing or social service; Ch.7 has a call script.
 [^violence-help]: Federal Violence against Women Helpline, official service information: https://www.hilfetelefon.de/
 
 [^cowan]: Cowan N, “The magical number 4 in short-term memory,” *Behavioral and Brain Sciences* 24 (2001): 87–114. The estimate concerns controlled laboratory tasks and is a design clue, not a fixed personal limit. https://doi.org/10.1017/S0140525X01003922
+
 :::
 
 ::: {#04-calm-guide .chapter}
+
 # Calm Guide — Reduce the Volume, Not Your Existence
 
 ## Before calming: one safety check
@@ -483,9 +492,11 @@ acute self-harm or other immediate danger.
 [^who-stress]: World Health Organization, *Doing What Matters in Times of Stress* (2020): https://www.who.int/publications/i/item/9789240003927
 
 [^balban]: Balban MY et al., “Brief structured respiration practices enhance mood and reduce physiological arousal,” *Cell Reports Medicine* 4 (2023), 100895. https://doi.org/10.1016/j.xcrm.2022.100895
+
 :::
 
 ::: {#05-self-ambulance .chapter}
+
 # First Aid — You Are the First Link, Not the Whole Ambulance
 
 This chapter is a prompt, not a first-aid qualification. Call **112** early and
@@ -634,9 +645,11 @@ information. None of them reliably cancel a red flag for a lay reader.
 [^drk-burns]: German Red Cross, public burn first-aid guidance: https://www.drk.de/hilfe-in-deutschland/erste-hilfe/erste-hilfe-handgriffe-fuer-den-sommer/
 
 [^emergency-numbers]: Federal Ministry of Health portal, “Nummern für den Notfall” (updated 2025): https://gesund.bund.de/notfallnummern
+
 :::
 
 ::: {#06-zombie-guide .chapter}
+
 # Zombie Guide — Mostly for Non-Zombie Disasters
 
 No confirmed zombie outbreak is known. Power cuts, floods, heat, contaminated
@@ -773,9 +786,11 @@ literature unless authorities specifically request an ethics seminar.
 [^bbk]: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe, *Vorsorgen für Krisen und Katastrophen* (2025), especially the water and individual-needs checklists: https://www.bbk.bund.de/SharedDocs/Downloads/DE/Mediathek/Publikationen/Buergerinformationen/Ratgeber/BBK-Vorsorgen-fuer-Krisen-und-Katastrophen.pdf?__blob=publicationFile&v=44
 
 [^ostrom]: Elinor Ostrom, “Beyond Markets and States: Polycentric Governance of Complex Economic Systems,” Nobel Prize Lecture (2009): https://www.nobelprize.org/prizes/economic-sciences/2009/ostrom/lecture/
+
 :::
 
 ::: {#07-professional-support .chapter}
+
 # Professional Support — When the Bathroom Is Too Small
 
 ## Germany quick reference
@@ -891,9 +906,11 @@ If exposure, violence, acute illness, or self-harm risk exists, use
 [^numbers]: gesund.bund.de, “Nummern für den Notfall”: https://gesund.bund.de/notfallnummern ; TelefonSeelsorge: https://www.telefonseelsorge.de/ ; Violence against Women Helpline: https://www.hilfetelefon.de/
 
 [^spd]: gesund.bund.de, “Sozialpsychiatrischer Dienst – Hilfe bei psychischen Krisen” (2025): https://gesund.bund.de/sozialpsychiatrischer-dienst
+
 :::
 
 ::: {#08-appendix .chapter}
+
 # Appendix — The Useful Loose Ends
 
 ## Evidence labels
@@ -1004,9 +1021,11 @@ Every non-emergency route must provide:
 3. a named destination.
 
 A dead end in prose is still a dead end.
+
 :::
 
 ::: {#09-version-history .chapter}
+
 # Version History
 
 ## 4.0.0 — 17 July 2026
@@ -1058,9 +1077,11 @@ A dead end in prose is still a dead end.
 Version 4 deliberately removes several “scientific-looking” claims introduced
 in 3.2. More formulas are not automatically more science; better boundaries
 are.
+
 :::
 
 ::: {#10-sources .chapter}
+
 # Sources and Evidence Notes
 
 Checked **17 July 2026**. Official and primary sources are preferred. A link is
@@ -1199,4 +1220,5 @@ not evidence by itself; the guide cites what each source actually supports.
 - Prefer a short action plus escalation rule to an impressive but unusable
   lecture.
 - Recheck service numbers and guideline versions at every release.
+
 :::

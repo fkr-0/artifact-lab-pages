@@ -69,6 +69,13 @@ body {
 a {
   color: var(--blue);
   text-underline-offset: .16em;
+  overflow-wrap: anywhere;
+}
+
+/* Pandoc intentionally leaves many reference URLs as plain text. */
+p, li, dd, td, th, .footnotes {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 button {
@@ -577,10 +584,23 @@ math[display="block"] {
     break-inside: avoid;
   }
 
+  .route-card {
+    padding: 5pt 8pt;
+  }
+
+  .route-card h3,
+  .route-card p {
+    margin: 2pt 0;
+  }
+
   .route-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 6pt;
+  }
+
+  img[alt*="flowgraph"] {
+    max-height: 125mm;
   }
 
   .emergency-strip { break-inside: avoid; }

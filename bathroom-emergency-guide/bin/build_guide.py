@@ -104,7 +104,9 @@ def assemble() -> Path:
         classes = "chapter document-cover" if index == 0 else "chapter"
         parts.extend([
             f"::: {{#{slug} .{classes.replace(' ', ' .')}}}",
+            "",
             body,
+            "",
             ":::",
             "",
         ])
