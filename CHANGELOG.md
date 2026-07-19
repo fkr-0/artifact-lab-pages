@@ -4,25 +4,37 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [1.5.0] - 2026-07-19
 
 ### Added
 
 - URL-safe Base64 studio-state sharing through the `state` query parameter, including Unicode-safe encoding, URL-over-local-storage precedence, clipboard actions, migration, validation, and malformed-state recovery.
 - A dedicated effect-fader bank with numeric entry, live filled tracks, reset controls, blur, pixelation, posterization, scanlines, bidirectional contrast, and extended saturation.
 - Browser coverage for the two-row tab layout, cached rendering, animation-frame coalescing, portrait preview geometry, and complete URL-state round trips.
+- A V11 Hub quick-access shelf combining pinned artifacts with recent launches, a resume-last action, persistent favorites-only filtering, and selectable changed/opened/title/kind ordering.
+- A compact V11 Hub release, network, open-app, and pinned-artifact health strip with favorite-aware command-center ranking.
+- V11 Peer DAW 1.5.0 with live master peak/RMS metering, clip hold, audio latency/sample-rate diagnostics, and persistent low-power telemetry.
+- Ethic Brawl 1.5.0 with composite shared-runtime rendering, arcade-core lifecycle and physics primitives, and aligned responsive 16:9 viewport scaling.
+- Badger Sprawl Runner 1.1.0 with complete Mirror Palace and Dub Colony campaign chapters, the full Moss motion atlas, production sprite coverage, and shared-runtime bridge support.
+- Hyperblast Shooter 0.2.0 with shared arcade-runtime rendering, display-object reuse, renderer telemetry, and reproducible runtime declarations and metadata.
 
 ### Changed
 
 - The compact Procedural Sharepic Studio now presents all six sidebar tabs in a visible two-row grid on narrow sidebars.
 - Preview rendering uses its displayed/export aspect ratio, adaptive device resolution, a reusable base-art cache, and one combined pixel-color pass.
 - Rapid fader input is coalesced through `requestAnimationFrame`; post-processing changes no longer regenerate the procedural base composition.
+- Artifact Lab now pins the exact independently published DAW, Ethic Brawl, Sprawl Runner, and Hyperblast release commits.
+- Pinned Hub artifacts are prioritized in command search and remain available through reloads.
+- DAW performance telemetry pauses in hidden tabs and lowers its visual update cadence without changing audio scheduling.
 
 ### Fixed
 
 - Portrait and landscape export presets no longer retain a misleading square preview.
 - Undo, recipe import, and URL restoration now keep the visible tab synchronized with restored state.
 - Untrusted shared state is normalized and clamped before reaching canvas, typography, frame, or export controls.
+- Hub users can recover frequently used artifacts without rebuilding filters or searching the full catalog.
+- DAW master gain writes are clamped and hidden-tab telemetry no longer consumes unnecessary animation frames.
+- Game deployments no longer depend on moving development worktrees; only verified tagged component revisions are materialized.
 
 ## [1.4.1] - 2026-07-17
 
@@ -161,6 +173,7 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[1.5.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.2.0...v1.3.0
