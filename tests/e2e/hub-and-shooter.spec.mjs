@@ -221,7 +221,7 @@ test.describe('Hyperblast Shooter', () => {
     await expect(page.locator('#progressStats')).toContainText('2/4');
     await page.locator('#progressSaveBtn').click();
     const savedMeta = await page.evaluate(() => JSON.parse(localStorage.getItem('hyperblast-shooter-progress-v1')).meta);
-    expect(savedMeta.schemaVersion).toBe(4);
+    expect(savedMeta.schemaVersion).toBe(5);
     expect(typeof savedMeta.savedAt).toBe('string');
     await page.locator('#progressCloseBtn').click();
     await expect(page.locator('[data-world-id="verdant-ion-reef"]')).toBeEnabled();
