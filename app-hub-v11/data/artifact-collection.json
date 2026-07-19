@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-06-22T19:57:33.548Z",
+  "generatedAt": "2026-07-19T06:06:06.720Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -12,6 +12,7 @@
       "source": "app-hub-v11/index.html"
     },
     "includeFiles": [
+      "CNAME",
       "ARTIFACTS_TOC.md",
       "SERVER_GUIDE.md",
       "SETUP_ALIASES.sh",
@@ -45,14 +46,30 @@
     }
   },
   "summary": {
-    "total": 49,
+    "total": 51,
     "byKind": {
-      "html-path": 45,
+      "html-path": 47,
       "info": 3,
       "external-link": 1
     },
     "byTag": {
-      "tool": 24,
+      "tool": 25,
+      "developer": 1,
+      "telegram": 1,
+      "bot": 1,
+      "api": 1,
+      "webhook": 1,
+      "messaging": 1,
+      "debugging": 1,
+      "client-side": 1,
+      "local-first": 8,
+      "android": 1,
+      "camera": 1,
+      "overlay": 1,
+      "image": 3,
+      "utility": 5,
+      "apk": 1,
+      "download": 1,
       "education": 3,
       "tea": 1,
       "japanese-culture": 1,
@@ -63,7 +80,6 @@
       "interactive": 2,
       "guide": 1,
       "meditative": 1,
-      "local-first": 7,
       "v11": 22,
       "strategy": 1,
       "history": 1,
@@ -107,7 +123,6 @@
       "space": 1,
       "cyberpunk": 3,
       "meme": 1,
-      "image": 2,
       "brawler": 1,
       "arcade": 1,
       "p2p": 3,
@@ -125,7 +140,6 @@
       "pdf": 1,
       "converter": 1,
       "editor": 10,
-      "utility": 4,
       "ai": 2,
       "prompts": 2,
       "creative": 3,
@@ -178,6 +192,78 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "developer",
+        "telegram",
+        "bot",
+        "api",
+        "webhook",
+        "messaging",
+        "debugging",
+        "client-side",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "id": "telegram-bot-api-workbench",
+      "title": "Telegram Bot API Workbench",
+      "href": "../telegram-bot-api-workbench/index.html",
+      "description": "Security-conscious, self-contained browser console for Telegram bots with status and webhook diagnostics, messaging, update polling, command and chat inspection, generic JSON and multipart method runners, abortable requests, reusable JavaScript snippets, safe profile exchange, and token-redacted logs.",
+      "deploy": {
+        "includePath": "telegram-bot-api-workbench",
+        "targetPath": "telegram-bot-api-workbench",
+        "include": true
+      },
+      "modifiedAt": "2026-07-19T06:00:00.000Z",
+      "changedAt": "2026-07-19T06:00:00.000Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "android",
+        "camera",
+        "overlay",
+        "image",
+        "utility",
+        "apk",
+        "download"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "id": "overlay-cam-apk",
+      "title": "Overlay Cam — Intuitive UX APK",
+      "href": "../overlay-cam/index.html",
+      "description": "Android debug APK with a simplified freeze-camera, add-overlay, direct gesture adjustment, fine-tuning, and save workflow.",
+      "deploy": {
+        "includePath": "overlay-cam",
+        "targetPath": "overlay-cam",
+        "include": true
+      },
+      "modifiedAt": "2026-07-10T14:49:16.000Z",
+      "changedAt": "2026-07-10T14:49:16.000Z"
+    },
     {
       "kind": "html-path",
       "tags": [

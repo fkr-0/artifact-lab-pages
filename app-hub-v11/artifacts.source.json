@@ -35,6 +35,44 @@
   },
   "items": [
     {
+      "id": "telegram-bot-api-workbench",
+      "title": "Telegram Bot API Workbench",
+      "kind": "html-path",
+      "href": "../telegram-bot-api-workbench/index.html",
+      "description": "Security-conscious, self-contained browser console for Telegram bots with status and webhook diagnostics, messaging, update polling, command and chat inspection, generic JSON and multipart method runners, abortable requests, reusable JavaScript snippets, safe profile exchange, and token-redacted logs.",
+      "tags": [
+        "tool",
+        "developer",
+        "telegram",
+        "bot",
+        "api",
+        "webhook",
+        "messaging",
+        "debugging",
+        "client-side",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "telegram-bot-api-workbench",
+        "targetPath": "telegram-bot-api-workbench"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "modifiedAt": "2026-07-19T06:00:00.000Z",
+      "changedAt": "2026-07-19T06:00:00.000Z"
+    },
+    {
       "id": "overlay-cam-apk",
       "title": "Overlay Cam — Intuitive UX APK",
       "kind": "html-path",

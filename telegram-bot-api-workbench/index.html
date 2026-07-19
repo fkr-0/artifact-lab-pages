@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; connect-src https://api.telegram.org; img-src 'self' data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=()">
+  <title>Telegram Bot API Workbench</title>
+  <style>
+    :root {
+      --bg: #08101e;
+      --surface: #101b30;
+      --surface-2: #17243d;
+      --surface-3: #1d2d4a;
+      --text: #edf5ff;
+      --muted: #9eb0cd;
+      --line: #30415f;
+      --accent: #5ec4ff;
+      --accent-2: #8ce8c9;
+      --ok: #7fe0a7;
+      --warn: #ffd166;
+      --bad: #ff7f91;
+      --shadow: 0 22px 70px rgba(0,0,0,.28);
+      --radius: 17px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #eef4fb;
+        --surface: #fff;
+        --surface-2: #f5f8fc;
+        --surface-3: #eaf1f9;
+        --text: #17243d;
+        --muted: #536581;
+        --line: #d2deed;
+        --accent: #087fc2;
+        --accent-2: #087b66;
+        --ok: #147c43;
+        --warn: #946300;
+        --bad: #c9334a;
+        --shadow: 0 22px 70px rgba(65,82,108,.15);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 31rem),
+        radial-gradient(circle at 100% 18%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.45;
+    }
+    button, input, textarea, select { font: inherit; }
+    button {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: .66rem .86rem;
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    button:hover:not(:disabled) { border-color: var(--accent); }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:disabled { opacity: .46; cursor: not-allowed; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #06131f; font-weight: 780; }
+    button.danger { border-color: color-mix(in srgb, var(--bad) 58%, var(--line)); color: var(--bad); }
+    button.ghost { background: transparent; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--bg);
+      color: var(--text);
+      padding: .72rem .78rem;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    textarea { min-height: 7rem; resize: vertical; font-family: var(--mono); font-size: .9rem; }
+    code, pre, .mono { font-family: var(--mono); }
+    a { color: var(--accent); }
+    .shell { width: min(1480px, calc(100% - 2rem)); margin: auto; padding: 1rem 0 3rem; }
+    .topbar {
+      position: sticky;
+      top: .65rem;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: minmax(230px,.8fr) minmax(380px,1.5fr) auto;
+      gap: .85rem;
+      align-items: end;
+      padding: .9rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--surface) 89%, transparent);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+    .brand h1 { margin: 0; font-size: 1.17rem; letter-spacing: -.02em; }
+    .brand p { margin: .18rem 0 0; color: var(--muted); font-size: .8rem; }
+    .token-row { display: grid; grid-template-columns: minmax(190px,1fr) auto auto; gap: .48rem; }
+    .token-tools { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+    .mini { padding: .5rem .65rem; font-size: .78rem; }
+    .field { display: grid; gap: .32rem; margin-bottom: .76rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { font-weight: 690; font-size: .85rem; }
+    .help, .muted { color: var(--muted); font-size: .78rem; }
+    .status { display: inline-flex; gap: .43rem; align-items: center; color: var(--muted); font-size: .82rem; }
+    .dot { width: .65rem; height: .65rem; border-radius: 99px; background: var(--muted); box-shadow: 0 0 0 4px color-mix(in srgb,var(--muted) 14%,transparent); }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb,var(--ok) 14%,transparent); }
+    .dot.bad { background: var(--bad); box-shadow: 0 0 0 4px color-mix(in srgb,var(--bad) 14%,transparent); }
+    .notice {
+      margin: 1rem 0;
+      padding: .9rem 1rem;
+      border: 1px solid color-mix(in srgb,var(--warn) 45%,var(--line));
+      border-left: 5px solid var(--warn);
+      border-radius: 14px;
+      background: color-mix(in srgb,var(--warn) 8%,var(--surface));
+    }
+    .notice p { margin: .15rem 0; }
+    .notice strong { color: var(--warn); }
+    .tabs { display: flex; gap: .42rem; overflow-x: auto; padding: .15rem 0 .85rem; scrollbar-width: thin; }
+    .tab { white-space: nowrap; background: transparent; }
+    .tab.active { color: var(--accent); border-color: var(--accent); background: var(--surface); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 1rem; }
+    .s12 { grid-column: span 12; } .s8 { grid-column: span 8; } .s7 { grid-column: span 7; }
+    .s6 { grid-column: span 6; } .s5 { grid-column: span 5; } .s4 { grid-column: span 4; }
+    .card { min-width: 0; padding: 1rem; border: 1px solid var(--line); border-radius: var(--radius); background: color-mix(in srgb,var(--surface) 97%,transparent); box-shadow: 0 9px 34px rgba(0,0,0,.08); }
+    .card h2, .card h3 { margin: 0 0 .65rem; letter-spacing: -.02em; }
+    .card h2 { font-size: 1.04rem; } .card h3 { font-size: .93rem; }
+    .fields2, .fields3, .fields4 { display: grid; gap: .68rem; }
+    .fields2 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .fields3 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .fields4 { grid-template-columns: repeat(4,minmax(0,1fr)); }
+    .actions, .toolbar, .toolbar > div { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+    .actions { margin-top: .68rem; }
+    .toolbar { justify-content: space-between; margin-bottom: .72rem; }
+    .check { display: inline-flex; gap: .42rem; align-items: center; color: var(--muted); font-size: .82rem; }
+    .check input { width: auto; margin: 0; }
+    .metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .7rem; }
+    .metric { padding: .8rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); min-width: 0; }
+    .metric small { display: block; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .69rem; }
+    .metric strong { display: block; margin-top: .28rem; overflow-wrap: anywhere; }
+    .result {
+      min-height: 11rem;
+      max-height: 34rem;
+      overflow: auto;
+      margin: .65rem 0 0;
+      padding: .85rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #050b14;
+      color: #dce9ff;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: .82rem/1.52 var(--mono);
+    }
+    @media (prefers-color-scheme: light) { .result, .snippet pre { background: #f5f8fc !important; color: #19304f !important; } }
+    .result.empty { color: var(--muted); }
+    .chips { display: flex; gap: .42rem; flex-wrap: wrap; }
+    .chip { max-width: 100%; display: inline-flex; gap: .38rem; align-items: center; border-radius: 999px; padding: .4rem .58rem; }
+    .log-list { display: grid; gap: .62rem; }
+    details.log { border: 1px solid var(--line); border-radius: 13px; background: var(--surface-2); overflow: hidden; }
+    details.log summary { display: flex; gap: .6rem; align-items: center; padding: .7rem; cursor: pointer; list-style: none; }
+    details.log summary::-webkit-details-marker { display: none; }
+    .method { color: var(--accent); font: 750 .83rem var(--mono); }
+    .badge { border-radius: 999px; padding: .16rem .43rem; font-size: .7rem; font-weight: 760; }
+    .badge.ok { color: var(--ok); background: color-mix(in srgb,var(--ok) 12%,transparent); }
+    .badge.bad { color: var(--bad); background: color-mix(in srgb,var(--bad) 12%,transparent); }
+    .log-body { border-top: 1px solid var(--line); padding: .72rem; }
+    .snippet { position: relative; margin: .6rem 0 1rem; }
+    .snippet pre { margin: 0; padding: 1rem; overflow: auto; border: 1px solid var(--line); border-radius: 14px; background: #050b14; color: #dce9ff; font: .8rem/1.55 var(--mono); white-space: pre; }
+    .snippet button { position: absolute; top: .5rem; right: .5rem; }
+    .spinner { width: .72rem; height: .72rem; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 99px; animation: spin .8s linear infinite; display: none; }
+    .polling .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast-zone { position: fixed; right: 1rem; bottom: 1rem; z-index: 99; width: min(390px,calc(100% - 2rem)); display: grid; gap: .5rem; pointer-events: none; }
+    .toast { padding: .72rem .85rem; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); animation: toast .18s ease; }
+    .toast.ok { border-left-color: var(--ok); } .toast.bad { border-left-color: var(--bad); }
+    @keyframes toast { from { opacity: 0; transform: translateY(8px); } }
+    dialog { width: min(690px,calc(100% - 2rem)); padding: 1rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(0,0,0,.63); }
+    .footer { margin-top: 1.4rem; color: var(--muted); font-size: .78rem; text-align: center; }
+    @media (max-width: 1040px) {
+      .topbar { position: static; grid-template-columns: 1fr; }
+      .token-tools { justify-content: flex-start; }
+      .s8,.s7,.s6,.s5,.s4 { grid-column: span 12; }
+      .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width: 680px) {
+      .shell { width: calc(100% - 1rem); }
+      .token-row,.fields2,.fields3,.fields4,.metrics { grid-template-columns: 1fr; }
+      .card { padding: .82rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Telegram Bot API Workbench</h1>
+        <p>Client-side console · no dependencies · token-redacted logs</p>
+      </div>
+      <div class="field">
+        <label for="token">Bot token</label>
+        <div class="token-row">
+          <input id="token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="123456789:AA…">
+          <button id="show-token" class="mini" type="button">Show</button>
+          <button id="test-token" class="mini primary" type="button">Test</button>
+        </div>
+        <span class="help">Memory only by default. “This tab” uses sessionStorage and clears with the browser session.</span>
+      </div>
+      <div class="token-tools">
+        <span class="status"><span id="status-dot" class="dot"></span><span id="status-label">Not tested</span></span>
+        <label class="check"><input id="remember-token" type="checkbox"> This tab</label>
+        <button id="abort-all" class="mini danger" type="button" disabled>Abort requests</button>
+        <button id="clear-sensitive" class="mini danger" type="button">Clear</button>
+      </div>
+    </header>
+
+    <section class="notice">
+      <p><strong>Use a dedicated development bot.</strong> This page sends the token directly from this browser to Telegram and cannot hide it from browser extensions, injected scripts, or anyone controlling the device.</p>
+      <p class="help">For a public application, keep the token on a trusted backend. Webhooks require a reachable HTTPS receiver; this tool configures them but does not receive updates. Browser calls also depend on network and cross-origin policy.</p>
+    </section>
+
+    <nav class="tabs" aria-label="Workbench sections">
+      <button class="tab active" data-tab="status" type="button">Status</button>
+      <button class="tab" data-tab="messages" type="button">Messages</button>
+      <button class="tab" data-tab="updates" type="button">Updates</button>
+      <button class="tab" data-tab="webhooks" type="button">Webhooks</button>
+      <button class="tab" data-tab="commands" type="button">Commands & chats</button>
+      <button class="tab" data-tab="lab" type="button">API lab</button>
+      <button class="tab" data-tab="code" type="button">JS collection</button>
+      <button class="tab" data-tab="logs" type="button">Logs</button>
+    </nav>
+
+    <section id="panel-status" class="panel active">
+      <div class="grid">
+        <article class="card s12">
+          <div class="toolbar"><div><h2>Bot dashboard</h2><span class="muted">Identity, delivery mode, queue and last webhook failure</span></div><button id="refresh-status" class="primary" type="button">Refresh all</button></div>
+          <div class="metrics">
+            <div class="metric"><small>Bot</small><strong id="metric-bot">—</strong></div>
+            <div class="metric"><small>Bot ID</small><strong id="metric-id">—</strong></div>
+            <div class="metric"><small>Update mode</small><strong id="metric-mode">—</strong></div>
+            <div class="metric"><small>Pending updates</small><strong id="metric-pending">—</strong></div>
+          </div>
+        </article>
+        <article class="card s6"><div class="toolbar"><h2>getMe</h2><div><button data-copy="out-me" type="button">Copy</button><button id="get-me" class="primary" type="button">Run</button></div></div><pre id="out-me" class="result empty">No response yet.</pre></article>
+        <article class="card s6"><div class="toolbar"><h2>getWebhookInfo</h2><div><button data-copy="out-webhook-info" type="button">Copy</button><button id="get-webhook-info" class="primary" type="button">Run</button></div></div><pre id="out-webhook-info" class="result empty">No response yet.</pre></article>
+      </div>
+    </section>
+
+    <section id="panel-messages" class="panel">
+      <div class="grid">
+        <article class="card s7">
+          <h2>sendMessage</h2>
+          <div class="fields2">
+            <div class="field"><label for="send-chat">Chat ID or @channel</label><input id="send-chat" class="chat-target" type="text" placeholder="-1001234567890 or @channel"></div>
+            <div class="field"><label for="send-thread">Message thread ID</label><input id="send-thread" type="number" placeholder="Optional topic ID"></div>
+          </div>
+          <div class="field"><label for="send-text">Text</label><textarea id="send-text" maxlength="4096" placeholder="Hello from the workbench"></textarea><span class="help"><span id="send-count">0</span>/4096 characters</span></div>
+          <div class="fields3">
+            <div class="field"><label for="send-parse">Parse mode</label><select id="send-parse"><option value="">None</option><option>HTML</option><option>MarkdownV2</option><option>Markdown</option></select></div>
+            <div class="field"><label for="send-business">Business connection ID</label><input id="send-business" type="text" placeholder="Optional"></div>
+            <div class="field"><label for="send-effect">Message effect ID</label><input id="send-effect" type="text" placeholder="Optional"></div>
+          </div>
+          <div class="fields2">
+            <div class="field"><label for="send-reply">reply_parameters JSON</label><textarea id="send-reply" style="min-height:5rem" placeholder='{"message_id":123}'></textarea></div>
+            <div class="field"><label for="send-markup">reply_markup JSON</label><textarea id="send-markup" style="min-height:5rem" placeholder='{"inline_keyboard":[[{"text":"Open","url":"https://example.org"}]]}'></textarea></div>
+          </div>
+          <div class="field"><label for="send-preview">link_preview_options JSON</label><textarea id="send-preview" style="min-height:4.5rem" placeholder='{"is_disabled":true}'></textarea></div>
+          <div class="actions">
+            <label class="check"><input id="send-silent" type="checkbox"> Silent</label>
+            <label class="check"><input id="send-protect" type="checkbox"> Protect</label>
+            <label class="check"><input id="send-paid" type="checkbox"> Paid broadcast</label>
+            <button id="send-message" class="primary" type="button">Send</button>
+          </div>
+        </article>
+        <article class="card s5"><div class="toolbar"><h2>Response</h2><button data-copy="out-send" type="button">Copy</button></div><pre id="out-send" class="result empty">No message sent yet.</pre></article>
+
+        <article class="card s4">
+          <h2>editMessageText</h2>
+          <div class="field"><label for="edit-chat">Chat ID</label><input id="edit-chat" class="chat-target" type="text"></div>
+          <div class="field"><label for="edit-message-id">Message ID</label><input id="edit-message-id" type="number"></div>
+          <div class="field"><label for="edit-text">New text</label><textarea id="edit-text" style="min-height:5rem"></textarea></div>
+          <div class="actions"><button id="edit-message" class="primary" type="button">Edit</button></div>
+          <pre id="out-edit" class="result empty">No response yet.</pre>
+        </article>
+        <article class="card s4">
+          <h2>deleteMessage</h2>
+          <div class="field"><label for="delete-chat">Chat ID</label><input id="delete-chat" class="chat-target" type="text"></div>
+          <div class="field"><label for="delete-message-id">Message ID</label><input id="delete-message-id" type="number"></div>
+          <div class="actions"><button id="delete-message" class="danger" type="button">Delete message</button></div>
+          <pre id="out-delete" class="result empty">No response yet.</pre>
+        </article>
+        <article class="card s4">
+          <h2>answerCallbackQuery</h2>
+          <div class="field"><label for="callback-id">Callback query ID</label><input id="callback-id" type="text"></div>
+          <div class="field"><label for="callback-text">Notification text</label><input id="callback-text" type="text" maxlength="200"></div>
+          <div class="field"><label for="callback-url">URL</label><input id="callback-url" type="url" placeholder="Optional"></div>
+          <div class="actions"><label class="check"><input id="callback-alert" type="checkbox"> Alert</label><button id="answer-callback" class="primary" type="button">Answer</button></div>
+          <pre id="out-callback" class="result empty">No response yet.</pre>
+        </article>
+      </div>
+    </section>
+
+    <section id="panel-updates" class="panel">
+      <div class="grid">
+        <article class="card s8">
+          <div class="toolbar"><div><h2>getUpdates</h2><span class="muted">Polling is unavailable while a webhook URL is configured.</span></div><span id="poll-state" class="status"><span class="spinner"></span><span>Stopped</span></span></div>
+          <div class="fields4">
+            <div class="field"><label for="updates-offset">Offset</label><input id="updates-offset" type="number" placeholder="Unconfirmed"></div>
+            <div class="field"><label for="updates-limit">Limit</label><input id="updates-limit" type="number" min="1" max="100" value="20"></div>
+            <div class="field"><label for="updates-timeout">Long-poll seconds</label><input id="updates-timeout" type="number" min="0" max="50" value="0"></div>
+            <div class="field"><label for="updates-delay">Loop delay ms</label><input id="updates-delay" type="number" min="0" value="700"></div>
+          </div>
+          <div class="field"><label for="updates-allowed">allowed_updates JSON</label><textarea id="updates-allowed" style="min-height:4.5rem" placeholder='["message","callback_query"]'></textarea></div>
+          <div class="actions">
+            <label class="check"><input id="updates-auto-offset" type="checkbox" checked> Advance offset</label>
+            <button id="fetch-updates" class="primary" type="button">Fetch once</button>
+            <button id="start-poll" type="button">Start loop</button>
+            <button id="stop-poll" class="danger" type="button" disabled>Stop</button>
+            <button id="clear-updates" class="ghost" type="button">Clear view</button>
+          </div>
+        </article>
+        <article class="card s4"><h2>Discovered chats</h2><p class="muted">Select a chat to fill message and chat-inspection fields.</p><div id="chat-chips" class="chips"><span class="muted">No chats discovered.</span></div></article>
+        <article class="card s12"><div class="toolbar"><h2>Update stream</h2><div><button data-copy="out-updates" type="button">Copy</button><button id="download-updates" type="button">Download JSON</button></div></div><pre id="out-updates" class="result empty">No updates fetched yet.</pre></article>
+      </div>
+    </section>
+
+    <section id="panel-webhooks" class="panel">
+      <div class="grid">
+        <article class="card s7">
+          <h2>setWebhook</h2>
+          <div class="field"><label for="hook-url">Webhook HTTPS URL</label><input id="hook-url" type="url" placeholder="https://example.org/telegram/webhook"></div>
+          <div class="fields3">
+            <div class="field"><label for="hook-ip">Fixed IP</label><input id="hook-ip" type="text" placeholder="Optional"></div>
+            <div class="field"><label for="hook-connections">Max connections</label><input id="hook-connections" type="number" min="1" max="100" value="40"></div>
+            <div class="field"><label for="hook-secret">Verification secret</label><input id="hook-secret" type="password" autocomplete="off" placeholder="A-Z a-z 0-9 _ -"></div>
+          </div>
+          <div class="field"><label for="hook-allowed">allowed_updates JSON</label><textarea id="hook-allowed" style="min-height:4.5rem" placeholder='["message","edited_message","callback_query"]'></textarea></div>
+          <div class="field"><label for="hook-cert">Self-signed public certificate</label><input id="hook-cert" type="file" accept=".pem,.crt,.cer,application/x-pem-file,application/pkix-cert"><span class="help">Optional. Selecting a certificate uses multipart/form-data.</span></div>
+          <div class="actions"><label class="check"><input id="hook-drop" type="checkbox"> Drop pending updates</label><button id="set-hook" class="primary" type="button">Set webhook</button><button id="check-hook" type="button">Check</button></div>
+        </article>
+        <article class="card s5"><h2>Webhook diagnostics</h2><pre id="out-hook" class="result empty">No response yet.</pre></article>
+        <article class="card s6"><h2>deleteWebhook</h2><p class="muted">Remove webhook delivery before switching back to getUpdates.</p><div class="actions"><label class="check"><input id="delete-hook-drop" type="checkbox"> Drop pending</label><button id="delete-hook" class="danger" type="button">Delete webhook</button></div><pre id="out-delete-hook" class="result empty">No response yet.</pre></article>
+        <article class="card s6"><h2>Receiver contract</h2><p class="muted">When a secret is configured, validate the <code>X-Telegram-Bot-Api-Secret-Token</code> request header with a timing-safe comparison at your HTTPS receiver. Respond quickly with a 2xx status and enqueue heavier work.</p></article>
+      </div>
+    </section>
+
+    <section id="panel-commands" class="panel">
+      <div class="grid">
+        <article class="card s6">
+          <h2>Bot commands</h2>
+          <div class="field"><label for="commands-json">Commands JSON</label><textarea id="commands-json" placeholder='[{"command":"start","description":"Start the bot"},{"command":"help","description":"Show help"}]'></textarea></div>
+          <div class="fields2"><div class="field"><label for="commands-scope">Scope JSON</label><textarea id="commands-scope" style="min-height:4.5rem" placeholder='{"type":"default"}'></textarea></div><div class="field"><label for="commands-language">Language code</label><input id="commands-language" type="text" placeholder="Optional, e.g. de"></div></div>
+          <div class="actions"><button id="get-commands" type="button">getMyCommands</button><button id="set-commands" class="primary" type="button">setMyCommands</button><button id="delete-commands" class="danger" type="button">deleteMyCommands</button></div>
+          <pre id="out-commands" class="result empty">No response yet.</pre>
+        </article>
+        <article class="card s6">
+          <h2>Chat inspection</h2>
+          <div class="field"><label for="inspect-chat">Chat ID or @username</label><input id="inspect-chat" class="chat-target" type="text"></div>
+          <div class="field"><label for="inspect-user">User ID for getChatMember</label><input id="inspect-user" type="number" placeholder="Optional"></div>
+          <div class="actions"><button id="get-chat" class="primary" type="button">getChat</button><button id="get-admins" type="button">Administrators</button><button id="get-count" type="button">Member count</button><button id="get-member" type="button">Member</button></div>
+          <pre id="out-chat" class="result empty">No response yet.</pre>
+        </article>
+      </div>
+    </section>
+
+    <section id="panel-lab" class="panel">
+      <div class="grid">
+        <article class="card s7">
+          <h2>Generic method runner</h2>
+          <div class="field"><label for="lab-method">Bot API method</label><input id="lab-method" list="method-list" type="text" placeholder="sendPhoto"><datalist id="method-list"><option value="getMe"><option value="sendPhoto"><option value="sendDocument"><option value="sendLocation"><option value="sendPoll"><option value="editMessageReplyMarkup"><option value="deleteMessages"><option value="answerInlineQuery"><option value="getFile"><option value="setChatMenuButton"></datalist></div>
+          <div class="field"><label for="lab-params">Parameters JSON</label><textarea id="lab-params" style="min-height:18rem" placeholder='{"chat_id":"123456789","text":"hello"}'></textarea></div>
+          <div class="actions"><button id="run-lab" class="primary" type="button">Run method</button><button id="format-lab" type="button">Format JSON</button><button id="example-lab" type="button">Load example</button></div>
+        </article>
+        <article class="card s5"><div class="toolbar"><h2>Result</h2><button data-copy="out-lab" type="button">Copy</button></div><pre id="out-lab" class="result empty">No request yet.</pre></article>
+        <article class="card s12">
+          <h2>Multipart upload runner</h2>
+          <div class="fields3"><div class="field"><label for="upload-method">Method</label><input id="upload-method" type="text" value="sendDocument"></div><div class="field"><label for="upload-field">InputFile field</label><input id="upload-field" type="text" value="document"></div><div class="field"><label for="upload-file">File</label><input id="upload-file" type="file"></div></div>
+          <div class="field"><label for="upload-params">Other parameters JSON</label><textarea id="upload-params" style="min-height:6rem" placeholder='{"chat_id":"123456789","caption":"Uploaded from the browser"}'></textarea></div>
+          <div class="actions"><button id="run-upload" class="primary" type="button">Upload and call</button></div>
+          <pre id="out-upload" class="result empty">No upload yet.</pre>
+        </article>
+        <article class="card s12">
+          <div class="toolbar"><div><h2>Non-secret workspace profile</h2><span class="muted">Export/import field values only. Token, webhook secret, files, logs and responses are excluded.</span></div><div><button id="export-profile" type="button">Export profile</button><label><input id="profile-file" type="file" accept="application/json" hidden><button id="import-profile" type="button">Import profile</button></label></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="panel-code" class="panel">
+      <article class="card">
+        <h2>Reusable JavaScript collection</h2>
+        <p class="muted">Read the token at runtime. Never bake a production token into browser-delivered source.</p>
+        <h3>Minimal form-encoded request wrapper</h3>
+        <div class="snippet"><button class="mini copy-snippet" type="button">Copy</button><pre><code>async function telegram(token, method, params = {}, { signal } = {}) {
+  if (!/^\d+:[A-Za-z0-9_-]{20,}$/.test(token)) {
+    throw new Error("Valid bot token required");
+  }
+
+  const body = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "") continue;
+    body.set(key, typeof value === "object" ? JSON.stringify(value) : String(value));
+  }
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${token}/${method}`,
+    { method: "POST", body, signal }
+  );
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    const retry = data.parameters?.retry_after;
+    throw new Error(`${data.description || `HTTP ${response.status}`}${retry ? `; retry after ${retry}s` : ""}`);
+  }
+  return data.result;
+}</code></pre></div>
+        <h3>Long polling with offset advancement</h3>
+        <div class="snippet"><button class="mini copy-snippet" type="button">Copy</button><pre><code>let offset;
+const controller = new AbortController();
+
+async function poll() {
+  while (!controller.signal.aborted) {
+    const updates = await telegram(token, "getUpdates", {
+      offset,
+      timeout: 25,
+      allowed_updates: ["message", "callback_query"]
+    }, { signal: controller.signal });
+
+    for (const update of updates) {
+      console.log(update);
+      offset = update.update_id + 1;
+    }
+  }
+}
+
+poll().catch(error => {
+  if (error.name !== "AbortError") console.error(error);
+});
+// controller.abort();</code></pre></div>
+        <h3>Multipart upload</h3>
+        <div class="snippet"><button class="mini copy-snippet" type="button">Copy</button><pre><code>async function telegramUpload(token, method, fields, fileField, file) {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) {
+    form.append(key, typeof value === "object" ? JSON.stringify(value) : String(value));
+  }
+  form.append(fileField, file);
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${token}/${method}`,
+    { method: "POST", body: form }
+  );
+  const data = await response.json();
+  if (!response.ok || !data.ok) throw new Error(data.description || `HTTP ${response.status}`);
+  return data.result;
+}</code></pre></div>
+      </article>
+    </section>
+
+    <section id="panel-logs" class="panel">
+      <article class="card">
+        <div class="toolbar"><div><h2>Redacted request log</h2><span class="muted">In memory only. Token, secret and authorization-like fields are removed.</span></div><div><button id="export-logs" type="button">Export JSON</button><button id="clear-logs" class="danger" type="button">Clear logs</button></div></div>
+        <div id="log-list" class="log-list"><span class="muted">No API calls yet.</span></div>
+      </article>
+    </section>
+
+    <footer class="footer">Self-contained artifact · no analytics · no external libraries · no service worker · no persistent token storage</footer>
+  </main>
+
+  <div id="toasts" class="toast-zone" aria-live="polite"></div>
+  <dialog id="confirm-dialog"><h2 id="confirm-title">Confirm action</h2><p id="confirm-message"></p><div class="actions" style="justify-content:flex-end"><button id="confirm-cancel" type="button">Cancel</button><button id="confirm-ok" class="danger" type="button">Continue</button></div></dialog>
+
+  <script>
+    "use strict";
+
+    const API_BASE = "https://api.telegram.org";
+    const state = {
+      bot: null,
+      webhook: null,
+      logs: [],
+      updates: [],
+      chats: new Map(),
+      polling: false,
+      pollController: null,
+      activeControllers: new Set()
+    };
+
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+
+    function toast(message, type = "") {
+      const item = document.createElement("div");
+      item.className = `toast ${type}`;
+      item.textContent = message;
+      $("#toasts").append(item);
+      setTimeout(() => item.remove(), 4300);
+    }
+
+    function setResult(target, value, error = false) {
+      const element = typeof target === "string" ? document.getElementById(target) : target;
+      element.classList.remove("empty");
+      element.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+      element.style.borderColor = error ? "var(--bad)" : "";
+    }
+
+    function busy(button, active, text = "Working…") {
+      if (!button) return;
+      if (active) {
+        button.dataset.oldText = button.textContent;
+        button.textContent = text;
+        button.disabled = true;
+      } else {
+        button.textContent = button.dataset.oldText || button.textContent;
+        button.disabled = false;
+      }
+    }
+
+    function clean(object) {
+      return Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined && value !== null && value !== ""));
+    }
+
+    function optionalJson(text, label) {
+      const source = text.trim();
+      if (!source) return undefined;
+      try { return JSON.parse(source); }
+      catch (error) { throw new Error(`${label} is not valid JSON: ${error.message}`); }
+    }
+
+    function getToken() {
+      const token = $("#token").value.trim();
+      if (!token) throw new Error("Paste a Telegram bot token first.");
+      if (!/^\d+:[A-Za-z0-9_-]{20,}$/.test(token)) throw new Error("The token format does not look like a Telegram bot token.");
+      return token;
+    }
+
+    function persistToken() {
+      const token = $("#token").value.trim();
+      if ($("#remember-token").checked && token) sessionStorage.setItem("telegram-workbench-token", token);
+      else sessionStorage.removeItem("telegram-workbench-token");
+    }
+
+    function redact(value) {
+      if (typeof value === "string") {
+        const token = $("#token").value.trim();
+        return token ? value.split(token).join("[REDACTED_TOKEN]") : value;
+      }
+      if (Array.isArray(value)) return value.map(redact);
+      if (value && typeof value === "object") {
+        const result = {};
+        for (const [key, nested] of Object.entries(value)) {
+          result[key] = /token|secret|password|authorization/i.test(key) ? "[REDACTED]" : redact(nested);
+        }
+        return result;
+      }
+      return value;
+    }
+
+    class TelegramApiError extends Error {
+      constructor(message, status, data) {
+        super(message);
+        this.name = "TelegramApiError";
+        this.status = status;
+        this.data = data;
+        this.retryAfter = data?.parameters?.retry_after;
+        this.migrateToChatId = data?.parameters?.migrate_to_chat_id;
+      }
+    }
+
+    function errorInfo(error) {
+      return clean({
+        name: error.name || "Error",
+        message: error.message || String(error),
+        status: error.status,
+        retry_after: error.retryAfter,
+        migrate_to_chat_id: error.migrateToChatId,
+        response: error.data
+      });
+    }
+
+    function updateAbortButton() {
+      $("#abort-all").disabled = state.activeControllers.size === 0 && !state.polling;
+    }
+
+    function requestController(externalSignal) {
+      const controller = new AbortController();
+      let onAbort = null;
+      if (externalSignal) {
+        onAbort = () => controller.abort(externalSignal.reason);
+        if (externalSignal.aborted) onAbort();
+        else externalSignal.addEventListener("abort", onAbort, { once: true });
+      }
+      state.activeControllers.add(controller);
+      updateAbortButton();
+      return {
+        controller,
+        release() {
+          if (externalSignal && onAbort) externalSignal.removeEventListener("abort", onAbort);
+          state.activeControllers.delete(controller);
+          updateAbortButton();
+        }
+      };
+    }
+
+    async function apiCall(method, params = {}, options = {}) {
+      const token = getToken();
+      persistToken();
+      const started = performance.now();
+      const request = requestController(options.signal);
+      const url = `${API_BASE}/bot${token}/${method}`;
+      const init = { method: "POST", signal: request.controller.signal };
+
+      if (options.formData) {
+        init.body = options.formData;
+      } else {
+        const body = new URLSearchParams();
+        for (const [key, value] of Object.entries(clean(params))) {
+          body.set(key, typeof value === "object" ? JSON.stringify(value) : String(value));
+        }
+        init.body = body;
+      }
+
+      try {
+        const response = await fetch(url, init);
+        const raw = await response.text();
+        let data;
+        try { data = raw ? JSON.parse(raw) : {}; }
+        catch { throw new TelegramApiError(`Telegram returned non-JSON data (HTTP ${response.status}).`, response.status, { raw: raw.slice(0, 1600) }); }
+
+        if (!response.ok || data.ok !== true) {
+          let message = data.description || `Telegram API request failed with HTTP ${response.status}.`;
+          if (data.parameters?.retry_after) message += ` Retry after ${data.parameters.retry_after} seconds.`;
+          if (data.parameters?.migrate_to_chat_id) message += ` Migrate to chat ID ${data.parameters.migrate_to_chat_id}.`;
+          throw new TelegramApiError(message, response.status, data);
+        }
+
+        addLog({ time: new Date().toISOString(), method, ok: true, durationMs: Math.round(performance.now() - started), request: options.formData ? "[multipart/form-data]" : redact(params), response: redact(data) });
+        return data.result;
+      } catch (error) {
+        if (error.name === "AbortError") throw error;
+        let normalized = error;
+        if (error instanceof TypeError) {
+          normalized = new Error("Network request failed. Check connectivity, browser CORS/CSP policy, privacy extensions, and whether api.telegram.org is reachable.");
+          normalized.name = "NetworkError";
+          normalized.cause = error;
+        }
+        addLog({ time: new Date().toISOString(), method, ok: false, durationMs: Math.round(performance.now() - started), request: options.formData ? "[multipart/form-data]" : redact(params), error: redact(errorInfo(normalized)) });
+        throw normalized;
+      } finally {
+        request.release();
+      }
+    }
+
+    async function action(button, output, callback, label = "Working…") {
+      busy(button, true, label);
+      try {
+        const result = await callback();
+        if (output) setResult(output, result);
+        toast("Telegram API call succeeded.", "ok");
+        return result;
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          if (output) setResult(output, errorInfo(error), true);
+          toast(error.message || String(error), "bad");
+        }
+        throw error;
+      } finally { busy(button, false); }
+    }
+
+    function addLog(entry) {
+      state.logs.unshift(entry);
+      if (state.logs.length > 160) state.logs.length = 160;
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const root = $("#log-list");
+      if (!state.logs.length) { root.innerHTML = '<span class="muted">No API calls yet.</span>'; return; }
+      root.replaceChildren(...state.logs.map(entry => {
+        const details = document.createElement("details"); details.className = "log";
+        const summary = document.createElement("summary");
+        const method = document.createElement("span"); method.className = "method"; method.textContent = entry.method;
+        const badge = document.createElement("span"); badge.className = `badge ${entry.ok ? "ok" : "bad"}`; badge.textContent = entry.ok ? "OK" : "ERROR";
+        const duration = document.createElement("span"); duration.className = "muted"; duration.textContent = `${entry.durationMs} ms`;
+        const time = document.createElement("span"); time.className = "muted"; time.style.marginLeft = "auto"; time.textContent = new Date(entry.time).toLocaleTimeString();
+        summary.append(method, badge, duration, time);
+        const body = document.createElement("div"); body.className = "log-body";
+        const pre = document.createElement("pre"); pre.className = "result"; pre.style.minHeight = "0"; pre.textContent = JSON.stringify(entry, null, 2);
+        body.append(pre); details.append(summary, body); return details;
+      }));
+    }
+
+    function connection(ok, label) {
+      $("#status-dot").className = `dot ${ok === true ? "ok" : ok === false ? "bad" : ""}`;
+      $("#status-label").textContent = label;
+    }
+
+    function dashboard() {
+      $("#metric-bot").textContent = state.bot ? (state.bot.username ? `@${state.bot.username}` : state.bot.first_name || "Bot") : "—";
+      $("#metric-id").textContent = state.bot?.id ?? "—";
+      $("#metric-mode").textContent = state.webhook ? (state.webhook.url ? "Webhook" : "getUpdates") : "—";
+      $("#metric-pending").textContent = state.webhook?.pending_update_count ?? "—";
+    }
+
+    async function loadMe() {
+      const result = await apiCall("getMe"); state.bot = result; setResult("out-me", result); connection(true, result.username ? `@${result.username}` : "Connected"); dashboard(); return result;
+    }
+
+    async function loadWebhook() {
+      const result = await apiCall("getWebhookInfo"); state.webhook = result; setResult("out-webhook-info", result); setResult("out-hook", webhookDiagnostic(result)); dashboard(); return result;
+    }
+
+    function webhookDiagnostic(info) {
+      const lines = [];
+      if (!info.url) lines.push("No webhook configured. getUpdates is available.");
+      else {
+        lines.push(`URL: ${info.url}`);
+        lines.push(`Pending updates: ${info.pending_update_count ?? 0}`);
+        if (info.ip_address) lines.push(`IP: ${info.ip_address}`);
+        if (info.max_connections) lines.push(`Max connections: ${info.max_connections}`);
+        if (info.allowed_updates?.length) lines.push(`Allowed updates: ${info.allowed_updates.join(", ")}`);
+        if (info.last_error_date) lines.push(`Last error: ${new Date(info.last_error_date * 1000).toLocaleString()}`);
+        if (info.last_error_message) lines.push(info.last_error_message);
+      }
+      return lines.join("\n");
+    }
+
+    async function refreshStatus(button) {
+      busy(button, true, "Refreshing…");
+      try {
+        const results = await Promise.allSettled([loadMe(), loadWebhook()]);
+        const failure = results.find(result => result.status === "rejected");
+        if (failure) throw failure.reason;
+        toast("Dashboard refreshed.", "ok");
+      } catch (error) { connection(false, "Request failed"); toast(error.message || String(error), "bad"); }
+      finally { busy(button, false); }
+    }
+
+    function discover(value) {
+      const visit = node => {
+        if (!node || typeof node !== "object") return;
+        const chat = node.chat;
+        if (chat?.id !== undefined) state.chats.set(String(chat.id), { id: String(chat.id), title: chat.title || [chat.first_name, chat.last_name].filter(Boolean).join(" ") || chat.username || "Unnamed chat", type: chat.type || "unknown" });
+        for (const nested of Object.values(node)) if (nested && typeof nested === "object") visit(nested);
+      };
+      visit(value); renderChats();
+    }
+
+    function renderChats() {
+      const root = $("#chat-chips");
+      if (!state.chats.size) { root.innerHTML = '<span class="muted">No chats discovered.</span>'; return; }
+      root.replaceChildren(...[...state.chats.values()].map(chat => {
+        const button = document.createElement("button"); button.type = "button"; button.className = "chip"; button.textContent = `${chat.title} · ${chat.id}`;
+        button.addEventListener("click", () => { $$(".chat-target").forEach(input => input.value = chat.id); switchTab("messages"); toast(`Selected chat ${chat.id}.`, "ok"); });
+        return button;
+      }));
+    }
+
+    function updateParams() {
+      return clean({
+        offset: $("#updates-offset").value ? Number($("#updates-offset").value) : undefined,
+        limit: $("#updates-limit").value ? Number($("#updates-limit").value) : undefined,
+        timeout: $("#updates-timeout").value ? Number($("#updates-timeout").value) : 0,
+        allowed_updates: optionalJson($("#updates-allowed").value, "allowed_updates")
+      });
+    }
+
+    async function fetchUpdates(signal) {
+      const updates = await apiCall("getUpdates", updateParams(), { signal });
+      state.updates.push(...updates);
+      if (state.updates.length > 500) state.updates.splice(0, state.updates.length - 500);
+      discover(updates); setResult("out-updates", state.updates);
+      if ($("#updates-auto-offset").checked && updates.length) $("#updates-offset").value = String(Math.max(...updates.map(item => Number(item.update_id))) + 1);
+      return updates;
+    }
+
+    async function startPolling() {
+      if (state.polling) return;
+      state.polling = true; state.pollController = new AbortController(); updateAbortButton();
+      $("#start-poll").disabled = true; $("#stop-poll").disabled = false; $("#fetch-updates").disabled = true;
+      $("#poll-state").classList.add("polling"); $("#poll-state span:last-child").textContent = "Polling";
+      try {
+        while (!state.pollController.signal.aborted) {
+          await fetchUpdates(state.pollController.signal);
+          const delay = Math.max(0, Number($("#updates-delay").value) || 0);
+          if (delay) await new Promise((resolve, reject) => {
+            const timer = setTimeout(resolve, delay);
+            state.pollController.signal.addEventListener("abort", () => { clearTimeout(timer); reject(new DOMException("Aborted", "AbortError")); }, { once: true });
+          });
+        }
+      } catch (error) { if (error.name !== "AbortError") toast(error.message || String(error), "bad"); }
+      finally {
+        state.polling = false; state.pollController = null; updateAbortButton();
+        $("#start-poll").disabled = false; $("#stop-poll").disabled = true; $("#fetch-updates").disabled = false;
+        $("#poll-state").classList.remove("polling"); $("#poll-state span:last-child").textContent = "Stopped";
+      }
+    }
+
+    function stopPolling() { state.pollController?.abort(); }
+    function abortAll() { stopPolling(); for (const controller of [...state.activeControllers]) controller.abort(); toast("Active requests aborted."); }
+
+    function switchTab(name) {
+      $$(".tab").forEach(button => button.classList.toggle("active", button.dataset.tab === name));
+      $$(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
+      history.replaceState(null, "", `#${name}`);
+    }
+
+    function downloadJson(name, value) {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }));
+      const link = document.createElement("a"); link.href = url; link.download = name; document.body.append(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        try { await navigator.clipboard.writeText(text); toast("Copied to clipboard.", "ok"); return; } catch {}
+      }
+      const textarea = document.createElement("textarea"); textarea.value = text; textarea.setAttribute("readonly", ""); textarea.style.position = "fixed"; textarea.style.opacity = "0"; document.body.append(textarea); textarea.select();
+      const copied = document.execCommand("copy"); textarea.remove();
+      if (!copied) throw new Error("Clipboard access was denied by the browser.");
+      toast("Copied to clipboard.", "ok");
+    }
+
+    function confirmAction(title, message) {
+      const dialog = $("#confirm-dialog"); $("#confirm-title").textContent = title; $("#confirm-message").textContent = message;
+      return new Promise(resolve => {
+        const yes = $("#confirm-ok"), no = $("#confirm-cancel");
+        const finish = value => { yes.removeEventListener("click", onYes); no.removeEventListener("click", onNo); dialog.removeEventListener("cancel", onCancel); dialog.close(); resolve(value); };
+        const onYes = () => finish(true), onNo = () => finish(false), onCancel = event => { event.preventDefault(); finish(false); };
+        yes.addEventListener("click", onYes); no.addEventListener("click", onNo); dialog.addEventListener("cancel", onCancel); dialog.showModal();
+      });
+    }
+
+    const profileSelectors = ["#send-chat","#send-thread","#send-text","#send-parse","#send-business","#send-effect","#send-reply","#send-markup","#send-preview","#updates-offset","#updates-limit","#updates-timeout","#updates-delay","#updates-allowed","#hook-url","#hook-ip","#hook-connections","#hook-allowed","#commands-json","#commands-scope","#commands-language","#inspect-chat","#inspect-user","#lab-method","#lab-params","#upload-method","#upload-field","#upload-params"];
+    function exportProfile() {
+      const fields = {};
+      for (const selector of profileSelectors) fields[selector] = $(selector).value;
+      downloadJson("telegram-workbench-profile.json", { schema: "telegram-workbench-profile/v1", exportedAt: new Date().toISOString(), fields });
+    }
+    async function importProfile(file) {
+      const profile = JSON.parse(await file.text());
+      if (profile.schema !== "telegram-workbench-profile/v1" || !profile.fields) throw new Error("Unsupported profile file.");
+      for (const selector of profileSelectors) if (typeof profile.fields[selector] === "string") $(selector).value = profile.fields[selector];
+      $("#send-count").textContent = $("#send-text").value.length; toast("Profile imported without secrets.", "ok");
+    }
+
+    $$(".tab").forEach(button => button.addEventListener("click", () => switchTab(button.dataset.tab)));
+    $("#show-token").addEventListener("click", () => { const input = $("#token"); input.type = input.type === "password" ? "text" : "password"; $("#show-token").textContent = input.type === "password" ? "Show" : "Hide"; });
+    $("#token").addEventListener("input", () => { connection(null, "Not tested"); persistToken(); });
+    $("#remember-token").addEventListener("change", persistToken);
+    $("#abort-all").addEventListener("click", abortAll);
+    $("#test-token").addEventListener("click", async event => { try { await action(event.currentTarget, "out-me", loadMe, "Testing…"); } catch { connection(false, "Invalid or unreachable"); } });
+    $("#clear-sensitive").addEventListener("click", async () => {
+      if (!await confirmAction("Clear sensitive state?", "This clears the token, webhook secret, active requests, in-memory updates, logs and discovered chats.")) return;
+      abortAll(); $("#token").value = ""; $("#hook-secret").value = ""; $("#remember-token").checked = false; sessionStorage.removeItem("telegram-workbench-token");
+      state.logs = []; state.updates = []; state.chats.clear(); state.bot = null; state.webhook = null; renderLogs(); renderChats(); dashboard(); connection(null, "Not tested"); setResult("out-updates", "No updates fetched yet."); $("#out-updates").classList.add("empty"); toast("Sensitive state cleared.", "ok");
+    });
+
+    $("#refresh-status").addEventListener("click", event => refreshStatus(event.currentTarget));
+    $("#get-me").addEventListener("click", async event => { try { await action(event.currentTarget, "out-me", loadMe); } catch {} });
+    $("#get-webhook-info").addEventListener("click", async event => { try { await action(event.currentTarget, "out-webhook-info", loadWebhook); } catch {} });
+
+    $("#send-text").addEventListener("input", event => $("#send-count").textContent = event.target.value.length);
+    $("#send-message").addEventListener("click", async event => {
+      try {
+        const params = clean({ chat_id: $("#send-chat").value.trim(), message_thread_id: $("#send-thread").value ? Number($("#send-thread").value) : undefined, business_connection_id: $("#send-business").value.trim(), message_effect_id: $("#send-effect").value.trim(), text: $("#send-text").value, parse_mode: $("#send-parse").value, disable_notification: $("#send-silent").checked || undefined, protect_content: $("#send-protect").checked || undefined, allow_paid_broadcast: $("#send-paid").checked || undefined, reply_parameters: optionalJson($("#send-reply").value, "reply_parameters"), reply_markup: optionalJson($("#send-markup").value, "reply_markup"), link_preview_options: optionalJson($("#send-preview").value, "link_preview_options") });
+        if (!params.chat_id) throw new Error("Chat ID is required."); if (!params.text) throw new Error("Message text is required.");
+        await action(event.currentTarget, "out-send", () => apiCall("sendMessage", params), "Sending…");
+      } catch (error) { if (!error.data && error.name !== "AbortError") { setResult("out-send", errorInfo(error), true); toast(error.message, "bad"); } }
+    });
+    $("#edit-message").addEventListener("click", async event => { try { await action(event.currentTarget, "out-edit", () => apiCall("editMessageText", clean({ chat_id: $("#edit-chat").value.trim(), message_id: Number($("#edit-message-id").value), text: $("#edit-text").value })), "Editing…"); } catch {} });
+    $("#delete-message").addEventListener("click", async event => { if (!await confirmAction("Delete message?", "Telegram will delete this message where bot permissions and age limits allow it.")) return; try { await action(event.currentTarget, "out-delete", () => apiCall("deleteMessage", { chat_id: $("#delete-chat").value.trim(), message_id: Number($("#delete-message-id").value) }), "Deleting…"); } catch {} });
+    $("#answer-callback").addEventListener("click", async event => { try { await action(event.currentTarget, "out-callback", () => apiCall("answerCallbackQuery", clean({ callback_query_id: $("#callback-id").value.trim(), text: $("#callback-text").value, show_alert: $("#callback-alert").checked || undefined, url: $("#callback-url").value.trim() })), "Answering…"); } catch {} });
+
+    $("#fetch-updates").addEventListener("click", async event => { try { await action(event.currentTarget, null, () => fetchUpdates(), "Fetching…"); } catch {} });
+    $("#start-poll").addEventListener("click", startPolling); $("#stop-poll").addEventListener("click", stopPolling);
+    $("#clear-updates").addEventListener("click", () => { state.updates = []; setResult("out-updates", "No updates fetched yet."); $("#out-updates").classList.add("empty"); });
+    $("#download-updates").addEventListener("click", () => downloadJson(`telegram-updates-${new Date().toISOString().replaceAll(":","-")}.json`, state.updates));
+
+    $("#set-hook").addEventListener("click", async event => {
+      try {
+        const url = $("#hook-url").value.trim(); if (!url.startsWith("https://")) throw new Error("Webhook URL must use HTTPS.");
+        const secret = $("#hook-secret").value.trim(); if (secret && !/^[A-Za-z0-9_-]{1,256}$/.test(secret)) throw new Error("Secret must use A-Z, a-z, 0-9, underscore or hyphen and be at most 256 characters.");
+        const params = clean({ url, ip_address: $("#hook-ip").value.trim(), max_connections: Number($("#hook-connections").value) || undefined, allowed_updates: optionalJson($("#hook-allowed").value, "allowed_updates"), drop_pending_updates: $("#hook-drop").checked || undefined, secret_token: secret });
+        const certificate = $("#hook-cert").files[0];
+        const callback = certificate ? () => { const form = new FormData(); for (const [key,value] of Object.entries(params)) form.append(key, typeof value === "object" ? JSON.stringify(value) : String(value)); form.append("certificate", certificate); return apiCall("setWebhook", {}, { formData: form }); } : () => apiCall("setWebhook", params);
+        await action(event.currentTarget, "out-hook", callback, "Setting…"); await loadWebhook();
+      } catch (error) { if (!error.data && error.name !== "AbortError") { setResult("out-hook", errorInfo(error), true); toast(error.message, "bad"); } }
+    });
+    $("#check-hook").addEventListener("click", async event => { try { const info = await action(event.currentTarget, null, loadWebhook, "Checking…"); setResult("out-hook", webhookDiagnostic(info)); } catch {} });
+    $("#delete-hook").addEventListener("click", async event => { if (!await confirmAction("Delete webhook?", "Telegram will stop delivering updates to the configured webhook.")) return; try { await action(event.currentTarget, "out-delete-hook", () => apiCall("deleteWebhook", { drop_pending_updates: $("#delete-hook-drop").checked || undefined }), "Deleting…"); await loadWebhook(); } catch {} });
+
+    function commandScope() { return clean({ scope: optionalJson($("#commands-scope").value, "scope"), language_code: $("#commands-language").value.trim() }); }
+    $("#get-commands").addEventListener("click", async event => { try { await action(event.currentTarget, "out-commands", () => apiCall("getMyCommands", commandScope())); } catch {} });
+    $("#set-commands").addEventListener("click", async event => { try { const commands = optionalJson($("#commands-json").value, "commands"); if (!Array.isArray(commands)) throw new Error("Commands must be a JSON array."); await action(event.currentTarget, "out-commands", () => apiCall("setMyCommands", { commands, ...commandScope() }), "Setting…"); } catch (error) { if (!error.data) { setResult("out-commands", errorInfo(error), true); toast(error.message, "bad"); } } });
+    $("#delete-commands").addEventListener("click", async event => { try { await action(event.currentTarget, "out-commands", () => apiCall("deleteMyCommands", commandScope()), "Deleting…"); } catch {} });
+    async function chatCall(button, method, extra = {}) { const chat_id = $("#inspect-chat").value.trim(); if (!chat_id) throw new Error("Chat ID is required."); return action(button, "out-chat", () => apiCall(method, { chat_id, ...extra })); }
+    $("#get-chat").addEventListener("click", async event => { try { await chatCall(event.currentTarget, "getChat"); } catch (error) { if (!error.data) setResult("out-chat", errorInfo(error), true); } });
+    $("#get-admins").addEventListener("click", async event => { try { await chatCall(event.currentTarget, "getChatAdministrators"); } catch {} });
+    $("#get-count").addEventListener("click", async event => { try { await chatCall(event.currentTarget, "getChatMemberCount"); } catch {} });
+    $("#get-member").addEventListener("click", async event => { try { const user_id = Number($("#inspect-user").value); if (!user_id) throw new Error("User ID is required."); await chatCall(event.currentTarget, "getChatMember", { user_id }); } catch (error) { if (!error.data) setResult("out-chat", errorInfo(error), true); } });
+
+    $("#run-lab").addEventListener("click", async event => { try { const method = $("#lab-method").value.trim(); if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(method)) throw new Error("Enter a valid Bot API method name."); await action(event.currentTarget, "out-lab", () => apiCall(method, optionalJson($("#lab-params").value, "Parameters") || {}), "Running…"); } catch (error) { if (!error.data && error.name !== "AbortError") { setResult("out-lab", errorInfo(error), true); toast(error.message, "bad"); } } });
+    $("#format-lab").addEventListener("click", () => { try { $("#lab-params").value = JSON.stringify(optionalJson($("#lab-params").value, "Parameters") || {}, null, 2); toast("JSON formatted.", "ok"); } catch (error) { toast(error.message, "bad"); } });
+    $("#example-lab").addEventListener("click", () => { $("#lab-method").value = "sendLocation"; $("#lab-params").value = JSON.stringify({ chat_id: "123456789", latitude: 50.7753, longitude: 6.0839, disable_notification: true }, null, 2); });
+    $("#run-upload").addEventListener("click", async event => { try { const method = $("#upload-method").value.trim(), field = $("#upload-field").value.trim(), file = $("#upload-file").files[0]; if (!method || !field || !file) throw new Error("Method, file field and file are required."); const params = optionalJson($("#upload-params").value, "Upload parameters") || {}; const form = new FormData(); for (const [key,value] of Object.entries(params)) form.append(key, typeof value === "object" ? JSON.stringify(value) : String(value)); form.append(field, file); await action(event.currentTarget, "out-upload", () => apiCall(method, {}, { formData: form }), "Uploading…"); } catch (error) { if (!error.data && error.name !== "AbortError") { setResult("out-upload", errorInfo(error), true); toast(error.message, "bad"); } } });
+
+    $("#export-profile").addEventListener("click", exportProfile);
+    $("#import-profile").addEventListener("click", () => $("#profile-file").click());
+    $("#profile-file").addEventListener("change", async event => { try { if (event.target.files[0]) await importProfile(event.target.files[0]); } catch (error) { toast(error.message, "bad"); } finally { event.target.value = ""; } });
+
+    $$('[data-copy]').forEach(button => button.addEventListener("click", async () => { try { await copyText(document.getElementById(button.dataset.copy).textContent); } catch (error) { toast(error.message, "bad"); } }));
+    $$(".copy-snippet").forEach(button => button.addEventListener("click", async () => { try { await copyText(button.parentElement.querySelector("code").textContent); } catch (error) { toast(error.message, "bad"); } }));
+    $("#export-logs").addEventListener("click", () => downloadJson(`telegram-workbench-log-${new Date().toISOString().replaceAll(":","-")}.json`, state.logs));
+    $("#clear-logs").addEventListener("click", () => { state.logs = []; renderLogs(); toast("Logs cleared.", "ok"); });
+
+    const savedToken = sessionStorage.getItem("telegram-workbench-token");
+    if (savedToken) { $("#token").value = savedToken; $("#remember-token").checked = true; }
+    const requestedTab = location.hash.slice(1);
+    if ($(`.tab[data-tab="${CSS.escape(requestedTab)}"]`)) switchTab(requestedTab);
+    window.addEventListener("beforeunload", abortAll);
+  </script>
+</body>
+</html>
