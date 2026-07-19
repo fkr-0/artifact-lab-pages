@@ -75,7 +75,7 @@ test.describe('modernized authoring studios', () => {
         return rect.left >= bar.left - 1 && rect.right <= bar.right + 1 && rect.top >= bar.top - 1 && rect.bottom <= bar.bottom + 1;
       }),
     }));
-    expect(tabGeometry.rows).toHaveLength(2);
+    expect(tabGeometry.rows).toHaveLength(1);
     expect(tabGeometry.allInside).toBe(true);
 
     await page.click('[data-tab="tune"]');
@@ -195,6 +195,98 @@ test.describe('modernized authoring studios', () => {
     await expect(blockedPage.locator('#save-state')).toContainText('Local save unavailable');
     expect(errors).toEqual([]);
     await blockedPage.close();
+  });
+
+  test('procedural sharepic structural controls affect every generator and frame controls render independently', async ({ page }) => {
+    test.setTimeout(60_000);
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto('/procedural-sharepic-studio.html');
+
+    const audit = await page.evaluate(() => {
+      const testCanvas = document.createElement('canvas');
+      testCanvas.width = 192;
+      testCanvas.height = 144;
+      const checksum = () => {
+        const data = testCanvas.getContext('2d').getImageData(0, 0, testCanvas.width, testCanvas.height).data;
+        let hash = 2166136261;
+        for (let index = 0; index < data.length; index += 8) {
+          hash ^= data[index];
+          hash = Math.imul(hash, 16777619);
+          hash ^= data[index + 1];
+          hash = Math.imul(hash, 16777619);
+          hash ^= data[index + 2];
+          hash = Math.imul(hash, 16777619);
+        }
+        return hash >>> 0;
+      };
+      const baseConfig = {
+        ...state,
+        seed: 424242,
+        theme: 'neonAlley',
+        paletteAdapter: 'native',
+        paletteStrength: 100,
+        hueShift: 0,
+        complexity: 6,
+        density: 6,
+        scale: 5,
+        flow: 0,
+        symmetry: 0,
+        rotation: 0,
+        variation: 0,
+        texture: 0,
+      };
+      const alternatives = {
+        complexity: 17,
+        density: 18,
+        scale: 17,
+        flow: 100,
+        symmetry: 100,
+        rotation: 31,
+        variation: 63,
+        texture: 80,
+      };
+      const failures = [];
+      const hashes = {};
+      Object.keys(generators).forEach(type => {
+        const config = { ...baseConfig, type };
+        generateBase(testCanvas, config);
+        const baseline = checksum();
+        hashes[type] = { baseline };
+        Object.entries(alternatives).forEach(([key, value]) => {
+          generateBase(testCanvas, { ...config, [key]: value });
+          const changed = checksum();
+          hashes[type][key] = changed;
+          if (changed === baseline) failures.push(`${type}:${key}`);
+        });
+      });
+
+      const frameBase = {
+        ...baseConfig,
+        type: 'hardRects',
+        frame: { ...state.frame, borderWidth: 0, borderOpacity: 0, innerGlow: 0, vignette: 0, darkOverlay: 0, inset: 0, cornerRadius: 0 },
+        content: { ...state.content, enabled: false },
+      };
+      generate(testCanvas, frameBase);
+      const noFrame = checksum();
+      generate(testCanvas, { ...frameBase, frame: { ...frameBase.frame, innerGlow: 70, inset: 12, cornerRadius: 24, borderColor: '#ff2d7b' } });
+      const glowOnly = checksum();
+      generate(testCanvas, { ...frameBase, frame: { ...frameBase.frame, borderWidth: 32, borderOpacity: 90, inset: 14, cornerRadius: 36, gradientBorder: true, borderColor: '#ff2d7b', borderColor2: '#00f0ff' } });
+      const gradientFrame = checksum();
+      return { failures, generatorCount: Object.keys(generators).length, hashes, frameDistinct: new Set([noFrame, glowOnly, gradientFrame]).size };
+    });
+
+    expect(audit.generatorCount).toBe(19);
+    expect(audit.failures).toEqual([]);
+    expect(audit.frameDistinct).toBe(3);
+
+    await page.click('[data-tab="frame"]');
+    await page.locator('#slider-previewFrameSize').fill('520');
+    await expect.poll(() => page.evaluate(() => state.previewFrameSize)).toBe(520);
+    await expect.poll(() => page.evaluate(() => document.getElementById('canvas-wrap').style.maxWidth)).toBe('520px');
+    await page.locator('[id="slider-frame.innerGlow"]').fill('65');
+    await expect.poll(() => page.evaluate(() => state.frame.innerGlow)).toBe(65);
+    expect(errors).toEqual([]);
   });
 
   test('catalog sharepic undo and redo cover layer creation, text edits, and inspector sliders', async ({ page }) => {

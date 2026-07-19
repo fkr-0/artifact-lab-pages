@@ -36,17 +36,17 @@ body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetic
 .layout { max-width:1800px; margin:0 auto; display:flex; flex-direction:column; }
 @media(min-width:1024px){ .layout { flex-direction:row; } }
 .sidebar { width:100%; border-right:1px solid var(--border); flex-shrink:0; }
-@media(min-width:1024px){ .sidebar { width:340px; min-height:calc(100vh - 56px); } }
-@media(min-width:1280px){ .sidebar { width:360px; } }
+@media(min-width:1024px){ .sidebar { width:420px; min-width:380px; max-width:560px; min-height:calc(100vh - 56px); resize:horizontal; overflow:hidden; } }
+@media(min-width:1440px){ .sidebar { width:460px; } }
 .tabs-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-auto-rows:34px; border-bottom:1px solid var(--border); background:transparent; min-height:68px; padding:0; }
 .tab-btn { min-width:0; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; padding:4px 6px; font-size:10px; color:var(--text40); transition:all 0.15s; position:relative; font-family:inherit; }
 .tab-btn:hover { color:var(--text60); }
 .tab-btn.active { color:var(--text90); }
 .tab-btn.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:rgba(255,255,255,0.3); }
 .tab-btn svg { width:12px; height:12px; flex:0 0 auto; }
-.scroll-area { height:320px; overflow-y:auto; }
+.scroll-area { height:320px; overflow-y:auto; scrollbar-gutter:stable; }
 @media(min-width:640px) and (max-width:1023px){ .tabs-bar { grid-template-columns:repeat(6,minmax(0,1fr)); grid-auto-rows:36px; min-height:36px; } }
-@media(min-width:1024px){ .scroll-area { height:calc(100vh - 56px - 68px); } }
+@media(min-width:1024px){ .tabs-bar { grid-template-columns:repeat(6,minmax(0,1fr)); grid-auto-rows:42px; min-height:42px; } .scroll-area { height:calc(100vh - 56px - 42px); } }
 .tab-panel { display:none; padding:16px; }
 .tab-panel.active { display:block; }
 .separator { border:none; border-top:1px solid var(--border); margin:12px 0; }
@@ -128,10 +128,10 @@ input[type="color"]::-webkit-color-swatch { border-radius:2px; border:none; }
 .preset-btn:hover { background:rgba(255,255,255,0.05); color:var(--text80); border-color:rgba(255,255,255,0.1); }
 .add-btn { height:24px; padding:0 8px; border-radius:4px; border:none; background:transparent; cursor:pointer; font-size:9px; font-family:inherit; color:var(--text30); transition:color 0.15s; }
 .add-btn:hover { color:var(--text60); }
-.main-area { flex:1; display:flex; align-items:center; justify-content:center; padding:16px; min-height:60vh; }
+.main-area { flex:1; min-width:0; display:flex; align-items:center; justify-content:center; padding:16px; min-height:60vh; }
 @media(min-width:1024px){ .main-area { padding:32px 48px; min-height:calc(100vh - 56px); } }
 @media(min-width:1024px){ .main-area { padding:32px; } }
-.canvas-wrap { width:100%; max-width:900px; position:relative; }
+.canvas-wrap { width:100%; max-width:900px; position:relative; transition:max-width .18s ease; }
 .canvas-frame { position:relative; border-radius:12px; overflow:hidden; transition:box-shadow 0.5s; }
 #preview { width:100%; aspect-ratio:1; display:block; image-rendering:auto; }
 .status-bar { margin-top:16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; font-size:10px; color:var(--text25); padding:0 4px; gap:4px; }
@@ -346,7 +346,7 @@ button:disabled { opacity:.35; cursor:not-allowed; transform:none !important; fi
         <div class="stage-toolbar-group">
           <label class="label" for="preview-zoom">Preview</label>
           <select class="text-select" id="preview-zoom">
-            <option value="70">70%</option><option value="85">85%</option><option value="100">100%</option><option value="115">115%</option>
+            <option value="70">70%</option><option value="85">85%</option><option value="100">100%</option><option value="115">115%</option><option value="130">130%</option><option value="150">150%</option>
           </select>
         </div>
       </div>
@@ -399,6 +399,28 @@ var generatorInfo = {
   guilloche: { name:'Guilloche', description:'Banknote-like hypotrochoid line engraving' }
 };
 
+var generatorTuningNotes = {
+  kaleidoscope:'layers, motifs, motif size, radial drift, and wedge folding',
+  pixelCity:'skyline depth, building population, pixel/building scale, atmospheric drift, and reflected skyline order',
+  sprayField:'paint layers, spray population, burst size, directional smear, and mirrored stencil balance',
+  glitchArt:'data layers, corruption bands, block scale, signal drift, and channel folding',
+  retroGrid:'terrain depth, grid population, sun scale, horizon motion, and vanishing-point order',
+  geometricTiles:'motif depth, internal repetition, tile size, row drift, and reflected tessellation',
+  goldLeaf:'fragment vocabulary, fragment population, fragment scale, directional scatter, and compositional folding',
+  hardRects:'mark vocabulary, block population, block scale, directional stacking, and mirrored balance',
+  gritNoise:'noise depth, active grain population, grain scale, directional erosion, and folded texture',
+  rawGrids:'grid layers, node population, cell scale, directional skew, and reflected grid order',
+  halftone:'noise depth, ink coverage, dot scale, screen drift, and mirrored screen order',
+  flowField:'noise depth, streamline population, path scale, field mobility, and paired flow order',
+  dotMatrix:'noise depth, active LED population, LED scale, signal drift, and reflected matrix order',
+  circuitBoard:'trace depth, route population, routing scale, route mobility, and mirrored board order',
+  contourMap:'noise depth, contour emphasis, terrain scale, field warp, and folded topography',
+  voronoiShards:'edge detail, site population, territory scale, site drift, and mirrored shard order',
+  lissajousRibbons:'curve resolution, ribbon population, orbit scale, phase mobility, and harmonic order',
+  cellularAutomata:'evolution depth, initial population, cell scale, rule mobility, and center-biased order',
+  guilloche:'curve resolution, ring population, engraving scale, orbital mobility, and rosette order'
+};
+
 var paletteAdapters = {
   native: { name:'Native palette', description:'Preserve the source palette and only apply hue rotation.' },
   analogous: { name:'Analogous drift', description:'Compress colors into a close, cinematic hue family.' },
@@ -431,11 +453,11 @@ var typographyPresets = {
 };
 
 var proceduralProfiles = {
-  minimal: { name:'Minimal', complexity:3, density:3, scale:12, flow:28, symmetry:40 },
-  balanced: { name:'Balanced', complexity:8, density:8, scale:9, flow:50, symmetry:50 },
-  intricate: { name:'Intricate', complexity:15, density:13, scale:5, flow:64, symmetry:72 },
-  kinetic: { name:'Kinetic', complexity:11, density:12, scale:8, flow:92, symmetry:18 },
-  monumental: { name:'Monumental', complexity:7, density:5, scale:18, flow:36, symmetry:86 }
+  minimal: { name:'Minimal', complexity:3, density:3, scale:12, flow:18, symmetry:22, rotation:0, variation:4, texture:2 },
+  balanced: { name:'Balanced', complexity:8, density:8, scale:9, flow:42, symmetry:45, rotation:0, variation:12, texture:8 },
+  intricate: { name:'Intricate', complexity:15, density:13, scale:5, flow:64, symmetry:72, rotation:3, variation:32, texture:22 },
+  kinetic: { name:'Kinetic', complexity:11, density:12, scale:8, flow:92, symmetry:18, rotation:-8, variation:54, texture:16 },
+  monumental: { name:'Monumental', complexity:7, density:5, scale:18, flow:28, symmetry:86, rotation:0, variation:9, texture:5 }
 };
 
 var exportPresets = [
@@ -469,6 +491,9 @@ var state = {
   scale: 5,
   flow: 50,
   symmetry: 50,
+  rotation: 0,
+  variation: 0,
+  texture: 0,
   opacity: 100,
   disruptFactor: 0,
   grain: 0,
@@ -483,7 +508,7 @@ var state = {
   paletteStrength: 100,
   hueShift: 0,
   content: { enabled:false, heading:'', col1:'', col2:'', posX:50, posY:50, textScale:10, preset:'signal', headingFont:'grotesk', bodyFont:'sans', headingWeight:900, bodyWeight:500, headingTracking:-24, bodyTracking:2, lineHeight:112, textWidth:72, align:'left', uppercase:true, backdrop:18, colorMode:'accent' },
-  frame: { borderWidth:0, borderColor:'#ffffff', borderColor2:'#000000', borderOpacity:60, gradientBorder:false, innerGlow:0, vignette:30, darkOverlay:0 },
+  frame: { borderWidth:0, borderColor:'#ffffff', borderColor2:'#000000', borderOpacity:60, gradientBorder:false, innerGlow:0, vignette:30, darkOverlay:0, inset:0, cornerRadius:0 },
   selectedPreset: 0,
   activeTab: 'generator',
   exportFormat: 'png',
@@ -492,13 +517,14 @@ var state = {
   customWidth: 1080,
   customHeight: 1080,
   safeArea: false,
-  previewZoom: 100
+  previewZoom: 100,
+  previewFrameSize: 900
 };
 
-var STORAGE_KEY = 'procedural-sharepic-studio-state-v6';
-var LEGACY_STORAGE_KEYS = ['procedural-sharepic-studio-state-v5','procedural-sharepic-studio-state-v4'];
+var STORAGE_KEY = 'procedural-sharepic-studio-state-v7';
+var LEGACY_STORAGE_KEYS = ['procedural-sharepic-studio-state-v6','procedural-sharepic-studio-state-v5','procedural-sharepic-studio-state-v4'];
 var STATE_URL_PARAM = 'state';
-var STATE_SCHEMA_VERSION = 6;
+var STATE_SCHEMA_VERSION = 7;
 var HISTORY_LIMIT = 60;
 var historyStack = [];
 var historyIndex = -1;
@@ -534,7 +560,8 @@ function normalizeStudioState(defaults, candidate) {
   if (['generator','palette','tune','content','frame','export'].indexOf(next.activeTab) < 0) next.activeTab = defaults.activeTab;
   ['complexity','density'].forEach(function(key){ next[key] = clampNumber(next[key], defaults[key], 0, 20); });
   next.scale = clampNumber(next.scale, defaults.scale, 1, 20);
-  ['flow','symmetry','opacity','disruptFactor','grain','pixelate','posterize','scanlines','paletteStrength'].forEach(function(key){ next[key] = clampNumber(next[key], defaults[key], 0, 100); });
+  ['flow','symmetry','variation','texture','opacity','disruptFactor','grain','pixelate','posterize','scanlines','paletteStrength'].forEach(function(key){ next[key] = clampNumber(next[key], defaults[key], 0, 100); });
+  next.rotation = clampNumber(next.rotation, defaults.rotation, -180, 180);
   next.blur = clampNumber(next.blur, defaults.blur, 0, 20);
   next.contrast = clampNumber(next.contrast, defaults.contrast, -100, 100);
   next.saturation = clampNumber(next.saturation, defaults.saturation, 0, 200);
@@ -545,7 +572,8 @@ function normalizeStudioState(defaults, candidate) {
   next.exportQuality = Math.round(clampNumber(next.exportQuality, defaults.exportQuality, 40, 100));
   next.customWidth = Math.round(clampNumber(next.customWidth, defaults.customWidth, 320, 8192));
   next.customHeight = Math.round(clampNumber(next.customHeight, defaults.customHeight, 320, 8192));
-  next.previewZoom = Math.round(clampNumber(next.previewZoom, defaults.previewZoom, 70, 115));
+  next.previewZoom = Math.round(clampNumber(next.previewZoom, defaults.previewZoom, 70, 150));
+  next.previewFrameSize = Math.round(clampNumber(next.previewFrameSize, defaults.previewFrameSize, 360, 1400));
   next.exportFormat = ['png','jpeg','webp'].indexOf(next.exportFormat) >= 0 ? next.exportFormat : defaults.exportFormat;
   next.useCustomSize = normalizeBoolean(next.useCustomSize, defaults.useCustomSize);
   next.safeArea = normalizeBoolean(next.safeArea, defaults.safeArea);
@@ -571,6 +599,8 @@ function normalizeStudioState(defaults, candidate) {
   next.frame.innerGlow = clampNumber(next.frame.innerGlow, defaults.frame.innerGlow, 0, 100);
   next.frame.vignette = clampNumber(next.frame.vignette, defaults.frame.vignette, 0, 100);
   next.frame.darkOverlay = clampNumber(next.frame.darkOverlay, defaults.frame.darkOverlay, 0, 80);
+  next.frame.inset = clampNumber(next.frame.inset, defaults.frame.inset, 0, 100);
+  next.frame.cornerRadius = clampNumber(next.frame.cornerRadius, defaults.frame.cornerRadius, 0, 160);
   next.frame.borderColor = normalizeHex(next.frame.borderColor, defaults.frame.borderColor);
   next.frame.borderColor2 = normalizeHex(next.frame.borderColor2, defaults.frame.borderColor2);
   next.frame.gradientBorder = normalizeBoolean(next.frame.gradientBorder, defaults.frame.gradientBorder);
@@ -766,7 +796,7 @@ function lerpColor(c1, c2, t) {
   return [Math.round(c1[0]+(c2[0]-c1[0])*t), Math.round(c1[1]+(c2[1]-c1[1])*t), Math.round(c1[2]+(c2[2]-c1[2])*t)];
 }
 function rgba(r, g, b, a) { return 'rgba('+r+','+g+','+b+','+a+')'; }
-function colorAlpha(hex, a) { var c=hexToRgb(hex); return rgba(c[0],c[1],c[2],a); }
+function colorAlpha(color, a) { var c=Array.isArray(color)?color:hexToRgb(color); return rgba(c[0],c[1],c[2],a); }
 function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
 function rgbToHex(rgb) { return '#'+rgb.map(function(v){ return clamp(Math.round(v),0,255).toString(16).padStart(2,'0'); }).join(''); }
 function rgbToHsl(rgb) {
@@ -994,49 +1024,70 @@ function applyOpacity(ctx, w, h, opacity, bgColor) {
 
 // ─── Frame Functions ──────────────────────────────────────────
 function applyFrameBorder(ctx, w, h, frame) {
-  if (frame.borderWidth <= 0) return;
-  var bw = frame.borderWidth;
+  var unit = Math.max(.25, Math.min(w, h) / 1200);
+  var bw = Math.max(0, Number(frame.borderWidth || 0) * unit);
+  var glowAmount = Math.max(0, Number(frame.innerGlow || 0));
+  if (bw <= 0 && glowAmount <= 0) return;
+  var inset = Math.max(0, Number(frame.inset || 0) * unit);
+  var radius = Math.max(0, Number(frame.cornerRadius || 0) * unit);
   var rgb = hexToRgb(frame.borderColor), rgb2 = hexToRgb(frame.borderColor2);
-  ctx.globalAlpha = frame.borderOpacity / 100;
-  var ss;
+  var paint;
   if (frame.gradientBorder) {
-    var grad = ctx.createLinearGradient(0, 0, w, h);
+    var grad = ctx.createLinearGradient(inset, inset, w-inset, h-inset);
     grad.addColorStop(0, rgba(rgb[0],rgb[1],rgb[2],1));
-    grad.addColorStop(1, rgba(rgb2[0],rgb2[1],rgb2[2],1));
-    ss = grad;
-  } else { ss = rgba(rgb[0],rgb[1],rgb[2],1); }
-  ctx.strokeStyle = ss;
-  if (bw > 30) {
-    ctx.lineWidth = 1;
-    ctx.strokeRect(bw/2-8, bw/2-8, w-bw+16, h-bw+16);
-    ctx.strokeRect(bw/2+8, bw/2+8, w-bw-16, h-bw-16);
-    ctx.fillStyle = ss;
-    ctx.fillRect(0,0,w,bw/2-8); ctx.fillRect(0,h-bw/2+8,w,bw/2-8);
-    ctx.fillRect(0,0,bw/2-8,h); ctx.fillRect(w-bw/2+8,0,bw/2-8,h);
-  } else if (bw > 20) {
-    ctx.lineWidth = 1;
-    ctx.strokeRect(bw/2-6, bw/2-6, w-bw+12, h-bw+12);
-    ctx.strokeRect(bw/2+6, bw/2+6, w-bw-12, h-bw-12);
-    ctx.fillStyle = ss;
-    ctx.fillRect(0,0,w,bw/2-6); ctx.fillRect(0,h-bw/2+6,w,bw/2-6);
-    ctx.fillRect(0,0,bw/2-6,h); ctx.fillRect(w-bw/2+6,0,bw/2-6,h);
-  } else {
-    ctx.lineWidth = bw; ctx.strokeRect(bw/2, bw/2, w-bw, h-bw);
+    grad.addColorStop(.52, rgba(rgb2[0],rgb2[1],rgb2[2],1));
+    grad.addColorStop(1, rgba(rgb[0],rgb[1],rgb[2],1));
+    paint = grad;
+  } else { paint = rgba(rgb[0],rgb[1],rgb[2],1); }
+
+  function framePath(pathInset, lineWidth) {
+    var x = pathInset + lineWidth/2, y = pathInset + lineWidth/2;
+    var fw = Math.max(1, w-pathInset*2-lineWidth), fh = Math.max(1, h-pathInset*2-lineWidth);
+    roundedRect(ctx, x, y, fw, fh, Math.max(0, radius-lineWidth*.15));
   }
-  if (frame.innerGlow > 0) {
-    var ga = (frame.innerGlow/100)*0.5, gw = Math.max(10, bw*0.4);
-    var gr = hexToRgb(frame.borderColor);
-    var gT = ctx.createLinearGradient(0,0,gw,0); gT.addColorStop(0,rgba(gr[0],gr[1],gr[2],ga)); gT.addColorStop(1,'transparent');
-    var gB = ctx.createLinearGradient(0,h,gw,h); gB.addColorStop(0,rgba(gr[0],gr[1],gr[2],ga)); gB.addColorStop(1,'transparent');
-    var gL = ctx.createLinearGradient(0,0,0,gw); gL.addColorStop(0,rgba(gr[0],gr[1],gr[2],ga)); gL.addColorStop(1,'transparent');
-    var gR = ctx.createLinearGradient(w,0,w,gw); gR.addColorStop(0,rgba(gr[0],gr[1],gr[2],ga)); gR.addColorStop(1,'transparent');
-    ctx.globalAlpha = frame.borderOpacity/100;
-    ctx.fillStyle=gT; ctx.fillRect(0,0,w,gw);
-    ctx.fillStyle=gB; ctx.fillRect(0,h-gw,w,gw);
-    ctx.fillStyle=gL; ctx.fillRect(0,0,gw,h);
-    ctx.fillStyle=gR; ctx.fillRect(w-gw,0,gw,h);
+
+  if (bw > 0 && frame.borderOpacity > 0) {
+    ctx.save();
+    ctx.globalAlpha = clamp(frame.borderOpacity/100, 0, 1);
+    ctx.strokeStyle = paint;
+    ctx.lineWidth = bw;
+    framePath(inset, bw);
+    ctx.stroke();
+    if (bw >= 18*unit) {
+      ctx.globalAlpha *= .78;
+      ctx.lineWidth = Math.max(1, unit);
+      framePath(inset+bw*.22, ctx.lineWidth);
+      ctx.stroke();
+      framePath(inset+bw*.78, ctx.lineWidth);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
-  ctx.globalAlpha = 1;
+
+  if (glowAmount > 0) {
+    var edge = inset + bw;
+    var gw = Math.max(8*unit, (10+glowAmount*.72)*unit);
+    var ga = clamp(glowAmount/100*.56, 0, .62);
+    var top = ctx.createLinearGradient(0,edge,0,edge+gw);
+    var bottom = ctx.createLinearGradient(0,h-edge,0,h-edge-gw);
+    var left = ctx.createLinearGradient(edge,0,edge+gw,0);
+    var right = ctx.createLinearGradient(w-edge,0,w-edge-gw,0);
+    [top,bottom,left,right].forEach(function(g){g.addColorStop(0,rgba(rgb[0],rgb[1],rgb[2],ga));g.addColorStop(1,'transparent');});
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle=top; ctx.fillRect(edge,edge,Math.max(0,w-edge*2),gw);
+    ctx.fillStyle=bottom; ctx.fillRect(edge,h-edge-gw,Math.max(0,w-edge*2),gw);
+    ctx.fillStyle=left; ctx.fillRect(edge,edge,gw,Math.max(0,h-edge*2));
+    ctx.fillStyle=right; ctx.fillRect(w-edge-gw,edge,gw,Math.max(0,h-edge*2));
+    ctx.globalAlpha = ga;
+    ctx.strokeStyle = paint;
+    ctx.lineWidth = Math.max(1, 2*unit);
+    ctx.shadowColor = rgba(rgb[0],rgb[1],rgb[2],1);
+    ctx.shadowBlur = gw*.6;
+    framePath(edge+gw*.16, ctx.lineWidth);
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function applyVignette(ctx, w, h, vignette) {
@@ -1187,7 +1238,7 @@ function generateKaleidoscope(ctx, w, h, theme, rng, config) {
 }
 
 function generatePixelCity(ctx, w, h, theme, rng, config) {
-  var pixelSize=Math.max(2,Math.round(12-config.scale));
+  var pixelSize=Math.max(2,Math.round(2+config.scale*.55));
   ctx.fillStyle=theme.background; ctx.fillRect(0,0,w,h);
   var colors=theme.colors.map(hexToRgb), bgRgb=hexToRgb(theme.background), skyHeight=h*0.6;
   var skyGrad=ctx.createLinearGradient(0,0,0,skyHeight);
@@ -1293,15 +1344,15 @@ function generateRetroGrid(ctx, w, h, theme, rng, config) {
 
 function generateGeometricTiles(ctx, w, h, theme, rng, config) {
   ctx.fillStyle=theme.background; ctx.fillRect(0,0,w,h);
-  var tileSize=30+(10-config.scale)*8, cols=Math.ceil(w/tileSize)+1, rows=Math.ceil(h/tileSize)+1;
-  var colors=theme.colors.map(hexToRgb), bgRgb=hexToRgb(theme.background);
+  var tileSize=12+config.scale*5, cols=Math.ceil(w/tileSize)+1, rows=Math.ceil(h/tileSize)+1;
+  var colors=theme.colors.map(hexToRgb), bgRgb=hexToRgb(theme.background), octaves=2+Math.floor(config.complexity/4);
   for(var row=0;row<rows;row++){for(var col=0;col<cols;col++){
     var x=col*tileSize, y=row*tileSize;
-    var n=fbm(col*0.3,row*0.3,config.seed,config.complexity>5?4:2);
+    var n=fbm(col*0.3,row*0.3,config.seed,octaves);
     var tileColor=colors[Math.floor(n*colors.length)%colors.length];
     var blendedColor=lerpColor(bgRgb,tileColor,0.3+n*0.5);
     ctx.fillStyle=rgba(blendedColor[0],blendedColor[1],blendedColor[2],1); ctx.fillRect(x,y,tileSize,tileSize);
-    var pt=Math.floor(fbm(col*0.7+100,row*0.7+100,config.seed+42,2)*6);
+    var pt=Math.floor(fbm(col*0.7+100,row*0.7+100,config.seed+42,Math.max(2,octaves-1))*6);
     var cx2=x+tileSize/2, cy2=y+tileSize/2, halfTile=tileSize/2-2;
     ctx.globalAlpha=0.6;
     if(pt===0){ctx.strokeStyle=rgba(tileColor[0],tileColor[1],tileColor[2],1);ctx.lineWidth=1.5;for(var r=halfTile;r>2;r-=tileSize/(3+Math.floor(config.density/2))){ctx.beginPath();ctx.arc(cx2,cy2,Math.max(1,r),0,Math.PI*2);ctx.stroke();}}
@@ -1367,7 +1418,7 @@ function generateGritNoise(ctx, w, h, theme, rng, config) {
   var colors=theme.colors.map(hexToRgb), bgRgb=hexToRgb(theme.background);
   var fieldCount=2+Math.floor(config.complexity/3);
   for(var i=0;i<fieldCount;i++){var fx=rng.nextFloat(w*0.1,w*0.9),fy=rng.nextFloat(h*0.1,h*0.9),fR=rng.nextFloat(150,500)*(config.scale/5),color=rng.pick(colors);var grad=ctx.createRadialGradient(fx,fy,0,fx,fy,fR);grad.addColorStop(0,colorAlpha(color,rng.nextFloat(0.1,0.25)));grad.addColorStop(0.5,colorAlpha(color,rng.nextFloat(0.05,0.1)));grad.addColorStop(1,'transparent');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);}
-  var blockSize=Math.max(1,Math.round(4-config.scale*0.3)), noiseIntensity=config.density/10;
+  var blockSize=Math.max(1,Math.round(1+config.scale*.42)), noiseIntensity=config.density/10;
   var imageData=ctx.getImageData(0,0,w,h), data=imageData.data;
   for(var y=0;y<h;y+=blockSize){for(var x=0;x<w;x+=blockSize){
     var n=fbm(x*0.008,y*0.008,config.seed,3+Math.floor(config.complexity/3));
@@ -1411,7 +1462,7 @@ function generateRawGrids(ctx, w, h, theme, rng, config) {
 function generateHalftone(ctx, w, h, theme, rng, config) {
   ctx.fillStyle=theme.background; ctx.fillRect(0,0,w,h);
   var colors=theme.colors.map(hexToRgb), octaves=2+Math.floor(config.complexity/5);
-  var dotSpacing=Math.max(4,20-config.scale)*(config.density/10+0.3), maxDotR=dotSpacing*0.52;
+  var density=clamp(config.density/20,0,1),dotSpacing=6+config.scale*1.35,maxDotR=dotSpacing*(.16+density*.42);
   for(var y=0;y<h;y+=dotSpacing){for(var x=0;x<w;x+=dotSpacing){
     var regionNoise=fbm(x*0.005,y*0.005,config.seed,octaves), colorIdx=Math.floor(regionNoise*colors.length)%colors.length, dotColor=colors[colorIdx];
     var sizeNoise=fbm(x*0.008+100,y*0.008+100,config.seed+37,octaves), dotR=Math.max(0.5,sizeNoise*maxDotR);
@@ -1441,7 +1492,7 @@ function generateFlowField(ctx, w, h, theme, rng, config) {
 function generateDotMatrix(ctx, w, h, theme, rng, config) {
   ctx.fillStyle=theme.background; ctx.fillRect(0,0,w,h);
   var colors=theme.colors.map(hexToRgb), bgRgb=hexToRgb(theme.background);
-  var spacing=Math.max(8,18-config.scale*0.5), baseDotR=spacing*0.3, activeThreshold=1-(config.density/20)*0.8, glowChance=0.15;
+  var spacing=6+config.scale*1.15, baseDotR=spacing*(.17+config.density/100), activeThreshold=1-(config.density/20)*0.8, glowChance=0.15;
   for(var y=spacing/2;y<h;y+=spacing){for(var x=spacing/2;x<w;x+=spacing){
     var n=fbm(x*0.01,y*0.01,config.seed,2+Math.floor(config.complexity/7));
     if(n>activeThreshold){
@@ -1460,7 +1511,7 @@ function generateCircuitBoard(ctx, w, h, theme, rng, config) {
   ctx.fillStyle=theme.background; ctx.fillRect(0,0,w,h);
   var colors=theme.colors.map(hexToRgb), traceColor=theme.accent, traceRgb=hexToRgb(traceColor);
   var highlightColor=theme.colors[1]||theme.accent, highlightRgb=hexToRgb(highlightColor);
-  var gridSize=Math.max(15,40-config.scale*1.5), cols=Math.floor(w/gridSize), rows=Math.floor(h/gridSize);
+  var gridSize=12+config.scale*2, cols=Math.max(3,Math.floor(w/gridSize)), rows=Math.max(3,Math.floor(h/gridSize));
   ctx.globalAlpha=0.08; ctx.fillStyle=traceColor;
   for(var row=0;row<=rows;row++){for(var col=0;col<=cols;col++){ctx.beginPath();ctx.arc(col*gridSize,row*gridSize,1,0,Math.PI*2);ctx.fill();}}
   var traceCount=8+config.complexity*4+config.density*3; ctx.lineCap='round'; ctx.lineJoin='round';
@@ -1493,7 +1544,7 @@ function proceduralProfile(config) {
 }
 
 function generateContourMap(ctx,w,h,theme,rng,config){
-  var profile=proceduralProfile(config),step=Math.max(8,Math.round(30-profile.scale*18)),cols=Math.ceil(w/step)+1,rows=Math.ceil(h/step)+1;
+  var profile=proceduralProfile(config),step=Math.max(8,Math.round(8+profile.scale*28)),cols=Math.ceil(w/step)+1,rows=Math.ceil(h/step)+1;
   ctx.fillStyle=theme.background;ctx.fillRect(0,0,w,h);
   var glow=ctx.createRadialGradient(w*(.35+profile.flow*.3),h*.45,0,w/2,h/2,Math.max(w,h)*.75);glow.addColorStop(0,colorAlpha(theme.accent,.1));glow.addColorStop(1,'transparent');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
   var values=[];
@@ -1532,7 +1583,7 @@ function generateLissajousRibbons(ctx,w,h,theme,rng,config){
 }
 
 function generateCellularAutomata(ctx,w,h,theme,rng,config){
-  var profile=proceduralProfile(config),cell=Math.max(5,Math.round(22-profile.scale*14)),cols=Math.ceil(w/cell),rows=Math.ceil(h/cell),grid=[],next=[],chance=.14+profile.density*.48;
+  var profile=proceduralProfile(config),cell=Math.max(5,Math.round(5+profile.scale*22)),cols=Math.ceil(w/cell),rows=Math.ceil(h/cell),grid=[],next=[],chance=.14+profile.density*.48;
   ctx.fillStyle=theme.background;ctx.fillRect(0,0,w,h);
   for(var y=0;y<rows;y++){grid[y]=[];for(var x=0;x<cols;x++){var centerBias=profile.symmetry>.62?Math.abs(x-cols/2)/(cols/2):0;grid[y][x]=rng.next()<chance-centerBias*.14?1:0;}}
   var iterations=2+Math.floor(profile.complexity*11),wrap=profile.flow>.52;
@@ -1574,17 +1625,125 @@ var generators = {
   guilloche: generateGuilloche
 };
 
+var generatorScratchCanvas = document.createElement('canvas');
+var generatorCompositeCanvas = document.createElement('canvas');
+
+function sizeWorkingCanvas(target, width, height) {
+  if (target.width !== width) target.width = width;
+  if (target.height !== height) target.height = height;
+  return target;
+}
+
+function copyWorkingCanvas(target, source, width, height) {
+  sizeWorkingCanvas(target, width, height);
+  var targetCtx = target.getContext('2d');
+  targetCtx.setTransform(1,0,0,1,0,0);
+  targetCtx.globalAlpha = 1;
+  targetCtx.globalCompositeOperation = 'source-over';
+  targetCtx.filter = 'none';
+  targetCtx.clearRect(0, 0, width, height);
+  targetCtx.drawImage(source, 0, 0, width, height);
+  return target;
+}
+
+function drawUniversalComposition(ctx, source, w, h, theme, config) {
+  var angle = (Number(config.rotation || 0) * Math.PI) / 180;
+  var scale = 1 + (Number(config.scale || 5) - 5) * .012;
+  var c = Math.abs(Math.cos(angle)), s = Math.abs(Math.sin(angle));
+  var cover = Math.max((w*c+h*s)/w, (w*s+h*c)/h);
+  if (Math.abs(angle) > .0001) scale *= cover;
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = theme.background;
+  ctx.fillRect(0, 0, w, h);
+  ctx.translate(w/2, h/2);
+  ctx.rotate(angle);
+  ctx.scale(scale, scale);
+  ctx.drawImage(source, -w/2, -h/2, w, h);
+  ctx.restore();
+}
+
+function applyUniversalFlow(canvas, config, theme) {
+  var amount = clamp(Number(config.flow || 0) / 100, 0, 1);
+  if (amount <= 0) return;
+  var w = canvas.width, h = canvas.height;
+  copyWorkingCanvas(generatorCompositeCanvas, canvas, w, h);
+  var ctx = canvas.getContext('2d');
+  var bandHeight = Math.max(2, Math.round(h / (18 + amount*34)));
+  var amplitude = w * (.004 + amount*.052);
+  var cycles = 1.2 + amount*3.8 + clamp(config.complexity/20,0,1)*1.5;
+  var phase = (config.seed % 997) / 997 * Math.PI*2;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle=theme.background;
+  ctx.fillRect(0,0,w,h);
+  for (var y=0;y<h;y+=bandHeight) {
+    var height=Math.min(bandHeight,h-y);
+    var wave=Math.sin((y/h)*Math.PI*2*cycles+phase);
+    var counter=Math.cos((y/h)*Math.PI*(1.4+amount*2)+phase*.5);
+    var dx=Math.round((wave*.78+counter*.22)*amplitude);
+    ctx.drawImage(generatorCompositeCanvas,0,y,w,height,dx,y,w,height);
+    if(dx>0)ctx.drawImage(generatorCompositeCanvas,w-dx,y,dx,height,0,y,dx,height);
+    if(dx<0)ctx.drawImage(generatorCompositeCanvas,0,y,-dx,height,w+dx,y,-dx,height);
+  }
+}
+
+function applyUniversalSymmetry(canvas, config) {
+  var amount = clamp(Number(config.symmetry || 0) / 100, 0, 1);
+  if (amount <= 0) return;
+  var w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d');
+  copyWorkingCanvas(generatorCompositeCanvas, canvas, w, h);
+  ctx.save();
+  ctx.beginPath();ctx.rect(w/2,0,w/2,h);ctx.clip();
+  ctx.globalAlpha=amount;
+  ctx.translate(w,0);ctx.scale(-1,1);
+  ctx.drawImage(generatorCompositeCanvas,0,0,w,h);
+  ctx.restore();
+  if(amount>.68){
+    copyWorkingCanvas(generatorCompositeCanvas, canvas, w, h);
+    ctx.save();
+    ctx.beginPath();ctx.rect(0,h/2,w,h/2);ctx.clip();
+    ctx.globalAlpha=(amount-.68)/.32*.72;
+    ctx.translate(0,h);ctx.scale(1,-1);
+    ctx.drawImage(generatorCompositeCanvas,0,0,w,h);
+    ctx.restore();
+  }
+}
+
+function applyGeneratorTexture(ctx, w, h, theme, config) {
+  var amount=clamp(Number(config.texture || 0)/100,0,1);
+  if(amount<=0)return;
+  var rng=new SeededRandom(config.seed+918273),unit=Math.max(.5,Math.min(w,h)/800);
+  var count=Math.max(8,Math.floor((w*h/10000)*(2+amount*18)));
+  ctx.save();ctx.globalCompositeOperation=luminance(theme.background)>.48?'multiply':'screen';ctx.lineCap='round';
+  for(var i=0;i<count;i++){
+    var x=rng.nextFloat(0,w),y=rng.nextFloat(0,h),length=rng.nextFloat(1,10+amount*28)*unit,angle=rng.nextFloat(-Math.PI,Math.PI);
+    ctx.globalAlpha=rng.nextFloat(.025,.08+amount*.16);ctx.strokeStyle=rng.pick(theme.colors);ctx.lineWidth=rng.nextFloat(.35,1.4+amount*1.8)*unit;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(angle)*length,y+Math.sin(angle)*length);ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function generateBase(canvas, config) {
   var ctx = canvas.getContext('2d');
   if (!ctx) return;
   var w = canvas.width, h = canvas.height;
   var theme = activeTheme(config);
-  var rng = new SeededRandom(config.seed);
-  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.imageSmoothingEnabled = true;
+  var tunedConfig = Object.assign({}, config);
+  tunedConfig.seed = Math.max(1, Math.round(Number(config.seed || 1) + Number(config.variation || 0) * 104729));
+  var rng = new SeededRandom(tunedConfig.seed);
+  sizeWorkingCanvas(generatorScratchCanvas,w,h);
+  var sourceCtx=generatorScratchCanvas.getContext('2d');
+  sourceCtx.setTransform(1,0,0,1,0,0);sourceCtx.globalAlpha=1;sourceCtx.globalCompositeOperation='source-over';sourceCtx.filter='none';sourceCtx.imageSmoothingEnabled=true;sourceCtx.clearRect(0,0,w,h);
+  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter='none';ctx.imageSmoothingEnabled = true;
   ctx.clearRect(0, 0, w, h);
 
-  var gen = generators[config.type];
-  if (gen) gen(ctx, w, h, theme, rng, config);
+  var gen = generators[tunedConfig.type];
+  if (gen) gen(sourceCtx, w, h, theme, rng, tunedConfig);
+  drawUniversalComposition(ctx,generatorScratchCanvas,w,h,theme,tunedConfig);
+  applyUniversalFlow(canvas,tunedConfig,theme);
+  applyUniversalSymmetry(canvas,tunedConfig);
+  applyGeneratorTexture(ctx,w,h,theme,tunedConfig);
 }
 
 function finishGeneratedCanvas(canvas, config) {
@@ -1643,8 +1802,11 @@ var sliderDefinitions = {
   complexity: { label:'Complexity', min:0, max:20, desc:'Structural depth, layers, and iteration count across every generator.' },
   density: { label:'Density', min:0, max:20, desc:'Population and repetition count. Low values breathe; high values pack the field.' },
   scale: { label:'Scale', min:1, max:20, desc:'Shared element scale from micro texture to monumental forms.' },
-  flow: { label:'Flow', min:0, max:100, desc:'Motion, warping, phase drift, and rule mobility for compatible algorithms.', suffix:'%' },
-  symmetry: { label:'Symmetry', min:0, max:100, desc:'Order and mirrored regularity. Low values loosen composition; high values lock it.', suffix:'%' },
+  flow: { label:'Flow', min:0, max:100, desc:'Motion, warping, phase drift, and rule mobility across every generator.', suffix:'%' },
+  symmetry: { label:'Symmetry', min:0, max:100, desc:'Universal fold strength plus native algorithmic order. Low values loosen; high values lock.', suffix:'%' },
+  rotation: { label:'Rotation', min:-180, max:180, defaultValue:0, desc:'Rotate the complete procedural composition while preserving full-frame coverage.', suffix:'°' },
+  variation: { label:'Variation', min:0, max:100, defaultValue:0, desc:'Move through deterministic structural alternatives without changing the visible seed.', suffix:'%' },
+  texture: { label:'Texture', min:0, max:100, defaultValue:0, desc:'Add seeded generator-level surface marks before post-processing.', suffix:'%' },
   opacity: { label:'Opacity', min:0, max:100, defaultValue:100, effect:true, desc:'Fade artwork toward its adapted background.', suffix:'%' },
   disruptFactor: { label:'Disruption', min:0, max:100, defaultValue:0, effect:true, desc:'Band shifts and RGB channel splitting distortion.', suffix:'%' },
   grain: { label:'Grain', min:0, max:100, defaultValue:0, effect:true, desc:'Seeded film grain in the combined color pass.', suffix:'%' },
@@ -1772,7 +1934,7 @@ function switchTab(tabId) {
   select.innerHTML=keys.map(function(key){return '<option value="'+key+'">'+proceduralProfiles[key].name+'</option>';}).join('');
   document.getElementById('btn-apply-profile').addEventListener('click',function(){
     var profile=proceduralProfiles[select.value]||proceduralProfiles.balanced;
-    ['complexity','density','scale','flow','symmetry'].forEach(function(key){state[key]=profile[key];});
+    ['complexity','density','scale','flow','symmetry','rotation','variation','texture'].forEach(function(key){state[key]=profile[key];});
     render();commitState(profile.name+' procedural profile applied.');
   });
 })();
@@ -1783,7 +1945,7 @@ function switchTab(tabId) {
   var postSliders = document.getElementById('tune-post-sliders');
   var colorSliders = document.getElementById('tune-color-sliders');
 
-  buildDefinedSliders(genSliders, ['complexity','density','scale','flow','symmetry']);
+  buildDefinedSliders(genSliders, ['complexity','density','scale','flow','symmetry','rotation','variation','texture']);
   buildDefinedSliders(postSliders, ['opacity','disruptFactor','grain','blur','pixelate','posterize','scanlines']);
   buildDefinedSliders(colorSliders, ['contrast','saturation','bgBrightness']);
 })();
@@ -1812,10 +1974,11 @@ function makeSlider(container, label, key, min, max, desc, options) {
     if (key.indexOf('.') > -1) setNested(state, key, value);
     else state[key] = value;
     syncSliderVisual(this);
+    if (typeof options.onInput === 'function') options.onInput(value, this);
     markDirty();
     doGenerate();
     if (key === 'paletteStrength' || key === 'hueShift') renderPaletteSummary();
-    if (['complexity','density','scale','flow','symmetry'].indexOf(key) > -1) renderParameterSummary();
+    if (['complexity','density','scale','flow','symmetry','rotation','variation','texture'].indexOf(key) > -1) renderParameterSummary();
   });
   var numberInput = document.getElementById('number-'+key);
   if (numberInput) numberInput.addEventListener('input', function(){
@@ -1944,6 +2107,10 @@ var renderContentFields = function(){};
 (function(){
   var panel = document.getElementById('panel-frame');
   panel.innerHTML =
+    '<div class="label-row"><span class="label">Preview stage</span><span class="label" style="text-transform:none">display only</span></div>' +
+    '<div id="frame-stage-sliders"></div>' +
+    '<div class="tip-card" style="margin-bottom:12px"><p><strong>Rendered frame size</strong> changes the on-screen inspection size only. Export dimensions remain controlled in Out.</p></div>' +
+    '<hr class="separator">' +
     '<div class="label-row"><span class="label">Border</span></div>' +
     '<div id="frame-sliders"></div>' +
     '<div class="color-row" style="margin-bottom:12px"><div class="color-field"><div class="cl">Color 1</div><div class="color-input-row"><input type="color" id="frame-color1" value="'+state.frame.borderColor+'"><input type="text" class="hex-input" id="frame-color1-hex" value="'+state.frame.borderColor+'"></div></div><div class="color-field"><div class="cl">Color 2</div><div class="color-input-row"><input type="color" id="frame-color2" value="'+state.frame.borderColor2+'"><input type="text" class="hex-input" id="frame-color2-hex" value="'+state.frame.borderColor2+'"></div></div></div>' +
@@ -1954,14 +2121,17 @@ var renderContentFields = function(){};
     '<hr class="separator"><div class="label-row"><span class="label">Quick Presets</span></div>' +
     '<div class="presets-grid" id="frame-presets"></div>';
 
-  makeSlider(document.getElementById('frame-sliders'), 'Width', 'frame.borderWidth', 0, 100, 'Border thickness. Thick (>30) gets triple-line treatment.');
+  makeSlider(document.getElementById('frame-stage-sliders'), 'Rendered Frame Size', 'previewFrameSize', 360, 1400, 'Maximum on-screen width of the rendered frame.', {suffix:'px', onInput:function(){ applyPreviewFrameSize(); updatePreviewGeometry(); }});
+  makeSlider(document.getElementById('frame-sliders'), 'Width', 'frame.borderWidth', 0, 100, 'Resolution-aware border thickness. Thick values receive nested line treatment.');
+  makeSlider(document.getElementById('frame-more-sliders'), 'Inset', 'frame.inset', 0, 100, 'Move the complete frame inward from the canvas edge.');
+  makeSlider(document.getElementById('frame-more-sliders'), 'Corner Radius', 'frame.cornerRadius', 0, 160, 'Round the border and glow path.');
   makeSlider(document.getElementById('frame-more-sliders'), 'Border Opacity', 'frame.borderOpacity', 0, 100, 'Border transparency.');
   makeSlider(document.getElementById('frame-more-sliders'), 'Inner Glow', 'frame.innerGlow', 0, 100, 'Subtle inset edge glow using border color.');
   makeSlider(document.getElementById('frame-fx-sliders'), 'Vignette', 'frame.vignette', 0, 100, 'Darkens edges for cinematic focus.');
   makeSlider(document.getElementById('frame-fx-sliders'), 'Dark Overlay', 'frame.darkOverlay', 0, 80, 'Uniform darkening for text readability.');
 
   // Initialize nested frame controls; makeSlider owns their event handling.
-  ['frame.borderWidth','frame.borderOpacity','frame.innerGlow','frame.vignette','frame.darkOverlay'].forEach(function(fullKey){
+  ['previewFrameSize','frame.borderWidth','frame.inset','frame.cornerRadius','frame.borderOpacity','frame.innerGlow','frame.vignette','frame.darkOverlay'].forEach(function(fullKey){
     var el = document.getElementById('slider-'+fullKey);
     if(!el) return;
     el.value = getNested(state, fullKey);
@@ -1975,14 +2145,14 @@ var renderContentFields = function(){};
   document.getElementById('frame-gradient').addEventListener('change', function(){ state.frame.gradientBorder=this.checked; doGenerate(); commitState('Gradient border updated.'); });
 
   var framePresets = [
-    ['None', {borderWidth:0,borderOpacity:0,vignette:0,darkOverlay:0,innerGlow:0,gradientBorder:false}],
-    ['Film Strip', {borderWidth:24,borderOpacity:70,vignette:40,darkOverlay:0,innerGlow:0,gradientBorder:false}],
-    ['Cinematic', {borderWidth:0,borderOpacity:0,vignette:70,darkOverlay:0,innerGlow:15,gradientBorder:false}],
-    ['Text Ready', {borderWidth:3,borderOpacity:50,vignette:20,darkOverlay:35,innerGlow:0,gradientBorder:false}],
-    ['Bold Frame', {borderWidth:40,borderOpacity:90,vignette:50,darkOverlay:0,innerGlow:20,gradientBorder:false}],
-    ['Spotlight', {borderWidth:1,borderOpacity:30,vignette:85,darkOverlay:20,innerGlow:10,gradientBorder:false}],
-    ['Neon Edge', {borderWidth:4,borderOpacity:80,vignette:30,darkOverlay:0,innerGlow:60,gradientBorder:true,borderColor2:'#00f0ff'}],
-    ['Gold Frame', {borderWidth:30,borderOpacity:85,vignette:20,darkOverlay:0,innerGlow:30,gradientBorder:true,borderColor2:'#1a1a1a'}]
+    ['None', {borderWidth:0,borderOpacity:0,vignette:0,darkOverlay:0,innerGlow:0,inset:0,cornerRadius:0,gradientBorder:false}],
+    ['Film Strip', {borderWidth:24,borderOpacity:70,vignette:40,darkOverlay:0,innerGlow:0,inset:8,cornerRadius:0,gradientBorder:false}],
+    ['Cinematic', {borderWidth:0,borderOpacity:0,vignette:70,darkOverlay:0,innerGlow:28,inset:8,cornerRadius:18,gradientBorder:false}],
+    ['Text Ready', {borderWidth:3,borderOpacity:50,vignette:20,darkOverlay:35,innerGlow:8,inset:14,cornerRadius:20,gradientBorder:false}],
+    ['Bold Frame', {borderWidth:40,borderOpacity:90,vignette:50,darkOverlay:0,innerGlow:20,inset:6,cornerRadius:10,gradientBorder:false}],
+    ['Spotlight', {borderWidth:1,borderOpacity:30,vignette:85,darkOverlay:20,innerGlow:22,inset:18,cornerRadius:40,gradientBorder:false}],
+    ['Neon Edge', {borderWidth:4,borderOpacity:80,vignette:30,darkOverlay:0,innerGlow:70,inset:10,cornerRadius:28,gradientBorder:true,borderColor2:'#00f0ff'}],
+    ['Gold Frame', {borderWidth:30,borderOpacity:85,vignette:20,darkOverlay:0,innerGlow:30,inset:16,cornerRadius:34,gradientBorder:true,borderColor2:'#1a1a1a'}]
   ];
   var presetGrid = document.getElementById('frame-presets');
   framePresets.forEach(function(p){
@@ -2059,6 +2229,9 @@ function randomizeAll() {
   state.scale = Math.floor(Math.random()*14)+2;
   state.flow = Math.floor(Math.random()*101);
   state.symmetry = Math.floor(Math.random()*101);
+  state.rotation = Math.floor(Math.random()*91)-45;
+  state.variation = Math.floor(Math.random()*101);
+  state.texture = Math.floor(Math.random()*46);
   render();
   commitState('New direction generated.');
 }
@@ -2145,9 +2318,16 @@ document.addEventListener('keydown', function(event){
 // ─── Render ──────────────────────────────────────────────────────
 function previewBaseKey(width, height) {
   return JSON.stringify([
-    width,height,state.type,state.theme,state.seed,state.complexity,state.density,state.scale,state.flow,state.symmetry,
+    width,height,state.type,state.theme,state.seed,state.complexity,state.density,state.scale,state.flow,state.symmetry,state.rotation,state.variation,state.texture,
     state.paletteAdapter,state.paletteStrength,state.hueShift
   ]);
+}
+function applyPreviewFrameSize() {
+  var wrap=document.getElementById('canvas-wrap');
+  if(!wrap)return;
+  var base=clampNumber(state.previewFrameSize,900,360,1400);
+  var zoom=clampNumber(state.previewZoom,100,70,150)/100;
+  wrap.style.maxWidth=Math.round(base*zoom)+'px';
 }
 function updatePreviewGeometry() {
   var dimensions = exportDimensions(), frame = document.getElementById('canvas-frame');
@@ -2225,7 +2405,8 @@ function renderPaletteSummary() {
 
 function renderParameterSummary() {
   var parameterSummary=document.getElementById('parameter-summary');
-  if(parameterSummary) parameterSummary.innerHTML='<strong>'+generatorInfo[state.type].name+'</strong> interprets the shared controls as: complexity '+state.complexity+'/20 · density '+state.density+'/20 · scale '+state.scale+'/20 · flow '+state.flow+'% · symmetry '+state.symmetry+'%. The same five-dimensional profile remains comparable when switching algorithms.';
+  var note=generatorTuningNotes[state.type]||'structure, population, scale, motion, and order';
+  if(parameterSummary) parameterSummary.innerHTML='<strong>'+generatorInfo[state.type].name+'</strong> maps the controls to '+note+'.<br>Shared composition pass: rotation '+state.rotation+'° · variation '+state.variation+'% · texture '+state.texture+'%. Every structural control is rendered before post-process and color adjustment.';
 }
 
 function render() {
@@ -2251,7 +2432,7 @@ function render() {
   if(adapterSelect)adapterSelect.value=state.paletteAdapter||'native';
 
   // Sliders - main tune sliders
-  ['complexity','density','scale','flow','symmetry','opacity','disruptFactor','grain','blur','pixelate','posterize','scanlines','contrast','saturation','bgBrightness','paletteStrength','hueShift'].forEach(function(key){
+  ['complexity','density','scale','flow','symmetry','rotation','variation','texture','opacity','disruptFactor','grain','blur','pixelate','posterize','scanlines','contrast','saturation','bgBrightness','paletteStrength','hueShift'].forEach(function(key){
     var el = document.getElementById('slider-'+key);
     if(el) { el.value = state[key]; syncSliderVisual(el); }
   });
@@ -2263,7 +2444,7 @@ function render() {
   if(ce) ce.checked = state.content.enabled;
 
   // Frame sliders
-  ['frame.borderWidth','frame.borderOpacity','frame.innerGlow','frame.vignette','frame.darkOverlay'].forEach(function(fullKey){
+  ['previewFrameSize','frame.borderWidth','frame.inset','frame.cornerRadius','frame.borderOpacity','frame.innerGlow','frame.vignette','frame.darkOverlay'].forEach(function(fullKey){
     var el = document.getElementById('slider-'+fullKey);
     if(el) { el.value = getNested(state, fullKey); syncSliderVisual(el); }
   });
@@ -2284,7 +2465,7 @@ function render() {
   document.getElementById('safe-area-overlay').classList.toggle('visible', !!state.safeArea);
   document.getElementById('btn-safe-area').setAttribute('aria-pressed', state.safeArea ? 'true' : 'false');
   document.getElementById('preview-zoom').value = String(state.previewZoom || 100);
-  document.getElementById('canvas-wrap').style.maxWidth = Math.round(900 * (state.previewZoom || 100) / 100) + 'px';
+  applyPreviewFrameSize();
 
   // Export info
   renderExportInfo();
@@ -2309,7 +2490,7 @@ function render() {
     if(state.saturation!==100) extra += ' sat:'+state.saturation;
     if(state.bgBrightness!==0) extra += ' br:'+state.bgBrightness;
   }
-  statusBar.innerHTML = '<div><span class="mono">'+state.type+'</span> · <span class="mono">'+baseTheme.name+'/'+adapter.name+'</span> · <span class="mono">seed:'+state.seed+'</span></div><div><span class="mono">c:'+state.complexity+' d:'+state.density+' s:'+state.scale+' f:'+state.flow+' y:'+state.symmetry+'</span>'+extra+'</div>';
+  statusBar.innerHTML = '<div><span class="mono">'+state.type+'</span> · <span class="mono">'+baseTheme.name+'/'+adapter.name+'</span> · <span class="mono">seed:'+state.seed+'</span></div><div><span class="mono">c:'+state.complexity+' d:'+state.density+' s:'+state.scale+' f:'+state.flow+' y:'+state.symmetry+' r:'+state.rotation+' v:'+state.variation+' t:'+state.texture+'</span>'+extra+'</div>';
 
   // Content fields
   if (typeof renderContentFields === 'function') renderContentFields();

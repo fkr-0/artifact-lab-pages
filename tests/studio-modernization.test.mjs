@@ -10,6 +10,7 @@ test('procedural sharepic studio exposes a reversible, portable production workf
   const html = await readFile(sharepicPath, 'utf8');
 
   for (const marker of [
+    'procedural-sharepic-studio-state-v7',
     'procedural-sharepic-studio-state-v6',
     'procedural-sharepic-studio-state-v5',
     'LEGACY_STORAGE_KEY',
@@ -34,7 +35,12 @@ test('procedural sharepic studio exposes a reversible, portable production workf
     'function applyScanlines(',
     'previewBaseSignature',
     'ResizeObserver',
-    'grid-template-columns:repeat(3,minmax(0,1fr))',
+    'grid-template-columns:repeat(6,minmax(0,1fr))',
+    'generatorTuningNotes',
+    'function drawUniversalComposition(',
+    'function applyUniversalFlow(',
+    'function applyUniversalSymmetry(',
+    'function applyGeneratorTexture(',
     'function generateContourMap(',
     'function generateVoronoiShards(',
     'function generateLissajousRibbons(',
@@ -47,6 +53,9 @@ test('procedural sharepic studio exposes a reversible, portable production workf
     'id="btn-safe-area"',
     'id="btn-share-state"',
     'id="preview-zoom"',
+    'previewFrameSize',
+    'frame.cornerRadius',
+    'frame.inset',
     'id="export-format"',
     'function exportToImage(',
     'function downloadRecipe()',
