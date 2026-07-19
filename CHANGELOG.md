@@ -14,7 +14,7 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - A V11 Hub quick-access shelf combining pinned artifacts with recent launches, a resume-last action, persistent favorites-only filtering, and selectable changed/opened/title/kind ordering.
 - A compact V11 Hub release, network, open-app, and pinned-artifact health strip with favorite-aware command-center ranking.
 - V11 Peer DAW 1.5.0 with live master peak/RMS metering, clip hold, audio latency/sample-rate diagnostics, and persistent low-power telemetry.
-- Ethic Brawl 1.5.0 with composite shared-runtime rendering, arcade-core lifecycle and physics primitives, and aligned responsive 16:9 viewport scaling.
+- Ethic Brawl 1.5.1 with composite shared-runtime rendering, arcade-core lifecycle and physics primitives, aligned responsive 16:9 viewport scaling, and smoother continuous fighter-animation cadence.
 - Badger Sprawl Runner 1.1.0 with complete Mirror Palace and Dub Colony campaign chapters, the full Moss motion atlas, production sprite coverage, and shared-runtime bridge support.
 - Hyperblast Shooter 0.2.0 with shared arcade-runtime rendering, display-object reuse, renderer telemetry, and reproducible runtime declarations and metadata.
 
