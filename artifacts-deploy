@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# artifacts-deploy - Deploy manifest-materialized artifacts to VPS
+# artifacts-deploy - Deploy manifest-materialized artifacts to the VPS mirror
 #
 # Usage:
 #   ./artifacts-deploy                  # materialize + rsync stage
@@ -96,4 +96,5 @@ if [[ -z "$DRY_RUN" ]]; then
 fi
 
 echo ""
-echo -e "${GREEN}Sync complete → https://artifacts.fkr.dev${NC}"
+echo -e "${GREEN}VPS mirror sync complete → $VPS_HOST:$VPS_PATH${NC}"
+echo -e "${YELLOW}Public artifacts.fkr.dev is GitHub Pages; push the Pages repository main branch to publish it.${NC}"
