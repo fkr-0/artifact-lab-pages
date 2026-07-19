@@ -38,14 +38,15 @@ body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetic
 .sidebar { width:100%; border-right:1px solid var(--border); flex-shrink:0; }
 @media(min-width:1024px){ .sidebar { width:340px; min-height:calc(100vh - 56px); } }
 @media(min-width:1280px){ .sidebar { width:360px; } }
-.tabs-bar { display:flex; border-bottom:1px solid var(--border); background:transparent; height:36px; padding:0; }
-.tab-btn { flex:1; border:none; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:4px 0; font-size:10px; color:var(--text40); transition:all 0.15s; position:relative; font-family:inherit; }
+.tabs-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-auto-rows:34px; border-bottom:1px solid var(--border); background:transparent; min-height:68px; padding:0; }
+.tab-btn { min-width:0; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; padding:4px 6px; font-size:10px; color:var(--text40); transition:all 0.15s; position:relative; font-family:inherit; }
 .tab-btn:hover { color:var(--text60); }
 .tab-btn.active { color:var(--text90); }
 .tab-btn.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:rgba(255,255,255,0.3); }
-.tab-btn svg { width:12px; height:12px; }
+.tab-btn svg { width:12px; height:12px; flex:0 0 auto; }
 .scroll-area { height:320px; overflow-y:auto; }
-@media(min-width:1024px){ .scroll-area { height:calc(100vh - 56px - 36px); } }
+@media(min-width:640px) and (max-width:1023px){ .tabs-bar { grid-template-columns:repeat(6,minmax(0,1fr)); grid-auto-rows:36px; min-height:36px; } }
+@media(min-width:1024px){ .scroll-area { height:calc(100vh - 56px - 68px); } }
 .tab-panel { display:none; padding:16px; }
 .tab-panel.active { display:block; }
 .separator { border:none; border-top:1px solid var(--border); margin:12px 0; }
@@ -55,11 +56,21 @@ body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetic
 .slider-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
 .slider-val { font-size:11px; font-family:monospace; color:var(--text50); }
 .slider-desc { font-size:10px; color:var(--text20); line-height:1.5; margin-top:4px; }
-input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; outline:none; cursor:pointer; }
+input[type="range"] { --range-fill:0%; -webkit-appearance:none; appearance:none; width:100%; height:4px; background:linear-gradient(90deg,var(--accent) 0 var(--range-fill),rgba(255,255,255,0.1) var(--range-fill) 100%); border-radius:2px; outline:none; cursor:pointer; }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:14px; height:14px; background:rgba(255,255,255,0.8); border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,0.8); }
 input[type="range"]::-moz-range-thumb { width:14px; height:14px; background:rgba(255,255,255,0.8); border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,0.8); }
 input[type="range"]::-webkit-slider-thumb:hover { background:#fff; }
 input[type="range"]::-moz-range-thumb:hover { background:#fff; }
+.effect-fader { margin-bottom:10px; padding:10px; border:1px solid rgba(255,255,255,.055); border-radius:8px; background:rgba(255,255,255,.018); }
+.effect-fader .slider-header { margin-bottom:8px; }
+.effect-fader input[type="range"] { height:8px; border-radius:999px; }
+.effect-fader input[type="range"]::-webkit-slider-thumb { width:18px; height:18px; box-shadow:0 2px 8px rgba(0,0,0,.45); }
+.effect-fader input[type="range"]::-moz-range-thumb { width:18px; height:18px; box-shadow:0 2px 8px rgba(0,0,0,.45); }
+.fader-actions { display:flex; align-items:center; gap:5px; }
+.fader-number { width:58px; height:26px; padding:0 6px; border:1px solid var(--border); border-radius:5px; background:rgba(255,255,255,.035); color:var(--text60); font:10px/1 ui-monospace,SFMono-Regular,Menlo,monospace; text-align:right; outline:none; }
+.fader-number:focus { border-color:var(--accent); }
+.fader-reset { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:5px; background:transparent; color:var(--text30); cursor:pointer; }
+.fader-reset:hover { color:var(--text80); background:rgba(255,255,255,.05); }
 .gen-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
 .gen-card, .swatch-card { width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.02); text-align:left; cursor:pointer; transition:all 0.15s; font-family:inherit; color:var(--text80); }
 .gen-card:hover, .swatch-card:hover { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); }
@@ -167,6 +178,7 @@ button:disabled { opacity:.35; cursor:not-allowed; transform:none !important; fi
 .export-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .export-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
 .export-actions .btn { justify-content:center; min-height:36px; }
+.export-actions .share-link-action { grid-column:1 / -1; }
 .inline-toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:8px 0 12px; }
 .control-cluster { margin-bottom:12px; padding:11px; border:1px solid var(--border); border-radius:9px; background:rgba(255,255,255,.022); }
 .control-cluster .field:last-child, .control-cluster .slider-row:last-child { margin-bottom:0; }
@@ -194,6 +206,7 @@ button:disabled { opacity:.35; cursor:not-allowed; transform:none !important; fi
   .save-state { display:none; }
   .stage-toolbar { align-items:flex-start; }
   .stage-toolbar-group { flex-wrap:wrap; }
+  .header-right .share-label { display:none; }
 }
 
 @media(max-width:1023px) {
@@ -229,6 +242,10 @@ button:disabled { opacity:.35; cursor:not-allowed; transform:none !important; fi
     <button class="btn btn-ghost" id="btn-save-recipe" type="button" title="Download an editable studio recipe">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 17h8"/></svg>
       <span>Recipe</span>
+    </button>
+    <button class="btn btn-ghost" id="btn-share-state" type="button" title="Copy a URL containing the complete studio state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.6 6.8-4.2M8.6 13.4l6.8 4.2"/></svg>
+      <span class="share-label">Share</span>
     </button>
     <button class="btn btn-ghost" id="btn-surprise" style="display:none" >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/></svg>
@@ -455,6 +472,10 @@ var state = {
   opacity: 100,
   disruptFactor: 0,
   grain: 0,
+  blur: 0,
+  pixelate: 0,
+  posterize: 0,
+  scanlines: 0,
   bgBrightness: 0,
   contrast: 0,
   saturation: 100,
@@ -474,29 +495,142 @@ var state = {
   previewZoom: 100
 };
 
-var STORAGE_KEY = 'procedural-sharepic-studio-state-v5';
-var LEGACY_STORAGE_KEY = 'procedural-sharepic-studio-state-v4';
+var STORAGE_KEY = 'procedural-sharepic-studio-state-v6';
+var LEGACY_STORAGE_KEYS = ['procedural-sharepic-studio-state-v5','procedural-sharepic-studio-state-v4'];
+var STATE_URL_PARAM = 'state';
+var STATE_SCHEMA_VERSION = 6;
 var HISTORY_LIMIT = 60;
 var historyStack = [];
 var historyIndex = -1;
 var saveTimer = null;
+var urlSyncTimer = null;
 var toastTimer = null;
 var storageAvailable = true;
 var historyDirty = false;
+var urlStateLoadError = '';
 state = loadStudioState(state);
 
+function clampNumber(value, fallback, min, max) {
+  var number = Number(value);
+  if (!Number.isFinite(number)) number = fallback;
+  return Math.max(min, Math.min(max, number));
+}
+function normalizeBoolean(value, fallback) {
+  return typeof value === 'boolean' ? value : fallback;
+}
+function normalizeHex(value, fallback) {
+  return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? String(value) : fallback;
+}
+function normalizeStudioState(defaults, candidate) {
+  candidate = candidate && candidate.state ? candidate.state : candidate;
+  if (!candidate || typeof candidate !== 'object') return defaults;
+  var next = Object.assign({}, defaults, candidate, {
+    content: Object.assign({}, defaults.content, candidate.content || {}),
+    frame: Object.assign({}, defaults.frame, candidate.frame || {})
+  });
+  if (!generatorInfo[next.type]) next.type = defaults.type;
+  if (!themes[next.theme]) next.theme = defaults.theme;
+  if (!paletteAdapters[next.paletteAdapter]) next.paletteAdapter = defaults.paletteAdapter;
+  if (['generator','palette','tune','content','frame','export'].indexOf(next.activeTab) < 0) next.activeTab = defaults.activeTab;
+  ['complexity','density'].forEach(function(key){ next[key] = clampNumber(next[key], defaults[key], 0, 20); });
+  next.scale = clampNumber(next.scale, defaults.scale, 1, 20);
+  ['flow','symmetry','opacity','disruptFactor','grain','pixelate','posterize','scanlines','paletteStrength'].forEach(function(key){ next[key] = clampNumber(next[key], defaults[key], 0, 100); });
+  next.blur = clampNumber(next.blur, defaults.blur, 0, 20);
+  next.contrast = clampNumber(next.contrast, defaults.contrast, -100, 100);
+  next.saturation = clampNumber(next.saturation, defaults.saturation, 0, 200);
+  next.bgBrightness = clampNumber(next.bgBrightness, defaults.bgBrightness, -100, 100);
+  next.hueShift = clampNumber(next.hueShift, defaults.hueShift, -180, 180);
+  next.seed = Math.max(1, Math.min(999999999, Math.round(clampNumber(next.seed, defaults.seed, 1, 999999999))));
+  next.selectedPreset = Math.round(clampNumber(next.selectedPreset, defaults.selectedPreset, 0, exportPresets.length - 1));
+  next.exportQuality = Math.round(clampNumber(next.exportQuality, defaults.exportQuality, 40, 100));
+  next.customWidth = Math.round(clampNumber(next.customWidth, defaults.customWidth, 320, 8192));
+  next.customHeight = Math.round(clampNumber(next.customHeight, defaults.customHeight, 320, 8192));
+  next.previewZoom = Math.round(clampNumber(next.previewZoom, defaults.previewZoom, 70, 115));
+  next.exportFormat = ['png','jpeg','webp'].indexOf(next.exportFormat) >= 0 ? next.exportFormat : defaults.exportFormat;
+  next.useCustomSize = normalizeBoolean(next.useCustomSize, defaults.useCustomSize);
+  next.safeArea = normalizeBoolean(next.safeArea, defaults.safeArea);
+  next.content.enabled = normalizeBoolean(next.content.enabled, defaults.content.enabled);
+  next.content.uppercase = normalizeBoolean(next.content.uppercase, defaults.content.uppercase);
+  next.content.headingFont = fontStacks[next.content.headingFont] ? next.content.headingFont : defaults.content.headingFont;
+  next.content.bodyFont = fontStacks[next.content.bodyFont] ? next.content.bodyFont : defaults.content.bodyFont;
+  next.content.preset = (typographyPresets[next.content.preset] || next.content.preset === 'custom') ? next.content.preset : defaults.content.preset;
+  next.content.align = ['left','center','right'].indexOf(next.content.align) >= 0 ? next.content.align : defaults.content.align;
+  next.content.colorMode = ['auto','accent','light','dark'].indexOf(next.content.colorMode) >= 0 ? next.content.colorMode : defaults.content.colorMode;
+  next.content.posX = clampNumber(next.content.posX, defaults.content.posX, 5, 95);
+  next.content.posY = clampNumber(next.content.posY, defaults.content.posY, 5, 95);
+  next.content.textScale = clampNumber(next.content.textScale, defaults.content.textScale, 1, 50);
+  next.content.textWidth = clampNumber(next.content.textWidth, defaults.content.textWidth, 28, 90);
+  next.content.headingWeight = clampNumber(next.content.headingWeight, defaults.content.headingWeight, 300, 900);
+  next.content.bodyWeight = clampNumber(next.content.bodyWeight, defaults.content.bodyWeight, 300, 800);
+  next.content.headingTracking = clampNumber(next.content.headingTracking, defaults.content.headingTracking, -40, 40);
+  next.content.bodyTracking = clampNumber(next.content.bodyTracking, defaults.content.bodyTracking, -10, 30);
+  next.content.lineHeight = clampNumber(next.content.lineHeight, defaults.content.lineHeight, 82, 180);
+  next.content.backdrop = clampNumber(next.content.backdrop, defaults.content.backdrop, 0, 80);
+  next.frame.borderWidth = clampNumber(next.frame.borderWidth, defaults.frame.borderWidth, 0, 100);
+  next.frame.borderOpacity = clampNumber(next.frame.borderOpacity, defaults.frame.borderOpacity, 0, 100);
+  next.frame.innerGlow = clampNumber(next.frame.innerGlow, defaults.frame.innerGlow, 0, 100);
+  next.frame.vignette = clampNumber(next.frame.vignette, defaults.frame.vignette, 0, 100);
+  next.frame.darkOverlay = clampNumber(next.frame.darkOverlay, defaults.frame.darkOverlay, 0, 80);
+  next.frame.borderColor = normalizeHex(next.frame.borderColor, defaults.frame.borderColor);
+  next.frame.borderColor2 = normalizeHex(next.frame.borderColor2, defaults.frame.borderColor2);
+  next.frame.gradientBorder = normalizeBoolean(next.frame.gradientBorder, defaults.frame.gradientBorder);
+  next.content.heading = String(next.content.heading == null ? '' : next.content.heading).slice(0, 1000);
+  next.content.col1 = String(next.content.col1 == null ? '' : next.content.col1).slice(0, 12000);
+  next.content.col2 = String(next.content.col2 == null ? '' : next.content.col2).slice(0, 12000);
+  return next;
+}
+function encodeBase64Url(text) {
+  var bytes = new TextEncoder().encode(text), binary = '', chunk = 0x8000;
+  for (var i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeBase64Url(value) {
+  var normalized = String(value || '').replace(/-/g,'+').replace(/_/g,'/');
+  while (normalized.length % 4) normalized += '=';
+  var binary = atob(normalized), bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function encodeStudioState(value) {
+  return encodeBase64Url(JSON.stringify({ version:STATE_SCHEMA_VERSION, state:value }));
+}
+function decodeStudioState(value) {
+  if (String(value || '').length > 200000) throw new Error('URL state is too large.');
+  var parsed = JSON.parse(decodeBase64Url(value));
+  return parsed && parsed.state ? parsed.state : parsed;
+}
+function stateUrl() {
+  var url = new URL(window.location.href);
+  url.searchParams.set(STATE_URL_PARAM, encodeStudioState(state));
+  return url;
+}
+function syncStateUrl() {
+  clearTimeout(urlSyncTimer);
+  urlSyncTimer = null;
+  try {
+    var url = stateUrl();
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+  } catch (error) {}
+}
+function scheduleStateUrlSync() {
+  clearTimeout(urlSyncTimer);
+  urlSyncTimer = setTimeout(syncStateUrl, 180);
+}
 function loadStudioState(defaults) {
   try {
-    var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY) || 'null');
-    if (!saved || !saved.type || !themes[saved.theme]) return defaults;
+    var encoded = new URL(window.location.href).searchParams.get(STATE_URL_PARAM);
+    if (encoded) return normalizeStudioState(defaults, decodeStudioState(encoded));
+  } catch (error) { urlStateLoadError = error && error.message ? error.message : 'Invalid URL state'; }
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    for (var i = 0; !raw && i < LEGACY_STORAGE_KEYS.length; i++) raw = localStorage.getItem(LEGACY_STORAGE_KEYS[i]);
+    var saved = JSON.parse(raw || 'null');
+    if (!saved) return defaults;
     if (saved.content && saved.content.fontFamily) {
       saved.content.headingFont = saved.content.headingFont || saved.content.fontFamily;
       saved.content.bodyFont = saved.content.bodyFont || saved.content.fontFamily;
     }
-    return Object.assign({}, defaults, saved, {
-      content: Object.assign({}, defaults.content, saved.content || {}),
-      frame: Object.assign({}, defaults.frame, saved.frame || {})
-    });
+    return normalizeStudioState(defaults, saved);
   } catch (error) { return defaults; }
 }
 function stateSnapshot() { return JSON.stringify(state); }
@@ -511,6 +645,7 @@ function persistState(message) {
     storageAvailable = false;
     if (indicator) { indicator.classList.add('is-dirty'); indicator.textContent = 'Local save unavailable'; }
   }
+  scheduleStateUrlSync();
   if (message) announce(message);
 }
 function markDirty() {
@@ -711,6 +846,87 @@ function applyDisruption(ctx, w, h, disruptFactor, rng) {
     }
   }
   ctx.putImageData(imageData, 0, 0);
+}
+
+var effectScratchCanvas = document.createElement('canvas');
+var effectScratchContext = effectScratchCanvas.getContext('2d');
+function sizeEffectScratch(width, height) {
+  if (effectScratchCanvas.width !== width) effectScratchCanvas.width = width;
+  if (effectScratchCanvas.height !== height) effectScratchCanvas.height = height;
+  effectScratchContext = effectScratchCanvas.getContext('2d');
+  return effectScratchContext;
+}
+function applyPixelate(ctx, w, h, amount) {
+  if (amount <= 0) return;
+  var block = 1 + Math.round((amount / 100) * 30);
+  var smallW = Math.max(1, Math.ceil(w / block)), smallH = Math.max(1, Math.ceil(h / block));
+  var scratch = sizeEffectScratch(smallW, smallH);
+  scratch.imageSmoothingEnabled = false;
+  scratch.clearRect(0, 0, smallW, smallH);
+  scratch.drawImage(ctx.canvas, 0, 0, w, h, 0, 0, smallW, smallH);
+  ctx.clearRect(0, 0, w, h);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(effectScratchCanvas, 0, 0, smallW, smallH, 0, 0, w, h);
+  ctx.imageSmoothingEnabled = true;
+}
+function applyBlur(ctx, w, h, amount) {
+  if (amount <= 0) return;
+  var scratch = sizeEffectScratch(w, h);
+  scratch.filter = 'none';
+  scratch.clearRect(0, 0, w, h);
+  scratch.drawImage(ctx.canvas, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.filter = 'blur(' + Math.max(.25, amount * Math.min(w, h) / 1200).toFixed(2) + 'px)';
+  ctx.drawImage(effectScratchCanvas, 0, 0);
+  ctx.filter = 'none';
+}
+function applyPixelEffects(ctx, w, h, config) {
+  var grain = Number(config.grain || 0), contrast = Number(config.contrast || 0);
+  var saturation = Number(config.saturation == null ? 100 : config.saturation);
+  var posterize = Number(config.posterize || 0);
+  if (grain <= 0 && contrast === 0 && saturation === 100 && posterize <= 0) return;
+  var imageData = ctx.getImageData(0, 0, w, h), data = imageData.data;
+  var contrastFactor = contrast >= 0 ? 1 + (contrast / 100) * 1.5 : 1 + contrast / 125;
+  var saturationFactor = saturation / 100;
+  var posterLevels = posterize > 0 ? Math.max(3, Math.round(32 - posterize * .28)) : 256;
+  var posterStep = 255 / Math.max(1, posterLevels - 1), grainStrength = grain * .5;
+  var seed = Number(config.seed || 1) + 913;
+  for (var idx = 0, pixel = 0; idx < data.length; idx += 4, pixel++) {
+    var r = data[idx], g = data[idx + 1], b = data[idx + 2];
+    if (saturationFactor !== 1) {
+      var lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      r = lum + (r - lum) * saturationFactor;
+      g = lum + (g - lum) * saturationFactor;
+      b = lum + (b - lum) * saturationFactor;
+    }
+    if (contrastFactor !== 1) {
+      r = 128 + (r - 128) * contrastFactor;
+      g = 128 + (g - 128) * contrastFactor;
+      b = 128 + (b - 128) * contrastFactor;
+    }
+    if (posterize > 0) {
+      r = Math.round(r / posterStep) * posterStep;
+      g = Math.round(g / posterStep) * posterStep;
+      b = Math.round(b / posterStep) * posterStep;
+    }
+    if (grain > 0) {
+      var noise = (hash2d(pixel % w, Math.floor(pixel / w), seed) * 2 - 1) * grainStrength;
+      r += noise; g += noise; b += noise;
+    }
+    data[idx] = clamp(Math.round(r), 0, 255);
+    data[idx + 1] = clamp(Math.round(g), 0, 255);
+    data[idx + 2] = clamp(Math.round(b), 0, 255);
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+function applyScanlines(ctx, w, h, amount) {
+  if (amount <= 0) return;
+  var spacing = Math.max(2, Math.round(Math.min(w, h) / 240));
+  ctx.save();
+  ctx.globalAlpha = Math.min(.65, amount / 150);
+  ctx.fillStyle = '#000';
+  for (var y = 0; y < h; y += spacing * 2) ctx.fillRect(0, y, w, spacing);
+  ctx.restore();
 }
 
 function applyGrain(ctx, w, h, grain) {
@@ -1358,23 +1574,31 @@ var generators = {
   guilloche: generateGuilloche
 };
 
-function generate(canvas, config) {
+function generateBase(canvas, config) {
   var ctx = canvas.getContext('2d');
   if (!ctx) return;
   var w = canvas.width, h = canvas.height;
   var theme = activeTheme(config);
   var rng = new SeededRandom(config.seed);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.imageSmoothingEnabled = true;
+  ctx.clearRect(0, 0, w, h);
 
   var gen = generators[config.type];
   if (gen) gen(ctx, w, h, theme, rng, config);
+}
+
+function finishGeneratedCanvas(canvas, config) {
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  var w = canvas.width, h = canvas.height, theme = activeTheme(config);
 
   if (config.disruptFactor > 0) applyDisruption(ctx, w, h, config.disruptFactor, new SeededRandom(config.seed + 7777));
-  if (config.grain > 0) applyGrain(ctx, w, h, config.grain);
-  if (config.saturation < 100) applySaturation(ctx, w, h, config.saturation);
-  if (config.contrast > 0) applyContrast(ctx, w, h, config.contrast);
+  if (config.pixelate > 0) applyPixelate(ctx, w, h, config.pixelate);
+  if (config.blur > 0) applyBlur(ctx, w, h, config.blur);
+  applyPixelEffects(ctx, w, h, config);
   if (config.bgBrightness !== 0) applyBgBrightness(ctx, w, h, config.bgBrightness);
   if (config.opacity < 100) applyOpacity(ctx, w, h, config.opacity, theme.background);
+  if (config.scanlines > 0) applyScanlines(ctx, w, h, config.scanlines);
 
   applyDarkOverlay(ctx, w, h, config.frame.darkOverlay);
   applyContent(ctx, w, h, config.content, theme);
@@ -1387,6 +1611,11 @@ function generate(canvas, config) {
   ctx.fillRect(12,h-15,3,16); ctx.fillRect(12,h-28,16,3);
   ctx.fillRect(w-15,h-15,3,16); ctx.fillRect(w-28,h-28,16,3);
   ctx.globalAlpha = 1;
+}
+
+function generate(canvas, config) {
+  generateBase(canvas, config);
+  finishGeneratedCanvas(canvas, config);
 }
 
 function exportToImage(canvas, width, height, config, format, quality) {
@@ -1402,6 +1631,11 @@ function exportToImage(canvas, width, height, config, format, quality) {
 // ═══════════════════════════════════════════════════════════════
 
 var canvas = document.getElementById('preview');
+var previewBaseCanvas = document.createElement('canvas');
+var previewBaseSignature = '';
+var previewFrameRequest = 0;
+var previewRenderCount = 0;
+var previewBaseRenderCount = 0;
 var genKeys = Object.keys(generatorInfo);
 var themeKeys = Object.keys(themes);
 var paletteAdapterKeys = Object.keys(paletteAdapters);
@@ -1411,12 +1645,16 @@ var sliderDefinitions = {
   scale: { label:'Scale', min:1, max:20, desc:'Shared element scale from micro texture to monumental forms.' },
   flow: { label:'Flow', min:0, max:100, desc:'Motion, warping, phase drift, and rule mobility for compatible algorithms.', suffix:'%' },
   symmetry: { label:'Symmetry', min:0, max:100, desc:'Order and mirrored regularity. Low values loosen composition; high values lock it.', suffix:'%' },
-  opacity: { label:'Opacity', min:0, max:100, desc:'Fade artwork toward its adapted background.', suffix:'%' },
-  disruptFactor: { label:'Disruption', min:0, max:100, desc:'Band shifts and RGB channel splitting distortion.', suffix:'%' },
-  grain: { label:'Grain', min:0, max:100, desc:'Film-like noise texture applied after generation.', suffix:'%' },
-  contrast: { label:'Contrast', min:0, max:100, desc:'Post-process contrast boost.', suffix:'%' },
-  saturation: { label:'Saturation', min:0, max:100, desc:'0% is grayscale; 100% preserves the adapted palette.', suffix:'%' },
-  bgBrightness: { label:'Brightness', min:-100, max:100, desc:'Global image lift or darkening after palette adaptation.' },
+  opacity: { label:'Opacity', min:0, max:100, defaultValue:100, effect:true, desc:'Fade artwork toward its adapted background.', suffix:'%' },
+  disruptFactor: { label:'Disruption', min:0, max:100, defaultValue:0, effect:true, desc:'Band shifts and RGB channel splitting distortion.', suffix:'%' },
+  grain: { label:'Grain', min:0, max:100, defaultValue:0, effect:true, desc:'Seeded film grain in the combined color pass.', suffix:'%' },
+  blur: { label:'Blur', min:0, max:20, defaultValue:0, effect:true, desc:'Soft optical blur scaled consistently between preview and export.', suffix:'px' },
+  pixelate: { label:'Pixelate', min:0, max:100, defaultValue:0, effect:true, desc:'Downsample and restore the image with hard pixel edges.', suffix:'%' },
+  posterize: { label:'Posterize', min:0, max:100, defaultValue:0, effect:true, desc:'Reduce tonal steps for screen-print and retro treatments.', suffix:'%' },
+  scanlines: { label:'Scanlines', min:0, max:100, defaultValue:0, effect:true, desc:'Overlay resolution-aware CRT scanlines.', suffix:'%' },
+  contrast: { label:'Contrast', min:-100, max:100, defaultValue:0, effect:true, desc:'Reduce or boost tonal separation.', suffix:'%' },
+  saturation: { label:'Saturation', min:0, max:200, defaultValue:100, effect:true, desc:'0% is grayscale; values above 100% intensify color.', suffix:'%' },
+  bgBrightness: { label:'Brightness', min:-100, max:100, defaultValue:0, effect:true, desc:'Global image lift or darkening after palette adaptation.', suffix:'%' },
   paletteStrength: { label:'Adapter strength', min:0, max:100, desc:'Blend from the source colors into the selected harmony model.', suffix:'%' },
   hueShift: { label:'Hue rotation', min:-180, max:180, desc:'Rotate the complete palette before harmony adaptation.', suffix:'°' }
 };
@@ -1458,14 +1696,19 @@ var tabDefs = [
   switchTab(state.activeTab);
 })();
 
-function switchTab(tabId) {
-  state.activeTab = tabId;
+function syncActiveTabUi(tabId) {
   document.querySelectorAll('.tab-btn').forEach(function(b){
     var active = b.dataset.tab === tabId;
     b.classList.toggle('active', active);
     b.setAttribute('aria-selected', active ? 'true' : 'false');
+    b.tabIndex = active ? 0 : -1;
   });
   document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('active', p.id === 'panel-'+tabId); });
+}
+function switchTab(tabId) {
+  if (['generator','palette','tune','content','frame','export'].indexOf(tabId) < 0) tabId = 'generator';
+  state.activeTab = tabId;
+  syncActiveTabUi(tabId);
   persistState();
 }
 
@@ -1541,32 +1784,63 @@ function switchTab(tabId) {
   var colorSliders = document.getElementById('tune-color-sliders');
 
   buildDefinedSliders(genSliders, ['complexity','density','scale','flow','symmetry']);
-  buildDefinedSliders(postSliders, ['opacity','disruptFactor','grain']);
+  buildDefinedSliders(postSliders, ['opacity','disruptFactor','grain','blur','pixelate','posterize','scanlines']);
   buildDefinedSliders(colorSliders, ['contrast','saturation','bgBrightness']);
 })();
 
 function buildDefinedSliders(container, keys) {
-  keys.forEach(function(key){ var spec=sliderDefinitions[key]; makeSlider(container,spec.label,key,spec.min,spec.max,spec.desc,{step:spec.step||1,suffix:spec.suffix||''}); });
+  keys.forEach(function(key){
+    var spec=sliderDefinitions[key];
+    makeSlider(container,spec.label,key,spec.min,spec.max,spec.desc,{step:spec.step||1,suffix:spec.suffix||'',effect:!!spec.effect,resetValue:spec.defaultValue});
+  });
 }
 
 function makeSlider(container, label, key, min, max, desc, options) {
   options=options||{};
   var div = document.createElement('div');
-  div.className = 'slider-row';
-  div.innerHTML = '<div class="slider-header"><span class="label">' + label + '</span><span class="slider-val" id="val-'+key+'"></span></div><input type="range" id="slider-'+key+'" min="'+min+'" max="'+max+'" step="'+(options.step||1)+'"><div class="slider-desc">' + (desc||'') + '</div>';
+  div.className = 'slider-row' + (options.effect ? ' effect-fader' : '');
+  var valueUi = options.effect
+    ? '<span class="fader-actions"><input class="fader-number" id="number-'+key+'" type="number" min="'+min+'" max="'+max+'" step="'+(options.step||1)+'" aria-label="'+label+' value"><button class="fader-reset" id="reset-'+key+'" type="button" title="Reset '+label+'" aria-label="Reset '+label+'">↺</button></span>'
+    : '<span class="slider-val" id="val-'+key+'"></span>';
+  div.innerHTML = '<div class="slider-header"><span class="label">' + label + '</span>'+valueUi+'</div><input type="range" id="slider-'+key+'" min="'+min+'" max="'+max+'" step="'+(options.step||1)+'" aria-label="'+label+'"><div class="slider-desc">' + (desc||'') + '</div>';
   container.appendChild(div);
-  var input = div.querySelector('input');
+  var input = div.querySelector('input[type="range"]');
   input.dataset.suffix=options.suffix||'';
+  input.dataset.resetValue=options.resetValue == null ? '' : options.resetValue;
   input.addEventListener('input', function(){
     var value=(options.step||1)%1===0?parseInt(this.value,10):parseFloat(this.value);
     if (key.indexOf('.') > -1) setNested(state, key, value);
     else state[key] = value;
-    document.getElementById('val-'+key).textContent = this.value+(this.dataset.suffix||'');
+    syncSliderVisual(this);
     markDirty();
     doGenerate();
     if (key === 'paletteStrength' || key === 'hueShift') renderPaletteSummary();
     if (['complexity','density','scale','flow','symmetry'].indexOf(key) > -1) renderParameterSummary();
   });
+  var numberInput = document.getElementById('number-'+key);
+  if (numberInput) numberInput.addEventListener('input', function(){
+    input.value = clampNumber(this.value, Number(input.value), Number(input.min), Number(input.max));
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+  });
+  var resetButton = document.getElementById('reset-'+key);
+  if (resetButton) resetButton.addEventListener('click', function(){
+    input.value = input.dataset.resetValue === '' ? min : input.dataset.resetValue;
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+    flushPendingHistory();
+    commitState(label + ' reset.');
+  });
+}
+
+function syncSliderVisual(input) {
+  if (!input) return;
+  var min = Number(input.min || 0), max = Number(input.max || 100), value = Number(input.value || 0);
+  var fill = max === min ? 0 : ((value - min) / (max - min)) * 100;
+  input.style.setProperty('--range-fill', Math.max(0, Math.min(100, fill)).toFixed(2) + '%');
+  var key = input.id.replace('slider-','');
+  var valueLabel = document.getElementById('val-'+key);
+  if (valueLabel) valueLabel.textContent = input.value+(input.dataset.suffix||'');
+  var numberInput = document.getElementById('number-'+key);
+  if (numberInput && document.activeElement !== numberInput) numberInput.value = input.value;
 }
 
 function fontOptions(selected) {
@@ -1630,7 +1904,7 @@ var renderContentFields = function(){};
       var el = document.getElementById('slider-'+fullKey);
       if(!el) return;
       el.value = getNested(state, fullKey);
-      document.getElementById('val-'+fullKey).textContent = el.value+(el.dataset.suffix||'');
+      syncSliderVisual(el);
       if(fullKey==='content.textScale'){
         el.addEventListener('input', function(){
           var descEl = this.parentElement.querySelector('.slider-desc');
@@ -1691,7 +1965,7 @@ var renderContentFields = function(){};
     var el = document.getElementById('slider-'+fullKey);
     if(!el) return;
     el.value = getNested(state, fullKey);
-    document.getElementById('val-'+fullKey).textContent = el.value;
+    syncSliderVisual(el);
   });
 
   document.getElementById('frame-color1').addEventListener('input', function(){ state.frame.borderColor=this.value; document.getElementById('frame-color1-hex').value=this.value; markDirty(); doGenerate(); });
@@ -1735,20 +2009,21 @@ var renderContentFields = function(){};
     '<div class="export-grid"><div class="field"><div class="fl">Format</div><select class="text-select" id="export-format" aria-label="Export format"><option value="png">PNG · lossless</option><option value="jpeg">JPEG · compact</option><option value="webp">WebP · modern</option></select></div><div class="field quality-row" id="quality-row"><div class="fl">Quality <span id="quality-value"></span></div><input type="range" id="export-quality" aria-label="Export quality" min="40" max="100" step="1"></div></div>' +
     '<div class="export-info" id="export-info"></div>' +
     '<button class="export-btn" id="btn-export-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export image<span class="export-dim" id="export-dim"></span></button>' +
-    '<div class="export-actions"><button class="btn btn-ghost" id="btn-copy-recipe" type="button">Copy recipe</button><button class="btn btn-ghost" id="btn-import-recipe" type="button">Import recipe</button></div>' +
+    '<div class="export-actions"><button class="btn btn-ghost" id="btn-copy-recipe" type="button">Copy recipe</button><button class="btn btn-ghost" id="btn-import-recipe" type="button">Import recipe</button><button class="btn btn-ghost share-link-action" id="btn-copy-share-link" type="button">Copy share URL · Base64 state</button></div>' +
     '<input type="file" id="recipe-file" accept="application/json,.json" hidden>' +
     '<p class="export-hint">Exports are rendered from the seed at full resolution. Recipe JSON preserves an editable setup.</p>';
 
-  document.getElementById('export-preset').addEventListener('change', function(){ state.selectedPreset = parseInt(this.value, 10); renderExportInfo(); commitState(); });
-  document.getElementById('export-custom').addEventListener('change', function(){ state.useCustomSize = this.checked; renderExportInfo(); commitState(); });
-  document.getElementById('export-width').addEventListener('input', function(){ if (this.value) { state.customWidth = parseInt(this.value, 10); renderExportInfo(); markDirty(); } });
-  document.getElementById('export-height').addEventListener('input', function(){ if (this.value) { state.customHeight = parseInt(this.value, 10); renderExportInfo(); markDirty(); } });
-  document.getElementById('export-width').addEventListener('change', function(){ state.customWidth = clampExportDimension(this.value); renderExportInfo(); commitState(); });
-  document.getElementById('export-height').addEventListener('change', function(){ state.customHeight = clampExportDimension(this.value); renderExportInfo(); commitState(); });
+  document.getElementById('export-preset').addEventListener('change', function(){ state.selectedPreset = parseInt(this.value, 10); renderExportInfo(); updatePreviewGeometry(); doGenerate(); commitState(); });
+  document.getElementById('export-custom').addEventListener('change', function(){ state.useCustomSize = this.checked; renderExportInfo(); updatePreviewGeometry(); doGenerate(); commitState(); });
+  document.getElementById('export-width').addEventListener('input', function(){ if (this.value) { state.customWidth = parseInt(this.value, 10); renderExportInfo(); updatePreviewGeometry(); doGenerate(); markDirty(); } });
+  document.getElementById('export-height').addEventListener('input', function(){ if (this.value) { state.customHeight = parseInt(this.value, 10); renderExportInfo(); updatePreviewGeometry(); doGenerate(); markDirty(); } });
+  document.getElementById('export-width').addEventListener('change', function(){ state.customWidth = clampExportDimension(this.value); renderExportInfo(); updatePreviewGeometry(); doGenerate(); commitState(); });
+  document.getElementById('export-height').addEventListener('change', function(){ state.customHeight = clampExportDimension(this.value); renderExportInfo(); updatePreviewGeometry(); doGenerate(); commitState(); });
   document.getElementById('export-format').addEventListener('change', function(){ state.exportFormat = this.value; renderExportInfo(); commitState(); });
   document.getElementById('export-quality').addEventListener('input', function(){ state.exportQuality = parseInt(this.value, 10); renderExportInfo(); markDirty(); });
   document.getElementById('btn-export-tab').addEventListener('click', doExport);
   document.getElementById('btn-copy-recipe').addEventListener('click', copyRecipe);
+  document.getElementById('btn-copy-share-link').addEventListener('click', copyShareLink);
   document.getElementById('btn-import-recipe').addEventListener('click', function(){ document.getElementById('recipe-file').click(); });
   document.getElementById('recipe-file').addEventListener('change', importRecipeFile);
 })();
@@ -1759,6 +2034,7 @@ document.getElementById('btn-export-header').style.display = '';
 document.getElementById('btn-surprise').addEventListener('click', randomizeAll);
 document.getElementById('btn-export-header').addEventListener('click', doExport);
 document.getElementById('btn-save-recipe').addEventListener('click', downloadRecipe);
+document.getElementById('btn-share-state').addEventListener('click', copyShareLink);
 document.getElementById('btn-undo').addEventListener('click', undo);
 document.getElementById('btn-redo').addEventListener('click', redo);
 document.getElementById('btn-safe-area').addEventListener('click', function(){ state.safeArea = !state.safeArea; render(); persistState(state.safeArea ? 'Safe area shown.' : 'Safe area hidden.'); });
@@ -1802,7 +2078,7 @@ function doExport() {
   announce('Exported ' + dimensions.width + ' × ' + dimensions.height + ' ' + format.toUpperCase() + '.');
 }
 function recipeJson() {
-  return JSON.stringify({ studio:'procedural-sharepic-studio', version:5, savedAt:new Date().toISOString(), state:state }, null, 2);
+  return JSON.stringify({ studio:'procedural-sharepic-studio', version:STATE_SCHEMA_VERSION, savedAt:new Date().toISOString(), state:state }, null, 2);
 }
 function downloadRecipe() {
   var blob = new Blob([recipeJson()], {type:'application/json'});
@@ -1816,6 +2092,31 @@ function copyRecipe() {
   if (!navigator.clipboard) { downloadRecipe(); return; }
   navigator.clipboard.writeText(recipeJson()).then(function(){ announce('Recipe copied.'); }, downloadRecipe);
 }
+function copyTextFallback(text) {
+  var area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly','');
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.select();
+  var copied = false;
+  try { copied = document.execCommand('copy'); } catch (error) {}
+  area.remove();
+  return copied;
+}
+function copyShareLink() {
+  flushPendingHistory();
+  syncStateUrl();
+  var url = stateUrl().href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function(){ announce('Share URL copied with Base64 state.'); }, function(){
+      announce(copyTextFallback(url) ? 'Share URL copied with Base64 state.' : 'Could not copy the share URL.');
+    });
+  } else {
+    announce(copyTextFallback(url) ? 'Share URL copied with Base64 state.' : 'Could not copy the share URL.');
+  }
+}
 function importRecipeFile(event) {
   var file = event.target.files && event.target.files[0];
   if (!file) return;
@@ -1825,7 +2126,7 @@ function importRecipeFile(event) {
       var parsed = JSON.parse(reader.result);
       var imported = parsed.state || parsed;
       if (!imported.type || !generatorInfo[imported.type] || !themes[imported.theme]) throw new Error('Unsupported studio recipe.');
-      state = Object.assign({}, state, imported, { content:Object.assign({}, state.content, imported.content || {}), frame:Object.assign({}, state.frame, imported.frame || {}) });
+      state = normalizeStudioState(state, imported);
       render(); commitState('Recipe imported.');
     } catch (error) { announce('Import failed: ' + error.message); }
     event.target.value = '';
@@ -1842,10 +2143,55 @@ document.addEventListener('keydown', function(event){
 });
 
 // ─── Render ──────────────────────────────────────────────────────
-var renderTimer = null;
+function previewBaseKey(width, height) {
+  return JSON.stringify([
+    width,height,state.type,state.theme,state.seed,state.complexity,state.density,state.scale,state.flow,state.symmetry,
+    state.paletteAdapter,state.paletteStrength,state.hueShift
+  ]);
+}
+function updatePreviewGeometry() {
+  var dimensions = exportDimensions(), frame = document.getElementById('canvas-frame');
+  var ratio = Math.max(.1, dimensions.width / dimensions.height);
+  frame.style.aspectRatio = dimensions.width + ' / ' + dimensions.height;
+  canvas.style.aspectRatio = dimensions.width + ' / ' + dimensions.height;
+  var cssWidth = Math.max(280, frame.clientWidth || canvas.clientWidth || 900);
+  var pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
+  var targetWidth = Math.round(cssWidth * pixelRatio), targetHeight = Math.round(targetWidth / ratio);
+  var longest = Math.max(targetWidth, targetHeight), cap = 1200;
+  if (longest > cap) {
+    var scale = cap / longest;
+    targetWidth = Math.max(1, Math.round(targetWidth * scale));
+    targetHeight = Math.max(1, Math.round(targetHeight * scale));
+  }
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    previewBaseSignature = '';
+  }
+}
+function renderPreviewNow() {
+  previewFrameRequest = 0;
+  updatePreviewGeometry();
+  if (previewBaseCanvas.width !== canvas.width) previewBaseCanvas.width = canvas.width;
+  if (previewBaseCanvas.height !== canvas.height) previewBaseCanvas.height = canvas.height;
+  var signature = previewBaseKey(canvas.width, canvas.height);
+  if (signature !== previewBaseSignature) {
+    generateBase(previewBaseCanvas, state);
+    previewBaseSignature = signature;
+    previewBaseRenderCount += 1;
+  }
+  var ctx = canvas.getContext('2d');
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.filter = 'none';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(previewBaseCanvas, 0, 0);
+  finishGeneratedCanvas(canvas, state);
+  previewRenderCount += 1;
+}
 function doGenerate() {
-  if (renderTimer) clearTimeout(renderTimer);
-  renderTimer = setTimeout(function(){ generate(canvas, state); }, 16);
+  if (previewFrameRequest) return;
+  previewFrameRequest = requestAnimationFrame(renderPreviewNow);
 }
 
 function getNested(obj, path) {
@@ -1885,6 +2231,7 @@ function renderParameterSummary() {
 function render() {
   var baseTheme=themes[state.theme],theme=activeTheme(state),adapter=paletteAdapters[state.paletteAdapter]||paletteAdapters.native;
   document.documentElement.style.setProperty('--accent',theme.accent);
+  syncActiveTabUi(state.activeTab);
 
   // Logo color
   document.getElementById('logo-box').style.backgroundColor = theme.accent;
@@ -1904,11 +2251,9 @@ function render() {
   if(adapterSelect)adapterSelect.value=state.paletteAdapter||'native';
 
   // Sliders - main tune sliders
-  ['complexity','density','scale','flow','symmetry','opacity','disruptFactor','grain','contrast','saturation','bgBrightness','paletteStrength','hueShift'].forEach(function(key){
+  ['complexity','density','scale','flow','symmetry','opacity','disruptFactor','grain','blur','pixelate','posterize','scanlines','contrast','saturation','bgBrightness','paletteStrength','hueShift'].forEach(function(key){
     var el = document.getElementById('slider-'+key);
-    var val = document.getElementById('val-'+key);
-    if(el) el.value = state[key];
-    if(val) val.textContent = state[key]+(el&&el.dataset.suffix||'');
+    if(el) { el.value = state[key]; syncSliderVisual(el); }
   });
 
   renderParameterSummary();
@@ -1920,9 +2265,7 @@ function render() {
   // Frame sliders
   ['frame.borderWidth','frame.borderOpacity','frame.innerGlow','frame.vignette','frame.darkOverlay'].forEach(function(fullKey){
     var el = document.getElementById('slider-'+fullKey);
-    var val = document.getElementById('val-'+fullKey);
-    if(el) el.value = getNested(state, fullKey);
-    if(val) val.textContent = getNested(state, fullKey);
+    if(el) { el.value = getNested(state, fullKey); syncSliderVisual(el); }
   });
 
   // Frame color inputs
@@ -1953,13 +2296,17 @@ function render() {
   var statusBar = document.getElementById('status-bar');
   var info = generatorInfo[state.type];
   var extra = '';
-  if(state.opacity<100||state.disruptFactor>0||state.grain>0||state.contrast>0||state.saturation<100||state.bgBrightness!==0){
+  if(state.opacity<100||state.disruptFactor>0||state.grain>0||state.blur>0||state.pixelate>0||state.posterize>0||state.scanlines>0||state.contrast!==0||state.saturation!==100||state.bgBrightness!==0){
     extra = ' · ';
     if(state.opacity<100) extra += 'op:'+state.opacity;
     if(state.disruptFactor>0) extra += ' dr:'+state.disruptFactor;
     if(state.grain>0) extra += ' gr:'+state.grain;
-    if(state.contrast>0) extra += ' ct:'+state.contrast;
-    if(state.saturation<100) extra += ' sat:'+state.saturation;
+    if(state.blur>0) extra += ' bl:'+state.blur;
+    if(state.pixelate>0) extra += ' px:'+state.pixelate;
+    if(state.posterize>0) extra += ' po:'+state.posterize;
+    if(state.scanlines>0) extra += ' sc:'+state.scanlines;
+    if(state.contrast!==0) extra += ' ct:'+state.contrast;
+    if(state.saturation!==100) extra += ' sat:'+state.saturation;
     if(state.bgBrightness!==0) extra += ' br:'+state.bgBrightness;
   }
   statusBar.innerHTML = '<div><span class="mono">'+state.type+'</span> · <span class="mono">'+baseTheme.name+'/'+adapter.name+'</span> · <span class="mono">seed:'+state.seed+'</span></div><div><span class="mono">c:'+state.complexity+' d:'+state.density+' s:'+state.scale+' f:'+state.flow+' y:'+state.symmetry+'</span>'+extra+'</div>';
@@ -1988,9 +2335,13 @@ function renderExportInfo() {
     ['Theme', baseTheme.name],
     ['Palette', adapter.name+' · '+state.paletteStrength+'%']
   ];
-  if(state.contrast>0) rows.push(['Contrast', state.contrast+'%']);
-  if(state.saturation<100) rows.push(['Saturation', state.saturation+'%']);
+  if(state.contrast!==0) rows.push(['Contrast', state.contrast+'%']);
+  if(state.saturation!==100) rows.push(['Saturation', state.saturation+'%']);
   if(state.grain>0) rows.push(['Grain', state.grain+'%']);
+  if(state.blur>0) rows.push(['Blur', state.blur+'px']);
+  if(state.pixelate>0) rows.push(['Pixelate', state.pixelate+'%']);
+  if(state.posterize>0) rows.push(['Posterize', state.posterize+'%']);
+  if(state.scanlines>0) rows.push(['Scanlines', state.scanlines+'%']);
   if(state.content.enabled&&(state.content.heading||state.content.col1)) rows.push(['Typography', (fontStacks[state.content.headingFont]||fontStacks.sans).name+' / '+(fontStacks[state.content.bodyFont]||fontStacks.sans).name]);
   if(state.frame.borderWidth>0||state.frame.vignette>0||state.frame.innerGlow>0) rows.push(['Frame', 'Yes']);
   var el = document.getElementById('export-info');
@@ -2022,6 +2373,12 @@ function renderExportInfo() {
 initializeHistory();
 render();
 persistState();
+if (window.ResizeObserver) {
+  new ResizeObserver(function(){ updatePreviewGeometry(); doGenerate(); }).observe(document.getElementById('canvas-frame'));
+} else {
+  window.addEventListener('resize', function(){ updatePreviewGeometry(); doGenerate(); });
+}
+if (urlStateLoadError) setTimeout(function(){ announce('URL state ignored: ' + urlStateLoadError); }, 0);
 </script>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>

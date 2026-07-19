@@ -4,6 +4,26 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- URL-safe Base64 studio-state sharing through the `state` query parameter, including Unicode-safe encoding, URL-over-local-storage precedence, clipboard actions, migration, validation, and malformed-state recovery.
+- A dedicated effect-fader bank with numeric entry, live filled tracks, reset controls, blur, pixelation, posterization, scanlines, bidirectional contrast, and extended saturation.
+- Browser coverage for the two-row tab layout, cached rendering, animation-frame coalescing, portrait preview geometry, and complete URL-state round trips.
+
+### Changed
+
+- The compact Procedural Sharepic Studio now presents all six sidebar tabs in a visible two-row grid on narrow sidebars.
+- Preview rendering uses its displayed/export aspect ratio, adaptive device resolution, a reusable base-art cache, and one combined pixel-color pass.
+- Rapid fader input is coalesced through `requestAnimationFrame`; post-processing changes no longer regenerate the procedural base composition.
+
+### Fixed
+
+- Portrait and landscape export presets no longer retain a misleading square preview.
+- Undo, recipe import, and URL restoration now keep the visible tab synchronized with restored state.
+- Untrusted shared state is normalized and clamped before reaching canvas, typography, frame, or export controls.
+
 ## [1.4.1] - 2026-07-17
 
 ### Fixed
