@@ -36,19 +36,23 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies (ethic-brawl)
-        run: npm install
+        run: pnpm install --frozen-lockfile
+        working-directory: ethic-brawl
+
+      - name: Verify generated prompts (ethic-brawl)
+        run: pnpm run prompts:v2:check
         working-directory: ethic-brawl
 
       - name: Build (ethic-brawl)
-        run: npm run build
+        run: pnpm run build
         working-directory: ethic-brawl
 
       - name: Install dependencies (v11-peer-daw)
-        run: npm install
+        run: pnpm install --frozen-lockfile
         working-directory: v11-peer-daw
 
       - name: Build (v11-peer-daw)
-        run: npm run build
+        run: pnpm run build
         working-directory: v11-peer-daw
 
       - name: Install dependencies (badger-sprawl-runner)
