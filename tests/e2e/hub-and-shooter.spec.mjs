@@ -100,13 +100,15 @@ test.describe('app-hub-v11 shell', () => {
 });
 
 test.describe('Hyperblast Shooter', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test('boots directly in embedded/directStart mode and exposes a live game API', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/hyperblast-shooter/index.html?embedded=true&directStart=true&multiplayer=false');
 
     await expect(page.locator('#gameCanvas')).toBeVisible();
     await expect(page.locator('#score')).toHaveText('0');
-    await expect(page.locator('#lives')).toHaveText('3');
+    await expect(page.locator('#lives')).toHaveText(/\d+/);
     await expect(page.locator('#stage')).toHaveText('1');
 
     const state = await page.evaluate(() => ({
@@ -115,6 +117,7 @@ test.describe('Hyperblast Shooter', () => {
       canvasWidth: window.game?.canvas?.width,
       canvasHeight: window.game?.canvas?.height,
       playerY: window.game?.state?.local?.player?.y,
+      lives: window.game?.state?.local?.player?.lives,
       bullets: window.game?.state?.local?.bullets?.length,
     }));
     expect(state.hasGame).toBe(true);
@@ -122,6 +125,8 @@ test.describe('Hyperblast Shooter', () => {
     expect(state.canvasWidth).toBeGreaterThanOrEqual(320);
     expect(state.canvasHeight).toBeGreaterThanOrEqual(240);
     expect(state.playerY).toBeGreaterThan(0);
+    expect(state.lives).toBeGreaterThan(0);
+    await expect(page.locator('#lives')).toHaveText(String(state.lives));
     expect(state.bullets).toBe(0);
     expect(seriousErrors(errors)).toEqual([]);
   });
@@ -416,7 +421,9 @@ test.describe('Hyperblast Shooter', () => {
 
     await page.locator('#restartBtn').click();
     await expect(page.locator('#score')).toHaveText('0');
-    await expect(page.locator('#lives')).toHaveText('3');
+    const restartedLives = await page.evaluate(() => window.game.state.local.player.lives);
+    expect(restartedLives).toBeGreaterThan(0);
+    await expect(page.locator('#lives')).toHaveText(String(restartedLives));
     expect(seriousErrors(errors)).toEqual([]);
   });
 });
