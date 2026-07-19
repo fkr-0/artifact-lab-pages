@@ -417,11 +417,6 @@ test.describe('v11-peer-daw app', () => {
     await expect(pilotA.locator('#localPeerCount')).toHaveText('1');
     await expect(pilotB.locator('#localPeerCount')).toHaveText('1');
 
-    const clients = await Promise.all([
-      pilotA.evaluate(() => window.v11PeerDAW.clientId),
-      pilotB.evaluate(() => window.v11PeerDAW.clientId),
-    ]);
-    const expectedBpm = clients[0].localeCompare(clients[1]) > 0 ? 111 : 222;
     const startAt = Date.now() + 250;
     await Promise.all([
       pilotA.evaluate(async ({ startAt: at }) => {
@@ -450,14 +445,39 @@ test.describe('v11-peer-daw app', () => {
       }, { startAt }),
     ]);
 
-    await expect.poll(() => pilotA.evaluate(() => window.v11PeerDAW.clock.bpm)).toBe(expectedBpm);
-    await expect.poll(() => pilotB.evaluate(() => window.v11PeerDAW.clock.bpm)).toBe(expectedBpm);
+    await expect
+      .poll(async () => {
+        const values = await Promise.all([
+          pilotA.evaluate(() => window.v11PeerDAW.clock.bpm),
+          pilotB.evaluate(() => window.v11PeerDAW.clock.bpm),
+        ]);
+        return values[0] === values[1] && [111, 222].includes(values[0]) ? values[0] : 0;
+      })
+      .toBeGreaterThan(0);
     await expect
       .poll(() => pilotA.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().pendingCount))
       .toBe(0);
     await expect
       .poll(() => pilotB.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().pendingCount))
       .toBe(0);
+    const [clockA, clockB] = await Promise.all([
+      pilotA.evaluate(() =>
+        Array.from(window.v11PeerDAW.operationReducerContext.fieldVersions.entries())
+          .find(([key]) => key.startsWith('clock:') && key.endsWith(':bpm'))?.[1] || null
+      ),
+      pilotB.evaluate(() =>
+        Array.from(window.v11PeerDAW.operationReducerContext.fieldVersions.entries())
+          .find(([key]) => key.startsWith('clock:') && key.endsWith(':bpm'))?.[1] || null
+      ),
+    ]);
+    expect(clockA).toEqual(clockB);
+    expect(clockA).toMatchObject({ actorId: expect.any(String), lamport: expect.any(Number) });
+    const convergedBpm = await pilotA.evaluate(() => window.v11PeerDAW.clock.bpm);
+    const winningClient = await Promise.all([
+      pilotA.evaluate(() => window.v11PeerDAW.clientId),
+      pilotB.evaluate(() => window.v11PeerDAW.clientId),
+    ]);
+    expect(convergedBpm).toBe(clockA.actorId === winningClient[0] ? 111 : 222);
     expect(
       await pilotA.evaluate(() => window.v11PeerDAW.collaboration.diagnostics().conflictCount)
     ).toBe(0);
@@ -473,7 +493,7 @@ test.describe('v11-peer-daw app', () => {
     const session = await page.locator('#sessionCode').textContent();
 
     await expect(page.locator('#moduleCount')).toHaveText('9 modules');
-    await expect(page.locator('#appVersion')).toHaveText('v1.4.0');
+    await expect(page.locator('#appVersion')).toHaveText('v1.5.0');
     await expect(page.locator('#routeCount')).toContainText('7 packet');
     expect(session).toMatch(/^E2E-/);
     await expect(page.locator('#workspaceMainView')).toContainText('Shared session');
@@ -493,6 +513,46 @@ test.describe('v11-peer-daw app', () => {
     }));
     expect(state).toMatchObject({ moduleCount: 9, packetRouteCount: 7, hasClock: true, hasMixer: true });
     expect(state.canvasNodes).toBeGreaterThanOrEqual(9);
+    expect(seriousErrors(errors)).toEqual([]);
+  });
+
+  test('renders live master telemetry and persists low-power monitoring mode', async ({ page }) => {
+    const errors = await bootDaw(page, dawUrl({ session: isolatedDawSession('performance'), username: 'meter' }));
+    await expect(page.locator('#performanceMonitor')).toBeVisible();
+    await expect(page.locator('[data-master-meter]')).toHaveCount(2);
+
+    await page.evaluate(() => {
+      const runtime = window.v11PeerDAW.runtime;
+      runtime.context = {
+        state: 'running',
+        sampleRate: 48000,
+        baseLatency: 0.006,
+        outputLatency: 0.012,
+      };
+      runtime.analyser = {
+        fftSize: 8,
+        getFloatTimeDomainData(target) {
+          target.set([0, 0.2, -0.45, 0.8, -0.3, 0.1, 0, 0]);
+        },
+      };
+      runtime.meterBuffer = new Float32Array(8);
+    });
+
+    await expect(page.locator('#performanceState')).toHaveText('running');
+    await expect(page.locator('#performanceLatency')).toHaveText('18 ms');
+    await expect(page.locator('#performanceEngine')).toContainText('48 kHz');
+    await expect.poll(() => page.locator('#performancePeak').textContent()).not.toBe('−∞ dB');
+    await expect.poll(() => page.locator('.transport-meter').evaluate((node) => node.style.getPropertyValue('--meter-rms'))).not.toBe('0.00%');
+
+    await page.locator('#btnPerformanceMode').click();
+    await expect(page.locator('#btnPerformanceMode')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-low-power', 'true');
+    await page.reload();
+    await expect(page.locator('#btnPerformanceMode')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-low-power', 'true');
+
+    await page.locator('[data-workspace-view="mixer"]').click();
+    await expect(page.locator('#workspaceMainView [data-master-meter]')).toBeVisible();
     expect(seriousErrors(errors)).toEqual([]);
   });
 

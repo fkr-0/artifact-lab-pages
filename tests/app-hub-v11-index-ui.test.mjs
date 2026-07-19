@@ -16,10 +16,23 @@ assert.match(html, /id="joinGamePrompt"/, 'bottom Lobby / Chat tab should expose
 assert.match(html, /id="resultsPanel"/, 'center upper panel should show filtered results');
 assert.match(html, /id="viewCards"/, 'results should be switchable to cards');
 assert.match(html, /id="viewList"/, 'results should be switchable to list');
+assert.match(html, /id="sortMode"/, 'catalog should expose selectable artifact ordering');
+assert.match(html, /id="favoritesOnly"/, 'catalog should expose favorites-only filtering');
+assert.match(html, /id="quickAccessShelf"/, 'results should expose a quick-access shelf');
+assert.match(html, /id="quickAccessItems"/, 'quick-access shelf should render pinned and recent artifacts');
+assert.match(html, /id="resumeLastArtifact"/, 'quick-access shelf should resume the most recent artifact');
+assert.match(html, /id="hubHealthStrip"/, 'results should expose release, network, and runtime health');
 
 assert.match(html, /readHubSetting\("viewMode", "cards"\)/, 'v11 should restore cards/list view mode from local storage');
 assert.match(html, /writeHubSetting\("viewMode", viewMode\)/, 'v11 should persist cards/list view mode to local storage');
 assert.match(html, /sortItemsByRecentlyChanged/, 'v11 should order modules by recently changed newest first');
+assert.match(html, /function sortCatalogItems\(items\)/, 'v11 should support recently changed, recently opened, title, and kind sorting');
+assert.match(html, /favoriteArtifactIds = readHubSetting\("favoriteArtifactIds", \[\]\)/, 'pinned artifacts should persist in hub storage');
+assert.match(html, /function toggleFavoriteArtifact\(itemId\)/, 'artifact cards should support persistent pinning');
+assert.match(html, /function renderQuickAccess\(\)/, 'quick access should be rendered from favorites and recent launches');
+assert.match(html, /function renderHubHealthStrip\(\)/, 'quick access should expose live release and network health');
+assert.match(html, /data-favorite=/, 'result items should expose pin controls');
+assert.match(html, /favoriteBoost/, 'command-center ranking should prioritize pinned artifacts');
 assert.match(html, /changedAt|updatedAt|modifiedAt|mtime|lastChanged/, 'v11 should recognize changed timestamps when sorting modules');
 assert.match(html, /data-launch="inline"/, 'result items should expose inline icon launch buttons');
 assert.match(html, /data-launch="fullscreen"/, 'result items should expose fullscreen icon launch buttons');

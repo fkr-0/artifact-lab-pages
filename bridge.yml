@@ -89,6 +89,18 @@ commands:
     timeoutMs: 180000
     track: test
     shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e:chrome-arcology"
+  e2e:mirror-palace:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run test:e2e:mirror-palace"]
+    description: "Run the Chapter 4 Mirror Palace story, animation, rocket traversal, and Reflection Judge flow in Chromium and Firefox."
+    timeoutMs: 180000
+    track: test
+    shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e:mirror-palace"
+  e2e:dub-colony:
+    run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run test:e2e:dub-colony"]
+    description: "Run the Chapter 5 colony vote, Naya companion, beat-reactor, and King Feedback flow in Chromium and Firefox."
+    timeoutMs: 180000
+    track: test
+    shellCommand: "cd badger-sprawl-runner && pnpm run test:e2e:dub-colony"
   e2e:badger-progression:
     run: ["/bin/sh", "-lc", "cd badger-sprawl-runner && pnpm run test:e2e:progression"]
     description: "Run the sprite-backed 23-item and four-track skill progression flow in Chromium and Firefox."
@@ -252,6 +264,8 @@ agent:
     - Split the shared sound module catalog into a reusable JS module if more audio apps become standalone folders.
     - Add browser-level WebAudio smoke tests when a headless browser harness is available.
   changelog:
+    - "2026-07-19: Added Badger Sprawl Runner Dub Colony Chapter 5 beat, civic-vote, companion, and King Feedback coverage."
+    - "2026-07-18: Added Badger Sprawl Runner Chapter 4 coverage, the 86-frame Moss motion atlas, and Mirror Palace story-mode validation."
     - "2026-07-14: Added Badger Sprawl Runner progression coverage for 23 items, six item sets, 20 skills, and generated progression atlases."
     - "2026-07-14: Added verified Chrome Arcology Stage 3 E2E and release-artifact coverage for badger-sprawl-runner."
     - "2026-07-14: Added verified Drainmarket E2E, release staging, dry-run deployment, and gated deployment commands for badger-sprawl-runner."

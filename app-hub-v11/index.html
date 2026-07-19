@@ -367,6 +367,11 @@
         box-shadow: var(--hub-shadow);
         transition: all 0.2s ease;
       }
+      .artifact-card.is-favorite,
+      .artifact-row.is-favorite {
+        border-color: color-mix(in srgb, var(--hub-secondary), transparent 35%);
+        box-shadow: inset 3px 0 0 var(--hub-secondary), var(--hub-shadow);
+      }
       .artifact-row {
         grid-template-columns: 1fr auto;
         align-items: center;
@@ -374,6 +379,69 @@
       .launch-icons {
         display: flex;
         gap: 0.25rem;
+      }
+      .favorite-toggle {
+        color: var(--hub-secondary);
+      }
+      .favorite-toggle[aria-pressed="true"] {
+        background: color-mix(in srgb, var(--hub-secondary), transparent 78%);
+        border-color: var(--hub-secondary);
+        box-shadow: 0 0 12px color-mix(in srgb, var(--hub-secondary), transparent 65%);
+      }
+      .catalog-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.35rem;
+      }
+      .quick-access-shelf {
+        display: grid;
+        gap: 0.45rem;
+        padding: 0.6rem;
+        border: 1px solid color-mix(in srgb, var(--hub-secondary), transparent 72%);
+        border-radius: 0;
+        background:
+          linear-gradient(135deg, color-mix(in srgb, var(--hub-secondary), transparent 94%), transparent),
+          rgba(255,255,255,0.018);
+      }
+      .quick-access-head,
+      .hub-health-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .quick-access-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.35rem;
+      }
+      .quick-access-card {
+        display: grid;
+        gap: 0.3rem;
+        min-width: 0;
+        padding: 0.55rem;
+        border: 1px solid color-mix(in srgb, var(--hub-accent), transparent 78%);
+        border-radius: 0;
+        background: rgba(0,0,0,.24);
+        cursor: pointer;
+      }
+      .quick-access-card strong,
+      .quick-access-card small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .quick-access-card small {
+        color: var(--hub-muted);
+      }
+      .hub-health-strip {
+        padding: 0.4rem 0;
+        font-size: 0.72rem;
+      }
+      .hub-health-strip .pill[data-state="warning"] {
+        color: #ffd166;
+        border-color: rgba(255,209,102,.55);
       }
       .icon-btn {
         width: 1.85rem;
@@ -1194,6 +1262,15 @@
             placeholder="search apps, tags, descriptions…"
             autocomplete="off"
           />
+          <div class="catalog-controls">
+            <select id="sortMode" aria-label="Sort artifacts">
+              <option value="changed">recently changed</option>
+              <option value="opened">recently opened</option>
+              <option value="title">title</option>
+              <option value="kind">kind</option>
+            </select>
+            <button id="favoritesOnly" type="button" aria-pressed="false">★ all</button>
+          </div>
           <div class="row">
             <button id="modeAnd" class="mode-btn" type="button">AND</button
             ><button id="modeOr" class="mode-btn active" type="button">
@@ -1261,6 +1338,17 @@
               </button>
             </div>
           </div>
+          <section id="quickAccessShelf" class="quick-access-shelf" aria-label="Quick access artifacts">
+            <div class="quick-access-head">
+              <div>
+                <strong>Quick access</strong>
+                <div class="muted">Pinned first, then recently opened</div>
+              </div>
+              <button id="resumeLastArtifact" type="button" disabled>resume last</button>
+            </div>
+            <div id="hubHealthStrip" class="hub-health-strip" aria-live="polite"></div>
+            <div id="quickAccessItems" class="quick-access-items"></div>
+          </section>
           <div id="results" class="results cards"></div>
         </section>
         <div
@@ -1659,11 +1747,17 @@
       let commandCenterReturnFocus = null;
       let lastNetworkHealth = network.health;
       let recentArtifactIds = readHubSetting("recentArtifactIds", []);
+      let favoriteArtifactIds = readHubSetting("favoriteArtifactIds", []);
+      let favoritesOnly = Boolean(readHubSetting("favoritesOnly", false));
+      let sortMode = readHubSetting("sortMode", "changed");
+      let latestBuildStats = {};
       let generatedRolePalette = readHubSetting("generatedPalette", null);
       let generatedPaletteColors = generatedRolePalette
         ? Object.values(generatedRolePalette)
         : [];
       if (!Array.isArray(recentArtifactIds)) recentArtifactIds = [];
+      if (!Array.isArray(favoriteArtifactIds)) favoriteArtifactIds = [];
+      if (!["changed", "opened", "title", "kind"].includes(sortMode)) sortMode = "changed";
       activeIncomingFileOffer = parseFileShareIntent(window.location);
       const fileShare = new PeernetFileShare({
         network,
@@ -1730,6 +1824,7 @@
             activeAppId || "none",
             `${openApps.size} open`,
           );
+          renderHubHealthStrip();
         },
       });
       const joinableGameIds = new Set(["bomberman-v10", "hyperblast-shooter", "v11-peer-daw", "minesweeper", "solitaire", "sprite-gif-creator"]);
@@ -1816,6 +1911,7 @@
       network.on("health", (health) => {
         lastNetworkHealth = health || network.health;
         renderCommandNetworkHealth();
+        renderHubHealthStrip();
       });
       network.on("peers", (peers) => {
         connectedPeers = peers || new Map();
@@ -2017,6 +2113,23 @@
         if (channel !== selectedChatChannel) incrementChannelUnread(channel);
       });
       $("search").oninput = renderResults;
+      $("sortMode").value = sortMode;
+      $("sortMode").onchange = () => {
+        sortMode = $("sortMode").value;
+        writeHubSetting("sortMode", sortMode);
+        renderResults();
+      };
+      $("favoritesOnly").onclick = () => {
+        favoritesOnly = !favoritesOnly;
+        writeHubSetting("favoritesOnly", favoritesOnly);
+        renderResults();
+      };
+      $("resumeLastArtifact").onclick = () => {
+        const item = catalog.items.find((candidate) => candidate.id === recentArtifactIds[0]);
+        if (!item) return;
+        selected = item;
+        openSelected(artifactDefaultAction(item));
+      };
       $("modeAnd").onclick = () => setTagMode("AND");
       $("modeOr").onclick = () => setTagMode("OR");
       $("clearTags").onclick = () => {
@@ -2205,10 +2318,11 @@
         $("footerArtifactCount").textContent = label;
       }
       function filteredItems() {
-        return sortItemsByRecentlyChanged(filterArtifactsAdvanced(catalog.items, {
+        const filtered = filterArtifactsAdvanced(catalog.items, {
           query: $("search").value,
           tagState,
-        }));
+        }).filter((item) => !favoritesOnly || favoriteArtifactIds.includes(item.id));
+        return sortCatalogItems(filtered);
       }
       function changedTimestamp(item) {
         const raw = item.changedAt || item.updatedAt || item.modifiedAt || item.mtime || item.lastChanged || item.generatedAt || item.createdAt || "";
@@ -2233,6 +2347,67 @@
       function sortItemsByRecentlyChanged(items) {
         return [...items].sort((a, b) => changedTimestamp(b) - changedTimestamp(a) || String(a.title || a.id).localeCompare(String(b.title || b.id)));
       }
+      function sortCatalogItems(items) {
+        if (sortMode === "title") {
+          return [...items].sort((a, b) => String(a.title || a.id).localeCompare(String(b.title || b.id)));
+        }
+        if (sortMode === "kind") {
+          return [...items].sort((a, b) => String(a.kind || "").localeCompare(String(b.kind || "")) || String(a.title || a.id).localeCompare(String(b.title || b.id)));
+        }
+        if (sortMode === "opened") {
+          return [...items].sort((a, b) => {
+            const aIndex = recentArtifactIds.indexOf(a.id);
+            const bIndex = recentArtifactIds.indexOf(b.id);
+            const aRank = aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex;
+            const bRank = bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex;
+            return aRank - bRank || changedTimestamp(b) - changedTimestamp(a);
+          });
+        }
+        return sortItemsByRecentlyChanged(items);
+      }
+      function toggleFavoriteArtifact(itemId) {
+        if (!itemId) return;
+        favoriteArtifactIds = favoriteArtifactIds.includes(itemId)
+          ? favoriteArtifactIds.filter((id) => id !== itemId)
+          : [itemId, ...favoriteArtifactIds].slice(0, 32);
+        writeHubSetting("favoriteArtifactIds", favoriteArtifactIds);
+        renderResults();
+        eventLog.info("favorite", itemId, favoriteArtifactIds.includes(itemId) ? "pinned" : "unpinned");
+      }
+      function quickAccessArtifacts() {
+        const ids = [...favoriteArtifactIds, ...recentArtifactIds]
+          .filter((id, index, all) => all.indexOf(id) === index)
+          .slice(0, 8);
+        return ids.map((id) => catalog.items.find((item) => item.id === id)).filter(Boolean);
+      }
+      function renderQuickAccess() {
+        const items = quickAccessArtifacts();
+        $("quickAccessItems").innerHTML = items.length
+          ? items.map((item) => `<button class="quick-access-card" type="button" data-quick-id="${esc(item.id)}"><strong>${favoriteArtifactIds.includes(item.id) ? "★ " : ""}${esc(item.title || item.id)}</strong><small>${esc(item.kind || "artifact")} · ${esc(formatArtifactTimestamp(item) || "ready")}</small></button>`).join("")
+          : '<span class="muted">Open or pin an artifact to build your quick shelf.</span>';
+        $("quickAccessItems").querySelectorAll("[data-quick-id]").forEach((button) => {
+          button.onclick = () => {
+            const item = catalog.items.find((candidate) => candidate.id === button.dataset.quickId);
+            if (!item) return;
+            selected = item;
+            openSelected(artifactDefaultAction(item));
+          };
+        });
+        const last = catalog.items.find((item) => item.id === recentArtifactIds[0]);
+        $("resumeLastArtifact").disabled = !last;
+        $("resumeLastArtifact").textContent = last ? `resume ${last.title || last.id}` : "resume last";
+        renderHubHealthStrip();
+      }
+      function renderHubHealthStrip() {
+        const health = lastNetworkHealth || network.health || {};
+        const openCount = document.querySelectorAll(".app-deck-tab[data-app-id]").length;
+        const buildState = latestBuildStats.dirty ? "dirty" : "clean";
+        $("hubHealthStrip").innerHTML = [
+          `<span class="pill" data-state="${latestBuildStats.dirty ? "warning" : "ok"}">release v${esc(latestBuildStats.version || "--")} · ${buildState}</span>`,
+          `<span class="pill">network ${esc(health.state || "offline")} · ${Number(health.peerCount || 0)} peers</span>`,
+          `<span class="pill">${openCount} open · ${favoriteArtifactIds.length} pinned</span>`,
+        ].join("");
+      }
       function artifactDefaultAction(item) {
         return item?.launch?.defaultAction || defaultAction || "newWindow";
       }
@@ -2241,7 +2416,9 @@
         const groups = buildMenuGroups(items);
         const activeTagLabel = [...tagState.activeTags].join(tagState.mode === "AND" ? " + " : " / ") || "all tags";
         $("summary").textContent =
-          `${items.length}/${catalog.items.length} visible · ${activeTagLabel}`;
+          `${items.length}/${catalog.items.length} visible · ${favoriteArtifactIds.length} pinned · ${activeTagLabel}`;
+        $("favoritesOnly").setAttribute("aria-pressed", favoritesOnly ? "true" : "false");
+        $("favoritesOnly").textContent = favoritesOnly ? "★ pinned" : "★ all";
         $("hubResultsHeadline").textContent =
           tagState.activeTags.size || $("search").value.trim()
             ? "NEXUS v11 · refined matrix"
@@ -2259,15 +2436,18 @@
               (node.onclick = (event) => {
                 const title = event.target.closest("[data-artifact-title]");
                 const b = event.target.closest("[data-launch]");
-                if (!b && !title) return;
+                const favorite = event.target.closest("[data-favorite]");
+                if (!b && !title && !favorite) return;
                 event.stopPropagation();
                 selected = catalog.items.find(
                   (item) => item.id === node.dataset.id,
                 );
+                if (favorite) return toggleFavoriteArtifact(node.dataset.id);
                 if (title) return openSelected(artifactDefaultAction(selected));
                 openSelected(b.dataset.launch);
               }),
           );
+        renderQuickAccess();
       }
       function renderArtifactItem(item) {
         const tags = (item.tags || [])
@@ -2280,20 +2460,23 @@
           .join("");
         const timestamp = formatArtifactTimestamp(item);
         const timestampDisplay = timestamp ? `<div class="muted" style="font-size: 0.7rem;">last changed: ${esc(timestamp)}</div>` : "";
-        const icons = `<div class="launch-icons"><button class="icon-btn" title="inline" data-launch="inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow">↗</button></div>`;
+        const favorite = favoriteArtifactIds.includes(item.id);
+        const icons = `<div class="launch-icons"><button class="icon-btn favorite-toggle" title="${favorite ? "unpin" : "pin"}" data-favorite="${esc(item.id)}" aria-pressed="${favorite}">${favorite ? "★" : "☆"}</button><button class="icon-btn" title="inline" data-launch="inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow">↗</button></div>`;
         return viewMode === "list"
-          ? `<article class="artifact-row" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="row between">${timestampDisplay}<span class="pill">${esc(item.kind)}</span></div><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
-          : `<article class="artifact-card" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div>${timestampDisplay}<p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
+          ? `<article class="artifact-row ${favorite ? "is-favorite" : ""}" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="row between">${timestampDisplay}<span class="pill">${esc(item.kind)}</span></div><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
+          : `<article class="artifact-card ${favorite ? "is-favorite" : ""}" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div>${timestampDisplay}<p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
       }
       function rememberRecentArtifact(item) {
         if (!item?.id) return;
         recentArtifactIds = [item.id, ...recentArtifactIds.filter((id) => id !== item.id)].slice(0, 12);
         writeHubSetting("recentArtifactIds", recentArtifactIds);
+        renderQuickAccess();
       }
       function commandSearchScore(entry, query) {
         const normalized = String(query || "").trim().toLowerCase();
         const recentIndex = entry.artifact ? recentArtifactIds.indexOf(entry.artifact.id) : -1;
-        if (!normalized) return (recentIndex >= 0 ? 120 - recentIndex : 0) + (entry.kind === "navigate" ? 18 : 0);
+        const favoriteBoost = entry.artifact && favoriteArtifactIds.includes(entry.artifact.id) ? 180 : 0;
+        if (!normalized) return favoriteBoost + (recentIndex >= 0 ? 120 - recentIndex : 0) + (entry.kind === "navigate" ? 18 : 0);
         const terms = normalized.split(/\s+/).filter(Boolean);
         const title = entry.title.toLowerCase();
         const haystack = `${entry.title} ${entry.detail || ""} ${entry.keywords || ""}`.toLowerCase();
@@ -2301,6 +2484,7 @@
         let score = terms.reduce((total, term) => total + (title.startsWith(term) ? 32 : title.includes(term) ? 18 : 7), 0);
         if (title === normalized) score += 80;
         if (recentIndex >= 0) score += 14 - recentIndex;
+        score += favoriteBoost;
         return score;
       }
       function hubCommandEntries() {
@@ -2360,6 +2544,18 @@
             kind: "navigate",
             keywords: "filter tags search catalog",
             run: () => $("search").focus(),
+          },
+          {
+            id: "filter:favorites",
+            title: favoritesOnly ? "Show All Artifacts" : "Show Pinned Artifacts",
+            detail: favoritesOnly ? "Leave favorites-only mode" : `Filter the catalog to ${favoriteArtifactIds.length} pinned artifacts`,
+            kind: "filter",
+            keywords: "favorite favourites pinned star quick access",
+            run: () => {
+              favoritesOnly = !favoritesOnly;
+              writeHubSetting("favoritesOnly", favoritesOnly);
+              renderResults();
+            },
           },
         ];
         const artifacts = catalog.items.map((artifact) => ({
@@ -3024,6 +3220,7 @@
           const response = await fetch("./data/build-stats.json");
           if (!response.ok) return;
           const stats = await response.json();
+          latestBuildStats = stats || {};
           const version = stats.version || "0.0.0";
           const commitShort = stats.commitShort || String(stats.commitHash || "--").slice(0, 12);
           const buildDate = Number.isFinite(Date.parse(stats.buildDate))
@@ -3053,6 +3250,7 @@
           document.documentElement.dataset.buildCommit = commitShort;
           document.documentElement.dataset.buildDirty = String(Boolean(stats.dirty));
           updateArtifactCount();
+          renderHubHealthStrip();
         } catch (e) {
           console.log("Build stats not available");
         }

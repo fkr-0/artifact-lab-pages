@@ -44,6 +44,37 @@ test.describe('app-hub-v11 shell', () => {
     expect(seriousErrors(errors)).toEqual([]);
   });
 
+  test('pins artifacts into quick access and persists favorites and catalog ordering', async ({ page }) => {
+    const errors = await collectPageErrors(page);
+    await page.goto('/app-hub-v11/index.html');
+
+    const firstCard = page.locator('#results [data-id]').first();
+    await expect(firstCard).toBeVisible();
+    const artifactId = await firstCard.getAttribute('data-id');
+    const artifactTitle = (await firstCard.locator('[data-artifact-title]').textContent())?.trim();
+    expect(artifactId).toBeTruthy();
+    expect(artifactTitle).toBeTruthy();
+
+    await firstCard.locator('[data-favorite]').click();
+    await expect(firstCard).toHaveClass(/is-favorite/);
+    await expect(firstCard.locator('[data-favorite]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator(`#quickAccessItems [data-quick-id="${artifactId}"]`)).toContainText(artifactTitle);
+    await expect(page.locator('#hubHealthStrip')).toContainText('1 pinned');
+
+    await page.selectOption('#sortMode', 'title');
+    await page.locator('#favoritesOnly').click();
+    await expect(page.locator('#favoritesOnly')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#results [data-id]')).toHaveCount(1);
+    await expect(page.locator('#results [data-id]').first()).toHaveAttribute('data-id', artifactId);
+
+    await page.reload();
+    await expect(page.locator('#sortMode')).toHaveValue('title');
+    await expect(page.locator('#favoritesOnly')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#results [data-id]')).toHaveCount(1);
+    await expect(page.locator(`#quickAccessItems [data-quick-id="${artifactId}"]`)).toBeVisible();
+    expect(seriousErrors(errors)).toEqual([]);
+  });
+
   test('launches Hyperblast inline and gives the iframe the full app-deck vertical lane', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/app-hub-v11/index.html');
