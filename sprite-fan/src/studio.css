@@ -75,7 +75,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:po
 .tl-frame[draggable="true"]{cursor:grab}
 .tl-frame.dragging{opacity:.45;outline:1px dashed var(--accent)}
 .tl-frame.drop-target{outline:2px solid var(--accent)}
-.contract-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.contract-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:6px;margin:8px 0}
 .contract-checklist{margin:8px 0;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(255,255,255,.02);font-size:10px;color:var(--text-muted);line-height:1.55}
 .contract-check{display:flex;gap:6px;align-items:flex-start;margin:2px 0}
 .contract-check.done{color:var(--success)}

@@ -299,6 +299,8 @@
                 <option value="badger-runner">Badger Runner 4x4 pages</option>
                 <option value="ethic-brawl-core">Ethic Brawl core_4x4</option>
                 <option value="ethic-brawl-extended">Ethic Brawl extended_4x4</option>
+                <option value="hyperblast-ship-clip">Hyperblast ship clip 4x1</option>
+                <option value="arcade-runtime-4x4">Arcade Runtime portable 4x4</option>
               </select>
             </div>
           </div>
@@ -307,6 +309,8 @@
             <button class="preset-btn" id="btn-target-badger" type="button"><div class="preset-name">Badger</div><div class="preset-size">4x4 pages</div></button>
             <button class="preset-btn" id="btn-target-ethic-core" type="button"><div class="preset-name">Ethic Core</div><div class="preset-size">core_4x4</div></button>
             <button class="preset-btn" id="btn-target-ethic-ext" type="button"><div class="preset-name">Ethic Ext</div><div class="preset-size">extended_4x4</div></button>
+            <button class="preset-btn" id="btn-target-hyperblast" type="button"><div class="preset-name">Hyperblast</div><div class="preset-size">clip 4x1</div></button>
+            <button class="preset-btn" id="btn-target-arcade" type="button"><div class="preset-name">Arcade</div><div class="preset-size">portable 4x4</div></button>
           </div>
           <div class="contract-checklist" id="reassembly-checklist">No target checks yet.</div>
           <div class="field">
@@ -322,7 +326,7 @@
             <button class="btn btn-ghost btn-sm" id="btn-frame-down">Move Selected Down</button>
           </div>
           <div class="btn-row">
-            <button class="btn btn-primary btn-sm" id="btn-contract-4x4">Set 4x4 Contract Layout</button>
+            <button class="btn btn-primary btn-sm" id="btn-contract-4x4">Apply Target Layout</button>
             <button class="btn btn-success btn-sm" id="btn-export-contract">Export Contract Pages</button>
           </div>
           <div class="layout-help" id="contract-page-info">No frames sliced yet.</div>
@@ -430,6 +434,8 @@
             <button class="btn btn-ghost btn-sm" id="btn-assist-badger">Badger</button>
             <button class="btn btn-ghost btn-sm" id="btn-assist-ethic-core">Ethic Core</button>
             <button class="btn btn-ghost btn-sm" id="btn-assist-ethic-ext">Ethic Ext</button>
+            <button class="btn btn-ghost btn-sm" id="btn-assist-hyperblast">Hyperblast</button>
+            <button class="btn btn-ghost btn-sm" id="btn-assist-arcade">Arcade</button>
           </div>
           <div class="assistant-checks" id="assistant-checks"></div>
           <div class="assistant-pages" id="assistant-pages"></div>

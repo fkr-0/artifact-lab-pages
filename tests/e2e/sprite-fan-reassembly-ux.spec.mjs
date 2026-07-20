@@ -99,3 +99,42 @@ test('contract export preview and filenames adapt to Ethic Brawl targets', async
   ]);
   await page.evaluate(() => window.__restoreAnchorClick?.());
 });
+
+test('Hyperblast target emits strict four-frame clip pages', async ({ page }) => {
+  await loadAndSliceTwentyFrames(page);
+  await page.locator('#btn-assist-hyperblast').click();
+
+  await expect(page.locator('#info-target')).toContainText('Hyperblast ship clip');
+  await expect(page.locator('#info-pages')).toContainText('5');
+  await expect(page.locator('#contract-page-info')).toContainText('4x1 contract');
+  await page.locator('button[data-wf="export"]').click();
+  await expect(page.locator('#contract-page-map .page-card')).toHaveCount(5);
+  await expect(page.locator('#contract-page-map .page-cell')).toHaveCount(20);
+});
+
+test('incomplete Arcade Runtime pages retain the full transparent 4x4 canvas', async ({ page }) => {
+  await loadAndSliceTwentyFrames(page);
+  await page.locator('#btn-assist-arcade').click();
+
+  await page.evaluate(() => {
+    window.__spriteFanDownloads = [];
+    const originalClick = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function patchedClick() {
+      window.__spriteFanDownloads.push({ name: this.download || '', href: this.href || '' });
+      return undefined;
+    };
+    window.__restoreAnchorClick = () => { HTMLAnchorElement.prototype.click = originalClick; };
+  });
+
+  await page.locator('#btn-assist-export').click();
+  const secondPage = await page.evaluate(() => window.__spriteFanDownloads.find((item) => item.name.endsWith('_p02.png')));
+  expect(secondPage).toBeTruthy();
+  const dimensions = await page.evaluate(async (href) => {
+    const image = new Image();
+    image.src = href;
+    await image.decode();
+    return { width: image.width, height: image.height };
+  }, secondPage.href);
+  expect(dimensions).toEqual({ width: 24, height: 24 });
+  await page.evaluate(() => window.__restoreAnchorClick?.());
+});
