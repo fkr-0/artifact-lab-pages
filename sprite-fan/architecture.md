@@ -2,71 +2,76 @@
 
 ## Decision
 
-Keep `atlas-studio.html` as the canonical integrated artifact for now.
+Use `sprite-fan/src/` as the canonical editing surface and generate the public
+standalone `sprite-fan/atlas-studio.html` artifact reproducibly.
 
-Do **not** split the studio into `src/`, `dist/`, and a compile-to-artifact pipeline yet.
+The generated file remains the stable browser and app-hub URL. It must not be
+edited directly.
 
-## Why
+## Why the decision changed
 
-The current pass hardened the single-file artifact with static contracts and end-to-end browser coverage for the main postprocessing and export workflows:
+The original single-file decision was appropriate while behavior was weakly
+tested. The split criteria have since been met:
 
-- load and slice a synthetic sprite sheet,
-- alpha cleanup,
-- dual-background alpha extraction,
-- island detection,
-- cleanup-all postprocessing,
-- issue review,
-- preview-before-apply checks,
-- PNG sheet export,
-- sprites.json export,
-- full config export,
-- source-sheet versus frame-review viewport state,
-- focused GIF export.
+- the DOM/canvas controller grew beyond comfortable single-file maintenance;
+- reusable image, workflow, export, and GIF logic needed direct tests;
+- the build now reproduces the deployable standalone HTML byte-for-byte;
+- browser workflows run against that generated artifact.
 
-A split would now add build-system complexity before the studio has a strong enough reason to require it. The simpler sibling artifacts still act as focused reference tools, and `atlas-studio.html` is now covered enough to remain the integration surface.
+Keeping duplicate test-only and production algorithms became a larger risk than
+the small deterministic assembly step. The source split removes that drift while
+preserving the zero-install standalone result.
 
-## Split criteria
-
-Reconsider splitting only when at least two of these become true:
-
-1. The studio grows beyond comfortable single-file maintenance.
-2. Shared image-processing functions need independent browser/runtime unit tests outside the existing `sprite-fan/lib` contract surface.
-3. GIF import is merged into the studio, or GIF export grows beyond the current focused standalone encoder.
-4. A reproducible compile step can emit a standalone `atlas-studio.html` without breaking the current zero-build artifact use case.
-5. Multiple artifacts start sharing the same sprite postprocessing UI components.
-
-## Future split shape
-
-If the criteria are met, use this shape:
+## Current boundaries
 
 ```text
 sprite-fan/
-  package.json
   src/
-    studio.html
-    studio.css
-    studio.js
-    image-ops.js
-    review-state.js
-    export-manifest.js
-  tests/
-    *.mjs
-  dist/
-    atlas-studio.html
+    atlas-studio.html   # HTML shell with injection markers
+    studio.css          # UI styling
+    config-core.js      # imported/persisted config normalization
+    ui-navigation.js    # keyboard and focus decisions
+    workflow-core.js    # workflow availability and redirects
+    image-io.js         # object URL and image loading lifecycle
+    pixel-analysis.js   # metrics, components, pinholes, hashes, jitter review
+    frame-operations.js # repair, morphology, cleanup, and alignment transforms
+    spec-guide.js       # requirement evaluation and display-line formatting
+    export-core.js      # review reports, manifests, page plans, safe names
+    gif-core.js         # deterministic GIF encoder
+    studio.js           # DOM/canvas orchestration
+  build-atlas-studio.mjs
+  atlas-studio.html     # generated public artifact
 ```
 
-The compile step must:
+Pure modules use classic-script globals because the final output is one
+self-contained HTML file. Node contract tests load those exact production
+scripts in a VM; browser E2E tests load the assembled artifact.
 
-- emit a single standalone HTML artifact,
-- preserve the current public filename `atlas-studio.html`,
-- run existing e2e specs against the emitted artifact,
-- include a source-map or readable section comments for reviewability,
-- avoid introducing a mandatory dev server beyond the existing artifact server.
+## Build contract
 
-## Current package stance
+The build must:
 
-`atlas-studio.html` remains the source of truth. `sprite-fan/lib/sprite-postprocess.mjs` is the current deterministic contract boundary for reusable image logic.
+- emit one standalone browser-loadable HTML artifact;
+- preserve the public filename and existing app-hub links;
+- preserve module order explicitly;
+- reject embedded closing `</script>` or `</style>` sequences;
+- support a source/output drift check;
+- require no development server beyond the existing artifact server.
 
-Focused GIF export is now merged into `atlas-studio.html` as a small standalone encoder with e2e coverage. This does not by itself trigger a split, because GIF import and shared GIF UI modules are still absent.
+## Testing contract
 
-Future GIF work should continue as focused import/export modules, not by copying the full GIF creator UI.
+Changes to a pure boundary need direct Node coverage. Changes to user-visible
+workflows need Chromium coverage against `atlas-studio.html`. Pixel operations
+must test immutability, malformed input, deterministic output, and undo/export
+integration where applicable.
+
+Focused GIF export lives in `src/gif-core.js` with direct binary tests and a real
+Chromium decode regression. Future GIF work should remain focused import/export
+modules rather than copying the separate GIF-creator UI.
+
+## Remaining architecture work
+
+Continue reducing `studio.js` through smaller repair, timeline, and
+contract-export controllers. New modules should be
+introduced only when they establish a meaningful testable boundary, not merely
+to reduce line count.

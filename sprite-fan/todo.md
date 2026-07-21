@@ -2,7 +2,7 @@
 
 ## Status
 
-- `atlas-studio.html` is currently the main integration surface.
+- `src/` is the editing surface; `atlas-studio.html` is the generated public integration artifact.
 - It already covers the three simpler sibling artifacts in this directory:
   - `alpha-rem.html`: white / near-white background alpha cleanup.
   - `dual-bg.html`: dual-background alpha extraction.
@@ -57,21 +57,13 @@
 
 ### Artifact architecture
 
-- [x] Do not split immediately. First harden `atlas-studio.html` as the canonical integrated artifact.
-- [x] Re-evaluate split after tests exist. Split into a subpackage only when at least two of these are true:
-  - studio code grows past comfortable single-file maintenance,
-  - shared image-processing functions need unit tests,
-  - a build step can emit the final standalone HTML artifact reproducibly,
-  - GIF export or larger animation tooling is merged.
-- [x] Proposed future shape if split becomes worthwhile:
-  - `sprite-fan/package.json`
-  - `sprite-fan/src/studio.html`
-  - `sprite-fan/src/studio.js`
-  - `sprite-fan/src/studio.css`
-  - `sprite-fan/src/image-ops.js`
-  - `sprite-fan/tests/*.mjs`
-  - `sprite-fan/dist/atlas-studio.html`
-  - compile command emits `atlas-studio.html` from source parts.
+- [x] Harden the original integrated artifact before splitting.
+- [x] Re-evaluate after tests existed; the split criteria were met.
+- [x] Move editing into `sprite-fan/src/` while retaining one generated standalone artifact.
+- [x] Add a byte-for-byte source/output drift contract.
+- [x] Move production pixel analysis and repair operations out of the DOM controller.
+- [x] Extract deterministic spec-guide logic and test the production module directly.
+- [ ] Split smaller repair, timeline, and contract-export controllers from `studio.js` where this improves testability.
 
 ### GIF creator merge review
 
@@ -118,14 +110,18 @@
 
 ## E2E postprocessing coverage added
 
-- [x] Added `sprite-fan/lib/sprite-postprocess.mjs` as a deterministic image-operation contract surface.
+- [x] Removed the test-only postprocess copy and moved its contracts onto the
+  production `src/pixel-analysis.js` and `src/frame-operations.js` surfaces.
 - [x] Added `tests/sprite-fan-postprocess.test.mjs` for:
   - alpha pixel metrics,
   - bounding boxes,
   - center of mass,
   - stray-pixel removal,
   - transparent pinhole detection and fill,
-  - combined postprocessing pipeline.
+  - combined postprocessing pipeline,
+  - morphology,
+  - immutable anchor/pixel jitter alignment,
+  - malformed RGBA rejection.
 - [x] Added `tests/e2e/sprite-fan-postprocessing.spec.mjs` to drive `atlas-studio.html` with a generated PNG sheet.
 - [x] Added bridge commands:
   - `test:sprite-fan`

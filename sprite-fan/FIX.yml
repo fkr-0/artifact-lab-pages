@@ -1,0 +1,158 @@
+version: 1
+title: Sprite Fan Atlas Studio UX Recovery Plan
+status: proposed
+objective: >-
+  Make the app operational for first-time users by fixing the core interaction model,
+  cleanup workflow, preview behavior, and grid adjustment UX before adding more features.
+
+principles:
+  - One action model per context: no hidden gesture conflicts.
+  - WYSIWYG: preview is on-canvas and matches apply output.
+  - Non-destructive iteration: parameter tuning must not force undo loops.
+  - Guided flow first, advanced tooling second.
+  - Deterministic defaults and explicit tool state at all times.
+
+critical_failures:
+  - Space+drag pan is unreliable due to gesture arbitration conflicts.
+  - Import/Cleanup state ownership is unclear; users lose confidence in what is persisted.
+  - Small right preview is disconnected from main canvas and hard to trust.
+  - Cleanup and per-frame cleanup are mixed cognitively and operationally.
+  - Island detection appears random to users because thresholds and visual meaning are under-explained.
+  - Grid adjustment lacks robust per-cell interaction parity with sprite-gif-creator-v2.
+
+milestones:
+  - id: M1
+    name: Interaction Kernel Stabilization
+    target: alpha
+    outcomes:
+      - Global input state machine introduced.
+      - Deterministic drag priority implemented.
+      - Tool HUD always visible.
+    tasks:
+      - Define tool states: idle, pan, grid_move, grid_resize, cell_move, cell_resize, anchor_place.
+      - Add priority order: space+drag > anchor_place > edit-mode drag.
+      - Centralize pointerdown/move/up handling in one controller.
+      - Add invariant checks in dev mode (single active tool only).
+    acceptance:
+      - Space+drag always pans in every workflow.
+      - Shift+drag only modifies size (grid or cell depending on mode).
+      - Mouse-up always returns to idle.
+
+  - id: M2
+    name: Cleanup Flow Separation + State Ownership
+    target: alpha
+    outcomes:
+      - Cleanup and Cleanup-by-Frame are separate workflows.
+      - Source sheet state is explicit and persistent.
+      - Switching workflows never silently reverts cleanup.
+    tasks:
+      - Keep separate states: original_image_data, working_sheet_data, selected_frame_data.
+      - Refactor Import rendering to always display working_sheet_data.
+      - Move per-frame operations to dedicated workflow tab and panel group.
+      - Add explicit actions: Reset to Original, Commit Current as New Base.
+    acceptance:
+      - After background removal, returning to Import keeps cleaned sheet.
+      - Slice always uses working_sheet_data, never implicitly original.
+
+  - id: M3
+    name: Preview Model Overhaul (Main-Canvas Overlay)
+    target: alpha
+    outcomes:
+      - Preview shown only on main canvas overlay.
+      - No tiny detached preview pane.
+      - Preview parameter changes are instant and non-destructive.
+    tasks:
+      - Remove right-pane preview canvas.
+      - Add preview overlay canvas layered between main and overlay guides.
+      - Render preview at native pixel resolution, transformed with main view.
+      - Auto-preview on relevant slider/checkbox changes; do not auto-apply.
+      - Keep explicit Apply button for destructive commit.
+    acceptance:
+      - Preview and apply produce matching output for same params.
+      - User can tune tolerance/saturation without undo churn.
+
+  - id: M4
+    name: Grid Editing Parity with sprite-gif-creator-v2
+    target: beta
+    outcomes:
+      - Whole-grid and per-cell editing with clear mouse mapping.
+      - Overrides visible and reversible.
+      - Slicing honors per-cell overrides.
+    tasks:
+      - Add edit modes: whole_grid, single_cell.
+      - Add selected_cell control and keyboard stepper.
+      - Add per-cell override map: dx, dy, dw, dh.
+      - Draw overlay styles: default grid, selected cell, overridden cells.
+      - Support double-click reset for selected-cell override.
+      - Ensure slicing reads effective rect (base + override) per cell.
+    acceptance:
+      - User can adjust one problematic cell without breaking full grid.
+      - Resetting one cell override is one action.
+      - Visual overlay always matches sliced result.
+
+  - id: M5
+    name: Island Detection Clarity and Trust
+    target: beta
+    outcomes:
+      - Detection results are explainable and tunable.
+      - Visuals map directly to resulting groups.
+    tasks:
+      - Add result panel: group count, min size filter, merge distance effect.
+      - Show numbered boxes and selected-group details.
+      - Add contextual hints for zero/one-group outcomes.
+      - Add optional foreground fallback mode with explicit toggle label.
+    acceptance:
+      - User can intentionally move from 1 group to multiple groups by changing controls.
+      - UI explains why detection collapsed or merged.
+
+  - id: M6
+    name: Guided Corridor for First Basic Usability
+    target: alpha
+    outcomes:
+      - First-run success path is obvious.
+      - Non-essential advanced controls are gated.
+    tasks:
+      - Introduce step banner: Load -> Cleanup -> Slice -> Export.
+      - Disable advanced panels until prerequisite state exists.
+      - Add one-line next action text based on state.
+      - Add compact in-app help for mouse mappings.
+    acceptance:
+      - New user completes load->transparent cleanup->slice in under 2 minutes.
+      - No dead-end state without actionable guidance.
+
+qa_strategy:
+  interaction_contract_tests:
+    - space_drag_pan_priority
+    - grid_vs_cell_mode_mouse_mapping
+    - mouseup_idle_recovery
+  workflow_contract_tests:
+    - cleanup_persists_when_returning_to_import
+    - slice_uses_working_sheet_not_original
+    - preview_overlay_non_destructive
+  visual_contract_tests:
+    - overlay_alignment_grid_anchor_islands
+    - per_cell_override_overlay_matches_slice
+  regression_tests_to_keep:
+    - existing export/manifest/gif/postprocess tests
+
+implementation_order:
+  - M1
+  - M2
+  - M3
+  - M6
+  - M4
+  - M5
+
+definition_of_done:
+  alpha:
+    - M1, M2, M3, M6 shipped
+    - Core path works reliably: load -> cleanup -> import slice -> export
+    - No known gesture conflicts
+  beta:
+    - M4, M5 shipped
+    - Per-cell editing and island detection are user-trustworthy
+
+notes:
+  - Do not introduce auto-apply cleanup as default behavior.
+  - Auto-preview only; explicit apply remains user-controlled.
+  - Keep behavior deterministic and reversible.

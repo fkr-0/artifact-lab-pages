@@ -31,7 +31,19 @@ async function check(label, fn) {
 const html = await read('sprite-fan/atlas-studio.html');
 const shell = await read('sprite-fan/src/atlas-studio.html');
 const cssSource = await read('sprite-fan/src/studio.css');
-const jsSource = await read('sprite-fan/src/studio.js');
+const jsSources = await Promise.all([
+  read('sprite-fan/src/config-core.js'),
+  read('sprite-fan/src/ui-navigation.js'),
+  read('sprite-fan/src/workflow-core.js'),
+  read('sprite-fan/src/image-io.js'),
+  read('sprite-fan/src/pixel-analysis.js'),
+  read('sprite-fan/src/frame-operations.js'),
+  read('sprite-fan/src/spec-guide.js'),
+  read('sprite-fan/src/export-core.js'),
+  read('sprite-fan/src/gif-core.js'),
+  read('sprite-fan/src/studio.js'),
+]);
+const jsSource = jsSources.join('\n\n');
 const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1] ?? '';
 
 await check('atlas-studio has no duplicate DOM ids', () => {
@@ -62,13 +74,15 @@ await check('sprite-fan UX hooks are present', () => {
   }
 });
 
-await check('sprite-fan docs reflect current GIF and split-plan state', async () => {
+await check('sprite-fan docs reflect generated-source architecture', async () => {
   const architecture = await read('sprite-fan/architecture.md');
   const splitPlan = await read('sprite-fan/source-split-plan.md');
-  assert.match(architecture, /Focused GIF export is now merged/i);
-  assert.match(architecture, /does not by itself trigger a split/i);
+  assert.match(architecture, /`sprite-fan\/src\/` as the canonical editing surface/i);
+  assert.match(architecture, /Focused GIF export lives in `src\/gif-core\.js`/i);
+  assert.match(architecture, /pixel-analysis\.js/i);
+  assert.match(architecture, /spec-guide\.js/i);
   assert.match(splitPlan, /single browser-loadable HTML file/i);
-  assert.match(splitPlan, /config sanitization/i);
+  assert.match(splitPlan, /byte-for-byte contract that detects source\/output drift/i);
 });
 
 await check('inline atlas-studio script parses in node', async () => {

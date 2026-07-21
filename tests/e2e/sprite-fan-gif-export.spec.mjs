@@ -4,6 +4,26 @@ function readU16(bytes, offset) {
   return bytes[offset] | (bytes[offset + 1] << 8);
 }
 
+async function longGifPayload(page) {
+  const dataUrl = await page.evaluate(async () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 40;
+    canvas.height = 20;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 40, 20);
+    ctx.fillStyle = 'rgba(70, 140, 230, 1)';
+    ctx.fillRect(2, 2, 16, 16);
+    ctx.fillStyle = 'rgba(230, 120, 70, 1)';
+    ctx.fillRect(22, 2, 16, 16);
+    return canvas.toDataURL('image/png');
+  });
+  return {
+    name: 'sprite-fan-long-gif-export.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(dataUrl.split(',')[1], 'base64'),
+  };
+}
+
 function parseGif(bytes) {
   const ascii = (start, len) => String.fromCharCode(...bytes.slice(start, start + len));
   const info = {
@@ -135,4 +155,35 @@ test('GIF export preserves frame count, duration, transparency flag, and loop me
     { x: 0, y: 0, w: 8, h: 8 },
     { x: 0, y: 0, w: 8, h: 8 },
   ]);
+});
+
+test('GIF export remains browser-decodable for frames larger than one 9-bit LZW block', async ({ page }) => {
+  await page.goto('/sprite-fan/atlas-studio.html');
+  await page.locator('#file-input').setInputFiles(await longGifPayload(page));
+  await page.locator('#frame-w-num').fill('20');
+  await page.locator('#frame-h-num').fill('20');
+  await page.locator('#btn-slice').click();
+  await expect(page.locator('#slice-info')).toContainText('2 frames');
+
+  await page.locator('button[data-wf="export"]').click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#btn-export-gif').click();
+  const bytes = await readDownloadBytes(await downloadPromise);
+  const dataUrl = `data:image/gif;base64,${Buffer.from(bytes).toString('base64')}`;
+
+  const decoded = await page.evaluate(async (source) => {
+    const image = new Image();
+    image.src = source;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0);
+    const center = Array.from(context.getImageData(10, 10, 1, 1).data);
+    return { width: image.width, height: image.height, center };
+  }, dataUrl);
+
+  expect(decoded).toMatchObject({ width: 20, height: 20 });
+  expect(decoded.center[3]).toBe(255);
 });

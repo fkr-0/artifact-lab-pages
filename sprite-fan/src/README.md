@@ -8,7 +8,16 @@ The files in this directory are the editable source for the integrated Sprite At
 src/
   atlas-studio.html  # HTML shell with CSS and JS insertion markers
   studio.css         # CSS payload for the standalone artifact
-  studio.js          # JS payload for the standalone artifact
+  config-core.js     # Dependency-free imported-config sanitization
+  ui-navigation.js   # Dependency-free keyboard/focus decisions
+  workflow-core.js   # Dependency-free workflow state and redirects
+  image-io.js        # Object URL and image lifecycle boundary
+  pixel-analysis.js  # Frame metrics, components, pinholes, hashes, jitter review
+  frame-operations.js # Pure repair, morphology, cleanup, and alignment transforms
+  spec-guide.js      # Requirement evaluation and safe display-line formatting
+  export-core.js     # Review, manifest, page-plan, and filename domain
+  gif-core.js        # Deterministic GIF palette and binary encoder
+  studio.js          # DOM, canvas, workflow, and export orchestration
 ```
 
 ## Build
@@ -17,7 +26,8 @@ src/
 pnpm run build:sprite-fan
 ```
 
-The builder writes `sprite-fan/atlas-studio.html`, which remains the standalone browser artifact.
+The builder concatenates the JavaScript modules in dependency order and writes
+`sprite-fan/atlas-studio.html`, which remains the standalone browser artifact.
 
 ## Check drift
 

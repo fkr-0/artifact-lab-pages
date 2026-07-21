@@ -11,25 +11,25 @@
   <div id="topbar">
     <span class="logo">Sprite Atlas Studio</span>
     <span class="topbar-sep"></span>
-    <div class="wf-tabs">
-      <button class="wf-tab active" data-wf="import"><span class="tab-num">1</span>Import</button>
-      <button class="wf-tab" data-wf="align"><span class="tab-num">2</span>Align</button>
-      <button class="wf-tab" data-wf="cleanup"><span class="tab-num">3</span>Cleanup</button>
-      <button class="wf-tab" data-wf="repair"><span class="tab-num">4</span>Cleanup by Frame</button>
-      <button class="wf-tab" data-wf="export"><span class="tab-num">5</span>Export</button>
+    <div class="wf-tabs" role="tablist" aria-label="Sprite workflow">
+      <button class="wf-tab active" role="tab" aria-selected="true" tabindex="0" data-wf="import"><span class="tab-num">1</span>Import</button>
+      <button class="wf-tab" role="tab" aria-selected="false" tabindex="-1" data-wf="align"><span class="tab-num">2</span>Align</button>
+      <button class="wf-tab" role="tab" aria-selected="false" tabindex="-1" data-wf="cleanup"><span class="tab-num">3</span>Cleanup</button>
+      <button class="wf-tab" role="tab" aria-selected="false" tabindex="-1" data-wf="repair"><span class="tab-num">4</span>Cleanup by Frame</button>
+      <button class="wf-tab" role="tab" aria-selected="false" tabindex="-1" data-wf="export"><span class="tab-num">5</span>Export</button>
     </div>
     <div class="topbar-actions">
-      <button class="btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#x21B6;</button>
-      <button class="btn-icon" id="btn-redo" title="Redo (Ctrl+Y)" disabled>&#x21B7;</button>
+      <button class="btn-icon" id="btn-undo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>&#x21B6;</button>
+      <button class="btn-icon" id="btn-redo" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>&#x21B7;</button>
       <span class="topbar-sep"></span>
-      <button class="btn-icon" id="btn-zoom-out" title="Zoom Out">&#x2212;</button>
-      <button class="btn-icon" id="btn-zoom-fit" title="Fit to View (F)">&#x25CE;</button>
-      <button class="btn-icon" id="btn-auto-fit" title="Toggle auto-fit while reviewing frames">AF</button>
-      <button class="btn-icon" id="btn-reset-layout" title="Reset panel layout">&#x21A4;</button>
-      <button class="btn-icon" id="btn-zoom-in" title="Zoom In">&#x2B;</button>
+      <button class="btn-icon" id="btn-zoom-out" title="Zoom Out" aria-label="Zoom out">&#x2212;</button>
+      <button class="btn-icon" id="btn-zoom-fit" title="Fit to View (F)" aria-label="Fit canvas to view">&#x25CE;</button>
+      <button class="btn-icon" id="btn-auto-fit" title="Toggle auto-fit while reviewing frames" aria-label="Toggle automatic frame fitting">AF</button>
+      <button class="btn-icon" id="btn-reset-layout" title="Reset panel layout" aria-label="Reset panel layout">&#x21A4;</button>
+      <button class="btn-icon" id="btn-zoom-in" title="Zoom In" aria-label="Zoom in">&#x2B;</button>
       <span class="topbar-sep"></span>
-      <button class="btn-icon" id="btn-onion" title="Onion Skin (O)">&#x25D0;</button>
-      <button class="btn-icon" id="btn-config" title="Config Manager">&#x2699;</button>
+      <button class="btn-icon" id="btn-onion" title="Onion Skin (O)" aria-label="Toggle onion skin">&#x25D0;</button>
+      <button class="btn-icon" id="btn-config" title="Config Manager" aria-label="Open configuration manager">&#x2699;</button>
       <button class="btn btn-primary btn-sm" id="btn-export">&#x2B07; Export PNG</button>
     </div>
   </div>
@@ -537,7 +537,7 @@
 
   <div id="statusbar">
     <span class="status-dot"></span>
-    <span class="status-msg" id="status-msg">Ready - load an image to begin</span>
+    <span class="status-msg" id="status-msg" role="status" aria-live="polite">Ready - load an image to begin</span>
     <div class="status-right">
       <span id="status-undo">Undo: 0</span>
       <span id="status-wf">Import</span>
@@ -546,9 +546,9 @@
 </div>
 
 <!-- Config Modal -->
-<div class="modal-overlay" id="config-modal">
-  <div class="modal">
-    <div class="modal-header"><span>Config Manager</span><button class="btn-icon" id="btn-config-close">&#x2715;</button></div>
+<div class="modal-overlay" id="config-modal" aria-hidden="true" inert>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="config-modal-title" tabindex="-1">
+    <div class="modal-header"><span id="config-modal-title">Config Manager</span><button class="btn-icon" id="btn-config-close" aria-label="Close configuration manager">&#x2715;</button></div>
     <div class="modal-body">
       <div class="btn-row" style="margin-bottom:10px">
         <button class="btn btn-ghost btn-sm" id="btn-cfg-save-local">Save LocalStorage</button>
@@ -565,7 +565,7 @@
     </div>
   </div>
 </div>
-<div class="toast-container" id="toast-container"></div>
+<div class="toast-container" id="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
 
 <script>{{SPRITE_FAN_JS}}</script>
 </body>

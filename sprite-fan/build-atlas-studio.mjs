@@ -8,19 +8,33 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = resolve(here, 'src');
 const shellPath = resolve(src, 'atlas-studio.html');
 const cssPath = resolve(src, 'studio.css');
-const jsPath = resolve(src, 'studio.js');
+const jsPaths = [
+  resolve(src, 'config-core.js'),
+  resolve(src, 'ui-navigation.js'),
+  resolve(src, 'workflow-core.js'),
+  resolve(src, 'image-io.js'),
+  resolve(src, 'pixel-analysis.js'),
+  resolve(src, 'frame-operations.js'),
+  resolve(src, 'spec-guide.js'),
+  resolve(src, 'export-core.js'),
+  resolve(src, 'gif-core.js'),
+  resolve(src, 'studio.js'),
+];
 const outPath = resolve(here, 'atlas-studio.html');
 
-const [shell, css, js] = await Promise.all([
+const [shell, css, ...jsSources] = await Promise.all([
   readFile(shellPath, 'utf8'),
   readFile(cssPath, 'utf8'),
-  readFile(jsPath, 'utf8'),
+  ...jsPaths.map((path) => readFile(path, 'utf8')),
 ]);
+const js = jsSources.join('\n\n');
 
 assert.match(shell, /\{\{SPRITE_FAN_CSS\}\}/, 'source shell must contain {{SPRITE_FAN_CSS}}');
 assert.match(shell, /\{\{SPRITE_FAN_JS\}\}/, 'source shell must contain {{SPRITE_FAN_JS}}');
 assert.doesNotMatch(css, /<\/style>/i, 'CSS source must not contain </style>');
-assert.doesNotMatch(js, /<\/script>/i, 'JS source must not contain </script>');
+jsSources.forEach((source, index) => {
+  assert.doesNotMatch(source, /<\/script>/i, `${jsPaths[index]} must not contain </script>`);
+});
 
 const html = shell
   .replace('{{SPRITE_FAN_CSS}}', css)
