@@ -154,7 +154,7 @@ function buildArtifactsOrder(options = {}) {
     }) => cleanArtifact),
   };
 
-  fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
+  fs.writeFileSync(outputPath, `${JSON.stringify(outputData, null, 2)}\n`);
   console.log(`\n✅ Ordered ${outputPath} with ${sortedArtifacts.length} artifacts`);
 
   return outputData;

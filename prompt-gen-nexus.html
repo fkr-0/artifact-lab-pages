@@ -209,6 +209,14 @@ body {
 }
 .prompt-list-item:hover { background: rgba(0,255,255,0.07); border-color: rgba(0,255,255,0.25); border-left-color: rgba(0,255,255,0.4); }
 .prompt-list-item.active { background: rgba(0,255,255,0.1); border-color: rgba(0,255,255,0.3); border-left-color: var(--accent); box-shadow: 0 0 8px rgba(0,255,255,0.15); }
+.prompt-list-item:focus-visible,
+.placeholder-header:focus-visible,
+.theme-btn:focus-visible,
+.toggle-sw:focus-visible,
+.tag-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .prompt-list-name { font-family: "Orbitron", sans-serif; font-size: 0.72rem; font-weight: 600; color: var(--fg-primary); line-height: 1.3; }
 .prompt-list-preview { font-size: 0.65rem; color: rgba(0,255,255,0.5); margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .prompt-list-tags { display: flex; flex-wrap: wrap; gap: 0.15rem; margin-top: 0.25rem; }
@@ -548,6 +556,14 @@ body {
 
 /* Search highlight */
 mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius: 2px; padding: 0 1px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
 </style>
 </head>
 
@@ -570,8 +586,8 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
     <div class="hdr-chip" id="hdrStorageChip"><div class="dot on"></div><span>LOCAL</span></div>
     <div class="hdr-chip"><span id="hdrPromptCount">0 PRMPT</span></div>
     <div class="hdr-chip"><span id="hdrDateTime">--:--:--</span></div>
-    <button class="hdr-btn" onclick="App.openAssembly()" title="Assemble">⊕</button>
-    <button class="hdr-btn" onclick="App.openSettings()" title="Settings">⚙</button>
+    <button class="hdr-btn" type="button" data-action="open-assembly" title="Assemble">⊕</button>
+    <button class="hdr-btn" type="button" data-action="open-settings" title="Settings">⚙</button>
   </div>
 </header>
 
@@ -583,17 +599,17 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
   <aside class="tag-sidebar">
     <div class="tag-title">Tag Filter</div>
     <div class="tag-mode-toggle">
-      <button class="mode-btn" id="modeAnd" onclick="App.setTagMode('AND')">AND</button>
-      <button class="mode-btn active" id="modeOr" onclick="App.setTagMode('OR')">OR</button>
+      <button class="mode-btn" type="button" id="modeAnd" data-action="set-tag-mode" data-mode="AND" aria-pressed="false">AND</button>
+      <button class="mode-btn active" type="button" id="modeOr" data-action="set-tag-mode" data-mode="OR" aria-pressed="true">OR</button>
     </div>
     <div class="tag-filter" id="tagFilter"></div>
-    <button class="clear-tags" onclick="App.clearAllTags()">Clear All Tags</button>
+    <button class="clear-tags" type="button" data-action="clear-tags">Clear All Tags</button>
 
     <!-- Prompt List -->
     <div class="prompt-list-section">
       <div class="tag-title">Prompts</div>
       <div class="prompt-list" id="promptList"></div>
-      <button class="new-prompt-btn" onclick="App.createPrompt()">
+      <button class="new-prompt-btn" type="button" data-action="create-prompt">
         <span>＋</span> New Prompt
       </button>
     </div>
@@ -604,27 +620,27 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
     <div class="content-header">
       <input class="content-title-input" id="promptTitle" type="text" placeholder="Prompt title…" />
       <div class="tag-chips" id="promptTags"></div>
-      <button class="action-btn" onclick="App.openTagModal()" title="Add tag">🏷</button>
+      <button class="action-btn" type="button" data-action="open-tag-modal" title="Add tag">🏷</button>
       <div style="width:1px;height:20px;background:rgba(0,255,255,0.15)"></div>
-      <button class="action-btn save" onclick="App.savePrompt()">💾 Save</button>
-      <button class="action-btn copy" onclick="App.copyPrompt()">📋 Copy</button>
-      <button class="action-btn delete" onclick="App.deletePrompt()">🗑 Del</button>
+      <button class="action-btn save" type="button" data-action="save-prompt">💾 Save</button>
+      <button class="action-btn copy" type="button" data-action="copy-prompt">📋 Copy</button>
+      <button class="action-btn delete" type="button" data-action="delete-prompt">🗑 Del</button>
     </div>
 
     <div class="content-body">
       <!-- Tab bar -->
       <div class="tab-bar">
-        <button class="tab-btn active" data-tab="editor" onclick="App.switchTab('editor')">EDITOR</button>
-        <button class="tab-btn" data-tab="preview" onclick="App.switchTab('preview')">PREVIEW</button>
-        <button class="tab-btn" data-tab="operations" onclick="App.switchTab('operations')">OPERATIONS</button>
-        <button class="tab-btn" data-tab="apidocs" onclick="App.switchTab('apidocs')">API DOCS</button>
+        <button class="tab-btn active" type="button" data-action="switch-tab" data-tab="editor">EDITOR</button>
+        <button class="tab-btn" type="button" data-action="switch-tab" data-tab="preview">PREVIEW</button>
+        <button class="tab-btn" type="button" data-action="switch-tab" data-tab="operations">OPERATIONS</button>
+        <button class="tab-btn" type="button" data-action="switch-tab" data-tab="apidocs">API DOCS</button>
       </div>
 
       <!-- Tab: Editor -->
       <div class="tab-panel active" id="tab-editor">
         <div id="editorContainer" style="flex:1;overflow:hidden;padding:0.5rem;"></div>
         <div class="placeholder-panel" id="placeholderPanel">
-          <div class="placeholder-header" onclick="App.togglePlaceholderPanel()">
+          <div class="placeholder-header" data-action="toggle-placeholder-panel" data-keyable="true" role="button" tabindex="0">
             <div class="placeholder-title">
               <span>◈</span> Placeholder Values
               <span class="placeholder-count" id="placeholderCount">0</span>
@@ -663,7 +679,7 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
           <div class="op-create-form">
             <input id="opName" type="text" placeholder="Operation name…" />
             <textarea id="opTemplate" rows="4" placeholder="Template… Use <!prompt> where the current prompt is injected.&#10;Example: Optimize this: <!prompt>"></textarea>
-            <button class="action-btn save" onclick="App.createOperation()">＋ Create Operation</button>
+            <button class="action-btn save" type="button" data-action="create-operation">＋ Create Operation</button>
           </div>
         </div>
       </div>
@@ -700,36 +716,36 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
 <!-- ══════════════════════════════════════
      SETTINGS DRAWER
 ══════════════════════════════════════ -->
-<div class="settings-backdrop" id="settingsBackdrop" onclick="App.closeSettings()"></div>
+<div class="settings-backdrop" id="settingsBackdrop" data-action="close-settings"></div>
 <div class="settings-drawer" id="settingsDrawer">
   <div class="settings-drawer-hdr">
     <span class="settings-drawer-title">⚙ SYSTEM CONFIG</span>
-    <button class="settings-close" onclick="App.closeSettings()">✕ CLOSE</button>
+    <button class="settings-close" type="button" data-action="close-settings">✕ CLOSE</button>
   </div>
   <div class="settings-body">
     <div>
       <div class="settings-sect-title">Interface Theme</div>
       <div class="theme-grid" id="themeGrid">
-        <div class="theme-btn active" data-theme="default" onclick="App.setTheme('default')"><span class="theme-btn-label">TRON</span></div>
-        <div class="theme-btn" data-theme="synthwave" onclick="App.setTheme('synthwave')"><span class="theme-btn-label">SYNTH</span></div>
-        <div class="theme-btn" data-theme="cyberpunk" onclick="App.setTheme('cyberpunk')"><span class="theme-btn-label">CYBER</span></div>
-        <div class="theme-btn" data-theme="retro8bit" onclick="App.setTheme('retro8bit')"><span class="theme-btn-label">8-BIT</span></div>
-        <div class="theme-btn" data-theme="midnight" onclick="App.setTheme('midnight')"><span class="theme-btn-label">MIDN</span></div>
-        <div class="theme-btn" data-theme="vaporwave" onclick="App.setTheme('vaporwave')"><span class="theme-btn-label">VAPOR</span></div>
-        <div class="theme-btn" data-theme="matrix" onclick="App.setTheme('matrix')"><span class="theme-btn-label">MATRIX</span></div>
+        <div class="theme-btn active" data-theme="default" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="true"><span class="theme-btn-label">TRON</span></div>
+        <div class="theme-btn" data-theme="synthwave" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="false"><span class="theme-btn-label">SYNTH</span></div>
+        <div class="theme-btn" data-theme="cyberpunk" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="false"><span class="theme-btn-label">CYBER</span></div>
+        <div class="theme-btn" data-theme="retro8bit" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="false"><span class="theme-btn-label">8-BIT</span></div>
+        <div class="theme-btn" data-theme="midnight" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="false"><span class="theme-btn-label">MIDN</span></div>
+        <div class="theme-btn" data-theme="vaporwave" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="false"><span class="theme-btn-label">VAPOR</span></div>
+        <div class="theme-btn" data-theme="matrix" data-action="set-theme" data-keyable="true" role="button" tabindex="0" aria-pressed="false"><span class="theme-btn-label">MATRIX</span></div>
       </div>
     </div>
     <div>
       <div class="settings-sect-title">Editor</div>
-      <div class="setting-row"><span>Line wrapping</span><div class="toggle-sw on" id="toggleWrap" onclick="App.toggleWrap()"></div></div>
-      <div class="setting-row"><span>Line numbers</span><div class="toggle-sw on" id="toggleNumbers" onclick="App.toggleNumbers()"></div></div>
+      <div class="setting-row"><span>Line wrapping</span><div class="toggle-sw on" id="toggleWrap" data-action="toggle-wrap" data-keyable="true" role="button" tabindex="0" aria-pressed="true"></div></div>
+      <div class="setting-row"><span>Line numbers</span><div class="toggle-sw on" id="toggleNumbers" data-action="toggle-numbers" data-keyable="true" role="button" tabindex="0" aria-pressed="true"></div></div>
     </div>
     <div>
       <div class="settings-sect-title">Data</div>
-      <div class="setting-row"><span>Export all (JSON)</span><button class="action-btn copy" onclick="App.exportData()">📤</button></div>
-      <div class="setting-row"><span>Import JSON</span><button class="action-btn save" onclick="document.getElementById('importFile').click()">📥</button></div>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="App.importData(event)" />
-      <div class="setting-row"><span>Purge all data</span><button class="action-btn delete" onclick="App.purgeData()">☠</button></div>
+      <div class="setting-row"><span>Export all (JSON)</span><button class="action-btn copy" type="button" data-action="export-data">📤</button></div>
+      <div class="setting-row"><span>Import JSON</span><button class="action-btn save" type="button" data-action="trigger-import">📥</button></div>
+      <input type="file" id="importFile" accept=".json" style="display:none" />
+      <div class="setting-row"><span>Purge all data</span><button class="action-btn delete" type="button" data-action="purge-data">☠</button></div>
     </div>
   </div>
 </div>
@@ -741,15 +757,15 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
   <div class="modal-box" style="width:360px">
     <div class="modal-header">
       <span class="modal-title">🏷 ADD TAG</span>
-      <button class="modal-close" onclick="App.closeTagModal()">✕</button>
+      <button class="modal-close" type="button" data-action="close-tag-modal">✕</button>
     </div>
     <div class="modal-body">
       <input class="tag-modal-input" id="tagModalInput" type="text" placeholder="Type tag, press Enter…" />
       <div class="tag-chips" id="tagModalExisting" style="margin-top:0.75rem"></div>
     </div>
     <div class="modal-footer">
-      <button class="action-btn" onclick="App.closeTagModal()">Cancel</button>
-      <button class="action-btn save" onclick="App.addTagFromModal()">Add</button>
+      <button class="action-btn" type="button" data-action="close-tag-modal">Cancel</button>
+      <button class="action-btn save" type="button" data-action="add-tag-from-modal">Add</button>
     </div>
   </div>
 </div>
@@ -761,7 +777,7 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
   <div class="modal-box">
     <div class="modal-header">
       <span class="modal-title">⊕ ASSEMBLE PROMPTS</span>
-      <button class="modal-close" onclick="App.closeAssembly()">✕</button>
+      <button class="modal-close" type="button" data-action="close-assembly">✕</button>
     </div>
     <div class="modal-body">
       <div class="settings-sect-title">Separator</div>
@@ -780,8 +796,8 @@ mark { background: rgba(0,255,136,0.3); color: var(--fg-primary); border-radius:
       <div class="asm-preview" id="asmPreview">—</div>
     </div>
     <div class="modal-footer">
-      <button class="action-btn" onclick="App.closeAssembly()">Cancel</button>
-      <button class="action-btn save" onclick="App.saveAssembly()">💾 Save Assembled</button>
+      <button class="action-btn" type="button" data-action="close-assembly">Cancel</button>
+      <button class="action-btn save" type="button" data-action="save-assembly">💾 Save Assembled</button>
     </div>
   </div>
 </div>
@@ -822,10 +838,49 @@ CodeMirror.defineMode('prompt-template', function() {
 ══════════════════════════════════════ */
 const STORE_KEY = 'promptforge_prompts';
 const OPS_KEY = 'promptforge_ops';
+const STORE_SCHEMA = 'promptforge-store/v2';
+const UI_STATE_KEY = 'promptforge_ui';
+const UI_STATE_SCHEMA = 'promptforge-ui/v1';
+
+function normalizePromptRecord(prompt = {}) {
+  return {
+    id: String(prompt.id || uid()),
+    title: String(prompt.title || 'Untitled'),
+    body: String(prompt.body || ''),
+    tags: Array.isArray(prompt.tags) ? prompt.tags.map(tag => String(tag)).filter(Boolean) : [],
+    created: String(prompt.created || new Date().toISOString()),
+    updated: String(prompt.updated || new Date().toISOString()),
+  };
+}
+
+function normalizeOperationRecord(operation = {}) {
+  return {
+    id: String(operation.id || uid()),
+    name: String(operation.name || 'Untitled'),
+    template: String(operation.template || ''),
+  };
+}
+
+function readCollection(key) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || 'null');
+    if (Array.isArray(raw)) {
+      return key === STORE_KEY ? raw.map(normalizePromptRecord) : raw.map(normalizeOperationRecord);
+    }
+    if (raw && raw.schema === STORE_SCHEMA && Array.isArray(raw.items)) {
+      return key === STORE_KEY ? raw.items.map(normalizePromptRecord) : raw.items.map(normalizeOperationRecord);
+    }
+  } catch {}
+  return [];
+}
+
+function writeCollection(key, items) {
+  localStorage.setItem(key, JSON.stringify({ schema: STORE_SCHEMA, schemaVersion: 2, items }));
+}
 
 const Store = {
-  _read(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; } },
-  _write(key, data) { localStorage.setItem(key, JSON.stringify(data)); },
+  _read(key) { return readCollection(key); },
+  _write(key, data) { writeCollection(key, data); },
 
   getPrompts() { return this._read(STORE_KEY); },
   savePrompts(p) { this._write(STORE_KEY, p); },
@@ -834,7 +889,7 @@ const Store = {
 
   createPrompt(data) {
     const prompts = this.getPrompts();
-    const p = { id: uid(), title: data.title || 'Untitled', body: data.body || '', tags: data.tags || [], created: new Date().toISOString(), updated: new Date().toISOString() };
+    const p = normalizePromptRecord({ ...data, id: uid(), created: new Date().toISOString(), updated: new Date().toISOString() });
     prompts.push(p);
     this.savePrompts(prompts);
     return p;
@@ -858,7 +913,7 @@ const Store = {
 
   createOperation(data) {
     const ops = this.getOperations();
-    const op = { id: uid(), name: data.name, template: data.template };
+    const op = normalizeOperationRecord({ ...data, id: uid() });
     ops.push(op);
     this.saveOperations(ops);
     return op;
@@ -889,6 +944,43 @@ const Store = {
   }
 };
 
+function readUiState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(UI_STATE_KEY) || 'null');
+    if (!raw) return {};
+    if (raw.schema && raw.schema !== UI_STATE_SCHEMA) return {};
+    return {
+      currentId: typeof raw.currentId === 'string' ? raw.currentId : '',
+      search: typeof raw.search === 'string' ? raw.search : '',
+      tagMode: raw.tagMode === 'AND' ? 'AND' : 'OR',
+      activeTags: Array.isArray(raw.activeTags) ? raw.activeTags.map(tag => String(tag)).filter(Boolean) : [],
+      phPanelOpen: raw.phPanelOpen !== false,
+      wrap: raw.wrap !== false,
+      numbers: raw.numbers !== false,
+      tab: typeof raw.tab === 'string' ? raw.tab : '',
+      theme: typeof raw.theme === 'string' ? raw.theme : '',
+    };
+  } catch {
+    return {};
+  }
+}
+
+function writeUiState(state) {
+  localStorage.setItem(UI_STATE_KEY, JSON.stringify({
+    schema: UI_STATE_SCHEMA,
+    schemaVersion: 1,
+    currentId: state.currentId || '',
+    search: state.search || '',
+    tagMode: state.tagMode === 'AND' ? 'AND' : 'OR',
+    activeTags: Array.isArray(state.activeTags) ? state.activeTags : [],
+    phPanelOpen: state.phPanelOpen !== false,
+    wrap: state.wrap !== false,
+    numbers: state.numbers !== false,
+    tab: state.tab || '',
+    theme: state.theme || '',
+  }));
+}
+
 /* ══════════════════════════════════════
    APPLICATION CONTROLLER
 ══════════════════════════════════════ */
@@ -907,11 +999,14 @@ const App = {
     this._initBgFx();
     this._initClock();
     this._initSearch();
+    this._initInteractions();
     this._initTicker();
+    this._applyUiState(readUiState());
     this.renderAll();
-    // Auto-select first
     const prompts = Store.getPrompts();
-    if (prompts.length > 0) this.selectPrompt(prompts[0].id);
+    const restoredId = this.currentId && Store.getPrompt(this.currentId) ? this.currentId : '';
+    if (restoredId) this.selectPrompt(restoredId);
+    else if (prompts.length > 0) this.selectPrompt(prompts[0].id);
   },
 
   _seedDefaults() {
@@ -971,7 +1066,141 @@ const App = {
   },
 
   _initSearch() {
-    document.getElementById('searchInput').addEventListener('input', e => { this.renderPromptList(); });
+    document.getElementById('searchInput').addEventListener('input', () => {
+      this.renderPromptList();
+      this.persistUiState();
+    });
+  },
+
+  _initInteractions() {
+    document.addEventListener('click', e => {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+      this._handleAction(target, e);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target.closest('[data-keyable="true"]');
+      if (!target) return;
+      e.preventDefault();
+      this._handleAction(target, e);
+    });
+
+    const placeholderFields = document.getElementById('placeholderFields');
+    const syncPlaceholder = e => {
+      const field = e.target.closest('[data-ph]');
+      if (!field) return;
+      this.setPh(field.dataset.ph, field.value);
+    };
+    placeholderFields.addEventListener('input', syncPlaceholder);
+    placeholderFields.addEventListener('change', syncPlaceholder);
+
+    document.getElementById('importFile').addEventListener('change', e => this.importData(e));
+  },
+
+  _handleAction(target) {
+    const action = target.dataset.action;
+    switch (action) {
+      case 'open-assembly':
+        this.openAssembly();
+        break;
+      case 'open-settings':
+        this.openSettings();
+        break;
+      case 'set-tag-mode':
+        this.setTagMode(target.dataset.mode);
+        break;
+      case 'clear-tags':
+        this.clearAllTags();
+        break;
+      case 'create-prompt':
+        this.createPrompt();
+        break;
+      case 'open-tag-modal':
+        this.openTagModal();
+        break;
+      case 'save-prompt':
+        this.savePrompt();
+        break;
+      case 'copy-prompt':
+        this.copyPrompt();
+        break;
+      case 'delete-prompt':
+        this.deletePrompt();
+        break;
+      case 'switch-tab':
+        this.switchTab(target.dataset.tab);
+        break;
+      case 'toggle-placeholder-panel':
+        this.togglePlaceholderPanel();
+        break;
+      case 'create-operation':
+        this.createOperation();
+        break;
+      case 'close-settings':
+        this.closeSettings();
+        break;
+      case 'set-theme':
+        this.setTheme(target.dataset.theme);
+        break;
+      case 'toggle-wrap':
+        this.toggleWrap();
+        break;
+      case 'toggle-numbers':
+        this.toggleNumbers();
+        break;
+      case 'export-data':
+        this.exportData();
+        break;
+      case 'trigger-import':
+        document.getElementById('importFile').click();
+        break;
+      case 'purge-data':
+        this.purgeData();
+        break;
+      case 'close-tag-modal':
+        this.closeTagModal();
+        break;
+      case 'add-tag-from-modal':
+        this.addTagFromModal();
+        break;
+      case 'close-assembly':
+        this.closeAssembly();
+        break;
+      case 'save-assembly':
+        this.saveAssembly();
+        break;
+      case 'toggle-tag':
+        this.toggleTag(target.dataset.tag);
+        break;
+      case 'select-prompt':
+        this.selectPrompt(target.dataset.promptId);
+        break;
+      case 'remove-tag':
+        this.removeTag(target.dataset.tag);
+        break;
+      case 'quick-add-tag':
+        this.quickAddTag(target.dataset.tag);
+        break;
+      case 'apply-operation':
+        this.applyOperation(target.dataset.opId);
+        break;
+      case 'delete-operation':
+        this.deleteOperation(target.dataset.opId);
+        break;
+      case 'add-assembly':
+        this.addAssembly(target.dataset.promptId);
+        break;
+      case 'move-assembly':
+        this.moveAssembly(Number(target.dataset.index), Number(target.dataset.dir));
+        break;
+      case 'remove-assembly':
+        this.removeAssembly(Number(target.dataset.index));
+        break;
+      default:
+        break;
+    }
   },
 
   _initTicker() {
@@ -993,6 +1222,7 @@ const App = {
     this.renderOperations();
     this.renderApiDocs();
     this.updateCounts();
+    this.persistUiState();
   },
 
   updateCounts() {
@@ -1006,7 +1236,7 @@ const App = {
     const el = document.getElementById('tagFilter');
     el.innerHTML = allTags.length === 0
       ? '<span style="font-size:0.6rem;color:rgba(0,255,255,0.3)">No tags yet</span>'
-      : allTags.map(t => `<button class="tag-button${this.activeTags.has(t)?' active':''}" onclick="App.toggleTag('${esc(t)}')">${esc(t)}</button>`).join('');
+      : allTags.map(t => `<button class="tag-button${this.activeTags.has(t)?' active':''}" type="button" data-action="toggle-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join('');
   },
 
   renderPromptList() {
@@ -1029,7 +1259,7 @@ const App = {
     el.innerHTML = prompts.length === 0
       ? '<div style="font-size:0.65rem;color:rgba(0,255,255,0.35);text-align:center;padding:0.75rem">No prompts found</div>'
       : prompts.map(p => `
-        <div class="prompt-list-item${p.id===this.currentId?' active':''}" onclick="App.selectPrompt('${p.id}')">
+        <div class="prompt-list-item${p.id===this.currentId?' active':''}" data-action="select-prompt" data-prompt-id="${p.id}" data-keyable="true" role="button" tabindex="0">
           <div class="prompt-list-name">${esc(p.title)}</div>
           <div class="prompt-list-preview">${esc(p.body.substring(0,50)) || 'Empty'}</div>
           ${p.tags&&p.tags.length ? `<div class="prompt-list-tags">${p.tags.map(t=>`<span class="prompt-list-tag">${esc(t)}</span>`).join('')}</div>` : ''}
@@ -1045,8 +1275,8 @@ const App = {
           <div class="op-name">${esc(op.name)}</div>
           <div class="op-template-preview">${esc(op.template.substring(0,70))}</div>
         </div>
-        <button class="op-apply-btn" onclick="App.applyOperation('${op.id}')">▶ Apply</button>
-        <button class="op-delete-btn" onclick="App.deleteOperation('${op.id}')" title="Delete">✕</button>
+        <button class="op-apply-btn" type="button" data-action="apply-operation" data-op-id="${op.id}">▶ Apply</button>
+        <button class="op-delete-btn" type="button" data-action="delete-operation" data-op-id="${op.id}" title="Delete">✕</button>
       </div>
     `).join('');
   },
@@ -1112,6 +1342,7 @@ const App = {
     this.renderPromptTags(p.tags || []);
     this.renderPromptList();
     this.detectPlaceholders();
+    this.persistUiState();
   },
 
   createPrompt() {
@@ -1156,7 +1387,7 @@ const App = {
   /* ── Tags ── */
   renderPromptTags(tags) {
     document.getElementById('promptTags').innerHTML = tags.map(t =>
-      `<span class="tag-chip" onclick="App.removeTag('${esc(t)}')">${esc(t)} ✕</span>`
+      `<span class="tag-chip" data-action="remove-tag" data-tag="${esc(t)}" data-keyable="true" role="button" tabindex="0">${esc(t)} ✕</span>`
     ).join('');
   },
 
@@ -1164,19 +1395,24 @@ const App = {
     if (this.activeTags.has(tag)) this.activeTags.delete(tag); else this.activeTags.add(tag);
     this.renderTagFilter();
     this.renderPromptList();
+    this.persistUiState();
   },
 
   clearAllTags() {
     this.activeTags.clear();
     this.renderTagFilter();
     this.renderPromptList();
+    this.persistUiState();
   },
 
   setTagMode(mode) {
     this.tagMode = mode;
     document.getElementById('modeAnd').classList.toggle('active', mode === 'AND');
     document.getElementById('modeOr').classList.toggle('active', mode === 'OR');
+    document.getElementById('modeAnd').setAttribute('aria-pressed', String(mode === 'AND'));
+    document.getElementById('modeOr').setAttribute('aria-pressed', String(mode === 'OR'));
     this.renderPromptList();
+    this.persistUiState();
   },
 
   openTagModal() {
@@ -1188,7 +1424,7 @@ const App = {
     const p = Store.getPrompt(this.currentId);
     const allTags = [...new Set(Store.getPrompts().flatMap(pr => pr.tags || []))].sort();
     document.getElementById('tagModalExisting').innerHTML = allTags.map(t =>
-      `<span class="tag-chip" onclick="App.quickAddTag('${esc(t)}')">${esc(t)}</span>`
+      `<span class="tag-chip" data-action="quick-add-tag" data-tag="${esc(t)}" data-keyable="true" role="button" tabindex="0">${esc(t)}</span>`
     ).join('');
     setTimeout(() => input.focus(), 100);
   },
@@ -1256,13 +1492,13 @@ const App = {
           <span class="placeholder-hint">${hint}</span>
         </div>
         ${isSpecial ? `
-          <select class="ph-select" onchange="App.setPh('${esc(name)}',this.value)" data-ph="${esc(name)}">
+          <select class="ph-select" data-ph="${esc(name)}">
             <option value="">— Select prompt to inject —</option>
             ${Store.getPrompts().filter(p=>p.id!==this.currentId).map(p=>`<option value="${esc(p.body)}" ${currentVal===p.body?'selected':''}>${esc(p.title)}</option>`).join('')}
           </select>
         ` : `
           <textarea class="ph-textarea" rows="2" placeholder="Value for <${esc(displayName)}>…"
-            oninput="App.setPh('${esc(name)}',this.value)" data-ph="${esc(name)}">${esc(currentVal)}</textarea>
+            data-ph="${esc(name)}">${esc(currentVal)}</textarea>
         `}
       </div>`;
     }).join('');
@@ -1274,6 +1510,7 @@ const App = {
     this.phPanelOpen = !this.phPanelOpen;
     document.getElementById('placeholderFields').style.display = this.phPanelOpen ? '' : 'none';
     document.getElementById('placeholderChevron').textContent = this.phPanelOpen ? '▼' : '▶';
+    this.persistUiState();
   },
 
   /* ── Tabs ── */
@@ -1282,6 +1519,7 @@ const App = {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
     if (tab === 'preview') this.renderPreview();
     if (tab === 'editor') setTimeout(() => this.editor.refresh(), 10);
+    this.persistUiState();
   },
 
   renderPreview() {
@@ -1352,7 +1590,7 @@ const App = {
       : available.map(p => `
         <div class="asm-item">
           <span style="flex:1;color:var(--fg-primary)">${esc(p.title)}</span>
-          <button class="asm-add-btn" onclick="App.addAssembly('${p.id}')">＋</button>
+          <button class="asm-add-btn" type="button" data-action="add-assembly" data-prompt-id="${p.id}">＋</button>
         </div>
       `).join('');
 
@@ -1362,9 +1600,9 @@ const App = {
         <div class="asm-item">
           <span style="color:rgba(0,255,255,0.4);font-size:0.6rem">${i+1}</span>
           <span style="flex:1;color:var(--fg-primary)">${esc(item.title)}</span>
-          <button class="asm-move-btn" onclick="App.moveAssembly(${i},-1)" ${i===0?'disabled':''}>▲</button>
-          <button class="asm-move-btn" onclick="App.moveAssembly(${i},1)" ${i===this.assemblyItems.length-1?'disabled':''}>▼</button>
-          <button class="asm-remove-btn" onclick="App.removeAssembly(${i})">✕</button>
+          <button class="asm-move-btn" type="button" data-action="move-assembly" data-index="${i}" data-dir="-1" ${i===0?'disabled':''}>▲</button>
+          <button class="asm-move-btn" type="button" data-action="move-assembly" data-index="${i}" data-dir="1" ${i===this.assemblyItems.length-1?'disabled':''}>▼</button>
+          <button class="asm-remove-btn" type="button" data-action="remove-assembly" data-index="${i}">✕</button>
         </div>
       `).join('');
 
@@ -1414,27 +1652,36 @@ const App = {
 
   setTheme(theme) {
     document.body.setAttribute('data-theme', theme);
-    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      const isActive = b.dataset.theme === theme;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-pressed', String(isActive));
+    });
     const names = { default:'TRON', synthwave:'SYNTH', cyberpunk:'CYBER', retro8bit:'8-BIT', midnight:'MIDN', vaporwave:'VAPOR', matrix:'MATRIX' };
     document.getElementById('footerTheme').textContent = names[theme] || theme.toUpperCase();
     localStorage.setItem('promptforge_theme', theme);
     this.toast('Theme: ' + (names[theme]||theme), 'info');
+    this.persistUiState();
   },
 
   toggleWrap() {
     const sw = document.getElementById('toggleWrap');
-    sw.classList.toggle('on');
-    this.editor.setOption('lineWrapping', sw.classList.contains('on'));
+    const isOn = sw.classList.toggle('on');
+    sw.setAttribute('aria-pressed', String(isOn));
+    this.editor.setOption('lineWrapping', isOn);
+    this.persistUiState();
   },
 
   toggleNumbers() {
     const sw = document.getElementById('toggleNumbers');
-    sw.classList.toggle('on');
-    this.editor.setOption('lineNumbers', sw.classList.contains('on'));
+    const isOn = sw.classList.toggle('on');
+    sw.setAttribute('aria-pressed', String(isOn));
+    this.editor.setOption('lineNumbers', isOn);
+    this.persistUiState();
   },
 
   exportData() {
-    const data = { prompts: Store.getPrompts(), operations: Store.getOperations(), exported: new Date().toISOString() };
+    const data = { schema: STORE_SCHEMA, schemaVersion: 2, exported: new Date().toISOString(), prompts: Store.getPrompts(), operations: Store.getOperations() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'promptforge-export.json'; a.click();
     this.toast('Exported', 'success');
@@ -1447,13 +1694,16 @@ const App = {
     reader.onload = e => {
       try {
         const data = JSON.parse(e.target.result);
-        if (data.prompts) { Store.savePrompts(data.prompts); }
-        if (data.operations) { Store.saveOperations(data.operations); }
+        if (data.schema && data.schema !== STORE_SCHEMA) throw new Error('Unsupported export schema');
+        if (Array.isArray(data.prompts)) { Store.savePrompts(data.prompts.map(normalizePromptRecord)); }
+        if (Array.isArray(data.operations)) { Store.saveOperations(data.operations.map(normalizeOperationRecord)); }
+        if (!Array.isArray(data.prompts) && !Array.isArray(data.operations)) throw new Error('Import file is missing prompts or operations');
         this.renderAll();
         const prompts = Store.getPrompts();
         if (prompts.length > 0) this.selectPrompt(prompts[0].id);
         this.toast('Imported', 'success');
-      } catch { this.toast('Invalid JSON', 'error'); }
+        this.persistUiState();
+      } catch (error) { this.toast(error.message || 'Invalid JSON', 'error'); }
     };
     reader.readAsText(file);
     event.target.value = '';
@@ -1471,6 +1721,48 @@ const App = {
     const prompts = Store.getPrompts();
     if (prompts.length > 0) this.selectPrompt(prompts[0].id);
     this.toast('Data purged', 'info');
+  },
+
+  persistUiState() {
+    writeUiState({
+      currentId: this.currentId || '',
+      search: document.getElementById('searchInput').value || '',
+      tagMode: this.tagMode,
+      activeTags: [...this.activeTags],
+      phPanelOpen: this.phPanelOpen,
+      wrap: this.editor?.getOption('lineWrapping'),
+      numbers: this.editor?.getOption('lineNumbers'),
+      tab: document.querySelector('.tab-btn.active')?.dataset.tab || '',
+      theme: document.body.getAttribute('data-theme') || '',
+    });
+  },
+
+  _applyUiState(state) {
+    if (!state || typeof state !== 'object') return;
+    if (state.search) document.getElementById('searchInput').value = state.search;
+    if (state.tagMode) this.tagMode = state.tagMode;
+    document.getElementById('modeAnd').classList.toggle('active', this.tagMode === 'AND');
+    document.getElementById('modeOr').classList.toggle('active', this.tagMode === 'OR');
+    document.getElementById('modeAnd').setAttribute('aria-pressed', String(this.tagMode === 'AND'));
+    document.getElementById('modeOr').setAttribute('aria-pressed', String(this.tagMode === 'OR'));
+    this.activeTags = new Set(state.activeTags || []);
+    if (typeof state.phPanelOpen === 'boolean') this.phPanelOpen = state.phPanelOpen;
+    if (this.editor && typeof state.wrap === 'boolean') {
+      document.getElementById('toggleWrap').classList.toggle('on', state.wrap);
+      document.getElementById('toggleWrap').setAttribute('aria-pressed', String(state.wrap));
+      this.editor.setOption('lineWrapping', state.wrap);
+    }
+    if (this.editor && typeof state.numbers === 'boolean') {
+      document.getElementById('toggleNumbers').classList.toggle('on', state.numbers);
+      document.getElementById('toggleNumbers').setAttribute('aria-pressed', String(state.numbers));
+      this.editor.setOption('lineNumbers', state.numbers);
+    }
+    document.getElementById('placeholderFields').style.display = this.phPanelOpen ? '' : 'none';
+    document.getElementById('placeholderChevron').textContent = this.phPanelOpen ? '▼' : '▶';
+    if (state.theme) this.setTheme(state.theme);
+    if (state.tab && document.querySelector(`.tab-btn[data-tab="${CSS.escape(state.tab)}"]`)) {
+      this.switchTab(state.tab);
+    }
   },
 
   /* ── Toast ── */

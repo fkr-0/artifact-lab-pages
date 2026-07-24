@@ -11,6 +11,36 @@ env:
   ARTIFACTS_PORT: "8080"
 
 commands:
+  audit:artifacts:
+    run: "node scripts/audit-artifact-portfolio.mjs"
+    description: "Audit the v11 catalog and every embedded non-subproject artifact for blocking catalog, launch-target, and static HTML defects."
+    timeoutMs: 30000
+    track: test
+    shellCommand: "node scripts/audit-artifact-portfolio.mjs"
+  test:portfolio:
+    run: "pnpm run test:portfolio"
+    description: "Run the permanent focused regression suite for root-owned embedded artifacts and the portfolio audit contract."
+    timeoutMs: 30000
+    track: test
+    shellCommand: "pnpm run test:portfolio"
+  e2e:inline-handler-migrations:
+    run: ["/bin/sh", "-lc", "pnpm run test:e2e:inline-handlers"]
+    description: "Exercise the migrated v9 portal, PDF Forge, Prompt Forge, and Template Engine controls in Chromium."
+    timeoutMs: 60000
+    track: test
+    shellCommand: "pnpm run test:e2e:inline-handlers"
+  e2e:root-portfolio:
+    run: ["/bin/sh", "-lc", "pnpm run test:e2e:root"]
+    description: "Run the complete Chromium matrix for root-owned artifacts while excluding independently versioned subprojects."
+    timeoutMs: 120000
+    track: test
+    shellCommand: "pnpm run test:e2e:root"
+  release:check:
+    run: ["/bin/sh", "-lc", "pnpm run release:check"]
+    description: "Regenerate root-owned outputs and run portfolio audit, focused contracts, all root tests, and the root-owned Chromium matrix without publishing."
+    timeoutMs: 180000
+    track: test
+    shellCommand: "pnpm run release:check"
   compile:app-hub-v11:
     run: "node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
     description: "Generate git-based artifact timestamps and compile the v11 app-hub artifact source list into a clean browser catalog."
@@ -18,11 +48,11 @@ commands:
     track: build
     shellCommand: "node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data"
   static:app-hub-v11:
-    run: "node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node scripts/extract-html-module.mjs app-hub-v11/index.html /tmp/app-hub-v11-index-module.mjs && node --check /tmp/app-hub-v11-index-module.mjs && node --check app-hub-v11/lib/launcher.js && node --check app-hub-v11/lib/network.js && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs && node --test tests/app-hub-v11-index-ui.test.mjs tests/app-hub-v11-root-safe-imports.test.mjs tests/app-hub-v11-shared-v9-shell-css.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-links-settings.test.mjs"
+    run: "node scripts/audit-artifact-portfolio.mjs && node app-hub-v11/build-artifacts-order.js && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node scripts/extract-html-module.mjs app-hub-v11/index.html /tmp/app-hub-v11-index-module.mjs && node --check /tmp/app-hub-v11-index-module.mjs && node --check app-hub-v11/lib/launcher.js && node --check app-hub-v11/lib/network.js && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs && node --test tests/app-hub-v11-index-ui.test.mjs tests/app-hub-v11-root-safe-imports.test.mjs tests/app-hub-v11-shared-v9-shell-css.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-links-settings.test.mjs tests/artifact-portfolio-audit.test.mjs"
     description: "Run app-hub-v11 static verification: compile catalog, extract/check index module, check core JS, and run focused UI/root-safe contracts."
     timeoutMs: 30000
     track: test
-    shellCommand: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node scripts/extract-html-module.mjs app-hub-v11/index.html /tmp/app-hub-v11-index-module.mjs && node --check /tmp/app-hub-v11-index-module.mjs && node --check app-hub-v11/lib/launcher.js && node --check app-hub-v11/lib/network.js && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs && node --test tests/app-hub-v11-index-ui.test.mjs tests/app-hub-v11-root-safe-imports.test.mjs tests/app-hub-v11-shared-v9-shell-css.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-links-settings.test.mjs"
+    shellCommand: "node scripts/audit-artifact-portfolio.mjs && node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node scripts/extract-html-module.mjs app-hub-v11/index.html /tmp/app-hub-v11-index-module.mjs && node --check /tmp/app-hub-v11-index-module.mjs && node --check app-hub-v11/lib/launcher.js && node --check app-hub-v11/lib/network.js && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs && node --test tests/app-hub-v11-index-ui.test.mjs tests/app-hub-v11-root-safe-imports.test.mjs tests/app-hub-v11-shared-v9-shell-css.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-links-settings.test.mjs tests/artifact-portfolio-audit.test.mjs"
   smoke:app-hub-v11:
     run: "node app-hub-v11/server/artifact-catalog.mjs app-hub-v11/artifacts.source.json app-hub-v11/data && node --test tests/app-hub-v11-catalog.test.mjs tests/app-hub-v11-libs.test.mjs tests/app-hub-v11-deploy-inclusion.test.mjs tests/app-hub-v11-legacy-tools.test.mjs tests/app-hub-v11-links-settings.test.mjs tests/app-hub-v11-build-manifest.test.mjs tests/app-hub-v11-sprite-fan.test.mjs && node --check app-hub-v11/server/artifact-catalog.mjs && node --check app-hub-v11/server/artifact-build.mjs"
     description: "Compile and smoke-test the v11 app-hub catalog, libs, and deployment metadata."

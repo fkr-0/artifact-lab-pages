@@ -1092,15 +1092,24 @@
 
     function normalizeState(value) {
       const normalized = { ...structuredClone(sample), ...(value || {}), version: 3 };
-      normalized.blocks = Array.isArray(value?.blocks) ? value.blocks.map(block => ({
-        id: block.id || uid(),
-        type: block.type || 'text',
-        title: block.title || block.type || 'Untitled block',
-        text: block.text || '',
-        image: block.image || '',
-        meta: block.meta || '',
-        alt: block.alt || ''
-      })) : structuredClone(sample.blocks);
+      const usedIds = new Set();
+      normalized.blocks = Array.isArray(value?.blocks) ? value.blocks.map(block => {
+        let id = typeof block?.id === 'string' && block.id.trim() ? block.id.trim() : uid();
+        while (usedIds.has(id)) id = uid();
+        usedIds.add(id);
+        return {
+          id,
+          type: block.type || 'text',
+          title: block.title || block.type || 'Untitled block',
+          text: block.text || '',
+          image: block.image || '',
+          meta: block.meta || '',
+          alt: block.alt || ''
+        };
+      }) : structuredClone(sample.blocks);
+      if (!Array.isArray(value?.blocks)) {
+        normalized.blocks.forEach(block => usedIds.add(block.id));
+      }
       normalized.zoom = Number(normalized.zoom) || 85;
       normalized.typeSystem = ['impact','editorial','condensed','technical','humanist'].includes(normalized.typeSystem) ? normalized.typeSystem : 'impact';
       normalized.colorSystem = colorSystems[normalized.colorSystem] ? normalized.colorSystem : 'resistance';
@@ -1113,7 +1122,7 @@
       try {
         const legacy = LEGACY_STORAGE_KEYS.map(key => localStorage.getItem(key)).find(Boolean);
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || legacy || 'null');
-        if (saved?.blocks?.length) return normalizeState(saved);
+        if (saved && typeof saved === 'object' && Array.isArray(saved.blocks) && saved.blocks.length) return normalizeState(saved);
       } catch (_) {}
       return normalizeState(sample);
     }
@@ -1345,15 +1354,25 @@
     }
 
     function handleFiles(files) {
-      const images = Array.from(files || []).filter(file => file.type.startsWith('image/'));
+      const images = Array.from(files || []).filter(file => file && file.type && file.type.startsWith('image/'));
       if (!images.length) return setStatus('No image files found.');
-      Promise.all(images.map(readFileDataUrl)).then(urls => {
-        urls.forEach((url, index) => addBlock(index === 0 && !state.blocks.some(b => b.type === 'hero' && b.image) ? 'hero' : 'image', {
-          title: images[index].name.replace(/\.[^.]+$/, ''),
+      Promise.allSettled(images.map(readFileDataUrl)).then(results => {
+        const imported = [];
+        const failures = [];
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled') imported.push({ url: result.value, file: images[index] });
+          else failures.push(images[index].name);
+        });
+        imported.forEach(({ url, file }, index) => addBlock(index === 0 && !state.blocks.some(b => b.type === 'hero' && b.image) ? 'hero' : 'image', {
+          title: file.name.replace(/\.[^.]+$/, ''),
           text: 'Imported illustration.',
           image: url
         }));
-        setStatus(`${images.length} image(s) embedded.`);
+        if (imported.length) {
+          setStatus(failures.length ? `${imported.length} image(s) embedded; skipped ${failures.length} file(s).` : `${imported.length} image(s) embedded.`);
+        } else {
+          setStatus('No valid image files could be imported.');
+        }
       });
     }
 

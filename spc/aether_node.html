@@ -290,7 +290,15 @@
         padding: 2px 6px;
         border-radius: 4px;
       }
-    </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
   </head>
   <body>
     <!-- Abstract Art Background Elements -->
@@ -300,7 +308,7 @@
     </div>
     <div class="noise-overlay"></div>
 
-    <div class="container">
+    <main class="container">
       <!-- Header -->
       <header class="brand-header">
         <div class="logo-mark">A/</div>
@@ -368,7 +376,7 @@
 <span class="keyword">def</span> encrypt_payload(data):
     <span class="keyword">if not</span> data:
         <span class="keyword">return</span> None
-    
+
     <span class="comment"># Return secured packet</span>
     <span class="keyword">return</span> cipher.secure(data)
             </pre>
@@ -384,6 +392,6 @@
       >
         &copy; 2023 Aether/Node Collective. Designed for the open web.
       </p>
-    </div>
+    </main>
   </body>
 </html>

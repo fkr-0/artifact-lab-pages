@@ -51,6 +51,10 @@ test('token handling and logs are intentionally constrained', () => {
   assert.doesNotMatch(html, /value="\d+:[A-Za-z0-9_-]{20,}"/);
   assert.match(html, /profileSelectors/);
   assert.doesNotMatch(html.match(/const profileSelectors = \[[\s\S]*?\];/)?.[0] || '', /#token|#hook-secret/);
+  assert.match(html, /schemaVersion:\s*1/);
+  assert.match(html, /role="tablist"/);
+  assert.match(html, /aria-selected="true"/);
+  assert.match(html, /aria-pressed="false"/);
 });
 
 test('request wrapper supports browser-friendly forms, cancellation, and rate-limit details', () => {
@@ -87,5 +91,5 @@ test('core Telegram workflows are represented', () => {
 test('clipboard fallback works for file URLs and non-secure contexts', () => {
   assert.match(html, /navigator\.clipboard\?\.writeText/);
   assert.match(html, /window\.isSecureContext/);
-  assert.match(html, /document\.execCommand\("copy"\)/);
+  assert.match(html, /document\.execCommand\(['"]copy['"]\)/);
 });

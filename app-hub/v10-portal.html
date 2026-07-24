@@ -12,7 +12,15 @@
     h1{margin:0;font-size:1.05rem;letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}.pill{border:1px solid var(--line);border-radius:999px;padding:.2rem .55rem;color:var(--muted);font-size:.78rem}.pill.ok{color:var(--ok);border-color:rgba(92,255,177,.4)}.pill.warn{color:var(--accent)}
     aside{border-right:1px solid var(--line);background:rgba(0,0,0,.24);padding:1rem;overflow:auto}.main{padding:1rem;overflow:auto}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 0 24px rgba(0,255,255,.08);padding:1rem;margin-bottom:1rem}
     button,input,textarea,select{font:inherit}button{background:rgba(0,255,255,.1);border:1px solid var(--line);color:var(--fg);border-radius:9px;padding:.48rem .7rem;cursor:pointer}button:hover{border-color:var(--cyan);box-shadow:0 0 14px rgba(0,255,255,.18)}button.active{background:rgba(0,255,255,.22);color:white}input,textarea{width:100%;background:rgba(0,0,0,.36);border:1px solid rgba(0,255,255,.18);color:var(--fg);border-radius:10px;padding:.65rem;outline:none}textarea{min-height:42vh;resize:vertical}.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.stack{display:grid;gap:.75rem}.muted{color:var(--muted)}.small{font-size:.82rem}.apps button{display:block;width:100%;text-align:left;margin:.35rem 0}.peers{display:grid;gap:.35rem}.peer{display:flex;align-items:center;gap:.5rem;color:var(--muted)}.dot{width:.75rem;height:.75rem;border-radius:99px;background:var(--cyan)}.split{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.seq-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:.35rem}.seq-step{aspect-ratio:1;border-radius:8px;border:1px solid rgba(0,255,255,.2);background:rgba(0,0,0,.28)}.seq-step.on{background:rgba(0,255,255,.32);box-shadow:0 0 12px rgba(0,255,255,.18)}.seq-step.play{outline:2px solid var(--accent)}.log{max-height:180px;overflow:auto;font-size:.8rem;color:var(--muted);white-space:pre-wrap}.remote-flash{animation:flash .4s ease}@keyframes flash{from{box-shadow:0 0 0 2px rgba(255,209,102,.8)}to{box-shadow:none}}@media(max-width:760px){.shell{grid-template-columns:1fr}.top{grid-column:1}.main,aside{overflow:visible}.shell{height:auto;min-height:100vh}.split{grid-template-columns:1fr}}
-  </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
 </head>
 <body>
   <a href="../app-hub-v11/index.html" style="position:fixed;top:.75rem;right:.75rem;z-index:10000;border:1px solid #00ffff;border-radius:999px;padding:.35rem .65rem;background:rgba(0,0,0,.72);color:#00ffff;text-decoration:none;font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-shadow:0 0 1rem rgba(0,255,255,.18)">↗ v11 hub</a>

@@ -1333,7 +1333,15 @@
       .panel, .stage-card, .tea-stage, .term, details { box-shadow: none; break-inside: avoid; }
       main { padding: 0; }
     }
-  </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
 </head>
 <body>
   <div class="mist" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1809,12 +1817,41 @@
       }
     ];
 
-    let currentStep = 0;
-    let currentLens = null;
+    const guideStateKey = "chado-zen-tea/state/v1";
+
+    function readGuideState() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(guideStateKey) || "null");
+        if (!raw || raw.schema !== "chado-zen-tea-state/v1") return null;
+        return raw;
+      } catch {
+        return null;
+      }
+    }
+
+    function writeGuideState() {
+      try {
+        localStorage.setItem(guideStateKey, JSON.stringify({
+          schema: "chado-zen-tea-state/v1",
+          schemaVersion: 1,
+          currentStep,
+          currentLens,
+          reducedMotion: document.body.classList.contains("reduced-motion"),
+          focusMode: document.body.classList.contains("focus-mode"),
+          timerRemaining,
+          timerPromptIndex,
+          quizIndex,
+        }));
+      } catch {}
+    }
+
+    const savedGuideState = readGuideState();
+    let currentStep = savedGuideState?.currentStep ?? 0;
+    let currentLens = savedGuideState?.currentLens ?? null;
     let timer = null;
-    let timerRemaining = 25;
-    let timerPromptIndex = 0;
-    let quizIndex = 0;
+    let timerRemaining = savedGuideState?.timerRemaining ?? 25;
+    let timerPromptIndex = savedGuideState?.timerPromptIndex ?? 0;
+    let quizIndex = savedGuideState?.quizIndex ?? 0;
 
     const stepList = document.getElementById("stepList");
     const stageLabel = document.getElementById("stageLabel");
@@ -1851,6 +1888,7 @@
         const card = document.createElement("button");
         card.type = "button";
         card.className = "step-card" + (index === currentStep ? " active" : "");
+        card.setAttribute("aria-current", index === currentStep ? "step" : "false");
         card.innerHTML = `
           <span class="step-num">${String(index + 1).padStart(2, "0")}</span>
           <span>
@@ -1862,6 +1900,14 @@
           renderStep();
         });
         stepList.appendChild(card);
+      });
+    }
+
+    function syncLensButtons() {
+      document.querySelectorAll(".principle button").forEach(button => {
+        const name = button.closest(".principle").dataset.principle;
+        button.textContent = currentLens === name ? "Lens active: " + currentLens : "Use " + name.toLowerCase() + " as lens";
+        button.setAttribute("aria-pressed", String(currentLens === name));
       });
     }
 
@@ -1880,6 +1926,7 @@
       progressBar.style.width = percent + "%";
       progressText.textContent = percent + "%";
       renderStepButtons();
+      writeGuideState();
     }
 
     document.getElementById("prevStep").addEventListener("click", () => {
@@ -1894,8 +1941,12 @@
 
     document.querySelectorAll("[data-jump]").forEach(button => {
       button.addEventListener("click", () => {
-        document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("current"));
+        document.querySelectorAll(".nav-item").forEach(item => {
+          item.classList.remove("current");
+          item.setAttribute("aria-current", "false");
+        });
         button.classList.add("current");
+        button.setAttribute("aria-current", "location");
         document.querySelector(button.dataset.jump).scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
@@ -1905,12 +1956,7 @@
         const card = button.closest(".principle");
         currentLens = card.dataset.principle;
         lensStatus.textContent = "Current lens: " + currentLens.toLowerCase() + ". Each step now reads through this principle.";
-        document.querySelectorAll(".principle button").forEach(btn => {
-          btn.textContent = "Use " + btn.closest(".principle").dataset.principle.toLowerCase() + " as lens";
-          btn.setAttribute("aria-pressed", "false");
-        });
-        button.textContent = "Lens active: " + currentLens;
-        button.setAttribute("aria-pressed", "true");
+        syncLensButtons();
         renderStep();
         document.querySelector("#guide").scrollIntoView({ behavior: "smooth" });
       });
@@ -1920,6 +1966,7 @@
       const pressed = event.currentTarget.getAttribute("aria-pressed") === "true";
       event.currentTarget.setAttribute("aria-pressed", String(!pressed));
       document.body.classList.toggle("reduced-motion", !pressed);
+      writeGuideState();
     });
 
     document.getElementById("focusToggle").addEventListener("click", event => {
@@ -1931,6 +1978,7 @@
         else el.style.opacity = "";
       });
       document.querySelector("#guide").scrollIntoView({ behavior: "smooth" });
+      writeGuideState();
     });
 
     const timerPrompts = steps.map(s => s.title + ": " + s.summary);
@@ -1955,10 +2003,12 @@
 
     document.getElementById("timerStart").addEventListener("click", () => {
       if (!timer) timer = setInterval(tick, 1000);
+      writeGuideState();
     });
     document.getElementById("timerPause").addEventListener("click", () => {
       clearInterval(timer);
       timer = null;
+      writeGuideState();
     });
     document.getElementById("timerReset").addEventListener("click", () => {
       clearInterval(timer);
@@ -1966,6 +2016,7 @@
       timerRemaining = 25;
       timerPromptIndex = 0;
       setTimerState();
+      writeGuideState();
     });
 
     function renderQuiz() {
@@ -1991,6 +2042,7 @@
     document.getElementById("quizNext").addEventListener("click", () => {
       quizIndex = (quizIndex + 1) % quizzes.length;
       renderQuiz();
+      writeGuideState();
     });
 
     function renderGlossary(filter = "") {
@@ -2000,13 +2052,13 @@
         const hay = (term + " " + kanji + " " + desc).toLowerCase();
         return hay.includes(needle);
       });
-      grid.innerHTML = rows.map(([term, kanji, desc]) => `
+      grid.innerHTML = rows.length ? rows.map(([term, kanji, desc]) => `
         <article class="term">
           <strong>${term}</strong>
           <em>${kanji}</em>
           <p>${desc}</p>
         </article>
-      `).join("");
+      `).join("") : '<p class="note" role="status">No glossary entries match your search.</p>';
     }
 
     document.getElementById("glossarySearch").addEventListener("input", event => {
@@ -2017,6 +2069,19 @@
     renderQuiz();
     renderGlossary();
     renderStep();
+    if (savedGuideState?.reducedMotion) {
+      document.body.classList.add("reduced-motion");
+      document.getElementById("motionToggle").setAttribute("aria-pressed", "true");
+    }
+    if (savedGuideState?.focusMode) {
+      document.body.classList.add("focus-mode");
+      document.getElementById("focusToggle").setAttribute("aria-pressed", "true");
+      document.querySelectorAll(".section:not(#guide), .hero, #sources").forEach(el => {
+        el.style.opacity = ".35";
+      });
+    }
+    syncLensButtons();
+    writeGuideState();
   </script>
 </body>
 </html>

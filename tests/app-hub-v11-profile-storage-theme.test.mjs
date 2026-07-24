@@ -6,6 +6,7 @@ import {
   clearHubSettings,
   exportHubSettings,
   importHubSettings,
+  readHubSetting,
 } from '../app-hub-v11/lib/storage.js';
 import {
   avatarInitials,
@@ -49,6 +50,11 @@ const storage = memoryStorage({
   'app-hub-v11:profile': JSON.stringify(profile),
   'other:key': 'ignore me',
 });
+const brokenStorage = memoryStorage({
+  'app-hub-v11:broken': '{not-json',
+});
+assert.equal(readHubSetting('broken', 'fallback', brokenStorage), 'fallback');
+assert.equal(buildStorageSnapshot(brokenStorage).entries[0].parsed, '{not-json');
 const snapshot = buildStorageSnapshot(storage);
 assert.equal(snapshot.totalKeys, 2);
 assert.equal(snapshot.entries.find((entry) => entry.key.endsWith(':profile')).parsed.displayName, 'flo topcoder');

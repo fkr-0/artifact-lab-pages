@@ -1,10 +1,18 @@
 import assert from 'node:assert/strict';
-import { execSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { promisify } from 'node:util';
 import { generateBuildStats } from '../app-hub-v11/server/generate-build-stats.mjs';
+
+const execFileAsync = promisify(execFile);
+
+async function readGitHeadHash(rootDir = process.cwd()) {
+  const { stdout } = await execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: rootDir, encoding: 'utf8' });
+  return String(stdout).trim();
+}
 
 test('V11 Hub build stats expose semantic version and source provenance', async () => {
   const temp = await mkdtemp(join(tmpdir(), 'artifact-build-stats-'));
@@ -13,7 +21,7 @@ test('V11 Hub build stats expose semantic version and source provenance', async 
   const outputPath = join(temp, 'nested', 'build-stats.json');
   await writeFile(sourcePath, JSON.stringify({ items: [{ id: 'one' }, { id: 'two' }] }));
   await writeFile(packagePath, JSON.stringify({ version: '9.8.7' }));
-  const sourceCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+  const sourceCommit = await readGitHeadHash();
 
   const stats = await generateBuildStats({
     sourcePath,
@@ -51,4 +59,3 @@ test('V11 Hub renders version, commit, and last-built metadata', async () => {
     assert.match(html, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 });
-

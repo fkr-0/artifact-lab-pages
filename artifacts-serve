@@ -6,14 +6,18 @@
 # Usage: ./artifacts-serve [port]
 #
 
-set -e
+set -euo pipefail
 
 # Default configuration
 PORT="${1:-8080}"
-HOST="localhost"
-DIR="/home/user/work/code/artifacts"
+HOST="${ARTIFACTS_HOST:-localhost}"
+BIND="${ARTIFACTS_BIND:-127.0.0.1}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DIR="${ARTIFACTS_DIR:-$SCRIPT_DIR}"
 URL="http://${HOST}:${PORT}/app-hub-v11/index.html"
-PID_FILE="${DIR}/.artifacts-server.pid"
+PID_FILE="${ARTIFACTS_PID_FILE:-${DIR}/.artifacts-server.pid}"
+LOG_FILE="${ARTIFACTS_LOG_FILE:-${DIR}/.artifacts-server.log}"
+SERVER_SCRIPT="${DIR}/scripts/artifacts_http_server.py"
 
 # Colors
 RED='\033[0;31m'
@@ -24,15 +28,20 @@ NC='\033[0m'
 
 # Check if already running
 if [[ -f "$PID_FILE" ]]; then
-    OLD_PID=$(cat "$PID_FILE" 2>/dev/null)
-    if kill -0 "$OLD_PID" 2>/dev/null; then
+    OLD_PID="$(cat "$PID_FILE" 2>/dev/null || true)"
+    if [[ "$OLD_PID" =~ ^[0-9]+$ ]] && kill -0 "$OLD_PID" 2>/dev/null; then
         echo -e "${YELLOW}⚠ Server already running (PID: $OLD_PID)${NC}"
         echo -e "${CYAN}  Opening Firefox to existing server...${NC}"
 
-        if command -v firefox &>/dev/null; then
+        if [[ "${ARTIFACTS_NO_BROWSER:-0}" == "1" ]]; then
+            echo -e "${CYAN}  Browser launch disabled (ARTIFACTS_NO_BROWSER=1)${NC}"
+        elif command -v firefox &>/dev/null; then
             firefox --private-window "$URL" &>/dev/null &
         elif command -v firefox-esr &>/dev/null; then
             firefox-esr --private-window "$URL" &>/dev/null &
+        else
+            echo -e "${YELLOW}  Firefox not found. Open manually:${NC}"
+            echo -e "  ${URL}"
         fi
         exit 0
     else
@@ -46,21 +55,42 @@ if [[ ! -d "$DIR" ]]; then
     exit 1
 fi
 
+if [[ ! -f "$SERVER_SCRIPT" ]]; then
+    echo -e "${RED}✗ Error: Artifacts HTTP server not found: $SERVER_SCRIPT${NC}"
+    exit 1
+fi
+
 # Start server
 echo -e "${CYAN}🚀 Starting Artifacts server...${NC}"
 cd "$DIR"
+trap cleanup EXIT INT TERM
 
-python3 -m http.server "$PORT" > /dev/null 2>&1 &
+python3 -u "$SERVER_SCRIPT" --directory "$DIR" --bind "$BIND" "$PORT" > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 
 echo $SERVER_PID > "$PID_FILE"
 
-# Wait for server to start
-sleep 0.8
+wait_for_ready() {
+    local attempts=60
+    while (( attempts > 0 )); do
+        if grep -q "Serving artifacts on http://" "$LOG_FILE" 2>/dev/null; then
+            return 0
+        fi
+        if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+            return 1
+        fi
+        sleep 0.1
+        ((attempts--))
+    done
+    return 1
+}
 
-# Verify
-if ! kill -0 $SERVER_PID 2>/dev/null; then
+if ! wait_for_ready; then
     echo -e "${RED}✗ Failed to start server${NC}"
+    if [[ -f "$LOG_FILE" ]]; then
+        echo -e "${YELLOW}Last log lines:${NC}"
+        tail -n 20 "$LOG_FILE"
+    fi
     rm -f "$PID_FILE"
     exit 1
 fi
@@ -70,34 +100,46 @@ echo -e "${CYAN}  Port: ${PORT}${NC}"
 echo -e "${CYAN}  PID:  ${SERVER_PID}${NC}"
 echo -e "${CYAN}  URL:  ${GREEN}${URL}${NC}"
 
-# Open Firefox
-echo -e "${CYAN}🌐 Opening Firefox Private Window...${NC}"
-
-if command -v firefox &>/dev/null; then
+# Open Firefox unless explicitly disabled for headless/test use.
+if [[ "${ARTIFACTS_NO_BROWSER:-0}" == "1" ]]; then
+    echo -e "${CYAN}🌐 Browser launch disabled (ARTIFACTS_NO_BROWSER=1)${NC}"
+elif command -v firefox &>/dev/null; then
+    echo -e "${CYAN}🌐 Opening Firefox Private Window...${NC}"
     firefox --private-window "$URL" &>/dev/null &
 elif command -v firefox-esr &>/dev/null; then
+    echo -e "${CYAN}🌐 Opening Firefox Private Window...${NC}"
     firefox-esr --private-window "$URL" &>/dev/null &
 else
     echo -e "${YELLOW}⚠ Firefox not found. Open manually:${NC}"
     echo -e "  ${URL}"
-    exit 0
 fi
 
 echo -e "${GREEN}✓ Done! NEXUS App Hub v11 loading...${NC}"
 echo ""
 echo -e "${CYAN}Press Ctrl+C to stop the server${NC}"
 
-# Handle graceful shutdown
-trap cleanup INT TERM
-
 cleanup() {
-    echo ""
-    echo -e "${CYAN}🛑 Stopping server...${NC}"
-    kill $SERVER_PID 2>/dev/null
+    if [[ "${CLEANED_UP:-0}" == "1" ]]; then
+        return 0
+    fi
+    CLEANED_UP=1
+    if [[ -n "${SERVER_PID:-}" ]]; then
+        kill "$SERVER_PID" 2>/dev/null || true
+    fi
     rm -f "$PID_FILE"
-    echo -e "${GREEN}✓ Server stopped${NC}"
-    exit 0
+    trap - EXIT INT TERM
 }
 
 # Keep script running
-wait $SERVER_PID
+if wait "$SERVER_PID"; then
+    :
+else
+    exit_code=$?
+    echo ""
+    echo -e "${RED}✗ Server exited with status ${exit_code}${NC}"
+    if [[ -f "$LOG_FILE" ]]; then
+        echo -e "${YELLOW}Last log lines:${NC}"
+        tail -n 20 "$LOG_FILE"
+    fi
+    exit "$exit_code"
+fi

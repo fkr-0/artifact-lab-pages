@@ -83,6 +83,31 @@ export class PeernetStack extends EventTarget {
     return true;
   }
 
+  async reconnect(profile = {}) {
+    if (!this.available()) {
+      this.emit('status', { text: 'Peernet 4-layer stack unavailable', connected: false });
+      return false;
+    }
+    if (!this.started) return this.start(profile);
+    const snapshot = this.user?.snapshot?.().profile || {};
+    const username = profile.username || snapshot.username || 'pilot';
+    const color = profile.color || snapshot.color || '#00ffff';
+    this.emit('status', { text: 'reconnecting', connected: false });
+    this.storage?.stopAutosave?.();
+    this.core?.stop?.();
+    this.started = false;
+    this.init({ ...profile, username, color });
+    if (this.core) {
+      this.core.username = username;
+      this.core.color = color;
+      this.core.start();
+      this.storage?.startAutosave?.();
+      this.started = true;
+      return true;
+    }
+    return false;
+  }
+
   broadcastPacket(packet, inputId = 'control') {
     this.core?.broadcast({ type: 'pmg-packet', inputId, packet, at: Date.now() });
   }
@@ -105,6 +130,20 @@ export class PeernetStack extends EventTarget {
     // allows shared editor adapters to request a logical room without owning transport.
     this.emit('status', { text: `logical room:${lobbyId}`, connected: Boolean(this.started) });
     return this;
+  }
+
+  async destroy() {
+    this.started = false;
+    this.storage?.stopAutosave?.();
+    this.core?.stop?.();
+    this.user?.destroy?.();
+    this.sessions?.destroy?.();
+    this.core = null;
+    this.user = null;
+    this.sessions = null;
+    this.storage = null;
+    this._bound = false;
+    this.emit('status', { text: 'offline', connected: false });
   }
 
   createSession(title = 'PeerModGroove Session') {

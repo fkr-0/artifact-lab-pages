@@ -42,11 +42,19 @@
     .tag-chat { background: rgba(79,195,247,0.3); color: #4fc3f7; }
     .tag-game { background: rgba(76,175,80,0.3); color: #66bb6a; }
     pre { font-size: 0.55em; }
-  </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
 </head>
 <body>
 
-<div class="reveal">
+<main class="reveal">
   <div class="slides">
 
     <section>
@@ -173,7 +181,7 @@
     </section>
 
   </div>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
 <script src="reveal-peerjs.js"></script>

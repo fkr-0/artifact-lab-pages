@@ -60,22 +60,54 @@ class PeerModGrooveApp {
     this.patchCanvas = null;
     this.clock = null;
     this.mixer = null;
+    this.isPlaying = false;
+    this.pendingTransportNoteOffTimers = new Set();
     this.peernet = new PeernetStack({
       namespace: 'peermodgroove',
       capture: () => this.serializeRig(),
       apply: payload => this.applyRig(payload)
     });
+    this._lifecycleBound = false;
+    this._wasPlayingBeforeHide = false;
+    this._destroyed = false;
   }
 
   async init() {
     this.createStarfield();
     this.bindChrome();
+    this.bindLifecycle();
     this.patchBay.addEventListener('packet', e => this.logPacket(e.detail));
     this.patchBay.addEventListener('route:add', () => this.renderRoutes());
     this.bindPatchCanvas();
     this.bindPeernetStack();
     this.bindV10SequencerBridge();
     await this.bootstrapDefaultRig();
+  }
+
+  bindLifecycle() {
+    if (this._lifecycleBound) return;
+    this._lifecycleBound = true;
+    this._onVisibilityChange = async () => {
+      if (this._destroyed) return;
+      if (document.visibilityState === 'hidden') {
+        this._wasPlayingBeforeHide = Boolean(this.isPlaying);
+        this.clock?.stop();
+        this.isPlaying = false;
+        await this.runtime.suspend();
+        return;
+      }
+      await this.runtime.resume();
+      if (this._wasPlayingBeforeHide && !this._destroyed) {
+        await this.runtime.init();
+        await this.startAudioModules();
+        this.clock?.start(this.runtime.context);
+        this.isPlaying = true;
+      }
+      this._wasPlayingBeforeHide = false;
+    };
+    this._onPageHide = event => { if (!event.persisted) void this.destroy(); };
+    document.addEventListener('visibilitychange', this._onVisibilityChange);
+    window.addEventListener('pagehide', this._onPageHide);
   }
 
   createStarfield() {
@@ -100,10 +132,12 @@ class PeerModGrooveApp {
       await this.runtime.init();
       await this.startAudioModules();
       this.clock?.start(this.runtime.context);
+      this.isPlaying = true;
     });
 
     document.querySelector('#btnStop').addEventListener('click', () => {
       this.clock?.stop();
+      this.isPlaying = false;
     });
 
     document.querySelector('#btnConnectPeer').addEventListener('click', () => {
@@ -157,7 +191,8 @@ class PeerModGrooveApp {
 
   bindPeernetStack() {
     this.peernet.addEventListener('status', e => {
-      document.querySelector('#peerStatus').textContent = e.detail.text;
+      const status = e.detail?.text || 'offline';
+      document.querySelector('#peerStatus').textContent = `peer: ${status}`;
     });
     this.peernet.addEventListener('presence', e => {
       document.querySelector('#peerCount').textContent = `${e.detail.length} peers`;
@@ -169,6 +204,24 @@ class PeerModGrooveApp {
       const packet = e.detail?.packet;
       if (packet) this.logText(`remote packet: ${packet.kind}/${packet.type}`);
     });
+  }
+
+  async destroy() {
+    if (this._destroyed) return;
+    this._destroyed = true;
+    document.removeEventListener('visibilitychange', this._onVisibilityChange);
+    window.removeEventListener('pagehide', this._onPageHide);
+    this._lifecycleBound = false;
+    this.clock?.stop();
+    this.isPlaying = false;
+    this.transportFailoverTimer && clearInterval(this.transportFailoverTimer);
+    this.transportFailoverTimer = null;
+    for (const timer of this.pendingTransportNoteOffTimers) clearTimeout(timer);
+    this.pendingTransportNoteOffTimers.clear();
+    this.v10SequencerLobby?.destroy?.();
+    this.v10SequencerLobby = null;
+    await this.peernet.destroy();
+    await this.runtime.dispose();
   }
 
   bindV10SequencerBridge() {
@@ -222,9 +275,11 @@ class PeerModGrooveApp {
     if (!payload || payload.docId !== this.externalSeqId) return;
     this.externalTransport = null;
     this.logText('v10 shared clock stopped');
+    this.renderTransportMetrics?.();
   }
 
   async consumeSequencerTick(payload) {
+    if (this._destroyed) return;
     await this.runtime.init();
     await this.startAudioModules();
     const active = payload.active || [];
@@ -242,9 +297,13 @@ class PeerModGrooveApp {
         transportStep: payload.step
       };
       this.patchBay.dispatchPacket('v10-sequencer', 'midi', packet);
-      window.setTimeout(() => {
+      let timer = null;
+      timer = window.setTimeout(() => {
+        this.pendingTransportNoteOffTimers.delete(timer);
+        if (this._destroyed) return;
         this.patchBay.dispatchPacket('v10-sequencer', 'midi', { ...packet, type: 'note-off', velocity: 0, audioTime: audioTime + Math.max(0.04, Math.min(0.14, (payload.tickMs || 120) * 0.00045)) });
       }, Math.max(40, Math.min(140, (payload.tickMs || 120) * 0.45)));
+      this.pendingTransportNoteOffTimers.add(timer);
     }
     if (active.length) this.logText(`v10 seq step ${payload.step}: ${active.map(x => x.name || x.note).join(', ')}`);
   }

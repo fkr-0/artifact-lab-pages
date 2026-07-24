@@ -16,10 +16,13 @@
       background: radial-gradient(circle at top, #1b1430 0, #070710 55%, #020205 100%);
       color: #e8fbff;
       font-family: 'Share Tech Mono', 'Courier New', monospace;
+      padding: 18px;
+    }
+    .game-shell {
+      min-height: calc(100vh - 36px);
       display: grid;
       grid-template-columns: minmax(320px, 1fr) 320px;
       gap: 16px;
-      padding: 18px;
     }
     canvas {
       width: min(90vmin, calc(100vw - 380px));
@@ -78,12 +81,13 @@
       text-shadow: 0 0 10px rgba(255,255,0,.35);
     }
     @media (max-width: 900px) {
-      body { grid-template-columns: 1fr; }
+      .game-shell { grid-template-columns: 1fr; }
       canvas { width: min(94vmin, calc(100vw - 36px)); height: min(94vmin, calc(100vw - 36px)); }
     }
   </style>
 </head>
 <body>
+  <main class="game-shell">
   <canvas id="board" width="780" height="780"></canvas>
   <aside>
     <h1>💣 Gridblast</h1>
@@ -109,6 +113,7 @@
       <span>Upgrades: 🔥 extends bomb cross, ＋ allows more active bombs.</span>
     </div>
   </aside>
+  </main>
 
   <script type="module">
     import { PeernetLobby } from '../lib/peernet/peernet-lib.js';
@@ -149,6 +154,9 @@
     let hostPeerId = null;
     let lastBroadcastAt = 0;
     let applyingRemoteState = false;
+    let pausedByVisibility = false;
+    let animationFrameId = 0;
+    let destroyed = false;
     const netStatus = document.getElementById('netStatus');
 
     const bindings = [
@@ -160,10 +168,7 @@
 
     document.body.dataset.mode = params.get('embedded') === 'true' ? 'embedded' : 'standalone';
     document.getElementById('newGameBtn').onclick = () => reset();
-    document.getElementById('pauseBtn').onclick = () => {
-      paused = !paused;
-      document.getElementById('pauseBtn').textContent = paused ? 'Resume' : 'Pause';
-    };
+    document.getElementById('pauseBtn').onclick = () => togglePause();
     playerCount.onchange = () => reset();
 
     document.addEventListener('keydown', (event) => {
@@ -182,6 +187,7 @@
 
     function reset() {
       paused = false;
+      pausedByVisibility = false;
       document.getElementById('pauseBtn').textContent = 'Pause';
       game = createGame({ players: Number(playerCount.value) });
       saveSnapshot();
@@ -189,7 +195,19 @@
       render();
     }
 
+    function startLoop() {
+      if (destroyed || animationFrameId) return;
+      animationFrameId = requestAnimationFrame(loop);
+    }
+
+    function stopLoop() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
+    }
+
     function loop(now) {
+      animationFrameId = 0;
+      if (destroyed) return;
       if (!paused && now - lastStep > 100) {
         lastStep = now;
         stepInput();
@@ -198,7 +216,7 @@
         broadcastBombermanState('tick');
       }
       render();
-      requestAnimationFrame(loop);
+      if (!destroyed && document.visibilityState !== 'hidden') startLoop();
     }
 
     function stepInput() {
@@ -331,6 +349,37 @@
       `).join('');
     }
 
+    function togglePause(nextPaused) {
+      paused = typeof nextPaused === 'boolean' ? nextPaused : !paused;
+      document.getElementById('pauseBtn').textContent = paused ? 'Resume' : 'Pause';
+      if (!paused && !destroyed) startLoop();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        if (!paused) {
+          pausedByVisibility = true;
+          togglePause(true);
+        }
+        stopLoop();
+        return;
+      }
+      if (pausedByVisibility) {
+        pausedByVisibility = false;
+        togglePause(false);
+      } else if (!destroyed) {
+        startLoop();
+      }
+    }
+
+    function destroyGame() {
+      if (destroyed) return;
+      destroyed = true;
+      stopLoop();
+      lobby?.destroy?.();
+      lobby = null;
+    }
+
 
 
     function saveSnapshot() {
@@ -395,7 +444,10 @@
       netStatus.textContent = `Network error: ${error?.message || error}`;
     });
     render();
-    requestAnimationFrame(loop);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', destroyGame);
+    window.addEventListener('beforeunload', destroyGame);
+    startLoop();
   </script>
 </body>
 </html>

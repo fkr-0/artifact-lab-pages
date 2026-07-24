@@ -121,7 +121,10 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     activeAppId = appId;
     for (const [id, data] of openApps) {
       data.tab.classList?.toggle('active', id === appId);
+      data.tab.setAttribute?.('aria-selected', String(id === appId));
+      data.tab.tabIndex = id === appId ? 0 : -1;
       data.panel.classList?.toggle('active', id === appId);
+      data.panel.hidden = id !== appId;
     }
     deck.classList?.add('active');
     onChange({ type: 'switch', activeAppId, openApps });
@@ -152,6 +155,9 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     tab.className = 'app-deck-tab';
     tab.dataset.appId = artifact.id;
     tab.dataset.instanceId = instanceId;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-selected', 'false');
+    tab.setAttribute('aria-label', artifact.title || artifact.name || artifact.id);
     const title = documentRef.createElement('span');
     title.textContent = artifact.title || artifact.name || artifact.id;
     const floatButton = documentRef.createElement('button');
@@ -159,6 +165,7 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     floatButton.className = 'app-deck-tab-float';
     floatButton.dataset.float = artifact.id;
     floatButton.title = 'float app';
+    floatButton.setAttribute('aria-label', `float ${artifact.title || artifact.id}`);
     floatButton.textContent = '▣';
     floatButton.onclick = (event) => { event?.stopPropagation?.(); float(artifact.id); };
     const closeButton = documentRef.createElement('button');
@@ -166,6 +173,7 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     closeButton.className = 'app-deck-tab-close';
     closeButton.dataset.close = artifact.id;
     closeButton.textContent = '✕';
+    closeButton.setAttribute('aria-label', `close ${artifact.title || artifact.id}`);
     closeButton.onclick = (event) => { event?.stopPropagation?.(); close(artifact.id); };
     tab.floatButton = floatButton;
     tab.closeButton = closeButton;
@@ -179,6 +187,7 @@ export function createInlineTabDeck({ deck, tabs, body, runtime = globalThis, on
     panel.className = 'app-deck-panel';
     panel.dataset.appId = artifact.id;
     panel.dataset.instanceId = instanceId;
+    panel.setAttribute('role', 'tabpanel');
     if (iframeNode) {
       panel.appendChild(iframeNode);
     } else if (launch.url === '#') {
@@ -278,9 +287,14 @@ export function createFloatingPanel({ title, url, iframeNode = null, dockLabel =
   const documentRef = runtime.document;
   if (!documentRef) throw new Error('createFloatingPanel requires a document runtime');
 
+  const returnFocus = typeof documentRef.activeElement?.focus === 'function' ? documentRef.activeElement : null;
   documentRef.querySelector?.('.floating')?.remove();
   const panel = documentRef.createElement('section');
   panel.className = 'floating';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-label', title || 'Floating app');
+  panel.tabIndex = -1;
   panel.style.position = 'fixed';
   panel.style.resize = 'both';
   panel.style.overflow = 'auto';
@@ -302,6 +316,7 @@ export function createFloatingPanel({ title, url, iframeNode = null, dockLabel =
     dockControl.type = 'button';
     dockControl.dataset.dock = '';
     dockControl.textContent = dockLabel || 'dock inline';
+    dockControl.setAttribute('aria-label', dockLabel || 'dock inline');
     dockControl.onclick = () => onDock?.(panel);
     header.appendChild(dockControl);
   }
@@ -309,7 +324,11 @@ export function createFloatingPanel({ title, url, iframeNode = null, dockLabel =
   closeButton.type = 'button';
   closeButton.dataset.closeFloating = '';
   closeButton.textContent = 'close';
-  closeButton.onclick = () => panel.remove();
+  closeButton.setAttribute('aria-label', 'close floating app');
+  closeButton.onclick = () => {
+    panel.remove();
+    returnFocus?.focus?.({ preventScroll: true });
+  };
   header.appendChild(closeButton);
   panel.appendChild(header);
   if (iframeNode) {
@@ -324,6 +343,7 @@ export function createFloatingPanel({ title, url, iframeNode = null, dockLabel =
   }
   makeFloatingPanelMovable(panel, runtime);
   (runtime.body || documentRef.body)?.append(panel);
+  panel.focus?.({ preventScroll: true });
   return panel;
 }
 

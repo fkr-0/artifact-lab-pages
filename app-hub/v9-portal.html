@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>NEXUS PORTAL v9 // Embedded Apps + P2P</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
@@ -990,6 +991,12 @@
         background: rgba(0, 255, 255, 0.15);
         border-color: var(--fg-primary);
       }
+      .hdr-link {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        white-space: nowrap;
+      }
 
       /* ══════════════════════════════════════
        FOOTER STATUS BAR
@@ -1904,30 +1911,17 @@
         border-radius: 10px;
         background: rgba(251, 191, 36, 0.05);
       }
-    </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
   </head>
   <body data-theme="default">
-    <a
-      href="../app-hub-v11/index.html"
-      style="
-        position: fixed;
-        top: 0.75rem;
-        right: 0.75rem;
-        z-index: 10000;
-        border: 1px solid rgba(0, 255, 255, 0.45);
-        border-radius: 999px;
-        padding: 0.35rem 0.65rem;
-        background: rgba(0, 0, 0, 0.72);
-        color: #00ffff;
-        text-decoration: none;
-        font:
-          12px &quot;Share Tech Mono&quot;,
-          monospace;
-        box-shadow: 0 0 1rem rgba(0, 255, 255, 0.18);
-      "
-      >↗ v11 hub</a
-    >
-
     <!-- Background effects -->
     <div class="starfield" id="starfield"></div>
     <div class="scanlines" id="scanlines"></div>
@@ -1943,18 +1937,17 @@
           type="text"
           placeholder="Search apps, tags, descriptions…"
           autocomplete="off"
-          oninput="onSearchInput(this.value)"
         />
         <button
           class="search-clear"
           id="searchClear"
-          onclick="clearSearch()"
           title="Clear search"
         >
           ✕
         </button>
       </div>
       <div class="header-controls" style="gap: 0.4rem">
+        <a class="hdr-btn hdr-link" href="../app-hub-v11/index.html" title="Open the current App Hub">v11 ↗</a>
         <!-- P2P status -->
         <div class="hdr-chip" id="hdrP2pChip" title="P2P network status">
           <div class="dot off" id="hdrP2pDot"></div>
@@ -1977,7 +1970,6 @@
           <button
             class="view-btn active"
             id="viewCards"
-            onclick="setViewMode('cards')"
             title="Card grid"
           >
             ⊞
@@ -1985,7 +1977,6 @@
           <button
             class="view-btn"
             id="viewList"
-            onclick="setViewMode('list')"
             title="List view"
           >
             ≡
@@ -1995,7 +1986,6 @@
         <button
           class="hdr-btn"
           id="settingsBtn"
-          onclick="toggleSettings()"
           title="System Config [S]"
         >
           ⚙
@@ -2011,20 +2001,18 @@
           <button
             class="mode-btn and-mode"
             id="modeAnd"
-            onclick="setTagMode('AND')"
           >
             AND
           </button>
           <button
             class="mode-btn or-mode active"
             id="modeOr"
-            onclick="setTagMode('OR')"
           >
             OR
           </button>
         </div>
         <div class="tag-filter" id="tagFilter"></div>
-        <button class="clear-tags" onclick="clearAllTags()">
+        <button class="clear-tags" id="clearTagsBtn">
           Clear All Tags
         </button>
 
@@ -2051,7 +2039,7 @@
               placeholder="Username..."
               maxlength="15"
             />
-            <button onclick="setUsername()">Set</button>
+            <button id="usernameSetBtn">Set</button>
           </div>
           <div class="p2p-users" id="p2pUsers">
             <div
@@ -2127,12 +2115,11 @@
     <div
       class="settings-backdrop"
       id="settingsBackdrop"
-      onclick="toggleSettings()"
     ></div>
     <div class="settings-drawer" id="settingsDrawer">
       <div class="settings-drawer-hdr">
         <span class="settings-drawer-title">⚙ SYSTEM CONFIG</span>
-        <button class="settings-close" onclick="toggleSettings()">
+        <button class="settings-close" id="settingsCloseBtn">
           ✕ CLOSE
         </button>
       </div>
@@ -2143,7 +2130,6 @@
             <div
               class="theme-btn active"
               data-theme="default"
-              onclick="setTheme('default')"
               title="TRON (default)"
             >
               <span class="theme-btn-label">TRON</span>
@@ -2151,7 +2137,6 @@
             <div
               class="theme-btn"
               data-theme="synthwave"
-              onclick="setTheme('synthwave')"
               title="Synthwave"
             >
               <span class="theme-btn-label">SYNTH</span>
@@ -2159,7 +2144,6 @@
             <div
               class="theme-btn"
               data-theme="cyberpunk"
-              onclick="setTheme('cyberpunk')"
               title="Cyberpunk"
             >
               <span class="theme-btn-label">CYBER</span>
@@ -2167,7 +2151,6 @@
             <div
               class="theme-btn"
               data-theme="retro8bit"
-              onclick="setTheme('retro8bit')"
               title="8-Bit Retro"
             >
               <span class="theme-btn-label">8-BIT</span>
@@ -2175,7 +2158,6 @@
             <div
               class="theme-btn"
               data-theme="midnight"
-              onclick="setTheme('midnight')"
               title="Midnight Blue"
             >
               <span class="theme-btn-label">NIGHT</span>
@@ -2183,7 +2165,6 @@
             <div
               class="theme-btn"
               data-theme="vaporwave"
-              onclick="setTheme('vaporwave')"
               title="Vaporwave"
             >
               <span class="theme-btn-label">VAPOR</span>
@@ -2191,7 +2172,6 @@
             <div
               class="theme-btn"
               data-theme="neon-rust"
-              onclick="setTheme('neon-rust')"
               title="Neon Rust"
             >
               <span class="theme-btn-label">RUST</span>
@@ -2199,7 +2179,6 @@
             <div
               class="theme-btn"
               data-theme="matrix"
-              onclick="setTheme('matrix')"
               title="Matrix"
             >
               <span class="theme-btn-label">MATRIX</span>
@@ -2214,7 +2193,6 @@
             <div
               class="toggle-sw on"
               id="toggleScanlines"
-              onclick="toggleEffect('scanlines')"
             ></div>
           </div>
           <div class="setting-row">
@@ -2222,7 +2200,6 @@
             <div
               class="toggle-sw on"
               id="toggleStarfield"
-              onclick="toggleEffect('starfield')"
             ></div>
           </div>
           <div class="setting-row">
@@ -2230,7 +2207,6 @@
             <div
               class="toggle-sw on"
               id="toggleWarp"
-              onclick="toggleEffect('warp')"
             ></div>
           </div>
         </div>
@@ -2242,7 +2218,6 @@
             <div
               class="toggle-sw"
               id="toggleSounds"
-              onclick="toggleSoundEnabled()"
             ></div>
           </div>
           <div class="setting-row">
@@ -2254,8 +2229,6 @@
               min="0"
               max="1"
               step="0.01"
-              onchange="setSoundVolume(this.value)"
-              oninput="setSoundVolume(this.value)"
             />
           </div>
           <div class="setting-row">
@@ -2263,7 +2236,6 @@
             <select
               class="sound-select"
               id="soundTheme"
-              onchange="setSoundTheme(this.value)"
             >
               <option value="retro">retro</option>
               <option value="soft">soft</option>
@@ -2272,7 +2244,7 @@
           </div>
           <div class="setting-row">
             <span>Test sound</span>
-            <button class="hdr-btn" onclick="playSound('success', true)">
+            <button class="hdr-btn" id="testSoundBtn">
               ▶ TEST
             </button>
           </div>
@@ -2341,25 +2313,20 @@
             <input
               id="lobbyChatInput"
               placeholder="lobby message…"
-              onkeydown="if(event.key==='Enter') sendLobbyChat()"
             />
             <div class="user-manager-actions">
-              <button class="mini-btn" onclick="sendLobbyChat()">
+              <button class="mini-btn" id="sendLobbyChatBtn">
                 send chat
               </button>
-              <button class="mini-btn" onclick="showOwnBadger()">
+              <button class="mini-btn" id="showOwnBadgerBtn">
                 my badger
               </button>
               <input
                 id="miniFileInput"
                 type="file"
                 style="display: none"
-                onchange="sendMiniFileToContextPeer(this.files[0])"
               />
-              <button
-                class="mini-btn"
-                onclick="document.getElementById('miniFileInput').click()"
-              >
+              <button class="mini-btn" id="openMiniFileBtn">
                 send file…
               </button>
             </div>
@@ -2375,14 +2342,9 @@
               id="umUsername"
               maxlength="24"
               placeholder="display name"
-              onchange="updateUnifiedUserFromSettings()"
             />
-            <input
-              id="umColor"
-              type="color"
-              onchange="updateUnifiedUserFromSettings()"
-            />
-            <select id="umStatus" onchange="updateUnifiedUserFromSettings()">
+            <input id="umColor" type="color" />
+            <select id="umStatus">
               <option value="available">available</option>
               <option value="busy">busy</option>
               <option value="away">away</option>
@@ -2392,14 +2354,12 @@
               id="umNote"
               maxlength="80"
               placeholder="status note"
-              onchange="updateUnifiedUserFromSettings()"
             />
             <div class="setting-row">
               <span>Auto connect shared</span>
               <div
                 class="toggle-sw"
                 id="toggleUmAutoConnect"
-                onclick="toggleUnifiedAutoConnect()"
               ></div>
             </div>
             <div class="setting-row">
@@ -2407,14 +2367,13 @@
               <div
                 class="toggle-sw"
                 id="toggleUmIncomingSaves"
-                onclick="toggleUnifiedIncomingSaves()"
               ></div>
             </div>
             <div class="user-manager-actions">
-              <button class="mini-btn" onclick="createV9SaveState()">
+              <button class="mini-btn" id="createV9SaveStateBtn">
                 ＋ save v9 state
               </button>
-              <button class="mini-btn" onclick="announceUnifiedPresence()">
+              <button class="mini-btn" id="announceUnifiedPresenceBtn">
                 announce presence
               </button>
             </div>
@@ -2426,15 +2385,14 @@
           <div class="settings-sect-title">Local Storage / Last Session</div>
           <div class="user-manager-panel">
             <div class="user-manager-actions">
-              <button class="mini-btn" onclick="saveLocalSnapshotNow()">
+              <button class="mini-btn" id="saveLocalSnapshotBtn">
                 ＋ snapshot
               </button>
-              <button class="mini-btn" onclick="restoreLastLocalSnapshot()">
+              <button class="mini-btn" id="restoreLastLocalSnapshotBtn">
                 ↩ load last
               </button>
               <button
                 class="mini-btn"
-                onclick="toggleLocalAutosave()"
                 id="localAutosaveBtn"
               >
                 autosave
@@ -2453,13 +2411,13 @@
               placeholder="session title"
             />
             <div class="user-manager-actions">
-              <button class="mini-btn" onclick="createSharedSessionFromV9()">
+              <button class="mini-btn" id="createSharedSessionBtn">
                 ＋ create
               </button>
-              <button class="mini-btn" onclick="saveActiveSessionFromV9()">
+              <button class="mini-btn" id="saveActiveSessionBtn">
                 ↻ update state
               </button>
-              <button class="mini-btn" onclick="leaveSharedSession()">
+              <button class="mini-btn" id="leaveSharedSessionBtn">
                 leave
               </button>
             </div>
@@ -2480,7 +2438,6 @@
             <div
               class="toggle-sw"
               id="toggleSharedPeernet"
-              onclick="toggleSharedPeernet()"
             ></div>
           </div>
           <div class="setting-row">
@@ -2533,56 +2490,37 @@
 
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
-      <div
-        class="context-menu-item"
-        onclick="contextAction('open')"
-        id="ctxItemOpen"
-      >
+      <div class="context-menu-item" id="ctxItemOpen">
         <span style="font-size: 1rem">▶</span>
         <span id="ctxOpenLabel">Launch</span>
       </div>
-      <div
-        class="context-menu-item"
-        onclick="contextAction('inline')"
-        id="ctxItemInline"
-      >
+      <div class="context-menu-item" id="ctxItemInline">
         <span style="font-size: 1rem">◱</span> <span>Open Inline</span>
       </div>
-      <div
-        class="context-menu-item"
-        onclick="contextAction('fullscreen')"
-        id="ctxItemFullscreen"
-      >
+      <div class="context-menu-item" id="ctxItemFullscreen">
         <span style="font-size: 1rem">⛶</span> <span>Fullscreen</span>
       </div>
       <div class="context-menu-separator"></div>
-      <div
-        class="context-menu-item"
-        onclick="contextAction('newtab')"
-        id="ctxItemNewTab"
-      >
+      <div class="context-menu-item" id="ctxItemNewTab">
         <span style="font-size: 1rem">↗</span> <span>New Tab</span>
       </div>
     </div>
 
     <!-- Peer Context Menu -->
     <div class="peer-context-menu" id="peerContextMenu">
-      <div
-        class="peer-context-menu-item"
-        onclick="peerContextAction('profile')"
-      >
+      <div class="peer-context-menu-item" id="peerContextProfile">
         <span>👤</span><span>Open user card</span>
       </div>
-      <div class="peer-context-menu-item" onclick="peerContextAction('chat')">
+      <div class="peer-context-menu-item" id="peerContextChat">
         <span>💬</span><span>Open floating chat</span>
       </div>
-      <div class="peer-context-menu-item" onclick="peerContextAction('ping')">
+      <div class="peer-context-menu-item" id="peerContextPing">
         <span>📡</span><span>Ping peer</span>
       </div>
-      <div class="peer-context-menu-item" onclick="peerContextAction('file')">
+      <div class="peer-context-menu-item" id="peerContextFile">
         <span>📎</span><span>Send file</span>
       </div>
-      <div class="peer-context-menu-item" onclick="peerContextAction('verify')">
+      <div class="peer-context-menu-item" id="peerContextVerify">
         <span>🦡</span><span>Compare badger</span>
       </div>
     </div>
@@ -2591,7 +2529,7 @@
 
     <!-- Peer Profile Card -->
     <div class="peer-profile-card" id="peerProfileCard">
-      <button class="peer-profile-close" onclick="hidePeerProfileCard()">
+      <button class="peer-profile-close" id="peerProfileCloseBtn">
         ✕
       </button>
       <div class="peer-profile-head">
@@ -2617,16 +2555,16 @@
         <div id="peerProfileCaps"></div>
       </div>
       <div class="peer-profile-actions">
-        <button class="mini-btn" onclick="peerProfileAction('chat')">
+        <button class="mini-btn" id="peerProfileChatBtn">
           💬 chat
         </button>
-        <button class="mini-btn" onclick="peerProfileAction('ping')">
+        <button class="mini-btn" id="peerProfilePingBtn">
           📡 ping
         </button>
-        <button class="mini-btn" onclick="peerProfileAction('offer-save')">
+        <button class="mini-btn" id="peerProfileOfferSaveBtn">
           🎁 send save
         </button>
-        <button class="mini-btn" onclick="peerProfileAction('announce')">
+        <button class="mini-btn" id="peerProfileAnnounceBtn">
           📣 announce
         </button>
       </div>
@@ -2637,7 +2575,7 @@
       <div class="app-modal-content">
         <div class="app-modal-header">
           <div class="app-modal-title" id="appModalTitle">App</div>
-          <button class="app-modal-close" onclick="closeApp()">
+          <button class="app-modal-close" id="appModalCloseBtn">
             Close App
           </button>
         </div>
@@ -3354,33 +3292,13 @@
         renderUnifiedUserSettings();
         renderSharedSessions();
         renderLocalSnapshots();
+        playSound("success", true);
+      }
 
-        // ============================================
-
-        // ============================================
-        // MULTI-APP SESSION ROUTER
-        // ============================================
-        const peernetSessionRouter = window.PeernetSessionRouter
-          ? new PeernetSessionRouter()
-          : null;
-
-        if (peernetSessionRouter) {
-          peernetSessionRouter.register("nexus-v9", applyV9StoredState);
-
-          if (peernetSessionManager) {
-            peernetSessionManager.on("session:join", (s) =>
-              peernetSessionRouter.apply(s),
-            );
-            peernetSessionManager.on("session:remote-update", (s) =>
-              peernetSessionRouter.apply(s),
-            );
-          }
-        }
-
-        // ============================================
-        // LOBBY MINI-APPS - chat, files, badger verification
-        // ============================================
-        const peernetMiniApps = window.PeernetMiniApps
+      // ============================================
+      // LOBBY MINI-APPS - chat, files, badger verification
+      // ============================================
+      const peernetMiniApps = window.PeernetMiniApps
           ? new PeernetMiniApps({ userManager: peernetUserManager })
           : null;
 
@@ -3441,24 +3359,6 @@
             if (b) alert("Compare badger out-of-band: " + b.text);
           });
         }
-
-        // SESSION-AWARE APP LOADER
-        // ============================================
-        const peernetAppLoader = window.PeernetAppLoader
-          ? new PeernetAppLoader({
-              sessionManager: peernetSessionManager,
-              applyState: applyV9StoredState,
-              captureState: captureV9SessionState,
-            })
-          : null;
-
-        if (peernetAppLoader) {
-          peernetAppLoader.bind();
-          peernetAppLoader.wrapOpenApp();
-        }
-
-        playSound("success", true);
-      }
 
       function renderUnifiedUserSettings() {
         if (!peernetUserManager) return;
@@ -3521,6 +3421,35 @@
             userManager: peernetUserManager,
           })
         : null;
+
+      const peernetSessionRouter = window.PeernetSessionRouter
+        ? new PeernetSessionRouter()
+        : null;
+
+      if (peernetSessionRouter) {
+        peernetSessionRouter.register("nexus-v9", applyV9StoredState);
+        if (peernetSessionManager) {
+          peernetSessionManager.on("session:join", (session) =>
+            peernetSessionRouter.apply(session),
+          );
+          peernetSessionManager.on("session:remote-update", (session) =>
+            peernetSessionRouter.apply(session),
+          );
+        }
+      }
+
+      const peernetAppLoader = window.PeernetAppLoader
+        ? new PeernetAppLoader({
+            sessionManager: peernetSessionManager,
+            applyState: applyV9StoredState,
+            captureState: captureV9SessionState,
+          })
+        : null;
+
+      if (peernetAppLoader) {
+        peernetAppLoader.bind();
+        peernetAppLoader.wrapOpenApp();
+      }
 
       function bindSessionManagerToSharedCore() {
         if (peernetSessionManager && sharedPeernet)
@@ -3607,7 +3536,7 @@
               .slice(0, 8)
               .map(
                 (session) => `
-    <div class="session-row ${session.id === snap.activeSessionId ? "session-active" : ""}" onclick="activateSharedSession('${session.id}')">
+    <div class="session-row ${session.id === snap.activeSessionId ? "session-active" : ""}" data-session-id="${session.id}">
       <span>${escapeHtml(session.title || session.id)}</span>
       <span>${(session.participants || []).length}p</span>
     </div>
@@ -3712,7 +3641,7 @@
               .slice(0, 8)
               .map(
                 (snap) => `
-    <div class="storage-row" onclick="restoreLocalSnapshot('${snap.id}')">
+    <div class="storage-row" data-snapshot-id="${snap.id}">
       <span>${escapeHtml(snap.title || snap.id)}</span>
       <span>${escapeHtml(snap.kind || "snap")}</span>
     </div>
@@ -3740,7 +3669,7 @@
         tagFilter.innerHTML = sortedTags
           .map((tag) => {
             const count = artifacts.filter((a) => a.tags.includes(tag)).length;
-            return `<button class="tag-button" data-tag="${tag}" onclick="toggleTag('${tag}')">${tag} (${count})</button>`;
+            return `<button class="tag-button" data-tag="${tag}">${tag} (${count})</button>`;
           })
           .join("");
       }
@@ -3916,8 +3845,7 @@
       <div class="no-results" style="${state.viewMode === "list" ? "" : "grid-column:1/-1"}">
         <div class="no-results-icon">🔍</div>
         <div>No artifacts match</div>
-        <button class="clear-tags" style="margin:1rem auto;display:inline-block"
-          onclick="clearAllTags();clearSearch()">Clear filters</button>
+        <button class="clear-tags" style="margin:1rem auto;display:inline-block" data-action="clear-filters">Clear filters</button>
       </div>`;
           return;
         }
@@ -3926,9 +3854,7 @@
           container.innerHTML = filtered
             .map(
               (a) => `
-      <div class="artifact-list-item ${a.embedded ? "embedded" : ""}"
-           onclick="launchArtifact('${a.id}')"
-           oncontextmenu="showContextMenu(event,'${a.id}')">
+      <div class="artifact-list-item ${a.embedded ? "embedded" : ""}" data-artifact-id="${a.id}">
         <div class="list-icon">${a.embedded ? "⚡" : "📦"}</div>
         <div class="list-name-block">
           <div class="list-name">${highlight(a.name, q)}&nbsp;${statusBadgeHtml(a.status)}</div>
@@ -3945,9 +3871,7 @@
           container.innerHTML = filtered
             .map(
               (a) => `
-      <div class="artifact-card ${a.embedded ? "embedded" : ""}"
-           onclick="launchArtifact('${a.id}')"
-           oncontextmenu="showContextMenu(event,'${a.id}')">
+      <div class="artifact-card ${a.embedded ? "embedded" : ""}" data-artifact-id="${a.id}">
         <div class="artifact-icon">${a.embedded ? "⚡" : "📦"}${statusBadgeHtml(a.status)}</div>
         <div class="artifact-name">${highlight(a.name, q)}</div>
         <div class="artifact-desc">${highlight(a.description, q)}</div>
@@ -4015,7 +3939,7 @@
       <div style="margin-top:10px; font-size:10px; opacity:0.7;">WASD/Arrows: Move | Space: Shoot</div>
     </div>
     <div style="position:absolute; top:10px; right:10px;">
-      <button onclick="initShooterGame()" style="padding:0.5rem 1rem; background:rgba(0,255,255,0.1); border:1px solid #0cf; color:#0cf; font-family:'Share Tech Mono'; cursor:pointer; border-radius:4px;">Restart</button>
+      <button data-action="restart-shooter" style="padding:0.5rem 1rem; background:rgba(0,255,255,0.1); border:1px solid #0cf; color:#0cf; font-family:'Share Tech Mono'; cursor:pointer; border-radius:4px;">Restart</button>
     </div>
   `;
 
@@ -4290,7 +4214,7 @@
           ]
             .map(
               (btn) =>
-                `<button onclick="calcInput('${btn}')" style="padding:0.75rem; background:rgba(0,255,0,0.1); border:1px solid #0f0; color:#0f0; font-family:'Share Tech Mono'; font-size:16px; cursor:pointer; border-radius:4px; transition:all 0.1s;">${btn}</button>`,
+                `<button data-calc="${btn}" style="padding:0.75rem; background:rgba(0,255,0,0.1); border:1px solid #0f0; color:#0f0; font-family:'Share Tech Mono'; font-size:16px; cursor:pointer; border-radius:4px; transition:all 0.1s;">${btn}</button>`,
             )
             .join("")}
         </div>
@@ -4420,9 +4344,9 @@
         tab.dataset.instanceId = instanceId;
         tab.innerHTML = `
     <span>${artifact.name}</span>
-    <span class="app-deck-tab-close" onclick="event.stopPropagation(); closeAppTab('${artifact.id}')">✕</span>
+    <span class="app-deck-tab-close" data-action="close-app-tab" data-app-id="${artifact.id}">✕</span>
   `;
-        tab.onclick = () => switchToAppTab(artifact.id);
+        tab.addEventListener("click", () => switchToAppTab(artifact.id));
 
         // Create panel
         const panel = document.createElement("div");
@@ -4434,9 +4358,9 @@
         const expandBtn = document.createElement("button");
         expandBtn.className = "app-deck-expand";
         expandBtn.textContent = "⛶ Fullscreen";
-        expandBtn.onclick = () => {
+        expandBtn.addEventListener("click", () => {
           launchAppModal(artifact);
-        };
+        });
         panel.appendChild(expandBtn);
 
         // Insert into DOM FIRST so embedded apps can use document.getElementById
@@ -4665,7 +4589,7 @@
                 .map(
                   (
                     c,
-                  ) => `<div title="${c}" onclick="(function(){picker.value='${c}';syncColor();})()"
+                  ) => `<div title="${c}" data-color="${c}"
           style="width:32px;height:32px;background:${c};border-radius:3px;cursor:pointer;border:2px solid rgba(255,255,255,0.1);flex-shrink:0;"></div>`,
                 )
                 .join("")
@@ -4768,6 +4692,12 @@
         });
         copyRoleButton.addEventListener("click", copyRolePaletteCss);
         applyRoleButton.addEventListener("click", applyRolePaletteToTheme);
+        palette.addEventListener("click", (e) => {
+          const swatch = e.target.closest("[data-color]");
+          if (!swatch) return;
+          picker.value = swatch.dataset.color;
+          syncColor();
+        });
 
         syncColor();
         renderPalette();
@@ -5238,17 +5168,17 @@
         document.getElementById("peerChatLayer").appendChild(el);
         state.peerUi.chats.set(peerId, el);
 
-        el.querySelector(".peer-chat-close").onclick = () => {
+        el.querySelector(".peer-chat-close").addEventListener("click", () => {
           el.remove();
           state.peerUi.chats.delete(peerId);
-        };
-        el.querySelector(".peer-chat-input").onkeydown = (e) => {
+        });
+        el.querySelector(".peer-chat-input").addEventListener("keydown", (e) => {
           if (e.key !== "Enter") return;
           const msg = e.target.value.trim();
           if (!msg) return;
           e.target.value = "";
           sendPeerChat(peerId, msg);
-        };
+        });
         makePeerChatDraggable(el);
         playSound("success");
         return el;
@@ -5336,6 +5266,143 @@
               '"': "&quot;",
             })[ch],
         );
+      }
+
+      function bindV9UiEvents() {
+        const bind = (id, eventName, handler) => {
+          const el = document.getElementById(id);
+          if (el) el.addEventListener(eventName, handler);
+        };
+
+        bind("searchInput", "input", (e) => onSearchInput(e.target.value));
+        bind("searchClear", "click", clearSearch);
+        bind("viewCards", "click", () => setViewMode("cards"));
+        bind("viewList", "click", () => setViewMode("list"));
+        bind("settingsBtn", "click", toggleSettings);
+        bind("settingsBackdrop", "click", toggleSettings);
+        bind("settingsCloseBtn", "click", toggleSettings);
+        bind("clearTagsBtn", "click", clearAllTags);
+        bind("usernameSetBtn", "click", setUsername);
+        bind("testSoundBtn", "click", () => playSound("success", true));
+        bind("sendLobbyChatBtn", "click", sendLobbyChat);
+        bind("showOwnBadgerBtn", "click", showOwnBadger);
+        bind("openMiniFileBtn", "click", () =>
+          document.getElementById("miniFileInput")?.click(),
+        );
+        bind("miniFileInput", "change", (e) =>
+          sendMiniFileToContextPeer(e.target.files?.[0]),
+        );
+        bind("lobbyChatInput", "keydown", (e) => {
+          if (e.key === "Enter") sendLobbyChat();
+        });
+        bind("umUsername", "input", updateUnifiedUserFromSettings);
+        bind("umColor", "input", updateUnifiedUserFromSettings);
+        bind("umStatus", "change", updateUnifiedUserFromSettings);
+        bind("umNote", "input", updateUnifiedUserFromSettings);
+        bind("toggleUmAutoConnect", "click", toggleUnifiedAutoConnect);
+        bind("toggleUmIncomingSaves", "click", toggleUnifiedIncomingSaves);
+        bind("createV9SaveStateBtn", "click", createV9SaveState);
+        bind("announceUnifiedPresenceBtn", "click", announceUnifiedPresence);
+        bind("saveLocalSnapshotBtn", "click", saveLocalSnapshotNow);
+        bind("restoreLastLocalSnapshotBtn", "click", restoreLastLocalSnapshot);
+        bind("localAutosaveBtn", "click", toggleLocalAutosave);
+        bind("createSharedSessionBtn", "click", createSharedSessionFromV9);
+        bind("saveActiveSessionBtn", "click", saveActiveSessionFromV9);
+        bind("leaveSharedSessionBtn", "click", leaveSharedSession);
+        bind("toggleSharedPeernet", "click", toggleSharedPeernet);
+        bind("ctxItemOpen", "click", () => contextAction("open"));
+        bind("ctxItemInline", "click", () => contextAction("inline"));
+        bind("ctxItemFullscreen", "click", () => contextAction("fullscreen"));
+        bind("ctxItemNewTab", "click", () => contextAction("newtab"));
+        bind("peerContextProfile", "click", () =>
+          peerContextAction("profile"),
+        );
+        bind("peerContextChat", "click", () => peerContextAction("chat"));
+        bind("peerContextPing", "click", () => peerContextAction("ping"));
+        bind("peerContextFile", "click", () => peerContextAction("file"));
+        bind("peerContextVerify", "click", () => peerContextAction("verify"));
+        bind("peerProfileCloseBtn", "click", hidePeerProfileCard);
+        bind("peerProfileChatBtn", "click", () => peerProfileAction("chat"));
+        bind("peerProfilePingBtn", "click", () => peerProfileAction("ping"));
+        bind("peerProfileOfferSaveBtn", "click", () =>
+          peerProfileAction("offer-save"),
+        );
+        bind("peerProfileAnnounceBtn", "click", () =>
+          peerProfileAction("announce"),
+        );
+        bind("appModalCloseBtn", "click", closeApp);
+        bind("soundVolume", "input", (e) => setSoundVolume(e.target.value));
+        bind("soundVolume", "change", (e) => setSoundVolume(e.target.value));
+        bind("soundTheme", "change", (e) => setSoundTheme(e.target.value));
+        bind("toggleScanlines", "click", () => toggleEffect("scanlines"));
+        bind("toggleStarfield", "click", () => toggleEffect("starfield"));
+        bind("toggleWarp", "click", () => toggleEffect("warp"));
+        bind("toggleSounds", "click", toggleSoundEnabled);
+
+        const themeGrid = document.getElementById("themeGrid");
+        if (themeGrid) {
+          themeGrid.addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-theme]");
+            if (btn) setTheme(btn.dataset.theme);
+          });
+        }
+
+        const tagFilter = document.getElementById("tagFilter");
+        if (tagFilter) {
+          tagFilter.addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-tag]");
+            if (btn) toggleTag(btn.dataset.tag);
+          });
+        }
+
+        const artifactsGrid = document.getElementById("artifactsGrid");
+        if (artifactsGrid) {
+          artifactsGrid.addEventListener("click", (e) => {
+            const clear = e.target.closest('[data-action="clear-filters"]');
+            if (clear) {
+              clearAllTags();
+              clearSearch();
+              return;
+            }
+            const card = e.target.closest("[data-artifact-id]");
+            if (card) launchArtifact(card.dataset.artifactId);
+          });
+          artifactsGrid.addEventListener("contextmenu", (e) => {
+            const card = e.target.closest("[data-artifact-id]");
+            if (!card) return;
+            showContextMenu(e, card.dataset.artifactId);
+          });
+        }
+
+        const appDeckTabs = document.getElementById("appDeckTabs");
+        if (appDeckTabs) {
+          appDeckTabs.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-action='close-app-tab']");
+            if (close) {
+              e.stopPropagation();
+              closeAppTab(close.dataset.appId);
+              return;
+            }
+            const tab = e.target.closest(".app-deck-tab");
+            if (tab) switchToAppTab(tab.dataset.appId);
+          });
+        }
+
+        const sessionList = document.getElementById("sessionList");
+        if (sessionList) {
+          sessionList.addEventListener("click", (e) => {
+            const row = e.target.closest("[data-session-id]");
+            if (row) activateSharedSession(row.dataset.sessionId);
+          });
+        }
+
+        const localSnapshotList = document.getElementById("localSnapshotList");
+        if (localSnapshotList) {
+          localSnapshotList.addEventListener("click", (e) => {
+            const row = e.target.closest("[data-snapshot-id]");
+            if (row) restoreLocalSnapshot(row.dataset.snapshotId);
+          });
+        }
       }
 
       document
@@ -5434,7 +5501,8 @@
         menu.style.top = my + "px";
         menu.classList.add("active");
 
-        event.currentTarget.classList.add("context-menu-open");
+        const card = event.target.closest("[data-artifact-id]");
+        if (card) card.classList.add("context-menu-open");
       }
 
       function hideContextMenu() {
@@ -5442,7 +5510,7 @@
         menu.classList.remove("active");
 
         // Remove marker from all cards
-        document.querySelectorAll(".artifact-card").forEach((card) => {
+        document.querySelectorAll("[data-artifact-id]").forEach((card) => {
           card.classList.remove("context-menu-open");
         });
 
@@ -5782,6 +5850,7 @@
       // ============================================
 
       // Apply saved theme
+      bindV9UiEvents();
       setTheme(currentTheme);
 
       initTagFilter();

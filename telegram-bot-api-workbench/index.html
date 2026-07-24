@@ -203,7 +203,15 @@
       .token-row,.fields2,.fields3,.fields4,.metrics { grid-template-columns: 1fr; }
       .card { padding: .82rem; }
     }
-  </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
 </head>
 <body>
   <main class="shell">
@@ -216,13 +224,13 @@
         <label for="token">Bot token</label>
         <div class="token-row">
           <input id="token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="123456789:AA…">
-          <button id="show-token" class="mini" type="button">Show</button>
+          <button id="show-token" class="mini" type="button" aria-pressed="false">Show</button>
           <button id="test-token" class="mini primary" type="button">Test</button>
         </div>
         <span class="help">Memory only by default. “This tab” uses sessionStorage and clears with the browser session.</span>
       </div>
       <div class="token-tools">
-        <span class="status"><span id="status-dot" class="dot"></span><span id="status-label">Not tested</span></span>
+        <span class="status"><span id="status-dot" class="dot"></span><span id="status-label" aria-live="polite">Not tested</span></span>
         <label class="check"><input id="remember-token" type="checkbox"> This tab</label>
         <button id="abort-all" class="mini danger" type="button" disabled>Abort requests</button>
         <button id="clear-sensitive" class="mini danger" type="button">Clear</button>
@@ -234,15 +242,15 @@
       <p class="help">For a public application, keep the token on a trusted backend. Webhooks require a reachable HTTPS receiver; this tool configures them but does not receive updates. Browser calls also depend on network and cross-origin policy.</p>
     </section>
 
-    <nav class="tabs" aria-label="Workbench sections">
-      <button class="tab active" data-tab="status" type="button">Status</button>
-      <button class="tab" data-tab="messages" type="button">Messages</button>
-      <button class="tab" data-tab="updates" type="button">Updates</button>
-      <button class="tab" data-tab="webhooks" type="button">Webhooks</button>
-      <button class="tab" data-tab="commands" type="button">Commands & chats</button>
-      <button class="tab" data-tab="lab" type="button">API lab</button>
-      <button class="tab" data-tab="code" type="button">JS collection</button>
-      <button class="tab" data-tab="logs" type="button">Logs</button>
+    <nav class="tabs" role="tablist" aria-label="Workbench sections">
+      <button class="tab active" data-tab="status" type="button" role="tab" aria-selected="true" tabindex="0">Status</button>
+      <button class="tab" data-tab="messages" type="button" role="tab" aria-selected="false" tabindex="-1">Messages</button>
+      <button class="tab" data-tab="updates" type="button" role="tab" aria-selected="false" tabindex="-1">Updates</button>
+      <button class="tab" data-tab="webhooks" type="button" role="tab" aria-selected="false" tabindex="-1">Webhooks</button>
+      <button class="tab" data-tab="commands" type="button" role="tab" aria-selected="false" tabindex="-1">Commands & chats</button>
+      <button class="tab" data-tab="lab" type="button" role="tab" aria-selected="false" tabindex="-1">API lab</button>
+      <button class="tab" data-tab="code" type="button" role="tab" aria-selected="false" tabindex="-1">JS collection</button>
+      <button class="tab" data-tab="logs" type="button" role="tab" aria-selected="false" tabindex="-1">Logs</button>
     </nav>
 
     <section id="panel-status" class="panel active">
@@ -811,7 +819,12 @@ poll().catch(error => {
     function abortAll() { stopPolling(); for (const controller of [...state.activeControllers]) controller.abort(); toast("Active requests aborted."); }
 
     function switchTab(name) {
-      $$(".tab").forEach(button => button.classList.toggle("active", button.dataset.tab === name));
+      $$(".tab").forEach(button => {
+        const active = button.dataset.tab === name;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+        button.tabIndex = active ? 0 : -1;
+      });
       $$(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
       history.replaceState(null, "", `#${name}`);
     }
@@ -845,17 +858,26 @@ poll().catch(error => {
     function exportProfile() {
       const fields = {};
       for (const selector of profileSelectors) fields[selector] = $(selector).value;
-      downloadJson("telegram-workbench-profile.json", { schema: "telegram-workbench-profile/v1", exportedAt: new Date().toISOString(), fields });
+      downloadJson("telegram-workbench-profile.json", { schema: "telegram-workbench-profile/v1", schemaVersion: 1, exportedAt: new Date().toISOString(), fields });
     }
     async function importProfile(file) {
       const profile = JSON.parse(await file.text());
-      if (profile.schema !== "telegram-workbench-profile/v1" || !profile.fields) throw new Error("Unsupported profile file.");
+      if (profile.schema !== "telegram-workbench-profile/v1" || profile.schemaVersion !== 1 || !profile.fields || typeof profile.fields !== "object" || Array.isArray(profile.fields)) throw new Error("Unsupported profile file.");
       for (const selector of profileSelectors) if (typeof profile.fields[selector] === "string") $(selector).value = profile.fields[selector];
       $("#send-count").textContent = $("#send-text").value.length; toast("Profile imported without secrets.", "ok");
     }
 
-    $$(".tab").forEach(button => button.addEventListener("click", () => switchTab(button.dataset.tab)));
-    $("#show-token").addEventListener("click", () => { const input = $("#token"); input.type = input.type === "password" ? "text" : "password"; $("#show-token").textContent = input.type === "password" ? "Show" : "Hide"; });
+    const tabButtons = $$(".tab");
+    tabButtons.forEach(button => button.addEventListener("click", () => switchTab(button.dataset.tab)));
+    tabButtons.forEach((button, index) => button.addEventListener("keydown", event => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const current = index;
+      const next = event.key === "Home" ? 0 : event.key === "End" ? tabButtons.length - 1 : event.key === "ArrowLeft" ? (current - 1 + tabButtons.length) % tabButtons.length : (current + 1) % tabButtons.length;
+      tabButtons[next].focus();
+      switchTab(tabButtons[next].dataset.tab);
+    }));
+    $("#show-token").addEventListener("click", () => { const input = $("#token"); input.type = input.type === "password" ? "text" : "password"; $("#show-token").textContent = input.type === "password" ? "Show" : "Hide"; $("#show-token").setAttribute("aria-pressed", String(input.type !== "password")); });
     $("#token").addEventListener("input", () => { connection(null, "Not tested"); persistToken(); });
     $("#remember-token").addEventListener("change", persistToken);
     $("#abort-all").addEventListener("click", abortAll);

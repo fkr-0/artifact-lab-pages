@@ -14,11 +14,19 @@ NC='\033[0m'
 
 ARTIFACTS_DIR="${ARTIFACTS_DIR:-/home/user/work/code/artifacts}"
 PACKAGE_NAME="artifacts-collection"
-VERSION=$(date +%Y.%m.%d)
 OUTPUT_DIR="${1:-$ARTIFACTS_DIR}"
 STAGE_ROOT="$(mktemp -d)"
 STAGE="$STAGE_ROOT/$PACKAGE_NAME"
 trap 'rm -rf "$STAGE_ROOT"' EXIT
+
+SOURCE_DATE_EPOCH_VALUE="${SOURCE_DATE_EPOCH:-$(date -u +%s)}"
+if VERSION_DATE=$(date -u -d "@${SOURCE_DATE_EPOCH_VALUE}" +%Y.%m.%d 2>/dev/null); then
+  VERSION="$VERSION_DATE"
+  PACKAGE_TIMESTAMP=$(date -u -d "@${SOURCE_DATE_EPOCH_VALUE}" +%Y-%m-%dT%H:%M:%SZ)
+else
+  VERSION=$(date -u +%Y.%m.%d)
+  PACKAGE_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+fi
 
 echo -e "${CYAN}📦 Artifacts Collection - Manifest Packaging${NC}"
 echo ""
@@ -28,7 +36,7 @@ node app-hub-v11/server/artifact-build.mjs --out "$STAGE"
 
 cat > "$STAGE/VERSION" <<EOF_VERSION
 $VERSION
-Packaged: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+Packaged: $PACKAGE_TIMESTAMP
 Source manifest: app-hub-v11/artifacts.source.json
 EOF_VERSION
 echo -e "${GREEN}  ✓${NC} VERSION"
@@ -64,7 +72,7 @@ echo ""
 echo -e "${CYAN}Creating package archive...${NC}"
 mkdir -p "$OUTPUT_DIR"
 cd "$STAGE_ROOT"
-tar -czf "$OUTPUT_FILE" "$PACKAGE_NAME"
+tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@${SOURCE_DATE_EPOCH_VALUE}" -cf - "$PACKAGE_NAME" | gzip -n > "$OUTPUT_FILE"
 
 PACKAGE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
 echo -e "${GREEN}✓ Package created:${NC} $OUTPUT_FILE"

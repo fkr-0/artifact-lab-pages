@@ -60,20 +60,20 @@
         <textarea id="pasteBox" rows="7" placeholder="Or paste Markdown here…"></textarea>
         <button id="renderPasteBtn" type="button">Render pasted Markdown</button>
       </div>
-      <div class="card stack"><strong>Document</strong><div id="meta" class="muted">No document loaded yet.</div><div class="row"><span id="wordCount" class="pill">0 words</span><span id="headingCount" class="pill">0 headings</span></div></div>
+      <div class="card stack"><strong>Document</strong><div id="meta" class="muted" aria-live="polite">No document loaded yet.</div><div class="row"><span id="wordCount" class="pill">0 words</span><span id="headingCount" class="pill">0 headings</span></div></div>
       <nav id="toc" class="card stack" aria-label="Table of contents"></nav>
     </aside>
     <main>
       <article class="card">
         <header class="doc-head"><div id="sourceLabel" class="pill">markdown viewer</div></header>
-        <section id="content" class="markdown-body"><h1>Markdown Viewer</h1><p class="muted">Choose a Markdown file from the URL field, drop a local file, or paste Markdown into the editor.</p></section>
+        <section id="content" class="markdown-body" aria-live="polite"><h1>Markdown Viewer</h1><p class="muted">Choose a Markdown file from the URL field, drop a local file, or paste Markdown into the editor.</p></section>
       </article>
     </main>
   </div>
   <script type="module">
     import { themes, applyThemeTokens, buildThemeStyleText } from '../app-hub-v11/lib/themes.js';
     import { readHubSetting, writeHubSetting } from '../app-hub-v11/lib/storage.js';
-    import { renderMarkdown, extractHeadings, escapeHtml } from './lib/markdown-renderer.mjs';
+    import { renderMarkdown, extractHeadings, escapeHtml, isSafeSourceUrl } from './lib/markdown-renderer.mjs';
 
     const $ = (id) => document.getElementById(id);
     $('themeStyles').textContent = buildThemeStyleText(themes);
@@ -91,7 +91,16 @@
       writeHubSetting('theme', $('themeSelect').value);
     });
     $('loadBtn').addEventListener('click', () => loadSource($('srcInput').value));
-    $('openRawBtn').addEventListener('click', () => { if ($('srcInput').value) window.open($('srcInput').value, '_blank', 'noopener,noreferrer'); });
+    $('openRawBtn').addEventListener('click', () => {
+      const clean = $('srcInput').value.trim();
+      if (!clean) return;
+      if (!isSafeSourceUrl(clean)) {
+        $('meta').textContent = `Blocked unsafe source URL: ${clean}`;
+        $('content').innerHTML = '<h1>Load failed</h1><p>Unsafe source URLs are blocked.</p>';
+        return;
+      }
+      window.open(clean, '_blank', 'noopener,noreferrer');
+    });
     $('renderPasteBtn').addEventListener('click', () => renderDocument($('pasteBox').value, 'pasted Markdown'));
     $('fileInput').addEventListener('change', async (event) => {
       const file = event.target.files?.[0];
@@ -108,13 +117,26 @@
     async function loadSource(src) {
       const clean = String(src || '').trim();
       if (!clean) return;
+      if (!isSafeSourceUrl(clean)) {
+        $('meta').textContent = `Blocked unsafe source URL: ${clean}`;
+        $('content').innerHTML = '<h1>Load failed</h1><p>Unsafe source URLs are blocked.</p>';
+        return;
+      }
       $('meta').textContent = `Loading ${clean}…`;
-      const response = await fetch(clean);
-      if (!response.ok) throw new Error(`Could not load ${clean}: ${response.status}`);
-      renderDocument(await response.text(), clean);
-      const next = new URL(location.href);
-      next.searchParams.set('src', clean);
-      history.replaceState(null, '', next);
+      $('content').setAttribute('aria-busy', 'true');
+      try {
+        const response = await fetch(clean);
+        if (!response.ok) throw new Error(`Could not load ${clean}: ${response.status}`);
+        renderDocument(await response.text(), clean);
+        const next = new URL(location.href);
+        next.searchParams.set('src', clean);
+        history.replaceState(null, '', next);
+      } catch (error) {
+        $('meta').textContent = error.message;
+        $('content').innerHTML = `<h1>Load failed</h1><p>${escapeHtml(error.message)}</p>`;
+      } finally {
+        $('content').removeAttribute('aria-busy');
+      }
     }
 
     function renderDocument(markdown, label = 'Markdown') {

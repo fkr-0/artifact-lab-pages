@@ -24,6 +24,7 @@ const DEFAULT_INCLUDE_FILES = [
   'SETUP_ALIASES.sh',
   'artifacts-serve',
   'artifacts-server.sh',
+  'scripts/artifacts_http_server.py',
   'artifacts-package',
   'artifacts-deploy',
   'bridge.yml',

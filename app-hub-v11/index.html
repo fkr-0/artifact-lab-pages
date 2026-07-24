@@ -37,6 +37,7 @@
       }
       body {
         margin: 0;
+        min-height: 100vh;
         height: 100vh;
         overflow: hidden;
         font-family: var(--hub-font, "Share Tech Mono", monospace);
@@ -109,6 +110,7 @@
             1fr
           );
         gap: 0.12rem;
+        min-height: 0;
         border-right: 1px solid color-mix(in srgb, var(--hub-accent), transparent 62%);
         background: var(--hub-panel-bg, var(--hub-panel));
         padding: 0.5rem;
@@ -348,10 +350,17 @@
         gap: 0.25rem;
       }
       .artifact-title {
+        appearance: none;
+        background: none;
+        border: 0;
+        color: inherit;
+        font: inherit;
         cursor: pointer;
         text-decoration: underline;
         text-decoration-style: dotted;
         text-underline-offset: 3px;
+        padding: 0;
+        text-align: left;
       }
       .artifact-title:hover {
         color: var(--hub-accent);
@@ -804,6 +813,9 @@
       .workspace-panel.active {
         display: grid;
       }
+      .workspace-panel[hidden] {
+        display: none !important;
+      }
       .app-deck {
         display: grid;
         grid-template-rows: minmax(0, 1fr);
@@ -1129,6 +1141,19 @@
         outline: 2px solid var(--hub-accent);
         outline-offset: 2px;
       }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+        .ticker-track,
+        .pixel-noise {
+          animation: none !important;
+        }
+      }
       /* ══════════════════════════════════════
          FOOTER STATUS BAR (v9-style ticker)
       ══════════════════════════════════════ */
@@ -1154,7 +1179,9 @@
         gap: 0.35rem;
         padding: 0 0.45rem;
         flex-shrink: 0;
+        min-width: 0;
         border-right: 1px solid rgba(0, 255, 255, 0.1);
+        overflow: hidden;
       }
       .footer-right {
         display: flex;
@@ -1162,7 +1189,9 @@
         gap: 0.35rem;
         padding: 0 0.45rem;
         flex-shrink: 0;
+        min-width: 0;
         border-left: 1px solid rgba(0, 255, 255, 0.1);
+        overflow: hidden;
       }
       .footer-sep {
         color: rgba(0, 255, 255, 0.2);
@@ -1252,13 +1281,15 @@
                 <div class="muted">filter artifacts</div>
               </div>
             </div>
-            <button id="profileButton" class="profile-chip" type="button">
+            <button id="profileButton" class="profile-chip" type="button" aria-haspopup="dialog" aria-expanded="false">
               <span id="profileAvatar" class="avatar">P</span
               ><span id="profileLabel">Profile</span>
             </button>
           </div>
           <input
             id="search"
+            type="search"
+            aria-label="Filter artifacts"
             placeholder="search apps, tags, descriptions…"
             autocomplete="off"
           />
@@ -1272,14 +1303,14 @@
             <button id="favoritesOnly" type="button" aria-pressed="false">★ all</button>
           </div>
           <div class="row">
-            <button id="modeAnd" class="mode-btn" type="button">AND</button
-            ><button id="modeOr" class="mode-btn active" type="button">
+            <button id="modeAnd" class="mode-btn" type="button" aria-pressed="false">AND</button
+            ><button id="modeOr" class="mode-btn active" type="button" aria-pressed="true">
               OR</button
             ><button id="clearTags" type="button">clear tags</button>
           </div>
           <div id="tagFilter" class="tag-filter"></div>
-          <div id="summary" class="muted"></div>
-          <nav id="menu" hidden></nav>
+          <div id="summary" class="muted" aria-live="polite"></div>
+          <nav id="menu" hidden aria-label="Filtered artifact groups"></nav>
         </section>
         <div
           id="sidebarSplitResizeHandle"
@@ -1331,9 +1362,9 @@
                   <option value="floating">floating</option>
                   <option value="fullscreen">fullscreen</option>
                 </select></label
-              ><button id="viewCards" class="view-toggle active" type="button">
+              ><button id="viewCards" class="view-toggle active" type="button" aria-pressed="true">
                 cards</button
-              ><button id="viewList" class="view-toggle" type="button">
+              ><button id="viewList" class="view-toggle" type="button" aria-pressed="false">
                 list
               </button>
             </div>
@@ -1358,12 +1389,14 @@
           aria-orientation="horizontal"
         ></div>
         <section id="workspacePane" class="card workspace-pane active">
-          <div id="workspaceTabs" class="workspace-tabs app-deck-tabs">
+          <div id="workspaceTabs" class="workspace-tabs app-deck-tabs" role="tablist" aria-label="Workspace tabs">
             <button
               class="workspace-tab active"
               type="button"
               data-workspace-tab="eventLog"
               data-permanent-tab="eventLog"
+              role="tab"
+              aria-selected="true"
             >
               event log
             </button>
@@ -1372,14 +1405,16 @@
               type="button"
               data-workspace-tab="lobbyChat"
               data-permanent-tab="lobbyChat"
+              role="tab"
+              aria-selected="false"
             >
               lobby / chat
             </button>
           </div>
-          <div id="appDeck" class="workspace-panel app-deck">
+          <div id="appDeck" class="workspace-panel app-deck" role="tabpanel">
             <div id="appDeckBody"></div>
           </div>
-          <div id="lobbyChatPanel" class="workspace-panel stack lobby-chat-panel">
+          <div id="lobbyChatPanel" class="workspace-panel stack lobby-chat-panel" role="tabpanel">
             <div class="row between">
               <strong>Lobby / Chat</strong>
               <div class="row">
@@ -1414,6 +1449,7 @@
                 <div class="row">
                   <input
                     id="chatChannelName"
+                    aria-label="Channel name"
                     placeholder="chat channel…"
                     value="general"
                   /><button id="spawnChatChannel" type="button">spawn</button>
@@ -1421,7 +1457,7 @@
                 <div id="chatChannels" class="chat-channels"></div>
                 <pre id="lobbyChatLog" class="card chat-log lobby-chat-log"></pre>
                 <div class="row">
-                  <input id="lobbyChatInput" placeholder="lobby message…" /><button
+                  <input id="lobbyChatInput" aria-label="Lobby message" placeholder="lobby message…" /><button
                     id="sendLobbyChat"
                     type="button"
                   >
@@ -1431,7 +1467,7 @@
               </section>
             </div>
           </div>
-          <div id="eventLogPanel" class="workspace-panel stack active">
+          <div id="eventLogPanel" class="workspace-panel stack active" role="tabpanel">
             <div class="row between">
               <strong>Event log</strong
               ><button id="clearEventLog" type="button">clear</button>
@@ -1465,7 +1501,7 @@
       </main>
     </div>
 
-    <aside id="profileMenu" class="drawer stack" aria-label="Profile settings">
+    <aside id="profileMenu" class="drawer stack" aria-label="Profile settings" aria-hidden="true">
       <div class="row between">
         <h2>Profile / Settings</h2>
         <button id="closeProfile" type="button">close</button>
@@ -1577,6 +1613,7 @@
         <textarea
           id="storageExport"
           rows="5"
+          aria-label="Storage export JSON"
           placeholder="export appears here; paste then import"
         ></textarea>
         <div class="row">
@@ -1585,7 +1622,7 @@
       </section>
     </aside>
 
-    <div id="presenceMenu" class="presence-menu" role="menu" aria-label="User options">
+    <div id="presenceMenu" class="presence-menu" role="menu" aria-label="User options" aria-hidden="true">
       <button id="presencePrimaryAction" type="button" role="menuitem"></button>
       <button id="presenceSecondaryAction" type="button" role="menuitem"></button>
       <button id="presenceTertiaryAction" type="button" role="menuitem"></button>
@@ -1594,13 +1631,13 @@
     </div>
 
     <input id="fileSharePicker" type="file" hidden />
-    <section id="fileSharePanel" class="file-share-panel card stack" aria-label="File sharing panel">
+    <section id="fileSharePanel" class="file-share-panel card stack" aria-label="File sharing panel" aria-hidden="true">
       <div class="row between">
         <h2 id="fileShareTitle">File share</h2>
         <button id="fileShareClose" type="button">close</button>
       </div>
       <div id="fileShareStatus" class="muted">No active file share.</div>
-      <textarea id="fileShareUrl" class="file-share-url" readonly placeholder="share link appears here"></textarea>
+      <textarea id="fileShareUrl" class="file-share-url" readonly aria-label="File share URL" placeholder="share link appears here"></textarea>
       <div class="row">
         <button id="copyFileShareUrl" type="button">copy link</button>
         <button id="requestFileShare" type="button">download</button>
@@ -1733,6 +1770,8 @@
       const seenPeerNames = new Map();
       const peerLastActivity = new Map();
       let activePresenceTarget = null;
+      let profileMenuReturnFocus = null;
+      let fileShareReturnFocus = null;
       let isLocalHub = false;
       let pendingFileShareTarget = null;
       let activeIncomingFileOffer = null;
@@ -2003,10 +2042,8 @@
       });
       $("summary").textContent =
         `${catalog.summary?.total || catalog.items.length} catalog items · ${Object.keys(catalog.operations || {}).join(", ")} operations`;
-      $("profileButton").onclick = () =>
-        $("profileMenu").classList.toggle("open");
-      $("closeProfile").onclick = () =>
-        $("profileMenu").classList.remove("open");
+      $("profileButton").onclick = openProfileMenu;
+      $("closeProfile").onclick = closeProfileMenu;
       $("onlineUsers").addEventListener("contextmenu", (event) => {
         const row = event.target.closest("[data-self]");
         if (!row) return;
@@ -2085,7 +2122,7 @@
           eventLog.warn("file share", error?.message || error);
         }
       };
-      $("fileShareClose").onclick = () => $("fileSharePanel").classList.remove("open");
+      $("fileShareClose").onclick = closeFileSharePanel;
       $("copyFileShareUrl").onclick = () => {
         const value = $("fileShareUrl").value;
         if (value) navigator.clipboard?.writeText(value);
@@ -2146,6 +2183,7 @@
       };
       $("clearEventLog").onclick = () => eventLog.clear();
       $("openLobbyChatTab").onclick = () => setWorkspaceTab("lobbyChat");
+      $("workspaceTabs").addEventListener("keydown", handleWorkspaceTabsKeydown);
       $("workspaceTabs")
         .querySelectorAll("[data-workspace-tab]")
         .forEach(
@@ -2261,6 +2299,8 @@
         tagState.mode = mode;
         $("modeAnd").classList.toggle("active", mode === "AND");
         $("modeOr").classList.toggle("active", mode === "OR");
+        $("modeAnd").setAttribute("aria-pressed", String(mode === "AND"));
+        $("modeOr").setAttribute("aria-pressed", String(mode === "OR"));
         renderResults();
         eventLog.info("tag mode", mode);
       }
@@ -2269,6 +2309,8 @@
         if (save) writeHubSetting("viewMode", viewMode);
         $("viewCards").classList.toggle("active", viewMode === "cards");
         $("viewList").classList.toggle("active", viewMode === "list");
+        $("viewCards").setAttribute("aria-pressed", String(viewMode === "cards"));
+        $("viewList").setAttribute("aria-pressed", String(viewMode === "list"));
         $("results").className = `results ${viewMode}`;
         renderResults();
       }
@@ -2277,23 +2319,131 @@
         $("workspaceTabs")
           .querySelectorAll("[data-workspace-tab], [data-app-id]")
           .forEach((button) =>
-            button.classList.toggle(
-              "active",
-              button.dataset.workspaceTab === tabId || button.dataset.appId === tabId,
-            ),
+            {
+              const isActive =
+                button.dataset.workspaceTab === tabId ||
+                button.dataset.appId === tabId;
+              button.classList.toggle("active", isActive);
+              button.setAttribute("aria-selected", String(isActive));
+              button.tabIndex = isActive ? 0 : -1;
+            },
           );
         workspacePane
           .querySelectorAll(".workspace-panel")
           .forEach((panel) =>
-            panel.classList.toggle(
-              "active",
-              panel.id === tabId ||
+            {
+              const isActive =
+                panel.id === tabId ||
                 panel.dataset.appId === tabId ||
                 (panel.id === "appDeck" && Boolean($("appDeckBody").querySelector(`[data-app-id="${tabId}"]`))) ||
                 (tabId === "eventLog" && panel.id === "eventLogPanel") ||
-                (tabId === "lobbyChat" && panel.id === "lobbyChatPanel"),
-            ),
+                (tabId === "lobbyChat" && panel.id === "lobbyChatPanel");
+              panel.classList.toggle("active", isActive);
+              panel.hidden = !isActive;
+            },
           );
+      }
+      function workspaceTabButtons() {
+        return [...$("workspaceTabs").querySelectorAll('[role="tab"]')].filter(
+          (button) =>
+            button instanceof HTMLElement &&
+            !button.disabled &&
+            button.getClientRects().length > 0,
+        );
+      }
+      function focusFirstFocusable(root) {
+        const focusable = [...root.querySelectorAll("button, input, select, textarea, [href], [tabindex]:not([tabindex='-1'])")]
+          .filter(
+            (node) =>
+              node instanceof HTMLElement &&
+              !node.disabled &&
+              node.getClientRects().length > 0,
+          );
+        focusable[0]?.focus?.({ preventScroll: true });
+        return focusable[0] || null;
+      }
+      function trapFocusWithin(root, event) {
+        if (event.key !== "Tab" || !root.classList.contains("open")) return false;
+        const focusable = [...root.querySelectorAll("button, input, select, textarea, [href], [tabindex]:not([tabindex='-1'])")]
+          .filter(
+            (node) =>
+              node instanceof HTMLElement &&
+              !node.disabled &&
+              node.getClientRects().length > 0,
+          );
+        if (!focusable.length) return false;
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus?.({ preventScroll: true });
+          return true;
+        }
+        if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus?.({ preventScroll: true });
+          return true;
+        }
+        return false;
+      }
+      function handleWorkspaceTabsKeydown(event) {
+        const tab = event.target instanceof HTMLElement ? event.target.closest('[role="tab"]') : null;
+        if (!tab || !$("workspaceTabs").contains(tab)) return;
+        const tabs = workspaceTabButtons();
+        const index = tabs.indexOf(tab);
+        if (index < 0) return;
+        const activate = (nextIndex) => {
+          const next = tabs[(nextIndex + tabs.length) % tabs.length];
+          if (!next) return;
+          event.preventDefault();
+          setWorkspaceTab(next.dataset.workspaceTab || next.dataset.appId || "eventLog");
+          next.focus?.({ preventScroll: true });
+        };
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") return activate(index + 1);
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") return activate(index - 1);
+        if (event.key === "Home") return activate(0);
+        if (event.key === "End") return activate(tabs.length - 1);
+        if (event.key === " " || event.key === "Enter") {
+          event.preventDefault();
+          setWorkspaceTab(tab.dataset.workspaceTab || tab.dataset.appId || "eventLog");
+        }
+      }
+      function openProfileMenu() {
+        const menu = $("profileMenu");
+        if (menu.classList.contains("open")) {
+          closeProfileMenu();
+          return;
+        }
+        profileMenuReturnFocus =
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : $("profileButton");
+        menu.classList.add("open");
+        menu.setAttribute("aria-hidden", "false");
+        $("profileButton").setAttribute("aria-expanded", "true");
+        $("profileName").focus?.({ preventScroll: true });
+      }
+      function closeProfileMenu() {
+        $("profileMenu").classList.remove("open");
+        $("profileMenu").setAttribute("aria-hidden", "true");
+        $("profileButton").setAttribute("aria-expanded", "false");
+        profileMenuReturnFocus?.focus?.({ preventScroll: true });
+        profileMenuReturnFocus = null;
+      }
+      function openFileSharePanel() {
+        fileShareReturnFocus =
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
+        $("fileSharePanel").classList.add("open");
+        $("fileSharePanel").setAttribute("aria-hidden", "false");
+        queueMicrotask(() => focusFirstFocusable($("fileSharePanel")));
+      }
+      function closeFileSharePanel() {
+        $("fileSharePanel").classList.remove("open");
+        $("fileSharePanel").setAttribute("aria-hidden", "true");
+        fileShareReturnFocus?.focus?.({ preventScroll: true });
+        fileShareReturnFocus = null;
       }
       function renderFilters() {
         $("tagFilter").innerHTML = renderTagFilterControls(
@@ -2383,7 +2533,7 @@
       function renderQuickAccess() {
         const items = quickAccessArtifacts();
         $("quickAccessItems").innerHTML = items.length
-          ? items.map((item) => `<button class="quick-access-card" type="button" data-quick-id="${esc(item.id)}"><strong>${favoriteArtifactIds.includes(item.id) ? "★ " : ""}${esc(item.title || item.id)}</strong><small>${esc(item.kind || "artifact")} · ${esc(formatArtifactTimestamp(item) || "ready")}</small></button>`).join("")
+          ? items.map((item) => `<button class="quick-access-card" type="button" data-quick-id="${esc(item.id)}" aria-label="Open ${esc(item.title || item.id)}"><strong>${favoriteArtifactIds.includes(item.id) ? "★ " : ""}${esc(item.title || item.id)}</strong><small>${esc(item.kind || "artifact")} · ${esc(formatArtifactTimestamp(item) || "ready")}</small></button>`).join("")
           : '<span class="muted">Open or pin an artifact to build your quick shelf.</span>';
         $("quickAccessItems").querySelectorAll("[data-quick-id]").forEach((button) => {
           button.onclick = () => {
@@ -2401,9 +2551,10 @@
       function renderHubHealthStrip() {
         const health = lastNetworkHealth || network.health || {};
         const openCount = document.querySelectorAll(".app-deck-tab[data-app-id]").length;
-        const buildState = latestBuildStats.dirty ? "dirty" : "clean";
+        const hasBuildStats = Boolean(latestBuildStats && Object.keys(latestBuildStats).length);
+        const buildState = !hasBuildStats ? "unknown" : latestBuildStats.dirty ? "dirty" : "clean";
         $("hubHealthStrip").innerHTML = [
-          `<span class="pill" data-state="${latestBuildStats.dirty ? "warning" : "ok"}">release v${esc(latestBuildStats.version || "--")} · ${buildState}</span>`,
+          `<span class="pill" data-state="${!hasBuildStats ? "unknown" : latestBuildStats.dirty ? "warning" : "ok"}">release v${esc(latestBuildStats.version || "--")} · ${buildState}</span>`,
           `<span class="pill">network ${esc(health.state || "offline")} · ${Number(health.peerCount || 0)} peers</span>`,
           `<span class="pill">${openCount} open · ${favoriteArtifactIds.length} pinned</span>`,
         ].join("");
@@ -2461,10 +2612,10 @@
         const timestamp = formatArtifactTimestamp(item);
         const timestampDisplay = timestamp ? `<div class="muted" style="font-size: 0.7rem;">last changed: ${esc(timestamp)}</div>` : "";
         const favorite = favoriteArtifactIds.includes(item.id);
-        const icons = `<div class="launch-icons"><button class="icon-btn favorite-toggle" title="${favorite ? "unpin" : "pin"}" data-favorite="${esc(item.id)}" aria-pressed="${favorite}">${favorite ? "★" : "☆"}</button><button class="icon-btn" title="inline" data-launch="inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow">↗</button></div>`;
+        const icons = `<div class="launch-icons"><button class="icon-btn favorite-toggle" title="${favorite ? "unpin" : "pin"}" data-favorite="${esc(item.id)}" aria-label="${favorite ? "unpin" : "pin"} ${esc(item.title || item.id)}" aria-pressed="${favorite}">${favorite ? "★" : "☆"}</button><button class="icon-btn" title="inline" data-launch="inline" aria-label="open ${esc(item.title || item.id)} inline">▶</button><button class="icon-btn" title="fullscreen" data-launch="fullscreen" aria-label="open ${esc(item.title || item.id)} fullscreen">⛶</button><button class="icon-btn" title="floating" data-launch="floating" aria-label="open ${esc(item.title || item.id)} floating">▣</button><button class="icon-btn" title="new window" data-launch="newWindow" aria-label="open ${esc(item.title || item.id)} in new window">↗</button></div>`;
         return viewMode === "list"
-          ? `<article class="artifact-row ${favorite ? "is-favorite" : ""}" data-id="${esc(item.id)}"><div><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><div class="row between">${timestampDisplay}<span class="pill">${esc(item.kind)}</span></div><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
-          : `<article class="artifact-card ${favorite ? "is-favorite" : ""}" data-id="${esc(item.id)}"><div class="row between"><strong class="artifact-title" data-artifact-title>${esc(item.title)}</strong><span class="pill">${esc(item.kind)}</span></div>${timestampDisplay}<p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
+          ? `<article class="artifact-row ${favorite ? "is-favorite" : ""}" data-id="${esc(item.id)}"><div><button type="button" class="artifact-title" data-artifact-title aria-label="Open ${esc(item.title || item.id)}">${esc(item.title)}</button><div class="row between">${timestampDisplay}<span class="pill">${esc(item.kind)}</span></div><div class="muted">${esc(item.description || item.note || "")}</div><div class="row">${tags}</div></div>${icons}</article>`
+          : `<article class="artifact-card ${favorite ? "is-favorite" : ""}" data-id="${esc(item.id)}"><div class="row between"><button type="button" class="artifact-title" data-artifact-title aria-label="Open ${esc(item.title || item.id)}">${esc(item.title)}</button><span class="pill">${esc(item.kind)}</span></div>${timestampDisplay}<p class="muted">${esc(item.description || item.note || "")}</p><div class="row">${tags}</div>${icons}</article>`;
       }
       function rememberRecentArtifact(item) {
         if (!item?.id) return;
@@ -2656,6 +2807,51 @@
         commandCenterReturnFocus?.focus?.();
         commandCenterReturnFocus = null;
       }
+      function isEditableTarget(target) {
+        return target instanceof HTMLElement && (
+          target.matches("input, textarea, select, [contenteditable='true']") ||
+          target.isContentEditable
+        );
+      }
+      function handleGlobalHubKeydown(event) {
+        if (event.defaultPrevented) return;
+        const key = String(event.key || "");
+        const commandCenterOpen = $("commandCenter").classList.contains("open");
+        if ((event.ctrlKey || event.metaKey) && key.toLowerCase() === "k") {
+          event.preventDefault();
+          commandCenterOpen
+            ? $("commandCenterInput").focus({ preventScroll: true })
+            : openCommandCenter();
+          return;
+        }
+        if (key === "/" && !event.ctrlKey && !event.metaKey && !event.altKey && !isEditableTarget(event.target)) {
+          event.preventDefault();
+          $("search").focus({ preventScroll: true });
+          $("search").select?.();
+          return;
+        }
+        if (key !== "Escape") return;
+        if (commandCenterOpen) {
+          event.preventDefault();
+          closeCommandCenter();
+          return;
+        }
+        if ($("profileMenu").classList.contains("open")) {
+          event.preventDefault();
+          closeProfileMenu();
+          return;
+        }
+        if ($("fileSharePanel").classList.contains("open")) {
+          event.preventDefault();
+          closeFileSharePanel();
+          return;
+        }
+        if ($("presenceMenu").classList.contains("open")) {
+          event.preventDefault();
+          closePresenceMenu();
+        }
+      }
+      document.addEventListener("keydown", handleGlobalHubKeydown);
       function runCommandCenterEntry(index = commandCenterIndex) {
         const entry = commandCenterMatches[index];
         if (!entry) return;
@@ -2854,9 +3050,6 @@
         $("fileShareStatus").textContent = text;
         if (progress !== null) $("fileShareProgressBar").style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
       }
-      function openFileSharePanel() {
-        $("fileSharePanel").classList.add("open");
-      }
       async function showFileShareOffer(offer) {
         openFileSharePanel();
         $("fileShareTitle").textContent = "File offer ready";
@@ -2911,6 +3104,7 @@
         menu.style.left = `${x}px`;
         menu.style.top = `${y}px`;
         menu.classList.add("open");
+        menu.setAttribute("aria-hidden", "false");
       }
       function openPersonalChat(target) {
         const peerId = String(target?.peerId || "peer");
@@ -2947,6 +3141,7 @@
       }
       function closePresenceMenu() {
         $("presenceMenu").classList.remove("open");
+        $("presenceMenu").setAttribute("aria-hidden", "true");
         activePresenceTarget = null;
       }
       function appendLobbyChat(message, broadcast = true) {
@@ -3032,7 +3227,7 @@
           .map((name) => {
             const unread = Number(channelUnreadCounts[name] || 0);
             const label = unread > 0 ? `# ${esc(name)} (${unread})` : `# ${esc(name)}`;
-            return `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}" data-unread-count="${unread}" aria-label="chat channel ${esc(name)}${unread ? `, ${unread} unread` : ""}">${label}</button>`;
+            return `<button type="button" class="pill ${name === selectedChatChannel ? "active" : ""}" data-chat-channel="${esc(name)}" data-unread-count="${unread}" aria-label="chat channel ${esc(name)}${unread ? `, ${unread} unread` : ""}" aria-pressed="${name === selectedChatChannel}">${label}</button>`;
           })
           .join("");
         $("activeChatChannel").textContent = `# ${selectedChatChannel}`;
@@ -3336,24 +3531,18 @@
       );
       document.addEventListener("keydown", (event) => {
         if (event.key === "Tab" && $("commandCenter").classList.contains("open")) {
-          const focusable = [...$("commandCenter").querySelectorAll("input, button, [href], [tabindex]:not([tabindex='-1'])")]
-            .filter((node) => !node.disabled && node.offsetParent !== null);
-          const first = focusable[0];
-          const last = focusable.at(-1);
-          if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last?.focus();
-          } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first?.focus();
-          }
-        }
-        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-          event.preventDefault();
-          $("commandCenter").classList.contains("open") ? closeCommandCenter() : openCommandCenter();
+          trapFocusWithin($("commandCenter"), event);
           return;
         }
-        if (event.key === "Escape") closeCommandCenter();
+        if (trapFocusWithin($("profileMenu"), event)) {
+          return;
+        }
+        if (trapFocusWithin($("fileSharePanel"), event)) {
+          return;
+        }
+        if (trapFocusWithin($("presenceMenu"), event)) {
+          return;
+        }
       });
       renderCommandNetworkHealth();
       loadBuildStats();

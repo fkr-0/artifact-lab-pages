@@ -199,6 +199,14 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
 /* Progress */
 .progress-bar { height:3px;background:rgba(0,255,255,.1);border-radius:2px;overflow:hidden;margin:.5rem 0; }
 .progress-bar-fill { height:100%;background:var(--accent);border-radius:2px;transition:width .3s;box-shadow:0 0 6px var(--accent); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
 </style>
 </head>
 <body data-theme="default">
@@ -214,7 +222,7 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
     <div class="hdr-chip"><span id="hdrDocCount">0 DOCS</span></div>
     <div class="hdr-chip"><span id="hdrPageCount">0 PG</span></div>
     <div class="hdr-chip"><span id="hdrClock">--:--:--</span></div>
-    <button class="hdr-btn" onclick="App.openSettings()" title="Settings">⚙</button>
+    <button class="hdr-btn" data-action="open-settings" title="Settings">⚙</button>
   </div>
 </header>
 
@@ -226,17 +234,17 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
       <span>◈ Documents</span>
       <span style="font-size:.58rem;color:rgba(0,255,255,.4)" id="sidebarCount">0</span>
     </div>
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="drop-zone" id="dropZone" data-action="open-file-picker">
       <div class="drop-zone-text"><strong>＋ DROP</strong> PDF / Images here<br>or click to browse</div>
-      <input type="file" id="fileInput" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg" style="display:none" />
+      <input type="file" id="fileInput" multiple accept=".pdf,.png,.jpg,.jpeg" style="display:none" />
     </div>
     <div class="sidebar-list" id="docList">
       <div style="font-size:.65rem;color:rgba(0,255,255,.3);text-align:center;padding:1rem">No documents loaded</div>
     </div>
     <div class="sidebar-actions">
-      <button class="sidebar-btn primary" onclick="App.mergeAll()" id="btnMergeAll">⊕ Merge All</button>
-      <button class="sidebar-btn secondary" onclick="App.mergeSelected()" id="btnMergeSel">⊕ Merge Selected</button>
-      <button class="sidebar-btn danger" onclick="App.removeAll()">✕ Remove All</button>
+      <button class="sidebar-btn primary" data-action="merge-all" id="btnMergeAll">⊕ Merge All</button>
+      <button class="sidebar-btn secondary" data-action="merge-selected" id="btnMergeSel">⊕ Merge Selected</button>
+      <button class="sidebar-btn danger" data-action="remove-all">✕ Remove All</button>
     </div>
   </aside>
 
@@ -244,21 +252,21 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
   <main class="content">
     <div class="content-header">
       <span class="content-title" id="contentTitle">Pages</span>
-      <button class="action-btn primary" onclick="App.extractSelected()">↗ Extract Selected</button>
-      <button class="action-btn warn" onclick="App.rotateSelected()">↻ Rotate 90°</button>
-      <button class="action-btn danger" onclick="App.deleteSelected()">✕ Delete</button>
-      <button class="action-btn info" onclick="App.selectAll()">☐ Select All</button>
-      <button class="action-btn info" onclick="App.deselectAll()">☒ Deselect</button>
+      <button class="action-btn primary" data-action="extract-selected">↗ Extract Selected</button>
+      <button class="action-btn warn" data-action="rotate-selected">↻ Rotate 90°</button>
+      <button class="action-btn danger" data-action="delete-selected">✕ Delete</button>
+      <button class="action-btn info" data-action="select-all">☐ Select All</button>
+      <button class="action-btn info" data-action="deselect-all">☒ Deselect</button>
       <div style="width:1px;height:18px;background:rgba(0,255,255,.12)"></div>
-      <button class="action-btn primary" onclick="App.exportCurrent()">💾 Export PDF</button>
+      <button class="action-btn primary" data-action="export-current">💾 Export PDF</button>
     </div>
 
     <div class="tab-bar">
-      <button class="tab-btn active" data-tab="pages" onclick="App.switchTab('pages')">PAGES</button>
-      <button class="tab-btn" data-tab="preview" onclick="App.switchTab('preview')">PREVIEW</button>
-      <button class="tab-btn" data-tab="split" onclick="App.switchTab('split')">SPLIT</button>
-      <button class="tab-btn" data-tab="html" onclick="App.switchTab('html')">PDF→HTML</button>
-      <button class="tab-btn" data-tab="imgtopdf" onclick="App.switchTab('imgtopdf')">IMG→PDF</button>
+      <button class="tab-btn active" data-tab="pages">PAGES</button>
+      <button class="tab-btn" data-tab="preview">PREVIEW</button>
+      <button class="tab-btn" data-tab="split">SPLIT</button>
+      <button class="tab-btn" data-tab="html">PDF→HTML</button>
+      <button class="tab-btn" data-tab="imgtopdf">IMG→PDF</button>
     </div>
 
     <!-- Tab: Pages -->
@@ -272,13 +280,13 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
         <div class="preview-canvas-wrap"><canvas id="previewCanvas"></canvas></div>
       </div>
       <div class="preview-nav">
-        <button class="preview-nav-btn" onclick="App.previewNav(-1)" id="prevBtn">◀ Prev</button>
+        <button class="preview-nav-btn" data-action="preview-nav" data-dir="-1" id="prevBtn">◀ Prev</button>
         <span class="preview-page-info" id="previewInfo">— / —</span>
-        <button class="preview-nav-btn" onclick="App.previewNav(1)" id="nextBtn">Next ▶</button>
+        <button class="preview-nav-btn" data-action="preview-nav" data-dir="1" id="nextBtn">Next ▶</button>
         <div style="width:1px;height:16px;background:rgba(0,255,255,.12)"></div>
-        <button class="preview-nav-btn" onclick="App.previewZoom(-1)">−</button>
+        <button class="preview-nav-btn" data-action="preview-zoom" data-dir="-1">−</button>
         <span style="font-size:.62rem;color:rgba(0,255,255,.5)" id="previewZoom">100%</span>
-        <button class="preview-nav-btn" onclick="App.previewZoom(1)">＋</button>
+        <button class="preview-nav-btn" data-action="preview-zoom" data-dir="1">＋</button>
       </div>
     </div>
 
@@ -290,7 +298,7 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
           <label>Select Document</label>
           <select id="splitDocSelect"><option value="">— Select —</option></select>
           <label>Split Mode</label>
-          <select id="splitMode" onchange="App.updateSplitUI()">
+          <select id="splitMode">
             <option value="every">Every N pages</option>
             <option value="at">At page number</option>
             <option value="range">Page range (e.g. 1-3,5,7-9)</option>
@@ -308,7 +316,7 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
             <label>Page range</label>
             <input type="text" id="splitRange" placeholder="1-3,5,7-9" />
           </div>
-          <button class="action-btn primary" onclick="App.executeSplit()">✂ Execute Split</button>
+          <button class="action-btn primary" data-action="execute-split">✂ Execute Split</button>
           <div class="progress-bar" id="splitProgress" style="display:none"><div class="progress-bar-fill" id="splitProgressFill" style="width:0%"></div></div>
           <div class="split-result" id="splitResult"></div>
         </div>
@@ -321,8 +329,8 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
         <div class="settings-sect" style="margin-bottom:.5rem">◈ PDF → HTML / Text Extraction</div>
         <p style="font-size:.65rem;color:rgba(0,255,255,.45);margin-bottom:.75rem">Extracts text content from each page. Formatting is approximate — PDFs with complex layouts may produce degraded results.</p>
         <select id="htmlDocSelect" style="width:100%;padding:.4rem .6rem;background:rgba(0,0,0,.3);border:1px solid rgba(0,255,255,.15);border-radius:4px;color:var(--fg-primary);font-family:'Share Tech Mono',monospace;font-size:.72rem;margin-bottom:.5rem;outline:none"><option value="">— Select Document —</option></select>
-        <button class="action-btn primary" onclick="App.extractHtml()" style="margin-bottom:.75rem">↗ Extract Text</button>
-        <button class="action-btn info" onclick="App.copyHtmlText()" style="margin-bottom:.75rem">📋 Copy Text</button>
+        <button class="action-btn primary" data-action="extract-html" style="margin-bottom:.75rem">↗ Extract Text</button>
+        <button class="action-btn info" data-action="copy-html-text" style="margin-bottom:.75rem">📋 Copy Text</button>
         <div class="html-extract-content" id="htmlOutput">Select a document and click Extract to view its text content.</div>
       </div>
     </div>
@@ -345,7 +353,7 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
             <option value="landscape">Landscape</option>
             <option value="auto">Auto (match image)</option>
           </select>
-          <button class="action-btn primary" onclick="App.convertImagesToPdf()">🔄 Convert Images to PDF</button>
+          <button class="action-btn primary" data-action="convert-images-to-pdf">🔄 Convert Images to PDF</button>
           <div class="progress-bar" id="imgProgress" style="display:none"><div class="progress-bar-fill" id="imgProgressFill" style="width:0%"></div></div>
           <div class="split-result" id="imgResult"></div>
         </div>
@@ -374,28 +382,28 @@ body { font-family: "Share Tech Mono", monospace; background: var(--bg-primary);
 </footer>
 
 <!-- Settings -->
-<div class="settings-backdrop" id="settingsBackdrop" onclick="App.closeSettings()"></div>
+<div class="settings-backdrop" id="settingsBackdrop" data-action="close-settings"></div>
 <div class="settings-drawer" id="settingsDrawer">
   <div class="settings-hdr">
     <span class="settings-title">⚙ CONFIG</span>
-    <button class="settings-close" onclick="App.closeSettings()">✕</button>
+    <button class="settings-close" data-action="close-settings">✕</button>
   </div>
   <div class="settings-body">
     <div>
       <div class="settings-sect">Theme</div>
       <div class="theme-grid" id="themeGrid">
-        <div class="theme-btn active" data-theme="default" onclick="App.setTheme('default')"><span class="theme-btn-label">TRON</span></div>
-        <div class="theme-btn" data-theme="synthwave" onclick="App.setTheme('synthwave')"><span class="theme-btn-label">SYNTH</span></div>
-        <div class="theme-btn" data-theme="cyberpunk" onclick="App.setTheme('cyberpunk')"><span class="theme-btn-label">CYBER</span></div>
-        <div class="theme-btn" data-theme="midnight" onclick="App.setTheme('midnight')"><span class="theme-btn-label">MIDN</span></div>
-        <div class="theme-btn" data-theme="matrix" onclick="App.setTheme('matrix')"><span class="theme-btn-label">MATRIX</span></div>
-        <div class="theme-btn" data-theme="vaporwave" onclick="App.setTheme('vaporwave')"><span class="theme-btn-label">VAPOR</span></div>
+        <div class="theme-btn active" data-theme="default"><span class="theme-btn-label">TRON</span></div>
+        <div class="theme-btn" data-theme="synthwave"><span class="theme-btn-label">SYNTH</span></div>
+        <div class="theme-btn" data-theme="cyberpunk"><span class="theme-btn-label">CYBER</span></div>
+        <div class="theme-btn" data-theme="midnight"><span class="theme-btn-label">MIDN</span></div>
+        <div class="theme-btn" data-theme="matrix"><span class="theme-btn-label">MATRIX</span></div>
+        <div class="theme-btn" data-theme="vaporwave"><span class="theme-btn-label">VAPOR</span></div>
       </div>
     </div>
     <div>
       <div class="settings-sect">Rendering</div>
       <div style="font-size:.68rem;color:rgba(0,255,255,.5);margin-bottom:.5rem">Thumbnail resolution scale (higher = sharper but slower)</div>
-      <input type="range" min="0.3" max="2" step="0.1" value="0.6" id="thumbScale" style="width:100%" oninput="App._thumbScale=parseFloat(this.value);document.getElementById('thumbScaleVal').textContent=this.value" />
+      <input type="range" min="0.3" max="2" step="0.1" value="0.6" id="thumbScale" style="width:100%" />
       <div style="font-size:.6rem;color:rgba(0,255,255,.4)">Scale: <span id="thumbScaleVal">0.6</span></div>
     </div>
   </div>
@@ -414,6 +422,28 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
 const uid = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxx'.replace(/x/g,()=>((Math.random()*16)|0).toString(16));
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const SUPPORTED_IMAGE_MIME = new Set(['image/png', 'image/jpeg']);
+
+function safeRevokeObjectUrl(url) {
+  if (!url) return;
+  try { URL.revokeObjectURL(url); } catch (_) {}
+}
+
+async function loadImageFromBytes(bytes, mimeType) {
+  const blob = new Blob([bytes], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = new Image();
+    img.src = url;
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error('Image preview failed to decode.'));
+    });
+    return img;
+  } finally {
+    safeRevokeObjectUrl(url);
+  }
+}
 
 const App = {
   docs: [],          // { id, name, type:'pdf'|'image', bytes:Uint8Array, pageCount, pages:[{docId,idx,rotation}] }
@@ -423,6 +453,32 @@ const App = {
   previewScale: 1.5,
   _thumbScale: 0.6,
   _renderQueue: [],
+  async _getPdfDoc(doc) {
+    if (!doc || doc.type !== 'pdf') return null;
+    if (!doc._pdfDocPromise) {
+      doc._pdfDocPromise = PDFDocument.load(doc.bytes, { ignoreEncryption: true })
+        .then((pdfDoc) => {
+          doc._pdfDoc = pdfDoc;
+          return pdfDoc;
+        })
+        .catch((error) => {
+          delete doc._pdfDocPromise;
+          delete doc._pdfDoc;
+          throw error;
+        });
+    }
+    return doc._pdfDocPromise;
+  },
+
+  async _releasePdfDoc(doc) {
+    if (!doc || !doc._pdfDoc) return;
+    const pdfDoc = doc._pdfDoc;
+    delete doc._pdfDoc;
+    delete doc._pdfDocPromise;
+    try {
+      await pdfDoc.destroy();
+    } catch (_) {}
+  },
 
   /* ── Init ── */
   init() {
@@ -431,6 +487,7 @@ const App = {
     this._initDragDrop();
     this._initTicker();
     this._initKeyboard();
+    this._bindUiEvents();
     const t = localStorage.getItem('pdfforge_theme');
     if (t) this.setTheme(t);
   },
@@ -456,7 +513,6 @@ const App = {
     ['dragenter','dragover'].forEach(e => { dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('dragover'); }); body.addEventListener(e, ev => ev.preventDefault()); });
     ['dragleave','drop'].forEach(e => dz.addEventListener(e, () => dz.classList.remove('dragover')));
     body.addEventListener('drop', ev => { ev.preventDefault(); if (ev.dataTransfer.files.length) this.handleFiles(ev.dataTransfer.files); });
-    document.getElementById('fileInput').addEventListener('change', ev => { if (ev.target.files.length) this.handleFiles(ev.target.files); ev.target.value = ''; });
   },
 
   _initTicker() {
@@ -471,16 +527,134 @@ const App = {
     });
   },
 
+  _bindUiEvents() {
+    document.addEventListener('click', e => {
+      const actionEl = e.target.closest('[data-action]');
+      if (actionEl) {
+        switch (actionEl.dataset.action) {
+          case 'open-settings': this.openSettings(); return;
+          case 'close-settings': this.closeSettings(); return;
+          case 'open-file-picker':
+            document.getElementById('fileInput').click();
+            return;
+          case 'merge-all': this.mergeAll(); return;
+          case 'merge-selected': this.mergeSelected(); return;
+          case 'remove-all': this.removeAll(); return;
+          case 'extract-selected': this.extractSelected(); return;
+          case 'rotate-selected': this.rotateSelected(); return;
+          case 'delete-selected': this.deleteSelected(); return;
+          case 'select-all': this.selectAll(); return;
+          case 'deselect-all': this.deselectAll(); return;
+          case 'export-current': this.exportCurrent(); return;
+          case 'preview-nav': this.previewNav(Number(actionEl.dataset.dir) || 0); return;
+          case 'preview-zoom': this.previewZoom(Number(actionEl.dataset.dir) || 0); return;
+          case 'execute-split': this.executeSplit(); return;
+          case 'extract-html': this.extractHtml(); return;
+          case 'copy-html-text': this.copyHtmlText(); return;
+          case 'convert-images-to-pdf': this.convertImagesToPdf(); return;
+          case 'select-doc': this.selectDoc(actionEl.dataset.docId); return;
+          case 'remove-doc': this.removeDoc(actionEl.dataset.docId); return;
+          case 'toggle-page': this.togglePageSelect(Number(actionEl.dataset.pageIdx), e); return;
+          case 'rotate-page': this.rotatePage(Number(actionEl.dataset.pageIdx)); return;
+          default: return;
+        }
+      }
+
+      const tabEl = e.target.closest('[data-tab]');
+      if (tabEl) {
+        this.switchTab(tabEl.dataset.tab);
+        return;
+      }
+
+      const themeEl = e.target.closest('[data-theme]');
+      if (themeEl) {
+        this.setTheme(themeEl.dataset.theme);
+      }
+    });
+
+    const fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', ev => {
+      if (ev.target.files.length) this.handleFiles(ev.target.files);
+      ev.target.value = '';
+    });
+
+    const thumbScale = document.getElementById('thumbScale');
+    const thumbScaleVal = document.getElementById('thumbScaleVal');
+    thumbScale.addEventListener('input', ev => {
+      this._thumbScale = parseFloat(ev.target.value);
+      thumbScaleVal.textContent = ev.target.value;
+    });
+
+    const splitMode = document.getElementById('splitMode');
+    splitMode.addEventListener('change', () => this.updateSplitUI());
+
+    const grid = document.getElementById('pageGrid');
+    grid.addEventListener('dragstart', e => {
+      const thumb = e.target.closest('.page-thumb');
+      if (!thumb) return;
+      this._dragStart(e, Number(thumb.dataset.pageIdx));
+    });
+    grid.addEventListener('dragover', e => {
+      const thumb = e.target.closest('.page-thumb');
+      if (!thumb) return;
+      e.preventDefault();
+      thumb.classList.add('drag-over');
+    });
+    grid.addEventListener('dragleave', e => {
+      const thumb = e.target.closest('.page-thumb');
+      if (!thumb) return;
+      thumb.classList.remove('drag-over');
+    });
+    grid.addEventListener('drop', e => {
+      const thumb = e.target.closest('.page-thumb');
+      if (!thumb) return;
+      this._dragDrop(e, Number(thumb.dataset.pageIdx));
+    });
+    grid.addEventListener('dragend', () => {
+      this._dragSrcIdx = null;
+      document.querySelectorAll('.page-thumb.dragging, .page-thumb.drag-over').forEach(el => {
+        el.classList.remove('dragging', 'drag-over');
+      });
+    });
+  },
+
   /* ── File Handling ── */
   async handleFiles(fileList) {
-    for (const file of fileList) {
+    const files = Array.from(fileList || []).filter(Boolean);
+    if (files.length === 0) {
+      this.toast('No files selected', 'error');
+      return;
+    }
+
+    let loaded = 0;
+    let rejected = 0;
+    for (const file of files) {
       try {
+        if (!file.size) throw new Error('File is empty.');
+        if (file.size > 256 * 1024 * 1024) throw new Error('Files larger than 256 MB are not supported in-browser.');
         const buf = await file.arrayBuffer();
         const bytes = new Uint8Array(buf);
-        const type = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image';
-        const doc = { id: uid(), name: file.name, type, bytes, pageCount: 0 };
-        if (type === 'pdf') {
-          const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        const lowerName = file.name.toLowerCase();
+        const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
+        const inferredMime = /\.jpe?g$/i.test(lowerName) ? 'image/jpeg' : 'image/png';
+        const mimeType = isPdf ? 'application/pdf' : (file.type || inferredMime);
+        const isSupportedImage = SUPPORTED_IMAGE_MIME.has(mimeType) || /\.(png|jpe?g)$/i.test(lowerName);
+        if (!isPdf && !isSupportedImage) {
+          throw new Error('Only PDF, PNG, and JPEG files are supported.');
+        }
+        const doc = { id: uid(), name: file.name, type: isPdf ? 'pdf' : 'image', mimeType: isPdf ? 'application/pdf' : (mimeType || 'image/png'), bytes, pageCount: 0 };
+        if (isPdf) {
+          doc._pdfDocPromise = PDFDocument.load(bytes, { ignoreEncryption: true })
+            .then((pdfDoc) => {
+              doc._pdfDoc = pdfDoc;
+              return pdfDoc;
+            })
+            .catch((error) => {
+              delete doc._pdfDocPromise;
+              delete doc._pdfDoc;
+              throw error;
+            });
+          const pdf = await doc._pdfDocPromise;
           doc.pageCount = pdf.getPageCount();
         } else {
           doc.pageCount = 1;
@@ -490,12 +664,14 @@ const App = {
         for (let i = 0; i < doc.pageCount; i++) {
           this.allPages.push({ id: uid(), docId: doc.id, pageIdx: i, rotation: 0, selected: false });
         }
+        loaded += 1;
       } catch (err) {
+        rejected += 1;
         this.toast(`Failed: ${file.name} — ${err.message}`, 'error');
       }
     }
     this.renderAll();
-    this.toast(`Loaded ${fileList.length} file(s)`, 'success');
+    if (loaded > 0) this.toast(`Loaded ${loaded} file(s)${rejected ? `, skipped ${rejected}` : ''}`, 'success');
   },
 
   /* ── Rendering ── */
@@ -524,8 +700,8 @@ const App = {
     el.innerHTML = this.docs.map(d => {
       const pgCount = this.allPages.filter(p => p.docId === d.id).length;
       const icon = d.type === 'pdf' ? '📄' : '🖼';
-      return `<div class="doc-card${d.id===this.activeDocId?' active':''}" onclick="App.selectDoc('${d.id}')">
-        <button class="doc-card-remove" onclick="event.stopPropagation();App.removeDoc('${d.id}')">✕</button>
+      return `<div class="doc-card${d.id===this.activeDocId?' active':''}" data-action="select-doc" data-doc-id="${d.id}">
+        <button class="doc-card-remove" data-action="remove-doc" data-doc-id="${d.id}">✕</button>
         <div class="doc-card-name">${icon} ${esc(d.name)}</div>
         <div class="doc-card-meta">${d.type.toUpperCase()} · ${pgCount} page${pgCount!==1?'s':''} · ${(d.bytes.length/1024).toFixed(1)}KB</div>
       </div>`;
@@ -541,13 +717,12 @@ const App = {
     grid.innerHTML = this.allPages.map((pg, i) => {
       const doc = this.docs.find(d => d.id === pg.docId);
       const name = doc ? doc.name : '?';
-      return `<div class="page-thumb${pg.selected?' selected':''}" data-page-idx="${i}" draggable="true"
-        onclick="App.togglePageSelect(${i},event)" ondragstart="App._dragStart(event,${i})" ondragover="event.preventDefault()" ondrop="App._dragDrop(event,${i})">
-        <div class="page-thumb-check" onclick="event.stopPropagation();App.togglePageSelect(${i})">${pg.selected?'✓':''}</div>
+      return `<div class="page-thumb${pg.selected?' selected':''}" data-action="toggle-page" data-page-idx="${i}" draggable="true">
+        <div class="page-thumb-check" data-action="toggle-page" data-page-idx="${i}">${pg.selected?'✓':''}</div>
         <canvas id="thumb_${pg.id}" width="120" height="160"></canvas>
         <div class="page-thumb-badge">${pg.rotation}°</div>
         <div class="page-thumb-label">${esc(name)} · p${pg.pageIdx+1}</div>
-        <button class="page-rotate-btn" onclick="event.stopPropagation();App.rotatePage(${i})" title="Rotate 90°">↻</button>
+        <button class="page-rotate-btn" data-action="rotate-page" data-page-idx="${i}" title="Rotate 90°">↻</button>
       </div>`;
     }).join('');
 
@@ -564,28 +739,20 @@ const App = {
         const doc = this.docs.find(d => d.id === pg.docId);
         if (!doc) continue;
         if (doc.type === 'pdf') {
-          const pdfDoc = await pdfjsLib.getDocument({ data: doc.bytes.slice() }).promise;
+          const pdfDoc = await this._getPdfDoc(doc);
           const page = await pdfDoc.getPage(pg.pageIdx + 1);
           const vp = page.getViewport({ scale });
           canvas.width = vp.width;
           canvas.height = vp.height;
           await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
         } else {
-          // Image
-          await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-              const ratio = img.width / img.height;
-              const w = 120, h = w / ratio;
-              canvas.width = w; canvas.height = h;
-              const ctx = canvas.getContext('2d');
-              ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
-              ctx.drawImage(img, 0, 0, w, h);
-              resolve();
-            };
-            img.onerror = reject;
-            img.src = URL.createObjectURL(new Blob([doc.bytes], { type: 'image/png' }));
-          });
+          const img = await loadImageFromBytes(doc.bytes, doc.mimeType || 'image/png');
+          const ratio = img.width / Math.max(1, img.height);
+          const w = 120, h = w / ratio;
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+          ctx.drawImage(img, 0, 0, w, h);
         }
       } catch (e) { /* skip failed thumbnail */ }
     }
@@ -635,6 +802,8 @@ const App = {
   selectDoc(id) { this.activeDocId = this.activeDocId === id ? null : id; this.renderDocList(); },
 
   removeDoc(id) {
+    const removed = this.docs.filter(d => d.id === id);
+    removed.forEach(doc => { void this._releasePdfDoc(doc); });
     this.docs = this.docs.filter(d => d.id !== id);
     this.allPages = this.allPages.filter(p => p.docId !== id);
     this.renderAll();
@@ -643,6 +812,7 @@ const App = {
   removeAll() {
     if (this.docs.length === 0) return;
     if (!confirm('Remove all documents?')) return;
+    this.docs.forEach(doc => { void this._releasePdfDoc(doc); });
     this.docs = []; this.allPages = [];
     this.renderAll();
     this.toast('All documents removed', 'info');
@@ -692,7 +862,7 @@ const App = {
         const doc = this.docs.find(d => d.id === pg.docId);
         if (!doc) continue;
         if (doc.type === 'pdf') {
-          const srcPdf = await PDFDocument.load(doc.bytes, { ignoreEncryption: true });
+          const srcPdf = await this._getPdfDoc(doc);
           const [copiedPage] = await merged.copyPages(srcPdf, [pg.pageIdx]);
           if (pg.rotation) copiedPage.setRotation(degrees(pg.rotation));
           merged.addPage(copiedPage);
@@ -781,7 +951,7 @@ const App = {
       }
 
       // Generate PDFs
-      const srcPdf = await PDFDocument.load(doc.bytes, { ignoreEncryption: true });
+      const srcPdf = await this._getPdfDoc(doc);
       let exported = 0;
       for (let ci = 0; ci < chunks.length; ci++) {
         const newPdf = await PDFDocument.create();
@@ -846,7 +1016,7 @@ const App = {
     if (!doc || doc.type !== 'pdf') { this.toast('Select a PDF', 'error'); return; }
 
     try {
-      const pdfDoc = await pdfjsLib.getDocument({ data: doc.bytes.slice() }).promise;
+      const pdfDoc = await this._getPdfDoc(doc);
       let fullText = '';
       for (let i = 1; i <= pdfDoc.numPages; i++) {
         const page = await pdfDoc.getPage(i);
@@ -946,16 +1116,14 @@ const App = {
     const canvas = document.getElementById('previewCanvas');
     try {
       if (doc.type === 'pdf') {
-        const pdfDoc = await pdfjsLib.getDocument({ data: doc.bytes.slice() }).promise;
+        const pdfDoc = await this._getPdfDoc(doc);
         const page = await pdfDoc.getPage(pg.pageIdx + 1);
         const vp = page.getViewport({ scale: this.previewScale, rotation: pg.rotation });
         canvas.width = vp.width;
         canvas.height = vp.height;
         await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       } else {
-        const img = new Image();
-        img.src = URL.createObjectURL(new Blob([doc.bytes]));
-        await new Promise(r => { img.onload = r; });
+        const img = await loadImageFromBytes(doc.bytes, doc.mimeType || 'image/png');
         const w = img.width * this.previewScale, h = img.height * this.previewScale;
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
@@ -1004,10 +1172,11 @@ const App = {
   _download(bytes, name, mime) {
     const blob = new Blob([bytes], { type: mime });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    a.href = url;
     a.download = name;
     a.click();
-    URL.revokeObjectURL(a.href);
+    setTimeout(() => safeRevokeObjectUrl(url), 0);
   },
 
   toast(msg, type = 'info') {

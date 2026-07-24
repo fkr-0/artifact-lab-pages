@@ -40,7 +40,9 @@ for (const key of [
 assert.match(initialStateBlock, /stageGoal: storyStageKillGoal/, 'story stage goals should come from the campaign model');
 
 const combatBlock = block('isCombatActive() {', 'currentWorld() {');
-assert.match(combatBlock, /this\.combatRunMode === 'story' \|\| isContractActive/, 'default story combat should run without requiring a patrol contract');
+assert.match(combatBlock, /this\.combatRunMode === 'story'/, 'default story combat should run without requiring a patrol contract');
+assert.match(combatBlock, /this\.combatRunMode === 'encounter'/, 'encounter combat should remain active without a patrol contract');
+assert.match(combatBlock, /isContractActive\(this\.contractState\)/, 'active patrol contracts should enable combat');
 assert.match(combatBlock, /this\.versusState\.phase === 'active'/, 'versus combat should require an active duel');
 
 const updateBlock = block('update() {', 'draw() {');
@@ -57,8 +59,13 @@ assert.match(advanceBlock, /this\.saveProgress\(\)/, 'story stage advancement sh
 const loopBlock = block('loop() {', 'spendMoney(');
 assert.match(
   loopBlock,
-  /if \(!this\.state\.local\.gameOver && !this\.paused && this\.sessionMode !== 'shipyard'\) this\.update\(\)/,
-  'pause, game-over, and shipyard states should halt simulation updates'
+  /!this\.state\.local\.gameOver && !this\.paused/,
+  'pause and game-over states should halt simulation updates'
+);
+assert.match(
+  loopBlock,
+  /!\['shipyard', 'adventure'\]\.includes\(this\.sessionMode\)/,
+  'shipyard and adventure UI modes should halt simulation updates'
 );
 assert.match(loopBlock, /this\.draw\(\)/, 'pause should keep the rendered scene visible');
 

@@ -26,8 +26,11 @@ export async function compileArtifactCollection(source, options = {}) {
   await mkdir(outDir, { recursive: true });
 
   const compiled = [];
+  const seenIds = new Set();
   for (const original of source.items || []) {
     let item = normalizeArtifact(original);
+    if (seenIds.has(item.id)) throw new Error(`Duplicate artifact id: ${item.id}`);
+    seenIds.add(item.id);
     for (const opName of item.operations || ['validate', 'index']) {
       const op = operations[opName];
       if (!op) throw new Error(`Unknown artifact operation: ${opName}`);
@@ -45,7 +48,7 @@ export async function compileArtifactCollection(source, options = {}) {
     summary: summarize(compiled),
     items: compiled,
   };
-  await writeFile(join(outDir, 'artifact-collection.json'), JSON.stringify(output, null, 2));
+  await writeFile(join(outDir, 'artifact-collection.json'), `${JSON.stringify(output, null, 2)}\n`);
   return output;
 }
 
@@ -129,7 +132,8 @@ function summarizeOperations(operations) {
   return Object.fromEntries(Object.entries(operations).map(([id, op]) => [id, { description: op.description || id }]));
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
   const sourcePath = process.argv[2] || 'app-hub-v11/artifacts.source.json';
   const outDir = process.argv[3] || 'app-hub-v11/data';
   const result = await compileArtifactCollectionFile(sourcePath, { rootDir: process.cwd(), outDir });

@@ -4,6 +4,55 @@ All notable changes to Artifact Lab are documented here. The repository follows
 [Semantic Versioning](https://semver.org/) and the structure of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+## [1.5.1] - 2026-07-24
+
+### Added
+
+- A portfolio-wide audit command covering catalog uniqueness, launch targets,
+  local paths, HTML landmarks, reduced-motion support, unsafe links, duplicate
+  IDs, and inline event attributes across every root-owned embedded artifact.
+- Permanent focused regression and Chromium interaction suites for NEXUS v9,
+  PDF Forge, Prompt Forge, Template Engine, graphics tools, classic games,
+  collaboration lifecycles, local persistence, and document security.
+- A documented root-owned release gate that rebuilds generated catalog and
+  Sprite Fan outputs, runs 133 Node tests, and exercises the full 67-test
+  root-owned Chromium matrix without entering independent subprojects.
+- An Artifact Portfolio Standard defining ownership boundaries, local-first
+  behavior, lifecycle cleanup, accessibility, catalog rules, and release gates.
+
+### Changed
+
+- The V11 catalog now contains 48 unique entries and rejects duplicate IDs
+  instead of silently discarding later definitions.
+- NEXUS v9, PDF Forge, Prompt Forge, Template Engine, QR Studio, and Magical
+  Love Chat now use explicit or delegated event listeners instead of inline
+  HTML handlers.
+- App Hub v11 received stronger keyboard tab behavior, focus restoration,
+  dialog focus containment, storage import guards, and clearer unknown-build
+  health reporting.
+- Root-owned games, collaboration tools, audio runtimes, GIF creators, and
+  editors now pause hidden work and release timers, animation frames, object
+  URLs, audio contexts, and peer resources during teardown.
+- Generated V11 catalog JSON is newline-terminated consistently, and local
+  test, dependency, Python bytecode, and agent-state outputs are ignored.
+
+### Fixed
+
+- NEXUS v9 startup no longer leaves mini-app, session-router, and app-loader
+  initialization trapped inside the save-state action.
+- The NEXUS v9 link to the current V11 hub no longer floats above and blocks
+  header controls.
+- Sprite Fan's generated standalone page and canonical split source now agree
+  on the main landmark and rebuild byte-for-byte.
+- PDF/image imports, shared-state imports, markdown links, GIF validation,
+  download cleanup, timer visibility behavior, and browser-storage failures
+  now fail visibly and recover without corrupting the active session.
+- Root integration tests now reflect Hyperblast's adventure pause mode,
+  Python 3.14 dynamic module loading, and the current command-center keyboard
+  implementation.
+
 ## [1.5.0] - 2026-07-19
 
 ### Added
@@ -173,6 +222,8 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
+[Unreleased]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.3.0...v1.4.0

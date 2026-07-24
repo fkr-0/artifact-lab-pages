@@ -416,6 +416,18 @@
         animation: qrIn 0.25s ease-out;
       }
 
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+          scroll-behavior: auto !important;
+        }
+        .qr-anim {
+          animation: none !important;
+        }
+      }
+
       /* Print */
       @media print {
         body {
@@ -431,6 +443,10 @@
         }
         .card {
           border-color: #ddd;
+        }
+        .qr-box, .qr-box svg {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
         }
       }
 
@@ -499,7 +515,7 @@
     ></div>
 
     <!-- Toast -->
-    <div id="toast" class="toast-el"></div>
+    <div id="toast" class="toast-el" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Header -->
     <header
@@ -610,19 +626,19 @@
           <!-- Actions -->
           <div class="no-print flex flex-wrap gap-2">
             <button
-              onclick="downloadPNG()"
+              id="download-png"
               class="act-btn primary flex-1"
               aria-label="Download PNG"
             >
               <i class="fa-solid fa-image"></i> PNG
             </button>
-            <button onclick="downloadSVG()" class="act-btn flex-1" aria-label="Download SVG">
+            <button id="download-svg" class="act-btn flex-1" aria-label="Download SVG">
               <i class="fa-solid fa-vector-square"></i> SVG
             </button>
-            <button onclick="shareEmail()" class="act-btn flex-1" aria-label="Share via email">
+            <button id="share-email" class="act-btn flex-1" aria-label="Share via email">
               <i class="fa-solid fa-envelope"></i> Share
             </button>
-            <button onclick="printQR()" class="act-btn" aria-label="Print QR code">
+            <button id="print-qr" class="act-btn" aria-label="Print QR code">
               <i class="fa-solid fa-print"></i>
             </button>
           </div>
@@ -632,7 +648,7 @@
             <div class="flex items-center justify-between mb-2">
               <span class="field-label" style="margin-bottom: 0">Encoded Data</span>
               <button
-                onclick="copyData()"
+                id="copy-data"
                 style="
                   color: var(--accent);
                   cursor: pointer;
@@ -658,6 +674,62 @@
       let currentQR = null
       let currentData = ''
       let debounceTimer = null
+      const STATE_KEY = 'qrcode-studio/state/v1'
+      const STATE_SCHEMA = 'qrcode-studio-state/v1'
+
+      function readState() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(STATE_KEY) || 'null')
+          if (!raw || (raw.schema && raw.schema !== STATE_SCHEMA)) return null
+          return {
+            type: typeof raw.type === 'string' ? raw.type : 'url',
+            fields: raw.fields && typeof raw.fields === 'object' && !Array.isArray(raw.fields) ? raw.fields : {},
+            options: raw.options && typeof raw.options === 'object' && !Array.isArray(raw.options) ? raw.options : {},
+          }
+        } catch {
+          return null
+        }
+      }
+
+      function writeState() {
+        try {
+          const type = QR_TYPES.find((item) => item.id === currentType)
+          if (!type) return
+          localStorage.setItem(
+            STATE_KEY,
+            JSON.stringify({
+              schema: STATE_SCHEMA,
+              schemaVersion: 1,
+              type: currentType,
+              fields: getFormValues(),
+              options: {
+                ec: document.getElementById('opt-ec').value,
+                fg: document.getElementById('opt-fg').value,
+                bg: document.getElementById('opt-bg').value,
+              },
+            })
+          )
+        } catch {}
+      }
+
+      function applyState(saved) {
+        if (!saved) return
+        const type = QR_TYPES.find((item) => item.id === saved.type)
+        if (type) currentType = saved.type
+        document.getElementById('opt-ec').value = saved.options.ec || 'M'
+        document.getElementById('opt-fg').value = saved.options.fg || '#1a1a1f'
+        document.getElementById('opt-bg').value = saved.options.bg || '#ffffff'
+        document.getElementById('fg-hex').textContent = document.getElementById('opt-fg').value
+        document.getElementById('bg-hex').textContent = document.getElementById('opt-bg').value
+      }
+
+      function ensureGenerator() {
+        if (typeof qrcode !== 'function') {
+          showError('QR generator library failed to load. Check connectivity and reload the page.')
+          return false
+        }
+        return true
+      }
 
       /* ===== QR Type Definitions ===== */
       const QR_TYPES = [
@@ -1020,7 +1092,11 @@
       /* ===== Init ===== */
       document.addEventListener('DOMContentLoaded', () => {
         renderTypeSelector()
-        selectType('url')
+        const savedState = readState()
+        selectType(savedState?.type || 'url', { generate: false })
+        applyState(savedState)
+        applyFormValues(savedState?.fields || {})
+        generateQR()
         document.getElementById('opt-ec').addEventListener('change', generateQR)
         document.getElementById('opt-fg').addEventListener('input', (e) => {
           document.getElementById('fg-hex').textContent = e.target.value
@@ -1030,6 +1106,15 @@
           document.getElementById('bg-hex').textContent = e.target.value
           generateQR()
         })
+        document.getElementById('type-selector').addEventListener('click', (event) => {
+          const button = event.target.closest('[data-type]')
+          if (button) selectType(button.dataset.type)
+        })
+        document.getElementById('download-png').addEventListener('click', downloadPNG)
+        document.getElementById('download-svg').addEventListener('click', downloadSVG)
+        document.getElementById('share-email').addEventListener('click', shareEmail)
+        document.getElementById('print-qr').addEventListener('click', printQR)
+        document.getElementById('copy-data').addEventListener('click', copyData)
       })
 
       /* ===== Type Selector ===== */
@@ -1037,22 +1122,22 @@
         const c = document.getElementById('type-selector')
         c.innerHTML = QR_TYPES.map(
           (t) =>
-            `<button class="type-pill" data-type="${t.id}" onclick="selectType('${t.id}')" tabindex="0" aria-label="${t.name}">` +
+            `<button class="type-pill" data-type="${t.id}" tabindex="0" aria-label="${t.name}">` +
             `<i class="fa-solid ${t.icon}"></i><span>${t.name}</span></button>`
         ).join('')
       }
 
-      function selectType(typeId) {
-        currentType = typeId
+      function selectType(typeId, { generate = true } = {}) {
         const type = QR_TYPES.find((t) => t.id === typeId)
         if (!type) return
+        currentType = typeId
         document
           .querySelectorAll('.type-pill')
           .forEach((el) => el.classList.toggle('active', el.dataset.type === typeId))
         document.getElementById('form-icon').className = `fa-solid ${type.icon}`
         document.getElementById('form-title').textContent = type.name
         renderForm(type)
-        generateQR()
+        if (generate) generateQR()
       }
 
       /* ===== Form Rendering ===== */
@@ -1093,6 +1178,21 @@
               ico.className = 'fa-regular fa-eye'
             }
           })
+        })
+        updateCharCounts()
+      }
+
+      function applyFormValues(values = {}) {
+        const type = QR_TYPES.find((item) => item.id === currentType)
+        if (!type) return
+        type.fields.forEach((field) => {
+          const el = document.getElementById(`f-${field.id}`)
+          if (!el || !(field.id in values)) return
+          if (field.type === 'checkbox') {
+            el.checked = Boolean(values[field.id])
+          } else {
+            el.value = values[field.id]
+          }
         })
         updateCharCounts()
       }
@@ -1177,9 +1277,11 @@
 
       function generateQR() {
         const type = QR_TYPES.find((t) => t.id === currentType)
+        if (!ensureGenerator()) return
         const vals = getFormValues()
         const data = type.build(vals)
         currentData = data
+        writeState()
 
         if (!data) {
           showEmpty()
@@ -1290,12 +1392,16 @@
           }
         }
         canvas.toBlob((blob) => {
+          if (!blob) {
+            showToast('PNG export failed', 'error')
+            return
+          }
           const url = URL.createObjectURL(blob)
           const a = document.createElement('a')
           a.href = url
           a.download = `qrcode-${currentType}.png`
           a.click()
-          URL.revokeObjectURL(url)
+          setTimeout(() => URL.revokeObjectURL(url), 0)
           showToast('PNG downloaded', 'success')
         })
       }
@@ -1314,7 +1420,7 @@
         a.href = url
         a.download = `qrcode-${currentType}.svg`
         a.click()
-        URL.revokeObjectURL(url)
+        setTimeout(() => URL.revokeObjectURL(url), 0)
         showToast('SVG downloaded', 'success')
       }
 
@@ -1330,10 +1436,10 @@
         )
         if (navigator.share) {
           navigator.share({ title: 'QR Code', text: `QR Code data: ${currentData}` }).catch(() => {
-            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank', 'noopener,noreferrer')
           })
         } else {
-          window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+          window.open(`mailto:?subject=${subject}&body=${body}`, '_blank', 'noopener,noreferrer')
         }
         showToast('Share initiated', 'info')
       }
@@ -1350,12 +1456,25 @@
       /* ===== Copy Data ===== */
       function copyData() {
         if (!currentData) return
-        navigator.clipboard
-          .writeText(currentData)
-          .then(() => {
-            showToast('Data copied to clipboard', 'success')
-          })
-          .catch(() => showToast('Copy failed', 'error'))
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+          navigator.clipboard
+            .writeText(currentData)
+            .then(() => {
+              showToast('Data copied to clipboard', 'success')
+            })
+            .catch(() => showToast('Copy failed', 'error'))
+          return
+        }
+        const textarea = document.createElement('textarea')
+        textarea.value = currentData
+        textarea.setAttribute('readonly', '')
+        textarea.style.position = 'fixed'
+        textarea.style.opacity = '0'
+        document.body.append(textarea)
+        textarea.select()
+        const copied = document.execCommand('copy')
+        textarea.remove()
+        showToast(copied ? 'Data copied to clipboard' : 'Copy failed', copied ? 'success' : 'error')
       }
 
       /* ===== Toast ===== */

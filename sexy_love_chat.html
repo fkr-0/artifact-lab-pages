@@ -789,14 +789,22 @@
         background: linear-gradient(180deg, #c084fc, #ec4899);
         border-radius: 8px;
       }
-    </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
   </head>
   <body>
     <div class="rainbow-bg"></div>
     <canvas id="floatCanvas"></canvas>
     <div id="heartExplosion" class="heart-explosion"></div>
 
-    <div class="container">
+    <main class="container">
       <!-- Intro Screen -->
       <div id="introScreen" class="intro">
         <h1>Magical Sexy Love Chat</h1>
@@ -816,7 +824,7 @@
               maxlength="20"
             />
           </div>
-          <button class="start-btn" onclick="createCustomRoom()">
+          <button class="start-btn" id="createCustomRoomBtn">
             <span class="btn-emoji">✨</span> Create Magical Room
           </button>
           <p class="config-hint">Set names and create your private love chat room!</p>
@@ -826,11 +834,11 @@
           <p class="created-as">Created as: <strong id="displayYourName"></strong></p>
           <p class="waiting-for">Waiting for: <strong id="displayPartnerName"></strong></p>
           <div class="hearts-container">
-            <button class="heart-btn primary-heart" onclick="createRoom()">
+            <button class="heart-btn primary-heart" id="createRoomBtn">
               <span class="emoji" id="yourEmoji">&#128151;</span>
               <span class="name" id="yourHeartName">You</span>
             </button>
-            <button class="heart-btn" onclick="joinAsPartner()">
+            <button class="heart-btn" id="joinPartnerBtn">
               <span class="emoji" id="partnerEmoji">&#128156;</span>
               <span class="name" id="partnerHeartName">Partner</span>
             </button>
@@ -854,7 +862,7 @@
               Share this magical link with <span id="partnerNameInInstructions">your partner</span>:
             </p>
             <code id="secretLink"></code>
-            <button class="copy-btn" onclick="copySecretLink()">Copy Magical Link</button>
+            <button class="copy-btn" id="copySecretLinkBtn">Copy Magical Link</button>
           </div>
         </div>
       </div>
@@ -869,8 +877,8 @@
             <div class="status-detail" id="connectingDetail">Preparing sparkly tunnel...</div>
           </div>
           <div class="connection-tools">
-            <button class="secondary-btn" onclick="retryJoinNow()">Retry now</button>
-            <button class="secondary-btn" onclick="goBackToIntro()">Back</button>
+            <button class="secondary-btn" id="retryJoinBtn">Retry now</button>
+            <button class="secondary-btn" id="backIntroBtn">Back</button>
           </div>
         </div>
       </div>
@@ -884,9 +892,9 @@
         <div class="messages" id="messages"></div>
         <div class="emoji-bar" id="emojiBar"></div>
         <div class="reactions">
-          <button class="reaction-btn" onclick="sendReaction('so romantic!')">so romantic!</button>
-          <button class="reaction-btn" onclick="sendReaction('aww adorable')">aww adorable</button>
-          <button class="reaction-btn" onclick="sendReaction('thinking of you...')">
+          <button class="reaction-btn" data-reaction="so romantic!">so romantic!</button>
+          <button class="reaction-btn" data-reaction="aww adorable">aww adorable</button>
+          <button class="reaction-btn" data-reaction="thinking of you...">
             thinking of you...
           </button>
         </div>
@@ -895,9 +903,8 @@
             type="text"
             id="messageInput"
             placeholder="Type something sweet..."
-            onkeypress="handleKeyPress(event)"
           />
-          <button class="send-btn" onclick="sendMessage()">Send</button>
+          <button class="send-btn" id="sendMessageBtn">Send</button>
         </div>
         <div class="game-section">
           <div class="game-header">
@@ -907,7 +914,7 @@
             >
           </div>
           <canvas id="graphCanvas" width="300" height="180"></canvas>
-          <button class="new-game-btn" onclick="startNewGame()">New Graph</button>
+          <button class="new-game-btn" id="newGraphBtn">New Graph</button>
         </div>
       </div>
 
@@ -921,12 +928,12 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <footer>
       <span>Made with love and unicorns</span>
-      <button id="soundToggle" class="sound-btn" onclick="toggleMusic()">Sound: off</button>
+      <button id="soundToggle" class="sound-btn">Sound: off</button>
     </footer>
 
     <script>
@@ -942,6 +949,9 @@
       let masterGain = null
       let musicStarted = false
       let musicTimers = []
+      let floatAnimationId = 0
+      let resumeMusicAfterVisible = false
+      let destroyed = false
       let customRoomId = null
       let userCustomName = ''
       let partnerCustomName = ''
@@ -1084,6 +1094,16 @@
         peer = null
       }
 
+      function stopFloatAnimation() {
+        if (floatAnimationId) cancelAnimationFrame(floatAnimationId)
+        floatAnimationId = 0
+      }
+
+      function startFloatAnimation() {
+        if (destroyed || floatAnimationId) return
+        floatAnimationId = requestAnimationFrame(animateFloat)
+      }
+
       // Graph game state
       let graphNodes = []
       let graphEdges = []
@@ -1135,7 +1155,7 @@
       resizeCanvas()
       window.addEventListener('resize', resizeCanvas)
 
-      const emojis = ['&#128151;', '&#128156;', '&#128149;', '&#10024;', '&#128420;', '&#127752;']
+      const emojis = ['💖', '💜', '💕', '✨', '🖤', '🌈']
       const floatingItems = []
 
       for (let i = 0; i < 20; i++) {
@@ -1151,13 +1171,12 @@
       }
 
       function animateFloat() {
+        if (destroyed) return
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         floatingItems.forEach((item) => {
           ctx.font = `${item.size}px Arial`
           ctx.globalAlpha = item.opacity
-          const span = document.createElement('span')
-          span.innerHTML = item.emoji
-          ctx.fillText(span.textContent, item.x, item.y)
+          ctx.fillText(item.emoji, item.x, item.y)
           item.y -= item.speed
           item.x += Math.sin(item.angle) * 0.3
           item.angle += 0.015
@@ -1167,9 +1186,9 @@
           }
         })
         ctx.globalAlpha = 1
-        requestAnimationFrame(animateFloat)
+        floatAnimationId = requestAnimationFrame(animateFloat)
       }
-      animateFloat()
+      startFloatAnimation()
 
       // Name validation and room creation
 
@@ -1888,6 +1907,30 @@
         else startMusic()
       }
 
+      function handleVisibilityChange() {
+        if (document.visibilityState === 'hidden') {
+          resumeMusicAfterVisible = musicStarted
+          stopFloatAnimation()
+          if (musicStarted) stopMusic()
+          return
+        }
+        if (resumeMusicAfterVisible && !musicStarted) {
+          resumeMusicAfterVisible = false
+          startMusic()
+        }
+        startFloatAnimation()
+      }
+
+      function destroyApp() {
+        if (destroyed) return
+        destroyed = true
+        resumeMusicAfterVisible = false
+        cleanupConnectionTimers()
+        destroyPeerOnly()
+        stopFloatAnimation()
+        stopMusic()
+      }
+
       function playSparkleSound() {
         if (!musicStarted || !audioContext || !masterGain || audioContext.state === 'closed') return
         const now = audioContext.currentTime
@@ -1905,6 +1948,27 @@
           osc.stop(now + i * 0.04 + 0.25)
         })
       }
+
+      function wireUiActions() {
+        const actions = [
+          ['createCustomRoomBtn', createCustomRoom],
+          ['createRoomBtn', createRoom],
+          ['joinPartnerBtn', joinAsPartner],
+          ['copySecretLinkBtn', copySecretLink],
+          ['retryJoinBtn', retryJoinNow],
+          ['backIntroBtn', goBackToIntro],
+          ['sendMessageBtn', sendMessage],
+          ['newGraphBtn', startNewGame],
+          ['soundToggle', toggleMusic],
+        ]
+        actions.forEach(([id, handler]) => document.getElementById(id)?.addEventListener('click', handler))
+        document.querySelectorAll('[data-reaction]').forEach((button) => {
+          button.addEventListener('click', () => sendReaction(button.dataset.reaction || ''))
+        })
+        document.getElementById('messageInput')?.addEventListener('keypress', handleKeyPress)
+      }
+
+      wireUiActions()
 
       // Check URL for custom room on load
       const params = new URLSearchParams(window.location.search)
@@ -1931,6 +1995,9 @@
 
       // Apply embedded mode if needed
       applyEmbeddedMode()
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+      window.addEventListener('pagehide', destroyApp)
+      window.addEventListener('beforeunload', destroyApp)
     </script>
   </body>
 </html>

@@ -208,6 +208,14 @@
     .button.secondary { background: #fff; color: var(--ink); border-color: var(--line); }
     .button.full { width: 100%; }
 
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
     .download-link {
       display: none;
       border-radius: var(--radius-lg);
@@ -406,6 +414,21 @@
     function setStatus(message) { els.status.textContent = message; }
     function setError(message) { els.errorText.textContent = message || ""; els.errorBox.classList.toggle("visible", Boolean(message)); }
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+    function isGifFile(file) {
+      if (!file || typeof file.name !== "string") return false;
+      if (file.type === "image/gif" || /\.gif$/i.test(file.name)) return true;
+      return false;
+    }
+
+    async function validateGifFile(file) {
+      if (!isGifFile(file)) throw new Error("Please choose a GIF file.");
+      const buffer = await file.arrayBuffer();
+      const signature = String.fromCharCode(...new Uint8Array(buffer.slice(0, 6)));
+      if (signature !== "GIF87a" && signature !== "GIF89a") {
+        throw new Error("The selected file is not a valid GIF image.");
+      }
+      return buffer;
+    }
 
     function setDownloadUrl(url) {
       if (state.downloadUrl) URL.revokeObjectURL(state.downloadUrl);
@@ -573,7 +596,7 @@
 
       try {
         const api = resolveGifApi();
-        const buffer = await file.arrayBuffer();
+        const buffer = await validateGifFile(file);
         const parsed = api.parseGIF(buffer);
         const frames = api.decompressFrames(parsed, true);
         const width = parsed.lsd.width;
@@ -638,6 +661,7 @@
           encoder.render();
         });
 
+        if (!blob) throw new Error("GIF encoding produced no download data.");
         setDownloadUrl(URL.createObjectURL(blob));
         setStatus("Export complete.");
       } catch (error) {
@@ -662,7 +686,10 @@
     function wireEvents() {
       els.fileInput.addEventListener("change", (event) => {
         const file = event.target.files && event.target.files[0];
-        if (file) loadGif(file);
+        if (file) loadGif(file).catch((error) => {
+          setError(error.message || String(error));
+          setStatus("Could not load the GIF.");
+        });
       });
 
       els.dropzone.addEventListener("dragenter", () => els.dropzone.classList.add("dragover"));
@@ -672,7 +699,10 @@
         event.preventDefault();
         els.dropzone.classList.remove("dragover");
         const file = event.dataTransfer.files && event.dataTransfer.files[0];
-        if (file) loadGif(file);
+        if (file) loadGif(file).catch((error) => {
+          setError(error.message || String(error));
+          setStatus("Could not load the GIF.");
+        });
       });
 
       for (const id of ["tolerance", "softness", "spillFix", "quality", "maxFrames"]) {

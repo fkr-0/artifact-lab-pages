@@ -1,0 +1,119 @@
+schemaVersion: 1
+generatedAt: "2026-07-24T01:36:31.523Z"
+release:
+  unit: "Artifact Lab root-owned portfolio"
+  branch: main
+  head: c1d85e9b553d233ae685534c06383646fa63a179
+  headCommitDate: "2026-07-21T02:28:26+02:00"
+  headSubject: "refactor(sprite-fan): test production pixel modules directly"
+  baseTag: v1.5.0
+  versionBefore: 1.5.0
+  versionAfter: 1.5.1
+  candidate: 1.5.1
+  tagProposed: v1.5.1
+  tagCreated: false
+  releaseReady: true
+  releaseIsolation: selective-index
+  workingTreeWarnings:
+    - "Substantial unrelated and independent-project work remains outside the release index and is intentionally excluded from the release commit."
+  publishState: not_requested
+  pushState: requested
+  deployState: not_requested
+
+scope:
+  catalogEntries: 48
+  uniqueCatalogIds: 48
+  embeddedArtifactsInspected: 43
+  independentIntegrationsExcludedFromRootMutation: 5
+  notes:
+    - "Root integration contracts may read independent projects, but the release gate does not build, test, tag, publish, or rewrite them as release units."
+    - "The browser matrix excludes Hyperblast Shooter and V11 Peer DAW E2E specifications because those projects have separate release ownership."
+
+revisionVector:
+  root: c1d85e9b553d233ae685534c06383646fa63a179
+  independentProjects:
+    badger-sprawl-runner:
+      checkout: 410fa46364e1efe6ccb9c33a8493f00604ffd6a8
+      describe: v1.2.0
+      differsFromParentGitlink: true
+    ethic-brawl:
+      checkout: e87c5a66fe9598ddf5fff61a18149adcb4c026d3
+      describe: v1.6.0-2-ge87c5a6
+      differsFromParentGitlink: true
+    hyperblast-shooter:
+      checkout: 5a1450f7c76af6a725e384402ba7e5bd9595c296
+      describe: v0.8.0
+      differsFromParentGitlink: true
+    git-recipe-book:
+      checkout: 99d9f76aa0e5b83678fa7de71ffa6aeef6dd4c75
+      describe: 99d9f76
+      trackedAsRootTree: true
+      nestedWorktreeDirty: true
+    v11-peer-daw:
+      checkout: 37783861b7681852b0605a891a2b831c4cde82de
+      describe: v1.5.0
+      differsFromParentGitlink: false
+
+verification:
+  - command: "pnpm run build:sprite-fan"
+    result: passed
+    purpose: "Rebuild the standalone Sprite Fan artifact from canonical split sources."
+  - command: "pnpm run build:catalog"
+    result: passed
+    purpose: "Regenerate git-ordered source metadata and the compiled V11 browser catalog."
+  - command: "pnpm run audit:artifacts"
+    result: passed
+    details:
+      errors: 0
+      warnings: 0
+      catalogEntries: 48
+      embeddedArtifacts: 43
+  - command: "pnpm run test:portfolio"
+    result: passed
+    details:
+      tests: 35
+      passed: 35
+      failed: 0
+  - command: "pnpm test"
+    result: passed
+    details:
+      tests: 133
+      passed: 133
+      failed: 0
+  - command: "pnpm run test:e2e:root"
+    result: passed
+    details:
+      browser: chromium
+      tests: 67
+      passed: 67
+      failed: 0
+  - command: "pnpm run release:check"
+    result: passed
+    purpose: "Execute the complete non-publishing root release gate."
+  - command: "git diff --check -- <root-owned changed paths>"
+    result: passed
+    notes:
+      - "A repository-wide diff check is intentionally not claimed because unrelated generated Bathroom Guide Markdown contains pre-existing hard-line-break whitespace."
+
+artifacts:
+  - path: app-hub-v11/artifacts.source.json
+    sizeBytes: 42728
+    sha256: bce50d4d812ccbb0e14a97b8af4ef14ed96eed2a17b4ba708607207e7ae0b248
+  - path: app-hub-v11/data/artifact-collection.json
+    sizeBytes: 48230
+    sha256: 856bf548b0484dd084a357af2a75bbdff5c8f978eeb61bf3e0ba66178a7df075
+  - path: sprite-fan/atlas-studio.html
+    sizeBytes: 252095
+    sha256: 92629685176fe9d4fd2c41b780aa439a3b221fa72fa02baf83c4829ac9b88230
+  - path: /tmp/artifacts-build-stats.json
+    sizeBytes: 411
+    sha256: 9f8a3c0251fb95c53397684906cc8cbb212d32110a3e555dd20a8dd65ed996c1
+    retainedInRepository: false
+
+warnings:
+  - "Playwright/npm emitted deprecation warnings for inherited npm configuration keys; they did not affect test execution."
+  - "The generated build metadata correctly records dirty: true."
+
+omittedChecks:
+  - name: "Independent project release matrices"
+    reason: "Badger Sprawl Runner, Ethic Brawl, Hyperblast Shooter, and V11 Peer DAW are separately versioned release units and were outside this root-owned release pass."

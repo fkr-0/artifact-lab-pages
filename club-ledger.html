@@ -1073,7 +1073,19 @@
       </footer>
     </div>
     <script type="module">
+      const LEDGER_SCHEMA = 'club-ledger/v2'
+
+      function unwrapLedgerPayload(raw = {}) {
+        if (raw && typeof raw === 'object' && raw.schema) {
+          if (raw.schema !== LEDGER_SCHEMA) throw new Error(`Unsupported ledger export schema: ${raw.schema}`)
+          if (!raw.ledger || typeof raw.ledger !== 'object') throw new Error('Ledger export payload is missing a ledger object.')
+          return raw.ledger
+        }
+        return raw
+      }
+
       export function normalizeLedger(raw = {}) {
+        raw = unwrapLedgerPayload(raw)
         const todayMonth = toMonth(new Date().toISOString().slice(0, 10))
         const setup = {
           periodStart: raw.setup?.periodStart || todayMonth,
@@ -1124,7 +1136,7 @@
 
         return {
           meta: {
-            version: 1,
+            version: 2,
             clubName: 'Small Club Ledger',
             updatedAt: new Date().toISOString(),
             ...(raw.meta || {}),
@@ -1646,7 +1658,12 @@
         node.dataset.tone = tone
       }
       function getExportJson() {
-        return JSON.stringify(normalizeLedger(state.ledger), null, 2)
+        return JSON.stringify({
+          schema: LEDGER_SCHEMA,
+          schemaVersion: 2,
+          exportedAt: new Date().toISOString(),
+          ledger: normalizeLedger(state.ledger),
+        }, null, 2)
       }
       function setLedger(
         raw,

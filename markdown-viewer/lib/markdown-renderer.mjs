@@ -8,6 +8,18 @@ export function escapeHtml(value = '') {
   })[char]);
 }
 
+export function isSafeUrl(value = '') {
+  const href = String(value || '').trim();
+  if (!href) return false;
+  return /^(?:https?:|mailto:|tel:|\/|\.{1,2}\/|#)/i.test(href);
+}
+
+export function isSafeSourceUrl(value = '') {
+  const href = String(value || '').trim();
+  if (!href) return false;
+  return /^(?:https?:|\/|\.{1,2}\/|file:)/i.test(href);
+}
+
 export function slugify(value = '') {
   return String(value)
     .trim()
@@ -25,8 +37,14 @@ export function inlineMarkdown(value = '') {
   text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
   text = text.replace(/(^|\W)\*([^*]+)\*/g, '$1<em>$2</em>');
   text = text.replace(/(^|\W)_([^_]+)_/g, '$1<em>$2</em>');
-  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" loading="lazy">');
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
+    if (!isSafeUrl(src)) return match;
+    return `<img alt="${alt}" src="${src}" loading="lazy">`;
+  });
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, href) => {
+    if (!isSafeUrl(href)) return match;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+  });
   return text;
 }
 

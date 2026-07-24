@@ -8,5 +8,6 @@ assert.ok(workflow.includes('fetch-depth: 0'), 'workflow fetches full git histor
 assert.ok(workflow.includes('build-artifacts-order.js --source .artifacts.source.ci.json --out .artifacts.source.ci.json'), 'workflow refreshes artifact order');
 assert.ok(script.includes("'git'"), 'ordering invokes git');
 assert.ok(script.includes("'--format=%ct'"), 'ordering reads git commit timestamps');
+assert.match(script, /JSON\.stringify\(outputData, null, 2\)\}\\n/, 'ordering keeps generated JSON newline-terminated');
 
 console.log('app-hub v11 Pages workflow contract OK');

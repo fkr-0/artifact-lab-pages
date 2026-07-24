@@ -183,7 +183,8 @@ test('App Hub v11 and V11 Peer DAW expose keyboard command centers and health su
   assert.match(hubHtml, /id="commandCenter"/);
   assert.match(hubHtml, /id="openCommandCenter"/);
   assert.match(hubHtml, /recentArtifactIds/);
-  assert.match(hubHtml, /event\.key\.toLowerCase\(\) === "k"/);
+  assert.match(hubHtml, /const key = String\(event\.key \|\| ""\)/);
+  assert.match(hubHtml, /key\.toLowerCase\(\) === "k"/);
   assert.match(hubHtml, /Reconnect Peernet Lobby/);
   assert.match(hubNetwork, /get health\(\)/);
   assert.match(hubNetwork, /reconnect\(\)/);

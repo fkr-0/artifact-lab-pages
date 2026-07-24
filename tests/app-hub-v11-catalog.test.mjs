@@ -58,12 +58,30 @@ assert.deepEqual(result.summary.byKind, {
   info: 1,
 });
 
+await assert.rejects(
+  compileArtifactCollection({
+    collection: { id: 'duplicates', title: 'Duplicates' },
+    items: [
+      { id: 'same-id', title: 'First', kind: 'info' },
+      { id: 'same-id', title: 'Second', kind: 'info' },
+    ],
+  }, {
+    rootDir: root,
+    outDir: join(root, 'duplicate-dist'),
+    operations: defaultArtifactOperations(),
+  }),
+  /Duplicate artifact id: same-id/,
+  'the compiler should fail fast instead of silently discarding duplicate artifacts',
+);
+
 const copied = result.items.find((item) => item.id === 'local-html');
 assert.equal(copied.hubHref, 'compiled/local-html/index.html');
 assert.equal(copied.deploy.include, true);
 await stat(join(root, 'dist', 'compiled', 'local-html', 'index.html'));
 
-const emitted = JSON.parse(await readFile(join(root, 'dist', 'artifact-collection.json'), 'utf8'));
+const emittedText = await readFile(join(root, 'dist', 'artifact-collection.json'), 'utf8');
+assert.ok(emittedText.endsWith('\n'), 'compiled catalog should end with a newline');
+const emitted = JSON.parse(emittedText);
 assert.equal(emitted.items[0].id, 'local-html');
 assert.equal(emitted.items[0].hubHref, 'compiled/local-html/index.html');
 assert.ok(emitted.operations.copy.description.includes('deployment'));
@@ -71,10 +89,17 @@ assert.ok(emitted.operations.copy.description.includes('deployment'));
 const shooterCatalog = JSON.parse(
   await readFile('app-hub-v11/data/artifact-collection.json', 'utf8')
 );
+const catalogIds = shooterCatalog.items.map((item) => item.id);
+assert.equal(new Set(catalogIds).size, catalogIds.length, 'compiled v11 catalog should not contain duplicate ids');
 assert.equal(
   shooterCatalog.items.some((item) => item.id === 'root-multitext-viewer' || item.title === 'Multi-text Viewer'),
   false,
   'Multi-text Viewer should be removed from the v11 catalog'
+);
+assert.equal(
+  shooterCatalog.items.some((item) => item.id === 'external-openai-docs' || item.href === 'https://example.com/'),
+  false,
+  'placeholder external references should not be present in the v11 catalog'
 );
 
 const shooter = shooterCatalog.items.find((item) => item.id === 'hyperblast-shooter');

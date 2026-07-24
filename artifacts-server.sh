@@ -10,10 +10,13 @@
 # Default configuration
 ARTIFACTS_PORT="${ARTIFACTS_PORT:-8080}"
 ARTIFACTS_HOST="${ARTIFACTS_HOST:-localhost}"
-ARTIFACTS_DIR="${ARTIFACTS_DIR:-/home/user/work/code/artifacts}"
+ARTIFACTS_BIND="${ARTIFACTS_BIND:-127.0.0.1}"
+_ARTIFACTS_SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-$_ARTIFACTS_SCRIPT_DIR}"
 
 # PID file for tracking the server
 ARTIFACTS_PID_FILE="${ARTIFACTS_DIR}/.artifacts-server.pid"
+ARTIFACTS_LOG_FILE="${ARTIFACTS_LOG_FILE:-${ARTIFACTS_DIR}/.artifacts-server.log}"
 
 # Color output
 RED='\033[0;31m'
@@ -27,6 +30,53 @@ NC='\033[0m' # No Color
 # artifacts-start
 # Start the HTTP server for artifacts
 # ============================================
+_artifacts_is_running_pid() {
+    [[ "${1:-}" =~ ^[0-9]+$ ]] && kill -0 "$1" 2>/dev/null
+}
+
+_artifacts_log_tail() {
+    if [[ -f "$ARTIFACTS_LOG_FILE" ]]; then
+        echo -e "${YELLOW}Last log lines:${NC}"
+        tail -n 20 "$ARTIFACTS_LOG_FILE"
+    fi
+}
+
+_artifacts_open_browser() {
+    local url="$1"
+    if [[ "${ARTIFACTS_NO_BROWSER:-0}" == "1" ]]; then
+        echo -e "${CYAN}🌐 Browser launch disabled (ARTIFACTS_NO_BROWSER=1)${NC}"
+        return 0
+    fi
+
+    if command -v firefox &>/dev/null; then
+        echo -e "${CYAN}🌐 Opening Firefox Private Window...${NC}"
+        firefox --private-window "$url" &>/dev/null &
+    elif command -v firefox-esr &>/dev/null; then
+        echo -e "${CYAN}🌐 Opening Firefox Private Window...${NC}"
+        firefox-esr --private-window "$url" &>/dev/null &
+    else
+        echo -e "${YELLOW}⚠ Firefox not found. Open manually:${NC}"
+        echo -e "  ${url}"
+        return 1
+    fi
+}
+
+_artifacts_wait_for_ready() {
+    local server_pid="$1"
+    local attempts=60
+    while (( attempts > 0 )); do
+        if grep -q "Serving artifacts on http://" "$ARTIFACTS_LOG_FILE" 2>/dev/null; then
+            return 0
+        fi
+        if ! kill -0 "$server_pid" 2>/dev/null; then
+            return 1
+        fi
+        sleep 0.1
+        ((attempts--))
+    done
+    return 1
+}
+
 artifacts-start() {
     local port="${1:-$ARTIFACTS_PORT}"
     local dir="${2:-$ARTIFACTS_DIR}"
@@ -48,18 +98,22 @@ artifacts-start() {
     echo -e "${CYAN}🚀 Starting Artifacts server...${NC}"
     cd "$dir" || return 1
 
-    # Use Python 3 http.server
-    python3 -m http.server "$port" > /dev/null 2>&1 &
+    local server_script="${dir}/scripts/artifacts_http_server.py"
+    if [[ ! -f "$server_script" ]]; then
+        echo -e "${RED}✗ Error: Artifacts HTTP server not found: $server_script${NC}"
+        return 1
+    fi
+
+    # Mirror deploy includePath/targetPath mappings while serving the workspace.
+    : > "$ARTIFACTS_LOG_FILE"
+    python3 -u "$server_script" --directory "$dir" --bind "$ARTIFACTS_BIND" "$port" > "$ARTIFACTS_LOG_FILE" 2>&1 &
     local server_pid=$!
 
     # Save PID
     echo $server_pid > "$ARTIFACTS_PID_FILE"
 
-    # Wait a moment for server to start
-    sleep 0.5
-
-    # Verify it's running
-    if kill -0 $server_pid 2>/dev/null; then
+    # Wait for the server to report readiness.
+    if _artifacts_wait_for_ready "$server_pid"; then
         echo -e "${GREEN}✓ Artifacts server started${NC}"
         echo -e "${CYAN}  URL: http://${ARTIFACTS_HOST}:${port}${NC}"
         echo -e "${CYAN}  Dir: ${dir}${NC}"
@@ -67,6 +121,7 @@ artifacts-start() {
     else
         echo -e "${RED}✗ Failed to start server${NC}"
         rm -f "$ARTIFACTS_PID_FILE"
+        _artifacts_log_tail
         return 1
     fi
 }
@@ -81,14 +136,20 @@ artifacts-stop() {
         return 0
     fi
 
-    local pid=$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null)
+    local pid
+    pid="$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null || true)"
+    if [[ ! "$pid" =~ ^[0-9]+$ ]]; then
+        rm -f "$ARTIFACTS_PID_FILE"
+        echo -e "${YELLOW}⚠ Invalid PID file removed${NC}"
+        return 1
+    fi
     echo -e "${CYAN}🛑 Stopping Artifacts server (PID: ${pid})...${NC}"
 
     kill "$pid" 2>/dev/null
     rm -f "$ARTIFACTS_PID_FILE"
 
     # Verify it stopped
-    sleep 0.5
+    sleep 0.2
     if artifacts-running; then
         echo -e "${YELLOW}⚠ Server still running, forcing kill...${NC}"
         kill -9 "$pid" 2>/dev/null
@@ -123,21 +184,16 @@ artifacts-open() {
         sleep 1
     fi
 
-    echo -e "${CYAN}🌐 Opening in Firefox Private Window...${NC}"
     echo -e "${CYAN}  URL: ${url}${NC}"
-
-    # Open Firefox in private mode
-    if command -v firefox &>/dev/null; then
-        firefox --private-window "$url" &>/dev/null &
-    elif command -v firefox-esr &>/dev/null; then
-        firefox-esr --private-window "$url" &>/dev/null &
+    if _artifacts_open_browser "$url"; then
+        if [[ "${ARTIFACTS_NO_BROWSER:-0}" == "1" ]]; then
+            echo -e "${CYAN}✓ Browser launch disabled${NC}"
+        else
+            echo -e "${GREEN}✓ Firefox opened${NC}"
+        fi
     else
-        echo -e "${RED}✗ Firefox not found. Please install Firefox or use your browser:${NC}"
-        echo -e "  ${url}"
         return 1
     fi
-
-    echo -e "${GREEN}✓ Firefox opened${NC}"
 }
 
 # ============================================
@@ -158,16 +214,20 @@ artifacts-status() {
     echo -e "${MAGENTA}═══════════════════════════════════════${NC}"
 
     if artifacts-running; then
-        local pid=$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null)
+        local pid
+        pid="$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null || true)"
         local port=$(artifacts-port)
         echo -e " ${GREEN}●${NC} Status: ${GREEN}Running${NC}"
         echo -e " ${CYAN}○${NC} PID:    ${pid}"
         echo -e " ${CYAN}○${NC} Port:   ${port}"
         echo -e " ${CYAN}○${NC} URL:    ${GREEN}http://${ARTIFACTS_HOST}:${port}/app-hub-v11/index.html${NC}"
         echo -e " ${CYAN}○${NC} Dir:    ${ARTIFACTS_DIR}"
+        echo -e " ${CYAN}○${NC} Log:    ${ARTIFACTS_LOG_FILE}"
     else
         echo -e " ${RED}●${NC} Status: ${RED}Stopped${NC}"
         echo -e " ${CYAN}○${NC} Dir:    ${ARTIFACTS_DIR}"
+        echo -e " ${CYAN}○${NC} Log:    ${ARTIFACTS_LOG_FILE}"
+        _artifacts_log_tail
     fi
 
     echo -e "${MAGENTA}═══════════════════════════════════════${NC}"
@@ -182,8 +242,9 @@ artifacts-running() {
         return 1
     fi
 
-    local pid=$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null)
-    kill -0 "$pid" 2>/dev/null
+    local pid
+    pid="$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null || true)"
+    _artifacts_is_running_pid "$pid"
 }
 
 # ============================================
@@ -192,12 +253,15 @@ artifacts-running() {
 # ============================================
 artifacts-port() {
     if artifacts-running; then
-        local pid=$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null)
+        local pid
+        pid="$(cat "$ARTIFACTS_PID_FILE" 2>/dev/null || true)"
         # Get port from lsof or netstat
         if command -v lsof &>/dev/null; then
             lsof -p "$pid" -a -i 2>/dev/null | grep LISTEN | awk '{print $9}' | cut -d: -f2 | head -1
         elif command -v netstat &>/dev/null; then
             netstat -tlnp 2>/dev/null | grep "$pid" | awk '{print $4}' | cut -d: -f2 | head -1
+        elif [[ -f "$ARTIFACTS_LOG_FILE" ]]; then
+            grep -oE 'Serving artifacts on http://[^:]+:[0-9]+/' "$ARTIFACTS_LOG_FILE" | tail -1 | sed -E 's/.*:([0-9]+)\/$/\1/'
         else
             echo "$ARTIFACTS_PORT"
         fi
@@ -226,7 +290,7 @@ ${CYAN}Browser Commands:${NC}
   artifacts-open [port]       Start server & open in Firefox private
   artifacts-view [port]       Alias for artifacts-open
 
-${CYN}Quick Start:${NC}
+${CYAN}Quick Start:${NC}
   $ artifacts-start           # Start server on port 8080
   $ artifacts-open            # Open Firefox to NEXUS Portal
 

@@ -2,6 +2,7 @@ export function textForArtifact(item) {
   return [item.id, item.title, item.kind, item.description, item.note, ...(item.tags || [])]
     .filter(Boolean)
     .join(' ')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .toLowerCase();
 }
 

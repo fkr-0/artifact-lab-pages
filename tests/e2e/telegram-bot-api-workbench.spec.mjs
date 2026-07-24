@@ -11,17 +11,17 @@ test('Telegram Bot API Workbench loads and exposes its main workflows', async ({
   await expect(page.getByText('Use a dedicated development bot.')).toBeVisible();
   await expect(page.locator('#metric-mode')).toHaveText('—');
 
-  await page.getByRole('button', { name: 'Messages' }).click();
+  await page.getByRole('tab', { name: 'Messages' }).click();
   await expect(page.getByRole('heading', { name: 'sendMessage' })).toBeVisible();
   await page.locator('#send-text').fill('Browser smoke test');
   await expect(page.locator('#send-count')).toHaveText('18');
 
-  await page.getByRole('button', { name: 'API lab' }).click();
+  await page.getByRole('tab', { name: 'API lab' }).click();
   await page.getByRole('button', { name: 'Load example' }).click();
   await expect(page.locator('#lab-method')).toHaveValue('sendLocation');
   await expect(page.locator('#lab-params')).toHaveValue(/50\.7753/);
 
-  await page.getByRole('button', { name: 'Status' }).click();
+  await page.getByRole('tab', { name: 'Status' }).click();
   await page.locator('#token').fill('not-a-token');
   await page.getByRole('button', { name: 'Test' }).click();
   await expect(page.locator('#out-me')).toContainText('token format');

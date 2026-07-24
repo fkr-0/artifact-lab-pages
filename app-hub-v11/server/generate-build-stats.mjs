@@ -1,15 +1,24 @@
 #!/usr/bin/env node
-import { execSync } from 'child_process';
-import { mkdir, readFile, writeFile } from 'fs/promises';
-import { dirname, join, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { execFile } from 'node:child_process';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
+import { inflateSync } from 'node:zlib';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '../..');
+const execFileAsync = promisify(execFile);
 
-function git(command, fallback = 'unknown') {
+async function git(args, fallback = null) {
   try {
-    return execSync(command, { cwd: rootDir, encoding: 'utf8' }).trim();
+    const { stdout } = await execFileAsync('git', args, {
+      cwd: rootDir,
+      encoding: 'utf8',
+      maxBuffer: 1024 * 1024,
+    });
+    const value = String(stdout || '').trim();
+    return value || fallback;
   } catch {
     return fallback;
   }
@@ -44,6 +53,62 @@ async function getArtifactCount(sourcePath) {
   }
 }
 
+async function getGitDir(baseDir = rootDir) {
+  const dotGitPath = join(baseDir, '.git');
+  try {
+    const dotGit = String(await readFile(dotGitPath, 'utf8')).trim();
+    const match = dotGit.match(/^gitdir:\s*(.+)$/i);
+    if (match) return resolve(baseDir, match[1].trim());
+  } catch {
+    // Not a gitfile; fall through to the conventional .git directory.
+  }
+  return dotGitPath;
+}
+
+async function readGitRef(gitDir, refPath) {
+  const refFile = join(gitDir, ...refPath.split('/'));
+  try {
+    return String(await readFile(refFile, 'utf8')).trim();
+  } catch {
+    // Fall through to packed-refs.
+  }
+  try {
+    const packedRefs = String(await readFile(join(gitDir, 'packed-refs'), 'utf8'));
+    for (const line of packedRefs.split('\n')) {
+      if (!line || line.startsWith('#') || line.startsWith('^')) continue;
+      const [hash, packedRef] = line.trim().split(' ');
+      if (packedRef === refPath) return hash;
+    }
+  } catch {
+    // Packed refs are optional.
+  }
+  return null;
+}
+
+async function resolveCommitMetadata(gitDir, commitHash, refPath = null) {
+  const objectPath = join(gitDir, 'objects', commitHash.slice(0, 2), commitHash.slice(2));
+  try {
+    const compressed = await readFile(objectPath);
+    const raw = inflateSync(compressed).toString('utf8');
+    const nulIndex = raw.indexOf('\0');
+    const body = nulIndex >= 0 ? raw.slice(nulIndex + 1) : raw;
+    const [headers, message = ''] = body.split('\n\n');
+    const committerLine = headers.split('\n').find((line) => line.startsWith('committer '));
+    const match = committerLine?.match(/^committer\s+.+\s+(\d+)\s+[+-]\d{4}$/);
+    return {
+      commitMessage: message.trim() || 'unknown commit',
+      commitDate: match ? new Date(Number(match[1]) * 1000).toISOString() : 'unknown',
+      branch: refPath ? refPath.replace(/^refs\/heads\//, '') : 'detached',
+    };
+  } catch {
+    return {
+      commitMessage: 'unknown commit',
+      commitDate: 'unknown',
+      branch: refPath ? refPath.replace(/^refs\/heads\//, '') : 'detached',
+    };
+  }
+}
+
 async function generateBuildStats(options = {}) {
   const sourcePath = options.sourcePath || process.env.SOURCE_PATH || join(rootDir, 'app-hub-v11', 'artifacts.source.json');
   const outputPath = options.outputPath || process.env.OUTPUT_PATH || join(rootDir, 'app-hub-v11', 'data', 'build-stats.json');
@@ -55,14 +120,22 @@ async function generateBuildStats(options = {}) {
   ]);
   const builtAt = new Date().toISOString();
   const requestedCommit = normalizeCommit(options.commitHash || process.env.ARTIFACTS_SOURCE_COMMIT);
-  const commitHash = requestedCommit
-    ? git(`git rev-parse ${requestedCommit}`, requestedCommit)
-    : git('git rev-parse HEAD');
-  const commitShort = git(`git rev-parse --short=12 ${commitHash}`, commitHash.slice(0, 12));
-  const commitMessage = git(`git show -s --format=%s ${commitHash}`, 'unknown commit');
-  const commitDate = git(`git show -s --format=%cI ${commitHash}`);
-  const branch = git('git branch --show-current', 'detached');
-  const detectedDirty = Boolean(git('git status --porcelain', ''));
+  const gitDir = await getGitDir(rootDir);
+  const headText = String(await readFile(join(gitDir, 'HEAD'), 'utf8')).trim();
+  const refPath = headText.startsWith('ref: ') ? headText.slice(5).trim() : null;
+  const filesystemCommit = normalizeCommit(refPath ? await readGitRef(gitDir, refPath) : headText);
+  const commitHash = await git(
+    ['rev-parse', requestedCommit || 'HEAD'],
+    requestedCommit || filesystemCommit || 'unknown'
+  );
+  const commitShort = await git(['rev-parse', '--short=12', commitHash], commitHash.slice(0, 12));
+  const filesystemMetadata = normalizeCommit(commitHash)
+    ? await resolveCommitMetadata(gitDir, commitHash, refPath)
+    : { commitMessage: 'unknown commit', commitDate: 'unknown', branch: 'detached' };
+  const commitMessage = await git(['show', '-s', '--format=%s', commitHash], filesystemMetadata.commitMessage);
+  const commitDate = await git(['show', '-s', '--format=%cI', commitHash], filesystemMetadata.commitDate);
+  const branch = await git(['branch', '--show-current'], filesystemMetadata.branch);
+  const detectedDirty = Boolean(await git(['status', '--porcelain'], ''));
   const dirty = normalizeBoolean(
     options.dirty ?? process.env.ARTIFACTS_SOURCE_DIRTY,
     detectedDirty

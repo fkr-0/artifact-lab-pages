@@ -491,9 +491,9 @@
         <div class="section">
           <h2>Seed <span class="value" id="seedv">1217</span></h2>
           <div class="row">
-            <button onclick="shiftSeed(-1)" aria-label="Previous seed">Prev</button>
-            <button onclick="shiftSeed(1)" aria-label="Next seed">Next</button>
-            <button class="ghost" onclick="randomizeSeed()" aria-label="Random seed">Random</button>
+            <button id="seedPrev" aria-label="Previous seed">Prev</button>
+            <button id="seedNext" aria-label="Next seed">Next</button>
+            <button id="seedRandom" class="ghost" aria-label="Random seed">Random</button>
           </div>
           <div class="row" style="margin-top: 8px">
             <input
@@ -505,7 +505,7 @@
               step="1"
               aria-label="Seed value"
             />
-            <button onclick="jumpSeed()">Apply</button>
+            <button id="seedApply">Apply</button>
           </div>
         </div>
 
@@ -516,7 +516,7 @@
               <div class="label">
                 <span>Aspect</span> <span class="value" id="formatv">poster-a</span>
               </div>
-              <select id="format" onchange="applyFormat()" aria-label="Format">
+              <select id="format" aria-label="Format">
                 <option value="poster-a">Poster A</option>
                 <option value="square">Square</option>
                 <option value="story">Story</option>
@@ -528,7 +528,7 @@
               <div class="label">
                 <span>Profile</span> <span class="value" id="presetv">field guide</span>
               </div>
-              <select id="preset" onchange="applyPreset(this.value)" aria-label="Preset">
+              <select id="preset" aria-label="Preset">
                 <option value="field guide">Field guide</option>
                 <option value="workshop">Workshop</option>
                 <option value="campaign">Campaign</option>
@@ -540,7 +540,7 @@
           <div class="label" style="margin-top: 12px">
             <span>Template</span> <span class="value" id="combov">knife ledger</span>
           </div>
-          <select id="combo" onchange="applyCombo(this.value)" aria-label="Combinator preset">
+          <select id="combo" aria-label="Combinator preset">
             <option value="knife ledger">Knife ledger</option>
             <option value="yard signal">Yard signal</option>
             <option value="relay square">Relay square</option>
@@ -562,7 +562,6 @@
           </div>
           <textarea
             id="titleText"
-            oninput="updateMeta();scheduleRender(false)"
             aria-label="Headline text"
           >
 ESCAPE
@@ -573,7 +572,6 @@ COLLECTIVE</textarea
           </div>
           <textarea
             id="subtitleText"
-            oninput="updateMeta();scheduleRender(false)"
             aria-label="Subtitle text"
           >
 hands-on tech for self protection</textarea
@@ -583,7 +581,6 @@ hands-on tech for self protection</textarea
           </div>
           <textarea
             id="footerText"
-            oninput="updateMeta();scheduleRender(false)"
             aria-label="Footer text"
           >
 education / privacy / repair / autonomy</textarea
@@ -599,7 +596,6 @@ education / privacy / repair / autonomy</textarea
             min="28"
             max="88"
             value="58"
-            oninput="updateUI();scheduleRender(true)"
             aria-label="Signal density"
           />
           <div class="label"><span>Edge</span> <span class="value" id="edgev">24</span></div>
@@ -609,7 +605,6 @@ education / privacy / repair / autonomy</textarea
             min="4"
             max="56"
             value="24"
-            oninput="updateUI();scheduleRender(true)"
             aria-label="Street edge intensity"
           />
           <div class="label">
@@ -621,13 +616,12 @@ education / privacy / repair / autonomy</textarea
             min="70"
             max="98"
             value="88"
-            oninput="updateUI();scheduleRender(true)"
             aria-label="Layout discipline"
           />
           <div class="label" style="margin-top: 12px">
             <span>Layout</span> <span class="value" id="intentv">balanced</span>
           </div>
-          <select id="intent" onchange="applyIntent(this.value)" aria-label="Layout intent">
+          <select id="intent" aria-label="Layout intent">
             <option value="balanced">Balanced</option>
             <option value="stacked">Stacked</option>
             <option value="broadcast">Broadcast</option>
@@ -637,7 +631,6 @@ education / privacy / repair / autonomy</textarea
           </div>
           <select
             id="activeBlock"
-            onchange="updateUI();syncBlockControls()"
             aria-label="Active text block"
           >
             <option value="title">headline</option>
@@ -653,7 +646,6 @@ education / privacy / repair / autonomy</textarea
                 min="3"
                 max="90"
                 value="14"
-                oninput="applyBlockSliders()"
                 aria-label="Block X position"
               />
             </div>
@@ -665,7 +657,6 @@ education / privacy / repair / autonomy</textarea
                 min="3"
                 max="94"
                 value="14"
-                oninput="applyBlockSliders()"
                 aria-label="Block Y position"
               />
             </div>
@@ -677,7 +668,6 @@ education / privacy / repair / autonomy</textarea
                 min="60"
                 max="160"
                 value="100"
-                oninput="applyBlockSliders()"
                 aria-label="Block scale"
               />
             </div>
@@ -690,14 +680,14 @@ education / privacy / repair / autonomy</textarea
         <div class="section">
           <h2>Export</h2>
           <div class="row">
-            <button class="ice" onclick="downloadPNG()">PNG</button>
-            <button onclick="downloadJSON()">Config</button>
-            <button onclick="downloadCSS()">CSS</button>
+            <button id="downloadPng" class="ice">PNG</button>
+            <button id="downloadConfig">Config</button>
+            <button id="downloadCss">CSS</button>
           </div>
           <div class="row">
-            <button onclick="downloadLaTeX()">LaTeX</button>
-            <button onclick="downloadOnePager()">HTML</button>
-            <button class="ghost" onclick="copyShareState()">Copy</button>
+            <button id="downloadLatex">LaTeX</button>
+            <button id="downloadHtml">HTML</button>
+            <button id="copyState" class="ghost">Copy</button>
           </div>
         </div>
 
@@ -717,8 +707,8 @@ education / privacy / repair / autonomy</textarea
 
         <div class="section">
           <div class="row">
-            <button class="hot" onclick="redrawArt()">Regenerate</button>
-            <button class="warn" onclick="resetAll()">Reset</button>
+            <button id="regenerate" class="hot">Regenerate</button>
+            <button id="resetAll" class="warn">Reset</button>
           </div>
         </div>
       </aside>
@@ -943,6 +933,55 @@ education / privacy / repair / autonomy</textarea
         syncOverlay()
       }
 
+      function bindControls() {
+        const bindClick = (id, handler) => {
+          const el = $(id)
+          if (el) el.addEventListener('click', handler)
+        }
+
+        bindClick('seedPrev', () => shiftSeed(-1))
+        bindClick('seedNext', () => shiftSeed(1))
+        bindClick('seedRandom', () => randomizeSeed())
+        bindClick('seedApply', () => jumpSeed())
+
+        bindClick('downloadPng', () => downloadPNG())
+        bindClick('downloadConfig', () => downloadJSON())
+        bindClick('downloadCss', () => downloadCSS())
+        bindClick('downloadLatex', () => downloadLaTeX())
+        bindClick('downloadHtml', () => downloadOnePager())
+        bindClick('copyState', () => copyShareState())
+
+        bindClick('regenerate', () => redrawArt())
+        bindClick('resetAll', () => resetAll())
+
+        $('format')?.addEventListener('change', () => applyFormat())
+        $('preset')?.addEventListener('change', (ev) => applyPreset(ev.target.value))
+        $('combo')?.addEventListener('change', (ev) => applyCombo(ev.target.value))
+        $('intent')?.addEventListener('change', (ev) => applyIntent(ev.target.value))
+        $('activeBlock')?.addEventListener('change', () => {
+          updateUI()
+          syncBlockControls()
+        })
+
+        ;['titleText', 'subtitleText', 'footerText'].forEach((id) => {
+          $(id)?.addEventListener('input', () => {
+            updateMeta()
+            scheduleRender(false)
+          })
+        })
+
+        ;['density', 'edge', 'discipline'].forEach((id) => {
+          $(id)?.addEventListener('input', () => {
+            updateUI()
+            scheduleRender(true)
+          })
+        })
+
+        ;['bx', 'by', 'bs'].forEach((id) => {
+          $(id)?.addEventListener('input', () => applyBlockSliders())
+        })
+      }
+
       // UI updates
       function updateMeta() {
         $('titleCount').textContent = $('titleText').value.length + 'c'
@@ -1151,10 +1190,11 @@ education / privacy / repair / autonomy</textarea
       function downloadText(name, text, type = 'text/plain') {
         const blob = new Blob([text], { type })
         const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
+        const url = URL.createObjectURL(blob)
+        a.href = url
         a.download = name
         a.click()
-        setTimeout(() => URL.revokeObjectURL(a.href), 300)
+        setTimeout(() => URL.revokeObjectURL(url), 300)
       }
 
       function escapeHTML(s) {
@@ -1634,6 +1674,7 @@ small { opacity: 0.8; }
         cnv.parent('holder')
         pixelDensity(2)
         noLoop()
+        bindControls()
         updateUI()
         syncBlockControls()
         scheduleRender(true)

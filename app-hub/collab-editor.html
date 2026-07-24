@@ -209,7 +209,15 @@
       background: rgba(0, 255, 255, 0.2);
       box-shadow: 0 0 10px var(--fg-primary);
     }
-  </style>
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+</style>
 </head>
 <body>
   <a href="../app-hub-v11/index.html" style="position:fixed;top:.75rem;right:.75rem;z-index:1000;border:1px solid rgba(0,255,255,.45);border-radius:999px;padding:.35rem .65rem;background:rgba(0,0,0,.72);color:#00ffff;text-decoration:none;font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-shadow:0 0 1rem rgba(0,255,255,.18)">↗ v11 hub</a>
@@ -632,7 +640,7 @@ document.getElementById('create-room-btn').addEventListener('click', () => {
   if (state.peer && state.peerId) {
     state.room = state.peerId;
     state.isHost = true;
-    document.getElementById('room-code').textContent = `Room ID: ${state.roomId}`;
+    document.getElementById('room-code').textContent = `Room ID: ${state.peerId}`;
     document.getElementById('room-id').textContent = state.room.substring(0, 8) + '...';
   }
 });
@@ -648,13 +656,32 @@ document.getElementById('join-room-btn').addEventListener('click', () => {
 });
 
 // Enable create room button when peer is ready
-const checkPeerReady = setInterval(() => {
+let checkPeerReady = setInterval(() => {
   if (state.peer && state.peerId) {
     document.getElementById('create-room-btn').disabled = false;
     document.getElementById('connect-btn').textContent = 'Connected to P2P Network';
     clearInterval(checkPeerReady);
+    checkPeerReady = null;
   }
 }, 100);
+
+function destroyPeerOnly() {
+  if (checkPeerReady) {
+    clearInterval(checkPeerReady);
+    checkPeerReady = null;
+  }
+  state.connections.forEach((user) => {
+    try { user.connection?.close?.(); } catch (error) {}
+  });
+  state.connections.clear();
+  updateUserList();
+  if (state.peer) {
+    try { state.peer.destroy(); } catch (error) {}
+    state.peer = null;
+  }
+  state.peerId = null;
+  document.getElementById('create-room-btn').disabled = true;
+}
 
 // ============================================
 // INITIALIZE
@@ -668,11 +695,8 @@ setTimeout(() => {
 }, 500);
 
 // Handle page unload
-window.addEventListener('beforeunload', () => {
-  if (state.peer) {
-    state.peer.destroy();
-  }
-});
+window.addEventListener('pagehide', destroyPeerOnly);
+window.addEventListener('beforeunload', destroyPeerOnly);
 </script>
 
 </body>

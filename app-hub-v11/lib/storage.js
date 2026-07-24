@@ -8,17 +8,27 @@ function fullKey(key) {
   return key.startsWith(hubStoragePrefix) ? key : `${hubStoragePrefix}${key}`;
 }
 
+function safeJsonParse(value, fallback = null) {
+  if (typeof value !== 'string') return value ?? fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
 export function readHubSetting(key, fallback = null, adapter) {
   try {
     const value = storage(adapter)?.getItem(fullKey(key));
-    return value == null ? fallback : JSON.parse(value);
+    return value == null ? fallback : safeJsonParse(value, fallback);
   } catch {
     return fallback;
   }
 }
 
 export function writeHubSetting(key, value, adapter) {
-  storage(adapter)?.setItem(fullKey(key), JSON.stringify(value));
+  const serialized = JSON.stringify(value);
+  storage(adapter)?.setItem(fullKey(key), serialized ?? 'null');
   return value;
 }
 
@@ -37,7 +47,7 @@ export function listHubSettings(adapter) {
 }
 
 export function safeParseStorageValue(value) {
-  try { return JSON.parse(value); } catch { return value; }
+  return safeJsonParse(value, value);
 }
 
 export function byteSize(value) {
@@ -70,9 +80,20 @@ export function exportHubSettings(adapter) {
 }
 
 export function importHubSettings(json, adapter) {
-  const payload = typeof json === 'string' ? JSON.parse(json) : json;
+  const payload = typeof json === 'string' ? safeJsonParse(json, {}) : json;
   const s = storage(adapter);
-  for (const entry of payload.entries || []) s.setItem(entry.key, entry.raw);
+  const entries = Array.isArray(payload?.entries)
+    ? payload.entries
+    : Array.isArray(payload)
+      ? payload
+      : typeof payload === 'object' && payload
+        ? Object.entries(payload).map(([key, raw]) => ({ key, raw }))
+        : [];
+  for (const entry of entries) {
+    if (!entry?.key) continue;
+    const raw = Object.prototype.hasOwnProperty.call(entry, 'raw') ? entry.raw : entry.value ?? entry.parsed;
+    s.setItem(entry.key, typeof raw === 'string' ? raw : JSON.stringify(raw ?? null));
+  }
   return buildStorageSnapshot(s);
 }
 

@@ -5,6 +5,7 @@ const html = await readFile('app-hub-v11/index.html', 'utf8');
 
 assert.doesNotMatch(html, /Artifact cockpit/, 'v11 should remove the old artifact cockpit hero panel');
 assert.match(html, /id="filterPanel"/, 'left sidebar should include an upper filtering panel');
+assert.match(html, /id="search"[^>]*aria-label="Filter artifacts"/, 'artifact filter search should be labeled for assistive tech');
 assert.match(html, /id="lobbyPanel"/, 'left sidebar should include a compact lower lobby summary panel');
 assert.match(html, /id="tagFilter"/, 'v11 should render reusable tag filter controls');
 assert.match(html, /id="modeAnd"/, 'tag filter should expose AND mode');
@@ -80,16 +81,24 @@ assert.match(html, /image-rendering:\s*pixelated/, 'v11 should lean into pixel r
 assert.match(html, /font-size:\s*0?\.7rem/, 'v11 tags should stay compact like v9');
 assert.match(html, /gap:\s*0?\.35rem/, 'v11 should reduce visual gaps');
 assert.match(html, /box-shadow:\s*4px 4px 0/, 'v11 should have harder nerdy edge shadows');
+assert.match(html, /@media \(prefers-reduced-motion: reduce\)/, 'v11 should provide a reduced-motion fallback');
 assert.match(html, /tagColorStyle/, 'v11 result tag pills should use shared tag color coding');
 assert.match(html, /--tag-hue/, 'v11 should expose CSS variables for per-tag colors');
 
 console.log('app-hub v11 index UI contract OK');
 
 assert.match(html, /id="workspacePane"/, 'v11 should include a bottom split workspace pane for inline apps and logs');
+assert.match(html, /id="workspaceTabs"[^>]*role="tablist"/, 'workspace tabs should expose tablist semantics');
 assert.match(html, /id="workspaceResizeHandle"/, 'workspace pane should be height-resizable');
 assert.match(html, /--workspace-height:\s*64vh/, 'workspace pane should keep its compact resizable default height');
 assert.match(html, /--workspace-height/, 'workspace pane height should persist as a CSS variable');
 assert.match(html, /id="workspaceTabs"/, 'workspace pane should expose shared tabs');
+assert.match(html, /function handleWorkspaceTabsKeydown\(event\)/, 'workspace tabs should support arrow-key navigation');
+assert.match(html, /workspaceTabs"\)\.addEventListener\("keydown", handleWorkspaceTabsKeydown\)/, 'workspace tabs should wire keyboard navigation to the shared tab strip');
+assert.match(html, /function focusFirstFocusable\(root\)/, 'dialogs should be able to focus their first control');
+assert.match(html, /function trapFocusWithin\(root, event\)/, 'dialogs should trap focus at the edges');
+assert.match(html, /trapFocusWithin\(\$\("profileMenu"\), event\)/, 'profile drawer should trap tab focus');
+assert.match(html, /trapFocusWithin\(\$\("fileSharePanel"\), event\)/, 'file share drawer should trap tab focus');
 assert.doesNotMatch(html, /data-workspace-tab="appDeck"/, 'workspace tabs should not include a wrapper inline-tabs tab');
 assert.match(html, /data-workspace-tab="eventLog"/, 'workspace tabs should include the event log as the first permanent tab');
 assert.match(html, /data-workspace-tab="lobbyChat"/, 'workspace tabs should include a distinct Lobby / Chat tab next to Event Log');
@@ -114,6 +123,7 @@ assert.match(html, /if \(activeAppId\) setWorkspaceTab\(activeAppId\)/, 'opening
 assert.match(html, /setWorkspaceTab\("eventLog"\)/, 'Event Log should be the permanent default tab');
 assert.match(html, /setWorkspaceTab/, 'v11 should switch the single workspace tab strip');
 assert.match(html, /workspacePane\.classList\.add\(["']active["']\)/, 'opening inline apps should show the split workspace pane');
+assert.equal([...html.matchAll(/key\.toLowerCase\(\) === "k"/g)].length, 1, 'Ctrl+K should only be handled once');
 assert.match(html, /grid-template-rows:\s*minmax\(100px, 1fr\) var\(--workspace-splitter-size\) minmax\(0, var\(--workspace-height\)\)/, 'workspace pane should not impose a lower-pane min-height floor');
 assert.match(html, /\.app-deck-panel\.active[\s\S]*grid-template-rows:\s*minmax\(0, 1fr\)[\s\S]*height:\s*100%/, 'inline app panels should fill the app-deck lane');
 assert.match(html, /\.app-deck-panel\.active \.app-deck-inline-frame,[\s\S]*min-height:\s*0/, 'inline app iframes should not force a short fixed-height floor');

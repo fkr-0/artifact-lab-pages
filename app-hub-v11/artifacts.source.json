@@ -35,6 +35,120 @@
   },
   "items": [
     {
+      "id": "sprite-fan-atlas-studio",
+      "title": "Sprite Fan Atlas Studio",
+      "kind": "html-path",
+      "href": "../sprite-fan/atlas-studio.html",
+      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "postprocessing",
+        "atlas",
+        "game-dev"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-21T00:28:26.000Z",
+      "changedAt": "2026-07-21T00:28:26.000Z"
+    },
+    {
+      "id": "ethic-brawl",
+      "title": "Ethic Brawl",
+      "kind": "html-path",
+      "href": "../ethic-brawl/index.html",
+      "description": "Built Vite artifact for the cyberpunk philosophical arena-brawler; package/deploy copies dist output only.",
+      "tags": [
+        "game",
+        "brawler",
+        "cyberpunk",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "ethic-brawl",
+          "command": "npm run build",
+          "dist": "dist"
+        },
+        "includePath": "ethic-brawl/dist",
+        "targetPath": "ethic-brawl"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-20T22:15:15.000Z",
+      "changedAt": "2026-07-20T22:15:15.000Z"
+    },
+    {
+      "id": "badger-sprawl-runner",
+      "title": "Badger Sprawl Runner",
+      "kind": "html-path",
+      "href": "../badger-sprawl-runner/dist/index.html",
+      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
+      "tags": [
+        "game",
+        "runner",
+        "platformer",
+        "sprite",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "badger-sprawl-runner",
+          "command": "pnpm run build",
+          "dist": "apps/runner/dist"
+        },
+        "includePath": "badger-sprawl-runner/apps/runner/dist",
+        "targetPath": "badger-sprawl-runner/dist"
+      },
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow",
+        "actions": [
+          {
+            "id": "play-new-window",
+            "label": "Open game",
+            "mode": "newWindow"
+          },
+          {
+            "id": "fullscreen",
+            "label": "Fullscreen",
+            "mode": "fullscreen"
+          }
+        ]
+      },
+      "modifiedAt": "2026-07-19T16:54:46.000Z",
+      "changedAt": "2026-07-19T16:54:46.000Z"
+    },
+    {
       "id": "telegram-bot-api-workbench",
       "title": "Telegram Bot API Workbench",
       "kind": "html-path",
@@ -69,143 +183,8 @@
         ],
         "defaultAction": "newWindow"
       },
-      "modifiedAt": "2026-07-19T06:00:00.000Z",
-      "changedAt": "2026-07-19T06:00:00.000Z"
-    },
-    {
-      "id": "overlay-cam-apk",
-      "title": "Overlay Cam — Intuitive UX APK",
-      "kind": "html-path",
-      "href": "../overlay-cam/index.html",
-      "description": "Android debug APK with a simplified freeze-camera, add-overlay, direct gesture adjustment, fine-tuning, and save workflow.",
-      "tags": [
-        "android",
-        "camera",
-        "overlay",
-        "image",
-        "utility",
-        "apk",
-        "download"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "includePath": "overlay-cam",
-        "targetPath": "overlay-cam"
-      },
-      "launch": {
-        "modes": [
-          "newWindow"
-        ],
-        "defaultAction": "newWindow"
-      },
-      "modifiedAt": "2026-07-10T14:49:16.000Z",
-      "changedAt": "2026-07-10T14:49:16.000Z"
-    },
-    {
-      "id": "chado-zen-tea",
-      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
-      "kind": "html-path",
-      "href": "../chado-zen-tea/index.html",
-      "description": "Self-contained interactive guide to chanoyu / chadō with a meditative step-by-step ceremony path, animated tea-room illustrations, wa-kei-sei-jaku interpretation lenses, practice timer, etiquette quiz, glossary, and embedded source notes.",
-      "tags": [
-        "tool",
-        "education",
-        "tea",
-        "japanese-culture",
-        "zen",
-        "chadō",
-        "chanoyu",
-        "ceremony",
-        "interactive",
-        "guide",
-        "meditative",
-        "local-first",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-22T00:00:00.000Z",
-      "changedAt": "2026-06-22T00:00:00.000Z"
-    },
-    {
-      "id": "clausewitz-on-war-interactive",
-      "title": "Clausewitz: On War Interactive Atlas",
-      "kind": "html-path",
-      "href": "../clausewitz-on-war-interactive/index.html",
-      "description": "Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter compartments, concept maps, friction and culminating-point simulations, scenario sliders, and retrieval prompts.",
-      "tags": [
-        "tool",
-        "education",
-        "strategy",
-        "history",
-        "philosophy",
-        "military-theory",
-        "interactive",
-        "visualization",
-        "local-first",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-21T22:02:45.000Z",
-      "changedAt": "2026-06-21T22:02:45.000Z"
-    },
-    {
-      "id": "storyboard-studio",
-      "title": "Storyboard Studio",
-      "kind": "html-path",
-      "href": "../storyboard-studio/index.html",
-      "description": "Client-side illustration and text document builder for arranging imported images, prose, captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard artifacts.",
-      "tags": [
-        "tool",
-        "graphics",
-        "storyboard",
-        "illustration",
-        "writing",
-        "html",
-        "local-first",
-        "print"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-21T22:02:45.000Z",
-      "changedAt": "2026-06-21T22:02:45.000Z"
+      "modifiedAt": "2026-07-19T06:06:43.000Z",
+      "changedAt": "2026-07-19T06:06:43.000Z"
     },
     {
       "id": "v11-peer-daw",
@@ -241,8 +220,364 @@
         ],
         "defaultAction": "inline"
       },
-      "modifiedAt": "2026-06-17T14:31:36.000Z",
-      "changedAt": "2026-06-17T14:31:36.000Z"
+      "modifiedAt": "2026-07-19T02:52:31.000Z",
+      "changedAt": "2026-07-19T02:52:31.000Z"
+    },
+    {
+      "id": "spc-procedural-sharepic-studio",
+      "title": "Procedural Sharepic Studio",
+      "kind": "html-path",
+      "href": "../spc/procedural_sharepic_studio.html",
+      "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
+      "tags": [
+        "tool",
+        "graphics",
+        "social",
+        "template",
+        "procedural",
+        "generator",
+        "design",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-14T14:27:15.000Z",
+      "changedAt": "2026-07-14T14:27:15.000Z"
+    },
+    {
+      "id": "storyboard-studio",
+      "title": "Storyboard Studio",
+      "kind": "html-path",
+      "href": "../storyboard-studio/index.html",
+      "description": "Client-side illustration and text document builder for arranging imported images, prose, captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard artifacts.",
+      "tags": [
+        "tool",
+        "graphics",
+        "storyboard",
+        "illustration",
+        "writing",
+        "html",
+        "local-first",
+        "print"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-14T14:27:15.000Z",
+      "changedAt": "2026-07-14T14:27:15.000Z"
+    },
+    {
+      "id": "hyperblast-shooter",
+      "title": "Hyperblast Shooter",
+      "kind": "html-path",
+      "href": "../hyperblast-shooter/index.html",
+      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
+      "tags": [
+        "game",
+        "shooter",
+        "space",
+        "multiplayer",
+        "cyberpunk"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-13T22:03:16.000Z",
+      "changedAt": "2026-07-13T22:03:16.000Z"
+    },
+    {
+      "id": "artifacts-toc",
+      "title": "Artifacts Table of Contents",
+      "kind": "info",
+      "href": "markdown-viewer.html?src=../ARTIFACTS_TOC.md",
+      "note": "Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes the machine-readable catalog.",
+      "tags": [
+        "catalog",
+        "docs",
+        "markdown",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "rawHref": "../ARTIFACTS_TOC.md",
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-13T21:20:08.000Z",
+      "changedAt": "2026-07-13T21:20:08.000Z"
+    },
+    {
+      "id": "server-guide",
+      "title": "Server Guide",
+      "kind": "info",
+      "href": "markdown-viewer.html?src=../SERVER_GUIDE.md",
+      "note": "Local serving and deployment notes for the static artifact collection.",
+      "tags": [
+        "docs",
+        "markdown",
+        "server",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "rawHref": "../SERVER_GUIDE.md",
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-13T21:20:08.000Z",
+      "changedAt": "2026-07-13T21:20:08.000Z"
+    },
+    {
+      "id": "v11-roadmap",
+      "title": "v11 Modularization Roadmap",
+      "kind": "info",
+      "href": "markdown-viewer.html?src=docs/ROADMAP.md",
+      "note": "Specs and TODOs for feature areas intentionally not fully implemented in this slice.",
+      "tags": [
+        "docs",
+        "markdown",
+        "roadmap",
+        "v11",
+        "viewer"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "rawHref": "docs/ROADMAP.md",
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-13T21:20:08.000Z",
+      "changedAt": "2026-07-13T21:20:08.000Z"
+    },
+    {
+      "id": "v9-full-portal",
+      "title": "NEXUS v9 Full Portal",
+      "kind": "html-path",
+      "href": "../app-hub/v9-portal.html",
+      "description": "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts, notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions, shooter game, and unified user settings.",
+      "tags": [
+        "hub",
+        "v9",
+        "legacy",
+        "compatibility",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-13T21:19:46.000Z",
+      "changedAt": "2026-07-13T21:19:46.000Z"
+    },
+    {
+      "id": "sprite-extractor",
+      "title": "Sprite Extractor",
+      "kind": "html-path",
+      "href": "../sprite_extractor.html",
+      "description": "Strict sprite extraction copy with alpha auto-detection, manual grid setup, default alpha trimming, per-sprite naming, and named PNG/ZIP export.",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "extraction"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-13T21:19:46.000Z",
+      "changedAt": "2026-07-13T21:19:46.000Z"
+    },
+    {
+      "id": "overlay-cam-apk",
+      "title": "Overlay Cam — Intuitive UX APK",
+      "kind": "html-path",
+      "href": "../overlay-cam/index.html",
+      "description": "Android debug APK with a simplified freeze-camera, add-overlay, direct gesture adjustment, fine-tuning, and save workflow.",
+      "tags": [
+        "android",
+        "camera",
+        "overlay",
+        "image",
+        "utility",
+        "apk",
+        "download"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "overlay-cam",
+        "targetPath": "overlay-cam"
+      },
+      "launch": {
+        "modes": [
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "modifiedAt": "2026-07-10T14:56:08.000Z",
+      "changedAt": "2026-07-10T14:56:08.000Z"
+    },
+    {
+      "id": "chado-zen-tea",
+      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+      "kind": "html-path",
+      "href": "../chado-zen-tea/index.html",
+      "description": "Self-contained interactive guide to chanoyu / chadō with a meditative step-by-step ceremony path, animated tea-room illustrations, wa-kei-sei-jaku interpretation lenses, practice timer, etiquette quiz, glossary, and embedded source notes.",
+      "tags": [
+        "tool",
+        "education",
+        "tea",
+        "japanese-culture",
+        "zen",
+        "chadō",
+        "chanoyu",
+        "ceremony",
+        "interactive",
+        "guide",
+        "meditative",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-22T20:01:50.000Z",
+      "changedAt": "2026-06-22T20:01:50.000Z"
+    },
+    {
+      "id": "clausewitz-on-war-interactive",
+      "title": "Clausewitz: On War Interactive Atlas",
+      "kind": "html-path",
+      "href": "../clausewitz-on-war-interactive/index.html",
+      "description": "Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter compartments, concept maps, friction and culminating-point simulations, scenario sliders, and retrieval prompts.",
+      "tags": [
+        "tool",
+        "education",
+        "strategy",
+        "history",
+        "philosophy",
+        "military-theory",
+        "interactive",
+        "visualization",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-06-21T22:02:45.000Z",
+      "changedAt": "2026-06-21T22:02:45.000Z"
     },
     {
       "id": "reveal-peer-plugin",
@@ -343,162 +678,6 @@
       "changedAt": "2026-06-10T20:30:28.000Z"
     },
     {
-      "id": "spc-procedural-sharepic-studio",
-      "title": "Procedural Sharepic Studio",
-      "kind": "html-path",
-      "href": "../spc/procedural_sharepic_studio.html",
-      "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
-      "tags": [
-        "tool",
-        "graphics",
-        "social",
-        "template",
-        "procedural",
-        "generator",
-        "design",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-10T20:30:28.000Z",
-      "changedAt": "2026-06-10T20:30:28.000Z"
-    },
-    {
-      "id": "sprite-fan-atlas-studio",
-      "title": "Sprite Fan Atlas Studio",
-      "kind": "html-path",
-      "href": "../sprite-fan/atlas-studio.html",
-      "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite",
-        "postprocessing",
-        "atlas",
-        "game-dev"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-10T20:30:28.000Z",
-      "changedAt": "2026-06-10T20:30:28.000Z"
-    },
-    {
-      "id": "badger-sprawl-runner",
-      "title": "Badger Sprawl Runner",
-      "kind": "html-path",
-      "href": "../badger-sprawl-runner/dist/index.html",
-      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
-      "tags": [
-        "game",
-        "runner",
-        "platformer",
-        "sprite",
-        "built"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "build": {
-          "cwd": "badger-sprawl-runner",
-          "command": "pnpm run build",
-          "dist": "apps/runner/dist"
-        },
-        "includePath": "badger-sprawl-runner/apps/runner/dist",
-        "targetPath": "badger-sprawl-runner/dist"
-      },
-      "launch": {
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "newWindow",
-        "actions": [
-          {
-            "id": "play-new-window",
-            "label": "Open game",
-            "mode": "newWindow"
-          },
-          {
-            "id": "fullscreen",
-            "label": "Fullscreen",
-            "mode": "fullscreen"
-          }
-        ]
-      },
-      "modifiedAt": "2026-06-09T09:59:14.000Z",
-      "changedAt": "2026-06-09T09:59:14.000Z"
-    },
-    {
-      "id": "hyperblast-shooter",
-      "title": "Hyperblast Shooter",
-      "kind": "html-path",
-      "href": "../hyperblast-shooter/index.html",
-      "description": "Classic cyberpunk space shooter with multiplayer hooks, progression systems, story mode, and floating-panel support inherited from the v10 enhanced portal.",
-      "tags": [
-        "game",
-        "shooter",
-        "space",
-        "multiplayer",
-        "cyberpunk"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "floating-panel",
-            "title": "Floating Panel",
-            "mode": "floating"
-          },
-          {
-            "id": "multiplayer",
-            "title": "Multiplayer",
-            "mode": "floating",
-            "multiplayer": true
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-06-09T09:59:14.000Z",
-      "changedAt": "2026-06-09T09:59:14.000Z"
-    },
-    {
       "id": "meme-lab",
       "title": "Meme Lab",
       "kind": "html-path",
@@ -528,42 +707,6 @@
       },
       "modifiedAt": "2026-06-01T07:56:21.000Z",
       "changedAt": "2026-06-01T07:56:21.000Z"
-    },
-    {
-      "id": "ethic-brawl",
-      "title": "Ethic Brawl",
-      "kind": "html-path",
-      "href": "../ethic-brawl/index.html",
-      "description": "Built Vite artifact for the cyberpunk philosophical arena-brawler; package/deploy copies dist output only.",
-      "tags": [
-        "game",
-        "brawler",
-        "cyberpunk",
-        "built"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "build": {
-          "cwd": "ethic-brawl",
-          "command": "npm run build",
-          "dist": "dist"
-        },
-        "includePath": "ethic-brawl/dist",
-        "targetPath": "ethic-brawl"
-      },
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-25T20:48:56.000Z",
-      "changedAt": "2026-05-25T20:48:56.000Z"
     },
     {
       "id": "brickbreaker",
@@ -627,35 +770,6 @@
       },
       "modifiedAt": "2026-05-19T13:35:18.000Z",
       "changedAt": "2026-05-19T13:35:18.000Z"
-    },
-    {
-      "id": "artifacts-toc",
-      "title": "Artifacts Table of Contents",
-      "kind": "info",
-      "href": "markdown-viewer.html?src=../ARTIFACTS_TOC.md",
-      "note": "Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes the machine-readable catalog.",
-      "tags": [
-        "catalog",
-        "docs",
-        "markdown",
-        "viewer"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "rawHref": "../ARTIFACTS_TOC.md",
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z"
     },
     {
       "id": "font-lab-browser",
@@ -808,38 +922,6 @@
       "changedAt": "2026-05-18T20:41:14.000Z"
     },
     {
-      "id": "prompt-forge-nexus",
-      "title": "Prompt Forge Nexus",
-      "kind": "html-path",
-      "href": "../prompt-gen-nexus.html",
-      "description": "Advanced LLM prompt generator with placeholder system, tag-based filtering, and prompt operations. Features CodeMirror syntax highlighting, placeholder auto-detection, prompt assembly from multiple templates, operation chains, theme support, and local storage persistence.",
-      "tags": [
-        "tool",
-        "ai",
-        "prompts",
-        "creative",
-        "writing",
-        "generator",
-        "editor",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z"
-    },
-    {
       "id": "qr-studio",
       "title": "QR Studio",
       "kind": "html-path",
@@ -858,96 +940,6 @@
         "validate",
         "index"
       ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z"
-    },
-    {
-      "id": "qr-studio",
-      "title": "QR Studio",
-      "kind": "html-path",
-      "href": "../qrcode.html",
-      "description": "Professional QR code generator supporting 12+ formats including URL, text, WiFi, 2FA/TOTP, eSIM, email, phone, SMS, vCard, location, and calendar events. Features customizable error correction, foreground/background colors, PNG/SVG export, print support, and real-time preview.",
-      "tags": [
-        "tool",
-        "generator",
-        "qr-code",
-        "graphics",
-        "utility",
-        "export",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z"
-    },
-    {
-      "id": "server-guide",
-      "title": "Server Guide",
-      "kind": "info",
-      "href": "markdown-viewer.html?src=../SERVER_GUIDE.md",
-      "note": "Local serving and deployment notes for the static artifact collection.",
-      "tags": [
-        "docs",
-        "markdown",
-        "server",
-        "viewer"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "rawHref": "../SERVER_GUIDE.md",
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z"
-    },
-    {
-      "id": "v11-roadmap",
-      "title": "v11 Modularization Roadmap",
-      "kind": "info",
-      "href": "markdown-viewer.html?src=docs/ROADMAP.md",
-      "note": "Specs and TODOs for feature areas intentionally not fully implemented in this slice.",
-      "tags": [
-        "docs",
-        "markdown",
-        "roadmap",
-        "v11",
-        "viewer"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "rawHref": "docs/ROADMAP.md",
       "launch": {
         "modes": [
           "inline",
@@ -1075,34 +1067,6 @@
       "changedAt": "2026-05-15T23:46:19.000Z"
     },
     {
-      "id": "v9-full-portal",
-      "title": "NEXUS v9 Full Portal",
-      "kind": "html-path",
-      "href": "../app-hub/v9-portal.html",
-      "description": "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts, notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions, shooter game, and unified user settings.",
-      "tags": [
-        "hub",
-        "v9",
-        "legacy",
-        "compatibility",
-        "tooling"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-12T19:10:42.000Z",
-      "changedAt": "2026-05-12T19:10:42.000Z"
-    },
-    {
       "id": "gif-white-to-transparent",
       "title": "GIF White→Alpha Preprocessor",
       "kind": "html-path",
@@ -1165,33 +1129,6 @@
       },
       "modifiedAt": "2026-05-11T10:23:05.000Z",
       "changedAt": "2026-05-11T10:23:05.000Z"
-    },
-    {
-      "id": "sprite-extractor",
-      "title": "Sprite Extractor",
-      "kind": "html-path",
-      "href": "../sprite_extractor.html",
-      "description": "Strict sprite extraction copy with alpha auto-detection, manual grid setup, default alpha trimming, per-sprite naming, and named PNG/ZIP export.",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite",
-        "extraction"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "modifiedAt": "2026-05-11T09:46:13.000Z",
-      "changedAt": "2026-05-11T09:46:13.000Z"
     },
     {
       "id": "v10-classic",
@@ -1642,30 +1579,6 @@
       },
       "modifiedAt": "2026-05-04T22:51:57.000Z",
       "changedAt": "2026-05-04T22:51:57.000Z"
-    },
-    {
-      "id": "external-openai-docs",
-      "title": "External Reference Example",
-      "kind": "external-link",
-      "href": "https://example.com/",
-      "description": "Demonstrates that catalog entries can be pure external links without deployment copying.",
-      "tags": [
-        "external",
-        "example"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "modifiedAt": "2026-05-01T12:00:00.000Z",
-      "launch": {
-        "modes": [
-          "inline",
-          "newWindow"
-        ],
-        "defaultAction": "newWindow"
-      },
-      "changedAt": "2026-05-01T12:00:00.000Z"
     }
   ]
 }
