@@ -35,6 +35,42 @@
   },
   "items": [
     {
+      "id": "nakamotos-disciples",
+      "title": "Nakamoto's Disciples",
+      "kind": "html-path",
+      "href": "../nakamotos-disciples/index.html",
+      "description": "Interactive local-first Bitcoin learning laboratory that teaches the protocol from bytes, hashes, transactions, mining, relay policy, fork choice, and incentives through inspectable simulations and concept labs.",
+      "tags": [
+        "education",
+        "bitcoin",
+        "blockchain",
+        "cryptography",
+        "simulation",
+        "protocol",
+        "pwa",
+        "local-first",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "nakamotos-disciples",
+        "targetPath": "nakamotos-disciples"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-07-31T09:28:00.000Z",
+      "changedAt": "2026-07-31T09:28:00.000Z"
+    },
+    {
       "id": "sprite-fan-atlas-studio",
       "title": "Sprite Fan Atlas Studio",
       "kind": "html-path",

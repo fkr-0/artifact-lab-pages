@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-07-24T01:36:08.399Z",
+  "generatedAt": "2026-07-31T09:31:58.604Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -46,12 +46,21 @@
     }
   },
   "summary": {
-    "total": 48,
+    "total": 49,
     "byKind": {
-      "html-path": 45,
+      "html-path": 46,
       "info": 3
     },
     "byTag": {
+      "education": 4,
+      "bitcoin": 1,
+      "blockchain": 1,
+      "cryptography": 1,
+      "simulation": 1,
+      "protocol": 1,
+      "pwa": 1,
+      "local-first": 9,
+      "built": 5,
       "tool": 23,
       "graphics": 12,
       "sprite": 5,
@@ -61,7 +70,6 @@
       "game": 8,
       "brawler": 1,
       "cyberpunk": 3,
-      "built": 4,
       "runner": 1,
       "platformer": 1,
       "developer": 1,
@@ -72,7 +80,6 @@
       "messaging": 1,
       "debugging": 1,
       "client-side": 1,
-      "local-first": 8,
       "audio": 2,
       "daw": 1,
       "peernet": 7,
@@ -109,7 +116,6 @@
       "utility": 4,
       "apk": 1,
       "download": 1,
-      "education": 3,
       "tea": 1,
       "japanese-culture": 1,
       "zen": 1,
@@ -189,6 +195,43 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "education",
+        "bitcoin",
+        "blockchain",
+        "cryptography",
+        "simulation",
+        "protocol",
+        "pwa",
+        "local-first",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "nakamotos-disciples",
+      "title": "Nakamoto's Disciples",
+      "href": "../nakamotos-disciples/index.html",
+      "description": "Interactive local-first Bitcoin learning laboratory that teaches the protocol from bytes, hashes, transactions, mining, relay policy, fork choice, and incentives through inspectable simulations and concept labs.",
+      "deploy": {
+        "includePath": "nakamotos-disciples",
+        "targetPath": "nakamotos-disciples",
+        "include": true
+      },
+      "modifiedAt": "2026-07-31T09:28:00.000Z",
+      "changedAt": "2026-07-31T09:28:00.000Z"
+    },
     {
       "kind": "html-path",
       "tags": [
