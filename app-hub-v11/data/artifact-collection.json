@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-07-31T12:48:22.715Z",
+  "generatedAt": "2026-07-31T12:49:12.834Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -229,8 +229,8 @@
         "targetPath": "nakamotos-disciples",
         "include": true
       },
-      "modifiedAt": "2026-07-31T09:33:40.000Z",
-      "changedAt": "2026-07-31T09:33:40.000Z"
+      "modifiedAt": "2026-07-31T12:49:12.000Z",
+      "changedAt": "2026-07-31T12:49:12.000Z"
     },
     {
       "kind": "html-path",
