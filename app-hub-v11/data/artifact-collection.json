@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-07-31T09:31:58.604Z",
+  "generatedAt": "2026-07-31T12:48:22.715Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -63,59 +63,18 @@
       "built": 5,
       "tool": 23,
       "graphics": 12,
-      "sprite": 5,
-      "postprocessing": 1,
-      "atlas": 1,
-      "game-dev": 2,
-      "game": 8,
-      "brawler": 1,
-      "cyberpunk": 3,
-      "runner": 1,
-      "platformer": 1,
-      "developer": 1,
-      "telegram": 1,
-      "bot": 1,
-      "api": 1,
-      "webhook": 1,
-      "messaging": 1,
-      "debugging": 1,
-      "client-side": 1,
-      "audio": 2,
-      "daw": 1,
-      "peernet": 7,
+      "generative": 1,
+      "node-based": 1,
+      "visual": 1,
+      "programming": 1,
+      "creative": 2,
       "v11": 20,
-      "social": 2,
-      "template": 3,
-      "procedural": 1,
-      "generator": 5,
-      "design": 3,
-      "storyboard": 1,
-      "illustration": 1,
-      "writing": 2,
-      "html": 1,
-      "print": 1,
-      "shooter": 1,
-      "space": 1,
+      "game": 8,
+      "arcade": 1,
       "multiplayer": 4,
-      "catalog": 1,
-      "docs": 4,
-      "markdown": 4,
-      "viewer": 4,
-      "server": 1,
-      "roadmap": 1,
-      "hub": 4,
-      "v9": 3,
-      "legacy": 2,
-      "compatibility": 2,
-      "tooling": 2,
-      "extraction": 1,
-      "android": 1,
-      "camera": 1,
-      "overlay": 1,
-      "image": 3,
-      "utility": 4,
-      "apk": 1,
-      "download": 1,
+      "p2p": 3,
+      "collaborative": 5,
+      "retro": 1,
       "tea": 1,
       "japanese-culture": 1,
       "zen": 1,
@@ -125,73 +84,114 @@
       "interactive": 2,
       "guide": 1,
       "meditative": 1,
-      "strategy": 1,
-      "history": 1,
-      "philosophy": 1,
-      "military-theory": 1,
-      "visualization": 1,
-      "plugin": 1,
-      "presentation": 1,
-      "chat": 2,
-      "finance": 1,
-      "club": 1,
-      "ledger": 1,
-      "accounting": 1,
-      "json": 1,
-      "git": 1,
-      "developer-tools": 1,
-      "meme": 1,
-      "arcade": 1,
-      "p2p": 3,
-      "collaborative": 5,
-      "retro": 1,
-      "real-time": 1,
-      "font": 1,
-      "palette": 1,
-      "theme": 1,
-      "color": 1,
-      "pdf": 1,
-      "converter": 1,
-      "editor": 9,
-      "ai": 1,
-      "prompts": 1,
-      "creative": 2,
-      "qr-code": 1,
-      "export": 1,
       "classic": 3,
       "minesweeper": 1,
       "puzzle": 1,
       "solitaire": 1,
       "cards": 1,
+      "strategy": 1,
+      "history": 1,
+      "philosophy": 1,
+      "military-theory": 1,
+      "visualization": 1,
+      "finance": 1,
+      "club": 1,
+      "ledger": 1,
+      "accounting": 1,
+      "json": 1,
+      "image": 3,
       "gif": 2,
       "preprocessor": 1,
       "transparency": 1,
-      "animator": 1,
-      "pixel-art": 1,
+      "utility": 4,
+      "bomberman": 1,
+      "peernet": 7,
+      "chat": 2,
+      "real-time": 1,
+      "social": 2,
+      "docs": 4,
+      "markdown": 4,
+      "viewer": 4,
+      "meme": 1,
+      "generator": 5,
+      "template": 3,
+      "hub": 4,
       "v10": 5,
       "themes": 1,
       "sound": 1,
       "floating": 1,
+      "legacy": 2,
+      "compatibility": 2,
+      "tooling": 2,
+      "v9": 3,
+      "pdf": 1,
+      "converter": 1,
+      "editor": 9,
+      "audio": 2,
+      "modular": 1,
+      "ai": 1,
+      "prompts": 1,
+      "writing": 2,
+      "cyberpunk": 3,
+      "qr-code": 1,
+      "export": 1,
+      "plugin": 1,
+      "presentation": 1,
+      "sprite": 5,
+      "postprocessing": 1,
+      "atlas": 1,
+      "game-dev": 2,
+      "animator": 1,
+      "pixel-art": 1,
+      "storyboard": 1,
+      "illustration": 1,
+      "html": 1,
+      "print": 1,
+      "developer": 1,
+      "telegram": 1,
+      "bot": 1,
+      "api": 1,
+      "webhook": 1,
+      "messaging": 1,
+      "debugging": 1,
+      "client-side": 1,
+      "automation": 1,
+      "design": 3,
+      "workflow": 1,
+      "monaco": 1,
+      "code": 1,
+      "textarea": 1,
+      "brawler": 1,
+      "runner": 1,
+      "platformer": 1,
+      "daw": 1,
+      "procedural": 1,
+      "shooter": 1,
+      "space": 1,
+      "catalog": 1,
+      "server": 1,
+      "roadmap": 1,
+      "extraction": 1,
+      "android": 1,
+      "camera": 1,
+      "overlay": 1,
+      "apk": 1,
+      "download": 1,
+      "git": 1,
+      "developer-tools": 1,
+      "font": 1,
+      "palette": 1,
+      "theme": 1,
+      "color": 1,
       "notepad": 3,
       "text": 1,
       "notes": 1,
       "v4": 1,
       "console": 1,
-      "monaco": 1,
-      "code": 1,
       "native": 1,
       "v8": 1,
       "calculator": 1,
-      "math": 1,
-      "bomberman": 1,
-      "modular": 1,
-      "generative": 1,
-      "node-based": 1,
-      "visual": 1,
-      "programming": 1,
-      "automation": 1,
-      "workflow": 1,
-      "textarea": 1
+      "math": 1
     }
   },
   "items": [
@@ -223,14 +223,775 @@
       "id": "nakamotos-disciples",
       "title": "Nakamoto's Disciples",
       "href": "../nakamotos-disciples/index.html",
-      "description": "Interactive local-first Bitcoin learning laboratory that teaches the protocol from bytes, hashes, transactions, mining, relay policy, fork choice, and incentives through inspectable simulations and concept labs.",
+      "description": "Interactive local-first Bitcoin course with six sequential mastery flows, real protocol experiments, persisted evidence, actor-local network reasoning, and gated implementation references from bytes through Nakamoto consensus.",
       "deploy": {
         "includePath": "nakamotos-disciples",
         "targetPath": "nakamotos-disciples",
         "include": true
       },
-      "modifiedAt": "2026-07-31T09:28:00.000Z",
-      "changedAt": "2026-07-31T09:28:00.000Z"
+      "modifiedAt": "2026-07-31T09:33:40.000Z",
+      "changedAt": "2026-07-31T09:33:40.000Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "generative",
+        "node-based",
+        "visual",
+        "programming",
+        "creative",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-aether-node",
+      "title": "Aether Node",
+      "href": "../spc/aether_node.html",
+      "description": "Abstract node-based visual programming tool for creating generative graphics and procedural patterns. Build networks of processing nodes, connect data flows, and export results as images or animations.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "arcade",
+        "multiplayer",
+        "p2p",
+        "collaborative",
+        "retro",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "brickbreaker",
+      "title": "BrickBreaker Coop",
+      "href": "../brickbreaker/index.html",
+      "description": "Cooperative brick-breaking arcade game with multiplayer support via PeerJS. Features powerups, progressive difficulty, and synchronized state management for networked play.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "education",
+        "tea",
+        "japanese-culture",
+        "zen",
+        "chadō",
+        "chanoyu",
+        "ceremony",
+        "interactive",
+        "guide",
+        "meditative",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "chado-zen-tea",
+      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+      "href": "../chado-zen-tea/index.html",
+      "description": "Self-contained interactive guide to chanoyu / chadō with a meditative step-by-step ceremony path, animated tea-room illustrations, wa-kei-sei-jaku interpretation lenses, practice timer, etiquette quiz, glossary, and embedded source notes.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "minesweeper",
+        "puzzle"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "minesweeper",
+      "title": "Classic Minesweeper",
+      "href": "../minesweeper/index.html",
+      "description": "Standalone Minesweeper artifact with original presets, custom boards, timer scoring, flags, chording, keyboard controls, and local best times.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "solitaire",
+        "cards"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "solitaire",
+      "title": "Classic Solitaire",
+      "href": "../solitaire/index.html",
+      "description": "Standalone Klondike Solitaire artifact with draw-one/draw-three modes, stock and waste piles, foundations, tableau moves, scoring, undo, auto-foundation, timer, and best score persistence.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "education",
+        "strategy",
+        "history",
+        "philosophy",
+        "military-theory",
+        "interactive",
+        "visualization",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "clausewitz-on-war-interactive",
+      "title": "Clausewitz: On War Interactive Atlas",
+      "href": "../clausewitz-on-war-interactive/index.html",
+      "description": "Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter compartments, concept maps, friction and culminating-point simulations, scenario sliders, and retrieval prompts.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "finance",
+        "club",
+        "ledger",
+        "accounting",
+        "json",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "club-ledger",
+      "title": "Club Ledger",
+      "href": "../club-ledger.html",
+      "description": "Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting updated JSON.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "image",
+        "gif",
+        "preprocessor",
+        "transparency",
+        "utility",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "gif-white-to-transparent",
+      "title": "GIF White→Alpha Preprocessor",
+      "href": "../gif-white-to-transparent.html",
+      "description": "Browser-based GIF preprocessor that removes white backgrounds and replaces with transparency. Upload animated GIF, adjust white threshold with live preview, and download cleaned GIF with proper alpha channel.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "classic",
+        "bomberman",
+        "multiplayer",
+        "peernet"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "actions": [
+          {
+            "id": "play-inline",
+            "title": "Play Inline",
+            "mode": "inline"
+          },
+          {
+            "id": "floating-panel",
+            "title": "Floating Panel",
+            "mode": "floating"
+          },
+          {
+            "id": "fullscreen",
+            "title": "Fullscreen",
+            "mode": "fullscreen"
+          },
+          {
+            "id": "multiplayer",
+            "title": "Multiplayer",
+            "mode": "floating",
+            "multiplayer": true
+          },
+          {
+            "id": "new-window",
+            "title": "New Window",
+            "mode": "newWindow"
+          }
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "bomberman-v10",
+      "title": "Gridblast Bomberman",
+      "href": "../app-hub/bomberman.html",
+      "description": "Legacy v10 Bomberman implementation with PeernetLobby one-session multiplayer, target-peer joins, and shared state snapshots.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "chat",
+        "p2p",
+        "real-time",
+        "social",
+        "peernet",
+        "collaborative",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sexy-love-chat",
+      "title": "Magical Love Chat",
+      "href": "../sexy_love_chat.html",
+      "description": "P2P real-time chat application with magical theme and PeerJS networking. Features private messaging, room creation, user presence, emoji support, and persistent chat history via localStorage.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "docs",
+        "markdown",
+        "viewer",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "markdown-viewer",
+      "title": "Markdown Viewer",
+      "href": "../markdown-viewer/index.html",
+      "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "meme",
+        "generator",
+        "image",
+        "template",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "meme-lab",
+      "title": "Meme Lab",
+      "href": "../meme-lab/meme-lab.html",
+      "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v10",
+        "peernet"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-classic",
+      "title": "NEXUS v10 Classic Portal",
+      "href": "../app-hub/v10-portal.html",
+      "description": "The clean PeernetLobby app runtime v11 is based on.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v10",
+        "themes",
+        "sound",
+        "floating"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-enhanced",
+      "title": "NEXUS v10 Enhanced Portal",
+      "href": "../app-hub/v10-portal-enhanced.html",
+      "description": "The rich v10 portal containing themes, sound, floating panels, and storage management ideas externalized in v11 libs.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v10",
+        "legacy",
+        "compatibility",
+        "peernet",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v10-full-portal",
+      "title": "NEXUS v10 Full Portal",
+      "href": "../app-hub/v10-portal.html",
+      "description": "Full v10 portal compatibility surface for PeernetLobby apps, notepad, shared text pad, sequencer, PeerModGroove launcher, peer console, linked artifacts, and sprite GIF launcher.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "hub",
+        "v9",
+        "legacy",
+        "compatibility",
+        "tooling"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v9-full-portal",
+      "title": "NEXUS v9 Full Portal",
+      "href": "../app-hub/v9-portal.html",
+      "description": "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts, notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions, shooter game, and unified user settings.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "pdf",
+        "converter",
+        "editor",
+        "graphics",
+        "utility",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "pdf-forge-nexus",
+      "title": "PDF Forge Nexus",
+      "href": "../pdf-forge-nexus.html",
+      "description": "Client-side PDF manipulator with merge, split, and conversion capabilities. Features drag-and-drop PDF/image loading, page reordering, rotation, multi-page merge, PDF splitting (by N pages, at page, range, or each page), PDF to text extraction, image to PDF conversion, and preview. All processing happens locally with no server upload.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "audio",
+        "peernet",
+        "modular"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "peer-mod-groove",
+      "title": "PeerModGroove",
+      "href": "../PeerModGroove/index.html",
+      "description": "Peer-synchronized modular audio app launched from v10/v11 rather than embedded into the hub runtime.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "editor",
+        "ai",
+        "prompts",
+        "creative",
+        "writing",
+        "generator",
+        "cyberpunk",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "prompt-forge-nexus",
+      "title": "Prompt Forge Nexus",
+      "href": "../prompt-gen-nexus.html",
+      "description": "Advanced LLM prompt generator with placeholder system, tag-based filtering, prompt operations library, assembly multi-prompt combiner, and 7 cyberpunk themes. Pure client-side with localStorage persistence, export/import, and live preview.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "generator",
+        "qr-code",
+        "graphics",
+        "utility",
+        "export",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "qr-studio",
+      "title": "QR Studio",
+      "href": "../qrcode.html",
+      "description": "Professional QR code generator supporting 12+ formats (URL, text, WiFi, TOTP, eSIM, email, phone, SMS, contact, location, event, vCard). Includes error correction levels, custom colors, PNG/SVG export, print support, and real-time preview.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "plugin",
+        "presentation",
+        "multiplayer",
+        "peernet",
+        "game",
+        "chat",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "fullscreen"
+      },
+      "id": "reveal-peer-plugin",
+      "title": "RevealPeerJS",
+      "href": "../reveal-peer-plugin/index.html",
+      "description": "Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong challenges, and a top-down arena shooter mini-game.",
+      "deploy": {
+        "includePath": "reveal-peer-plugin",
+        "targetPath": "reveal-peer-plugin",
+        "include": true
+      },
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z"
     },
     {
       "kind": "html-path",
@@ -259,8 +1020,241 @@
       "title": "Sprite Fan Atlas Studio",
       "href": "../sprite-fan/atlas-studio.html",
       "description": "Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and sprites.json/review-report manifest studio for generated sprite assets.",
-      "modifiedAt": "2026-07-21T00:28:26.000Z",
-      "changedAt": "2026-07-21T00:28:26.000Z",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "sprite-gif-creator",
+      "title": "Sprite GIF Creator",
+      "href": "../spc/sprite-gif-creator.html",
+      "description": "Browser-only sprite-sheet splitter, frame editor, PNG exporter, and animated GIF assembler.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "sprite",
+        "animator",
+        "gif",
+        "pixel-art",
+        "game-dev",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-sprite-gif-creator-v2",
+      "title": "Sprite GIF Creator v2",
+      "href": "../spc/sprite-gif-creator-v2.html",
+      "description": "Enhanced sprite sheet animator with timeline, frame editing, multiple source support, batch processing, and GIF export. Features source card management, improved batch operations, and pixel-perfect preview controls.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "graphics",
+        "storyboard",
+        "illustration",
+        "writing",
+        "html",
+        "local-first",
+        "print"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "storyboard-studio",
+      "title": "Storyboard Studio",
+      "href": "../storyboard-studio/index.html",
+      "description": "Client-side illustration and text document builder for arranging imported images, prose, captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard artifacts.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "developer",
+        "telegram",
+        "bot",
+        "api",
+        "webhook",
+        "messaging",
+        "debugging",
+        "client-side",
+        "local-first"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "id": "telegram-bot-api-workbench",
+      "title": "Telegram Bot API Workbench",
+      "href": "../telegram-bot-api-workbench/index.html",
+      "description": "Security-conscious, self-contained browser console for Telegram bots with status and webhook diagnostics, messaging, update polling, command and chat inspection, generic JSON and multipart method runners, abortable requests, reusable JavaScript snippets, safe profile exchange, and token-redacted logs.",
+      "deploy": {
+        "includePath": "telegram-bot-api-workbench",
+        "targetPath": "telegram-bot-api-workbench",
+        "include": true
+      },
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "template",
+        "generator",
+        "automation",
+        "design",
+        "workflow",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "spc-template-engine",
+      "title": "Template Engine",
+      "href": "../spc/template_engine.html",
+      "description": "Template processing engine for creating and managing reusable design templates. Supports variable substitution, conditional rendering, loops, and custom processing logic for generating dynamic content from templates.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "monaco",
+        "code"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v8-collab-code-editor",
+      "title": "v8 Collab Code Editor",
+      "href": "../app-hub/collab-editor.html",
+      "description": "Full Monaco-based collaborative code editor from the earlier app hub line, exposed through the v11 catalog.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "editor",
+        "collaborative",
+        "textarea",
+        "p2p"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "id": "v8-collab-pad-lite",
+      "title": "v8 Collab Pad Lite",
+      "href": "../app-hub/collab-editor-lite.html",
+      "description": "Textarea-based collaborative editor from the earlier app hub line, exposed through the v11 catalog.",
+      "modifiedAt": "2026-07-24T01:39:07.000Z",
+      "changedAt": "2026-07-24T01:39:07.000Z",
       "deploy": {
         "include": true
       }
@@ -354,45 +1348,6 @@
     {
       "kind": "html-path",
       "tags": [
-        "tool",
-        "developer",
-        "telegram",
-        "bot",
-        "api",
-        "webhook",
-        "messaging",
-        "debugging",
-        "client-side",
-        "local-first"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "newWindow"
-      },
-      "id": "telegram-bot-api-workbench",
-      "title": "Telegram Bot API Workbench",
-      "href": "../telegram-bot-api-workbench/index.html",
-      "description": "Security-conscious, self-contained browser console for Telegram bots with status and webhook diagnostics, messaging, update polling, command and chat inspection, generic JSON and multipart method runners, abortable requests, reusable JavaScript snippets, safe profile exchange, and token-redacted logs.",
-      "deploy": {
-        "includePath": "telegram-bot-api-workbench",
-        "targetPath": "telegram-bot-api-workbench",
-        "include": true
-      },
-      "modifiedAt": "2026-07-19T06:06:43.000Z",
-      "changedAt": "2026-07-19T06:06:43.000Z"
-    },
-    {
-      "kind": "html-path",
-      "tags": [
         "audio",
         "daw",
         "peernet",
@@ -457,41 +1412,6 @@
       "title": "Procedural Sharepic Studio",
       "href": "../spc/procedural_sharepic_studio.html",
       "description": "Most feature-rich sharepic generator with template system, procedural backgrounds, text effects, color themes, and export options. Create branded social media images with custom layouts, typography, filters, and batch processing capabilities.",
-      "modifiedAt": "2026-07-14T14:27:15.000Z",
-      "changedAt": "2026-07-14T14:27:15.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "storyboard",
-        "illustration",
-        "writing",
-        "html",
-        "local-first",
-        "print"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "storyboard-studio",
-      "title": "Storyboard Studio",
-      "href": "../storyboard-studio/index.html",
-      "description": "Client-side illustration and text document builder for arranging imported images, prose, captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard artifacts.",
       "modifiedAt": "2026-07-14T14:27:15.000Z",
       "changedAt": "2026-07-14T14:27:15.000Z",
       "deploy": {
@@ -647,37 +1567,6 @@
     {
       "kind": "html-path",
       "tags": [
-        "hub",
-        "v9",
-        "legacy",
-        "compatibility",
-        "tooling"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v9-full-portal",
-      "title": "NEXUS v9 Full Portal",
-      "href": "../app-hub/v9-portal.html",
-      "description": "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts, notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions, shooter game, and unified user settings.",
-      "modifiedAt": "2026-07-13T21:19:46.000Z",
-      "changedAt": "2026-07-13T21:19:46.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
         "tool",
         "graphics",
         "sprite",
@@ -743,151 +1632,6 @@
       "tags": [
         "tool",
         "education",
-        "tea",
-        "japanese-culture",
-        "zen",
-        "chadō",
-        "chanoyu",
-        "ceremony",
-        "interactive",
-        "guide",
-        "meditative",
-        "local-first",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "chado-zen-tea",
-      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
-      "href": "../chado-zen-tea/index.html",
-      "description": "Self-contained interactive guide to chanoyu / chadō with a meditative step-by-step ceremony path, animated tea-room illustrations, wa-kei-sei-jaku interpretation lenses, practice timer, etiquette quiz, glossary, and embedded source notes.",
-      "modifiedAt": "2026-06-22T20:01:50.000Z",
-      "changedAt": "2026-06-22T20:01:50.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "education",
-        "strategy",
-        "history",
-        "philosophy",
-        "military-theory",
-        "interactive",
-        "visualization",
-        "local-first",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "clausewitz-on-war-interactive",
-      "title": "Clausewitz: On War Interactive Atlas",
-      "href": "../clausewitz-on-war-interactive/index.html",
-      "description": "Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter compartments, concept maps, friction and culminating-point simulations, scenario sliders, and retrieval prompts.",
-      "modifiedAt": "2026-06-21T22:02:45.000Z",
-      "changedAt": "2026-06-21T22:02:45.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "plugin",
-        "presentation",
-        "multiplayer",
-        "peernet",
-        "game",
-        "chat",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "fullscreen"
-      },
-      "id": "reveal-peer-plugin",
-      "title": "RevealPeerJS",
-      "href": "../reveal-peer-plugin/index.html",
-      "description": "Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong challenges, and a top-down arena shooter mini-game.",
-      "deploy": {
-        "includePath": "reveal-peer-plugin",
-        "targetPath": "reveal-peer-plugin",
-        "include": true
-      },
-      "modifiedAt": "2026-06-17T11:01:53.000Z",
-      "changedAt": "2026-06-17T11:01:53.000Z"
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "finance",
-        "club",
-        "ledger",
-        "accounting",
-        "json",
-        "local-first"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "club-ledger",
-      "title": "Club Ledger",
-      "href": "../club-ledger.html",
-      "description": "Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting updated JSON.",
-      "modifiedAt": "2026-06-16T19:32:11.000Z",
-      "changedAt": "2026-06-16T19:32:11.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "education",
         "git",
         "developer-tools",
         "built",
@@ -917,109 +1661,6 @@
       },
       "modifiedAt": "2026-06-10T20:30:28.000Z",
       "changedAt": "2026-06-10T20:30:28.000Z"
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "meme",
-        "generator",
-        "image",
-        "template",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "meme-lab",
-      "title": "Meme Lab",
-      "href": "../meme-lab/meme-lab.html",
-      "description": "Single-file meme generator with template system, drag-and-drop image support, crop editing, text overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste, and JSON template save/load for reusable meme compositions.",
-      "modifiedAt": "2026-06-01T07:56:21.000Z",
-      "changedAt": "2026-06-01T07:56:21.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "game",
-        "arcade",
-        "multiplayer",
-        "p2p",
-        "collaborative",
-        "retro",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "brickbreaker",
-      "title": "BrickBreaker Coop",
-      "href": "../brickbreaker/index.html",
-      "description": "Cooperative brick-breaking arcade game with multiplayer support via PeerJS. Features powerups, progressive difficulty, and synchronized state management for networked play.",
-      "modifiedAt": "2026-05-21T02:32:11.000Z",
-      "changedAt": "2026-05-21T02:32:11.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "chat",
-        "p2p",
-        "real-time",
-        "social",
-        "peernet",
-        "collaborative",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "sexy-love-chat",
-      "title": "Magical Love Chat",
-      "href": "../sexy_love_chat.html",
-      "description": "P2P real-time chat application with magical theme and PeerJS networking. Features private messaging, room creation, user presence, emoji support, and persistent chat history via localStorage.",
-      "modifiedAt": "2026-05-19T13:35:18.000Z",
-      "changedAt": "2026-05-19T13:35:18.000Z",
-      "deploy": {
-        "include": true
-      }
     },
     {
       "kind": "html-path",
@@ -1055,37 +1696,6 @@
     {
       "kind": "html-path",
       "tags": [
-        "docs",
-        "markdown",
-        "viewer",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "markdown-viewer",
-      "title": "Markdown Viewer",
-      "href": "../markdown-viewer/index.html",
-      "description": "Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.",
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
         "tool",
         "palette",
         "theme",
@@ -1112,396 +1722,6 @@
       "description": "Advanced palette generator with multiple anchors, role inference, contrast checks, and CSS variable export for readable UI themes.",
       "modifiedAt": "2026-05-18T20:41:14.000Z",
       "changedAt": "2026-05-18T20:41:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "pdf",
-        "converter",
-        "editor",
-        "graphics",
-        "utility",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "pdf-forge-nexus",
-      "title": "PDF Forge Nexus",
-      "href": "../pdf-forge-nexus.html",
-      "description": "Client-side PDF manipulator with merge, split, and conversion capabilities. Features drag-and-drop PDF/image loading, page reordering, rotation, multi-page merge, PDF splitting (by N pages, at page, range, or each page), PDF to text extraction, image to PDF conversion, and preview. All processing happens locally with no server upload.",
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "editor",
-        "ai",
-        "prompts",
-        "creative",
-        "writing",
-        "generator",
-        "cyberpunk",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "prompt-forge-nexus",
-      "title": "Prompt Forge Nexus",
-      "href": "../prompt-gen-nexus.html",
-      "description": "Advanced LLM prompt generator with placeholder system, tag-based filtering, prompt operations library, assembly multi-prompt combiner, and 7 cyberpunk themes. Pure client-side with localStorage persistence, export/import, and live preview.",
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "generator",
-        "qr-code",
-        "graphics",
-        "utility",
-        "export",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "qr-studio",
-      "title": "QR Studio",
-      "href": "../qrcode.html",
-      "description": "Professional QR code generator supporting 12+ formats (URL, text, WiFi, TOTP, eSIM, email, phone, SMS, contact, location, event, vCard). Includes error correction levels, custom colors, PNG/SVG export, print support, and real-time preview.",
-      "modifiedAt": "2026-05-18T20:41:14.000Z",
-      "changedAt": "2026-05-18T20:41:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "game",
-        "classic",
-        "minesweeper",
-        "puzzle"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "fullscreen",
-            "title": "Fullscreen",
-            "mode": "fullscreen"
-          },
-          {
-            "id": "new-window",
-            "title": "New Window",
-            "mode": "newWindow"
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "minesweeper",
-      "title": "Classic Minesweeper",
-      "href": "../minesweeper/index.html",
-      "description": "Standalone Minesweeper artifact with original presets, custom boards, timer scoring, flags, chording, keyboard controls, and local best times.",
-      "modifiedAt": "2026-05-16T00:12:25.000Z",
-      "changedAt": "2026-05-16T00:12:25.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "game",
-        "classic",
-        "solitaire",
-        "cards"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "fullscreen",
-            "title": "Fullscreen",
-            "mode": "fullscreen"
-          },
-          {
-            "id": "new-window",
-            "title": "New Window",
-            "mode": "newWindow"
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "solitaire",
-      "title": "Classic Solitaire",
-      "href": "../solitaire/index.html",
-      "description": "Standalone Klondike Solitaire artifact with draw-one/draw-three modes, stock and waste piles, foundations, tableau moves, scoring, undo, auto-foundation, timer, and best score persistence.",
-      "modifiedAt": "2026-05-15T23:46:19.000Z",
-      "changedAt": "2026-05-15T23:46:19.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "sprite-gif-creator",
-      "title": "Sprite GIF Creator",
-      "href": "../spc/sprite-gif-creator.html",
-      "description": "Browser-only sprite-sheet splitter, frame editor, PNG exporter, and animated GIF assembler.",
-      "modifiedAt": "2026-05-15T23:46:19.000Z",
-      "changedAt": "2026-05-15T23:46:19.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "image",
-        "gif",
-        "preprocessor",
-        "transparency",
-        "utility",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "gif-white-to-transparent",
-      "title": "GIF White→Alpha Preprocessor",
-      "href": "../gif-white-to-transparent.html",
-      "description": "Browser-based GIF preprocessor that removes white backgrounds and replaces with transparency. Upload animated GIF, adjust white threshold with live preview, and download cleaned GIF with proper alpha channel.",
-      "modifiedAt": "2026-05-12T19:00:09.000Z",
-      "changedAt": "2026-05-12T19:00:09.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "sprite",
-        "animator",
-        "gif",
-        "pixel-art",
-        "game-dev",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "spc-sprite-gif-creator-v2",
-      "title": "Sprite GIF Creator v2",
-      "href": "../spc/sprite-gif-creator-v2.html",
-      "description": "Enhanced sprite sheet animator with timeline, frame editing, multiple source support, batch processing, and GIF export. Features source card management, improved batch operations, and pixel-perfect preview controls.",
-      "modifiedAt": "2026-05-11T10:23:05.000Z",
-      "changedAt": "2026-05-11T10:23:05.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "hub",
-        "v10",
-        "peernet"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v10-classic",
-      "title": "NEXUS v10 Classic Portal",
-      "href": "../app-hub/v10-portal.html",
-      "description": "The clean PeernetLobby app runtime v11 is based on.",
-      "modifiedAt": "2026-05-11T05:57:14.000Z",
-      "changedAt": "2026-05-11T05:57:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "hub",
-        "v10",
-        "themes",
-        "sound",
-        "floating"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v10-enhanced",
-      "title": "NEXUS v10 Enhanced Portal",
-      "href": "../app-hub/v10-portal-enhanced.html",
-      "description": "The rich v10 portal containing themes, sound, floating panels, and storage management ideas externalized in v11 libs.",
-      "modifiedAt": "2026-05-11T05:57:14.000Z",
-      "changedAt": "2026-05-11T05:57:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "hub",
-        "v10",
-        "legacy",
-        "compatibility",
-        "peernet",
-        "tooling"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v10-full-portal",
-      "title": "NEXUS v10 Full Portal",
-      "href": "../app-hub/v10-portal.html",
-      "description": "Full v10 portal compatibility surface for PeernetLobby apps, notepad, shared text pad, sequencer, PeerModGroove launcher, peer console, linked artifacts, and sprite GIF launcher.",
-      "modifiedAt": "2026-05-11T05:57:14.000Z",
-      "changedAt": "2026-05-11T05:57:14.000Z",
       "deploy": {
         "include": true
       }
@@ -1600,37 +1820,6 @@
       "kind": "html-path",
       "tags": [
         "editor",
-        "collaborative",
-        "monaco",
-        "code"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v8-collab-code-editor",
-      "title": "v8 Collab Code Editor",
-      "href": "../app-hub/collab-editor.html",
-      "description": "Full Monaco-based collaborative code editor from the earlier app hub line, exposed through the v11 catalog.",
-      "modifiedAt": "2026-05-11T05:57:14.000Z",
-      "changedAt": "2026-05-11T05:57:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "editor",
         "notepad",
         "native",
         "v8",
@@ -1715,195 +1904,6 @@
       "description": "Cyberpunk calculator from the v9 embedded utility deck, ported as a standalone v11 tool with history tape.",
       "modifiedAt": "2026-05-11T05:57:14.000Z",
       "changedAt": "2026-05-11T05:57:14.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "game",
-        "classic",
-        "bomberman",
-        "multiplayer",
-        "peernet"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "actions": [
-          {
-            "id": "play-inline",
-            "title": "Play Inline",
-            "mode": "inline"
-          },
-          {
-            "id": "floating-panel",
-            "title": "Floating Panel",
-            "mode": "floating"
-          },
-          {
-            "id": "fullscreen",
-            "title": "Fullscreen",
-            "mode": "fullscreen"
-          },
-          {
-            "id": "multiplayer",
-            "title": "Multiplayer",
-            "mode": "floating",
-            "multiplayer": true
-          },
-          {
-            "id": "new-window",
-            "title": "New Window",
-            "mode": "newWindow"
-          }
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "bomberman-v10",
-      "title": "Gridblast Bomberman",
-      "href": "../app-hub/bomberman.html",
-      "description": "Legacy v10 Bomberman implementation with PeernetLobby one-session multiplayer, target-peer joins, and shared state snapshots.",
-      "modifiedAt": "2026-05-07T20:45:32.000Z",
-      "changedAt": "2026-05-07T20:45:32.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "audio",
-        "peernet",
-        "modular"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "peer-mod-groove",
-      "title": "PeerModGroove",
-      "href": "../PeerModGroove/index.html",
-      "description": "Peer-synchronized modular audio app launched from v10/v11 rather than embedded into the hub runtime.",
-      "modifiedAt": "2026-05-05T02:30:17.000Z",
-      "changedAt": "2026-05-05T02:30:17.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "graphics",
-        "generative",
-        "node-based",
-        "visual",
-        "programming",
-        "creative",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "spc-aether-node",
-      "title": "Aether Node",
-      "href": "../spc/aether_node.html",
-      "description": "Abstract node-based visual programming tool for creating generative graphics and procedural patterns. Build networks of processing nodes, connect data flows, and export results as images or animations.",
-      "modifiedAt": "2026-05-04T22:51:57.000Z",
-      "changedAt": "2026-05-04T22:51:57.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "tool",
-        "template",
-        "generator",
-        "automation",
-        "design",
-        "workflow",
-        "v11"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "spc-template-engine",
-      "title": "Template Engine",
-      "href": "../spc/template_engine.html",
-      "description": "Template processing engine for creating and managing reusable design templates. Supports variable substitution, conditional rendering, loops, and custom processing logic for generating dynamic content from templates.",
-      "modifiedAt": "2026-05-04T22:51:57.000Z",
-      "changedAt": "2026-05-04T22:51:57.000Z",
-      "deploy": {
-        "include": true
-      }
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "editor",
-        "collaborative",
-        "textarea",
-        "p2p"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "defaultAction": "inline"
-      },
-      "id": "v8-collab-pad-lite",
-      "title": "v8 Collab Pad Lite",
-      "href": "../app-hub/collab-editor-lite.html",
-      "description": "Textarea-based collaborative editor from the earlier app hub line, exposed through the v11 catalog.",
-      "modifiedAt": "2026-05-04T22:51:57.000Z",
-      "changedAt": "2026-05-04T22:51:57.000Z",
       "deploy": {
         "include": true
       }

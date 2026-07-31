@@ -6,6 +6,20 @@ All notable changes to Artifact Lab are documented here. The repository follows
 
 ## [Unreleased]
 
+### Added
+
+- Deployed Nakamoto's Disciples `0.2.0-alpha.9` as a checksummed,
+  provenance-recorded static PWA with the complete six-lesson guided mastery
+  path, schema-3 learner-state migration, and per-lesson implementation-reference
+  gating.
+
+### Changed
+
+- Updated the App Hub catalog entry for Nakamoto's Disciples to describe its
+  sequential prediction, experiment, explanation, and transfer course model.
+- Replaced the previous vendored build with the tagged `v0.2.0-alpha.9` source
+  revision while retaining relocatable subpath assets and excluding source maps.
+
 ## [1.5.1] - 2026-07-24
 
 ### Added
