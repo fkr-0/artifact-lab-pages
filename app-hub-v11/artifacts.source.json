@@ -39,7 +39,7 @@
       "title": "Nakamoto's Disciples",
       "kind": "html-path",
       "href": "../nakamotos-disciples/index.html",
-      "description": "Interactive local-first Bitcoin course with six sequential mastery flows, real protocol experiments, persisted evidence, actor-local network reasoning, and gated implementation references from bytes through Nakamoto consensus.",
+      "description": "Interactive local-first Bitcoin course with six sequential mastery flows, fail-closed phase and persisted-state integrity, accessible repair feedback, read-only completed evidence, real protocol experiments, and gated implementation references from bytes through Nakamoto consensus.",
       "tags": [
         "education",
         "bitcoin",
