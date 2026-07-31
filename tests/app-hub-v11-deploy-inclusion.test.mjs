@@ -27,7 +27,7 @@ assert.equal(nakamotos.deploy?.targetPath, 'nakamotos-disciples');
 assert.doesNotMatch(nakamotosIndex, /(?:src|href)="\//, 'vendored assets must remain subpath-relative');
 assert.equal(nakamotosManifest.start_url, '.');
 assert.equal(nakamotosManifest.scope, '.');
-assert.equal(nakamotosProvenance.sourceRevision, '5af97c0370c2ee734da9d9ebdd427cc79871406d');
+assert.equal(nakamotosProvenance.sourceRevision, '9922cd02e92ec262cedb9dc4989380164ee45401');
 assert.equal(nakamotosProvenance.sourceVersion, '0.2.0-alpha.9');
 assert.equal(nakamotosProvenance.sourceMapsIncluded, false);
 assert.match(nakamotosChecksums, /\.\/assets\/GuidedProtocolCourse-[^\s]+\.js$/m);
