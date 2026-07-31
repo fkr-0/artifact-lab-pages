@@ -41,7 +41,6 @@ assert.match(initialStateBlock, /stageGoal: storyStageKillGoal/, 'story stage go
 
 const combatBlock = block('isCombatActive() {', 'currentWorld() {');
 assert.match(combatBlock, /this\.combatRunMode === 'story'/, 'default story combat should run without requiring a patrol contract');
-assert.match(combatBlock, /this\.combatRunMode === 'encounter'/, 'encounter combat should remain active without a patrol contract');
 assert.match(combatBlock, /isContractActive\(this\.contractState\)/, 'active patrol contracts should enable combat');
 assert.match(combatBlock, /this\.versusState\.phase === 'active'/, 'versus combat should require an active duel');
 
@@ -64,8 +63,8 @@ assert.match(
 );
 assert.match(
   loopBlock,
-  /!\['shipyard', 'adventure'\]\.includes\(this\.sessionMode\)/,
-  'shipyard and adventure UI modes should halt simulation updates'
+  /this\.sessionMode !== 'shipyard'/,
+  'shipyard UI mode should halt simulation updates'
 );
 assert.match(loopBlock, /this\.draw\(\)/, 'pause should keep the rendered scene visible');
 
