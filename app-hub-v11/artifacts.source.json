@@ -35,6 +35,44 @@
   },
   "items": [
     {
+      "id": "file-diff-studio",
+      "title": "File Diff Studio",
+      "kind": "html-path",
+      "href": "../file-diff-studio/index.html",
+      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, file upload and drop, live Myers line diffing, keyboard-driven hunk navigation, non-destructive three-way result assembly, undo and redo, and an exportable replayable JSON operation journal.",
+      "tags": [
+        "tool",
+        "developer",
+        "diff",
+        "merge",
+        "text",
+        "files",
+        "editor",
+        "keyboard",
+        "local-first",
+        "accessibility"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "includePath": "file-diff-studio",
+        "targetPath": "file-diff-studio"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "modifiedAt": "2026-08-02T13:58:00.000Z",
+      "changedAt": "2026-08-02T13:58:00.000Z"
+    },
+    {
       "id": "nakamotos-disciples",
       "title": "Nakamoto's Disciples",
       "kind": "html-path",

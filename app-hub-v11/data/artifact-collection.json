@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-07-31T14:59:00.177Z",
+  "generatedAt": "2026-08-02T14:00:56.482Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -46,12 +46,22 @@
     }
   },
   "summary": {
-    "total": 49,
+    "total": 50,
     "byKind": {
-      "html-path": 46,
+      "html-path": 47,
       "info": 3
     },
     "byTag": {
+      "tool": 24,
+      "developer": 2,
+      "diff": 1,
+      "merge": 1,
+      "text": 2,
+      "files": 1,
+      "editor": 10,
+      "keyboard": 1,
+      "local-first": 10,
+      "accessibility": 1,
       "education": 4,
       "bitcoin": 1,
       "blockchain": 1,
@@ -59,9 +69,7 @@
       "simulation": 1,
       "protocol": 1,
       "pwa": 1,
-      "local-first": 9,
       "built": 5,
-      "tool": 23,
       "graphics": 12,
       "generative": 1,
       "node-based": 1,
@@ -126,7 +134,6 @@
       "v9": 3,
       "pdf": 1,
       "converter": 1,
-      "editor": 9,
       "audio": 2,
       "modular": 1,
       "ai": 1,
@@ -147,7 +154,6 @@
       "illustration": 1,
       "html": 1,
       "print": 1,
-      "developer": 1,
       "telegram": 1,
       "bot": 1,
       "api": 1,
@@ -184,7 +190,6 @@
       "theme": 1,
       "color": 1,
       "notepad": 3,
-      "text": 1,
       "notes": 1,
       "v4": 1,
       "console": 1,
@@ -195,6 +200,45 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "developer",
+        "diff",
+        "merge",
+        "text",
+        "files",
+        "editor",
+        "keyboard",
+        "local-first",
+        "accessibility"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "id": "file-diff-studio",
+      "title": "File Diff Studio",
+      "href": "../file-diff-studio/index.html",
+      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, file upload and drop, live Myers line diffing, keyboard-driven hunk navigation, non-destructive three-way result assembly, undo and redo, and an exportable replayable JSON operation journal.",
+      "deploy": {
+        "includePath": "file-diff-studio",
+        "targetPath": "file-diff-studio",
+        "include": true
+      },
+      "modifiedAt": "2026-08-02T13:58:00.000Z",
+      "changedAt": "2026-08-02T13:58:00.000Z"
+    },
     {
       "kind": "html-path",
       "tags": [

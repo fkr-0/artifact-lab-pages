@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=()">
+  <title>File Diff Studio</title>
+  <style>
+    :root {
+      --bg: #0b0d0e;
+      --panel: #121516;
+      --panel-2: #181c1d;
+      --panel-3: #202526;
+      --text: #f2f0e9;
+      --muted: #a4aaa7;
+      --faint: #747b78;
+      --line: #333a38;
+      --line-strong: #4b5551;
+      --accent: #e6a45d;
+      --accent-ink: #211508;
+      --cyan: #72c7bd;
+      --green: #78c59a;
+      --red: #e68176;
+      --blue: #7ca8d8;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .34);
+      --mono: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      --sans: "Aptos", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ecece7;
+        --panel: #f9f8f3;
+        --panel-2: #f0efe9;
+        --panel-3: #e5e5de;
+        --text: #1b201e;
+        --muted: #5c6561;
+        --faint: #7c8581;
+        --line: #c9ccc7;
+        --line-strong: #a9afaa;
+        --accent: #a95e19;
+        --accent-ink: #fff9f1;
+        --cyan: #147e73;
+        --green: #277a49;
+        --red: #ad3e35;
+        --blue: #315f99;
+        --shadow: 0 24px 70px rgba(42, 49, 46, .14);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b0d0e; --panel: #121516; --panel-2: #181c1d; --panel-3: #202526;
+      --text: #f2f0e9; --muted: #a4aaa7; --faint: #747b78; --line: #333a38;
+      --line-strong: #4b5551; --accent: #e6a45d; --accent-ink: #211508;
+      --cyan: #72c7bd; --green: #78c59a; --red: #e68176; --blue: #7ca8d8;
+    }
+    :root[data-theme="light"] {
+      --bg: #ecece7; --panel: #f9f8f3; --panel-2: #f0efe9; --panel-3: #e5e5de;
+      --text: #1b201e; --muted: #5c6561; --faint: #7c8581; --line: #c9ccc7;
+      --line-strong: #a9afaa; --accent: #a95e19; --accent-ink: #fff9f1;
+      --cyan: #147e73; --green: #277a49; --red: #ad3e35; --blue: #315f99;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px) 0 0 / 42px 42px,
+        linear-gradient(color-mix(in srgb, var(--line) 18%, transparent) 1px, transparent 1px) 0 0 / 42px 42px,
+        radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 34rem),
+        var(--bg);
+      font: 15px/1.45 var(--sans);
+    }
+    button, input, textarea { font: inherit; }
+    button {
+      min-height: 2.35rem;
+      padding: .58rem .78rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: var(--panel-2);
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    button:hover:not(:disabled) { border-color: var(--line-strong); background: var(--panel-3); }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+      outline-offset: 2px;
+    }
+    button:disabled { opacity: .38; cursor: not-allowed; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 760; }
+    button.quiet { background: transparent; }
+    button.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, var(--line)); }
+    button.icon { width: 2.35rem; padding: 0; display: inline-grid; place-items: center; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: var(--bg);
+      padding: .68rem .72rem;
+    }
+    textarea { resize: vertical; font: .86rem/1.55 var(--mono); tab-size: 2; }
+    .app { width: min(1780px, calc(100% - 1.5rem)); margin: 0 auto; padding: .75rem 0 4rem; }
+    .command-bar {
+      position: sticky; top: .55rem; z-index: 50;
+      display: grid; grid-template-columns: minmax(240px, 1fr) auto auto; gap: .8rem; align-items: center;
+      padding: .7rem; border: 1px solid var(--line); border-radius: 12px;
+      background: color-mix(in srgb, var(--panel) 91%, transparent); backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+    .brand { display: flex; gap: .7rem; align-items: center; min-width: 0; }
+    .brand-mark { width: 2.3rem; height: 2.3rem; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 7px; font: 800 1rem var(--mono); color: var(--accent); background: var(--panel-2); }
+    .brand h1 { margin: 0; font-size: 1.02rem; letter-spacing: -.015em; }
+    .brand p { margin: .08rem 0 0; color: var(--muted); font-size: .74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .command-actions, .cluster { display: flex; align-items: center; flex-wrap: wrap; gap: .42rem; }
+    .command-actions { justify-content: center; }
+    .cluster.end { justify-content: flex-end; }
+    .kbd { display: inline-block; margin-left: .3rem; padding: .08rem .3rem; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; color: var(--muted); background: var(--bg); font: .68rem var(--mono); }
+    .status-strip {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem;
+      margin: .75rem 0; padding: .72rem .82rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+    }
+    .metric { min-width: 0; }
+    .metric small { display: block; color: var(--faint); text-transform: uppercase; letter-spacing: .09em; font-size: .62rem; }
+    .metric strong { display: block; margin-top: .18rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 700 .84rem var(--mono); }
+    .metric strong.ok { color: var(--green); } .metric strong.warn { color: var(--accent); }
+    .paste-dock {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      margin-bottom: .75rem; padding: .62rem .78rem; border: 1px dashed var(--line-strong); border-radius: 9px;
+      color: var(--muted); background: color-mix(in srgb, var(--panel) 82%, transparent);
+    }
+    .paste-dock strong { color: var(--text); }
+    .paste-target { color: var(--accent); font: 700 .8rem var(--mono); }
+    .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .source-card, .workspace-panel {
+      min-width: 0; border: 1px solid var(--line); background: var(--panel); box-shadow: 0 12px 35px rgba(0,0,0,.08);
+    }
+    .source-card { border-radius: 10px; overflow: hidden; }
+    .source-card.armed { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent); }
+    .source-card.dragover { border-color: var(--cyan); background: color-mix(in srgb, var(--cyan) 7%, var(--panel)); }
+    .source-head { display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; gap: .55rem; align-items: center; padding: .62rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+    .source-label { display: flex; align-items: center; gap: .42rem; font-weight: 760; }
+    .source-letter { display: grid; place-items: center; width: 1.55rem; height: 1.55rem; border-radius: 5px; color: var(--accent-ink); background: var(--accent); font: 800 .75rem var(--mono); }
+    .source-name { min-width: 0; padding: .44rem .52rem; background: var(--panel); }
+    .source-tools { display: flex; gap: .35rem; }
+    .source-editor { min-height: 17rem; max-height: 48rem; border: 0; border-radius: 0; background: color-mix(in srgb, var(--bg) 92%, var(--panel)); }
+    .source-foot { display: flex; justify-content: space-between; gap: .7rem; padding: .46rem .65rem; border-top: 1px solid var(--line); color: var(--muted); font: .69rem var(--mono); }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr); gap: .75rem; margin-top: .75rem; align-items: start; }
+    .workspace-panel { border-radius: 10px; overflow: hidden; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .68rem .75rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+    .panel-head h2 { margin: 0; font-size: .9rem; }
+    .panel-head p { margin: .12rem 0 0; color: var(--muted); font-size: .7rem; }
+    .hunk-list { display: grid; gap: .6rem; max-height: 65vh; min-height: 22rem; overflow: auto; padding: .65rem; scroll-padding: .65rem; }
+    .empty-state { min-height: 20rem; display: grid; place-items: center; padding: 2rem; text-align: center; color: var(--muted); }
+    .empty-state strong { display: block; margin-bottom: .35rem; color: var(--text); font-size: 1rem; }
+    .hunk { border: 1px solid var(--line); border-radius: 8px; overflow: clip; background: var(--panel-2); }
+    .hunk.current { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 13%, transparent); }
+    .hunk-head { display: flex; justify-content: space-between; align-items: center; gap: .6rem; padding: .48rem .55rem; border-bottom: 1px solid var(--line); background: var(--panel-3); }
+    .hunk-title { font: 700 .72rem var(--mono); }
+    .decision { display: flex; gap: .3rem; flex-wrap: wrap; }
+    .decision button { min-height: 1.9rem; padding: .34rem .48rem; font-size: .68rem; }
+    .decision button.selected { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+    .diff-pair { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; }
+    .diff-side { min-width: 0; overflow: auto; }
+    .diff-side + .diff-side { border-left: 1px solid var(--line); }
+    .side-label { position: sticky; left: 0; padding: .3rem .5rem; border-bottom: 1px solid var(--line); color: var(--muted); background: var(--panel); font: 700 .63rem var(--mono); }
+    .code-line { display: grid; grid-template-columns: 3.3rem minmax(max-content, 1fr); min-height: 1.5rem; font: .75rem/1.5 var(--mono); }
+    .line-no { padding: .14rem .55rem .14rem .2rem; text-align: right; user-select: none; color: var(--faint); border-right: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 82%, transparent); }
+    .line-text { padding: .14rem .55rem; white-space: pre; }
+    .removed .line-text { color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); }
+    .added .line-text { color: var(--green); background: color-mix(in srgb, var(--green) 10%, transparent); }
+    .placeholder .line-text { color: var(--faint); }
+    .result-panel { position: sticky; top: 5.2rem; }
+    .result-editor { min-height: 35rem; max-height: 69vh; border: 0; border-radius: 0; background: color-mix(in srgb, var(--bg) 94%, var(--panel)); }
+    .result-foot { display: flex; justify-content: space-between; gap: .8rem; padding: .5rem .65rem; border-top: 1px solid var(--line); color: var(--muted); font: .69rem var(--mono); }
+    .journal { margin-top: .75rem; }
+    .journal-list { max-height: 18rem; overflow: auto; padding: .5rem; }
+    .journal-entry { display: grid; grid-template-columns: 5rem 1fr auto; gap: .65rem; align-items: baseline; padding: .45rem .35rem; border-bottom: 1px solid var(--line); font-size: .74rem; }
+    .journal-entry:last-child { border-bottom: 0; }
+    .journal-entry time, .journal-entry code { color: var(--muted); font: .67rem var(--mono); }
+    .journal-entry.future { opacity: .42; }
+    .toast-zone { position: fixed; right: 1rem; bottom: 1rem; z-index: 100; display: grid; gap: .45rem; width: min(390px, calc(100% - 2rem)); pointer-events: none; }
+    .toast { padding: .68rem .8rem; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; color: var(--text); background: var(--panel); box-shadow: var(--shadow); animation: toast-in .18s ease; }
+    .toast.ok { border-left-color: var(--green); } .toast.bad { border-left-color: var(--red); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(7px); } }
+    dialog { width: min(720px, calc(100% - 1.5rem)); border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--panel); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(0,0,0,.68); backdrop-filter: blur(3px); }
+    dialog h2 { margin-top: 0; }
+    .shortcut-grid { display: grid; grid-template-columns: auto 1fr; gap: .55rem 1rem; }
+    .shortcut-grid dt { text-align: right; }
+    .shortcut-grid dd { margin: 0; color: var(--muted); }
+    .footer { margin-top: 1rem; text-align: center; color: var(--faint); font-size: .7rem; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 1120px) {
+      .command-bar { grid-template-columns: 1fr auto; }
+      .command-actions { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
+      .workspace { grid-template-columns: 1fr; }
+      .result-panel { position: static; }
+      .result-editor { min-height: 25rem; }
+    }
+    @media (max-width: 760px) {
+      .app { width: min(100% - .7rem, 1780px); }
+      .command-bar { position: static; grid-template-columns: 1fr; }
+      .cluster.end { justify-content: flex-start; }
+      .source-grid, .diff-pair { grid-template-columns: 1fr; }
+      .diff-side + .diff-side { border-left: 0; border-top: 1px solid var(--line); }
+      .status-strip { grid-template-columns: 1fr 1fr; }
+      .paste-dock { align-items: flex-start; flex-direction: column; }
+      .source-head { grid-template-columns: auto 1fr; }
+      .source-tools { grid-column: 1 / -1; }
+      .journal-entry { grid-template-columns: 4.5rem 1fr; }
+      .journal-entry code { grid-column: 2; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="command-bar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">Δ</div>
+        <div><h1>File Diff Studio</h1><p>Local-first comparison, merge decisions, and replayable history</p></div>
+      </div>
+      <div class="command-actions" aria-label="Diff navigation and history">
+        <button id="undo" type="button" disabled>Undo <span class="kbd">⌘Z</span></button>
+        <button id="redo" type="button" disabled>Redo <span class="kbd">⇧⌘Z</span></button>
+        <button id="previous-hunk" type="button" disabled>Previous <span class="kbd">[</span></button>
+        <button id="next-hunk" type="button" disabled>Next <span class="kbd">]</span></button>
+      </div>
+      <div class="cluster end">
+        <button id="load-example" class="quiet" type="button">Example</button>
+        <button id="shortcuts" class="quiet" type="button" aria-label="Show keyboard shortcuts">Keys</button>
+        <button id="theme" class="icon quiet" type="button" aria-label="Toggle color theme">◐</button>
+        <button id="clear-workspace" class="danger" type="button">Reset</button>
+      </div>
+    </header>
+
+    <section class="status-strip" aria-label="Comparison status">
+      <div class="metric"><small>Diff engine</small><strong id="engine-status">Waiting for two inputs</strong></div>
+      <div class="metric"><small>Occurrences</small><strong id="hunk-status">0 changes</strong></div>
+      <div class="metric"><small>Resolution</small><strong id="resolution-status">Nothing to resolve</strong></div>
+      <div class="metric"><small>Journal</small><strong id="journal-status">0 operations</strong></div>
+    </section>
+
+    <section class="paste-dock" id="paste-dock" tabindex="0" aria-label="Smart paste target">
+      <div><strong>DWIM paste:</strong> paste anywhere outside an editor. The first paste fills Original; the next fills Changed. Normal editor paste remains native.</div>
+      <div>Next paste → <span id="paste-target" class="paste-target">Original</span></div>
+    </section>
+
+    <section class="source-grid" aria-label="Source documents">
+      <article class="source-card armed" data-source-card="a">
+        <div class="source-head">
+          <div class="source-label"><span class="source-letter">A</span><span>Original</span></div>
+          <label><span class="sr-only">Original file name</span><input id="name-a" class="source-name" value="original.txt" spellcheck="false"></label>
+          <div class="source-tools">
+            <input id="file-a" type="file" hidden>
+            <button data-upload="a" type="button">Upload</button>
+            <button data-clear="a" class="quiet" type="button">Clear</button>
+          </div>
+        </div>
+        <label for="source-a" class="sr-only">Original document text</label>
+        <textarea id="source-a" class="source-editor" placeholder="Paste, type, drop, or upload the original document…" spellcheck="false"></textarea>
+        <div class="source-foot"><span id="meta-a">0 lines · 0 B</span><span>Drop a text file anywhere on this panel</span></div>
+      </article>
+
+      <article class="source-card" data-source-card="b">
+        <div class="source-head">
+          <div class="source-label"><span class="source-letter">B</span><span>Changed</span></div>
+          <label><span class="sr-only">Changed file name</span><input id="name-b" class="source-name" value="changed.txt" spellcheck="false"></label>
+          <div class="source-tools">
+            <input id="file-b" type="file" hidden>
+            <button data-upload="b" type="button">Upload</button>
+            <button data-clear="b" class="quiet" type="button">Clear</button>
+          </div>
+        </div>
+        <label for="source-b" class="sr-only">Changed document text</label>
+        <textarea id="source-b" class="source-editor" placeholder="Paste, type, drop, or upload the changed document…" spellcheck="false"></textarea>
+        <div class="source-foot"><span id="meta-b">0 lines · 0 B</span><span>Live diff updates after every change</span></div>
+      </article>
+    </section>
+
+    <section class="workspace" aria-label="Diff and merge workspace">
+      <article class="workspace-panel">
+        <div class="panel-head">
+          <div><h2>Change occurrences</h2><p>Each occurrence can take Original, Changed, or Both. Unresolved occurrences preview Changed.</p></div>
+          <div class="cluster"><button id="accept-all" type="button" disabled>Accept all Changed</button><button id="reset-decisions" class="quiet" type="button" disabled>Unresolve all</button></div>
+        </div>
+        <div id="hunk-list" class="hunk-list" aria-live="polite">
+          <div class="empty-state"><div><strong>Bring two documents.</strong>Use DWIM paste, type directly, drop files, or upload from disk.</div></div>
+        </div>
+      </article>
+
+      <article class="workspace-panel result-panel">
+        <div class="panel-head">
+          <div><h2>Result document</h2><p id="result-mode">Generated non-destructively from the changed document preview</p></div>
+          <div class="cluster">
+            <button id="regenerate-result" class="quiet" type="button" disabled>Regenerate</button>
+            <button id="copy-result" type="button" disabled>Copy</button>
+            <button id="download-result" class="primary" type="button" disabled>Download</button>
+          </div>
+        </div>
+        <label for="result" class="sr-only">Merged result document</label>
+        <textarea id="result" class="result-editor" placeholder="The third document appears here…" spellcheck="false"></textarea>
+        <div class="result-foot"><span id="result-meta">0 lines · 0 B</span><span id="result-state">Generated</span></div>
+      </article>
+    </section>
+
+    <section class="workspace-panel journal">
+      <div class="panel-head">
+        <div><h2>Operation journal</h2><p>Every source revision, merge decision, and result edit is replayable. Inputs are never overwritten.</p></div>
+        <div class="cluster"><button id="export-journal" type="button">Export JSON</button><input id="import-journal-file" type="file" accept="application/json" hidden><button id="import-journal" type="button">Import JSON</button></div>
+      </div>
+      <div id="journal-list" class="journal-list"><div class="empty-state" style="min-height:7rem"><div><strong>No operations yet.</strong>Your exact change history will appear here.</div></div></div>
+    </section>
+
+    <footer class="footer">Self-contained · browser-only · no uploads · no analytics · session autosave is size-limited and stays on this device</footer>
+  </main>
+
+  <div id="toasts" class="toast-zone" aria-live="polite"></div>
+
+  <dialog id="shortcut-dialog">
+    <h2>Keyboard map</h2>
+    <dl class="shortcut-grid">
+      <dt><span class="kbd">⌘/Ctrl Z</span></dt><dd>Undo the latest journal operation</dd>
+      <dt><span class="kbd">⇧⌘/Ctrl Z</span></dt><dd>Redo; Ctrl Y also works</dd>
+      <dt><span class="kbd">[</span> / <span class="kbd">]</span></dt><dd>Previous / next change occurrence</dd>
+      <dt><span class="kbd">Alt ↑</span> / <span class="kbd">Alt ↓</span></dt><dd>Previous / next change occurrence from any control</dd>
+      <dt><span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span></dt><dd>Use Original / Changed / Both for the current occurrence</dd>
+      <dt><span class="kbd">⌘/Ctrl S</span></dt><dd>Download the result document</dd>
+      <dt><span class="kbd">⇧⌘/Ctrl S</span></dt><dd>Export the complete JSON journal</dd>
+      <dt><span class="kbd">?</span></dt><dd>Open this keyboard map</dd>
+    </dl>
+    <div class="cluster end" style="margin-top:1rem"><button id="close-shortcuts" class="primary" type="button">Close</button></div>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    const MAX_FILE_BYTES = 5 * 1024 * 1024;
+    const EXACT_CELL_BUDGET = 6_000_000;
+    const AUTOSAVE_LIMIT = 1_800_000;
+    const STORAGE_KEY = "file-diff-studio/session-v1";
+    const encoder = new TextEncoder();
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+    const editable = target => target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target?.isContentEditable;
+
+    const state = {
+      sources: {
+        a: { name: "original.txt", content: "" },
+        b: { name: "changed.txt", content: "" }
+      },
+      ops: [],
+      hunks: [],
+      decisions: {},
+      resultOverride: null,
+      activeHunk: 0,
+      nextPaste: "a",
+      engine: "waiting",
+      history: [],
+      cursor: 0,
+      pending: new Map(),
+      restoring: false
+    };
+
+    function hashText(text) {
+      let hash = 2166136261;
+      for (let i = 0; i < text.length; i += 1) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    }
+
+    function snapshot() {
+      return {
+        sources: {
+          a: { ...state.sources.a },
+          b: { ...state.sources.b }
+        },
+        decisions: { ...state.decisions },
+        resultOverride: state.resultOverride,
+        activeHunk: state.activeHunk,
+        nextPaste: state.nextPaste
+      };
+    }
+
+    function snapshotsEqual(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function journalEntry(type, label, before, after) {
+      if (snapshotsEqual(before, after)) return;
+      if (state.cursor < state.history.length) state.history.splice(state.cursor);
+      state.history.push({
+        id: crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        at: new Date().toISOString(),
+        type,
+        label,
+        before,
+        after,
+        beforeHash: hashText(JSON.stringify(before)),
+        afterHash: hashText(JSON.stringify(after))
+      });
+      if (state.history.length > 160) state.history.shift();
+      state.cursor = state.history.length;
+      persist();
+    }
+
+    function mutate(type, label, callback) {
+      flushPending();
+      const before = snapshot();
+      callback();
+      recompute();
+      const after = snapshot();
+      journalEntry(type, label, before, after);
+      render();
+    }
+
+    function queueMutation(key, type, label, before) {
+      const existing = state.pending.get(key);
+      if (existing) clearTimeout(existing.timer);
+      const base = existing?.before || before;
+      const timer = setTimeout(() => {
+        state.pending.delete(key);
+        journalEntry(type, label, base, snapshot());
+        renderJournal();
+        updateControls();
+      }, 420);
+      state.pending.set(key, { before: base, timer, type, label });
+    }
+
+    function flushPending() {
+      for (const [key, item] of state.pending) {
+        clearTimeout(item.timer);
+        state.pending.delete(key);
+        journalEntry(item.type, item.label, item.before, snapshot());
+      }
+    }
+
+    function restore(data) {
+      state.restoring = true;
+      state.sources = {
+        a: { name: data.sources?.a?.name || "original.txt", content: String(data.sources?.a?.content || "") },
+        b: { name: data.sources?.b?.name || "changed.txt", content: String(data.sources?.b?.content || "") }
+      };
+      state.decisions = { ...(data.decisions || {}) };
+      state.resultOverride = typeof data.resultOverride === "string" ? data.resultOverride : null;
+      state.activeHunk = Number.isInteger(data.activeHunk) ? data.activeHunk : 0;
+      state.nextPaste = data.nextPaste === "b" ? "b" : "a";
+      recompute({ preserveDecisions: true });
+      render();
+      state.restoring = false;
+    }
+
+    function undo() {
+      flushPending();
+      if (state.cursor <= 0) return;
+      state.cursor -= 1;
+      restore(state.history[state.cursor].before);
+      toast("Undid: " + state.history[state.cursor].label);
+      persist();
+    }
+
+    function redo() {
+      flushPending();
+      if (state.cursor >= state.history.length) return;
+      const entry = state.history[state.cursor];
+      state.cursor += 1;
+      restore(entry.after);
+      toast("Redid: " + entry.label);
+      persist();
+    }
+
+    function splitLines(text) {
+      return String(text).replaceAll("\r\n", "\n").replaceAll("\r", "\n").split("\n");
+    }
+
+    function myersDiff(a, b) {
+      const n = a.length, m = b.length, max = n + m;
+      let v = new Map([[1, 0]]);
+      const trace = [];
+      for (let d = 0; d <= max; d += 1) {
+        trace.push(new Map(v));
+        for (let k = -d; k <= d; k += 2) {
+          const left = v.get(k - 1) ?? Number.NEGATIVE_INFINITY;
+          const right = v.get(k + 1) ?? Number.NEGATIVE_INFINITY;
+          let x = k === -d || (k !== d && left < right) ? (v.get(k + 1) ?? 0) : (v.get(k - 1) ?? 0) + 1;
+          let y = x - k;
+          while (x < n && y < m && a[x] === b[y]) { x += 1; y += 1; }
+          v.set(k, x);
+          if (x >= n && y >= m) return backtrack(trace, a, b);
+        }
+      }
+      return [];
+    }
+
+    function backtrack(trace, a, b) {
+      let x = a.length, y = b.length;
+      const result = [];
+      for (let d = trace.length - 1; d >= 0; d -= 1) {
+        const v = trace[d];
+        const k = x - y;
+        const left = v.get(k - 1) ?? Number.NEGATIVE_INFINITY;
+        const right = v.get(k + 1) ?? Number.NEGATIVE_INFINITY;
+        const prevK = k === -d || (k !== d && left < right) ? k + 1 : k - 1;
+        const prevX = v.get(prevK) ?? 0;
+        const prevY = prevX - prevK;
+        while (x > prevX && y > prevY) {
+          result.push({ type: "equal", value: a[x - 1] });
+          x -= 1; y -= 1;
+        }
+        if (d === 0) break;
+        if (x === prevX) {
+          result.push({ type: "insert", value: b[y - 1] });
+          y -= 1;
+        } else {
+          result.push({ type: "delete", value: a[x - 1] });
+          x -= 1;
+        }
+      }
+      return result.reverse();
+    }
+
+    function coarseDiff(a, b) {
+      let prefix = 0;
+      while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) prefix += 1;
+      let suffix = 0;
+      while (suffix < a.length - prefix && suffix < b.length - prefix && a[a.length - 1 - suffix] === b[b.length - 1 - suffix]) suffix += 1;
+      return [
+        ...a.slice(0, prefix).map(value => ({ type: "equal", value })),
+        ...a.slice(prefix, a.length - suffix).map(value => ({ type: "delete", value })),
+        ...b.slice(prefix, b.length - suffix).map(value => ({ type: "insert", value })),
+        ...a.slice(a.length - suffix).map(value => ({ type: "equal", value }))
+      ];
+    }
+
+    function buildHunks(ops) {
+      const hunks = [];
+      let aLine = 1, bLine = 1, index = 0;
+      while (index < ops.length) {
+        const op = ops[index];
+        if (op.type === "equal") { aLine += 1; bLine += 1; index += 1; continue; }
+        const aStart = aLine, bStart = bLine;
+        const original = [], changed = [];
+        while (index < ops.length && ops[index].type !== "equal") {
+          const current = ops[index];
+          if (current.type === "delete") { original.push(current.value); aLine += 1; }
+          if (current.type === "insert") { changed.push(current.value); bLine += 1; }
+          index += 1;
+        }
+        const fingerprint = hashText(`${aStart}\u0000${bStart}\u0000${original.join("\n")}\u0001${changed.join("\n")}`);
+        hunks.push({ id: `h-${fingerprint}`, aStart, bStart, original, changed });
+      }
+      return hunks;
+    }
+
+    function recompute(options = {}) {
+      const a = splitLines(state.sources.a.content);
+      const b = splitLines(state.sources.b.content);
+      if (!state.sources.a.content && !state.sources.b.content) {
+        state.ops = []; state.hunks = []; state.engine = "waiting"; state.activeHunk = 0; return;
+      }
+      const exact = a.length * b.length <= EXACT_CELL_BUDGET;
+      state.ops = exact ? myersDiff(a, b) : coarseDiff(a, b);
+      state.engine = exact ? "exact" : "coarse";
+      const previous = state.decisions;
+      state.hunks = buildHunks(state.ops);
+      const decisions = {};
+      for (const hunk of state.hunks) {
+        const decision = previous[hunk.id];
+        if (options.preserveDecisions && ["original", "changed", "both", "unresolved"].includes(decision)) decisions[hunk.id] = decision;
+        else if (["original", "changed", "both"].includes(decision)) decisions[hunk.id] = decision;
+        else decisions[hunk.id] = "unresolved";
+      }
+      state.decisions = decisions;
+      state.activeHunk = Math.max(0, Math.min(state.activeHunk, Math.max(0, state.hunks.length - 1)));
+    }
+
+    function generatedResult() {
+      if (!state.ops.length) return state.sources.b.content || state.sources.a.content;
+      const lines = [];
+      let index = 0, hunkIndex = 0;
+      while (index < state.ops.length) {
+        if (state.ops[index].type === "equal") { lines.push(state.ops[index].value); index += 1; continue; }
+        const original = [], changed = [];
+        while (index < state.ops.length && state.ops[index].type !== "equal") {
+          if (state.ops[index].type === "delete") original.push(state.ops[index].value);
+          else changed.push(state.ops[index].value);
+          index += 1;
+        }
+        const hunk = state.hunks[hunkIndex++];
+        const decision = state.decisions[hunk?.id] || "unresolved";
+        if (decision === "original") lines.push(...original);
+        else if (decision === "both") lines.push(...original, ...changed);
+        else lines.push(...changed);
+      }
+      return lines.join("\n");
+    }
+
+    function currentResult() {
+      return state.resultOverride === null ? generatedResult() : state.resultOverride;
+    }
+
+    function byteSize(text) { return encoder.encode(text).byteLength; }
+    function formatBytes(bytes) {
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
+      return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
+    }
+    function documentMeta(text) { return `${text ? splitLines(text).length : 0} lines · ${formatBytes(byteSize(text))}`; }
+
+    function render() {
+      $("#source-a").value = state.sources.a.content;
+      $("#source-b").value = state.sources.b.content;
+      $("#name-a").value = state.sources.a.name;
+      $("#name-b").value = state.sources.b.name;
+      $("#meta-a").textContent = documentMeta(state.sources.a.content);
+      $("#meta-b").textContent = documentMeta(state.sources.b.content);
+      $("#paste-target").textContent = state.nextPaste === "a" ? "Original" : "Changed";
+      $$('[data-source-card]').forEach(card => card.classList.toggle("armed", card.dataset.sourceCard === state.nextPaste));
+      renderHunks();
+      renderResult();
+      renderJournal();
+      updateControls();
+      persist();
+    }
+
+    function renderHunks() {
+      const root = $("#hunk-list");
+      if (!state.sources.a.content || !state.sources.b.content) {
+        root.replaceChildren(emptyState("Bring two documents.", "Use DWIM paste, type directly, drop files, or upload from disk."));
+        return;
+      }
+      if (!state.hunks.length) {
+        root.replaceChildren(emptyState("Documents are identical.", "The result is a byte-for-byte copy of Changed."));
+        return;
+      }
+      const fragment = document.createDocumentFragment();
+      state.hunks.forEach((hunk, index) => {
+        const article = document.createElement("article");
+        article.className = `hunk${index === state.activeHunk ? " current" : ""}`;
+        article.dataset.hunkIndex = String(index);
+        article.tabIndex = 0;
+        article.setAttribute("aria-label", `Change ${index + 1} of ${state.hunks.length}`);
+        article.addEventListener("focus", () => { state.activeHunk = index; updateCurrentHunk(); });
+        article.addEventListener("click", event => {
+          if (!(event.target instanceof HTMLButtonElement)) { state.activeHunk = index; updateCurrentHunk(); }
+        });
+
+        const head = document.createElement("div"); head.className = "hunk-head";
+        const title = document.createElement("span"); title.className = "hunk-title";
+        title.textContent = `#${index + 1} · A ${lineRange(hunk.aStart, hunk.original.length)} → B ${lineRange(hunk.bStart, hunk.changed.length)}`;
+        const decisions = document.createElement("div"); decisions.className = "decision";
+        for (const [value, label] of [["original", "Original · 1"], ["changed", "Changed · 2"], ["both", "Both · 3"]]) {
+          const button = document.createElement("button"); button.type = "button"; button.textContent = label;
+          button.dataset.decision = value; button.dataset.hunkId = hunk.id;
+          button.classList.toggle("selected", state.decisions[hunk.id] === value);
+          button.setAttribute("aria-pressed", String(state.decisions[hunk.id] === value));
+          button.addEventListener("click", () => decide(index, value));
+          decisions.append(button);
+        }
+        head.append(title, decisions);
+
+        const pair = document.createElement("div"); pair.className = "diff-pair";
+        pair.append(renderSide("Original", hunk.original, hunk.aStart, "removed"), renderSide("Changed", hunk.changed, hunk.bStart, "added"));
+        article.append(head, pair); fragment.append(article);
+      });
+      root.replaceChildren(fragment);
+    }
+
+    function emptyState(title, copy) {
+      const box = document.createElement("div"); box.className = "empty-state";
+      const inner = document.createElement("div"); const strong = document.createElement("strong"); strong.textContent = title;
+      inner.append(strong, document.createTextNode(copy)); box.append(inner); return box;
+    }
+
+    function renderSide(label, lines, start, className) {
+      const side = document.createElement("div"); side.className = "diff-side";
+      const heading = document.createElement("div"); heading.className = "side-label"; heading.textContent = `${label} · ${lines.length} line${lines.length === 1 ? "" : "s"}`; side.append(heading);
+      if (!lines.length) {
+        const row = document.createElement("div"); row.className = "code-line placeholder";
+        const no = document.createElement("span"); no.className = "line-no"; no.textContent = "—";
+        const text = document.createElement("span"); text.className = "line-text"; text.textContent = "∅ no lines";
+        row.append(no, text); side.append(row); return side;
+      }
+      lines.forEach((line, index) => {
+        const row = document.createElement("div"); row.className = `code-line ${className}`;
+        const no = document.createElement("span"); no.className = "line-no"; no.textContent = String(start + index);
+        const text = document.createElement("span"); text.className = "line-text"; text.textContent = line || " ";
+        row.append(no, text); side.append(row);
+      });
+      return side;
+    }
+
+    function lineRange(start, count) { return count ? (count === 1 ? String(start) : `${start}–${start + count - 1}`) : `${start} (empty)`; }
+
+    function renderResult() {
+      const result = currentResult();
+      const editor = $("#result");
+      if (document.activeElement !== editor || state.restoring) editor.value = result;
+      $("#result-meta").textContent = documentMeta(result);
+      const manual = state.resultOverride !== null;
+      $("#result-state").textContent = manual ? "Manually edited" : "Generated";
+      $("#result-mode").textContent = manual ? "Manual result overlay; sources and decisions remain intact" : "Generated non-destructively from the current hunk decisions";
+    }
+
+    function renderJournal() {
+      const root = $("#journal-list");
+      if (!state.history.length) { root.replaceChildren(emptyState("No operations yet.", "Your exact change history will appear here.")); root.firstChild.style.minHeight = "7rem"; return; }
+      const fragment = document.createDocumentFragment();
+      state.history.forEach((entry, index) => {
+        const row = document.createElement("div"); row.className = `journal-entry${index >= state.cursor ? " future" : ""}`;
+        const time = document.createElement("time"); time.dateTime = entry.at; time.textContent = new Date(entry.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        const label = document.createElement("span"); label.textContent = entry.label;
+        const code = document.createElement("code"); code.textContent = `${entry.type} · ${entry.afterHash}`;
+        row.append(time, label, code); fragment.append(row);
+      });
+      root.replaceChildren(fragment);
+      root.scrollTop = root.scrollHeight;
+    }
+
+    function updateControls() {
+      const hasHunks = state.hunks.length > 0;
+      $("#undo").disabled = state.cursor <= 0;
+      $("#redo").disabled = state.cursor >= state.history.length;
+      $("#previous-hunk").disabled = !hasHunks;
+      $("#next-hunk").disabled = !hasHunks;
+      $("#accept-all").disabled = !hasHunks;
+      $("#reset-decisions").disabled = !hasHunks;
+      $("#regenerate-result").disabled = state.resultOverride === null;
+      const hasResult = Boolean(currentResult()) || Boolean(state.sources.a.content || state.sources.b.content);
+      $("#copy-result").disabled = !hasResult;
+      $("#download-result").disabled = !hasResult;
+      const unresolved = state.hunks.filter(hunk => state.decisions[hunk.id] === "unresolved").length;
+      $("#engine-status").textContent = state.engine === "waiting" ? "Waiting for two inputs" : state.engine === "exact" ? "Exact Myers line diff" : "Large-file coarse diff";
+      $("#engine-status").className = state.engine === "coarse" ? "warn" : state.engine === "exact" ? "ok" : "";
+      $("#hunk-status").textContent = `${state.hunks.length} change${state.hunks.length === 1 ? "" : "s"}`;
+      $("#resolution-status").textContent = state.hunks.length ? (unresolved ? `${unresolved} unresolved` : "All resolved") : "Nothing to resolve";
+      $("#resolution-status").className = unresolved ? "warn" : state.hunks.length ? "ok" : "";
+      $("#journal-status").textContent = `${state.cursor}/${state.history.length} operations`;
+    }
+
+    function updateCurrentHunk(options = {}) {
+      $$(".hunk").forEach((element, index) => element.classList.toggle("current", index === state.activeHunk));
+      if (options.scroll) document.querySelector(`[data-hunk-index="${state.activeHunk}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    function navigate(delta) {
+      if (!state.hunks.length) return;
+      state.activeHunk = (state.activeHunk + delta + state.hunks.length) % state.hunks.length;
+      updateCurrentHunk({ scroll: true });
+    }
+
+    function decide(index, decision) {
+      const hunk = state.hunks[index]; if (!hunk) return;
+      mutate("decision", `Use ${decision} for change ${index + 1}`, () => {
+        state.activeHunk = index;
+        state.decisions[hunk.id] = decision;
+        state.resultOverride = null;
+      });
+      updateCurrentHunk({ scroll: true });
+    }
+
+    function setSource(target, content, name, label = "Update source") {
+      mutate("source", label, () => {
+        state.sources[target].content = String(content);
+        if (name) state.sources[target].name = name;
+        state.nextPaste = target === "a" ? "b" : "a";
+        state.resultOverride = null;
+      });
+    }
+
+    async function loadFile(target, file) {
+      if (!file) return;
+      if (file.size > MAX_FILE_BYTES) throw new Error(`File is larger than ${formatBytes(MAX_FILE_BYTES)}.`);
+      const text = await file.text();
+      setSource(target, text, file.name, `Load ${file.name} into ${target === "a" ? "Original" : "Changed"}`);
+      toast(`${file.name} loaded locally.`, "ok");
+    }
+
+    function download(name, content, type = "text/plain") {
+      const url = URL.createObjectURL(new Blob([content], { type }));
+      const link = document.createElement("a"); link.href = url; link.download = name; document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    async function copy(text) {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        try { await navigator.clipboard.writeText(text); toast("Result copied.", "ok"); return; } catch {}
+      }
+      const temporary = document.createElement("textarea"); temporary.value = text; temporary.style.position = "fixed"; temporary.style.opacity = "0"; document.body.append(temporary); temporary.select();
+      const ok = document.execCommand("copy"); temporary.remove();
+      if (!ok) throw new Error("Clipboard permission was denied.");
+      toast("Result copied.", "ok");
+    }
+
+    function resultFilename() {
+      const raw = state.sources.b.name || "merged.txt";
+      const dot = raw.lastIndexOf(".");
+      return dot > 0 ? `${raw.slice(0, dot)}.merged${raw.slice(dot)}` : `${raw}.merged.txt`;
+    }
+
+    function journalDocument() {
+      flushPending();
+      return {
+        schema: "file-diff-studio/journal-v1",
+        schemaVersion: 1,
+        exportedAt: new Date().toISOString(),
+        appVersion: "1.0.0",
+        cursor: state.cursor,
+        current: snapshot(),
+        operations: state.history
+      };
+    }
+
+    function exportJournal() {
+      download("file-diff-studio-journal.json", JSON.stringify(journalDocument(), null, 2), "application/json");
+      toast("Journal exported with complete replay snapshots.", "ok");
+    }
+
+    async function importJournal(file) {
+      const data = JSON.parse(await file.text());
+      if (data.schema !== "file-diff-studio/journal-v1" || data.schemaVersion !== 1 || !Array.isArray(data.operations) || !data.current) throw new Error("Unsupported File Diff Studio journal.");
+      state.history = data.operations.slice(0, 160);
+      state.cursor = Math.max(0, Math.min(Number(data.cursor) || 0, state.history.length));
+      restore(data.current);
+      toast("Journal imported and replay state restored.", "ok");
+    }
+
+    function persist() {
+      try {
+        const payload = JSON.stringify({ current: snapshot(), history: state.history, cursor: state.cursor });
+        if (payload.length <= AUTOSAVE_LIMIT) sessionStorage.setItem(STORAGE_KEY, payload);
+        else sessionStorage.removeItem(STORAGE_KEY);
+      } catch {}
+    }
+
+    function loadPersisted() {
+      try {
+        const data = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "null");
+        if (!data?.current || !Array.isArray(data.history)) return false;
+        state.history = data.history.slice(0, 160);
+        state.cursor = Math.max(0, Math.min(Number(data.cursor) || 0, state.history.length));
+        restore(data.current); return true;
+      } catch { return false; }
+    }
+
+    function toast(message, type = "") {
+      const item = document.createElement("div"); item.className = `toast ${type}`; item.textContent = message; $("#toasts").append(item); setTimeout(() => item.remove(), 3600);
+    }
+
+    for (const target of ["a", "b"]) {
+      const source = $(`#source-${target}`), name = $(`#name-${target}`), fileInput = $(`#file-${target}`), card = $(`[data-source-card="${target}"]`);
+      source.addEventListener("focus", () => { state.nextPaste = target; render(); });
+      source.addEventListener("input", event => {
+        const before = snapshot();
+        state.sources[target].content = event.target.value;
+        state.resultOverride = null;
+        recompute(); renderHunks(); renderResult(); updateControls();
+        $(`#meta-${target}`).textContent = documentMeta(event.target.value);
+        queueMutation(`source-${target}`, "source", `Edit ${target === "a" ? "Original" : "Changed"}`, before);
+      });
+      name.addEventListener("input", event => {
+        const before = snapshot(); state.sources[target].name = event.target.value; queueMutation(`name-${target}`, "metadata", `Rename ${target === "a" ? "Original" : "Changed"}`, before);
+      });
+      document.querySelector(`[data-upload="${target}"]`).addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", async event => { try { await loadFile(target, event.target.files[0]); } catch (error) { toast(error.message, "bad"); } finally { event.target.value = ""; } });
+      document.querySelector(`[data-clear="${target}"]`).addEventListener("click", () => setSource(target, "", state.sources[target].name, `Clear ${target === "a" ? "Original" : "Changed"}`));
+      for (const eventName of ["dragenter", "dragover"]) card.addEventListener(eventName, event => { event.preventDefault(); card.classList.add("dragover"); });
+      for (const eventName of ["dragleave", "drop"]) card.addEventListener(eventName, event => { event.preventDefault(); card.classList.remove("dragover"); });
+      card.addEventListener("drop", async event => { try { await loadFile(target, event.dataTransfer.files[0]); } catch (error) { toast(error.message, "bad"); } });
+    }
+
+    document.addEventListener("paste", event => {
+      if (editable(event.target)) return;
+      const text = event.clipboardData?.getData("text/plain");
+      if (!text) return;
+      event.preventDefault();
+      let target = state.nextPaste;
+      if (!state.sources.a.content) target = "a";
+      else if (!state.sources.b.content) target = "b";
+      setSource(target, text, state.sources[target].name, `DWIM paste into ${target === "a" ? "Original" : "Changed"}`);
+      toast(`Pasted into ${target === "a" ? "Original" : "Changed"}.`, "ok");
+    });
+
+    $("#result").addEventListener("input", event => {
+      const before = snapshot(); state.resultOverride = event.target.value; $("#result-meta").textContent = documentMeta(event.target.value); $("#result-state").textContent = "Manually edited";
+      queueMutation("result", "result", "Edit result document", before); updateControls();
+    });
+    $("#undo").addEventListener("click", undo); $("#redo").addEventListener("click", redo);
+    $("#previous-hunk").addEventListener("click", () => navigate(-1)); $("#next-hunk").addEventListener("click", () => navigate(1));
+    $("#accept-all").addEventListener("click", () => mutate("decision", "Accept all Changed occurrences", () => { for (const hunk of state.hunks) state.decisions[hunk.id] = "changed"; state.resultOverride = null; }));
+    $("#reset-decisions").addEventListener("click", () => mutate("decision", "Mark every occurrence unresolved", () => { for (const hunk of state.hunks) state.decisions[hunk.id] = "unresolved"; state.resultOverride = null; }));
+    $("#regenerate-result").addEventListener("click", () => mutate("result", "Discard manual result overlay", () => { state.resultOverride = null; }));
+    $("#copy-result").addEventListener("click", async () => { try { await copy(currentResult()); } catch (error) { toast(error.message, "bad"); } });
+    $("#download-result").addEventListener("click", () => download(resultFilename(), currentResult()));
+    $("#export-journal").addEventListener("click", exportJournal);
+    $("#import-journal").addEventListener("click", () => $("#import-journal-file").click());
+    $("#import-journal-file").addEventListener("change", async event => { try { if (event.target.files[0]) await importJournal(event.target.files[0]); } catch (error) { toast(error.message, "bad"); } finally { event.target.value = ""; } });
+    $("#shortcuts").addEventListener("click", () => $("#shortcut-dialog").showModal());
+    $("#close-shortcuts").addEventListener("click", () => $("#shortcut-dialog").close());
+    $("#theme").addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme;
+      document.documentElement.dataset.theme = current === "dark" ? "light" : current === "light" ? "" : "dark";
+    });
+    $("#clear-workspace").addEventListener("click", () => {
+      if (!confirm("Reset both source revisions, result overlay, decisions, and operation journal?")) return;
+      state.history = []; state.cursor = 0; sessionStorage.removeItem(STORAGE_KEY);
+      restore({ sources: { a: { name: "original.txt", content: "" }, b: { name: "changed.txt", content: "" } }, decisions: {}, resultOverride: null, activeHunk: 0, nextPaste: "a" });
+      toast("Workspace reset.");
+    });
+    $("#load-example").addEventListener("click", () => mutate("workspace", "Load comparison example", () => {
+      state.sources.a = { name: "deploy.yml", content: "service: atlas\nreplicas: 2\nregion: eu-central\nfeatures:\n  audit: false\n  cache: memory\n" };
+      state.sources.b = { name: "deploy.yml", content: "service: atlas\nreplicas: 4\nregion: eu-central\nfeatures:\n  audit: true\n  cache: redis\n  tracing: enabled\n" };
+      state.nextPaste = "a"; state.resultOverride = null;
+    }));
+
+    document.addEventListener("keydown", event => {
+      const mod = event.ctrlKey || event.metaKey;
+      if (mod && event.key.toLowerCase() === "z") { event.preventDefault(); event.shiftKey ? redo() : undo(); return; }
+      if (mod && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); return; }
+      if (mod && event.key.toLowerCase() === "s") { event.preventDefault(); event.shiftKey ? exportJournal() : download(resultFilename(), currentResult()); return; }
+      if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); navigate(1); return; }
+      if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); navigate(-1); return; }
+      if (editable(event.target)) return;
+      if (event.key === "]") { event.preventDefault(); navigate(1); }
+      else if (event.key === "[") { event.preventDefault(); navigate(-1); }
+      else if (["1", "2", "3"].includes(event.key) && state.hunks.length) { event.preventDefault(); decide(state.activeHunk, { "1": "original", "2": "changed", "3": "both" }[event.key]); }
+      else if (event.key === "?") { event.preventDefault(); $("#shortcut-dialog").showModal(); }
+    });
+
+    window.addEventListener("beforeunload", flushPending);
+    window.__FILE_DIFF_STUDIO__ = { state, myersDiff, buildHunks, generatedResult, snapshot, journalDocument, recompute };
+    if (!loadPersisted()) { recompute(); render(); }
+  </script>
+</body>
+</html>
