@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-08-02T14:00:56.482Z",
+  "generatedAt": "2026-08-02T14:36:06.145Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -62,6 +62,8 @@
       "keyboard": 1,
       "local-first": 10,
       "accessibility": 1,
+      "resizable": 1,
+      "layout": 1,
       "education": 4,
       "bitcoin": 1,
       "blockchain": 1,
@@ -212,7 +214,9 @@
         "editor",
         "keyboard",
         "local-first",
-        "accessibility"
+        "accessibility",
+        "resizable",
+        "layout"
       ],
       "operations": [
         "validate",
@@ -230,14 +234,14 @@
       "id": "file-diff-studio",
       "title": "File Diff Studio",
       "href": "../file-diff-studio/index.html",
-      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, file upload and drop, live Myers line diffing, keyboard-driven hunk navigation, non-destructive three-way result assembly, undo and redo, and an exportable replayable JSON operation journal.",
+      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, uploads and drop, live Myers line diffing, a persistent diff-first workspace, collapsible regions, draggable and keyboard-operable dividers, stacked or side-by-side long-line review, non-destructive result assembly, undo and redo, and an exportable replayable JSON journal.",
       "deploy": {
         "includePath": "file-diff-studio",
         "targetPath": "file-diff-studio",
         "include": true
       },
-      "modifiedAt": "2026-08-02T13:58:00.000Z",
-      "changedAt": "2026-08-02T13:58:00.000Z"
+      "modifiedAt": "2026-08-02T14:05:51.000Z",
+      "changedAt": "2026-08-02T14:05:51.000Z"
     },
     {
       "kind": "html-path",

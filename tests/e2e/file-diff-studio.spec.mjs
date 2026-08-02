@@ -98,6 +98,75 @@ test('diff core reconstructs both inputs and exported journals round-trip exactl
   await expect(page.locator('#journal-status')).toContainText('/');
 });
 
+test('diff-first layouts collapse low-priority panels, resize with the keyboard, and persist', async ({ page }) => {
+  await page.locator('#load-example').click();
+  await expect(page.locator('.hunk')).toHaveCount(2);
+
+  await page.locator('[data-layout-preset="diff"]').click();
+  await expect(page.locator('body')).toHaveClass(/layout-diff/);
+  await expect(page.locator('body')).toHaveClass(/diff-stacked/);
+  await expect(page.locator('#source-region')).toBeHidden();
+  await expect(page.locator('#result-panel')).toBeHidden();
+  await expect(page.locator('#journal-panel')).toBeHidden();
+  await expect(page.locator('#diff-panel')).toBeVisible();
+  await expect(page.locator('#layout-name')).toHaveText('Diff focus');
+  const focusGeometry = await page.evaluate(() => {
+    const panel = document.querySelector('#diff-panel').getBoundingClientRect();
+    const side = document.querySelector('.diff-side').getBoundingClientRect();
+    return { panelWidth: panel.width, sideWidth: side.width, viewportWidth: innerWidth };
+  });
+  expect(focusGeometry.panelWidth).toBeGreaterThan(focusGeometry.viewportWidth * 0.9);
+  expect(focusGeometry.sideWidth).toBeGreaterThan(focusGeometry.panelWidth * 0.95);
+
+  await page.keyboard.press('v');
+  await expect(page.locator('body')).not.toHaveClass(/diff-stacked/);
+  await page.keyboard.press('w');
+  await expect(page.locator('body')).toHaveClass(/wrap-diff/);
+
+  await page.keyboard.press('Alt+3');
+  await expect(page.locator('#source-region')).toBeHidden();
+  await expect(page.locator('#result-panel')).toBeVisible();
+  await expect(page.locator('#journal-panel')).toBeHidden();
+  await expect(page.locator('#layout-name')).toHaveText('Merge');
+
+  const resultWidthBefore = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.resultWidth);
+  await page.locator('#workspace-splitter').focus();
+  await page.keyboard.press('ArrowLeft');
+  const resultWidthAfter = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.resultWidth);
+  expect(resultWidthAfter).toBeGreaterThan(resultWidthBefore);
+  const workspaceHandle = await page.locator('#workspace-splitter').boundingBox();
+  await page.mouse.move(workspaceHandle.x + workspaceHandle.width / 2, workspaceHandle.y + 80);
+  await page.mouse.down();
+  await page.mouse.move(workspaceHandle.x - 70, workspaceHandle.y + 80, { steps: 4 });
+  await page.mouse.up();
+  const resultWidthDragged = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.resultWidth);
+  expect(resultWidthDragged).toBeGreaterThan(resultWidthAfter);
+
+  await page.locator('[data-region-toggle="sources"]').click();
+  await expect(page.locator('#source-region')).toBeVisible();
+  await expect(page.locator('#layout-name')).toHaveText('Custom');
+  const sourceHeightBefore = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.sourceHeight);
+  await page.locator('#source-splitter').focus();
+  await page.keyboard.press('ArrowDown');
+  const sourceHeightAfter = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.sourceHeight);
+  expect(sourceHeightAfter).toBeGreaterThan(sourceHeightBefore);
+
+  const diffLeftBefore = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.diffLeft);
+  await page.locator('.diff-column-splitter').first().focus();
+  await page.keyboard.press('ArrowRight');
+  const diffLeftAfter = await page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.diffLeft);
+  expect(diffLeftAfter).toBeGreaterThan(diffLeftBefore);
+
+  await page.reload();
+  await expect(page.locator('#source-region')).toBeVisible();
+  await expect(page.locator('#result-panel')).toBeVisible();
+  await expect(page.locator('#journal-panel')).toBeHidden();
+  await expect(page.locator('#layout-name')).toHaveText('Custom');
+  await expect.poll(() => page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.resultWidth)).toBe(resultWidthDragged);
+  await expect.poll(() => page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.sourceHeight)).toBe(sourceHeightAfter);
+  await expect.poll(() => page.evaluate(() => window.__FILE_DIFF_STUDIO__.layout.diffLeft)).toBe(diffLeftAfter);
+});
+
 test('native editor paste is not captured by DWIM and file uploads update live diff', async ({ page }) => {
   const prevented = await syntheticPaste(page, 'native paste', '#source-a');
   expect(prevented).toBe(false);

@@ -39,7 +39,7 @@
       "title": "File Diff Studio",
       "kind": "html-path",
       "href": "../file-diff-studio/index.html",
-      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, file upload and drop, live Myers line diffing, keyboard-driven hunk navigation, non-destructive three-way result assembly, undo and redo, and an exportable replayable JSON operation journal.",
+      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, uploads and drop, live Myers line diffing, a persistent diff-first workspace, collapsible regions, draggable and keyboard-operable dividers, stacked or side-by-side long-line review, non-destructive result assembly, undo and redo, and an exportable replayable JSON journal.",
       "tags": [
         "tool",
         "developer",
@@ -50,7 +50,9 @@
         "editor",
         "keyboard",
         "local-first",
-        "accessibility"
+        "accessibility",
+        "resizable",
+        "layout"
       ],
       "operations": [
         "validate",
@@ -69,8 +71,8 @@
         ],
         "defaultAction": "newWindow"
       },
-      "modifiedAt": "2026-08-02T13:58:00.000Z",
-      "changedAt": "2026-08-02T13:58:00.000Z"
+      "modifiedAt": "2026-08-02T14:05:51.000Z",
+      "changedAt": "2026-08-02T14:05:51.000Z"
     },
     {
       "id": "nakamotos-disciples",

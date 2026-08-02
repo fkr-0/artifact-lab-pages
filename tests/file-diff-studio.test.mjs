@@ -38,6 +38,14 @@ test('File Diff Studio exposes the required diff, merge, paste, upload, and jour
     'id="redo"',
     'id="previous-hunk"',
     'id="next-hunk"',
+    'data-layout-preset="diff"',
+    'id="source-splitter"',
+    'id="workspace-splitter"',
+    'diff-column-splitter',
+    'id="diff-orientation"',
+    'id="wrap-lines"',
+    'LAYOUT_STORAGE_KEY',
+    'function applyLayout',
     'window.__FILE_DIFF_STUDIO__'
   ]) assert.ok(source.includes(marker), `missing contract marker: ${marker}`);
 });

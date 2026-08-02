@@ -28,6 +28,10 @@
       --shadow: 0 24px 80px rgba(0, 0, 0, .34);
       --mono: "IBM Plex Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
       --sans: "Aptos", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+      --source-height: 17rem;
+      --result-width: 37%;
+      --diff-left: 50%;
+      --splitter-size: .58rem;
     }
     @media (prefers-color-scheme: light) {
       :root {
@@ -136,6 +140,21 @@
     }
     .paste-dock strong { color: var(--text); }
     .paste-target { color: var(--accent); font: 700 .8rem var(--mono); }
+    .layout-toolbar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .65rem 1rem;
+      margin-bottom: .75rem; padding: .58rem .68rem; border: 1px solid var(--line); border-radius: 10px;
+      background: var(--panel); box-shadow: 0 10px 28px rgba(0,0,0,.07);
+    }
+    .layout-presets, .layout-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .38rem; }
+    .layout-copy { display: grid; margin-right: .35rem; min-width: 7rem; }
+    .layout-copy small { color: var(--faint); text-transform: uppercase; letter-spacing: .08em; font-size: .59rem; }
+    .layout-copy strong { font-size: .77rem; }
+    .layout-toolbar button { min-height: 2rem; padding: .38rem .58rem; font-size: .72rem; }
+    .layout-toolbar button[aria-pressed="true"], .layout-toolbar button.selected {
+      color: var(--accent-ink); border-color: var(--accent); background: var(--accent); font-weight: 760;
+    }
+    .layout-divider { width: 1px; height: 1.7rem; margin: 0 .15rem; background: var(--line); }
+    .source-region { min-width: 0; }
     .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
     .source-card, .workspace-panel {
       min-width: 0; border: 1px solid var(--line); background: var(--panel); box-shadow: 0 12px 35px rgba(0,0,0,.08);
@@ -148,9 +167,18 @@
     .source-letter { display: grid; place-items: center; width: 1.55rem; height: 1.55rem; border-radius: 5px; color: var(--accent-ink); background: var(--accent); font: 800 .75rem var(--mono); }
     .source-name { min-width: 0; padding: .44rem .52rem; background: var(--panel); }
     .source-tools { display: flex; gap: .35rem; }
-    .source-editor { min-height: 17rem; max-height: 48rem; border: 0; border-radius: 0; background: color-mix(in srgb, var(--bg) 92%, var(--panel)); }
+    .source-editor { height: var(--source-height); min-height: 8rem; max-height: 72vh; resize: none; border: 0; border-radius: 0; background: color-mix(in srgb, var(--bg) 92%, var(--panel)); }
     .source-foot { display: flex; justify-content: space-between; gap: .7rem; padding: .46rem .65rem; border-top: 1px solid var(--line); color: var(--muted); font: .69rem var(--mono); }
-    .workspace { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr); gap: .75rem; margin-top: .75rem; align-items: start; }
+    .splitter {
+      position: relative; border: 0; border-radius: 999px; background: transparent; touch-action: none; user-select: none;
+    }
+    .splitter::before { content: ""; position: absolute; border-radius: 999px; background: var(--line); transition: background .12s ease, box-shadow .12s ease; }
+    .splitter:hover::before, .splitter:focus-visible::before, body.is-resizing .splitter::before { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+    .splitter-horizontal { height: var(--splitter-size); margin: .18rem 0 -.18rem; cursor: row-resize; }
+    .splitter-horizontal::before { left: 50%; top: 50%; width: min(9rem, 28%); height: 3px; transform: translate(-50%, -50%); }
+    .splitter-vertical { width: var(--splitter-size); min-height: 22rem; cursor: col-resize; align-self: stretch; }
+    .splitter-vertical::before { left: 50%; top: 50%; width: 3px; height: min(9rem, 34%); transform: translate(-50%, -50%); }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) var(--splitter-size) minmax(300px, var(--result-width)); gap: .3rem; margin-top: .75rem; align-items: start; }
     .workspace-panel { border-radius: 10px; overflow: hidden; }
     .panel-head { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .68rem .75rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
     .panel-head h2 { margin: 0; font-size: .9rem; }
@@ -165,9 +193,11 @@
     .decision { display: flex; gap: .3rem; flex-wrap: wrap; }
     .decision button { min-height: 1.9rem; padding: .34rem .48rem; font-size: .68rem; }
     .decision button.selected { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
-    .diff-pair { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; }
+    .diff-pair { display: grid; grid-template-columns: minmax(0, var(--diff-left)) .5rem minmax(0, 1fr); min-width: 0; }
     .diff-side { min-width: 0; overflow: auto; }
-    .diff-side + .diff-side { border-left: 1px solid var(--line); }
+    .diff-column-splitter { position: relative; cursor: col-resize; touch-action: none; background: var(--panel); }
+    .diff-column-splitter::before { content: ""; position: absolute; inset: 0 auto 0 50%; width: 1px; background: var(--line); }
+    .diff-column-splitter:hover::before, .diff-column-splitter:focus-visible::before { width: 3px; background: var(--accent); transform: translateX(-1px); }
     .side-label { position: sticky; left: 0; padding: .3rem .5rem; border-bottom: 1px solid var(--line); color: var(--muted); background: var(--panel); font: 700 .63rem var(--mono); }
     .code-line { display: grid; grid-template-columns: 3.3rem minmax(max-content, 1fr); min-height: 1.5rem; font: .75rem/1.5 var(--mono); }
     .line-no { padding: .14rem .55rem .14rem .2rem; text-align: right; user-select: none; color: var(--faint); border-right: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 82%, transparent); }
@@ -176,6 +206,17 @@
     .added .line-text { color: var(--green); background: color-mix(in srgb, var(--green) 10%, transparent); }
     .placeholder .line-text { color: var(--faint); }
     .result-panel { position: sticky; top: 5.2rem; }
+    body.sources-hidden #source-region, body.sources-hidden #source-splitter, body.result-hidden #result-panel,
+    body.journal-hidden #journal-panel { display: none; }
+    body.result-hidden .workspace { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    body.result-hidden #workspace-splitter { display: none; }
+    body.diff-stacked .diff-pair { grid-template-columns: minmax(0, 1fr); }
+    body.diff-stacked .diff-column-splitter { display: none; }
+    body.diff-stacked .diff-side + .diff-side { border-left: 0; border-top: 1px solid var(--line); }
+    body.wrap-diff .code-line { grid-template-columns: 3.3rem minmax(0, 1fr); }
+    body.wrap-diff .line-text { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+    body.layout-diff .app { width: calc(100% - 1rem); max-width: none; }
+    body.layout-diff .hunk-list { max-height: calc(100vh - 14.5rem); min-height: calc(100vh - 14.5rem); }
     .result-editor { min-height: 35rem; max-height: 69vh; border: 0; border-radius: 0; background: color-mix(in srgb, var(--bg) 94%, var(--panel)); }
     .result-foot { display: flex; justify-content: space-between; gap: .8rem; padding: .5rem .65rem; border-top: 1px solid var(--line); color: var(--muted); font: .69rem var(--mono); }
     .journal { margin-top: .75rem; }
@@ -199,7 +240,8 @@
     @media (max-width: 1120px) {
       .command-bar { grid-template-columns: 1fr auto; }
       .command-actions { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
-      .workspace { grid-template-columns: 1fr; }
+      .workspace { grid-template-columns: 1fr; gap: .75rem; }
+      #workspace-splitter { display: none; }
       .result-panel { position: static; }
       .result-editor { min-height: 25rem; }
     }
@@ -208,7 +250,10 @@
       .command-bar { position: static; grid-template-columns: 1fr; }
       .cluster.end { justify-content: flex-start; }
       .source-grid, .diff-pair { grid-template-columns: 1fr; }
+      .diff-column-splitter { display: none; }
       .diff-side + .diff-side { border-left: 0; border-top: 1px solid var(--line); }
+      .layout-toolbar { align-items: flex-start; }
+      .layout-presets, .layout-controls { width: 100%; }
       .status-strip { grid-template-columns: 1fr 1fr; }
       .paste-dock { align-items: flex-start; flex-direction: column; }
       .source-head { grid-template-columns: auto 1fr; }
@@ -254,7 +299,27 @@
       <div>Next paste → <span id="paste-target" class="paste-target">Original</span></div>
     </section>
 
-    <section class="source-grid" aria-label="Source documents">
+    <section class="layout-toolbar" aria-label="Workspace layout controls">
+      <div class="layout-presets">
+        <div class="layout-copy"><small>Workspace</small><strong id="layout-name">Balanced</strong></div>
+        <div role="group" aria-label="Layout presets">
+          <button type="button" data-layout-preset="balanced" aria-pressed="true">Balanced <span class="kbd">Alt 1</span></button>
+          <button type="button" data-layout-preset="diff">Diff focus <span class="kbd">Alt 2</span></button>
+          <button type="button" data-layout-preset="merge">Merge <span class="kbd">Alt 3</span></button>
+        </div>
+      </div>
+      <div class="layout-controls" role="group" aria-label="Visible regions and diff presentation">
+        <button type="button" data-region-toggle="sources" aria-pressed="true">Sources</button>
+        <button type="button" data-region-toggle="result" aria-pressed="true">Result</button>
+        <button type="button" data-region-toggle="journal" aria-pressed="true">Journal</button>
+        <span class="layout-divider" aria-hidden="true"></span>
+        <button id="diff-orientation" type="button" aria-pressed="false">Stacked diff</button>
+        <button id="wrap-lines" type="button" aria-pressed="false">Wrap lines</button>
+        <button id="reset-layout" class="quiet" type="button">Reset layout</button>
+      </div>
+    </section>
+
+    <section id="source-region" class="source-region source-grid" aria-label="Source documents">
       <article class="source-card armed" data-source-card="a">
         <div class="source-head">
           <div class="source-label"><span class="source-letter">A</span><span>Original</span></div>
@@ -285,19 +350,22 @@
         <div class="source-foot"><span id="meta-b">0 lines · 0 B</span><span>Live diff updates after every change</span></div>
       </article>
     </section>
+    <div id="source-splitter" class="splitter splitter-horizontal" role="separator" aria-label="Resize source editors" aria-orientation="horizontal" aria-valuemin="128" aria-valuemax="720" aria-valuenow="272" tabindex="0"></div>
 
-    <section class="workspace" aria-label="Diff and merge workspace">
-      <article class="workspace-panel">
+    <section id="diff-workspace" class="workspace" aria-label="Diff and merge workspace">
+      <article id="diff-panel" class="workspace-panel">
         <div class="panel-head">
           <div><h2>Change occurrences</h2><p>Each occurrence can take Original, Changed, or Both. Unresolved occurrences preview Changed.</p></div>
-          <div class="cluster"><button id="accept-all" type="button" disabled>Accept all Changed</button><button id="reset-decisions" class="quiet" type="button" disabled>Unresolve all</button></div>
+          <div class="cluster"><button id="focus-diff" class="quiet" type="button">Focus diff</button><button id="accept-all" type="button" disabled>Accept all Changed</button><button id="reset-decisions" class="quiet" type="button" disabled>Unresolve all</button></div>
         </div>
         <div id="hunk-list" class="hunk-list" aria-live="polite">
           <div class="empty-state"><div><strong>Bring two documents.</strong>Use DWIM paste, type directly, drop files, or upload from disk.</div></div>
         </div>
       </article>
 
-      <article class="workspace-panel result-panel">
+      <div id="workspace-splitter" class="splitter splitter-vertical" role="separator" aria-label="Resize diff and result panels" aria-orientation="vertical" aria-valuemin="22" aria-valuemax="62" aria-valuenow="37" tabindex="0"></div>
+
+      <article id="result-panel" class="workspace-panel result-panel">
         <div class="panel-head">
           <div><h2>Result document</h2><p id="result-mode">Generated non-destructively from the changed document preview</p></div>
           <div class="cluster">
@@ -312,7 +380,7 @@
       </article>
     </section>
 
-    <section class="workspace-panel journal">
+    <section id="journal-panel" class="workspace-panel journal">
       <div class="panel-head">
         <div><h2>Operation journal</h2><p>Every source revision, merge decision, and result edit is replayable. Inputs are never overwritten.</p></div>
         <div class="cluster"><button id="export-journal" type="button">Export JSON</button><input id="import-journal-file" type="file" accept="application/json" hidden><button id="import-journal" type="button">Import JSON</button></div>
@@ -335,6 +403,10 @@
       <dt><span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span></dt><dd>Use Original / Changed / Both for the current occurrence</dd>
       <dt><span class="kbd">⌘/Ctrl S</span></dt><dd>Download the result document</dd>
       <dt><span class="kbd">⇧⌘/Ctrl S</span></dt><dd>Export the complete JSON journal</dd>
+      <dt><span class="kbd">Alt 1</span> <span class="kbd">Alt 2</span> <span class="kbd">Alt 3</span></dt><dd>Balanced / Diff focus / Merge layout</dd>
+      <dt><span class="kbd">V</span></dt><dd>Switch side-by-side and stacked diff presentation</dd>
+      <dt><span class="kbd">W</span></dt><dd>Toggle wrapping for long changed lines</dd>
+      <dt><span class="kbd">F</span></dt><dd>Enter the distraction-free Diff focus layout</dd>
       <dt><span class="kbd">?</span></dt><dd>Open this keyboard map</dd>
     </dl>
     <div class="cluster end" style="margin-top:1rem"><button id="close-shortcuts" class="primary" type="button">Close</button></div>
@@ -347,10 +419,80 @@
     const EXACT_CELL_BUDGET = 6_000_000;
     const AUTOSAVE_LIMIT = 1_800_000;
     const STORAGE_KEY = "file-diff-studio/session-v1";
+    const LAYOUT_STORAGE_KEY = "file-diff-studio/layout-v1";
     const encoder = new TextEncoder();
     const $ = selector => document.querySelector(selector);
     const $$ = selector => [...document.querySelectorAll(selector)];
     const editable = target => target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target?.isContentEditable;
+    const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
+    const LAYOUT_DEFAULT = Object.freeze({ preset: "balanced", sources: true, result: true, journal: true, diffView: "side", wrap: false, sourceHeight: 272, resultWidth: 37, diffLeft: 50 });
+    const LAYOUT_PRESETS = Object.freeze({
+      balanced: { ...LAYOUT_DEFAULT },
+      diff: { ...LAYOUT_DEFAULT, preset: "diff", sources: false, result: false, journal: false, diffView: "stacked" },
+      merge: { ...LAYOUT_DEFAULT, preset: "merge", sources: false, result: true, journal: false, resultWidth: 32 }
+    });
+    const layout = { ...LAYOUT_DEFAULT };
+
+    function normalizeLayout(candidate = {}) {
+      return {
+        preset: ["balanced", "diff", "merge", "custom"].includes(candidate.preset) ? candidate.preset : "balanced",
+        sources: candidate.sources !== false,
+        result: candidate.result !== false,
+        journal: candidate.journal !== false,
+        diffView: candidate.diffView === "stacked" ? "stacked" : "side",
+        wrap: candidate.wrap === true,
+        sourceHeight: clamp(Number(candidate.sourceHeight) || LAYOUT_DEFAULT.sourceHeight, 128, 720),
+        resultWidth: clamp(Number(candidate.resultWidth) || LAYOUT_DEFAULT.resultWidth, 22, 62),
+        diffLeft: clamp(Number(candidate.diffLeft) || LAYOUT_DEFAULT.diffLeft, 20, 80)
+      };
+    }
+
+    function loadLayoutPreferences() {
+      try { Object.assign(layout, normalizeLayout(JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || "null") || {})); }
+      catch { Object.assign(layout, LAYOUT_DEFAULT); }
+    }
+
+    function saveLayoutPreferences() {
+      try { localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout)); } catch {}
+    }
+
+    function applyLayout(options = {}) {
+      document.body.classList.toggle("sources-hidden", !layout.sources);
+      document.body.classList.toggle("result-hidden", !layout.result);
+      document.body.classList.toggle("journal-hidden", !layout.journal);
+      document.body.classList.toggle("diff-stacked", layout.diffView === "stacked");
+      document.body.classList.toggle("wrap-diff", layout.wrap);
+      document.body.classList.toggle("layout-diff", !layout.sources && !layout.result && !layout.journal);
+      document.documentElement.style.setProperty("--source-height", `${layout.sourceHeight}px`);
+      document.documentElement.style.setProperty("--result-width", `${layout.resultWidth}%`);
+      document.documentElement.style.setProperty("--diff-left", `${layout.diffLeft}%`);
+      if (options.controls === false) return;
+      $("#layout-name").textContent = ({ balanced: "Balanced", diff: "Diff focus", merge: "Merge", custom: "Custom" })[layout.preset];
+      $$('[data-layout-preset]').forEach(button => {
+        const selected = button.dataset.layoutPreset === layout.preset;
+        button.classList.toggle("selected", selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
+      $$('[data-region-toggle]').forEach(button => button.setAttribute("aria-pressed", String(Boolean(layout[button.dataset.regionToggle]))));
+      $("#diff-orientation").setAttribute("aria-pressed", String(layout.diffView === "stacked"));
+      $("#wrap-lines").setAttribute("aria-pressed", String(layout.wrap));
+      $("#source-splitter").setAttribute("aria-valuenow", String(Math.round(layout.sourceHeight)));
+      $("#workspace-splitter").setAttribute("aria-valuenow", String(Math.round(layout.resultWidth)));
+      $$(".diff-column-splitter").forEach(splitter => splitter.setAttribute("aria-valuenow", String(Math.round(layout.diffLeft))));
+    }
+
+    function updateLayout(patch, options = {}) {
+      Object.assign(layout, normalizeLayout({ ...layout, ...patch, preset: patch.preset || "custom" }));
+      applyLayout({ controls: options.controls !== false });
+      if (options.persist !== false) saveLayoutPreferences();
+    }
+
+    function setLayoutPreset(name, options = {}) {
+      if (!LAYOUT_PRESETS[name]) return;
+      Object.assign(layout, normalizeLayout(LAYOUT_PRESETS[name]));
+      applyLayout(); saveLayoutPreferences();
+      if (options.announce !== false) toast(`${({ balanced: "Balanced", diff: "Diff focus", merge: "Merge" })[name]} layout applied.`, "ok");
+    }
 
     const state = {
       sources: {
@@ -670,7 +812,17 @@
         head.append(title, decisions);
 
         const pair = document.createElement("div"); pair.className = "diff-pair";
-        pair.append(renderSide("Original", hunk.original, hunk.aStart, "removed"), renderSide("Changed", hunk.changed, hunk.bStart, "added"));
+        const columnSplitter = document.createElement("div");
+        columnSplitter.className = "diff-column-splitter";
+        columnSplitter.setAttribute("role", "separator");
+        columnSplitter.setAttribute("aria-label", "Resize Original and Changed columns");
+        columnSplitter.setAttribute("aria-orientation", "vertical");
+        columnSplitter.setAttribute("aria-valuemin", "20");
+        columnSplitter.setAttribute("aria-valuemax", "80");
+        columnSplitter.setAttribute("aria-valuenow", String(Math.round(layout.diffLeft)));
+        columnSplitter.tabIndex = 0;
+        installDiffColumnSplitter(columnSplitter, pair);
+        pair.append(renderSide("Original", hunk.original, hunk.aStart, "removed"), columnSplitter, renderSide("Changed", hunk.changed, hunk.bStart, "added"));
         article.append(head, pair); fragment.append(article);
       });
       root.replaceChildren(fragment);
@@ -814,7 +966,7 @@
         schema: "file-diff-studio/journal-v1",
         schemaVersion: 1,
         exportedAt: new Date().toISOString(),
-        appVersion: "1.0.0",
+        appVersion: "1.1.0",
         cursor: state.cursor,
         current: snapshot(),
         operations: state.history
@@ -855,6 +1007,65 @@
 
     function toast(message, type = "") {
       const item = document.createElement("div"); item.className = `toast ${type}`; item.textContent = message; $("#toasts").append(item); setTimeout(() => item.remove(), 3600);
+    }
+
+    function beginResize(event, onMove) {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      const target = event.currentTarget;
+      document.body.classList.add("is-resizing");
+      target.setPointerCapture?.(event.pointerId);
+      const move = current => onMove(current);
+      const finish = () => {
+        target.removeEventListener("pointermove", move);
+        target.removeEventListener("pointerup", finish);
+        target.removeEventListener("pointercancel", finish);
+        document.body.classList.remove("is-resizing");
+        applyLayout();
+        saveLayoutPreferences();
+      };
+      target.addEventListener("pointermove", move);
+      target.addEventListener("pointerup", finish);
+      target.addEventListener("pointercancel", finish);
+    }
+
+    function installDiffColumnSplitter(splitter, pair) {
+      splitter.addEventListener("pointerdown", event => {
+        const bounds = pair.getBoundingClientRect();
+        beginResize(event, current => updateLayout({ diffLeft: ((current.clientX - bounds.left) / bounds.width) * 100 }, { persist: false, controls: false }));
+      });
+      splitter.addEventListener("keydown", event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        updateLayout({ diffLeft: layout.diffLeft + (event.key === 'ArrowLeft' ? -3 : 3) });
+      });
+      splitter.addEventListener("dblclick", () => updateLayout({ diffLeft: 50 }));
+    }
+
+    function installLayoutSplitters() {
+      const sourceSplitter = $("#source-splitter");
+      sourceSplitter.addEventListener("pointerdown", event => {
+        const startY = event.clientY, startHeight = layout.sourceHeight;
+        beginResize(event, current => updateLayout({ sourceHeight: startHeight + current.clientY - startY }, { persist: false, controls: false }));
+      });
+      sourceSplitter.addEventListener("keydown", event => {
+        if (!['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        updateLayout({ sourceHeight: layout.sourceHeight + (event.key === 'ArrowUp' ? -24 : 24) });
+      });
+      sourceSplitter.addEventListener("dblclick", () => updateLayout({ sourceHeight: LAYOUT_DEFAULT.sourceHeight }));
+
+      const workspaceSplitter = $("#workspace-splitter");
+      workspaceSplitter.addEventListener("pointerdown", event => {
+        const bounds = $("#diff-workspace").getBoundingClientRect();
+        beginResize(event, current => updateLayout({ resultWidth: ((bounds.right - current.clientX) / bounds.width) * 100 }, { persist: false, controls: false }));
+      });
+      workspaceSplitter.addEventListener("keydown", event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        updateLayout({ resultWidth: layout.resultWidth + (event.key === 'ArrowLeft' ? 2 : -2) });
+      });
+      workspaceSplitter.addEventListener("dblclick", () => updateLayout({ resultWidth: LAYOUT_DEFAULT.resultWidth }));
     }
 
     for (const target of ["a", "b"]) {
@@ -905,6 +1116,12 @@
     $("#export-journal").addEventListener("click", exportJournal);
     $("#import-journal").addEventListener("click", () => $("#import-journal-file").click());
     $("#import-journal-file").addEventListener("change", async event => { try { if (event.target.files[0]) await importJournal(event.target.files[0]); } catch (error) { toast(error.message, "bad"); } finally { event.target.value = ""; } });
+    $$('[data-layout-preset]').forEach(button => button.addEventListener("click", () => setLayoutPreset(button.dataset.layoutPreset)));
+    $$('[data-region-toggle]').forEach(button => button.addEventListener("click", () => updateLayout({ [button.dataset.regionToggle]: !layout[button.dataset.regionToggle] })));
+    $("#diff-orientation").addEventListener("click", () => updateLayout({ diffView: layout.diffView === "side" ? "stacked" : "side" }));
+    $("#wrap-lines").addEventListener("click", () => updateLayout({ wrap: !layout.wrap }));
+    $("#reset-layout").addEventListener("click", () => setLayoutPreset("balanced"));
+    $("#focus-diff").addEventListener("click", () => setLayoutPreset("diff"));
     $("#shortcuts").addEventListener("click", () => $("#shortcut-dialog").showModal());
     $("#close-shortcuts").addEventListener("click", () => $("#shortcut-dialog").close());
     $("#theme").addEventListener("click", () => {
@@ -928,17 +1145,24 @@
       if (mod && event.key.toLowerCase() === "z") { event.preventDefault(); event.shiftKey ? redo() : undo(); return; }
       if (mod && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); return; }
       if (mod && event.key.toLowerCase() === "s") { event.preventDefault(); event.shiftKey ? exportJournal() : download(resultFilename(), currentResult()); return; }
+      if (event.altKey && ["1", "2", "3"].includes(event.key)) { event.preventDefault(); setLayoutPreset({ "1": "balanced", "2": "diff", "3": "merge" }[event.key]); return; }
       if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); navigate(1); return; }
       if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); navigate(-1); return; }
       if (editable(event.target)) return;
-      if (event.key === "]") { event.preventDefault(); navigate(1); }
+      if (event.key.toLowerCase() === "f") { event.preventDefault(); setLayoutPreset("diff"); }
+      else if (event.key.toLowerCase() === "v") { event.preventDefault(); updateLayout({ diffView: layout.diffView === "side" ? "stacked" : "side" }); }
+      else if (event.key.toLowerCase() === "w") { event.preventDefault(); updateLayout({ wrap: !layout.wrap }); }
+      else if (event.key === "]") { event.preventDefault(); navigate(1); }
       else if (event.key === "[") { event.preventDefault(); navigate(-1); }
       else if (["1", "2", "3"].includes(event.key) && state.hunks.length) { event.preventDefault(); decide(state.activeHunk, { "1": "original", "2": "changed", "3": "both" }[event.key]); }
       else if (event.key === "?") { event.preventDefault(); $("#shortcut-dialog").showModal(); }
     });
 
     window.addEventListener("beforeunload", flushPending);
-    window.__FILE_DIFF_STUDIO__ = { state, myersDiff, buildHunks, generatedResult, snapshot, journalDocument, recompute };
+    window.__FILE_DIFF_STUDIO__ = { state, layout, myersDiff, buildHunks, generatedResult, snapshot, journalDocument, recompute, applyLayout, setLayoutPreset, updateLayout };
+    loadLayoutPreferences();
+    applyLayout();
+    installLayoutSplitters();
     if (!loadPersisted()) { recompute(); render(); }
   </script>
 </body>
