@@ -30,10 +30,41 @@
       "meme-lab",
       "reveal-peer-plugin",
       "storyboard-studio",
-      "chado-zen-tea"
+      "chado-zen-tea",
+      "file-diff-studio"
     ]
   },
   "items": [
+    {
+      "id": "file-diff-studio",
+      "title": "File Diff Studio",
+      "kind": "html-path",
+      "href": "../file-diff-studio/index.html",
+      "description": "Local-first visual file comparison and merge workbench with DWIM paste, uploads, live line diffs, keyboard navigation, per-change choices, editable result output, undo/redo, and a portable JSON operation journal.",
+      "tags": [
+        "tool",
+        "developer-tools",
+        "diff",
+        "merge",
+        "text",
+        "local-first",
+        "keyboard",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      }
+    },
     {
       "id": "sprite-fan-atlas-studio",
       "title": "Sprite Fan Atlas Studio",
