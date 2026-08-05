@@ -35,6 +35,37 @@
   },
   "items": [
     {
+      "id": "label-sheet-studio",
+      "title": "Label Sheet Studio",
+      "kind": "html-path",
+      "href": "../label-sheet-studio/index.html",
+      "description": "Local-first DIN A4 3 x 5 label designer for repeating images or auto-fitting text across sticker sheets, calibrating margins and gaps, and exporting exact-size print-ready PDFs.",
+      "tags": [
+        "tool",
+        "pdf",
+        "labels",
+        "stickers",
+        "printing",
+        "typography",
+        "image",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      }
+    },
+    {
       "id": "file-diff-studio",
       "title": "File Diff Studio",
       "kind": "html-path",

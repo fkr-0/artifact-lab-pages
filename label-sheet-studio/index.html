@@ -1,0 +1,1444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111b18" />
+  <meta name="description" content="Local-first DIN A4 3 x 5 label sheet designer with image and auto-fitting text PDF export." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111b18'/%3E%3Cg fill='%2377e2b7'%3E%3Crect x='12' y='11' width='11' height='7' rx='2'/%3E%3Crect x='27' y='11' width='11' height='7' rx='2'/%3E%3Crect x='42' y='11' width='11' height='7' rx='2'/%3E%3Crect x='12' y='22' width='11' height='7' rx='2'/%3E%3Crect x='27' y='22' width='11' height='7' rx='2'/%3E%3Crect x='42' y='22' width='11' height='7' rx='2'/%3E%3Crect x='12' y='33' width='11' height='7' rx='2'/%3E%3Crect x='27' y='33' width='11' height='7' rx='2'/%3E%3Crect x='42' y='33' width='11' height='7' rx='2'/%3E%3Crect x='12' y='44' width='11' height='7' rx='2'/%3E%3Crect x='27' y='44' width='11' height='7' rx='2'/%3E%3Crect x='42' y='44' width='11' height='7' rx='2'/%3E%3C/g%3E%3C/svg%3E" />
+  <title>Label Sheet Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d1412;
+      --bg-soft: #121c19;
+      --panel: rgba(24, 35, 31, 0.88);
+      --panel-solid: #18231f;
+      --panel-2: #1d2b26;
+      --line: rgba(225, 244, 235, 0.14);
+      --line-strong: rgba(225, 244, 235, 0.25);
+      --text: #f1f7f4;
+      --muted: #a7b8b1;
+      --accent: #77e2b7;
+      --accent-strong: #35c88d;
+      --accent-ink: #092116;
+      --warn: #f6c76d;
+      --danger: #ff8e8e;
+      --paper: #ffffff;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 11px;
+      --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-width: 320px; background: var(--bg); }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-ui);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% -8%, rgba(53, 200, 141, 0.18), transparent 34rem),
+        radial-gradient(circle at 105% 15%, rgba(119, 226, 183, 0.10), transparent 32rem),
+        linear-gradient(160deg, #0d1412, #101816 52%, #0b1210);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid rgba(119, 226, 183, 0.42);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      width: min(1640px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 42px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 78px;
+      padding: 14px 16px 14px 20px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(17, 27, 24, 0.88);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(18px) saturate(1.25);
+    }
+
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+
+    .brand-mark {
+      display: grid;
+      grid-template-columns: repeat(3, 8px);
+      grid-template-rows: repeat(5, 8px);
+      gap: 2px;
+      flex: 0 0 auto;
+      padding: 9px;
+      border: 1px solid rgba(119, 226, 183, 0.32);
+      border-radius: 13px;
+      background: linear-gradient(145deg, rgba(119, 226, 183, 0.16), rgba(119, 226, 183, 0.04));
+    }
+
+    .brand-mark i {
+      display: block;
+      border-radius: 2px;
+      background: var(--accent);
+      opacity: 0.84;
+    }
+
+    .brand-copy { min-width: 0; }
+    .brand h1 { margin: 0; font-size: clamp(1.02rem, 2vw, 1.25rem); letter-spacing: -0.02em; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .top-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .button {
+      min-height: 43px;
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 0 15px;
+      background: rgba(255, 255, 255, 0.035);
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+    }
+
+    .button:hover { transform: translateY(-1px); border-color: rgba(119, 226, 183, 0.45); background: rgba(119, 226, 183, 0.08); }
+    .button:active { transform: translateY(0); }
+    .button:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
+
+    .button.primary {
+      border-color: transparent;
+      color: var(--accent-ink);
+      font-weight: 760;
+      background: linear-gradient(135deg, #91efc9, #4fd59f);
+      box-shadow: 0 10px 24px rgba(53, 200, 141, 0.18);
+    }
+
+    .button.primary:hover { background: linear-gradient(135deg, #a5f4d5, #61dcae); }
+    .button.compact { min-height: 36px; padding-inline: 11px; font-size: 0.82rem; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px) minmax(500px, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+      align-items: start;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(150deg, rgba(29, 43, 38, 0.92), rgba(20, 31, 27, 0.92));
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 17px 18px 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 { margin: 0; font-size: 0.96rem; letter-spacing: -0.01em; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 0.76rem; }
+    .panel-body { padding: 17px 18px 19px; }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .mode-switch button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 690;
+      cursor: pointer;
+    }
+
+    .mode-switch button[aria-selected="true"] {
+      color: var(--accent-ink);
+      background: var(--accent);
+      box-shadow: 0 8px 18px rgba(53, 200, 141, 0.14);
+    }
+
+    .mode-panel { display: none; margin-top: 16px; }
+    .mode-panel.active { display: block; }
+
+    .field { display: grid; gap: 7px; min-width: 0; }
+    .field + .field { margin-top: 13px; }
+    .field > label,
+    .field-label {
+      color: #dfeae5;
+      font-size: 0.79rem;
+      font-weight: 680;
+    }
+
+    .field-note { color: var(--muted); font-size: 0.72rem; line-height: 1.45; }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      background: rgba(6, 11, 9, 0.28);
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    input[type="text"], input[type="number"], select { min-height: 42px; padding: 0 11px; }
+    textarea { min-height: 122px; padding: 11px 12px; resize: vertical; line-height: 1.46; }
+    input:hover, select:hover, textarea:hover { border-color: rgba(119, 226, 183, 0.38); }
+    option { background: #17231f; }
+
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+    .field-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .inline-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .check-row input { margin-top: 2px; accent-color: var(--accent-strong); }
+    .check-row strong { display: block; font-size: 0.8rem; }
+    .check-row span { display: block; margin-top: 3px; color: var(--muted); font-size: 0.71rem; line-height: 1.4; }
+
+    .range-row { display: grid; grid-template-columns: minmax(0, 1fr) 64px; align-items: center; gap: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--accent-strong); }
+
+    .color-field { display: flex; align-items: center; gap: 10px; }
+    input[type="color"] {
+      width: 48px;
+      height: 42px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line-strong);
+      border-radius: 11px;
+      padding: 4px;
+      background: rgba(6, 11, 9, 0.28);
+    }
+
+    .drop-zone {
+      min-height: 145px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      border: 1px dashed rgba(119, 226, 183, 0.38);
+      border-radius: 16px;
+      text-align: center;
+      background:
+        linear-gradient(rgba(119, 226, 183, 0.045), rgba(119, 226, 183, 0.02)),
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.015) 10px, rgba(255, 255, 255, 0.015) 20px);
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .drop-zone:hover, .drop-zone.dragging { border-color: var(--accent); background: rgba(119, 226, 183, 0.085); transform: translateY(-1px); }
+    .drop-zone strong { display: block; font-size: 0.9rem; }
+    .drop-zone span { display: block; margin-top: 5px; color: var(--muted); font-size: 0.72rem; }
+    .drop-zone .file-name { color: var(--accent); }
+    .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .metric {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .metric span { display: block; color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric strong { display: block; margin-top: 4px; font-size: 0.83rem; font-variant-numeric: tabular-nums; }
+
+    .geometry-message {
+      margin-top: 13px;
+      padding: 10px 11px;
+      border: 1px solid rgba(119, 226, 183, 0.2);
+      border-radius: 11px;
+      color: #c8e8da;
+      background: rgba(119, 226, 183, 0.055);
+      font-size: 0.73rem;
+      line-height: 1.45;
+    }
+
+    .geometry-message.invalid { border-color: rgba(255, 142, 142, 0.35); color: #ffd2d2; background: rgba(255, 142, 142, 0.06); }
+
+    .preview-panel {
+      position: sticky;
+      top: 108px;
+      min-height: calc(100vh - 130px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(119, 226, 183, 0.07), transparent 28rem),
+        rgba(14, 22, 19, 0.72);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(19, 29, 25, 0.76);
+    }
+
+    .preview-toolbar h2 { margin: 0; font-size: 0.92rem; }
+    .preview-toolbar p { margin: 3px 0 0; color: var(--muted); font-size: 0.71rem; }
+
+    .privacy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 1px solid rgba(119, 226, 183, 0.2);
+      border-radius: 999px;
+      color: #c9ecdc;
+      background: rgba(119, 226, 183, 0.055);
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .privacy-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(119, 226, 183, 0.09); }
+
+    .preview-stage {
+      min-height: 680px;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 3vw, 42px);
+      overflow: auto;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,0.018) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.018) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.018) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.018) 75%);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+    }
+
+    .paper-wrap { width: min(100%, 720px); }
+
+    .sheet {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 210 / 297;
+      overflow: hidden;
+      color: #111;
+      background: var(--paper);
+      box-shadow: 0 24px 75px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(0, 0, 0, 0.11);
+      transform-origin: top center;
+    }
+
+    .sheet.invalid { opacity: 0.5; }
+
+    .label-cell {
+      position: absolute;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .sheet.show-guides .label-cell { outline: 1px dashed rgba(18, 60, 43, 0.35); outline-offset: -1px; }
+    .label-cell.blank { background: linear-gradient(135deg, #fafafa, #f4f4f4); }
+    .label-cell.blank::after { content: attr(data-index); position: absolute; inset: 0; display: grid; place-items: center; color: rgba(0,0,0,0.19); font: 650 11px var(--font-ui); }
+    .label-cell.active::after { content: attr(data-index); position: absolute; right: 3px; bottom: 2px; color: rgba(0,0,0,0.18); font: 600 7px var(--font-ui); pointer-events: none; }
+
+    .label-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      overflow: hidden;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .label-text > span { width: 100%; }
+    .label-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+
+    .empty-image-hint {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 8%;
+      color: rgba(0, 0, 0, 0.35);
+      text-align: center;
+      font: 650 clamp(7px, 1vw, 13px) var(--font-ui);
+      background: repeating-linear-gradient(45deg, #fff, #fff 8px, #fafafa 8px, #fafafa 16px);
+    }
+
+    .preview-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(19, 29, 25, 0.76);
+      font-size: 0.72rem;
+    }
+
+    .preview-footer strong { color: var(--text); }
+
+    .export-card {
+      display: grid;
+      gap: 13px;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid rgba(119, 226, 183, 0.18);
+      border-radius: 15px;
+      background: linear-gradient(145deg, rgba(119, 226, 183, 0.07), rgba(119, 226, 183, 0.025));
+    }
+
+    .export-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; }
+
+    .tips {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      max-width: min(420px, calc(100vw - 36px));
+      padding: 13px 15px;
+      border: 1px solid rgba(119, 226, 183, 0.28);
+      border-radius: 13px;
+      color: #eafff5;
+      background: rgba(18, 31, 26, 0.96);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
+      transform: translateY(24px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .toast.visible { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: rgba(255, 142, 142, 0.4); color: #ffe2e2; }
+
+    .busy .button.primary { position: relative; color: transparent; }
+    .busy .button.primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(9, 33, 22, 0.28);
+      border-top-color: var(--accent-ink);
+      border-radius: 50%;
+      animation: spin 700ms linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(1turn); } }
+
+    @media (max-width: 1050px) {
+      .workspace { grid-template-columns: 1fr; }
+      .preview-panel { position: relative; top: auto; min-height: auto; order: -1; }
+      .preview-stage { min-height: 520px; }
+      .paper-wrap { width: min(100%, 610px); }
+    }
+
+    @media (max-width: 680px) {
+      .app-shell { width: min(100% - 16px, 1640px); padding-top: 8px; }
+      .topbar { position: relative; top: auto; align-items: flex-start; padding: 14px; border-radius: 18px; }
+      .brand p { white-space: normal; }
+      .top-actions { flex-direction: column; align-items: stretch; }
+      .top-actions .button { min-height: 38px; }
+      .workspace { margin-top: 10px; gap: 10px; }
+      .panel, .preview-panel { border-radius: 18px; }
+      .preview-stage { min-height: 400px; padding: 14px; }
+      .preview-toolbar { align-items: flex-start; }
+      .privacy-badge { display: none; }
+      .field-grid, .field-grid.three { grid-template-columns: 1fr; }
+      .metric-strip { grid-template-columns: 1fr; }
+      .export-row { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media print {
+      @page { size: A4 portrait; margin: 0; }
+      html, body { width: 210mm; height: 297mm; background: #fff !important; }
+      body { margin: 0; }
+      .topbar, .controls, .preview-toolbar, .preview-footer, .toast { display: none !important; }
+      .app-shell, .workspace, .preview-panel, .preview-stage, .paper-wrap {
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        overflow: visible !important;
+      }
+      .sheet {
+        width: 210mm !important;
+        height: 297mm !important;
+        aspect-ratio: auto !important;
+        box-shadow: none !important;
+      }
+      .label-cell.active::after, .label-cell.blank::after { content: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="brand-copy">
+          <h1>Label Sheet Studio</h1>
+          <p>Print-ready DIN A4 · 3 columns × 5 rows · local PDF export</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="button" id="printButton" type="button">Print / system PDF</button>
+        <button class="button primary" id="downloadButton" type="button">Download PDF</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="controls" aria-label="Label design controls">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>1. Label content</h2>
+              <p>Repeat one design across the selected labels.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="mode-switch" role="tablist" aria-label="Content mode">
+              <button id="textModeTab" type="button" role="tab" aria-controls="textModePanel" aria-selected="true" data-mode="text">Text</button>
+              <button id="imageModeTab" type="button" role="tab" aria-controls="imageModePanel" aria-selected="false" data-mode="image">Image</button>
+            </div>
+
+            <div id="textModePanel" class="mode-panel active" role="tabpanel" aria-labelledby="textModeTab">
+              <div class="field">
+                <label for="labelText">Label text</label>
+                <textarea id="labelText" data-render spellcheck="true">Sample label
+Secondary line</textarea>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="fontFamily">Font</label>
+                  <select id="fontFamily" data-render>
+                    <option value="helvetica">Helvetica</option>
+                    <option value="times">Times</option>
+                    <option value="courier">Courier</option>
+                    <option value="custom">Uploaded TTF</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fontStyle">Style</label>
+                  <select id="fontStyle" data-render>
+                    <option value="normal">Regular</option>
+                    <option value="bold">Bold</option>
+                    <option value="italic">Italic</option>
+                    <option value="bolditalic">Bold italic</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="fontUpload">Custom font</label>
+                <input id="fontUpload" type="file" accept=".ttf,font/ttf" />
+                <span class="field-note" id="fontStatus">Optional. TTF stays in this browser session and is embedded into the PDF.</span>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="textAlign">Horizontal</label>
+                  <select id="textAlign" data-render>
+                    <option value="left">Left</option>
+                    <option value="center" selected>Center</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="verticalAlign">Vertical</label>
+                  <select id="verticalAlign" data-render>
+                    <option value="top">Top</option>
+                    <option value="middle" selected>Middle</option>
+                    <option value="bottom">Bottom</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="fontSize">Maximum size (pt)</label>
+                  <input id="fontSize" type="number" min="4" max="144" step="0.5" value="34" data-render />
+                </div>
+                <div class="field">
+                  <label for="lineHeight">Line height</label>
+                  <input id="lineHeight" type="number" min="0.8" max="2" step="0.05" value="1.15" data-render />
+                </div>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="paddingMm">Inner padding (mm)</label>
+                  <input id="paddingMm" type="number" min="0" max="20" step="0.5" value="4" data-render />
+                </div>
+                <div class="field">
+                  <label for="textColor">Text color</label>
+                  <div class="color-field">
+                    <input id="textColor" type="color" value="#111111" data-render aria-label="Text color" />
+                    <span class="field-note">PDF vector text</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="check-row" for="autoFit">
+                  <input id="autoFit" type="checkbox" checked data-render />
+                  <span><strong>Auto-fit text to each rectangle</strong><span>Recalculates size whenever margins, gaps, padding, font, or text changes.</span></span>
+                </label>
+              </div>
+            </div>
+
+            <div id="imageModePanel" class="mode-panel" role="tabpanel" aria-labelledby="imageModeTab">
+              <div class="field">
+                <label class="drop-zone" id="imageDropZone" for="imageUpload" tabindex="0">
+                  <span>
+                    <strong>Drop an image or choose a file</strong>
+                    <span>PNG, JPEG, WebP, GIF first frame, or SVG</span>
+                    <span class="file-name" id="imageFileName">No image selected</span>
+                  </span>
+                </label>
+                <input id="imageUpload" class="visually-hidden" type="file" accept="image/*" />
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="imageFit">Fit</label>
+                  <select id="imageFit" data-render>
+                    <option value="contain">Contain</option>
+                    <option value="cover" selected>Cover</option>
+                    <option value="stretch">Stretch</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="imageBackground">Background</label>
+                  <div class="color-field">
+                    <input id="imageBackground" type="color" value="#ffffff" data-render aria-label="Image background color" />
+                    <span class="field-note">Fills empty area</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="imageScale">Scale</label>
+                <div class="range-row">
+                  <input id="imageScale" type="range" min="25" max="250" step="1" value="100" data-render />
+                  <input id="imageScaleNumber" type="number" min="25" max="250" step="1" value="100" data-range-pair="imageScale" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="imageRotation">Rotation</label>
+                <div class="range-row">
+                  <input id="imageRotation" type="range" min="-180" max="180" step="1" value="0" data-render />
+                  <input id="imageRotationNumber" type="number" min="-180" max="180" step="1" value="0" data-range-pair="imageRotation" />
+                </div>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="imagePositionX">Horizontal focus (%)</label>
+                  <input id="imagePositionX" type="number" min="0" max="100" step="1" value="50" data-render />
+                </div>
+                <div class="field">
+                  <label for="imagePositionY">Vertical focus (%)</label>
+                  <input id="imagePositionY" type="number" min="0" max="100" step="1" value="50" data-render />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>2. Sheet geometry</h2>
+              <p>A4 preset with editable calibration values.</p>
+            </div>
+            <button class="button compact" id="resetGeometry" type="button">Reset 3 × 5</button>
+          </div>
+          <div class="panel-body">
+            <div class="metric-strip">
+              <div class="metric"><span>Grid</span><strong>3 × 5</strong></div>
+              <div class="metric"><span>Label</span><strong id="labelMetric">70 × 51 mm</strong></div>
+              <div class="metric"><span>Sheet</span><strong>A4 · 210 × 297</strong></div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field"><label for="marginTop">Top margin (mm)</label><input id="marginTop" type="number" min="0" max="120" step="0.1" value="21" data-render /></div>
+              <div class="field"><label for="marginBottom">Bottom margin (mm)</label><input id="marginBottom" type="number" min="0" max="120" step="0.1" value="21" data-render /></div>
+              <div class="field"><label for="marginLeft">Left margin (mm)</label><input id="marginLeft" type="number" min="0" max="100" step="0.1" value="0" data-render /></div>
+              <div class="field"><label for="marginRight">Right margin (mm)</label><input id="marginRight" type="number" min="0" max="100" step="0.1" value="0" data-render /></div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field"><label for="gapX">Column gap (mm)</label><input id="gapX" type="number" min="0" max="40" step="0.1" value="0" data-render /></div>
+              <div class="field"><label for="gapY">Row gap (mm)</label><input id="gapY" type="number" min="0" max="40" step="0.1" value="0" data-render /></div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field"><label for="startPosition">Start at label</label><input id="startPosition" type="number" min="1" max="15" step="1" value="1" data-render /></div>
+              <div class="field"><label for="copyCount">Number of copies</label><input id="copyCount" type="number" min="1" max="15" step="1" value="15" data-render /></div>
+            </div>
+
+            <div class="field">
+              <label class="check-row" for="showGuides">
+                <input id="showGuides" type="checkbox" checked data-render />
+                <span><strong>Show label boundaries in preview</strong><span>Guides are editor-only unless “include guides in PDF” is enabled below.</span></span>
+              </label>
+            </div>
+
+            <div class="geometry-message" id="geometryMessage">Default stock: 21 mm top and bottom borders, then five equal 51 mm rows.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>3. Export</h2>
+              <p>Exact millimetre coordinates; no server upload.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="field">
+              <label for="fileName">PDF filename</label>
+              <input id="fileName" type="text" value="label-sheet-3x5" autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label class="check-row" for="pdfGuides">
+                <input id="pdfGuides" type="checkbox" />
+                <span><strong>Include fine cut guides in PDF</strong><span>Leave disabled for pre-cut sticker paper.</span></span>
+              </label>
+            </div>
+
+            <div class="export-card">
+              <div class="export-row">
+                <button class="button primary" id="downloadButtonSecondary" type="button">Download print-ready PDF</button>
+                <button class="button" id="printButtonSecondary" type="button">Print</button>
+              </div>
+              <ul class="tips">
+                <li>Print at <strong>100% / actual size</strong>; disable “fit to page”.</li>
+                <li>Test one sheet on plain paper and hold it behind the label stock.</li>
+                <li>Uploaded images and fonts never leave this device.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="preview-panel" aria-label="A4 sheet preview">
+        <div class="preview-toolbar">
+          <div>
+            <h2>Live A4 preview</h2>
+            <p id="previewSummary">15 labels · text auto-fit</p>
+          </div>
+          <div class="privacy-badge">Local processing</div>
+        </div>
+        <div class="preview-stage">
+          <div class="paper-wrap">
+            <div class="sheet show-guides" id="sheet" aria-label="DIN A4 label sheet preview"></div>
+          </div>
+        </div>
+        <div class="preview-footer">
+          <span id="computedSize">Each label: <strong>70.00 × 51.00 mm</strong></span>
+          <span id="computedFont">Auto-fit: <strong>34 pt</strong></span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const A4 = Object.freeze({ width: 210, height: 297, columns: 3, rows: 5, count: 15 });
+      const MM_PER_PT = 25.4 / 72;
+      const MM_PER_CSS_PX = 25.4 / 96;
+      const STORAGE_KEY = "label-sheet-studio.settings.v1";
+      const $ = (id) => document.getElementById(id);
+      const renderInputs = [...document.querySelectorAll("[data-render]")];
+      const sheet = $("sheet");
+      const appShell = $("appShell");
+      const measureCanvas = document.createElement("canvas");
+      const measureContext = measureCanvas.getContext("2d");
+
+      let mode = "text";
+      let uploadedImage = null;
+      let uploadedImageUrl = "";
+      let customFont = null;
+      let previewImageDataUrl = "";
+      let toastTimer = 0;
+      let renderFrame = 0;
+      let saveTimer = 0;
+
+      const fontCssFamily = {
+        helvetica: "Arial, Helvetica, sans-serif",
+        times: '"Times New Roman", Times, serif',
+        courier: '"Courier New", Courier, monospace',
+      };
+
+      function numberValue(id, fallback = 0) {
+        const value = Number.parseFloat($(id).value);
+        return Number.isFinite(value) ? value : fallback;
+      }
+
+      function integerValue(id, fallback = 0) {
+        const value = Number.parseInt($(id).value, 10);
+        return Number.isFinite(value) ? value : fallback;
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function stateFromForm() {
+        const start = clamp(integerValue("startPosition", 1), 1, A4.count);
+        const maxCopies = A4.count - start + 1;
+        const copies = clamp(integerValue("copyCount", maxCopies), 1, maxCopies);
+        return {
+          mode,
+          text: $("labelText").value,
+          fontFamily: $("fontFamily").value,
+          fontStyle: $("fontStyle").value,
+          fontSize: clamp(numberValue("fontSize", 34), 4, 144),
+          lineHeight: clamp(numberValue("lineHeight", 1.15), 0.8, 2),
+          padding: clamp(numberValue("paddingMm", 4), 0, 20),
+          textColor: $("textColor").value,
+          textAlign: $("textAlign").value,
+          verticalAlign: $("verticalAlign").value,
+          autoFit: $("autoFit").checked,
+          imageFit: $("imageFit").value,
+          imageScale: clamp(numberValue("imageScale", 100), 25, 250),
+          imageRotation: clamp(numberValue("imageRotation", 0), -180, 180),
+          imagePositionX: clamp(numberValue("imagePositionX", 50), 0, 100),
+          imagePositionY: clamp(numberValue("imagePositionY", 50), 0, 100),
+          imageBackground: $("imageBackground").value,
+          marginTop: clamp(numberValue("marginTop", 21), 0, 120),
+          marginBottom: clamp(numberValue("marginBottom", 21), 0, 120),
+          marginLeft: clamp(numberValue("marginLeft", 0), 0, 100),
+          marginRight: clamp(numberValue("marginRight", 0), 0, 100),
+          gapX: clamp(numberValue("gapX", 0), 0, 40),
+          gapY: clamp(numberValue("gapY", 0), 0, 40),
+          start,
+          copies,
+          showGuides: $("showGuides").checked,
+          pdfGuides: $("pdfGuides").checked,
+          fileName: sanitizeFilename($("fileName").value || "label-sheet-3x5"),
+        };
+      }
+
+      function geometryFor(state) {
+        const usableWidth = A4.width - state.marginLeft - state.marginRight - state.gapX * (A4.columns - 1);
+        const usableHeight = A4.height - state.marginTop - state.marginBottom - state.gapY * (A4.rows - 1);
+        const labelWidth = usableWidth / A4.columns;
+        const labelHeight = usableHeight / A4.rows;
+        const valid = labelWidth > 5 && labelHeight > 5 && usableWidth > 0 && usableHeight > 0;
+        return { usableWidth, usableHeight, labelWidth, labelHeight, valid };
+      }
+
+      function sanitizeFilename(value) {
+        return String(value).trim().replace(/\.pdf$/i, "").replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").replace(/-+/g, "-") || "label-sheet-3x5";
+      }
+
+      function hexToRgb(hex) {
+        const clean = String(hex).replace("#", "");
+        const value = Number.parseInt(clean.length === 3 ? clean.split("").map((x) => x + x).join("") : clean, 16);
+        return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
+      }
+
+      function cssFontFamily(state) {
+        if (state.fontFamily === "custom" && customFont) return `"${customFont.family}", sans-serif`;
+        return fontCssFamily[state.fontFamily] || fontCssFamily.helvetica;
+      }
+
+      function cssFontStyle(state) {
+        return state.fontStyle.includes("italic") ? "italic" : "normal";
+      }
+
+      function cssFontWeight(state) {
+        return state.fontStyle.includes("bold") ? "700" : "400";
+      }
+
+      function measureWidthMm(text, fontPt, state) {
+        const px = fontPt * (96 / 72);
+        measureContext.font = `${cssFontStyle(state)} ${cssFontWeight(state)} ${px}px ${cssFontFamily(state)}`;
+        return measureContext.measureText(text).width * MM_PER_CSS_PX;
+      }
+
+      function splitLongToken(token, maxWidthMm, fontPt, state) {
+        const pieces = [];
+        let current = "";
+        for (const character of [...token]) {
+          const next = current + character;
+          if (current && measureWidthMm(next, fontPt, state) > maxWidthMm) {
+            pieces.push(current);
+            current = character;
+          } else {
+            current = next;
+          }
+        }
+        if (current || pieces.length === 0) pieces.push(current);
+        return pieces;
+      }
+
+      function wrapText(text, maxWidthMm, fontPt, state) {
+        const paragraphs = String(text || "").replace(/\r/g, "").split("\n");
+        const lines = [];
+        for (const paragraph of paragraphs) {
+          if (paragraph === "") {
+            lines.push("");
+            continue;
+          }
+          const words = paragraph.trim().split(/\s+/);
+          let line = "";
+          for (const word of words) {
+            const candidate = line ? `${line} ${word}` : word;
+            if (measureWidthMm(candidate, fontPt, state) <= maxWidthMm) {
+              line = candidate;
+              continue;
+            }
+            if (line) {
+              lines.push(line);
+              line = "";
+            }
+            if (measureWidthMm(word, fontPt, state) <= maxWidthMm) {
+              line = word;
+            } else {
+              const pieces = splitLongToken(word, maxWidthMm, fontPt, state);
+              lines.push(...pieces.slice(0, -1));
+              line = pieces.at(-1) || "";
+            }
+          }
+          lines.push(line);
+        }
+        return lines.length ? lines : [""];
+      }
+
+      function layoutText(state, geometry) {
+        const availableWidth = Math.max(0.1, geometry.labelWidth - state.padding * 2);
+        const availableHeight = Math.max(0.1, geometry.labelHeight - state.padding * 2);
+        const evaluate = (fontPt) => {
+          const lines = wrapText(state.text, availableWidth, fontPt, state);
+          const lineHeightMm = fontPt * MM_PER_PT * state.lineHeight;
+          const height = Math.max(lineHeightMm, lines.length * lineHeightMm);
+          const widest = lines.reduce((max, line) => Math.max(max, measureWidthMm(line, fontPt, state)), 0);
+          return { fontPt, lines, lineHeightMm, height, widest, fits: height <= availableHeight + 0.01 && widest <= availableWidth + 0.01 };
+        };
+
+        if (!state.autoFit) return evaluate(state.fontSize);
+        let low = 4;
+        let high = state.fontSize;
+        let best = evaluate(low);
+        for (let i = 0; i < 18; i += 1) {
+          const mid = (low + high) / 2;
+          const result = evaluate(mid);
+          if (result.fits) {
+            best = result;
+            low = mid;
+          } else {
+            high = mid;
+          }
+        }
+        best.fontPt = Math.floor(best.fontPt * 10) / 10;
+        return evaluate(best.fontPt);
+      }
+
+      function isActiveCell(index, state) {
+        const position = index + 1;
+        return position >= state.start && position < state.start + state.copies;
+      }
+
+      function cellRect(index, state, geometry) {
+        const row = Math.floor(index / A4.columns);
+        const column = index % A4.columns;
+        return {
+          x: state.marginLeft + column * (geometry.labelWidth + state.gapX),
+          y: state.marginTop + row * (geometry.labelHeight + state.gapY),
+          width: geometry.labelWidth,
+          height: geometry.labelHeight,
+        };
+      }
+
+      function renderImageCanvas(state, geometry, targetWidth = 1400) {
+        if (!uploadedImage || !geometry.valid) return "";
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(400, Math.round(targetWidth));
+        canvas.height = Math.max(300, Math.round(targetWidth * geometry.labelHeight / geometry.labelWidth));
+        const context = canvas.getContext("2d", { alpha: false });
+        context.fillStyle = state.imageBackground;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const imageRatio = uploadedImage.naturalWidth / uploadedImage.naturalHeight;
+        const canvasRatio = canvas.width / canvas.height;
+        let drawWidth;
+        let drawHeight;
+        if (state.imageFit === "stretch") {
+          drawWidth = canvas.width;
+          drawHeight = canvas.height;
+        } else if ((state.imageFit === "contain" && imageRatio > canvasRatio) || (state.imageFit === "cover" && imageRatio < canvasRatio)) {
+          drawWidth = canvas.width;
+          drawHeight = drawWidth / imageRatio;
+        } else {
+          drawHeight = canvas.height;
+          drawWidth = drawHeight * imageRatio;
+        }
+        drawWidth *= state.imageScale / 100;
+        drawHeight *= state.imageScale / 100;
+        const x = (canvas.width - drawWidth) * (state.imagePositionX / 100);
+        const y = (canvas.height - drawHeight) * (state.imagePositionY / 100);
+
+        context.save();
+        context.beginPath();
+        context.rect(0, 0, canvas.width, canvas.height);
+        context.clip();
+        context.translate(x + drawWidth / 2, y + drawHeight / 2);
+        context.rotate(state.imageRotation * Math.PI / 180);
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+        context.drawImage(uploadedImage, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+        context.restore();
+        return canvas.toDataURL("image/png");
+      }
+
+      function scheduleRender() {
+        clearTimeout(renderFrame);
+        renderFrame = setTimeout(render, 0);
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveSettings, 160);
+      }
+
+      function render() {
+        const state = stateFromForm();
+        const geometry = geometryFor(state);
+        $("copyCount").max = String(A4.count - state.start + 1);
+        if (integerValue("copyCount", state.copies) !== state.copies) $("copyCount").value = String(state.copies);
+        if (integerValue("startPosition", state.start) !== state.start) $("startPosition").value = String(state.start);
+
+        const textLayout = layoutText(state, geometry);
+        previewImageDataUrl = state.mode === "image" ? renderImageCanvas(state, geometry, 900) : "";
+
+        sheet.classList.toggle("show-guides", state.showGuides);
+        sheet.classList.toggle("invalid", !geometry.valid);
+        sheet.replaceChildren();
+
+        if (geometry.valid) {
+          for (let index = 0; index < A4.count; index += 1) {
+            const rect = cellRect(index, state, geometry);
+            const active = isActiveCell(index, state);
+            const cell = document.createElement("div");
+            cell.className = `label-cell ${active ? "active" : "blank"}`;
+            cell.dataset.index = String(index + 1);
+            cell.style.left = `${rect.x / A4.width * 100}%`;
+            cell.style.top = `${rect.y / A4.height * 100}%`;
+            cell.style.width = `${rect.width / A4.width * 100}%`;
+            cell.style.height = `${rect.height / A4.height * 100}%`;
+
+            if (active) {
+              if (state.mode === "text") {
+                const content = document.createElement("div");
+                const span = document.createElement("span");
+                content.className = "label-text";
+                span.textContent = state.text;
+                const pxPerMm = sheet.clientWidth ? sheet.clientWidth / A4.width : 2.5;
+                content.style.padding = `${state.padding * pxPerMm}px`;
+                content.style.fontFamily = cssFontFamily(state);
+                content.style.fontStyle = cssFontStyle(state);
+                content.style.fontWeight = cssFontWeight(state);
+                content.style.fontSize = `${textLayout.fontPt * MM_PER_PT * pxPerMm}px`;
+                content.style.lineHeight = String(state.lineHeight);
+                content.style.color = state.textColor;
+                content.style.textAlign = state.textAlign;
+                content.style.alignItems = state.verticalAlign === "top" ? "flex-start" : state.verticalAlign === "bottom" ? "flex-end" : "center";
+                content.append(span);
+                cell.append(content);
+              } else if (previewImageDataUrl) {
+                const image = document.createElement("img");
+                image.className = "label-image";
+                image.alt = "";
+                image.src = previewImageDataUrl;
+                cell.append(image);
+              } else {
+                const hint = document.createElement("div");
+                hint.className = "empty-image-hint";
+                hint.textContent = "Choose an image";
+                cell.append(hint);
+              }
+            }
+            sheet.append(cell);
+          }
+        }
+
+        const sizeText = geometry.valid ? `${geometry.labelWidth.toFixed(2)} × ${geometry.labelHeight.toFixed(2)} mm` : "Invalid";
+        $("labelMetric").textContent = sizeText;
+        $("computedSize").innerHTML = geometry.valid ? `Each label: <strong>${sizeText}</strong>` : "<strong>Invalid sheet geometry</strong>";
+        $("computedFont").innerHTML = state.mode === "text" ? `${state.autoFit ? "Auto-fit" : "Font size"}: <strong>${textLayout.fontPt.toFixed(1)} pt</strong>` : uploadedImage ? `<strong>${uploadedImage.naturalWidth} × ${uploadedImage.naturalHeight} px image</strong>` : "<strong>No image selected</strong>";
+        $("previewSummary").textContent = `${state.copies} ${state.copies === 1 ? "label" : "labels"} · ${state.mode === "text" ? (state.autoFit ? "text auto-fit" : "fixed-size text") : "image repeat"}`;
+
+        const message = $("geometryMessage");
+        message.classList.toggle("invalid", !geometry.valid);
+        message.textContent = geometry.valid
+          ? `Computed from A4: ${geometry.labelWidth.toFixed(2)} mm wide × ${geometry.labelHeight.toFixed(2)} mm high. Rows and columns remain equally divided.`
+          : "Margins and gaps leave too little printable area. Reduce them before exporting.";
+
+        for (const button of [$("downloadButton"), $("downloadButtonSecondary")]) button.disabled = !geometry.valid || (state.mode === "image" && !uploadedImage);
+        syncModeUi();
+      }
+
+      function syncModeUi() {
+        for (const button of document.querySelectorAll("[data-mode]")) button.setAttribute("aria-selected", String(button.dataset.mode === mode));
+        $("textModePanel").classList.toggle("active", mode === "text");
+        $("imageModePanel").classList.toggle("active", mode === "image");
+      }
+
+      function showToast(message, type = "success") {
+        const toast = $("toast");
+        toast.textContent = message;
+        toast.classList.toggle("error", type === "error");
+        toast.classList.add("visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("visible"), 3600);
+      }
+
+      function setBusy(busy) {
+        appShell.classList.toggle("busy", busy);
+        for (const button of [$("downloadButton"), $("downloadButtonSecondary")]) button.disabled = busy || button.disabled;
+      }
+
+      function pdfTextCoordinates(rect, state, layout) {
+        const availableHeight = rect.height - state.padding * 2;
+        const blockHeight = layout.lines.length * layout.lineHeightMm;
+        let blockTop = rect.y + state.padding;
+        if (state.verticalAlign === "middle") blockTop += Math.max(0, (availableHeight - blockHeight) / 2);
+        if (state.verticalAlign === "bottom") blockTop += Math.max(0, availableHeight - blockHeight);
+        const fontHeightMm = layout.fontPt * MM_PER_PT;
+        const baseline = blockTop + fontHeightMm * 0.82;
+        const x = state.textAlign === "left" ? rect.x + state.padding : state.textAlign === "right" ? rect.x + rect.width - state.padding : rect.x + rect.width / 2;
+        return { x, baseline };
+      }
+
+      function addCustomFont(doc) {
+        if (!customFont) throw new Error("Choose a TTF font file first, or select a built-in font.");
+        doc.addFileToVFS(customFont.fileName, customFont.base64);
+        doc.addFont(customFont.fileName, "customLabelFont", "normal");
+        doc.setFont("customLabelFont", "normal");
+      }
+
+      async function generatePdf() {
+        const state = stateFromForm();
+        const geometry = geometryFor(state);
+        if (!geometry.valid) return showToast("Sheet geometry is invalid.", "error");
+        if (state.mode === "image" && !uploadedImage) return showToast("Choose an image before exporting.", "error");
+        if (!window.jspdf?.jsPDF) return showToast("PDF engine did not load. Use Print / system PDF instead.", "error");
+
+        setBusy(true);
+        try {
+          await document.fonts.ready;
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true, putOnlyUsedFonts: true });
+          doc.setProperties({
+            title: state.fileName,
+            subject: "DIN A4 3 x 5 label sheet",
+            author: "Label Sheet Studio",
+            creator: "Label Sheet Studio",
+            keywords: "labels, stickers, DIN A4, 3x5",
+          });
+
+          let layout = null;
+          let pdfImage = "";
+          if (state.mode === "text") {
+            layout = layoutText(state, geometry);
+            if (state.fontFamily === "custom") addCustomFont(doc);
+            else doc.setFont(state.fontFamily, state.fontStyle);
+            doc.setFontSize(layout.fontPt);
+            const rgb = hexToRgb(state.textColor);
+            doc.setTextColor(rgb.r, rgb.g, rgb.b);
+          } else {
+            pdfImage = renderImageCanvas(state, geometry, Math.min(1900, Math.max(1200, Math.round(geometry.labelWidth / 25.4 * 520))));
+          }
+
+          for (let index = 0; index < A4.count; index += 1) {
+            if (!isActiveCell(index, state)) continue;
+            const rect = cellRect(index, state, geometry);
+            if (state.mode === "text") {
+              const position = pdfTextCoordinates(rect, state, layout);
+              doc.text(layout.lines, position.x, position.baseline, {
+                align: state.textAlign,
+                baseline: "alphabetic",
+                lineHeightFactor: state.lineHeight,
+                maxWidth: Math.max(0.1, rect.width - state.padding * 2),
+              });
+            } else {
+              doc.addImage(pdfImage, "PNG", rect.x, rect.y, rect.width, rect.height, "label-image", "FAST");
+            }
+          }
+
+          if (state.pdfGuides) {
+            doc.setDrawColor(180, 190, 185);
+            doc.setLineWidth(0.08);
+            for (let index = 0; index < A4.count; index += 1) {
+              const rect = cellRect(index, state, geometry);
+              doc.rect(rect.x, rect.y, rect.width, rect.height);
+            }
+          }
+
+          doc.save(`${state.fileName}.pdf`);
+          showToast(`Downloaded ${state.fileName}.pdf with ${state.copies} labels.`);
+        } catch (error) {
+          console.error(error);
+          showToast(`PDF export failed: ${error.message || error}`, "error");
+        } finally {
+          appShell.classList.remove("busy");
+          scheduleRender();
+        }
+      }
+
+      function printSheet() {
+        const state = stateFromForm();
+        const geometry = geometryFor(state);
+        if (!geometry.valid) return showToast("Sheet geometry is invalid.", "error");
+        if (state.mode === "image" && !uploadedImage) return showToast("Choose an image before printing.", "error");
+        window.print();
+      }
+
+      async function loadImage(file) {
+        if (!file || !file.type.startsWith("image/")) return showToast("Choose a supported image file.", "error");
+        if (file.size > 30 * 1024 * 1024) return showToast("The image is larger than 30 MB. Please use a smaller file.", "error");
+        if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
+        uploadedImageUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.decoding = "async";
+        image.onload = () => {
+          uploadedImage = image;
+          $("imageFileName").textContent = `${file.name} · ${image.naturalWidth} × ${image.naturalHeight}px`;
+          mode = "image";
+          scheduleRender();
+          showToast("Image loaded locally.");
+        };
+        image.onerror = () => showToast("This image could not be decoded.", "error");
+        image.src = uploadedImageUrl;
+      }
+
+      function arrayBufferToBase64(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let offset = 0; offset < bytes.length; offset += chunk) binary += String.fromCharCode(...bytes.subarray(offset, offset + chunk));
+        return btoa(binary);
+      }
+
+      async function loadFont(file) {
+        if (!file || !/\.ttf$/i.test(file.name)) return showToast("Choose a TrueType .ttf font.", "error");
+        if (file.size > 12 * 1024 * 1024) return showToast("The font is larger than 12 MB.", "error");
+        try {
+          const buffer = await file.arrayBuffer();
+          const family = `LabelCustomFont${Date.now()}`;
+          const face = new FontFace(family, buffer);
+          await face.load();
+          document.fonts.add(face);
+          customFont = {
+            family,
+            fileName: file.name.replace(/[^a-z0-9._-]+/gi, "-") || "custom.ttf",
+            base64: arrayBufferToBase64(buffer),
+          };
+          $("fontFamily").value = "custom";
+          $("fontStyle").value = "normal";
+          $("fontStatus").textContent = `${file.name} loaded and ready to embed. Custom fonts use regular style.`;
+          scheduleRender();
+          showToast("Custom font loaded locally.");
+        } catch (error) {
+          console.error(error);
+          showToast("The TTF font could not be loaded.", "error");
+        }
+      }
+
+      function resetGeometry() {
+        const defaults = { marginTop: 21, marginBottom: 21, marginLeft: 0, marginRight: 0, gapX: 0, gapY: 0, startPosition: 1, copyCount: 15 };
+        for (const [id, value] of Object.entries(defaults)) $(id).value = String(value);
+        scheduleRender();
+        showToast("Restored the DIN A4 3 × 5 preset.");
+      }
+
+      function saveSettings() {
+        try {
+          const state = stateFromForm();
+          const persisted = { ...state };
+          delete persisted.fileName;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+        } catch (error) {
+          console.debug("Settings were not saved", error);
+        }
+      }
+
+      function restoreSettings() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (!saved || typeof saved !== "object") return;
+          const controlMap = {
+            text: "labelText", fontFamily: "fontFamily", fontStyle: "fontStyle", fontSize: "fontSize", lineHeight: "lineHeight", padding: "paddingMm", textColor: "textColor", textAlign: "textAlign", verticalAlign: "verticalAlign", autoFit: "autoFit",
+            imageFit: "imageFit", imageScale: "imageScale", imageRotation: "imageRotation", imagePositionX: "imagePositionX", imagePositionY: "imagePositionY", imageBackground: "imageBackground",
+            marginTop: "marginTop", marginBottom: "marginBottom", marginLeft: "marginLeft", marginRight: "marginRight", gapX: "gapX", gapY: "gapY", start: "startPosition", copies: "copyCount", showGuides: "showGuides", pdfGuides: "pdfGuides",
+          };
+          for (const [key, id] of Object.entries(controlMap)) {
+            if (!(key in saved) || !$(id)) continue;
+            if ($(id).type === "checkbox") $(id).checked = Boolean(saved[key]);
+            else $(id).value = String(saved[key]);
+          }
+          if (saved.fontFamily === "custom") $("fontFamily").value = "helvetica";
+          mode = saved.mode === "image" ? "image" : "text";
+          $("imageScaleNumber").value = $("imageScale").value;
+          $("imageRotationNumber").value = $("imageRotation").value;
+        } catch (error) {
+          console.debug("Settings were not restored", error);
+        }
+      }
+
+      for (const input of renderInputs) input.addEventListener("input", scheduleRender);
+      for (const input of renderInputs) input.addEventListener("change", scheduleRender);
+
+      for (const button of document.querySelectorAll("[data-mode]")) {
+        button.addEventListener("click", () => {
+          mode = button.dataset.mode;
+          scheduleRender();
+        });
+      }
+
+      for (const numberInput of document.querySelectorAll("[data-range-pair]")) {
+        const range = $(numberInput.dataset.rangePair);
+        numberInput.addEventListener("input", () => {
+          range.value = numberInput.value;
+          scheduleRender();
+        });
+        range.addEventListener("input", () => { numberInput.value = range.value; });
+      }
+
+      const dropZone = $("imageDropZone");
+      $("imageUpload").addEventListener("change", (event) => loadImage(event.target.files?.[0]));
+      dropZone.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          $("imageUpload").click();
+        }
+      });
+      for (const eventName of ["dragenter", "dragover"]) dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.add("dragging"); });
+      for (const eventName of ["dragleave", "drop"]) dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.remove("dragging"); });
+      dropZone.addEventListener("drop", (event) => loadImage(event.dataTransfer?.files?.[0]));
+
+      $("fontUpload").addEventListener("change", (event) => loadFont(event.target.files?.[0]));
+      $("fontFamily").addEventListener("change", () => {
+        if ($("fontFamily").value === "custom" && !customFont) {
+          $("fontFamily").value = "helvetica";
+          showToast("Upload a TTF font before selecting custom font.", "error");
+        }
+        if ($("fontFamily").value === "custom") $("fontStyle").value = "normal";
+        scheduleRender();
+      });
+      $("fontStyle").addEventListener("change", () => {
+        if ($("fontFamily").value === "custom" && $("fontStyle").value !== "normal") {
+          $("fontStyle").value = "normal";
+          showToast("Uploaded fonts use their regular face in this version.");
+        }
+      });
+
+      $("resetGeometry").addEventListener("click", resetGeometry);
+      for (const button of [$("downloadButton"), $("downloadButtonSecondary")]) button.addEventListener("click", generatePdf);
+      for (const button of [$("printButton"), $("printButtonSecondary")]) button.addEventListener("click", printSheet);
+
+      window.addEventListener("resize", scheduleRender, { passive: true });
+      window.addEventListener("beforeunload", () => { if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl); });
+      document.addEventListener("keydown", (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          generatePdf();
+        }
+      });
+
+      restoreSettings();
+      render();
+    })();
+  </script>
+</body>
+</html>
