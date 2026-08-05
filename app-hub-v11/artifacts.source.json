@@ -39,7 +39,7 @@
       "title": "Label Sheet Studio",
       "kind": "html-path",
       "href": "../label-sheet-studio/index.html",
-      "description": "Local-first DIN A4 3 x 5 label designer for repeating images or auto-fitting text across sticker sheets, calibrating margins and gaps, and exporting exact-size print-ready PDFs.",
+      "description": "Local-first DIN A4 label designer with configurable equal-cell rows and columns, draggable grid positioning and resizing, repeated images or auto-fitting text, and exact-size print-ready PDF export.",
       "tags": [
         "tool",
         "pdf",
@@ -48,6 +48,8 @@
         "printing",
         "typography",
         "image",
+        "grid",
+        "drag-and-drop",
         "local-first",
         "v11"
       ],

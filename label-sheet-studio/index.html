@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#111b18" />
-  <meta name="description" content="Local-first DIN A4 3 x 5 label sheet designer with image and auto-fitting text PDF export." />
+  <meta name="description" content="Local-first DIN A4 label sheet designer with configurable rows and columns, direct grid adjustment, images, auto-fitting text, and PDF export." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111b18'/%3E%3Cg fill='%2377e2b7'%3E%3Crect x='12' y='11' width='11' height='7' rx='2'/%3E%3Crect x='27' y='11' width='11' height='7' rx='2'/%3E%3Crect x='42' y='11' width='11' height='7' rx='2'/%3E%3Crect x='12' y='22' width='11' height='7' rx='2'/%3E%3Crect x='27' y='22' width='11' height='7' rx='2'/%3E%3Crect x='42' y='22' width='11' height='7' rx='2'/%3E%3Crect x='12' y='33' width='11' height='7' rx='2'/%3E%3Crect x='27' y='33' width='11' height='7' rx='2'/%3E%3Crect x='42' y='33' width='11' height='7' rx='2'/%3E%3Crect x='12' y='44' width='11' height='7' rx='2'/%3E%3Crect x='27' y='44' width='11' height='7' rx='2'/%3E%3Crect x='42' y='44' width='11' height='7' rx='2'/%3E%3C/g%3E%3C/svg%3E" />
   <title>Label Sheet Studio</title>
   <style>
@@ -392,6 +392,57 @@
     .label-cell.blank::after { content: attr(data-index); position: absolute; inset: 0; display: grid; place-items: center; color: rgba(0,0,0,0.19); font: 650 11px var(--font-ui); }
     .label-cell.active::after { content: attr(data-index); position: absolute; right: 3px; bottom: 2px; color: rgba(0,0,0,0.18); font: 600 7px var(--font-ui); pointer-events: none; }
 
+    .grid-frame {
+      position: absolute;
+      z-index: 20;
+      border: 2px solid rgba(53, 200, 141, 0.88);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.82), 0 0 0 4px rgba(53, 200, 141, 0.12);
+      pointer-events: none;
+    }
+
+    .grid-drag-handle,
+    .grid-resize-handle {
+      position: absolute;
+      pointer-events: auto;
+      touch-action: none;
+      border: 1px solid rgba(7, 48, 31, 0.38);
+      color: #07301f;
+      background: #77e2b7;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+      user-select: none;
+    }
+
+    .grid-drag-handle {
+      left: 50%;
+      top: 50%;
+      min-width: 74px;
+      min-height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      cursor: move;
+      font: 750 9px var(--font-ui);
+      letter-spacing: 0.02em;
+    }
+
+    .grid-resize-handle {
+      width: 15px;
+      height: 15px;
+      padding: 0;
+      border-radius: 50%;
+    }
+
+    .grid-resize-handle[data-handle="nw"] { left: 0; top: 0; transform: translate(-50%, -50%); cursor: nwse-resize; }
+    .grid-resize-handle[data-handle="ne"] { right: 0; top: 0; transform: translate(50%, -50%); cursor: nesw-resize; }
+    .grid-resize-handle[data-handle="sw"] { left: 0; bottom: 0; transform: translate(-50%, 50%); cursor: nesw-resize; }
+    .grid-resize-handle[data-handle="se"] { right: 0; bottom: 0; transform: translate(50%, 50%); cursor: nwse-resize; }
+
+    .grid-drag-handle:focus-visible,
+    .grid-resize-handle:focus-visible {
+      outline: 3px solid rgba(8, 52, 34, 0.48);
+      outline-offset: 2px;
+    }
+
     .label-text {
       position: absolute;
       inset: 0;
@@ -547,6 +598,7 @@
         box-shadow: none !important;
       }
       .label-cell.active::after, .label-cell.blank::after { content: none !important; }
+      .grid-frame { display: none !important; }
     }
   </style>
 </head>
@@ -559,7 +611,7 @@
         </div>
         <div class="brand-copy">
           <h1>Label Sheet Studio</h1>
-          <p>Print-ready DIN A4 · 3 columns × 5 rows · local PDF export</p>
+          <p>Print-ready DIN A4 · configurable equal-cell grids · local PDF export</p>
         </div>
       </div>
       <div class="top-actions">
@@ -733,15 +785,27 @@ Secondary line</textarea>
           <div class="panel-head">
             <div>
               <h2>2. Sheet geometry</h2>
-              <p>A4 preset with editable calibration values.</p>
+              <p>Configure the grid numerically or manipulate it on the A4 preview.</p>
             </div>
             <button class="button compact" id="resetGeometry" type="button">Reset 3 × 5</button>
           </div>
           <div class="panel-body">
             <div class="metric-strip">
-              <div class="metric"><span>Grid</span><strong>3 × 5</strong></div>
+              <div class="metric"><span>Grid</span><strong id="gridMetric">3 × 5 · 15</strong></div>
               <div class="metric"><span>Label</span><strong id="labelMetric">70 × 51 mm</strong></div>
               <div class="metric"><span>Sheet</span><strong>A4 · 210 × 297</strong></div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field"><label for="columns">Columns</label><input id="columns" type="number" min="1" max="12" step="1" value="3" data-render /></div>
+              <div class="field"><label for="rows">Rows</label><input id="rows" type="number" min="1" max="12" step="1" value="5" data-render /></div>
+            </div>
+
+            <div class="field">
+              <label class="check-row" for="directManipulation">
+                <input id="directManipulation" type="checkbox" checked data-render />
+                <span><strong>Direct grid adjustment</strong><span>Drag the green handle to move the equal-cell grid. Drag a corner to resize its outer bounds; use gap fields for gutters.</span></span>
+              </label>
             </div>
 
             <div class="field-grid">
@@ -768,7 +832,7 @@ Secondary line</textarea>
               </label>
             </div>
 
-            <div class="geometry-message" id="geometryMessage">Default stock: 21 mm top and bottom borders, then five equal 51 mm rows.</div>
+            <div class="geometry-message" id="geometryMessage">Default stock: 21 mm top and bottom borders, then five equal 51 mm rows. Dragging the frame updates these exact millimetre fields.</div>
           </div>
         </section>
 
@@ -834,10 +898,12 @@ Secondary line</textarea>
     (() => {
       "use strict";
 
-      const A4 = Object.freeze({ width: 210, height: 297, columns: 3, rows: 5, count: 15 });
+      const SHEET = Object.freeze({ width: 210, height: 297 });
+      const DEFAULT_GRID = Object.freeze({ columns: 3, rows: 5, marginTop: 21, marginBottom: 21, marginLeft: 0, marginRight: 0, gapX: 0, gapY: 0 });
       const MM_PER_PT = 25.4 / 72;
       const MM_PER_CSS_PX = 25.4 / 96;
-      const STORAGE_KEY = "label-sheet-studio.settings.v1";
+      const STORAGE_KEY = "label-sheet-studio.settings.v2";
+      const LEGACY_STORAGE_KEY = "label-sheet-studio.settings.v1";
       const $ = (id) => document.getElementById(id);
       const renderInputs = [...document.querySelectorAll("[data-render]")];
       const sheet = $("sheet");
@@ -875,10 +941,16 @@ Secondary line</textarea>
       }
 
       function stateFromForm() {
-        const start = clamp(integerValue("startPosition", 1), 1, A4.count);
-        const maxCopies = A4.count - start + 1;
+        const columns = clamp(integerValue("columns", DEFAULT_GRID.columns), 1, 12);
+        const rows = clamp(integerValue("rows", DEFAULT_GRID.rows), 1, 12);
+        const count = columns * rows;
+        const start = clamp(integerValue("startPosition", 1), 1, count);
+        const maxCopies = count - start + 1;
         const copies = clamp(integerValue("copyCount", maxCopies), 1, maxCopies);
         return {
+          columns,
+          rows,
+          count,
           mode,
           text: $("labelText").value,
           fontFamily: $("fontFamily").value,
@@ -896,31 +968,34 @@ Secondary line</textarea>
           imagePositionX: clamp(numberValue("imagePositionX", 50), 0, 100),
           imagePositionY: clamp(numberValue("imagePositionY", 50), 0, 100),
           imageBackground: $("imageBackground").value,
-          marginTop: clamp(numberValue("marginTop", 21), 0, 120),
-          marginBottom: clamp(numberValue("marginBottom", 21), 0, 120),
-          marginLeft: clamp(numberValue("marginLeft", 0), 0, 100),
-          marginRight: clamp(numberValue("marginRight", 0), 0, 100),
-          gapX: clamp(numberValue("gapX", 0), 0, 40),
-          gapY: clamp(numberValue("gapY", 0), 0, 40),
+          marginTop: clamp(numberValue("marginTop", DEFAULT_GRID.marginTop), 0, 120),
+          marginBottom: clamp(numberValue("marginBottom", DEFAULT_GRID.marginBottom), 0, 120),
+          marginLeft: clamp(numberValue("marginLeft", DEFAULT_GRID.marginLeft), 0, 100),
+          marginRight: clamp(numberValue("marginRight", DEFAULT_GRID.marginRight), 0, 100),
+          gapX: clamp(numberValue("gapX", DEFAULT_GRID.gapX), 0, 40),
+          gapY: clamp(numberValue("gapY", DEFAULT_GRID.gapY), 0, 40),
           start,
           copies,
           showGuides: $("showGuides").checked,
+          directManipulation: $("directManipulation").checked,
           pdfGuides: $("pdfGuides").checked,
-          fileName: sanitizeFilename($("fileName").value || "label-sheet-3x5"),
+          fileName: sanitizeFilename($("fileName").value || `label-sheet-${columns}x${rows}`),
         };
       }
 
       function geometryFor(state) {
-        const usableWidth = A4.width - state.marginLeft - state.marginRight - state.gapX * (A4.columns - 1);
-        const usableHeight = A4.height - state.marginTop - state.marginBottom - state.gapY * (A4.rows - 1);
-        const labelWidth = usableWidth / A4.columns;
-        const labelHeight = usableHeight / A4.rows;
+        const gridWidth = SHEET.width - state.marginLeft - state.marginRight;
+        const gridHeight = SHEET.height - state.marginTop - state.marginBottom;
+        const usableWidth = gridWidth - state.gapX * (state.columns - 1);
+        const usableHeight = gridHeight - state.gapY * (state.rows - 1);
+        const labelWidth = usableWidth / state.columns;
+        const labelHeight = usableHeight / state.rows;
         const valid = labelWidth > 5 && labelHeight > 5 && usableWidth > 0 && usableHeight > 0;
-        return { usableWidth, usableHeight, labelWidth, labelHeight, valid };
+        return { gridWidth, gridHeight, usableWidth, usableHeight, labelWidth, labelHeight, valid };
       }
 
       function sanitizeFilename(value) {
-        return String(value).trim().replace(/\.pdf$/i, "").replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").replace(/-+/g, "-") || "label-sheet-3x5";
+        return String(value).trim().replace(/\.pdf$/i, "").replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").replace(/-+/g, "-") || "label-sheet";
       }
 
       function hexToRgb(hex) {
@@ -1032,8 +1107,8 @@ Secondary line</textarea>
       }
 
       function cellRect(index, state, geometry) {
-        const row = Math.floor(index / A4.columns);
-        const column = index % A4.columns;
+        const row = Math.floor(index / state.columns);
+        const column = index % state.columns;
         return {
           x: state.marginLeft + column * (geometry.labelWidth + state.gapX),
           y: state.marginTop + row * (geometry.labelHeight + state.gapY),
@@ -1042,11 +1117,156 @@ Secondary line</textarea>
         };
       }
 
-      function renderImageCanvas(state, geometry, targetWidth = 1400) {
+      function roundedMm(value) {
+        return Math.round(value * 10) / 10;
+      }
+
+      function writeMarginInputs(margins) {
+        $("marginLeft").value = String(roundedMm(margins.left));
+        $("marginRight").value = String(roundedMm(margins.right));
+        $("marginTop").value = String(roundedMm(margins.top));
+        $("marginBottom").value = String(roundedMm(margins.bottom));
+      }
+
+      function positionGridFrame(frame, margins) {
+        const width = SHEET.width - margins.left - margins.right;
+        const height = SHEET.height - margins.top - margins.bottom;
+        frame.style.left = `${margins.left / SHEET.width * 100}%`;
+        frame.style.top = `${margins.top / SHEET.height * 100}%`;
+        frame.style.width = `${width / SHEET.width * 100}%`;
+        frame.style.height = `${height / SHEET.height * 100}%`;
+      }
+
+      function minimumGridSize(state) {
+        return {
+          width: state.columns * 5.1 + Math.max(0, state.columns - 1) * state.gapX,
+          height: state.rows * 5.1 + Math.max(0, state.rows - 1) * state.gapY,
+        };
+      }
+
+      function draggedMargins(handle, base, dx, dy, state, geometry) {
+        const next = { ...base };
+        const minimum = minimumGridSize(state);
+        if (handle === "move") {
+          const left = clamp(base.left + dx, 0, SHEET.width - geometry.gridWidth);
+          const top = clamp(base.top + dy, 0, SHEET.height - geometry.gridHeight);
+          next.left = left;
+          next.right = SHEET.width - geometry.gridWidth - left;
+          next.top = top;
+          next.bottom = SHEET.height - geometry.gridHeight - top;
+          return next;
+        }
+        if (handle.includes("w")) next.left = clamp(base.left + dx, 0, SHEET.width - base.right - minimum.width);
+        if (handle.includes("e")) next.right = clamp(base.right - dx, 0, SHEET.width - base.left - minimum.width);
+        if (handle.includes("n")) next.top = clamp(base.top + dy, 0, SHEET.height - base.bottom - minimum.height);
+        if (handle.includes("s")) next.bottom = clamp(base.bottom - dy, 0, SHEET.height - base.top - minimum.height);
+        return next;
+      }
+
+      function attachGridHandleInteraction(button, handle, frame, state, geometry) {
+        const base = {
+          left: state.marginLeft,
+          right: state.marginRight,
+          top: state.marginTop,
+          bottom: state.marginBottom,
+        };
+
+        button.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          button.setPointerCapture(event.pointerId);
+          const sheetRect = sheet.getBoundingClientRect();
+          const startX = event.clientX;
+          const startY = event.clientY;
+          const onMove = (moveEvent) => {
+            const dx = (moveEvent.clientX - startX) * SHEET.width / sheetRect.width;
+            const dy = (moveEvent.clientY - startY) * SHEET.height / sheetRect.height;
+            const next = draggedMargins(handle, base, dx, dy, state, geometry);
+            writeMarginInputs(next);
+            positionGridFrame(frame, next);
+          };
+          const onEnd = () => {
+            button.removeEventListener("pointermove", onMove);
+            button.removeEventListener("pointerup", onEnd);
+            button.removeEventListener("pointercancel", onEnd);
+            scheduleRender();
+          };
+          button.addEventListener("pointermove", onMove);
+          button.addEventListener("pointerup", onEnd);
+          button.addEventListener("pointercancel", onEnd);
+        });
+
+        button.addEventListener("keydown", (event) => {
+          if (!event.key.startsWith("Arrow")) return;
+          event.preventDefault();
+          const step = event.shiftKey ? 2 : 0.5;
+          const dx = event.key === "ArrowLeft" ? -step : event.key === "ArrowRight" ? step : 0;
+          const dy = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
+          const current = stateFromForm();
+          const currentGeometry = geometryFor(current);
+          const currentMargins = {
+            left: current.marginLeft,
+            right: current.marginRight,
+            top: current.marginTop,
+            bottom: current.marginBottom,
+          };
+          writeMarginInputs(draggedMargins(handle, currentMargins, dx, dy, current, currentGeometry));
+          scheduleRender();
+          const selector = handle === "move" ? ".grid-drag-handle" : `.grid-resize-handle[data-handle="${handle}"]`;
+          setTimeout(() => sheet.querySelector(selector)?.focus({ preventScroll: true }), 5);
+        });
+      }
+
+      function renderGridManipulator(state, geometry) {
+        const frame = document.createElement("div");
+        frame.className = "grid-frame";
+        frame.setAttribute("role", "group");
+        frame.setAttribute("aria-label", "Direct grid adjustment controls");
+        positionGridFrame(frame, {
+          left: state.marginLeft,
+          right: state.marginRight,
+          top: state.marginTop,
+          bottom: state.marginBottom,
+        });
+
+        const move = document.createElement("button");
+        move.type = "button";
+        move.className = "grid-drag-handle";
+        move.textContent = "Drag grid";
+        move.setAttribute("aria-label", "Move grid. Use arrow keys for 0.5 millimetres; hold Shift for 2 millimetres.");
+        attachGridHandleInteraction(move, "move", frame, state, geometry);
+        frame.append(move);
+
+        for (const handle of ["nw", "ne", "sw", "se"]) {
+          const corner = document.createElement("button");
+          corner.type = "button";
+          corner.className = "grid-resize-handle";
+          corner.dataset.handle = handle;
+          corner.setAttribute("aria-label", `Resize grid from ${handle.toUpperCase()} corner. Use arrow keys for precise adjustment.`);
+          attachGridHandleInteraction(corner, handle, frame, state, geometry);
+          frame.append(corner);
+        }
+        sheet.append(frame);
+      }
+
+      function renderImageCanvas(state, geometry, targetWidth = 1400, limits = {}) {
         if (!uploadedImage || !geometry.valid) return "";
         const canvas = document.createElement("canvas");
-        canvas.width = Math.max(400, Math.round(targetWidth));
-        canvas.height = Math.max(300, Math.round(targetWidth * geometry.labelHeight / geometry.labelWidth));
+        const aspect = geometry.labelHeight / geometry.labelWidth;
+        let width = Math.max(400, targetWidth);
+        let height = width * aspect;
+        if (height < 300) {
+          const scale = 300 / height;
+          width *= scale;
+          height = 300;
+        }
+        const maxDimension = limits.maxDimension || 2400;
+        const dimensionScale = Math.min(1, maxDimension / Math.max(width, height));
+        width *= dimensionScale;
+        height *= dimensionScale;
+        const maxPixels = limits.maxPixels || 4_000_000;
+        const pixelScale = Math.min(1, Math.sqrt(maxPixels / (width * height)));
+        canvas.width = Math.max(1, Math.round(width * pixelScale));
+        canvas.height = Math.max(1, Math.round(height * pixelScale));
         const context = canvas.getContext("2d", { alpha: false });
         context.fillStyle = state.imageBackground;
         context.fillRect(0, 0, canvas.width, canvas.height);
@@ -1093,28 +1313,31 @@ Secondary line</textarea>
       function render() {
         const state = stateFromForm();
         const geometry = geometryFor(state);
-        $("copyCount").max = String(A4.count - state.start + 1);
+        $("copyCount").max = String(state.count - state.start + 1);
+        $("startPosition").max = String(state.count);
         if (integerValue("copyCount", state.copies) !== state.copies) $("copyCount").value = String(state.copies);
         if (integerValue("startPosition", state.start) !== state.start) $("startPosition").value = String(state.start);
 
         const textLayout = layoutText(state, geometry);
-        previewImageDataUrl = state.mode === "image" ? renderImageCanvas(state, geometry, 900) : "";
+        previewImageDataUrl = state.mode === "image"
+          ? renderImageCanvas(state, geometry, 640, { maxDimension: 1200, maxPixels: 1_000_000 })
+          : "";
 
         sheet.classList.toggle("show-guides", state.showGuides);
         sheet.classList.toggle("invalid", !geometry.valid);
         sheet.replaceChildren();
 
         if (geometry.valid) {
-          for (let index = 0; index < A4.count; index += 1) {
+          for (let index = 0; index < state.count; index += 1) {
             const rect = cellRect(index, state, geometry);
             const active = isActiveCell(index, state);
             const cell = document.createElement("div");
             cell.className = `label-cell ${active ? "active" : "blank"}`;
             cell.dataset.index = String(index + 1);
-            cell.style.left = `${rect.x / A4.width * 100}%`;
-            cell.style.top = `${rect.y / A4.height * 100}%`;
-            cell.style.width = `${rect.width / A4.width * 100}%`;
-            cell.style.height = `${rect.height / A4.height * 100}%`;
+            cell.style.left = `${rect.x / SHEET.width * 100}%`;
+            cell.style.top = `${rect.y / SHEET.height * 100}%`;
+            cell.style.width = `${rect.width / SHEET.width * 100}%`;
+            cell.style.height = `${rect.height / SHEET.height * 100}%`;
 
             if (active) {
               if (state.mode === "text") {
@@ -1122,7 +1345,7 @@ Secondary line</textarea>
                 const span = document.createElement("span");
                 content.className = "label-text";
                 span.textContent = state.text;
-                const pxPerMm = sheet.clientWidth ? sheet.clientWidth / A4.width : 2.5;
+                const pxPerMm = sheet.clientWidth ? sheet.clientWidth / SHEET.width : 2.5;
                 content.style.padding = `${state.padding * pxPerMm}px`;
                 content.style.fontFamily = cssFontFamily(state);
                 content.style.fontStyle = cssFontStyle(state);
@@ -1149,19 +1372,21 @@ Secondary line</textarea>
             }
             sheet.append(cell);
           }
+          if (state.directManipulation) renderGridManipulator(state, geometry);
         }
 
         const sizeText = geometry.valid ? `${geometry.labelWidth.toFixed(2)} × ${geometry.labelHeight.toFixed(2)} mm` : "Invalid";
+        $("gridMetric").textContent = `${state.columns} × ${state.rows} · ${state.count}`;
         $("labelMetric").textContent = sizeText;
         $("computedSize").innerHTML = geometry.valid ? `Each label: <strong>${sizeText}</strong>` : "<strong>Invalid sheet geometry</strong>";
         $("computedFont").innerHTML = state.mode === "text" ? `${state.autoFit ? "Auto-fit" : "Font size"}: <strong>${textLayout.fontPt.toFixed(1)} pt</strong>` : uploadedImage ? `<strong>${uploadedImage.naturalWidth} × ${uploadedImage.naturalHeight} px image</strong>` : "<strong>No image selected</strong>";
-        $("previewSummary").textContent = `${state.copies} ${state.copies === 1 ? "label" : "labels"} · ${state.mode === "text" ? (state.autoFit ? "text auto-fit" : "fixed-size text") : "image repeat"}`;
+        $("previewSummary").textContent = `${state.columns} × ${state.rows} grid · ${state.copies} ${state.copies === 1 ? "label" : "labels"} · ${state.mode === "text" ? (state.autoFit ? "text auto-fit" : "fixed-size text") : "image repeat"}`;
 
         const message = $("geometryMessage");
         message.classList.toggle("invalid", !geometry.valid);
         message.textContent = geometry.valid
-          ? `Computed from A4: ${geometry.labelWidth.toFixed(2)} mm wide × ${geometry.labelHeight.toFixed(2)} mm high. Rows and columns remain equally divided.`
-          : "Margins and gaps leave too little printable area. Reduce them before exporting.";
+          ? `${state.columns} × ${state.rows} equal-cell grid: ${geometry.labelWidth.toFixed(2)} × ${geometry.labelHeight.toFixed(2)} mm per label. Drag the frame to update margins; gutters remain exact numeric values.`
+          : "Margins, gaps, rows, and columns leave too little printable area. Reduce them before exporting.";
 
         for (const button of [$("downloadButton"), $("downloadButtonSecondary")]) button.disabled = !geometry.valid || (state.mode === "image" && !uploadedImage);
         syncModeUi();
@@ -1221,10 +1446,10 @@ Secondary line</textarea>
           const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true, putOnlyUsedFonts: true });
           doc.setProperties({
             title: state.fileName,
-            subject: "DIN A4 3 x 5 label sheet",
+            subject: `DIN A4 ${state.columns} x ${state.rows} label sheet`,
             author: "Label Sheet Studio",
             creator: "Label Sheet Studio",
-            keywords: "labels, stickers, DIN A4, 3x5",
+            keywords: `labels, stickers, DIN A4, ${state.columns}x${state.rows}`,
           });
 
           let layout = null;
@@ -1237,10 +1462,15 @@ Secondary line</textarea>
             const rgb = hexToRgb(state.textColor);
             doc.setTextColor(rgb.r, rgb.g, rgb.b);
           } else {
-            pdfImage = renderImageCanvas(state, geometry, Math.min(1900, Math.max(1200, Math.round(geometry.labelWidth / 25.4 * 520))));
+            pdfImage = renderImageCanvas(
+              state,
+              geometry,
+              Math.min(1900, Math.max(1200, Math.round(geometry.labelWidth / 25.4 * 520))),
+              { maxDimension: 2400, maxPixels: 4_000_000 },
+            );
           }
 
-          for (let index = 0; index < A4.count; index += 1) {
+          for (let index = 0; index < state.count; index += 1) {
             if (!isActiveCell(index, state)) continue;
             const rect = cellRect(index, state, geometry);
             if (state.mode === "text") {
@@ -1259,7 +1489,7 @@ Secondary line</textarea>
           if (state.pdfGuides) {
             doc.setDrawColor(180, 190, 185);
             doc.setLineWidth(0.08);
-            for (let index = 0; index < A4.count; index += 1) {
+            for (let index = 0; index < state.count; index += 1) {
               const rect = cellRect(index, state, geometry);
               doc.rect(rect.x, rect.y, rect.width, rect.height);
             }
@@ -1335,9 +1565,32 @@ Secondary line</textarea>
         }
       }
 
+      function updateDefaultFilename(columns, rows) {
+        if (/^label-sheet-\d+x\d+$/i.test($("fileName").value.trim())) {
+          $("fileName").value = `label-sheet-${columns}x${rows}`;
+        }
+      }
+
+      function applyGridDimensions() {
+        const columns = clamp(integerValue("columns", DEFAULT_GRID.columns), 1, 12);
+        const rows = clamp(integerValue("rows", DEFAULT_GRID.rows), 1, 12);
+        $("columns").value = String(columns);
+        $("rows").value = String(rows);
+        $("startPosition").value = "1";
+        $("copyCount").value = String(columns * rows);
+        updateDefaultFilename(columns, rows);
+        scheduleRender();
+      }
+
       function resetGeometry() {
-        const defaults = { marginTop: 21, marginBottom: 21, marginLeft: 0, marginRight: 0, gapX: 0, gapY: 0, startPosition: 1, copyCount: 15 };
+        const defaults = {
+          ...DEFAULT_GRID,
+          startPosition: 1,
+          copyCount: DEFAULT_GRID.columns * DEFAULT_GRID.rows,
+        };
         for (const [id, value] of Object.entries(defaults)) $(id).value = String(value);
+        $("directManipulation").checked = true;
+        updateDefaultFilename(DEFAULT_GRID.columns, DEFAULT_GRID.rows);
         scheduleRender();
         showToast("Restored the DIN A4 3 × 5 preset.");
       }
@@ -1355,12 +1608,13 @@ Secondary line</textarea>
 
       function restoreSettings() {
         try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY) || "null";
+          const saved = JSON.parse(raw);
           if (!saved || typeof saved !== "object") return;
           const controlMap = {
             text: "labelText", fontFamily: "fontFamily", fontStyle: "fontStyle", fontSize: "fontSize", lineHeight: "lineHeight", padding: "paddingMm", textColor: "textColor", textAlign: "textAlign", verticalAlign: "verticalAlign", autoFit: "autoFit",
             imageFit: "imageFit", imageScale: "imageScale", imageRotation: "imageRotation", imagePositionX: "imagePositionX", imagePositionY: "imagePositionY", imageBackground: "imageBackground",
-            marginTop: "marginTop", marginBottom: "marginBottom", marginLeft: "marginLeft", marginRight: "marginRight", gapX: "gapX", gapY: "gapY", start: "startPosition", copies: "copyCount", showGuides: "showGuides", pdfGuides: "pdfGuides",
+            columns: "columns", rows: "rows", marginTop: "marginTop", marginBottom: "marginBottom", marginLeft: "marginLeft", marginRight: "marginRight", gapX: "gapX", gapY: "gapY", start: "startPosition", copies: "copyCount", showGuides: "showGuides", directManipulation: "directManipulation", pdfGuides: "pdfGuides",
           };
           for (const [key, id] of Object.entries(controlMap)) {
             if (!(key in saved) || !$(id)) continue;
@@ -1371,6 +1625,7 @@ Secondary line</textarea>
           mode = saved.mode === "image" ? "image" : "text";
           $("imageScaleNumber").value = $("imageScale").value;
           $("imageRotationNumber").value = $("imageRotation").value;
+          updateDefaultFilename(clamp(integerValue("columns", DEFAULT_GRID.columns), 1, 12), clamp(integerValue("rows", DEFAULT_GRID.rows), 1, 12));
         } catch (error) {
           console.debug("Settings were not restored", error);
         }
@@ -1378,6 +1633,8 @@ Secondary line</textarea>
 
       for (const input of renderInputs) input.addEventListener("input", scheduleRender);
       for (const input of renderInputs) input.addEventListener("change", scheduleRender);
+      $("columns").addEventListener("change", applyGridDimensions);
+      $("rows").addEventListener("change", applyGridDimensions);
 
       for (const button of document.querySelectorAll("[data-mode]")) {
         button.addEventListener("click", () => {
