@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "hyperblast-shooter",
+  "title": "Hyperblast Shooter",
+  "description": "Published independent submodule pinned to the parent-owned reachable revision; newer locally verified release branches remain outside the parent gitlink until published.",
+  "kind": "application",
+  "status": "provisional",
+  "required": true,
+  "tags": ["game", "project", "submodule"],
+  "source": {
+    "kind": "project",
+    "path": "hyperblast-shooter",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "submodule",
+      "repository": "https://github.com/fkr-0/hyperblast-shooter.git",
+      "revision": "df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204"
+    }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": false,
+    "exclude": [".github/**", ".ws-bridge/**", "tests/**", "test-results/**", "docs/**", "package*.json", "playwright.config.mjs", "bridge.yml"]
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "floating", "newWindow"],
+    "sandbox": "trusted"
+  }
+}

@@ -22,7 +22,7 @@ Current clean worktrees:
 | Badger Sprawl Runner | `rescue/badger-mixed-worktree-20260805` | `5a7b946c9457` | clean rescue checkpoint |
 | Badger Pixi migration worktree | `worktree-pixi-migration` | `45072948b0eb` | clean verified prototype |
 | Ethic Brawl | `rescue/ethic-brawl-mixed-worktree-20260805` | `3e4d7ed94e20` | clean rescue checkpoint |
-| Hyperblast Shooter | `release/v0.8.0` | `5a1450f7c76a` | clean after generated-runtime restore |
+| Hyperblast Shooter | detached at parent pin | `df79a2fc9dd4` | published submodule aligned; local `release/v0.8.0` preserved at `5a1450f7c76a` |
 | V11 Peer DAW | detached at parent pin | `37783861b768` | published submodule aligned; local `main` preserved at `5a45fe665fb8` |
 | Inf Arrange | parent-owned | former child `dd0db5f204f7` | root-owned project; complete former history preserved as a verified bundle |
 | Bathroom Emergency Guide | parent-owned | former main `f1ef78d5c292`; former alt `e19763de3047` | verified canonical integration and alternate source library adopted as distinct root-owned directories |
@@ -76,8 +76,9 @@ SHA-256 1becf616e1563c88cdff0d49ac8b93728f42767ffba2879949f5caca8cfb64f9
 
 Parent action:
 
-- keep the current child revision unless a deliberate runtime 1.12 upgrade is prepared with matching release metadata;
-- do not update the parent gitlink merely because the checkout is currently at a different recorded revision.
+- parent ownership remains pinned to published revision `df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204`;
+- the checkout was realigned to that pin because the verified `v0.8.0` commit and tag are not reachable from the canonical remote;
+- publish the local release branch first, then promote the gitlink deliberately rather than recording an uncloneable pointer.
 
 ### V11 Peer DAW
 
@@ -560,7 +561,7 @@ Current parent submodule status:
 ```text
 +5a7b946c94574b6764eef4850feb7bcf339ad8d7 badger-sprawl-runner
 +3e4d7ed94e20e23b983410bcbc1619aae73a48b3 ethic-brawl
-+5a1450f7c76af6a725e384402ba7e5bd9595c296 hyperblast-shooter
+ df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204 hyperblast-shooter
  37783861b7681852b0605a891a2b831c4cde82de v11-peer-daw
 ```
 
@@ -569,7 +570,7 @@ A leading `+` means the checked-out child revision differs from the parent gitli
 Recommended parent commits, separately reviewed:
 
 1. V11 Peer DAW ownership reconciled: keep the published parent pin until the verified child commits are published and deliberately promoted.
-2. Hyperblast gitlink normalization only after comparing the recorded parent revision and the clean v0.8.0 child.
+2. Hyperblast ownership normalized: retain the published parent pin until the verified `v0.8.0` branch and tag are published.
 3. Badger gitlink update only after rescue-to-release reconciliation.
 4. Ethic Brawl gitlink update only after rescue-to-1.7.x reconciliation and browser repair.
 5. Inf Arrange ownership reconciled as a root-owned parent project with recoverable former Git history.
@@ -581,8 +582,7 @@ Recommended parent commits, separately reviewed:
 1. Compare Badger rescue branch against `release/v1.3.0` by subsystem.
 2. Compare Ethic rescue branch against 1.7.1/1.7.2 worktrees and repair browser startup.
 3. Review Bathroom Emergency Guide `4.14.0-alt.2` for promotion from experimental integration version to a normal release version/tag.
-4. Normalize Hyperblast's parent gitlink after its recorded revision is reviewed.
-5. Publish the verified V11 Peer DAW child commits before deliberately promoting its parent gitlink.
+4. Publish the verified Hyperblast `v0.8.0` branch/tag and V11 Peer DAW child commits before deliberately promoting either parent gitlink.
 
 ## Definition of completion for this review phase
 
@@ -664,3 +664,24 @@ SHA-256 8cccec9d53b1bd78d337bd8480c450f233da90ab750d044c9ec1a71a3cd5ef2d
 
 /tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-alt.git/
 ```
+
+### Hyperblast Shooter
+
+Ownership remains `submodule`. The canonical remote exposes `main` and `HEAD` at the parent-recorded revision `df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204`, while the clean local `release/v0.8.0` branch and annotated `v0.8.0` tag resolve to `5a1450f7c76af6a725e384402ba7e5bd9595c296` and are not published remotely.
+
+The child checkout was therefore realigned to the parent pin instead of promoting an unreachable commit. All local release branches, tags, worktree refs, and review refs remain in the child object database, and a complete bundle was captured before alignment.
+
+Recovery evidence:
+
+```text
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/hyperblast-before-parent-alignment.bundle
+SHA-256 797f0bf161ea2b336c6cc005ef58c31a70007b33a44936898decc120c2175eda
+```
+
+Resume the unpublished release locally with:
+
+```sh
+git -C hyperblast-shooter switch release/v0.8.0
+```
+
+Do not update the parent gitlink until `5a1450f7c76af6a725e384402ba7e5bd9595c296` is reachable from the canonical remote.
