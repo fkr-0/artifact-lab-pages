@@ -1,0 +1,70 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "width": 760,
+  "height": 300,
+  "padding": 18,
+  "data": {
+    "name": "table"
+  },
+  "encoding": {
+    "y": {
+      "field": "condition",
+      "type": "nominal",
+      "sort": [
+        "8 h time in bed",
+        "6 h time in bed",
+        "4 h time in bed",
+        "0 h comparator"
+      ],
+      "axis": {
+        "title": null,
+        "labelFontWeight": "bold"
+      }
+    },
+    "x": {
+      "field": "duration_days",
+      "type": "quantitative",
+      "scale": {
+        "domain": [
+          0,
+          15
+        ]
+      },
+      "axis": {
+        "title": "Assigned exposure duration (days)",
+        "values": [
+          0,
+          3,
+          7,
+          14
+        ]
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "height": 28,
+        "stroke": "#172033",
+        "strokeWidth": 1,
+        "color": "#175cd3"
+      },
+      "encoding": {}
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 8,
+        "fontWeight": "bold",
+        "fontSize": 12
+      },
+      "encoding": {
+        "text": {
+          "field": "label"
+        }
+      }
+    }
+  ]
+}

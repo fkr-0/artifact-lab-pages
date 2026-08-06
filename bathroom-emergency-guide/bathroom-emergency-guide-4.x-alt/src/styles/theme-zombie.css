@@ -1,0 +1,7 @@
+/* src/styles/theme-zombie.css — The Olive Book */
+:root {
+  --sg-accent: #4A6741;
+  --sg-accent-dim: #3b5234;
+  --sg-accent-glow: rgba(74,103,65,0.06);
+  --sg-text-on-accent: #ffffff; /* #4A6741 passes WCAG AA with white (≈5.72:1) */
+}

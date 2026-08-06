@@ -1,0 +1,216 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "padding": 18,
+  "data": {
+    "name": "table"
+  },
+  "hconcat": [
+    {
+      "width": 330,
+      "height": 270,
+      "transform": [
+        {
+          "filter": "datum.panel === 'Lifetime infertility'"
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "rule",
+            "strokeWidth": 5,
+            "color": "#175cd3"
+          },
+          "encoding": {
+            "x": {
+              "field": "panel",
+              "type": "nominal",
+              "axis": {
+                "title": null,
+                "labels": false,
+                "ticks": false
+              }
+            },
+            "y": {
+              "field": "value",
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  0,
+                  25
+                ]
+              },
+              "axis": {
+                "title": "People per 100",
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25
+                ]
+              }
+            },
+            "y2": {
+              "datum": 0
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "dy": -12,
+            "fontWeight": "bold",
+            "fontSize": 13
+          },
+          "encoding": {
+            "x": {
+              "field": "panel",
+              "type": "nominal"
+            },
+            "y": {
+              "field": "value",
+              "type": "quantitative",
+              "axis": null
+            },
+            "text": {
+              "field": "label"
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Lifetime infertility",
+        "anchor": "middle",
+        "fontSize": 14
+      }
+    },
+    {
+      "width": 330,
+      "height": 270,
+      "transform": [
+        {
+          "filter": "datum.panel === 'Postpartum psychosis'"
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "rule",
+            "strokeWidth": 8,
+            "color": "#b54708"
+          },
+          "encoding": {
+            "x": {
+              "field": "panel",
+              "type": "nominal",
+              "axis": {
+                "title": null,
+                "labels": false,
+                "ticks": false
+              }
+            },
+            "y": {
+              "field": "lower",
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  0,
+                  3.2
+                ]
+              },
+              "axis": {
+                "title": "Incidence estimates per 1,000",
+                "values": [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              }
+            },
+            "y2": {
+              "field": "upper"
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 145,
+            "shape": "diamond",
+            "color": "#fffdf8",
+            "stroke": "#172033",
+            "strokeWidth": 2
+          },
+          "encoding": {
+            "x": {
+              "field": "panel",
+              "type": "nominal"
+            },
+            "y": {
+              "field": "lower",
+              "type": "quantitative",
+              "axis": null
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 145,
+            "shape": "diamond",
+            "color": "#fffdf8",
+            "stroke": "#172033",
+            "strokeWidth": 2
+          },
+          "encoding": {
+            "x": {
+              "field": "panel",
+              "type": "nominal"
+            },
+            "y": {
+              "field": "upper",
+              "type": "quantitative",
+              "axis": null
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "dy": -14,
+            "fontWeight": "bold",
+            "fontSize": 13
+          },
+          "encoding": {
+            "x": {
+              "field": "panel",
+              "type": "nominal"
+            },
+            "y": {
+              "field": "upper",
+              "type": "quantitative",
+              "axis": null
+            },
+            "text": {
+              "field": "label"
+            }
+          }
+        }
+      ],
+      "title": {
+        "text": "Postpartum psychosis",
+        "anchor": "middle",
+        "fontSize": 14
+      }
+    }
+  ],
+  "resolve": {
+    "scale": {
+      "y": "independent"
+    }
+  }
+}

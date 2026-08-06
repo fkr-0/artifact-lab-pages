@@ -1,0 +1,192 @@
+project: bathroom-emergency-guide
+version: 4.13.1
+release_date: 2026-08-02
+source_revision: e32d176a3abf
+source_date_epoch: 1785673282
+implementation_commit: e32d176
+local_tag: v4.13.1
+tag_target: commit containing this evidence record
+push_performed: false
+publish_performed: false
+deployment_performed: false
+
+patch_scope:
+  semantic_content_changed: false
+  route_identity_changed: false
+  source_claims_changed: false
+  stable_existing_references_changed: false
+  changes:
+    - project-local Fontconfig profile for offline Vega and SVG raster rendering
+    - supported bold diagram weights replacing unavailable black-weight requests
+    - successful child-renderer stderr propagation
+    - warning-free temporary smoke rendering of all eight Vega-Lite figures
+    - exact SVG and PNG output-set validation
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 335
+  retired_stable_resources: 1
+  standalone_nodes: [O, A, B, C, D, H, Z, P, T, R]
+  master_only_nodes: []
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 675
+  current_non_vega_illustrations: 33
+  vega_lite_figures: 8
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sections: 227
+    sources: 54
+    reader_visuals: 41
+    standalone_nodes: 10
+
+render_tooling:
+  fontconfig:
+    path: src/visualizations/fontconfig.conf
+    bytes: 1063
+    sha256: bbba262405d236e52a067c84fd1e66eb1fff50f402878893c47f3d62f8a603e3
+    declared_in: src/data/visualization_catalog.json
+    generic_families: [DejaVu Sans, DejaVu Serif, DejaVu Sans Mono]
+  validator:
+    path: bin/validate_render_tooling.py
+    bytes: 3007
+    sha256: 964e1b4d4815c2d92bdefe5e340563a71547d591990f625a155b84916615fa69
+    checks:
+      - valid Fontconfig XML and declared profile path
+      - no unsupported black fontweight in diagram generators
+      - eight temporary SVG renders
+      - eight temporary PNG renders
+      - exact output filenames
+      - zero renderer stderr
+  observed_warning_state:
+    complete_diagram_build_stderr_bytes: 0
+    exact_build_stderr_bytes: 0
+    exact_test_stderr_bytes: 0
+
+verification:
+  exact_revision_environment:
+    GUIDE_REVISION: e32d176a3abf
+    SOURCE_DATE_EPOCH: 1785673282
+  precommit_build:
+    command: npm run build
+    result: passed
+    stderr_bytes: 0
+  precommit_test:
+    command: npm test
+    result: passed
+    stderr_bytes: 0
+  exact_revision_build:
+    command: GUIDE_REVISION=e32d176a3abf SOURCE_DATE_EPOCH=1785673282 npm run build
+    result: passed
+    stdout_lines: 146
+    stderr_bytes: 0
+  independent_exact_test:
+    command: GUIDE_REVISION=e32d176a3abf SOURCE_DATE_EPOCH=1785673282 npm test
+    result: passed
+    stdout_lines: 26
+    stderr_bytes: 0
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  visual_review:
+    changed_diagram_contact_sheet:
+      result: passed
+      reviewed: identity cards, graph overview, A local graph, alarm channels, overload control, hazard source-location map, hazard handoff card
+      observations: labels remained proportionate, graph nodes remained centred, route cards stayed distinct, and no diagram text or notes clipped
+    a_standalone_contact_sheet:
+      pages: 16
+      generated: true
+      direct_agent_view: unavailable across the bridge file namespace
+      automated_evidence: blank-page, edge, density, semantic-parity, and accessibility gates passed
+    master_a4half_contact_sheet:
+      pages: 159
+      generated: true
+      direct_agent_view: unavailable across the bridge file namespace
+      automated_evidence: geometry, blank-page, edge-collision, density, semantic-parity, and accessibility gates passed
+  observed_gates:
+    - 335 stable active resources across six typed kinds
+    - exactly one pre-existing retired historical key
+    - ten released standalone route identities and no master-only node
+    - 60 tagged standalone PDF editions with A4, A4/2, and large-print color-monochrome parity
+    - six master HTML and PDF editions plus Markdown, DOCX, and LaTeX
+    - project-local Fontconfig smoke render with exact eight-SVG and eight-PNG output sets
+    - native MathML and color-monochrome semantic parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, image alternatives, page-edge safety, and color-monochrome parity
+    - six master HTML editions with no boxed or content overflow
+    - responsive Pages package with no remote runtime requests
+    - working theme, deployment planner persistence, download filters, and complete build matrix
+
+render_metrics:
+  a4:
+    color_pages: 156
+    monochrome_pages: 156
+    median_span: 0.99
+    color_median_ink: 0.118
+    monochrome_median_ink: 0.114
+    color_max_ink: 0.285
+    monochrome_max_ink: 0.286
+  a4half:
+    color_pages: 159
+    monochrome_pages: 159
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 256
+    monochrome_pages: 256
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 123161
+  sha256: 4496414602bb2a33f31f42d9ac03dd8522f625659835079079b761ddc3e3812b
+  embedded_revision: e32d176a3abf
+  artifacts: 675
+  standalone_nodes: [O, A, B, C, D, H, Z, P, T, R]
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 156, bytes: 8507835, sha256: 5cfa78fbdf0de56d5d06ee7c68692753afa93b285db4e2288ab0bbaefe6fd733}
+  - {path: build/pdf/guide_mono.pdf, pages: 156, bytes: 8906257, sha256: eb22c4e3695f775b99c05a3cf3acf36b5245a659aa8f5281e8606f1e45955c48}
+  - {path: build/pdf/guide_a4half.pdf, pages: 159, bytes: 8637445, sha256: d8d19840f35a85532f916b9fe885a2c262cae1148cfd81f47fbda048c769d082}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 159, bytes: 6576849, sha256: a47688156c0b59c3765f4c73139c716d6ec78a3d507c1bc2318fc83de50fdf66}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 256, bytes: 8754731, sha256: cd34fe2e08150229227b027289296d84c1719caacd891b97fa3ddbaab633a6fd}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 256, bytes: 9007384, sha256: d452cd002d59c8043ea5a8aea5a590dacd1b65149f0e9669ae6470e09924f217}
+  - {path: build/subguides/A/responsibility-care.pdf, pages: 16, bytes: 2018784, sha256: 671ab4c1deaf704a81c7ad7b49882904e49b85191b7ee1b39438a85191603329}
+  - {path: build/subguides/A/responsibility-care_mono.pdf, pages: 16, bytes: 2060266, sha256: cb1490bda70f0e582589bbdc0516b34932b4d5aceb099ba7d6e5b447465bb2d2}
+  - {path: build/subguides/A/responsibility-care_a4half.pdf, pages: 16, bytes: 2163871, sha256: f2aceffc86b4aecc0719b98100503e51ba1d709fe412ff22988efe9c8f8817dd}
+  - {path: build/subguides/A/responsibility-care_a4half_mono.pdf, pages: 16, bytes: 1780284, sha256: fcf94161c46a758db57b29282cbd37f9290d4c504ba6c08dca571b9bb501c999}
+  - {path: build/subguides/A/responsibility-care_largeprint.pdf, pages: 24, bytes: 2030175, sha256: b8d4c113e09c96b3c88eff1d977d051e9f5759e20114f30dca456d8b9cf5f2ad}
+  - {path: build/subguides/A/responsibility-care_largeprint_mono.pdf, pages: 24, bytes: 2062181, sha256: be1283e4aa8108d1c4dc36a7c8e950e7633f6be6fae06bc261bd80fb7a37f8c5}
+  - {path: build/subguides/A/manifest.json, bytes: 3985, sha256: 2d5547a285bca913884c89d4129ac6e0496504311d46ffcdc3cb5fbb3d81d6dd}
+  - {path: build/html/guide.html, bytes: 7237886, sha256: e1a51d80947d93ae701edf40bbcc1c750cafb3df78e6511d3f76d15d778980b1}
+  - {path: build/subguides/index.html, bytes: 447840, sha256: 4c10b1640fec319643a9999d5160b5fc746c34d93be40c74bbdcfe0f22d2e7d5}
+  - {path: build/site/index.html, bytes: 13817, sha256: 730af84ca6a18c4e87097ffbddc1c5d054c606c15563194fe12dc0fa0d8caab4}
+  - {path: build/docx/guide.docx, bytes: 4548090, sha256: c0389828052c8ac4e2f647e1f4cb0754ed102aa2fe7d9e643797b35fc8106675}
+  - {path: build/latex/guide.tex, bytes: 460169, sha256: b496a0f57167a122c5cf6684a841aa9da8cbfb1d24f28313fca9094494ea7eca}
+  - {path: src/data/coverage_matrix.json, bytes: 10834, sha256: b65e6d9b5809b8f279730b276b168f3ff0a3107104164a7c60b43298036e6f58}
+  - {path: src/data/content_index.json, bytes: 130484, sha256: cbb73755e5c0945d135420eca91ba1659a5235c4d85f3c628da4209083f85652}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+  rsvg_convert: 2.62.3
+
+release_decisions:
+  - The patch changes render tooling and release metadata only; reader-facing routes and evidence claims are unchanged.
+  - The visualization catalog is the canonical owner of the Fontconfig profile path.
+  - Fontconfig is set before Vega and native canvas dependencies are imported.
+  - Renderer stderr is surfaced even when the child process succeeds.
+  - No existing stable reference was renumbered, reused, or retired.
+  - The Pages package and deployment workflow remain prepared but were not invoked.
+
+known_limits:
+  - Build evidence does not establish real-world route availability, successful crisis use, clinical outcomes, or deployment quality.
+  - The project-local Fontconfig profile assumes the configured DejaVu families are installed on the build host; the smoke validator fails if rendering cannot complete.
+  - The changed diagram contact sheet was directly reviewed. Larger A and master contact sheets were generated but were not directly viewable inside the agent runtime because the bridge and inspection container use separate file namespaces; automated page, edge, density, semantic-parity, and accessibility checks passed.

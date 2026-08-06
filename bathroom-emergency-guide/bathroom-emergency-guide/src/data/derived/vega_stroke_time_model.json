@@ -1,0 +1,80 @@
+[
+  {
+    "minute": 0,
+    "neurons_million": 0.0,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 5,
+    "neurons_million": 9.5,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 10,
+    "neurons_million": 19.0,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 15,
+    "neurons_million": 28.5,
+    "label": "28.5 million",
+    "action_label": ""
+  },
+  {
+    "minute": 20,
+    "neurons_million": 38.0,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 25,
+    "neurons_million": 47.5,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 30,
+    "neurons_million": 57.0,
+    "label": "57.0 million",
+    "action_label": ""
+  },
+  {
+    "minute": 35,
+    "neurons_million": 66.5,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 40,
+    "neurons_million": 76.0,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 45,
+    "neurons_million": 85.5,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 50,
+    "neurons_million": 95.0,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 55,
+    "neurons_million": 104.5,
+    "label": "",
+    "action_label": ""
+  },
+  {
+    "minute": 60,
+    "neurons_million": 114.0,
+    "label": "114.0 million",
+    "action_label": "FAST sign → 112"
+  }
+]

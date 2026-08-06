@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "locale": "de-DE",
+  "region": "Germany",
+  "reviewed_on": "2026-07-22",
+  "services": {
+    "112": {
+      "number": "112",
+      "label": "rescue service and fire brigade",
+      "scope": "acute or potentially life-threatening emergencies, fire, smoke, explosion, suspected gas release",
+      "always_available": true,
+      "source_id": "bbk-112"
+    },
+    "110": {
+      "number": "110",
+      "label": "police",
+      "scope": "active crime, violence, or police danger",
+      "always_available": true
+    },
+    "116117": {
+      "number": "116 117",
+      "label": "medical on-call service",
+      "scope": "urgent medical problems that cannot wait but are not life-threatening",
+      "always_available": true
+    },
+    "116123": {
+      "number": "116 123",
+      "label": "TelefonSeelsorge",
+      "scope": "confidential crisis conversation; acute danger remains 112",
+      "always_available": true
+    },
+    "gas_network": {
+      "number": null,
+      "label": "local gas-network emergency service",
+      "scope": "gas odour or suspected network fault; call only from outside",
+      "local_value_required": true,
+      "fallback": "112"
+    },
+    "115": {
+      "number": "115",
+      "label": "public-administration information line",
+      "scope": "identifies the responsible public authority; not an emergency or guaranteed-accommodation line",
+      "availability": "Monday to Friday, 08:00–18:00",
+      "source_id": "authority-115",
+      "access_channels": [
+        "telephone",
+        "easy-language information",
+        "sign-language video service"
+      ]
+    },
+    "116016": {
+      "number": "116 016",
+      "label": "violence against women helpline",
+      "scope": "confidential support for women affected or threatened by violence and people supporting them",
+      "always_available": true,
+      "source_id": "hilfetelefon-women",
+      "access_channels": [
+        "telephone",
+        "online counselling",
+        "multilingual",
+        "sign language",
+        "easy language"
+      ]
+    },
+    "men_violence_help": {
+      "number": "0800 1239900",
+      "label": "violence against men helpline",
+      "scope": "anonymous support for men affected by violence and people supporting them; published service hours apply",
+      "always_available": false,
+      "source_id": "men-violence-help",
+      "access_channels": [
+        "telephone",
+        "online counselling"
+      ]
+    },
+    "116111": {
+      "number": "116 111",
+      "label": "child and youth helpline",
+      "scope": "anonymous support for children and young people; published service hours apply",
+      "always_available": false,
+      "source_id": "children-help",
+      "access_channels": [
+        "telephone",
+        "online counselling",
+        "easy-language information"
+      ]
+    },
+    "women_shelter_search": {
+      "number": null,
+      "label": "nationwide women’s refuge search",
+      "scope": "directory and availability hints; placement must be confirmed directly and the directory is not complete",
+      "source_id": "women-shelter-search",
+      "access_channels": [
+        "web directory",
+        "accessibility filters"
+      ]
+    },
+    "municipal_emergency_housing": {
+      "number": null,
+      "label": "municipal emergency accommodation / homelessness service",
+      "scope": "local authority responsible for emergency accommodation; day and after-hours routes vary",
+      "local_value_required": true,
+      "administrative_fallback": "115",
+      "danger_fallback": "110/112"
+    },
+    "accessible_emergency_place": {
+      "number": null,
+      "label": "accessible emergency accommodation or powered care destination",
+      "scope": "locally confirmed destination matching mobility, communication, medication, power, caregiver, child, or animal needs",
+      "local_value_required": true,
+      "danger_fallback": "112"
+    },
+    "youth_emergency_service": {
+      "number": null,
+      "label": "local youth emergency service / Jugendnotdienst",
+      "scope": "local child-protection and safe-place route outside ordinary office hours",
+      "local_value_required": true,
+      "danger_fallback": "110/112"
+    }
+  },
+  "poison_centres": [
+    {
+      "city": "Berlin",
+      "number": "030 19240"
+    },
+    {
+      "city": "Bonn",
+      "number": "0228 19240"
+    },
+    {
+      "city": "Erfurt",
+      "number": "0361 730730"
+    },
+    {
+      "city": "Freiburg",
+      "number": "0761 19240"
+    },
+    {
+      "city": "Göttingen",
+      "number": "0551 19240"
+    },
+    {
+      "city": "Mainz",
+      "number": "06131 19240"
+    },
+    {
+      "city": "München",
+      "number": "089 19240"
+    }
+  ],
+  "warning_channels": [
+    {
+      "id": "nina",
+      "label": "NINA warning app",
+      "source_id": "bbk-warning"
+    },
+    {
+      "id": "warnung-bund",
+      "label": "warnung.bund.de"
+    },
+    {
+      "id": "radio",
+      "label": "local and public radio"
+    }
+  ],
+  "local_fields": [
+    "municipal emergency housing — daytime",
+    "municipal emergency housing — after hours",
+    "accessible emergency accommodation",
+    "accessible transport",
+    "powered refuge or care destination",
+    "local youth emergency service",
+    "specialist violence shelter or counselling",
+    "pet-compatible emergency accommodation",
+    "gas-network emergency number",
+    "veterinary emergency service"
+  ],
+  "review_policy": {
+    "warn_after_days": 90,
+    "fail_after_days": 180
+  },
+  "access_services": {
+    "115_sign_language": {
+      "label": "115 sign-language video service",
+      "source_id": "authority-115-sign",
+      "requires": [
+        "internet",
+        "camera-capable device"
+      ]
+    },
+    "violence_women_sign_or_text": {
+      "label": "116 016 sign-language or written-language access",
+      "source_id": "hilfetelefon-women",
+      "requires": [
+        "safe device or telephone path"
+      ]
+    }
+  }
+}

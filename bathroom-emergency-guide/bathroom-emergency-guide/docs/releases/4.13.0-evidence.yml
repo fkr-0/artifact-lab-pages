@@ -1,0 +1,207 @@
+project: bathroom-emergency-guide
+version: 4.13.0
+release_date: 2026-08-02
+source_revision: 51152db42520
+source_date_epoch: 1785634621
+implementation_commit: 51152db
+local_tag: v4.13.0
+tag_target: commit containing this evidence record
+push_performed: false
+publish_performed: false
+deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 334
+  retired_stable_resources: 1
+  standalone_nodes: [O, A, B, C, D, H, Z, P, T, R]
+  master_only_nodes: []
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 675
+  current_non_vega_illustrations: 33
+  vega_lite_figures: 8
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sections: 226
+    sources: 54
+    reader_visuals: 41
+    standalone_nodes: 10
+
+new_standalone_slice:
+  A:
+    title: Responsibility and Care
+    canonical_chapters: [02-situation-a.md]
+    local_sources: 5
+    owned_reader_visuals: 5
+    shared_reader_visuals: 0
+    linked_blue_book_forms: 7
+    linked_support_services: 12
+    aliases:
+      - Ch.2
+      - Situation A
+      - Responsibility, Harm, and Other Life Forms
+      - responsibility
+    source_ids:
+      - 02-situation-a--attachment
+      - 02-situation-a--caregiver
+      - 02-situation-a--infertility
+      - 02-situation-a--ppd
+      - 02-situation-a--ppp-incidence
+    visual_ids:
+      - responsibility-clock-map
+      - repair-sequence
+      - consent-authority-boundary
+      - care-continuity-loop
+      - vega-reproductive-denominators
+    form_refs:
+      - BEG:T:F:003
+      - BEG:T:F:004
+      - BEG:T:F:006
+      - BEG:T:F:007
+      - BEG:T:F:008
+      - BEG:T:F:009
+      - BEG:T:F:013
+    extraction_boundary: generated standalone cover and emergency gate plus the complete canonical responsibility and care chapter
+    pages:
+      a4: {color: 16, monochrome: 16}
+      a4half: {color: 16, monochrome: 16}
+      largeprint: {color: 24, monochrome: 24}
+    manifest:
+      path: build/subguides/A/manifest.json
+      bytes: 3985
+      sha256: e801d63ef6e657991fddeda23716a90479c3c84cf5ff8a016b9729a8743d15cb
+
+new_operational_figures:
+  - id: responsibility-clock-map
+    path: build/diagrams/responsibility_clock_map.png
+    pixels: 1962x1120
+    bytes: 147096
+    sha256: 9538230cd9c4f511cc3ffd07858243e8ade1c01102ce04e4ec9bca3509077a65
+    content_margins_pixels: [98, 74, 96, 94]
+  - id: repair-sequence
+    path: build/diagrams/repair_sequence.png
+    pixels: 2047x967
+    bytes: 144596
+    sha256: 0f51629a797a354f3a2c2d277a67bc2c3f54617fc387fce60bfbeff4e0ded617
+    content_margins_pixels: [75, 67, 74, 84]
+  - id: consent-authority-boundary
+    path: build/diagrams/consent_authority_boundary.png
+    pixels: 2206x1170
+    bytes: 161129
+    sha256: 5214f40ffbaae7115ee5fef1b0ff0f67df4cfa09673c65071ccb56154a68a7c3
+    content_margins_pixels: [96, 75, 28, 97]
+  - id: care-continuity-loop
+    path: build/diagrams/care_continuity_loop.png
+    pixels: 1826x1238
+    bytes: 186759
+    sha256: e61fa55a1bed7d60c7b68630fe95d53c449e4d59af1c620c29e662534999c936
+    content_margins_pixels: [92, 79, 60, 78]
+
+verification:
+  exact_revision_environment:
+    GUIDE_REVISION: 51152db42520
+    SOURCE_DATE_EPOCH: 1785634621
+  precommit_build:
+    command: npm run build
+    result: passed
+  precommit_test:
+    command: npm test
+    result: passed
+  exact_revision_build:
+    command: GUIDE_REVISION=51152db42520 SOURCE_DATE_EPOCH=1785634621 npm run build
+    result: passed
+  independent_exact_test:
+    command: GUIDE_REVISION=51152db42520 SOURCE_DATE_EPOCH=1785634621 npm test
+    result: passed
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  observed_gates:
+    - 334 stable active resources across six typed kinds
+    - exactly one pre-existing retired historical key
+    - ten released standalone route identities and no master-only node
+    - A five-source and five-owned-visual release thresholds
+    - A one emergency gate, one edition contract, one resource map, graph handoffs, and generated Sources and limits
+    - A five stable figure cards, seven canonical form references, and twelve support-service references
+    - 60 tagged standalone PDF editions with A4/A4/2/large-print color-mono page and semantic parity
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - native MathML and color/monochrome semantic parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, image alternatives, page-edge safety, and color/mono parity
+    - six master HTML editions with no boxed or content overflow
+    - responsive Pages package with no remote runtime requests
+    - working theme, deployment planner persistence, download filters, and complete build matrix
+
+render_metrics:
+  a4:
+    color_pages: 155
+    monochrome_pages: 155
+    median_span: 0.99
+    color_median_ink: 0.120
+    monochrome_median_ink: 0.114
+    color_max_ink: 0.285
+    monochrome_max_ink: 0.286
+  a4half:
+    color_pages: 158
+    monochrome_pages: 158
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 256
+    monochrome_pages: 256
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 123161
+  sha256: aae56f1e418f4d33321d57e6464f1ff4eb9a8f44e956aabc84b12450f6158d56
+  embedded_revision: 51152db42520
+  artifacts: 675
+  standalone_nodes: [O, A, B, C, D, H, Z, P, T, R]
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 155, bytes: 8498521, sha256: 49d9639290cb9dcf6220474ff9908895bfec915fa4d61c823680db34560284a3}
+  - {path: build/pdf/guide_mono.pdf, pages: 155, bytes: 8896946, sha256: 0b1010f3425763e4cf5ae1019415c425c8d6c743f48afb409371161323e8f6a7}
+  - {path: build/pdf/guide_a4half.pdf, pages: 158, bytes: 8628089, sha256: f07e5a81d24c4026acab493d14b3a885f6eb2c9d4e8a03803127f4d645165939}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 158, bytes: 6567559, sha256: 71154334b3278d3b96bccf0b777f6c40841f6885bccc34afa67b1ee5eabff474}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 256, bytes: 8745871, sha256: 97c3c733c1ce984b7890b05d73420347b4a0215beb3fd904007d6536c28a022f}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 256, bytes: 8998546, sha256: a48f6e9b9140774bc0ded5608fdb1b200eada7ccc23a35b6010e1892ab5e28d6}
+  - {path: build/subguides/A/responsibility-care.pdf, pages: 16, bytes: 2018791, sha256: 6e4b649df0bbb230f7a3668a8661c27ee3e0c33a79897361b34256953070c9b4}
+  - {path: build/subguides/A/responsibility-care_mono.pdf, pages: 16, bytes: 2060312, sha256: f1eb05487dd858ce8ce3c6eb54538fea26afc57e34a15177b99db6be634fd6e8}
+  - {path: build/subguides/A/responsibility-care_a4half.pdf, pages: 16, bytes: 2163703, sha256: 2eaaafa1364a16479842ebef2b589391c53dcc179a31437c0ea1069c943cc730}
+  - {path: build/subguides/A/responsibility-care_largeprint.pdf, pages: 24, bytes: 2030190, sha256: dbb39d2cabc60081c5baf274cf38af7adbad3e27a93273cc53b97d766425cfb7}
+  - {path: build/html/guide.html, bytes: 7236601, sha256: 29eada31b53d96e330c40055eaa1f6a96f7099b201c6024f5f14f648b5499847}
+  - {path: build/subguides/index.html, bytes: 447844, sha256: 788dd3975c17c572f801f8b9de55fc93fc7faa7026be7983f34cdba8d4a45d10}
+  - {path: build/site/index.html, bytes: 13817, sha256: b650ed878922c268f21e744f16f73d2eac9f123721016ebb6170db028395ad1e}
+  - {path: build/docx/guide.docx, bytes: 4547638, sha256: 53bb79ad38b03ceba9e2673ae730649e4c837f637e5f9f3edd01d0723354bd32}
+  - {path: build/latex/guide.tex, bytes: 458963, sha256: 73e7771e369f97a38329b496459241d118f82dde7172f8d608b52e555632fc1d}
+  - {path: src/data/coverage_matrix.json, bytes: 10834, sha256: 13364f0772fd7dd1817dbbaba27987d7db07f7bc9c9f816935611b698ef4a9f5}
+  - {path: src/data/content_index.json, bytes: 130169, sha256: 2b78ba6f231db38ffe86c00c0035202ab511da1ba0e09fa37672522696a20b5f}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+
+release_decisions:
+  - A uses the complete canonical responsibility and care chapter; no parallel standalone prose source was introduced.
+  - Immediate safety outranks blame, confession, explanation, or later repair.
+  - Apology, acceptance, forgiveness, liability, consent, capacity, authority, and completed repair remain distinct claims.
+  - Blue Book forms remain owned by T and are linked into A rather than copied.
+  - All ten maintained route identities now have released standalone families.
+  - The Pages package and deployment workflow remain prepared but were not invoked.
+  - No existing stable reference was renumbered, reused, or retired.
+
+known_limits:
+  - Build evidence does not establish legal liability, clinical capacity, valid consent, forgiveness, service availability, or successful real-world repair.
+  - The consent/capacity/authority figure requires external review with disability advocates, clinicians, safeguarding practitioners, and legal advisers before being treated as a professional protocol.
+  - The care-continuity model has not been field-tested with caregivers, disability-support households, veterinary users, or operators of critical household systems.
+  - Figure generator source, raster dimensions, content margins, adjacent prose, text fallbacks, monochrome strategies, PDF geometry, density, accessibility, and overflow were inspected; direct manual pixel-by-pixel or page-by-page visual inspection was not available in this run.
+  - Local Fontconfig emitted known configuration warnings and unavailable black-weight fallbacks; tagging, geometry, text parity, accessibility, and edge checks passed.

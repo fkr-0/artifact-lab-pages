@@ -1,0 +1,97 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "width": 650,
+  "height": 430,
+  "padding": 18,
+  "data": {
+    "name": "table"
+  },
+  "mark": {
+    "type": "bar",
+    "stroke": "#172033",
+    "strokeWidth": 0.8
+  },
+  "encoding": {
+    "y": {
+      "field": "system",
+      "type": "nominal",
+      "axis": {
+        "title": null,
+        "labelLimit": 230
+      }
+    },
+    "x": {
+      "field": "count",
+      "type": "quantitative",
+      "scale": {
+        "zero": true,
+        "domain": [
+          0,
+          7
+        ]
+      },
+      "axis": {
+        "title": "Named links",
+        "tickMinStep": 1,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    "yOffset": {
+      "field": "metric",
+      "sort": [
+        "Depends on",
+        "Supports"
+      ]
+    },
+    "color": {
+      "field": "metric",
+      "type": "nominal",
+      "sort": [
+        "Depends on",
+        "Supports"
+      ],
+      "scale": {
+        "range": [
+          "#175cd3",
+          "#b54708"
+        ]
+      },
+      "legend": {
+        "title": null,
+        "orient": "bottom"
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "stroke": "#172033",
+        "strokeWidth": 0.8
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 7,
+        "fontWeight": "bold",
+        "fontSize": 12
+      },
+      "encoding": {
+        "text": {
+          "field": "label"
+        }
+      }
+    }
+  ]
+}

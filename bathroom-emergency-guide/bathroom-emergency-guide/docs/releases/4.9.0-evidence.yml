@@ -1,0 +1,179 @@
+release:
+  project: bathroom-emergency-guide
+  version: 4.9.0
+  release_date: 2026-08-01
+  source_revision: ba274a9a24fd
+  source_date_epoch: 1785619048
+  implementation_commit: 6d632e9
+  verification_fix_commit: ba274a9
+  local_tag: v4.9.0
+  tag_target: commit containing this evidence record
+  push_performed: false
+  publish_performed: false
+  deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 322
+  retired_stable_resources: 1
+  standalone_nodes: [B, C, H, P, T, R]
+  standalone_candidates_not_released: [O, D]
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 486
+  current_non_vega_illustrations: 29
+  migrated_non_reader_illustration_records: 3
+  vega_lite_figures: 8
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sections: 218
+    sources: 53
+    reader_visuals: 37
+    standalone_nodes: 6
+
+improved_slices:
+  O:
+    title: Small-Room Observatory
+    local_sources: 11
+    owned_reader_visuals: 4
+    readiness: standalone-candidate
+    released_standalone: false
+    new_visuals:
+      - observatory-scan
+      - interoception-loop
+      - signal-story-question
+      - three-minute-observation
+    editorial_boundaries:
+      - the first route scans body, room, and attention before diagnostic interpretation
+      - the three-minute experiment is observation rather than mandatory delay
+      - danger, worsening, or loss of safe comparison stops the experiment
+      - no improvement after one controlled change is a route-changing result
+  D:
+    title: Threat and Safe Place
+    local_sources: 8
+    owned_reader_visuals: 4
+    readiness: standalone-candidate
+    released_standalone: false
+    redesigned_visuals:
+      - safe-place-route-map
+      - communication-access-card
+    new_visuals:
+      - safe-place-confirmation-packet
+      - safe-reserve-clock
+    editorial_boundaries:
+      - a suggested place is not confirmed until destination, availability, access, arrival, backup, and escalation are usable
+      - remaining safe runtime is an estimate rather than a guarantee
+      - no generic battery, medication, caregiver, or transport runtime constant is introduced
+      - unknown reserve is treated as time-critical rather than assumed plentiful
+
+verification:
+  exact_revision_build:
+    command: GUIDE_REVISION=ba274a9a24fd SOURCE_DATE_EPOCH=1785619048 npm run build
+    result: passed
+  independent_test:
+    command: GUIDE_REVISION=ba274a9a24fd SOURCE_DATE_EPOCH=1785619048 npm test
+    result: passed
+  generated_registry_checks:
+    commands:
+      - python3 bin/build_inventories.py --check
+      - python3 bin/build_source_inventory.py --check
+      - python3 bin/build_reference_index.py --check
+      - python3 bin/build_coverage_matrix.py --check
+    result: passed
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  opening_emergency_gate:
+    combined_files: [src/chapters/00-cover.md, src/chapters/01-how-to-use.md]
+    literal_112_count: 1
+    result: passed
+  visual_raster_bounds:
+    result: passed
+    observations:
+      - observatory_scan.png: 1894x1001, minimum outer margin 68 px
+      - interoception_loop.png: 1655x1103, minimum outer margin 73 px
+      - signal_story_question.png: 1791x933, minimum outer margin 65 px
+      - three_minute_observation.png: 1928x984, minimum outer margin 51 px
+      - safe_place_route_map.png: 1500x1111, minimum outer margin 18 px
+      - communication_access_card.png: 1500x1255, minimum outer margin 33 px
+      - safe_place_confirmation_packet.png: 1542x895, minimum outer margin 32 px
+      - safe_reserve_clock.png: 1542x839, minimum outer margin 19 px
+  observed_gates:
+    - 322 stable active resources across six typed kinds
+    - ten-node source, section, visual, and standalone-readiness provenance
+    - 37 reader-facing visuals and 29 current non-Vega illustration records
+    - O and D four-visual numeric candidate thresholds without standalone release claims
+    - B/C/H/P/T/R released standalone scope and 36 standalone PDF editions
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - tagged PDFs, native MathML, and color/monochrome semantic parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, image alternatives, page-edge safety, and color/mono parity
+    - six HTML editions with no boxed or content overflow
+    - responsive project/deployment/download browser checks with no external runtime requests
+    - landing, release-manifest, and complete-build-matrix validation
+
+render_metrics:
+  a4:
+    color_pages: 140
+    monochrome_pages: 140
+    median_span: 0.99
+    color_median_ink: 0.120
+    monochrome_median_ink: 0.118
+  a4half:
+    color_pages: 136
+    monochrome_pages: 136
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 227
+    monochrome_pages: 227
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 87569
+  sha256: e6e69d6ecba696a0b0b7594e9bde40a62fcd7603dde90c9a6012e5050d4844f1
+  embedded_revision: ba274a9a24fd
+  artifact_count: 486
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 140, bytes: 7163525, sha256: 5bd1a57ace5cc2aa2a57bd6a2038e6fbed5471189155854e72b1a0d3b9edac0a}
+  - {path: build/pdf/guide_mono.pdf, pages: 140, bytes: 7544049, sha256: 4a5bf1a642b0c55436994630f0e0a3725cc1fa6d3ca0cae86d030e05afcdc312}
+  - {path: build/pdf/guide_a4half.pdf, pages: 136, bytes: 7174155, sha256: 5bf23a089d209f2199b9e1effcb4f9d38c9563e0618fcdfa8e48fd785306f35b}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 136, bytes: 5409666, sha256: c96f1de2f73b2428ad88d62de8ef63eb98d3bc0e7bc39237031604755eb2fa74}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 227, bytes: 7385080, sha256: 45809e88c79658143d445851a45924ff4e3f9aabb0cf2915290aba9be46ba8f3}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 227, bytes: 7623109, sha256: 8c1d8ff7316a41f7d3c13a7d2eeae39da33ffa8fe113d70b747bf72571b71b5b}
+  - {path: build/html/guide.html, bytes: 6304744, sha256: 41c80962944ce5234783e7910f341753c1f9ae00bf5981aab2a4f727488f0b63}
+  - {path: build/subguides/index.html, bytes: 442630, sha256: 8bc107a19e2c1dd81cc9c401fa76ebab41a6ec765b2f51028e9845961adaebd6}
+  - {path: build/site/index.html, bytes: 13687, sha256: 0360bc02aea6f14d0fb777c62ca9aa800375c562409897195c5db78548ad7b60}
+  - {path: build/docx/guide.docx, bytes: 3941762, sha256: 2c26e545292df745c00c6721219ef06123a68d31df5d3aa18e44f156c1e70655}
+  - {path: build/latex/guide.tex, bytes: 405062, sha256: 99e340d8657125abfee548b377a589f827e0f3309adad0690d14152e3b716ae7}
+  - {path: src/data/coverage_matrix.json, bytes: 10596, sha256: 7c9d7b806faa99a436e4cf4b52d7371c13aa47fa08a632eda1f6f5e7fce45214}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+
+release_decisions:
+  - O and D cross only the numerical source/visual candidate screen; neither is detached or advertised as a released standalone family.
+  - New diagrams use number, order, shape, direct labels, and adjacent complete prose so meaning does not depend on colour or embedded image text.
+  - Observation language does not diagnose, clear danger, or require waiting through worsening symptoms.
+  - Safe-place language distinguishes a possible direction from a confirmed destination and backup.
+  - The reserve-clock figure deliberately contains no generic device, medication, care, or transport duration.
+  - Existing stable references were not renumbered or reused; new active resources were appended.
+  - The prepared Pages workflow remains separate from this local release and was not invoked.
+
+known_limits:
+  - Actual novice and expert usability sessions for the new observation and safe-place figures remain outstanding.
+  - Disability-route, violence-support, municipal-service, caregiver, and device-user route drills remain outstanding.
+  - Direct visual viewing was unavailable through the active bridge interface; figures were checked through source review, raster dimensions and pixel margins, adjacent fallbacks, PDF rendering, contact sheets, geometry, accessibility, overflow, and color/mono tests.
+  - Actual wet-room installations and physical page-turning, glare, moisture, reach, and replacement tests remain outstanding.
+  - Local services and safe destinations still require dated deployer verification.
+  - Local Fontconfig emitted configuration warnings and unavailable black-weight fallbacks; geometry, text parity, accessibility, edge, and browser checks passed.

@@ -1,0 +1,305 @@
+/*
+ * A4/2 vertical field-strip edition.
+ * Physical page: 105 mm x 297 mm (one A4 sheet cut lengthwise).
+ * The layout remains one column and keeps the full text route usable.
+ */
+
+@page {
+  size: 105mm 297mm;
+  margin: 10mm 7mm 13mm;
+
+  @top-left {
+    content: "BATHROOM / FIELD GUIDE";
+    color: #52645e;
+    font-family: sans-serif;
+    font-size: 6.2pt;
+    letter-spacing: .08em;
+  }
+
+  @top-right {
+    content: "A4/2";
+    color: #52645e;
+    font-family: sans-serif;
+    font-size: 6.2pt;
+    letter-spacing: .08em;
+  }
+
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    color: #52645e;
+    font-family: sans-serif;
+    font-size: 7pt;
+  }
+}
+
+@page :first {
+  margin: 7mm;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-center { content: none; }
+}
+
+@media print {
+  :root {
+    --measure: 100%;
+    font-size: 8.35pt;
+    line-height: 1.35;
+  }
+
+  body,
+  main {
+    counter-reset: field-section;
+  }
+
+  .document-cover {
+    min-height: 283mm;
+    padding: 9mm 6mm;
+    border-width: 2.5mm;
+    background-size: 18px 18px;
+  }
+
+  .document-cover::before {
+    margin-bottom: 8pt;
+    padding: 3pt 4pt;
+    font-size: 6pt;
+    letter-spacing: .11em;
+  }
+
+  .document-cover h2 {
+    margin: 9pt 0;
+    padding: 0;
+    background: transparent;
+    counter-increment: none;
+  }
+
+  .document-cover h2::before { content: none; }
+
+  .document-cover h1 {
+    max-width: 11ch;
+    font-size: 26pt;
+    line-height: .94;
+  }
+
+  .document-cover h2 { font-size: 11.5pt; }
+
+  h1 {
+    font-size: 17.5pt;
+    line-height: 1.03;
+  }
+
+  h2 {
+    counter-increment: field-section;
+    position: relative;
+    margin-top: 11pt;
+    padding: 5pt 5pt 4pt;
+    border: 0;
+    background: var(--tile);
+    font-size: 12.6pt;
+    line-height: 1.08;
+  }
+
+  h2::before {
+    content: "FIELD NOTE " counter(field-section, decimal-leading-zero);
+    display: block;
+    margin-bottom: 3pt;
+    color: var(--green);
+    font-family: ui-monospace, monospace;
+    font-size: 5.8pt;
+    font-weight: 900;
+    letter-spacing: .11em;
+  }
+
+  h3 {
+    margin-top: 9pt;
+    margin-bottom: 3pt;
+    padding-left: 5pt;
+    border-left: 3pt solid var(--green);
+    font-size: 9.8pt;
+    line-height: 1.15;
+  }
+
+  h4 { font-size: 8.8pt; }
+
+  p,
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: 4pt;
+  }
+
+  p {
+    widows: 2;
+    orphans: 2;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.25rem;
+  }
+
+  li { margin-bottom: 1.5pt; }
+
+  blockquote,
+  .route-card,
+  .safety-card,
+  .formula-card,
+  .checklist {
+    min-width: 0;
+    margin: 4pt 0;
+    padding: 4.5pt;
+    overflow-wrap: anywhere;
+    border-radius: 0;
+  }
+
+  blockquote {
+    border-left-width: 3pt;
+  }
+
+  .route-grid {
+    gap: 4pt;
+  }
+
+  .emergency-strip {
+    grid-template-columns: 1fr 1fr;
+    margin: 6pt 0 8pt;
+  }
+
+  .emergency-strip > div {
+    padding: 5pt;
+    font-size: 6.9pt;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .emergency-strip > div:nth-child(2n) { border-right: 0; }
+  .emergency-strip > div:nth-last-child(-n+2) { border-bottom: 0; }
+  .emergency-strip strong { font-size: 10.5pt; }
+
+  figure {
+    position: relative;
+    margin: 9pt -3mm;
+    padding: 6mm 3mm 3mm;
+    background: color-mix(in srgb, var(--tile) 66%, white);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    break-inside: avoid;
+  }
+
+  figure::before {
+    content: "LOOK CLOSER / MAP · EVIDENCE · DIAGRAM";
+    position: absolute;
+    inset: 2.2mm 3mm auto;
+    color: var(--green);
+    font-family: ui-monospace, monospace;
+    font-size: 5.6pt;
+    font-weight: 900;
+    letter-spacing: .08em;
+  }
+
+  figure img,
+  img {
+    max-height: 128mm;
+    margin: 4pt auto;
+  }
+
+  figcaption {
+    margin-top: 4pt;
+    font-size: 6.8pt;
+    line-height: 1.3;
+  }
+
+  table {
+    table-layout: fixed;
+    margin: 6pt 0 8pt;
+    font-size: 6.5pt;
+    line-height: 1.22;
+    hyphens: auto;
+  }
+
+  table:has(tr > :nth-child(4)) {
+    font-size: 6.05pt;
+  }
+
+  th,
+  td {
+    padding: 3pt;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  th {
+    font-size: .92em;
+    letter-spacing: .015em;
+  }
+
+  pre {
+    padding: 6pt;
+    font-size: 6.6pt;
+    line-height: 1.36;
+  }
+
+  code { font-size: .86em; }
+
+  math[display="block"] {
+    margin: 8pt 0;
+    padding: 5pt;
+    font-size: .86em;
+    border-left-width: 3pt;
+  }
+
+  .footnotes {
+    margin-top: 10pt;
+    padding-top: 5pt;
+    font-size: 6.6pt;
+    line-height: 1.3;
+  }
+
+  .source-note { font-size: 6.5pt; }
+
+  .emergency-gate {
+    margin: 4pt 0 6pt;
+    padding: 4.5pt 5pt;
+    border-left-width: 3pt;
+    font-size: 7.2pt;
+    line-height: 1.3;
+  }
+
+  img[alt*="flowgraph"] { max-height: 145mm; }
+
+  .quantitative-figure {
+    margin: 7pt -3mm 9pt;
+  }
+
+  .quantitative-figure > figure {
+    margin: 0;
+    padding: 4pt 3mm 3pt;
+    border-left: 0;
+    border-right: 0;
+    border-top-width: 2pt;
+    border-bottom: .5pt solid var(--line);
+    background: #fff;
+  }
+
+  .quantitative-figure > figure::before { content: none; }
+
+  .quantitative-figure > figure img {
+    max-height: 116mm;
+    margin: 2pt auto 0;
+  }
+
+  .quantitative-figure > figure figcaption {
+    margin: 0;
+    padding: 0 0 3pt;
+    font-size: 7.2pt;
+    line-height: 1.25;
+  }
+
+  .chart-note {
+    grid-template-columns: 1fr;
+    gap: 2pt;
+    padding: 3.5pt 3mm 4pt;
+    border-left: 0;
+    border-right: 0;
+    font-size: 6.25pt;
+    line-height: 1.28;
+  }
+}

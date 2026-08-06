@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+node_modules/
+build/
+.ws-bridge/
+
+# Local migration/reference checkouts. Their reviewed, intentional material
+# lives in src-alt/ and docs/plans; these full copies are not release inputs.
+bathroom-emergency-guide-4.x/
+bathroom-emergency-guide_v3.3/

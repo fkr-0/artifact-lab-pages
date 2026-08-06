@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "bathroom-emergency-guide",
+  "version": "4.14.0-alt.2",
+  "title": "Bathroom Emergency Guide",
+  "description": "Root-owned, sourced, print-first decision guide with an accessible static site, master editions, and eleven standalone route books.",
+  "kind": "document",
+  "status": "experimental",
+  "required": false,
+  "tags": ["accessibility", "decision-guide", "document", "offline", "print", "root-owned"],
+  "source": {
+    "kind": "project",
+    "path": "bathroom-emergency-guide/bathroom-emergency-guide",
+    "git": { "mode": "root" }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "bathroom-emergency-guide/bathroom-emergency-guide",
+    "command": ["npm", "run", "build"],
+    "output": "build/site"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "build/site",
+    "offline": true
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "strict"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html"],
+    "commands": [
+      ["npm", "run", "build"],
+      ["npm", "test"]
+    ]
+  }
+}

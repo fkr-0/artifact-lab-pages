@@ -1,0 +1,137 @@
+{
+  "calm": {
+    "title": "The Teal Book — Calm Guide",
+    "accent": "#2E8B7A",
+    "pattern": "wave",
+    "mascot": "mascot_calm.png",
+    "chapters": [
+      "subguides/calm/chapters/00-situations-b-e.md",
+      "subguides/calm/chapters/01-calm-guide.md"
+    ],
+    "sources": "subguides/calm/sources.md",
+    "version": "subguides/calm/version.md",
+    "tagline": "Anxiety, panic, breathing, comfort, and exit strategies"
+  },
+  "ambulance": {
+    "title": "The Red Book — Self Ambulance",
+    "accent": "#C23D2E",
+    "pattern": "cross",
+    "mascot": "mascot_ambulance.png",
+    "chapters": [
+      "subguides/ambulance/chapters/01-first-response.md"
+    ],
+    "sources": "subguides/ambulance/sources.md",
+    "version": "subguides/ambulance/version.md",
+    "tagline": "First aid, pain, triage, and vital signs"
+  },
+  "responsibility": {
+    "title": "The Amber Book — Responsibility",
+    "accent": "#D4880A",
+    "pattern": "diamond",
+    "mascot": "mascot_responsibility.png",
+    "chapters": [
+      "subguides/responsibility/chapters/01-situation-a.md"
+    ],
+    "sources": "subguides/responsibility/sources.md",
+    "version": "subguides/responsibility/version.md",
+    "tagline": "Harm, guilt, caregiving, and repair"
+  },
+  "safety": {
+    "title": "The Blue Book — Safety & No Place",
+    "accent": "#2563EB",
+    "pattern": "shield",
+    "mascot": "mascot_safety.png",
+    "chapters": [
+      "subguides/safety/chapters/01-no-safe-place.md",
+      "subguides/safety/chapters/02-environmental.md"
+    ],
+    "sources": "subguides/safety/sources.md",
+    "version": "subguides/safety/version.md",
+    "tagline": "Danger, coercion, shelter, and environmental hazards"
+  },
+  "zombie": {
+    "title": "The Olive Book — Zombie Guide",
+    "accent": "#4A6741",
+    "pattern": "crosshatch",
+    "mascot": "mascot_zombie.png",
+    "chapters": [
+      "subguides/zombie/chapters/01-zombie-guide.md"
+    ],
+    "sources": "subguides/zombie/sources.md",
+    "version": "subguides/zombie/version.md",
+    "tagline": "Survival, outages, community, and preparedness"
+  },
+  "support": {
+    "title": "The Indigo Book — Professional Support",
+    "accent": "#6366F1",
+    "pattern": "dots",
+    "mascot": "mascot_support.png",
+    "chapters": [
+      "subguides/support/chapters/01-professional.md",
+      "subguides/support/chapters/02-glossary-index.md"
+    ],
+    "sources": "subguides/support/sources.md",
+    "version": "subguides/support/version.md",
+    "tagline": "Numbers, scripts, legal, medical routes, glossary, and cross-reference index"
+  },
+  "appendix": {
+    "title": "The Appendix — Reference",
+    "accent": "#B5763B",
+    "pattern": "solid",
+    "mascot": "mascot_appendix.png",
+    "chapters": [
+      "subguides/appendix/chapters/01-reference.md"
+    ],
+    "sources": "subguides/appendix/sources.md",
+    "version": "subguides/appendix/version.md",
+    "tagline": "Formulas, flowcharts, fillable fields, and print card"
+  },
+  "body": {
+    "title": "The Green Book — Body Owner's Manual",
+    "accent": "#16A34A",
+    "pattern": "pulse",
+    "mascot": "mascot_body.png",
+    "chapters": [
+      "subguides/body/chapters/01-placeholder.md"
+    ],
+    "sources": "subguides/body/sources.md",
+    "version": "subguides/body/version.md",
+    "tagline": "Skin, teeth, digestion, periods, allergies, and 'is this normal?'"
+  },
+  "social": {
+    "title": "The Purple Book — Social Field Guide",
+    "accent": "#9333EA",
+    "pattern": "speech",
+    "mascot": "mascot_social.png",
+    "chapters": [
+      "subguides/social/chapters/01-placeholder.md"
+    ],
+    "sources": "subguides/social/sources.md",
+    "version": "subguides/social/version.md",
+    "tagline": "Awkward moments, etiquette, hosting, and small-talk"
+  },
+  "disaster": {
+    "title": "The Orange Book — Natural Disasters",
+    "accent": "#EA580C",
+    "pattern": "zigzag",
+    "mascot": "mascot_disaster.png",
+    "chapters": [
+      "subguides/disaster/chapters/01-placeholder.md"
+    ],
+    "sources": "subguides/disaster/sources.md",
+    "version": "subguides/disaster/version.md",
+    "tagline": "Earthquake, flood, storm, and extreme weather"
+  },
+  "templates": {
+    "title": "The Grey Book — Templates & Forms",
+    "accent": "#6B7280",
+    "pattern": "solid",
+    "mascot": "mascot_appendix.png",
+    "chapters": [
+      "subguides/templates/chapters/01-forms.md"
+    ],
+    "sources": "subguides/templates/sources.md",
+    "version": "subguides/templates/version.md",
+    "tagline": "Printable forms, observation logs, checklists, and fill-in sheets"
+  }
+}

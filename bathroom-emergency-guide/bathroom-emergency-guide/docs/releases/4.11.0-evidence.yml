@@ -1,0 +1,176 @@
+release:
+  project: bathroom-emergency-guide
+  version: 4.11.0
+  release_date: 2026-08-02
+  source_revision: 61caa6d9b91a
+  source_date_epoch: 1785622951
+  implementation_commit: 61caa6d
+  documentation_commit: 61caa6d
+  local_tag: v4.11.0
+  tag_target: commit containing this evidence record
+  push_performed: false
+  publish_performed: false
+  deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 324
+  retired_stable_resources: 1
+  standalone_nodes: [O, B, C, D, H, Z, P, T, R]
+  master_only_nodes: [A]
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 636
+  current_non_vega_illustrations: 29
+  vega_lite_figures: 8
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sources: 54
+    reader_visuals: 37
+    standalone_nodes: 9
+
+new_standalone_slice:
+  Z:
+    title: Outage and Continuity
+    canonical_chapters: [06-zombie-guide.md]
+    local_sources: 4
+    owned_reader_visuals: 7
+    shared_reader_visuals: 1
+    embedded_canonical_visuals: 8
+    extraction_boundary: generated standalone cover and emergency gate plus the complete canonical outage and continuity chapter
+    source_ids:
+      - 06-zombie-guide--bbk
+      - 06-zombie-guide--bbk-warning
+      - 06-zombie-guide--drk-cold
+      - 06-zombie-guide--ostrom
+    owned_visual_ids:
+      - first-meeting-roles
+      - household-continuity-board
+      - scaling-chart
+      - survival-pyramid
+      - vega-communication-channels
+      - vega-continuity-dependencies
+      - vega-household-water-stock
+    shared_visual_ids:
+      - dependency-continuity-map
+    pages:
+      a4: {color: 19, monochrome: 19}
+      a4half: {color: 17, monochrome: 17}
+      largeprint: {color: 28, monochrome: 28}
+    manifest:
+      path: build/subguides/Z/manifest.json
+      bytes: 3075
+      sha256: 5267ea25787875b5165b75c3e5b5df1f2ce75fdb0b1deca534232ddc2093f63b
+
+verification:
+  exact_revision_environment:
+    GUIDE_REVISION: 61caa6d9b91a
+    SOURCE_DATE_EPOCH: 1785622951
+  exact_revision_build:
+    contract: deterministic stages from bin/build_all.sh in declared order
+    result: passed
+    execution_note: the monolithic npm run build process exceeded the workspace bridge process lifetime and restarted the bridge twice; no success was inferred from either interrupted parent process
+    completed_stages:
+      - bin/build_diagrams.sh
+      - python3 bin/build_inventories.py
+      - python3 bin/build_source_inventory.py
+      - python3 bin/build_reference_index.py
+      - python3 bin/build_coverage_matrix.py
+      - bin/build_guide.sh all
+      - python3 bin/build_subguides.py --node all
+      - python3 bin/build_site.py
+      - python3 bin/build_release_manifest.py
+      - all validators listed below
+  independent_test:
+    command: GUIDE_REVISION=61caa6d9b91a SOURCE_DATE_EPOCH=1785622951 npm test
+    result: passed
+  generated_registry_checks:
+    commands:
+      - python3 bin/build_inventories.py --check
+      - python3 bin/build_source_inventory.py --check
+      - python3 bin/build_reference_index.py --check
+      - python3 bin/build_coverage_matrix.py --check
+    result: passed
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  observed_gates:
+    - 324 stable active resources across six typed kinds
+    - ten-node source, section, visual, and release provenance
+    - O/B/C/D/H/Z/P/T/R released standalone scope
+    - 54 tagged standalone PDF editions with A4/A4/2/large-print color-mono parity
+    - Z canonical extraction without parallel reader prose
+    - Z four-source, seven-owned-visual, and one-shared-visual thresholds
+    - one emergency gate and generated Sources and limits per standalone edition
+    - semantic-text parity across each standalone family
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - native MathML and color/monochrome semantic parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, image alternatives, page-edge safety, and color/mono parity
+    - six master HTML editions with no boxed or content overflow
+    - responsive Pages package with no remote runtime requests
+    - landing, deployment, release-manifest, browser-interaction, and complete-matrix validation
+
+render_metrics:
+  a4:
+    color_pages: 141
+    monochrome_pages: 141
+    median_span: 0.98
+    color_median_ink: 0.120
+    monochrome_median_ink: 0.117
+  a4half:
+    color_pages: 136
+    monochrome_pages: 136
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 228
+    monochrome_pages: 228
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 115524
+  sha256: 87a2ee3df0ce55bee11c0932c68f30cc239ad724a9a91b1c5948b35145be7e3f
+  embedded_revision: 61caa6d9b91a
+  artifacts: 636
+  standalone_nodes: [O, B, C, D, H, Z, P, T, R]
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 141, bytes: 7186656, sha256: 7ff8d504444fe8fb9913e64f482c15419012df63d9ad8020267e57df3c70caad}
+  - {path: build/pdf/guide_mono.pdf, pages: 141, bytes: 7567127, sha256: 091a9ced452fe0c423622868c0840f367c5a8fbc9b5956b133d0e2f8839bf4bf}
+  - {path: build/pdf/guide_a4half.pdf, pages: 136, bytes: 7195826, sha256: eb9b38d9a1b5e65cfae669f7fe5b4e6cf07537ece1bf00edb757d51a32c8239b}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 136, bytes: 5431406, sha256: a0fb95045337d36e4ddf23811c4d9799ea0dc9dfae8b5428fb0355eea1257de1}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 228, bytes: 7408380, sha256: b20b8b9c93faf808ac1c2f797cf65452e2d6264502d8467c2787b28f7b323301}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 228, bytes: 7646443, sha256: 4394d1e9e1b2a8e0c8ddeac6d2fd9d2ab39e42dedcb1ece4930d2637cd16cac0}
+  - {path: build/html/guide.html, bytes: 6309066, sha256: f125650a99525bd905b233a7534b35d74cfcef2d602b28d7b2a74b90b1efaba1}
+  - {path: build/subguides/index.html, bytes: 441825, sha256: d826cfba6a1edef9b18ba1824d30926d585d55da36fbe9ae5cc1a0c11fae356b}
+  - {path: build/site/index.html, bytes: 13792, sha256: 3efee9a3e386e5725c4530b8402a43a7808ea2d11b6e6becbe609cd370aa1a4a}
+  - {path: build/docx/guide.docx, bytes: 3942865, sha256: 7d640e3e748f636f29251b2bcbf4ed14a9f6cb0d7f0cca610f292f67cbb006e6}
+  - {path: build/latex/guide.tex, bytes: 409190, sha256: 27c43a9092fa1c82cc879d8f47e03ca36c7c6d39b9afd36f066c3e27abbe4515}
+  - {path: src/data/coverage_matrix.json, bytes: 10638, sha256: 9da26270880b83f786d99f3bcc4687f20b9d2da87a1ee0ce594d9f91dfdba34b}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+
+release_decisions:
+  - Z uses the complete canonical outage and continuity chapter; no parallel standalone prose source was introduced.
+  - The warning-verification instruction now carries a local BBK source for NINA and Cell Broadcast.
+  - A remains master-only rather than being released with only one owned reader visual.
+  - The Pages package and deployment workflow remain prepared but were not invoked.
+  - No existing stable reference was renumbered or reused.
+
+known_limits:
+  - Build and rendering checks do not establish that readers can select or operate Z correctly during a real outage, evacuation, or disaster; route drills remain outstanding.
+  - Warning delivery, device compatibility, municipal instructions, water availability, transport, shelter, power restoration, and service capacity remain local and time-sensitive facts.
+  - No new figure artwork was introduced in 4.11.0; existing Z figures were reflowed into standalone editions and passed source, fallback, tagging, geometry, accessibility, overflow, and color/mono checks. Direct manual image inspection was not performed in this run.
+  - Actual wet-room installations, household continuity exercises, and emergency supply audits remain outstanding.
+  - Local Fontconfig emitted configuration warnings and unavailable font-weight fallbacks; tagging, geometry, text parity, accessibility, and edge checks passed.

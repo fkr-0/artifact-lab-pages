@@ -1,0 +1,98 @@
+[
+  {
+    "system": "Information",
+    "metric": "Depends on",
+    "count": 1,
+    "label": "1"
+  },
+  {
+    "system": "Information",
+    "metric": "Supports",
+    "count": 5,
+    "label": "5"
+  },
+  {
+    "system": "Air and hazard",
+    "metric": "Depends on",
+    "count": 2,
+    "label": "2"
+  },
+  {
+    "system": "Air and hazard",
+    "metric": "Supports",
+    "count": 2,
+    "label": "2"
+  },
+  {
+    "system": "Care and power",
+    "metric": "Depends on",
+    "count": 3,
+    "label": "3"
+  },
+  {
+    "system": "Care and power",
+    "metric": "Supports",
+    "count": 3,
+    "label": "3"
+  },
+  {
+    "system": "Water",
+    "metric": "Depends on",
+    "count": 3,
+    "label": "3"
+  },
+  {
+    "system": "Water",
+    "metric": "Supports",
+    "count": 2,
+    "label": "2"
+  },
+  {
+    "system": "Temperature and shelter",
+    "metric": "Depends on",
+    "count": 3,
+    "label": "3"
+  },
+  {
+    "system": "Temperature and shelter",
+    "metric": "Supports",
+    "count": 1,
+    "label": "1"
+  },
+  {
+    "system": "Food and cooking",
+    "metric": "Depends on",
+    "count": 3,
+    "label": "3"
+  },
+  {
+    "system": "Food and cooking",
+    "metric": "Supports",
+    "count": 0,
+    "label": "0"
+  },
+  {
+    "system": "Sanitation",
+    "metric": "Depends on",
+    "count": 3,
+    "label": "3"
+  },
+  {
+    "system": "Sanitation",
+    "metric": "Supports",
+    "count": 1,
+    "label": "1"
+  },
+  {
+    "system": "People, access, and transport",
+    "metric": "Depends on",
+    "count": 2,
+    "label": "2"
+  },
+  {
+    "system": "People, access, and transport",
+    "metric": "Supports",
+    "count": 6,
+    "label": "6"
+  }
+]

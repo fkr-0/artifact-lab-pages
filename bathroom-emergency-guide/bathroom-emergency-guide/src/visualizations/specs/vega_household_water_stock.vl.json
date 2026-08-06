@@ -1,0 +1,93 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "width": 760,
+  "height": 360,
+  "padding": 18,
+  "data": {
+    "name": "table"
+  },
+  "encoding": {
+    "x": {
+      "field": "people",
+      "type": "ordinal",
+      "sort": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "axis": {
+        "title": "People in household",
+        "labelAngle": 0
+      }
+    },
+    "xOffset": {
+      "field": "horizon",
+      "sort": [
+        "Start: 3 days",
+        "Build toward: 10 days"
+      ]
+    },
+    "color": {
+      "field": "horizon",
+      "type": "nominal",
+      "sort": [
+        "Start: 3 days",
+        "Build toward: 10 days"
+      ],
+      "scale": {
+        "range": [
+          "#0891b2",
+          "#175cd3"
+        ]
+      },
+      "legend": {
+        "title": null,
+        "orient": "bottom"
+      }
+    },
+    "y": {
+      "field": "litres",
+      "type": "quantitative",
+      "scale": {
+        "zero": true
+      },
+      "axis": {
+        "title": "Stored water (litres)",
+        "values": [
+          0,
+          20,
+          40,
+          60,
+          80,
+          100,
+          120
+        ]
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "stroke": "#172033",
+        "strokeWidth": 0.8
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "dy": -7,
+        "fontSize": 11,
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "text": {
+          "field": "label"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "panel": "Lifetime infertility",
+    "measure": "People per 100",
+    "value": 17.5,
+    "lower": 17.5,
+    "upper": 17.5,
+    "label": "17.5 per 100",
+    "denominator": "adults over the reproductive life course"
+  },
+  {
+    "panel": "Postpartum psychosis",
+    "measure": "Incidence per 1,000",
+    "value": 1.745,
+    "lower": 0.89,
+    "upper": 2.6,
+    "label": "0.89–2.6 per 1,000",
+    "denominator": "incidence estimates across five studies"
+  }
+]

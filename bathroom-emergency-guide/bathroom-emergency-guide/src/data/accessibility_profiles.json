@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "reviewed_on": "2026-07-22",
+  "policy": {
+    "invariants": [
+      "The text route must be complete without colour, diagram, sound, or gesture.",
+      "Adaptation changes communication and logistics, not the urgency threshold.",
+      "Use one speaker, one next action, one backup, and one escalation condition.",
+      "Ask the person what works; do not infer capacity from speech, movement, eye contact, or distress."
+    ],
+    "source_ids": [
+      "wcag22",
+      "authority-115-sign",
+      "hilfetelefon-women"
+    ]
+  },
+  "profiles": [
+    {
+      "id": "blind-low-vision",
+      "barrier": "Visual-only maps, colour coding, inaccessible exits, or unannounced obstacles",
+      "adaptation": "Read the next action aloud; describe direction and obstacles; offer an elbow or requested guiding method; keep mobility aids with the person.",
+      "handoff": "State visual access needs, guide method, assistive devices, and whether an accessible route is known.",
+      "failure_escalation": "The person cannot leave, orient, or receive critical instructions safely."
+    },
+    {
+      "id": "deaf-hard-of-hearing",
+      "barrier": "Voice-only calls, alarms, masks, background noise, or missing text/sign channel",
+      "adaptation": "Use text, writing, visual alarms, lip-visible speech when useful, relay/video sign service, or a trusted interpreter chosen by the person.",
+      "handoff": "State the preferred language or channel and whether text, sign, lip-reading, or hearing technology is available.",
+      "failure_escalation": "Critical instructions or consent cannot be exchanged in time."
+    },
+    {
+      "id": "speech-language",
+      "barrier": "Speech loss, aphasia, stammering under stress, language mismatch, or a call handler who cannot understand",
+      "adaptation": "Use the written emergency card, yes/no questions, pointing, text relay, translation, or a named communication partner without speaking over the person.",
+      "handoff": "Show location, problem, danger, callback number, preferred language, and how the person answers yes/no.",
+      "failure_escalation": "Location, danger, symptoms, or instructions cannot be communicated."
+    },
+    {
+      "id": "cognitive-overload",
+      "barrier": "Long explanations, several speakers, figurative language, memory load, or rapidly changing choices",
+      "adaptation": "Use literal short sentences; show one action at a time; keep choices binary where possible; repeat the same labels and write the next step down.",
+      "handoff": "State that the person needs one speaker, extra processing time, and written or repeated instructions.",
+      "failure_escalation": "The person cannot complete the safety action or is becoming more disoriented."
+    },
+    {
+      "id": "mobility-fatigue-pain",
+      "barrier": "Stairs, narrow doors, transfer needs, pain, fatigue, missing equipment, or separation from a mobility aid",
+      "adaptation": "Use the accessible route; request trained transfer help; keep wheelchair, walker, prosthesis, charger, and positioning needs with the person.",
+      "handoff": "State transfer method, weight-bearing limits, equipment, stair barrier, transport need, and remaining device power.",
+      "failure_escalation": "The person cannot leave before the route becomes unsafe or essential positioning/support fails."
+    },
+    {
+      "id": "sensory-panic-neurodivergent",
+      "barrier": "Bright light, noise, touch, crowding, uncertain social demands, or breathing exercises that intensify distress",
+      "adaptation": "Reduce stimulation when safe; ask before touching; offer a non-breath-focused grounding option; use predictable literal language and one contact person.",
+      "handoff": "State useful and harmful stimuli, touch preference, communication style, and the person’s established calming or emergency plan.",
+      "failure_escalation": "Distress prevents evacuation, communication, essential care, or safe supervision."
+    }
+  ],
+  "minimal_cards": {
+    "emergency": "HELP. LOCATION: ____. DANGER: ____. PERSON AWAKE: YES/NO. BREATHING NORMALLY: YES/NO. CALLBACK: ____.",
+    "safe_place": "I have no safe place tonight. I am at ____. I need: shelter / accessible route / power / medication / child safety / violence support / transport.",
+    "communication": "I communicate best by: speech / writing / text / sign / pointing / yes-no. Please use one sentence and one question at a time."
+  }
+}

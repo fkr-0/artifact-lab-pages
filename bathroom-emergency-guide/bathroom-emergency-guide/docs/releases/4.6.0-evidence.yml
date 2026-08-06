@@ -1,0 +1,159 @@
+release:
+  project: bathroom-emergency-guide
+  version: 4.6.0
+  release_date: 2026-07-26
+  source_revision: 5f60f73cf1ff
+  implementation_commit: e143b5c
+  documentation_commit: 5f60f73
+  local_tag: v4.6.0
+  tag_target: commit containing this evidence record
+  push_performed: false
+  publish_performed: false
+  deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 303
+  retired_stable_resources: 1
+  stable_resource_kinds:
+    - section
+    - form
+    - figure
+    - professional_contact
+    - deployment_field
+    - glossary_term
+  standalone_nodes:
+    - B
+    - H
+    - T
+    - R
+  master_layouts:
+    - a4
+    - a4half
+    - largeprint
+  print_modes:
+    - color
+    - monochrome
+  additional_formats:
+    - markdown
+    - docx
+    - latex
+  release_manifest_artifacts: 242
+
+verification:
+  complete_build:
+    command: SOURCE_DATE_EPOCH=1785024000 GUIDE_REVISION=5f60f73cf1ff GUIDE_AS_OF=2026-07-26 npm run build
+    result: passed
+  independent_test:
+    command: SOURCE_DATE_EPOCH=1785024000 GUIDE_REVISION=5f60f73cf1ff GUIDE_AS_OF=2026-07-26 npm test
+    result: passed
+  generated_registry_checks:
+    commands:
+      - python3 bin/build_inventories.py --check
+      - python3 bin/build_source_inventory.py --check
+      - python3 bin/build_reference_index.py --check
+    result: passed
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  observed_gates:
+    - 7 pass-1 emergency overrides, 6 pass-2 needs, 4 safe-place routes
+    - 8 continuity systems and 5 household roles
+    - 303 active stable references across six typed kinds
+    - 10 frozen graph identities with reciprocal handoffs
+    - 8 offline Vega-Lite figures and 20 current non-Vega illustrations
+    - 24 standalone B/H/T/R PDF editions with layout and semantic parity
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - tagged PDFs, native MathML, color/monochrome text parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, alt text, page-edge safety, and color/mono parity
+    - six HTML editions with no boxed or content overflow
+    - landing, deployment, release-manifest, and complete-matrix validation
+
+render_metrics:
+  a4:
+    color_pages: 129
+    monochrome_pages: 129
+    median_span: 0.98
+    color_median_ink: 0.112
+    monochrome_median_ink: 0.113
+  a4half:
+    color_pages: 124
+    monochrome_pages: 124
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 206
+    monochrome_pages: 206
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 43024
+  sha256: 2e9c4764b85e1a78740eebb939843c266484189e96d8a998102483fe6176f4c4
+  note: ignored build output; regenerate from the tagged source with the recorded environment
+
+artifact_samples:
+  - path: build/pdf/guide.pdf
+    pages: 129
+    bytes: 6136332
+    sha256: b4cf0f855c25ef2bbd4fec463c5fbfe6f0cda00c127a19a772d0ec32ca739a13
+  - path: build/pdf/guide_mono.pdf
+    pages: 129
+    bytes: 6416361
+    sha256: 1fac946bbed2c18b4ac9631c225375d3105faaecfb99b8e2aeb6aa222e3ec1e2
+  - path: build/pdf/guide_a4half.pdf
+    pages: 124
+    bytes: 6139942
+    sha256: d33cac1e9286e0052526406d0b2f44873dc3d09b002e90e6b07208dec0c8e11d
+  - path: build/pdf/guide_a4half_mono.pdf
+    pages: 124
+    bytes: 4774541
+    sha256: 9257b4e1c9891c7a44ad85f042d600a9cf59c24e961a7e3d182441910af4822d
+  - path: build/pdf/guide_largeprint.pdf
+    pages: 206
+    bytes: 6328043
+    sha256: 14cfee5baea9aac0c815f979f6f8fc4cc06377c8f4b73cf7a250849d9f2bd69a
+  - path: build/pdf/guide_largeprint_mono.pdf
+    pages: 206
+    bytes: 6478755
+    sha256: 18bdce88aeb053f98daadda3261dba53b6916d8a37dcf595361caa9d0495b102
+  - path: build/html/guide.html
+    bytes: 4986400
+    sha256: dc4399ff7f0364a2078a365128b68d6838d0d145258bbed4c1e7e20474f1bb40
+  - path: build/subguides/index.html
+    bytes: 441977
+    sha256: 19f5b77e3d8b5b30e13d7c897492e3ce53f9dc035907c70ef18f34a748483bbd
+  - path: build/site/index.html
+    bytes: 7596
+    sha256: d401d5fbc89ee4e2495cced4b7d0c6ea9c892b2ca24698d5a3e72f2b5af9c532
+  - path: build/docx/guide.docx
+    bytes: 3072161
+    sha256: 0c303d5e3cc0ba5fbbdacbc3fd0d27bd0e303ae06aff225b326efbfc82c288e2
+  - path: build/latex/guide.tex
+    bytes: 373246
+    sha256: ea0d7112cef8dc06705493b5c0f936651af1800b6b426d737902eb598b3f16d8
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  weasyprint: 69.0
+  poppler_pdfinfo: 26.07.0
+  chrome_for_testing: 148.0.7778.96
+
+release_decisions:
+  - Canonical addresses use stable typed IDs such as [BEG:T:F:003]; hierarchical numbers remain non-canonical navigation aids because insertions would rename downstream resources.
+  - T and R are detached now; the remaining six graph nodes stay in the complete guide until they receive equivalent source, visual, layout, and accessibility review.
+  - AED language describes rhythm analysis and shocks only when indicated; the inaccurate universal reboot metaphor is rejected.
+  - Effective coughing remains the first choking principle; unreviewed self-thrust and furniture manoeuvres are not shipped.
+  - A complete bird-folding tutorial and puzzle packs remain deferred until diagram, licensing, difficulty, and accessibility review.
+  - Shared installations must not expose hidden-key locations, credentials, private medical details, or violence-related safe places.
+
+known_limits:
+  - The new CPR, AED, and recovery-position figures passed source, raster-boundary, alt-text, physical-edge, and print checks but still need usability review with first-aid instructors and readers without prior CPR practice.
+  - Real bathroom mounting concepts remain proposals until tested for water, glare, reach, privacy, page turning, replacement, and maintenance.
+  - Local service numbers and safe destinations remain deployment fields requiring dated verification by the deployer.
+  - Local Fontconfig emitted configuration warnings during rendering; output generation, tagging, geometry, text parity, and accessibility checks nevertheless passed.
+  - The attempted independent OpenCode repository review failed in its adapter before repository inspection; no review evidence is claimed from it.

@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "renderer": {
+    "engine": "Vega-Lite",
+    "version": "6.4.3",
+    "offline": true,
+    "canonical": "SVG",
+    "fallback": "PNG",
+    "theme": "src/visualizations/theme.json",
+    "fontconfig": "src/visualizations/fontconfig.conf",
+    "title_owner": "document",
+    "svg_accessibility_metadata": true
+  },
+  "visualizations": [
+    {
+      "id": "vega-gad7-accuracy",
+      "title": "One cut-off, different observed accuracy",
+      "subguides": [
+        "B"
+      ],
+      "family": "quantitative-evidence",
+      "question": "How did GAD-7 accuracy at cut-off 10 differ between its original study and a pooled diagnostic review?",
+      "takeaway": "Accuracy changed across samples and settings; a screen supports assessment but neither diagnoses nor handles acute triage.",
+      "data": "src/data/derived/vega_gad7_accuracy.json",
+      "spec": "src/visualizations/specs/vega_gad7_accuracy.vl.json",
+      "svg": "build/diagrams/vega_gad7_accuracy.svg",
+      "png": "build/diagrams/vega_gad7_accuracy.png",
+      "sources": [
+        "gad7_original",
+        "gad7_cochrane"
+      ],
+      "evidence_class": "diagnostic-accuracy study and systematic review",
+      "denominator_scope": "965 US primary-care patients in the original study; pooled adult diagnostic-accuracy studies in the review.",
+      "uncertainty_policy": "Show the pooled review 95% confidence intervals; do not invent an interval for the original point estimate.",
+      "limit": "A screen is not a diagnosis, does not exclude a medical emergency, and varies by population and reference standard.",
+      "alt": "Four point-and-interval estimates compare GAD-7 sensitivity and specificity at cut-off 10 in the original study and a pooled diagnostic review.",
+      "long_description": "The original study reports sensitivity 89% and specificity 82%. The pooled review reports sensitivity 64% with a 56–72% confidence interval and specificity 91% with an 87–93% interval. The visual separates study source by point shape and direct legend, and separates sensitivity from specificity by vertical position.",
+      "table_fallback": "src/data/derived/vega_gad7_accuracy.json",
+      "mono_encoding": [
+        "position",
+        "shape",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-household-water-stock",
+      "title": "Household drinking and cooking water",
+      "subguides": [
+        "Z"
+      ],
+      "family": "planning-model",
+      "question": "How much drinking and cooking water does the BBK planning value imply for one to six people over three and ten days?",
+      "takeaway": "At two litres per person per day, household stock scales linearly with both people and days.",
+      "data": "src/data/derived/vega_household_water_stock.json",
+      "spec": "src/visualizations/specs/vega_household_water_stock.vl.json",
+      "svg": "build/diagrams/vega_household_water_stock.svg",
+      "png": "build/diagrams/vega_household_water_stock.png",
+      "sources": [
+        "household_water"
+      ],
+      "evidence_class": "official household preparedness planning value",
+      "denominator_scope": "One to six household members; drinking and cooking stock only; three-day and ten-day planning horizons.",
+      "uncertainty_policy": "No statistical interval applies; the chart is a deterministic multiplication of the reviewed planning value.",
+      "limit": "Heat, illness, pregnancy, breastfeeding, work, pets, and hygiene can require more; local do-not-use notices override household calculation.",
+      "alt": "Grouped bars show drinking and cooking water in litres for one to six people at three-day and ten-day planning horizons.",
+      "long_description": "For each household size from one to six, the chart shows two exact values based on two litres per person per day. Three-day values run from 6 to 36 litres; ten-day values run from 20 to 120 litres. Labels print each exact litre total above its bar.",
+      "table_fallback": "src/data/derived/vega_household_water_stock.json",
+      "mono_encoding": [
+        "position",
+        "group-offset",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-social-connection",
+      "title": "Social connection: associations, not personal fate",
+      "subguides": [
+        "P"
+      ],
+      "family": "quantitative-evidence",
+      "question": "What adjusted mortality associations did a 2015 longitudinal meta-analysis report for isolation, loneliness, and living alone?",
+      "takeaway": "The three reported associations are similar in magnitude, but observational estimates do not establish individual causation or prognosis.",
+      "data": "src/data/derived/vega_social_connection.json",
+      "spec": "src/visualizations/specs/vega_social_connection.vl.json",
+      "svg": "build/diagrams/vega_social_connection.svg",
+      "png": "build/diagrams/vega_social_connection.png",
+      "sources": [
+        "social_connection_mortality"
+      ],
+      "evidence_class": "observational meta-analysis",
+      "denominator_scope": "Longitudinal observational studies pooled in the cited meta-analysis; adjusted odds ratios.",
+      "uncertainty_policy": "Plot the reviewed adjusted point estimates only; do not invent intervals absent from the current registry.",
+      "limit": "Associations do not prove that one social state caused one death and do not predict an individual future.",
+      "alt": "Three lollipop marks show adjusted mortality odds ratios of 1.29 for social isolation, 1.26 for loneliness, and 1.32 for living alone.",
+      "long_description": "A dashed reference line marks odds ratio 1.00. Each condition extends from that reference to its adjusted point estimate: social isolation 1.29, loneliness 1.26, and living alone 1.32. Direct labels and different point shapes preserve meaning without colour.",
+      "table_fallback": "src/data/derived/vega_social_connection.json",
+      "mono_encoding": [
+        "position",
+        "shape",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-communication-channels",
+      "title": "Why everyone-tells-everyone stops scaling",
+      "subguides": [
+        "Z"
+      ],
+      "family": "mathematical-model",
+      "question": "How quickly do possible pairwise communication channels grow as a group grows?",
+      "takeaway": "Pairwise channels grow quadratically, so larger groups need named roles, shared logs, and scheduled briefing routes.",
+      "data": "src/data/derived/vega_communication_channels.json",
+      "spec": "src/visualizations/specs/vega_communication_channels.vl.json",
+      "svg": "build/diagrams/vega_communication_channels.svg",
+      "png": "build/diagrams/vega_communication_channels.png",
+      "sources": [
+        "math-pairwise-channels"
+      ],
+      "evidence_class": "mathematical identity",
+      "denominator_scope": "Fully connected groups of 2, 3, 5, 10, 20, 50, and 100 people.",
+      "uncertainty_policy": "No statistical interval applies; exact integer values follow C(n)=n(n−1)/2.",
+      "limit": "Possible channels are not the same as actual messages, trust, hierarchy, or organisational performance.",
+      "alt": "A log-log line chart shows pairwise channels growing from 1 for two people to 4,950 for one hundred people, with exact labels at every point.",
+      "long_description": "The exact values are 1, 3, 10, 45, 190, 1,225, and 4,950 possible pairwise channels for groups of 2, 3, 5, 10, 20, 50, and 100. Both axes are logarithmic so the complete range remains visible; the adjacent table provides the same values.",
+      "table_fallback": "src/data/derived/vega_communication_channels.json",
+      "mono_encoding": [
+        "position",
+        "line",
+        "point-shape",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-continuity-dependencies",
+      "title": "Continuity systems are coupled",
+      "subguides": [
+        "Z"
+      ],
+      "family": "architecture-explanation",
+      "question": "Which household-continuity systems name the most dependencies and support the most other systems in the current guide model?",
+      "takeaway": "Information, water, care/power, and access appear repeatedly across other functions, so a narrow failure can propagate through the plan.",
+      "data": "src/data/derived/vega_continuity_dependencies.json",
+      "spec": "src/visualizations/specs/vega_continuity_dependencies.vl.json",
+      "svg": "build/diagrams/vega_continuity_dependencies.svg",
+      "png": "build/diagrams/vega_continuity_dependencies.png",
+      "sources": [
+        "continuity-catalog"
+      ],
+      "evidence_class": "structured guide architecture",
+      "denominator_scope": "Eight continuity systems and their explicitly declared dependency links in continuity_catalog.json.",
+      "uncertainty_policy": "Counts are deterministic properties of the current registry; changes to the registry must regenerate the chart.",
+      "limit": "Link counts describe this guide’s planning model, not hazard probability, causal strength, or a universal ranking of household needs.",
+      "alt": "Grouped horizontal bars compare how many prerequisites each of eight continuity systems names and how many other systems name it as support.",
+      "long_description": "Each system has a Depends on count and a Supports count derived from the continuity registry. The chart is an architecture audit: it highlights coupling and likely handoff pressure but does not estimate which system will fail.",
+      "table_fallback": "src/data/derived/vega_continuity_dependencies.json",
+      "mono_encoding": [
+        "position",
+        "group-offset",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-stroke-time-model",
+      "title": "Time is brain — a model, not a bedside meter",
+      "subguides": [
+        "C"
+      ],
+      "family": "mathematical-model",
+      "question": "How does the literature-derived untreated-stroke model accumulate estimated neural loss over sixty minutes?",
+      "takeaway": "The model rises linearly at 1.9 million neurons per minute; its purpose is urgency, not individual measurement.",
+      "data": "src/data/derived/vega_stroke_time_model.json",
+      "spec": "src/visualizations/specs/vega_stroke_time_model.vl.json",
+      "svg": "build/diagrams/vega_stroke_time_model.svg",
+      "png": "build/diagrams/vega_stroke_time_model.png",
+      "sources": [
+        "stroke_time_model"
+      ],
+      "evidence_class": "literature-derived mathematical model",
+      "denominator_scope": "Typical untreated large-vessel supratentorial ischaemic stroke; cumulative values over 0–60 minutes.",
+      "uncertainty_policy": "No confidence interval is available in the registry; label the line as a model and do not imply patient-specific measurement.",
+      "limit": "Order-of-magnitude model estimate, not a measurement in an individual patient; practical action remains FAST and 112.",
+      "alt": "A rising line shows a literature-derived stroke model increasing from zero to 114 million cumulative neurons lost over sixty minutes, with labels at fifteen, thirty, and sixty minutes.",
+      "long_description": "The line uses the reviewed estimate of 1.9 million neurons per minute. Direct labels mark 28.5 million at 15 minutes, 57.0 million at 30 minutes, and 114.0 million at 60 minutes. The chart is explicitly a deterministic urgency model, not a bedside measurement or forecast for one person.",
+      "table_fallback": "src/data/derived/vega_stroke_time_model.json",
+      "mono_encoding": [
+        "position",
+        "line",
+        "point-shape",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-sleep-study-design",
+      "title": "What the sleep-restriction study actually assigned",
+      "subguides": [
+        "B"
+      ],
+      "family": "study-design",
+      "question": "What time-in-bed conditions and exposure durations did the controlled sleep study compare?",
+      "takeaway": "The chronic 4-, 6-, and 8-hour conditions lasted fourteen days; the zero-hour comparator was a separate three-day condition.",
+      "data": "src/data/derived/vega_sleep_study_design.json",
+      "spec": "src/visualizations/specs/vega_sleep_study_design.vl.json",
+      "svg": "build/diagrams/vega_sleep_study_design.svg",
+      "png": "build/diagrams/vega_sleep_study_design.png",
+      "sources": [
+        "sleep_restriction"
+      ],
+      "evidence_class": "controlled laboratory study design",
+      "denominator_scope": "48 healthy adults aged 21–38; fourteen-day chronic restriction arms and a separate three-day total-deprivation comparator.",
+      "uncertainty_policy": "The registry contains bounded qualitative results rather than comparable effect sizes, so the chart visualizes assignment and duration only.",
+      "limit": "Small controlled study in healthy adults; use as a warning about cumulative impairment, not as a personal calculator or emergency rule.",
+      "alt": "Four horizontal duration bars show fourteen-day assignments for eight, six, and four hours time in bed, plus a separate three-day zero-hour comparator.",
+      "long_description": "The first three rows each extend to day 14 and are labelled eight, six, and four hours time in bed. The fourth row extends only to day 3 and is labelled zero-hour comparator. Text beside the rows summarizes the bounded study result without inventing numeric effect sizes absent from the registry.",
+      "table_fallback": "src/data/derived/vega_sleep_study_design.json",
+      "mono_encoding": [
+        "position",
+        "duration",
+        "direct-label",
+        "row-order"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    },
+    {
+      "id": "vega-reproductive-denominators",
+      "title": "Two reproductive-health facts with different denominators",
+      "subguides": [
+        "A"
+      ],
+      "family": "quantitative-evidence",
+      "question": "How can lifetime infertility prevalence and postpartum-psychosis incidence be shown without pretending they share a denominator?",
+      "takeaway": "The panels deliberately use independent units and scales: people per 100 over a life course versus incidence estimates per 1,000 births/postpartum episodes.",
+      "data": "src/data/derived/vega_reproductive_denominators.json",
+      "spec": "src/visualizations/specs/vega_reproductive_denominators.vl.json",
+      "svg": "build/diagrams/vega_reproductive_denominators.svg",
+      "png": "build/diagrams/vega_reproductive_denominators.png",
+      "sources": [
+        "infertility_lifetime",
+        "postpartum_psychosis"
+      ],
+      "evidence_class": "population prevalence estimate and systematic review of incidence studies",
+      "denominator_scope": "Lifetime infertility among adults over the reproductive life course; postpartum-psychosis incidence range across five studies, per 1,000.",
+      "uncertainty_policy": "Use separate axes and direct unit labels; do not compare panel heights or derive a pooled postpartum estimate that the review did not support.",
+      "limit": "Population context only. Neither panel predicts one person; postpartum-psychosis symptoms remain an emergency despite low incidence.",
+      "alt": "Two independent panels show lifetime infertility at 17.5 people per 100 and postpartum-psychosis incidence estimates ranging from 0.89 to 2.6 per 1,000.",
+      "long_description": "The left panel uses a zero-to-25 people-per-100 axis and directly labels lifetime infertility as 17.5 per 100. The right panel uses a separate zero-to-3.2 per-1,000 axis and shows a vertical range from 0.89 to 2.6. The separate units and scales are intentional and the panels must not be compared by bar height.",
+      "table_fallback": "src/data/derived/vega_reproductive_denominators.json",
+      "mono_encoding": [
+        "separate-panels",
+        "position",
+        "range-mark",
+        "direct-label"
+      ],
+      "reviewed_on": "2026-07-22",
+      "reader_facing": true
+    }
+  ]
+}

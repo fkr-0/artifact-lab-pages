@@ -1,0 +1,962 @@
+{
+  "release": "4.14.0-alt.2",
+  "status": "initial audited inventory",
+  "families": [
+    "quantitative-evidence",
+    "quantitative-model",
+    "routing",
+    "route-matrix",
+    "dependency",
+    "mechanism-sequence",
+    "study-design",
+    "handoff",
+    "operational-form",
+    "reference-taxonomy",
+    "orientation",
+    "priority-hierarchy"
+  ],
+  "illustrations": [
+    {
+      "id": "aed-action-sequence",
+      "file": "build/diagrams/aed_action_sequence.png",
+      "chapters": [
+        "05-self-ambulance.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "What should a lay rescuer do when an AED arrives?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent text says turn on, expose and dry chest, attach pads, clear for analysis/shock, and resume CPR.",
+      "mono_strategy": [
+        "numbered panels",
+        "direct labels",
+        "action verbs"
+      ],
+      "status": "current",
+      "next_action": "Review wording against the next ERC/DRK public algorithm update.",
+      "priority": "high",
+      "owner": "C",
+      "secondary_subguides": [],
+      "sources": [
+        "erc2025"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "alarm-channels-map",
+      "file": "build/diagrams/alarm_channels_map.png",
+      "chapters": [
+        "03-situations-b-g.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "How can an anxiety bundle be separated into observable sensation, emotion, prediction, and urge channels?",
+      "renderer": "generated-raster",
+      "text_fallback": "The adjacent four-row table names every channel, example, and observation question.",
+      "mono_strategy": [
+        "letter-coded channels",
+        "fixed card order",
+        "direct labels"
+      ],
+      "status": "canonical-graph-grammar",
+      "next_action": "Retain as the B orientation visual and keep the physical-red-flag limit adjacent.",
+      "priority": "high",
+      "owner": "B",
+      "secondary_subguides": [],
+      "sources": [
+        "source-note:affect-labelling-and-emotional-regulation",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "breathing-techniques",
+      "file": "build/diagrams/breathing_techniques.png",
+      "chapters": [
+        "04-calm-guide.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "How do the three optional breathing patterns differ in timing?",
+      "renderer": "generated-raster",
+      "text_fallback": "Nearby prose lists all timings and cautions.",
+      "mono_strategy": [
+        "timing labels",
+        "distinct geometry",
+        "direct labels"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Rebuild as a clean authored SVG timing strip with consistent phase widths.",
+      "priority": "medium",
+      "owner": "B",
+      "secondary_subguides": [],
+      "sources": [
+        "conceptual-breath-patterns"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "breathwork-trial-map",
+      "file": "build/diagrams/breathwork_trial_map.png",
+      "chapters": [
+        "04-calm-guide.md"
+      ],
+      "family": "study-design",
+      "question": "What did the breathwork trial actually compare and measure?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent study description names groups, duration, outcomes, and limits.",
+      "mono_strategy": [
+        "panel position",
+        "direct labels",
+        "rule styles"
+      ],
+      "status": "candidate-redesign",
+      "next_action": "Rebuild as an authored study-design strip; reserve Vega-Lite for measured results.",
+      "priority": "high",
+      "owner": "B",
+      "secondary_subguides": [],
+      "sources": [
+        "breathwork_trial"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "communication-access-card",
+      "file": "build/diagrams/communication_access_card.png",
+      "chapters": [
+        "03g-safe-place-routing.md"
+      ],
+      "family": "handoff",
+      "question": "Which communication adaptation helps with which barrier?",
+      "renderer": "matplotlib",
+      "text_fallback": "The chapter provides the complete communication and access card in text.",
+      "mono_strategy": [
+        "icons",
+        "labels",
+        "row position"
+      ],
+      "status": "current",
+      "next_action": "Test channel selection, confirmation wording, and large-print comprehension with users of each communication route.",
+      "priority": "high",
+      "owner": "D",
+      "secondary_subguides": [],
+      "sources": [
+        "authority-115-sign",
+        "hilfetelefon-women",
+        "children-help",
+        "wcag22"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "cpr-body-orientation",
+      "file": "build/diagrams/cpr_body_orientation.png",
+      "chapters": [
+        "05-self-ambulance.md"
+      ],
+      "family": "orientation",
+      "question": "Where is the centre of an adult chest relative to the head, hips, and feet?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent CPR section says centre of the adult chest, with hands together and shoulders above hands.",
+      "mono_strategy": [
+        "body outline",
+        "landmark labels",
+        "direct arrow"
+      ],
+      "status": "current",
+      "next_action": "Test with first-aid instructors and readers who have never practised CPR.",
+      "priority": "high",
+      "owner": "C",
+      "secondary_subguides": [],
+      "sources": [
+        "erc2025"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "dependency-continuity-map",
+      "file": "build/diagrams/dependency_continuity_map.png",
+      "chapters": [
+        "03h-environmental-hazards.md",
+        "06-zombie-guide.md"
+      ],
+      "family": "dependency",
+      "question": "What treatment or powered-device dependencies require an early backup route?",
+      "renderer": "generated-raster",
+      "text_fallback": "The surrounding route text lists dependency classes and escalation actions.",
+      "mono_strategy": [
+        "line style",
+        "node shape",
+        "direct labels"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Rebuild in the shared graph grammar and reduce crossing connectors.",
+      "priority": "high",
+      "owner": "H",
+      "secondary_subguides": [
+        "Z"
+      ],
+      "sources": [
+        "continuity-catalog",
+        "bbk-power"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "evidence-classes",
+      "file": "build/diagrams/evidence_classes.png",
+      "chapters": [
+        "08-appendix.md"
+      ],
+      "family": "reference-taxonomy",
+      "question": "How do the guide’s evidence labels differ in what they can support?",
+      "renderer": "matplotlib",
+      "text_fallback": "The appendix contains the full evidence-label table.",
+      "mono_strategy": [
+        "row order",
+        "direct labels",
+        "group boundaries"
+      ],
+      "status": "candidate-redesign",
+      "next_action": "Replace with semantic HTML or an authored SVG taxonomy; do not force into a chart.",
+      "priority": "medium",
+      "owner": "R",
+      "secondary_subguides": [],
+      "sources": [
+        "evidence-policy"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "first-meeting-roles",
+      "file": "build/diagrams/first_meeting_roles.png",
+      "chapters": [
+        "06-zombie-guide.md"
+      ],
+      "family": "operational-form",
+      "question": "Which five functions should a short crisis meeting assign?",
+      "renderer": "generated-raster",
+      "text_fallback": "The five roles and assignment invariant are listed immediately nearby.",
+      "mono_strategy": [
+        "numbered roles",
+        "icons",
+        "direct labels"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Convert to semantic role cards with one consistent icon family.",
+      "priority": "medium",
+      "owner": "Z",
+      "secondary_subguides": [],
+      "sources": [
+        "continuity-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "hazard-handoff-card",
+      "file": "build/diagrams/hazard_handoff_card.png",
+      "chapters": [
+        "03h-environmental-hazards.md"
+      ],
+      "family": "handoff",
+      "question": "Which five fields make an environmental-hazard handoff usable from a safe place?",
+      "renderer": "generated-raster",
+      "text_fallback": "The complete location, hazard, people, symptoms, and access script follows immediately below the card.",
+      "mono_strategy": [
+        "numbered fields",
+        "direct labels",
+        "fixed left-to-right order"
+      ],
+      "status": "canonical-graph-grammar",
+      "next_action": "Retain as the H handoff visual and test the narrow-format stack at every release.",
+      "priority": "high",
+      "owner": "H",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-footnote:bbk-112",
+        "chapter-footnote:bfr"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "hazard-override-matrix",
+      "file": "build/diagrams/hazard_override_matrix.png",
+      "chapters": [
+        "03h-environmental-hazards.md"
+      ],
+      "family": "route-matrix",
+      "question": "Which environmental signs override ordinary symptom routing?",
+      "renderer": "generated-raster",
+      "text_fallback": "The chapter repeats all override conditions and actions in a text matrix.",
+      "mono_strategy": [
+        "row position",
+        "symbols",
+        "action labels"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Rebuild with the shared route grammar and stronger source→path→action separation.",
+      "priority": "high",
+      "owner": "H",
+      "secondary_subguides": [],
+      "sources": [
+        "bbk-fire",
+        "bbk-power",
+        "dvgw-gas",
+        "gesund-poison",
+        "drk-electric",
+        "bbk-warning"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "hazard-source-location-map",
+      "file": "build/diagrams/hazard_source_location_map.png",
+      "chapters": [
+        "03h-environmental-hazards.md"
+      ],
+      "family": "routing",
+      "question": "How does indoor, outdoor, or uncertain source location change the safe movement decision?",
+      "renderer": "generated-raster",
+      "text_fallback": "The adjacent three-item list gives the full indoor-source, outside-warning, and uncertain-source actions.",
+      "mono_strategy": [
+        "numbered panels",
+        "direct action labels",
+        "distinct card positions"
+      ],
+      "status": "canonical-graph-grammar",
+      "next_action": "Retain as an operational-source-location model and review whenever official warning routes change.",
+      "priority": "high",
+      "owner": "H",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-footnote:warning",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "household-continuity-board",
+      "file": "build/diagrams/household_continuity_board.png",
+      "chapters": [
+        "06-zombie-guide.md"
+      ],
+      "family": "operational-form",
+      "question": "What must be recorded for each household continuity function?",
+      "renderer": "generated-raster",
+      "text_fallback": "The complete eight-function board is provided as a table.",
+      "mono_strategy": [
+        "column structure",
+        "field labels",
+        "system codes"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Make the HTML table the canonical form and generate a print worksheet from it.",
+      "priority": "high",
+      "owner": "Z",
+      "secondary_subguides": [],
+      "sources": [
+        "continuity-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "interoception-loop",
+      "file": "build/diagrams/interoception_loop.png",
+      "chapters": [
+        "01-how-to-use.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "How do signal, attention, interpretation, and action produce a revisable loop?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent prose names all four questions and explains that the loop may amplify or revise a working hypothesis.",
+      "mono_strategy": [
+        "numbered nodes",
+        "clockwise connector order",
+        "direct labels"
+      ],
+      "status": "current",
+      "next_action": "Review with readers for accidental diagnostic or reassurance interpretations.",
+      "priority": "medium",
+      "owner": "O",
+      "secondary_subguides": [],
+      "sources": [
+        "01-how-to-use--interoception-review"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "observatory-scan",
+      "file": "build/diagrams/observatory_scan.png",
+      "chapters": [
+        "01-how-to-use.md"
+      ],
+      "family": "orientation",
+      "question": "What should be observed in body, room, and attention before choosing a route?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent First 90 seconds section lists the body, room, and attention checks and states when observation must end.",
+      "mono_strategy": [
+        "numbered channels",
+        "fixed left-to-right order",
+        "direct labels"
+      ],
+      "status": "current",
+      "next_action": "Test the three-channel scan under time pressure and with screen-reader, low-vision, and cognitive-overload profiles.",
+      "priority": "high",
+      "owner": "O",
+      "secondary_subguides": [],
+      "sources": [
+        "route-catalog",
+        "01-how-to-use--stress-executive"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "overload-control-map",
+      "file": "build/diagrams/overload_control_map.png",
+      "chapters": [
+        "03-situations-b-g.md"
+      ],
+      "family": "quantitative-model",
+      "question": "Which load terms can be reduced, supported, or offloaded when conceptual load exceeds current capacity?",
+      "renderer": "generated-raster",
+      "text_fallback": "The adjacent equation defines I, E, S, capacity K, headroom H, and the same three control levers.",
+      "mono_strategy": [
+        "symbol-coded terms",
+        "direct lever labels",
+        "fixed equation panel"
+      ],
+      "status": "canonical-graph-grammar",
+      "next_action": "Retain as a conceptual model; never present its symbols as measured clinical units.",
+      "priority": "high",
+      "owner": "B",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-footnote:cowan",
+        "source-note:cognitive-load-theory"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "professional-call-packet",
+      "file": "build/diagrams/professional_call_packet.png",
+      "chapters": [
+        "07-professional-support.md"
+      ],
+      "family": "handoff",
+      "question": "Which six facts form a useful first packet for a professional or emergency call?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent text names where, what, when, current state, current danger, and callback number, followed by a complete example script.",
+      "mono_strategy": [
+        "numbered cards",
+        "fixed reading order",
+        "direct field labels"
+      ],
+      "status": "current",
+      "next_action": "Test with voice, writing, sign, and yes/no communication routes; revise only when a field consistently causes delay or confusion.",
+      "priority": "high",
+      "owner": "P",
+      "secondary_subguides": [],
+      "sources": [
+        "07-professional-support--numbers"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "professional-route-selector",
+      "file": "build/diagrams/professional_route_selector.png",
+      "chapters": [
+        "07-professional-support.md"
+      ],
+      "family": "routing",
+      "question": "Which professional system can change the named problem, and what backup or escalation route remains?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent support-selection matrix repeats every situation, first professional route, and backup route.",
+      "mono_strategy": [
+        "numbered rows",
+        "three fixed columns",
+        "direct route labels"
+      ],
+      "status": "current",
+      "next_action": "Recheck whenever national route scope or local deployment contracts change.",
+      "priority": "high",
+      "owner": "P",
+      "secondary_subguides": [],
+      "sources": [
+        "07-professional-support--numbers",
+        "07-professional-support--spd",
+        "07-professional-support--legal-aid"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "recovery-position-steps",
+      "file": "build/diagrams/recovery_position_steps.png",
+      "chapters": [
+        "05-self-ambulance.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "How do the five recovery-position movements relate spatially?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent text gives all five steps and the breathing recheck.",
+      "mono_strategy": [
+        "numbered panels",
+        "direct labels",
+        "body geometry"
+      ],
+      "status": "current",
+      "next_action": "Replace abstract figures with reviewed human-body drawings after usability testing.",
+      "priority": "high",
+      "owner": "C",
+      "secondary_subguides": [],
+      "sources": [
+        "drk-recovery"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "care-continuity-loop",
+      "file": "build/diagrams/care_continuity_loop.png",
+      "chapters": [
+        "02-situation-a.md"
+      ],
+      "family": "dependency",
+      "question": "Which five fields keep ongoing care usable when the primary caregiver is absent?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent responsibility dashboard and prose name essentials, warning signs, owner, backup, and next review.",
+      "mono_strategy": [
+        "numbered fields",
+        "fixed radial positions",
+        "direct labels"
+      ],
+      "status": "current",
+      "next_action": "Test with caregivers, veterinary users, disability-support households, and system operators using sanitized continuity scenarios.",
+      "priority": "high",
+      "owner": "A",
+      "secondary_subguides": [
+        "Z"
+      ],
+      "sources": [
+        "02-situation-a--caregiver",
+        "continuity-catalog",
+        "forms-registry"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "consent-authority-boundary",
+      "file": "build/diagrams/consent_authority_boundary.png",
+      "chapters": [
+        "02-situation-a.md"
+      ],
+      "family": "route-matrix",
+      "question": "How do requested support, refusal, uncertain capacity, and immediate danger change the first posture?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent four-row table gives the complete support, refusal, assessment, and emergency postures and states the limits of the model.",
+      "mono_strategy": [
+        "numbered quadrants",
+        "fixed card order",
+        "direct labels"
+      ],
+      "status": "current",
+      "next_action": "Review with disability advocates, clinicians, legal advisers, and safeguarding practitioners for accidental overreach or paternalistic interpretation.",
+      "priority": "high",
+      "owner": "A",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-logic:02-situation-a",
+        "02-situation-a--attachment",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "repair-sequence",
+      "file": "build/diagrams/repair_sequence.png",
+      "chapters": [
+        "02-situation-a.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "How do stop, stabilize, tell, repair, and follow up form a revisable accountability sequence?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent equation, five action definitions, and limits explain the full repair sequence and its return path.",
+      "mono_strategy": [
+        "numbered steps",
+        "left-to-right order",
+        "direct action labels"
+      ],
+      "status": "current",
+      "next_action": "Test whether readers understand that follow-up can reopen stop or stabilize and that apology does not prove acceptance or completion.",
+      "priority": "high",
+      "owner": "A",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-logic:02-situation-a",
+        "forms-registry"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "responsibility-clock-map",
+      "file": "build/diagrams/responsibility_clock_map.png",
+      "chapters": [
+        "02-situation-a.md"
+      ],
+      "family": "routing",
+      "question": "Which of four responsibility clocks owns the next useful action?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent table and prose define live harm, continuing effects, repair, and ongoing care with their first actions.",
+      "mono_strategy": [
+        "numbered cards",
+        "fixed two-by-two positions",
+        "direct action labels"
+      ],
+      "status": "current",
+      "next_action": "Test whether readers choose safety before blame and distinguish continuing effects from later repair.",
+      "priority": "high",
+      "owner": "A",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-logic:02-situation-a",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "reproductive-health-denominators",
+      "file": "build/diagrams/reproductive_health_denominators.png",
+      "chapters": [
+        "02-situation-a.md"
+      ],
+      "family": "quantitative-evidence",
+      "question": "How do reproductive-health estimates differ when their denominators differ?",
+      "renderer": "matplotlib",
+      "text_fallback": "Adjacent prose and source notes state every estimate and denominator.",
+      "mono_strategy": [
+        "panel separation",
+        "direct labels",
+        "denominator labels"
+      ],
+      "status": "migrated-to-vega",
+      "next_action": "Retain only as migration history; canonical replacement is vega-reproductive-denominators.",
+      "priority": "low",
+      "owner": "A",
+      "secondary_subguides": [],
+      "sources": [
+        "infertility_lifetime",
+        "postpartum_psychosis"
+      ],
+      "reader_facing": false,
+      "replacement_id": "vega-reproductive-denominators"
+    },
+    {
+      "id": "safe-place-confirmation-packet",
+      "file": "build/diagrams/safe_place_confirmation_packet.png",
+      "chapters": [
+        "03g-safe-place-routing.md"
+      ],
+      "family": "handoff",
+      "question": "Which six fields turn a suggested safe place into a usable destination and backup route?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent numbered list defines destination, availability, access, arrival instruction, backup, and escalation in full.",
+      "mono_strategy": [
+        "numbered fields",
+        "fixed grid order",
+        "direct labels"
+      ],
+      "status": "current",
+      "next_action": "Test with municipal, violence-support, disability-access, and youth-service route drills using sanitized scenarios.",
+      "priority": "high",
+      "owner": "D",
+      "secondary_subguides": [],
+      "sources": [
+        "03g-safe-place-routing--authority-115",
+        "03g-safe-place-routing--shelter-search",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "safe-place-route-map",
+      "file": "build/diagrams/safe_place_route_map.png",
+      "chapters": [
+        "03g-safe-place-routing.md"
+      ],
+      "family": "routing",
+      "question": "Which of four safe-place routes fits the immediate barrier?",
+      "renderer": "matplotlib",
+      "text_fallback": "The chapter contains the complete G1–G4 text routes.",
+      "mono_strategy": [
+        "route codes",
+        "node shape",
+        "connector style"
+      ],
+      "status": "current",
+      "next_action": "Test whether readers can choose the correct route from the short failure/first/confirm labels without relying on colour.",
+      "priority": "high",
+      "owner": "D",
+      "secondary_subguides": [],
+      "sources": [
+        "authority-115",
+        "hilfetelefon-women",
+        "men-violence-help",
+        "children-help",
+        "telefonseelsorge",
+        "women-shelter-search"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "safe-reserve-clock",
+      "file": "build/diagrams/safe_reserve_clock.png",
+      "chapters": [
+        "03g-safe-place-routing.md"
+      ],
+      "family": "routing",
+      "question": "How should an access or essential-care route use remaining safe runtime without treating it as guaranteed?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent G3 prose explains the estimate limit, unknown-reserve rule, early contact, confirmation fields, movement margin, and escalation.",
+      "mono_strategy": [
+        "three numbered stages",
+        "left-to-right arrows",
+        "boxed time-critical rule"
+      ],
+      "status": "current",
+      "next_action": "Review with device users, caregivers, suppliers, and accessible-transport planners; do not add generic runtime constants.",
+      "priority": "high",
+      "owner": "D",
+      "secondary_subguides": [],
+      "sources": [
+        "continuity-catalog",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "scaling-chart",
+      "file": "build/diagrams/scaling_chart.png",
+      "chapters": [
+        "06-zombie-guide.md"
+      ],
+      "family": "orientation",
+      "question": "How does coordination change as a group grows?",
+      "renderer": "generated-raster",
+      "text_fallback": "The surrounding section explains team, representative, briefing, and record needs.",
+      "mono_strategy": [
+        "stage position",
+        "direct labels",
+        "scale bands"
+      ],
+      "status": "candidate-redesign",
+      "next_action": "Replace decorative scale steps with a clearer staged coordination model.",
+      "priority": "medium",
+      "owner": "Z",
+      "secondary_subguides": [],
+      "sources": [
+        "math-pairwise-channels"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "signal-story-question",
+      "file": "build/diagrams/signal_story_question.png",
+      "chapters": [
+        "01-how-to-use.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "How can a reader separate sensation, fast interpretation, and a route-changing question?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent affect-labeling section provides the complete signal, story, and next-question sequence and its safety limit.",
+      "mono_strategy": [
+        "numbered stages",
+        "fixed left-to-right order",
+        "direct labels"
+      ],
+      "status": "current",
+      "next_action": "Test whether the third panel encourages observation without implying that symptoms are only anxiety.",
+      "priority": "high",
+      "owner": "O",
+      "secondary_subguides": [],
+      "sources": [
+        "01-how-to-use--affect-labeling",
+        "route-catalog"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "sleep-restriction-study",
+      "file": "build/diagrams/sleep_restriction_study.png",
+      "chapters": [
+        "03-situations-b-g.md"
+      ],
+      "family": "quantitative-evidence",
+      "question": "What did the 14-day sleep-restriction study show and what was its scope?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent section explains design, bounded result, population, and limits.",
+      "mono_strategy": [
+        "panel position",
+        "direct labels",
+        "condition labels"
+      ],
+      "status": "migrated-to-vega",
+      "next_action": "Retain only as migration history; canonical replacement is vega-sleep-study-design.",
+      "priority": "low",
+      "owner": "B",
+      "secondary_subguides": [],
+      "sources": [
+        "sleep_restriction"
+      ],
+      "reader_facing": false,
+      "replacement_id": "vega-sleep-study-design"
+    },
+    {
+      "id": "stroke-time-model",
+      "file": "build/diagrams/stroke_time_model.png",
+      "chapters": [
+        "05-self-ambulance.md"
+      ],
+      "family": "quantitative-model",
+      "question": "How does the literature-derived untreated stroke model accumulate loss over time?",
+      "renderer": "matplotlib",
+      "text_fallback": "The chapter gives the equation, model status, assumptions, and emergency action.",
+      "mono_strategy": [
+        "line style",
+        "direct labels",
+        "model-status label"
+      ],
+      "status": "migrated-to-vega",
+      "next_action": "Retain only as migration history; canonical replacement is vega-stroke-time-model.",
+      "priority": "low",
+      "owner": "C",
+      "secondary_subguides": [],
+      "sources": [
+        "stroke_time_model"
+      ],
+      "reader_facing": false,
+      "replacement_id": "vega-stroke-time-model"
+    },
+    {
+      "id": "support-system-layers",
+      "file": "build/diagrams/support_system_layers.png",
+      "chapters": [
+        "07-professional-support.md"
+      ],
+      "family": "priority-hierarchy",
+      "question": "How do basic services, community support, focused general support, and specialist services relate?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent numbered list defines all four IASC support layers and explicitly says they may operate together rather than rank deservingness.",
+      "mono_strategy": [
+        "numbered layers",
+        "different widths",
+        "direct layer labels"
+      ],
+      "status": "current",
+      "next_action": "Retain the anti-ranking note and review terminology when the IASC framework changes.",
+      "priority": "high",
+      "owner": "P",
+      "secondary_subguides": [],
+      "sources": [
+        "07-professional-support--iasc"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "survival-pyramid",
+      "file": "build/diagrams/survival_pyramid.png",
+      "chapters": [
+        "06-zombie-guide.md"
+      ],
+      "family": "priority-hierarchy",
+      "question": "Which continuity needs should be stabilized before later comforts?",
+      "renderer": "generated-raster",
+      "text_fallback": "The chapter lists the same priority order and its caveats.",
+      "mono_strategy": [
+        "tier position",
+        "direct labels",
+        "tier numbering"
+      ],
+      "status": "candidate-redesign",
+      "next_action": "Replace the pyramid metaphor if it implies rigid universal ordering; test a priority ladder.",
+      "priority": "medium",
+      "owner": "Z",
+      "secondary_subguides": [],
+      "sources": [
+        "bbk-bag",
+        "conceptual-priority-order"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "three-minute-observation",
+      "file": "build/diagrams/three_minute_observation.png",
+      "chapters": [
+        "01-how-to-use.md"
+      ],
+      "family": "mechanism-sequence",
+      "question": "What happens at each minute of the bounded observation experiment, and when must it stop?",
+      "renderer": "matplotlib",
+      "text_fallback": "The adjacent table gives all four timed actions and the prose states the danger, worsening, and safe-comparison stop conditions.",
+      "mono_strategy": [
+        "time labels",
+        "ordered panels",
+        "boxed stop condition"
+      ],
+      "status": "current",
+      "next_action": "Usability-test whether the stop rule dominates the timeline and prevents repeated observation from becoming delay.",
+      "priority": "high",
+      "owner": "O",
+      "secondary_subguides": [],
+      "sources": [
+        "route-catalog",
+        "01-how-to-use--stress-executive"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "triage-flow",
+      "file": "build/diagrams/triage_flow.png",
+      "chapters": [
+        "05-self-ambulance.md"
+      ],
+      "family": "routing",
+      "question": "What is the first-aid sequence from scene safety through escalation and monitoring?",
+      "renderer": "generated-raster",
+      "text_fallback": "The complete first-aid text route follows in the chapter.",
+      "mono_strategy": [
+        "numbered steps",
+        "decision shapes",
+        "connector labels"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Rebuild with one route grammar, fewer boxes, and clearer emergency exits.",
+      "priority": "high",
+      "owner": "C",
+      "secondary_subguides": [],
+      "sources": [
+        "chapter-footnote:erc2025"
+      ],
+      "reader_facing": true
+    },
+    {
+      "id": "two-pass-route-map",
+      "file": "build/diagrams/two_pass_route_map.png",
+      "chapters": [
+        "08-appendix.md"
+      ],
+      "family": "orientation",
+      "question": "How do pass-one hazards, pass-two needs, and modifiers combine?",
+      "renderer": "generated-raster",
+      "text_fallback": "The appendix includes the complete master flowchart in text.",
+      "mono_strategy": [
+        "layer position",
+        "node shape",
+        "connector style"
+      ],
+      "status": "retain-and-redesign",
+      "next_action": "Use as the first shared graph-grammar pilot for the 4.5 subguide family.",
+      "priority": "high",
+      "owner": "R",
+      "secondary_subguides": [],
+      "sources": [
+        "route-catalog"
+      ],
+      "reader_facing": true
+    }
+  ]
+}

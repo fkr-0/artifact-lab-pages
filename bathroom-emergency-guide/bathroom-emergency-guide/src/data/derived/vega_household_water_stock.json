@@ -1,0 +1,98 @@
+[
+  {
+    "people": "1",
+    "people_count": 1,
+    "days": 3,
+    "horizon": "Start: 3 days",
+    "litres": 6,
+    "label": "6 L"
+  },
+  {
+    "people": "1",
+    "people_count": 1,
+    "days": 10,
+    "horizon": "Build toward: 10 days",
+    "litres": 20,
+    "label": "20 L"
+  },
+  {
+    "people": "2",
+    "people_count": 2,
+    "days": 3,
+    "horizon": "Start: 3 days",
+    "litres": 12,
+    "label": "12 L"
+  },
+  {
+    "people": "2",
+    "people_count": 2,
+    "days": 10,
+    "horizon": "Build toward: 10 days",
+    "litres": 40,
+    "label": "40 L"
+  },
+  {
+    "people": "3",
+    "people_count": 3,
+    "days": 3,
+    "horizon": "Start: 3 days",
+    "litres": 18,
+    "label": "18 L"
+  },
+  {
+    "people": "3",
+    "people_count": 3,
+    "days": 10,
+    "horizon": "Build toward: 10 days",
+    "litres": 60,
+    "label": "60 L"
+  },
+  {
+    "people": "4",
+    "people_count": 4,
+    "days": 3,
+    "horizon": "Start: 3 days",
+    "litres": 24,
+    "label": "24 L"
+  },
+  {
+    "people": "4",
+    "people_count": 4,
+    "days": 10,
+    "horizon": "Build toward: 10 days",
+    "litres": 80,
+    "label": "80 L"
+  },
+  {
+    "people": "5",
+    "people_count": 5,
+    "days": 3,
+    "horizon": "Start: 3 days",
+    "litres": 30,
+    "label": "30 L"
+  },
+  {
+    "people": "5",
+    "people_count": 5,
+    "days": 10,
+    "horizon": "Build toward: 10 days",
+    "litres": 100,
+    "label": "100 L"
+  },
+  {
+    "people": "6",
+    "people_count": 6,
+    "days": 3,
+    "horizon": "Start: 3 days",
+    "litres": 36,
+    "label": "36 L"
+  },
+  {
+    "people": "6",
+    "people_count": 6,
+    "days": 10,
+    "horizon": "Build toward: 10 days",
+    "litres": 120,
+    "label": "120 L"
+  }
+]

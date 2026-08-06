@@ -1,0 +1,190 @@
+release:
+  project: bathroom-emergency-guide
+  version: 4.10.0
+  release_date: 2026-08-01
+  source_revision: 3244beed7b8a
+  source_date_epoch: 1785620518
+  implementation_commit: 3244bee
+  documentation_commit: 3244bee
+  local_tag: v4.10.0
+  tag_target: commit containing this evidence record
+  push_performed: false
+  publish_performed: false
+  deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 323
+  retired_stable_resources: 1
+  standalone_nodes: [O, B, C, D, H, P, T, R]
+  master_only_nodes: [A, Z]
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 586
+  current_non_vega_illustrations: 29
+  vega_lite_figures: 8
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sources: 53
+    reader_visuals: 37
+    standalone_nodes: 8
+
+new_standalone_slices:
+  O:
+    title: Small-Room Observatory
+    canonical_chapters: [01-how-to-use.md]
+    local_sources: 11
+    canonical_visuals: 4
+    extraction_boundary: generated standalone cover and emergency gate plus canonical Observatory chapter; master cover excluded
+    source_ids:
+      - 01-how-to-use--interoception-review
+      - 01-how-to-use--gut-stress
+      - 01-how-to-use--bathroom-acoustics
+      - 01-how-to-use--anxiety-time
+      - 01-how-to-use--panic-course
+      - 01-how-to-use--stress-executive
+      - 01-how-to-use--affect-labeling
+      - 01-how-to-use--cold-face
+      - 01-how-to-use--cold-water
+      - 01-how-to-use--situational-syncope
+      - 01-how-to-use--olfactory-habituation
+    visual_ids:
+      - observatory-scan
+      - interoception-loop
+      - signal-story-question
+      - three-minute-observation
+    pages:
+      a4: {color: 13, monochrome: 13}
+      a4half: {color: 13, monochrome: 13}
+      largeprint: {color: 18, monochrome: 18}
+    manifest:
+      path: build/subguides/O/manifest.json
+      bytes: 3219
+      sha256: 805ac164fae9b09b68fab483bb8bfc77d62d32b19eabdb88811b214693d94668
+  D:
+    title: Threat and Safe Place
+    canonical_chapters: [03-situations-b-g.md, 03g-safe-place-routing.md]
+    local_sources: 8
+    canonical_visuals: 4
+    extraction_boundary: D-owned threat section followed by the complete canonical safe-place chapter
+    source_ids:
+      - 03g-safe-place-routing--women-help
+      - 03g-safe-place-routing--men-help
+      - 03g-safe-place-routing--shelter-search
+      - 03g-safe-place-routing--authority-115
+      - 03g-safe-place-routing--telefonseelsorge
+      - 03g-safe-place-routing--children-help
+      - 03g-safe-place-routing--authority-sign
+      - 03g-safe-place-routing--women-sign
+    visual_ids:
+      - safe-place-route-map
+      - safe-place-confirmation-packet
+      - safe-reserve-clock
+      - communication-access-card
+    pages:
+      a4: {color: 14, monochrome: 14}
+      a4half: {color: 13, monochrome: 13}
+      largeprint: {color: 19, monochrome: 19}
+    manifest:
+      path: build/subguides/D/manifest.json
+      bytes: 3106
+      sha256: 45803c3672ed68e4dd9f6ec0ab45251d7d748e60c2a03dcb4d6d580a1f6a1089
+
+verification:
+  exact_revision_build:
+    command: GUIDE_REVISION=3244beed7b8a SOURCE_DATE_EPOCH=1785620518 npm run build
+    result: passed
+  independent_test:
+    command: GUIDE_REVISION=3244beed7b8a SOURCE_DATE_EPOCH=1785620518 npm test
+    result: passed
+  generated_registry_checks:
+    commands:
+      - python3 bin/build_inventories.py --check
+      - python3 bin/build_source_inventory.py --check
+      - python3 bin/build_reference_index.py --check
+      - python3 bin/build_coverage_matrix.py --check
+    result: passed as part of the exact build and independent validation sequence
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  observed_gates:
+    - 323 stable active resources across six typed kinds
+    - ten-node source, section, visual, and release provenance
+    - O/B/C/D/H/P/T/R released standalone scope
+    - 48 tagged standalone PDF editions with A4/A4/2/large-print color-mono parity
+    - O canonical extraction without the master cover or duplicate emergency gate
+    - D canonical extraction without B/C/E/F mixed-section leakage
+    - O eleven-source/four-visual and D eight-source/four-visual release thresholds
+    - one emergency gate and generated Sources and limits per standalone edition
+    - semantic-text parity across each standalone family
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - native MathML and color/monochrome semantic parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, image alternatives, page-edge safety, and color/mono parity
+    - six master HTML editions with no boxed or content overflow
+    - responsive Pages package with no remote runtime requests
+    - landing, deployment, release-manifest, browser-interaction, and complete-matrix validation
+
+render_metrics:
+  a4:
+    color_pages: 140
+    monochrome_pages: 140
+    median_span: 0.99
+    color_median_ink: 0.120
+    monochrome_median_ink: 0.118
+  a4half:
+    color_pages: 136
+    monochrome_pages: 136
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 227
+    monochrome_pages: 227
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 106277
+  sha256: a436bc1435e800966b8f50cc6e3f2f8e1bf079ff77e025eebd765bcab1c9c151
+  embedded_revision: 3244beed7b8a
+  artifacts: 586
+  standalone_nodes: [O, B, C, D, H, P, T, R]
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 140, bytes: 7173092, sha256: 68817f961bca09288b6fa852583c9f7969c363e54b6d3e4002986f84cd2907e2}
+  - {path: build/pdf/guide_mono.pdf, pages: 140, bytes: 7553592, sha256: e8ed61d76fb200bb0f2359fa7aba5eacd9b1062207fa539ee814e577b520c0c1}
+  - {path: build/pdf/guide_a4half.pdf, pages: 136, bytes: 7184148, sha256: 99a5721451ed48fcd4fa6decadd34b80ba5b6a826d94203051dc407259ce9db3}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 136, bytes: 5419554, sha256: df08205bb4061017976aeff297730e26b152ec8c5eec8c4c5f4c536a3804836b}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 227, bytes: 7394446, sha256: a075390bc959e20faa459de2451c2fbe4278cb6e3798fcd67e6089b10f543e7a}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 227, bytes: 7632520, sha256: 48500450e80873f70083681f56289b32b2b62d5d5fd43d9a3fbe7670aaa85529}
+  - {path: build/html/guide.html, bytes: 6306508, sha256: 978ecd4b4d53ee4fd20fbd6f5f7a6f4f5df7d2b8a3c0b54f099c30cefe4a51bc}
+  - {path: build/subguides/index.html, bytes: 442102, sha256: 0eaca04bfb03f5588b425f14f7a760e2f8150cd62ce5e61eceae5535f352f277}
+  - {path: build/site/index.html, bytes: 13763, sha256: e4f0ac3719f1222227a41fb4cb9d5856ccb194e7146b63f03a84e3007756ba04}
+  - {path: build/docx/guide.docx, bytes: 3942258, sha256: 9f3dca64f3360ce3c9f12b180bdce465cbefabdcbcf59b5a0aa7f5506b648507}
+  - {path: build/latex/guide.tex, bytes: 406824, sha256: 1aa428b7efe6da6ae0827523c371de6b152097264fb82ec5e8c53955fc3b3155}
+  - {path: src/data/coverage_matrix.json, bytes: 10593, sha256: 2be1d09b1747498f6dae72325793dc0c813b527f4fc03f7812ce7677b69d1c21}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+
+release_decisions:
+  - O uses the generated standalone cover and page-zero emergency gate plus the canonical Observatory chapter; the master cover is deliberately not copied.
+  - D uses the D-owned mixed-situations section plus the complete safe-place chapter; no parallel standalone prose source was introduced.
+  - A and Z remain master-only instead of being released merely to complete the ten-node graph.
+  - The Pages package and deployment workflow remain prepared but were not invoked.
+  - No existing stable reference was renumbered or reused.
+
+known_limits:
+  - Build and rendering checks do not establish that readers can select O or D correctly during an actual crisis; real-reader route testing remains outstanding.
+  - Safe-place directories, municipal accommodation, transport, accessibility, and service capacity remain local, time-sensitive facts requiring dated deployer verification.
+  - No new figure artwork was introduced in 4.10.0; existing O/D figures were reflowed into standalone editions and passed source, fallback, tagging, geometry, accessibility, overflow, and color/mono checks. Direct manual image inspection was not available through the current bridge interface.
+  - Actual wet-room installations and route drills remain outstanding; the Blue Book supplies recording forms but does not claim field completion.
+  - Local Fontconfig emitted configuration warnings and unavailable font-weight fallbacks; tagging, geometry, text parity, accessibility, and edge checks passed.

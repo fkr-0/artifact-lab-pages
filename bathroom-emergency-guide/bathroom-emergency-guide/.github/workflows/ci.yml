@@ -1,0 +1,76 @@
+name: build-and-validate
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  complete-release-matrix:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GUIDE_AS_OF: "2026-08-06"
+      SOURCE_DATE_EPOCH: "1785024000"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install document toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pandoc poppler-utils
+          python -m pip install --disable-pip-version-check matplotlib pillow weasyprint
+
+      - name: Install locked Node dependencies
+        run: npm ci
+
+      - name: Install Chromium for tagged PDF builds
+        run: npx playwright install --with-deps chromium
+
+      - name: Record revision metadata
+        run: echo "GUIDE_REVISION=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_ENV"
+
+      - name: Build and validate every supported edition
+        run: npm run build
+
+      - name: Re-run validation independently
+        run: npm test
+
+      - name: Verify clean generated registries
+        run: |
+          python3 bin/build_inventories.py --check
+          python3 bin/build_source_inventory.py --check
+          python3 bin/build_reference_index.py --check
+          python3 bin/build_coverage_matrix.py --check
+          git diff --check
+
+      - name: Upload complete release matrix
+        uses: actions/upload-artifact@v4
+        with:
+          name: bathroom-emergency-guide-${{ github.sha }}
+          path: |
+            build/html/
+            build/pdf/
+            build/md/
+            build/docx/
+            build/latex/
+            build/subguides/
+            build/site/
+            build/release/
+          if-no-files-found: error
+          retention-days: 14

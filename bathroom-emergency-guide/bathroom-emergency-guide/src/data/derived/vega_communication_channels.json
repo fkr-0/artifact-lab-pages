@@ -1,0 +1,44 @@
+[
+  {
+    "group_size": 2,
+    "channels": 1,
+    "group_label": "2",
+    "channel_label": "1"
+  },
+  {
+    "group_size": 3,
+    "channels": 3,
+    "group_label": "3",
+    "channel_label": "3"
+  },
+  {
+    "group_size": 5,
+    "channels": 10,
+    "group_label": "5",
+    "channel_label": "10"
+  },
+  {
+    "group_size": 10,
+    "channels": 45,
+    "group_label": "10",
+    "channel_label": "45"
+  },
+  {
+    "group_size": 20,
+    "channels": 190,
+    "group_label": "20",
+    "channel_label": "190"
+  },
+  {
+    "group_size": 50,
+    "channels": 1225,
+    "group_label": "50",
+    "channel_label": "1,225"
+  },
+  {
+    "group_size": 100,
+    "channels": 4950,
+    "group_label": "100",
+    "channel_label": "4,950"
+  }
+]

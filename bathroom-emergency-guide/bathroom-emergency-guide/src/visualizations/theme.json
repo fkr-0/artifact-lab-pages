@@ -1,0 +1,55 @@
+{
+  "font": "DejaVu Sans",
+  "background": null,
+  "view": {
+    "stroke": null
+  },
+  "axis": {
+    "labelFont": "DejaVu Sans",
+    "titleFont": "DejaVu Sans",
+    "labelColor": "#263442",
+    "titleColor": "#263442",
+    "gridColor": "#d8e0e7",
+    "gridOpacity": 0.72,
+    "domain": false,
+    "tickColor": "#7a8793",
+    "tickSize": 4,
+    "labelFontSize": 13,
+    "titleFontSize": 14,
+    "titleFontWeight": 700,
+    "titlePadding": 12,
+    "labelPadding": 6
+  },
+  "legend": {
+    "labelFont": "DejaVu Sans",
+    "titleFont": "DejaVu Sans",
+    "labelColor": "#263442",
+    "titleColor": "#263442",
+    "labelFontSize": 13,
+    "titleFontSize": 13,
+    "symbolStrokeWidth": 2,
+    "orient": "bottom",
+    "direction": "horizontal",
+    "title": null
+  },
+  "text": {
+    "font": "DejaVu Sans",
+    "color": "#263442"
+  },
+  "bar": {
+    "cornerRadiusEnd": 2
+  },
+  "point": {
+    "filled": true
+  },
+  "range": {
+    "category": [
+      "#175cd3",
+      "#b54708",
+      "#6f3ab2",
+      "#087e8b",
+      "#9f1239",
+      "#3f6212"
+    ]
+  }
+}

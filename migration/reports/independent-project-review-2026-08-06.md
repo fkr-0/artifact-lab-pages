@@ -25,17 +25,12 @@ Current clean worktrees:
 | Hyperblast Shooter | `release/v0.8.0` | `5a1450f7c76a` | clean after generated-runtime restore |
 | V11 Peer DAW | detached at parent pin | `37783861b768` | published submodule aligned; local `main` preserved at `5a45fe665fb8` |
 | Inf Arrange | parent-owned | former child `dd0db5f204f7` | root-owned project; complete former history preserved as a verified bundle |
-| Bathroom Emergency Guide | `integration/v4-alt-full-synthesis` | `bee0f3e` plus active changes | canonical/alt restructuring is in progress; ownership conversion deferred until integration work is verified |
+| Bathroom Emergency Guide | parent-owned | former main `f1ef78d5c292`; former alt `e19763de3047` | verified canonical integration and alternate source library adopted as distinct root-owned directories |
 | Git Recipe Book | parent-owned | former child `de3b1bfb3b16` | root-owned project; complete former history preserved as a verified bundle |
 | Bathroom Guide 4.3 candidate | `rescue/bathroom-guide-4.3-accessibility-20260806` | `e8c5dfae13cd` | clean rescue checkpoint |
 | Bathroom Guide alternate | `rescue/bathroom-guide-alt-20260806` | `e19763de3047` | clean rescue checkpoint |
 
-Remaining duplicate worktrees:
-
-| Path | HEAD | Dirty state | Required strategy |
-|---|---:|---:|---|
-| `bathroom-disaster/bathroom-emergency-guide-4.x` | `82c537861246` | 30 tracked + 156 untracked entries | archive and remove recursive duplicate after canonical migration |
-| `bathroom-disaster/bathroom-emergency-guide-4.x/bathroom-emergency-guide-4.x` | `82c537861246` | 29 tracked + 155 untracked entries | archive and remove; byte-identical source copy of canonical candidate before local fixes |
+Previously reported recursive duplicate worktrees are no longer present in the active checkout. Their source snapshots and diffs remain preserved under `/tmp/artifacts-v12-rescue/2026-08-06/`; this ownership reconciliation did not perform any additional duplicate deletion.
 
 ## Review principles
 
@@ -317,32 +312,55 @@ Parent action:
 - either cherry-pick reusable Pixi pieces or retire the nested worktree after merge;
 - do not keep active worktrees under `.claude/` long-term—move them to a normal sibling worktree directory.
 
-### Bathroom Emergency Guide child repository
+### Bathroom Emergency Guide ownership reconciliation
 
-State:
+The earlier single child snapshot was superseded by an explicit sibling layout:
 
 ```text
-branch main
-HEAD 42eb11490941
+bathroom-emergency-guide/bathroom-emergency-guide
+  canonical integration branch integration/v4-alt-full-synthesis
+  HEAD f1ef78d5c2921e03f83a7a20f314b5f5fcff0eb9
+
+bathroom-emergency-guide/bathroom-emergency-guide-4.x-alt
+  preserved alternate editorial source library
+  HEAD e19763de3047aa2d83cb9c032f8abea9835ff4b2
+```
+
+Neither repository had a configured remote, so submodules would have been uncloneable. Both histories were bundled and their `.git` directories moved outside the parent checkout. The parent now owns the two directories while preserving their distinct product roles; no source overlay or unrelated-history merge was performed.
+
+Canonical verification:
+
+```text
+version 4.14.0-alt.2
+full build: pass
+750 hashed release artifacts
+6 master editions
+66 standalone eleven-book editions
+route, continuity, reference, coverage, rendering, migration, illustration: pass
+A4/2 layout and standard A4 density/text parity: pass
+accessibility and overflow: pass
+responsive/offline browser site verification: pass
+build matrix: pass
+```
+
+Alternate source-library verification:
+
+```text
+25 pytest tests: pass
 worktree clean
 ```
 
-Problem:
-
-- child repository is internally clean;
-- parent repository simultaneously tracks its directory as ordinary files;
-- this is prohibited double ownership.
-
-Rescue bundle:
+Recovery evidence:
 
 ```text
-/tmp/artifacts-v12-rescue/2026-08-06/bathroom-emergency-guide.bundle
-SHA-256 dad7823488c7ee6be11088637e0f711f92744dc6cb2a14dd16843154b6047b29
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-main-before-root-ownership.bundle
+SHA-256 9d4335dffdd0fe1f08621042648ca1a8e2275d058257d57e1054154e67a6cef2
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-alt-before-root-ownership.bundle
+SHA-256 8cccec9d53b1bd78d337bd8480c450f233da90ab750d044c9ec1a71a3cd5ef2d
 ```
 
-Parent action:
-
-Preferred: convert the project to a real submodule after the parent records/removes its ordinary tracked copy. Alternative: remove the nested `.git` and keep it root-owned. Do not retain both owners.
+A V12 manifest now declares the canonical guide as a root-owned experimental document project. The alternate tree remains an explicitly preserved source library rather than a competing release target.
 
 ### Git Recipe Book ownership reconciliation
 
@@ -555,18 +573,16 @@ Recommended parent commits, separately reviewed:
 3. Badger gitlink update only after rescue-to-release reconciliation.
 4. Ethic Brawl gitlink update only after rescue-to-1.7.x reconciliation and browser repair.
 5. Inf Arrange ownership reconciled as a root-owned parent project with recoverable former Git history.
-6. Git Recipe Book ownership reconciled as root-owned; resolve the Bathroom Emergency Guide only after its active main/alt integration work is committed and verified.
-7. Remove recursive bathroom duplicates after snapshot verification.
+6. Git Recipe Book and Bathroom Emergency Guide ownership reconciled as root-owned, with former child histories preserved as complete bundles.
+7. Previously reported recursive bathroom duplicate paths are absent from the active checkout; retain their stored snapshots as recovery evidence.
 
 ## Recommended next execution order
 
 1. Compare Badger rescue branch against `release/v1.3.0` by subsystem.
 2. Compare Ethic rescue branch against 1.7.1/1.7.2 worktrees and repair browser startup.
-3. Repair tagged-PDF generation for the canonical bathroom 4.3 branch.
-4. Port any unique CSS from the bathroom duplicate outer copy.
-5. Delete/archive the recursive duplicate bathroom trees.
-6. Resolve Bathroom Emergency Guide ownership after the active `integration/v4-alt-full-synthesis` workspace is clean and its two sibling histories are preserved.
-7. Normalize Hyperblast's parent gitlink after its recorded revision is reviewed.
+3. Review Bathroom Emergency Guide `4.14.0-alt.2` for promotion from experimental integration version to a normal release version/tag.
+4. Normalize Hyperblast's parent gitlink after its recorded revision is reviewed.
+5. Publish the verified V11 Peer DAW child commits before deliberately promoting its parent gitlink.
 
 ## Definition of completion for this review phase
 
@@ -626,3 +642,25 @@ SHA-256 61ff237bdd32786ca908744a3a24f9f279cf807a57ff6f57d70f5cd9339a9035
 ```
 
 The bundle was verified as complete and preserves `main`, tag `v1.1.0`, HEAD `de3b1bfb3b166e87b2c53d5b9682ab05ae56aae6`, and the prior ws-bridge review refs.
+
+### Bathroom Emergency Guide
+
+Ownership changed to `root` for both the canonical integration and the alternate editorial source library. The former nested repositories had no remotes, but both complete histories were preserved before conversion.
+
+The canonical project at `bathroom-emergency-guide/bathroom-emergency-guide` is pinned by provenance to former child HEAD `f1ef78d5c2921e03f83a7a20f314b5f5fcff0eb9`. Its full `4.14.0-alt.2` build and publication gate passed, including Chrome PDFs, accessibility, layout, density, overflow, offline browser behavior, 750 release artifacts, and 66 standalone editions.
+
+The alternate source library at `bathroom-emergency-guide/bathroom-emergency-guide-4.x-alt` remains byte-identical to former child HEAD `e19763de3047aa2d83cb9c032f8abea9835ff4b2` and passed all 25 tests. It is retained beside the canonical project as provenance, not merged over canonical source paths.
+
+Recovery evidence:
+
+```text
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-main-before-root-ownership.bundle
+SHA-256 9d4335dffdd0fe1f08621042648ca1a8e2275d058257d57e1054154e67a6cef2
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-main.git/
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-alt-before-root-ownership.bundle
+SHA-256 8cccec9d53b1bd78d337bd8480c450f233da90ab750d044c9ec1a71a3cd5ef2d
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/bathroom-alt.git/
+```

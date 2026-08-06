@@ -1,0 +1,200 @@
+project: bathroom-emergency-guide
+version: 4.12.0
+release_date: 2026-08-02
+source_revision: 1482091f0175
+source_date_epoch: 1785627734
+implementation_commit: 1482091
+local_tag: v4.12.0
+tag_target: commit containing this evidence record
+push_performed: false
+publish_performed: false
+deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 328
+  retired_stable_resources: 1
+  standalone_nodes: [O, B, C, D, H, Z, P, T, R]
+  master_only_nodes: [A]
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 621
+  current_non_vega_illustrations: 29
+  vega_lite_figures: 8
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sections: 224
+    sources: 54
+    reader_visuals: 37
+    standalone_nodes: 9
+
+encapsulation_contract:
+  released_families: 9
+  fields:
+    - scope
+    - outside_scope
+    - aliases
+    - exit_rule
+    - figure_refs
+    - form_refs
+    - support_refs
+    - route_identity
+  generated_master_markup:
+    figure_reference_cards: 38
+    canonical_template_route_bands: 18
+    route_identity_chips: 45
+  identity_channels:
+    primary: [route_code, route_title]
+    supplementary: [colour]
+    print_and_spoken_fallback: [pattern_name, glyph_name]
+  stable_reference_policy:
+    active_resources: 328
+    retired_resources: 1
+    permitted_retired_key: section:09-version-history:4-5-0-23-july-2026-release-candidate
+    rewritten_headings_preserved: 5
+
+cross_reference_slices:
+  P:
+    title: Professional Support
+    figure_refs: 4
+    form_refs: 6
+    support_refs: 12
+    manifest:
+      path: build/subguides/P/manifest.json
+      bytes: 3930
+      sha256: cb13ac4d99ff8ef2c11c3f50f7f01274e26c33d68a8568186249c75bd76151ab
+    pages:
+      a4: {color: 17, monochrome: 17}
+      a4half: {color: 17, monochrome: 17}
+      largeprint: {color: 26, monochrome: 26}
+  T:
+    title: Templates — The Blue Book
+    figure_refs: 0
+    form_refs: 18
+    support_refs: 12
+    manifest:
+      path: build/subguides/T/manifest.json
+      sha256: 50e177b2177fcab137d7bb4743a265ef513c6af01315da0b19ec972535e65b8e
+    pages:
+      a4: {color: 18, monochrome: 18}
+      a4half: {color: 21, monochrome: 21}
+      largeprint: {color: 28, monochrome: 28}
+  R:
+    title: Reference and Appendix
+    figure_refs: 2
+    form_refs: 6
+    support_refs: 1
+    manifest:
+      path: build/subguides/R/manifest.json
+      sha256: 993a931a28d2c607c6cceaedf1c98c0fd749ae0c0c9d5c603cd4eeeb89be378f
+    pages:
+      a4: {color: 59, monochrome: 59}
+      a4half: {color: 61, monochrome: 61}
+      largeprint: {color: 105, monochrome: 105}
+
+verification:
+  exact_revision_environment:
+    GUIDE_REVISION: 1482091f0175
+    SOURCE_DATE_EPOCH: 1785627734
+  exact_revision_build:
+    command: GUIDE_REVISION=1482091f0175 SOURCE_DATE_EPOCH=1785627734 npm run build
+    result: passed
+  independent_exact_test:
+    command: GUIDE_REVISION=1482091f0175 SOURCE_DATE_EPOCH=1785627734 npm test
+    result: passed
+  precommit_build:
+    command: npm run build
+    result: passed
+  precommit_test:
+    command: npm test
+    result: passed
+  generated_registry_checks:
+    result: passed
+    observed:
+      - 328 stable active resources across six typed kinds
+      - exactly one pre-existing retired historical key
+      - eighteen canonical forms with valid route, figure, support, responsibility, and privacy metadata
+      - route identity, illustration, form, and support-handoff generated indexes
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  observed_gates:
+    - ten frozen route identities with unique colour, print-safe pattern, and glyph
+    - nine released standalone families with explicit scope, boundary, aliases, resource map, graph handoff, and Sources and limits
+    - 54 tagged standalone PDF editions with A4/A4/2/large-print color-mono parity
+    - P support-to-form-to-figure handoff mapping
+    - all eighteen canonical T form bands
+    - R route identity, figure/form, support, stable-reference, and source indexes
+    - figure cards with stable address, route identity, reader question, and paired forms
+    - no active resource retired by the five planned heading rewrites
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - native MathML and color/monochrome semantic parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, image alternatives, page-edge safety, and color/mono parity
+    - six master HTML editions with no boxed or content overflow
+    - responsive Pages package with no remote runtime requests
+    - working theme, deployment planner persistence, download filters, and complete build matrix
+
+render_metrics:
+  a4:
+    color_pages: 150
+    monochrome_pages: 150
+  a4half:
+    color_pages: 155
+    monochrome_pages: 155
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 249
+    monochrome_pages: 249
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 113104
+  sha256: 8e1431500f813596b0260e9d659bbf5cb11435c8815c4ac2581785a783c635a1
+  embedded_revision: 1482091f0175
+  artifacts: 621
+  standalone_nodes: [O, B, C, D, H, Z, P, T, R]
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 150, bytes: 7877928, sha256: 4efd3bf4b5e78201e458f1a61d0c2bea3297eb12fa1f0f744e42f8638218f603}
+  - {path: build/pdf/guide_mono.pdf, pages: 150, bytes: 8257227, sha256: e662a3174f63cb50d3afed4d1965a9b2427ffc02e30ad57295a1dfd943e318d7}
+  - {path: build/pdf/guide_a4half.pdf, pages: 155, bytes: 7969426, sha256: 2fb6ffce4da6c1e9b6d08dcdd707789b1695e2d855eaa9781537ea88172f6c2a}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 155, bytes: 6210153, sha256: 3f1528e2d0b1987322c4009f637c02f7374e4ac38be9e53f04000d2302ceacc9}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 249, bytes: 8135705, sha256: 4f5118505dcc65bd14f6433d3a354790d14ae464f199476a74610fefce43686e}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 249, bytes: 8376559, sha256: a37206d1cbfe7dbcdf33e401ce9464e66f5899a89317269429d2292afc190a29}
+  - {path: build/html/guide.html, bytes: 6369952, sha256: 3182eb713ad3e881cfd7cdd79d5ea1e628aa06d99c5c32228cb10a6d16f68cb0}
+  - {path: build/subguides/index.html, bytes: 448171, sha256: b41f05ded3ceb9fd8dda72d893df9528b654cb8c44ec582e61c68b494ede8fae}
+  - {path: build/site/index.html, bytes: 13792, sha256: b897fc15a02f8268c6b90f0508547873e61c1de91bb39ba594dd81cd3e9a63df}
+  - {path: build/docx/guide.docx, bytes: 3954794, sha256: 79dae9cfcf710f3ce57bef0f3f1b124236a5ca6f8383944f6d0a0480028b3d2a}
+  - {path: build/latex/guide.tex, bytes: 448719, sha256: 371345f7536a9bfc0bba448dd40bd371d28b16a98a5832ac584f38dc5d67bde9}
+  - {path: src/data/content_index.json, bytes: 126628, sha256: 1b01331f012db50ceaec9dc33c13d7e32f05f2101d8635ce55804845d176f355}
+  - {path: src/data/coverage_matrix.json, bytes: 10638, sha256: 135a51b31c3aa6d2e192680185b4c8f41571a4a036291bedebf97b8c5d81032a}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+
+release_decisions:
+  - Code and route title are the primary identity carriers; colour accelerates scanning while pattern and written glyph name preserve identity in monochrome and spoken handoffs.
+  - Blue Book forms remain owned by T even when multiple operational routes use them; one maintained form replaces parallel copies.
+  - Reference indexes writable resources but does not maintain a second blank-form system.
+  - Professional Support owns service-selection and handoff logic while local contact facts remain in the canonical T contact form.
+  - Five clearer headings retain their previous stable public IDs.
+  - A remains master-only pending an equivalent visual and standalone review.
+  - The Pages package and deployment workflow remain prepared but were not invoked.
+
+known_limits:
+  - Build evidence does not prove that a service answered, a handoff succeeded, a form was completed accurately, or a route worked under real stress.
+  - The colour/pattern/glyph system has not yet received external usability testing with readers using monochrome printers, screen readers, cognitive-access supports, or spoken handoffs.
+  - The added figure cards and form bands increased page counts; automated geometry, density, overflow, semantic-parity, and accessibility gates passed, but direct manual page-by-page visual inspection was not performed in this run.
+  - A diagnostic pre-release build encountered a full root filesystem. Only the reproducible project build tree and obsolete Playwright Chromium 1223 caches were removed; the clean full build and exact-revision build then passed with the current Chromium runtime.
+  - Local Fontconfig emitted known configuration warnings and unavailable font-weight fallbacks; tagging, geometry, text parity, accessibility, and edge checks passed.

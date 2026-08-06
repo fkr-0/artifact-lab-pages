@@ -1,0 +1,120 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "width": 760,
+  "height": 340,
+  "padding": 18,
+  "data": {
+    "name": "table"
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 4,
+        "color": "#b42318"
+      },
+      "encoding": {
+        "x": {
+          "field": "minute",
+          "type": "quantitative",
+          "axis": {
+            "title": "Minutes in the model",
+            "values": [
+              0,
+              15,
+              30,
+              45,
+              60
+            ]
+          },
+          "scale": {
+            "domain": [
+              0,
+              60
+            ]
+          }
+        },
+        "y": {
+          "field": "neurons_million",
+          "type": "quantitative",
+          "axis": {
+            "title": "Cumulative neurons lost (millions, model estimate)",
+            "values": [
+              0,
+              30,
+              60,
+              90,
+              120
+            ]
+          },
+          "scale": {
+            "zero": true,
+            "domain": [
+              0,
+              120
+            ]
+          }
+        },
+        "order": {
+          "field": "minute"
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.label !== ''"
+        }
+      ],
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "size": 145,
+        "shape": "diamond",
+        "color": "#fffdf8",
+        "stroke": "#172033",
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "x": {
+          "field": "minute",
+          "type": "quantitative",
+          "axis": null
+        },
+        "y": {
+          "field": "neurons_million",
+          "type": "quantitative",
+          "axis": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.label !== ''"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "dy": -15,
+        "fontWeight": "bold",
+        "fontSize": 12
+      },
+      "encoding": {
+        "x": {
+          "field": "minute",
+          "type": "quantitative",
+          "axis": null
+        },
+        "y": {
+          "field": "neurons_million",
+          "type": "quantitative",
+          "axis": null
+        },
+        "text": {
+          "field": "label"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,517 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "reviewed_on": "2026-07-22",
+  "policy": {
+    "queue": [
+      "action",
+      "backup",
+      "escalation",
+      "destination"
+    ],
+    "rules": [
+      "Pass-1 overrides are evaluated before need-based routes.",
+      "Uncertainty about a life-threatening or environmental hazard escalates rather than reassures.",
+      "A modifier changes logistics and access; it does not cancel urgency.",
+      "Every diagram is a view of this registry, never the only route."
+    ],
+    "source_freshness": {
+      "warn_after_days": 120,
+      "fail_after_days": 240,
+      "as_of_environment": "GUIDE_AS_OF"
+    }
+  },
+  "destinations": {
+    "112": {
+      "kind": "service",
+      "label": "112 — rescue service / fire brigade",
+      "locale_key": "112"
+    },
+    "110": {
+      "kind": "service",
+      "label": "110 — police",
+      "locale_key": "110"
+    },
+    "116117": {
+      "kind": "service",
+      "label": "116 117 — urgent non-life-threatening medical care",
+      "locale_key": "116117"
+    },
+    "poison-centre": {
+      "kind": "service_group",
+      "label": "regional poison information centre",
+      "locale_key": "poison_centres"
+    },
+    "gas-network": {
+      "kind": "local_service",
+      "label": "local gas-network emergency service",
+      "locale_key": "gas_network"
+    },
+    "chapter-responsibility": {
+      "kind": "chapter",
+      "label": "Ch.2 responsibility and repair"
+    },
+    "chapter-calm": {
+      "kind": "chapter",
+      "label": "Ch.4 calm and overload"
+    },
+    "chapter-first-aid": {
+      "kind": "chapter",
+      "label": "Ch.5 first aid"
+    },
+    "chapter-hazard": {
+      "kind": "chapter",
+      "label": "Situation H environmental hazards"
+    },
+    "chapter-outage": {
+      "kind": "chapter",
+      "label": "Ch.6 outage and continuity"
+    },
+    "chapter-support": {
+      "kind": "chapter",
+      "label": "Ch.7 professional and practical support"
+    },
+    "chapter-safe-place": {
+      "kind": "chapter",
+      "label": "Situation G — no safe place"
+    },
+    "115": {
+      "kind": "service",
+      "label": "115 — public-administration information",
+      "locale_key": "115"
+    },
+    "116016": {
+      "kind": "service",
+      "label": "116 016 — violence against women helpline",
+      "locale_key": "116016"
+    },
+    "men-violence-help": {
+      "kind": "service",
+      "label": "violence against men helpline",
+      "locale_key": "men_violence_help"
+    },
+    "116111": {
+      "kind": "service",
+      "label": "116 111 — child and youth helpline",
+      "locale_key": "116111"
+    },
+    "116123": {
+      "kind": "service",
+      "label": "116 123 — crisis conversation",
+      "locale_key": "116123"
+    },
+    "women-shelter-search": {
+      "kind": "directory",
+      "label": "nationwide women’s refuge search",
+      "locale_key": "women_shelter_search"
+    },
+    "municipal-emergency-housing": {
+      "kind": "local_service",
+      "label": "municipal emergency accommodation",
+      "locale_key": "municipal_emergency_housing"
+    },
+    "accessible-emergency-place": {
+      "kind": "local_service",
+      "label": "accessible emergency accommodation or powered destination",
+      "locale_key": "accessible_emergency_place"
+    },
+    "youth-emergency-service": {
+      "kind": "local_service",
+      "label": "local youth emergency service",
+      "locale_key": "youth_emergency_service"
+    }
+  },
+  "override_order": [
+    "life-medical",
+    "violence-crime",
+    "fire-smoke",
+    "carbon-monoxide",
+    "gas-release",
+    "chemical-exposure",
+    "electrical-danger"
+  ],
+  "overrides": [
+    {
+      "id": "life-medical",
+      "pass": 1,
+      "trigger": "Possible death, abnormal breathing, unconsciousness, severe bleeding, stroke sign, major injury, or lasting harm",
+      "action": "Call 112 now; use speakerphone and follow the dispatcher.",
+      "backup": "If you cannot call, direct a named person to call or use another available emergency channel.",
+      "escalation": "Yes, maybe, cannot tell, or the person is worsening.",
+      "destination": "112",
+      "source_ids": [
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "violence-crime",
+      "pass": 1,
+      "trigger": "Active violence, coercion, stalking at the door, or a crime requiring police now",
+      "action": "Move toward a safer place without confronting the threat; call 110 when safe to do so.",
+      "backup": "Use 112 when medical rescue is also needed or life may be in danger.",
+      "escalation": "Threat is present, access is blocked, a weapon is involved, or anyone is injured.",
+      "destination": "110",
+      "source_ids": [
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "fire-smoke",
+      "pass": 1,
+      "trigger": "Fire, visible smoke, a smoke alarm, or smoke in an escape route",
+      "action": "Warn others and leave by a smoke-free route; close doors behind you when this does not delay escape.",
+      "backup": "If the route is smoky, do not enter it; close the door, call 112, state your location, and signal at a window.",
+      "escalation": "Any uncontrolled fire, smoke, trapped person, symptoms, or uncertainty.",
+      "destination": "112",
+      "source_ids": [
+        "bbk-fire",
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "carbon-monoxide",
+      "pass": 1,
+      "trigger": "CO alarm or compatible symptoms near a heater, boiler, stove, generator, fire, or other combustion source",
+      "action": "Get everyone into fresh air immediately without delaying to search for the source.",
+      "backup": "Call 112 from outside and prevent re-entry until the scene is cleared.",
+      "escalation": "Alarm, symptoms, collapse, confusion, headache affecting several people, or suspected combustion exposure.",
+      "destination": "112",
+      "source_ids": [
+        "bbk-power",
+        "gesund-poison",
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "gas-release",
+      "pass": 1,
+      "trigger": "Gas odour, hissing, damaged gas line, or suspected gas release inside a building",
+      "action": "Use no flame, switch, plug, bell, fan, or phone inside; warn by knocking and leave.",
+      "backup": "Open doors or windows only when immediately reachable without operating equipment or delaying escape; call outside.",
+      "escalation": "Strong or persistent odour, hissing, symptoms, damaged line, or uncertainty.",
+      "destination": "gas-network",
+      "emergency_destination": "112",
+      "source_ids": [
+        "dvgw-gas",
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "chemical-exposure",
+      "pass": 1,
+      "trigger": "Unknown fumes, mixed cleaners, chemical splash, eye or skin exposure, or swallowed product",
+      "action": "Stop the exposure and move to fresh air when safe; rinse exposed skin or eyes with running water and remove contaminated clothing.",
+      "backup": "Keep the label or container and call a poison centre for substance-specific advice; do not induce vomiting or improvise neutralization.",
+      "escalation": "Breathing difficulty, altered consciousness, severe pain, seizure, collapse, extensive exposure, or rapid worsening.",
+      "destination": "poison-centre",
+      "emergency_destination": "112",
+      "source_ids": [
+        "gesund-poison",
+        "bfr-poison-centres"
+      ]
+    },
+    {
+      "id": "electrical-danger",
+      "pass": 1,
+      "trigger": "Live current, sparking, burning electrical equipment, damaged cable, or a person still connected to electricity",
+      "action": "Do not touch the person or source while it may be live; disconnect power only from a safely reachable control.",
+      "backup": "Leave the danger area and call 112; keep others away.",
+      "escalation": "Any electrical injury, fire, smoke, high-voltage source, wet environment, or inability to isolate power.",
+      "destination": "112",
+      "source_ids": [
+        "bbk-fire",
+        "bbk-112",
+        "drk-electric"
+      ]
+    }
+  ],
+  "needs": [
+    {
+      "id": "responsibility",
+      "pass": 2,
+      "label": "Responsibility / harm",
+      "action": "Stabilize the live problem, then make one repair step.",
+      "backup": "Bring in a trusted person or relevant service.",
+      "escalation": "A dependant is unsafe or harm is continuing.",
+      "destination": "chapter-responsibility"
+    },
+    {
+      "id": "alarm",
+      "pass": 2,
+      "label": "Panic / overload",
+      "action": "Orient outward and choose one visible action.",
+      "backup": "Contact one person and use a non-breath-focused grounding option.",
+      "escalation": "New medical red flag, self-harm risk, or inability to stay safe.",
+      "destination": "chapter-calm"
+    },
+    {
+      "id": "body",
+      "pass": 2,
+      "label": "Body / pain",
+      "action": "Check red flags, then use simple first aid.",
+      "backup": "Contact 116 117 for urgent non-life-threatening assessment.",
+      "escalation": "Sudden, severe, neurological, chest, breathing, bleeding, or collapse signs.",
+      "destination": "chapter-first-aid"
+    },
+    {
+      "id": "threat",
+      "pass": 2,
+      "label": "Threat / no safe place",
+      "action": "Use the Situation G safe-place classifier and secure the next safe hour.",
+      "backup": "Use a staffed public place and tell one person where you are while contacting the matching service.",
+      "escalation": "Violence, exposure, medical danger, acute self-harm risk, or a failed essential-care bridge.",
+      "destination": "chapter-safe-place"
+    },
+    {
+      "id": "environment",
+      "pass": 2,
+      "label": "Smell / household hazard",
+      "action": "Use the environmental-hazard classifier before troubleshooting.",
+      "backup": "Leave the source area and call from outside.",
+      "escalation": "Fire, smoke, gas, electricity, chemicals, symptoms, or uncertainty.",
+      "destination": "chapter-hazard"
+    },
+    {
+      "id": "outage",
+      "pass": 2,
+      "label": "Outage / disruption",
+      "action": "Protect air, medication, essential devices, water, temperature, and information in that order.",
+      "backup": "Move to a powered or staffed location using the household continuity plan.",
+      "escalation": "A device or treatment cannot be safely bridged, or official instructions require evacuation.",
+      "destination": "chapter-outage"
+    }
+  ],
+  "modifiers": [
+    {
+      "id": "alone",
+      "label": "alone",
+      "preparation": "Identify one check-in person and a way responders can enter.",
+      "failure_escalation": "You cannot call, move, unlock, or monitor safely."
+    },
+    {
+      "id": "infant-child",
+      "label": "infant or child",
+      "preparation": "Keep age-specific supplies, caregiver contacts, and transport ready.",
+      "failure_escalation": "The child is difficult to wake, breathing abnormally, or cannot be kept warm/safe."
+    },
+    {
+      "id": "pregnancy-postpartum",
+      "label": "pregnancy or postpartum",
+      "preparation": "Keep maternity contacts, medication list, and a transport plan.",
+      "failure_escalation": "Heavy bleeding, seizure, severe breathlessness, collapse, or acute psychiatric danger."
+    },
+    {
+      "id": "mobility-sensory",
+      "label": "mobility, vision, hearing, or cognitive access",
+      "preparation": "Plan transfer help, communication cards, alarms, and an accessible exit.",
+      "failure_escalation": "The person cannot leave or communicate without immediate assistance."
+    },
+    {
+      "id": "medication",
+      "label": "essential medication",
+      "preparation": "Keep a current list, refill path, storage requirement, and agreed reserve.",
+      "failure_escalation": "A critical dose or storage condition cannot be maintained."
+    },
+    {
+      "id": "powered-device",
+      "label": "powered medical device",
+      "preparation": "Record power draw, battery runtime, backup source, supplier, and powered destination.",
+      "failure_escalation": "Life-supporting function is interrupted or remaining runtime cannot cover transfer."
+    },
+    {
+      "id": "animal",
+      "label": "animal",
+      "preparation": "Prepare carrier, lead, medication, food, records, and a backup carer.",
+      "failure_escalation": "The animal cannot be moved without endangering people or is acutely ill."
+    },
+    {
+      "id": "language-communication",
+      "label": "language or speech access",
+      "preparation": "Keep a short written emergency card and preferred communication method.",
+      "failure_escalation": "Critical instructions cannot be exchanged."
+    },
+    {
+      "id": "no-transport",
+      "label": "no transport",
+      "preparation": "Name one accessible destination and two transport options.",
+      "failure_escalation": "Official evacuation or essential treatment cannot be reached."
+    }
+  ],
+  "source_registry": {
+    "bbk-112": {
+      "title": "BBK — European emergency number 112",
+      "url": "https://www.bbk.bund.de/SharedDocs/Kurzmeldungen/DE/2026/02/om-11-tag-notruf.html",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "bbk-fire": {
+      "title": "BBK — What to do when it burns",
+      "url": "https://www.bbk.bund.de/DE/Warnung-Vorsorge/Vorsorge/Brandschutz/_documents/feuer-verhalten_dossier2.html",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "bbk-power": {
+      "title": "BBK — Preparing for and acting during a power outage",
+      "url": "https://www.bbk.bund.de/DE/Warnung-Vorsorge/Vorsorge/Stromausfall/stromausfall_node.html",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "bbk-warning": {
+      "title": "BBK — Official NINA warning messages",
+      "url": "https://www.bbk.bund.de/DE/Warnung-Vorsorge/Warn-App-NINA/Funktion-Inhalt/Warnmeldungen/warnmeldungen_node.html",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "dvgw-gas": {
+      "title": "DVGW — What to do when gas is smelled",
+      "url": "https://www.dvgw.de/themen/gas/verbraucherinformationen/was-tun-bei-gasgeruch",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "gesund-poison": {
+      "title": "gesund.bund.de — First aid for poisoning",
+      "url": "https://gesund.bund.de/erste-hilfe-bei-vergiftungen",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "bfr-poison-centres": {
+      "title": "BfR — Poison information centres in Germany",
+      "url": "https://www.bfr.bund.de/deutsches-produktregister-depro/giftinformationszentren-in-deutschland/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "bbk-bag": {
+      "title": "BBK — Emergency bag",
+      "url": "https://www.bbk.bund.de/DE/Warnung-Vorsorge/Vorsorge/So-koennen-Sie-sich-vorbereiten/Notgepaeck/notgepaeck_node.html",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "drk-electric": {
+      "title": "German Red Cross — First aid for electric shock",
+      "url": "https://www.drk.de/hilfe-in-deutschland/erste-hilfe/stromschlag/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "authority-115": {
+      "title": "115 — nationwide public-administration information line",
+      "url": "https://www.115.de/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 120
+    },
+    "authority-115-sign": {
+      "title": "115 sign-language video service",
+      "url": "https://www.115.de/gebaerdensprache",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 180
+    },
+    "hilfetelefon-women": {
+      "title": "Violence against women helpline",
+      "url": "https://www.hilfetelefon.de/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 120
+    },
+    "men-violence-help": {
+      "title": "Violence against men helpline",
+      "url": "https://www.maennerhilfetelefon.de/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 120
+    },
+    "children-help": {
+      "title": "Nummer gegen Kummer — child and youth helpline",
+      "url": "https://www.nummergegenkummer.de/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 120
+    },
+    "telefonseelsorge": {
+      "title": "TelefonSeelsorge Germany",
+      "url": "https://www.telefonseelsorge.de/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 120
+    },
+    "women-shelter-search": {
+      "title": "Nationwide women’s refuge search",
+      "url": "https://www.frauenhaus-suche.de/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 120
+    },
+    "wcag22": {
+      "title": "W3C Web Content Accessibility Guidelines 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "reviewed_on": "2026-07-22",
+      "review_max_age_days": 365
+    }
+  },
+  "safe_place_routes": [
+    {
+      "id": "violence-coercion",
+      "trigger": "A person, stalker, controller, or active crime makes the current place unsafe",
+      "action": "Move toward a safer place without confrontation; use 110 for active police danger and 112 for medical or life danger.",
+      "backup": "Use 116 016, the violence-against-men helpline, or a specialist refuge route from a safer device or location.",
+      "escalation": "The threat is present, access is blocked, a weapon is involved, a child is endangered, or anyone is injured.",
+      "destination": "chapter-safe-place",
+      "service_destinations": [
+        "110",
+        "112",
+        "116016",
+        "men-violence-help",
+        "women-shelter-search"
+      ],
+      "source_ids": [
+        "hilfetelefon-women",
+        "men-violence-help",
+        "women-shelter-search"
+      ]
+    },
+    {
+      "id": "no-roof-tonight",
+      "trigger": "There is no lawful, weather-safe place to sleep tonight and no immediate violence route",
+      "action": "Contact municipal emergency accommodation, social services, or the local after-hours authority; state tonight’s need and all access or care constraints.",
+      "backup": "During 115 service hours, use 115 to identify the responsible authority; while arranging help, move to a staffed, weather-protected public place when possible.",
+      "escalation": "Exposure, severe weather, illness, pregnancy/postpartum danger, a child without safe care, or inability to maintain essential treatment.",
+      "destination": "municipal-emergency-housing",
+      "service_destinations": [
+        "115",
+        "municipal-emergency-housing",
+        "112"
+      ],
+      "source_ids": [
+        "authority-115"
+      ]
+    },
+    {
+      "id": "access-care-failure",
+      "trigger": "A nominal place exists but cannot safely support mobility, communication, medication, powered equipment, pregnancy, a child, or another essential dependency",
+      "action": "Name the exact barrier and remaining safe runtime; request an accessible place, transport, power, refrigeration, caregiver, or communication support.",
+      "backup": "Contact the care team, supplier, 116 117, municipal service, or accessible destination before the safe reserve is exhausted.",
+      "escalation": "Life-supporting function is interrupted, transfer cannot finish in time, or the person cannot leave or communicate safely.",
+      "destination": "accessible-emergency-place",
+      "service_destinations": [
+        "116117",
+        "accessible-emergency-place",
+        "112"
+      ],
+      "source_ids": [
+        "authority-115",
+        "wcag22"
+      ]
+    },
+    {
+      "id": "social-internal-crisis",
+      "trigger": "The place is physically safe, but social rupture, overload, panic, or internal crisis makes staying unworkable",
+      "action": "Secure one hour: choose one ally, one staffed place or quiet exit, and one concrete next contact.",
+      "backup": "Use 116 123, 116 111 for children and young people, 116 117, or a local crisis service.",
+      "escalation": "Acute self-harm or other danger, severe confusion, loss of reality contact, exposure, or inability to remain safe.",
+      "destination": "chapter-safe-place",
+      "service_destinations": [
+        "116123",
+        "116111",
+        "116117",
+        "112"
+      ],
+      "source_ids": [
+        "telefonseelsorge",
+        "children-help"
+      ]
+    }
+  ]
+}

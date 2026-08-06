@@ -1,0 +1,7 @@
+/* src/styles/theme-social.css — The Purple Book */
+:root {
+  --sg-accent: #9333EA;
+  --sg-accent-dim: #7528bb;
+  --sg-accent-glow: rgba(147,51,234,0.06);
+  --sg-text-on-accent: #ffffff; /* #9333EA passes WCAG AA with white (≈4.97:1) */
+}

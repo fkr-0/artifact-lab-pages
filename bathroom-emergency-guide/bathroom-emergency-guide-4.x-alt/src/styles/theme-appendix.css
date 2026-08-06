@@ -1,0 +1,6 @@
+/* src/styles/theme-appendix.css — The Appendix */
+:root {
+  --sg-accent: #B5763B;
+  --sg-accent-dim: #905e2f;
+  --sg-accent-glow: rgba(181,118,59,0.06);
+}

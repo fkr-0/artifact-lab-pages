@@ -1,0 +1,20 @@
+[
+  {
+    "condition": "Social Isolation",
+    "reference": 1.0,
+    "odds_ratio": 1.29,
+    "label": "OR 1.29"
+  },
+  {
+    "condition": "Loneliness",
+    "reference": 1.0,
+    "odds_ratio": 1.26,
+    "label": "OR 1.26"
+  },
+  {
+    "condition": "Living Alone",
+    "reference": 1.0,
+    "odds_ratio": 1.32,
+    "label": "OR 1.32"
+  }
+]

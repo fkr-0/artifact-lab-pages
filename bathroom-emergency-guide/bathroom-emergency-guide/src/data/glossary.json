@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "status": "reader-glossary",
+  "terms": [
+    {
+      "key": "aed",
+      "term": "AED",
+      "definition": "Automated external defibrillator: a device that analyzes the heart rhythm and gives a shock only when its algorithm identifies a shockable rhythm."
+    },
+    {
+      "key": "cpr",
+      "term": "CPR",
+      "definition": "Cardiopulmonary resuscitation: chest compressions, with rescue breaths when trained and willing, used when a person is unresponsive and not breathing normally."
+    },
+    {
+      "key": "dispatcher",
+      "term": "Dispatcher",
+      "definition": "The trained call handler in a control centre who gathers information, sends suitable help, and may coach immediate actions."
+    },
+    {
+      "key": "red-flag",
+      "term": "Red flag",
+      "definition": "A sign or situation that overrides ordinary self-care and changes the route to urgent or emergency help."
+    },
+    {
+      "key": "recovery-position",
+      "term": "Recovery position",
+      "definition": "A stable side-lying position used for an unresponsive person who is breathing normally when movement is not prevented by major trauma."
+    },
+    {
+      "key": "triage",
+      "term": "Triage",
+      "definition": "Prioritizing action by urgency and likely harm; in this guide it is a lay routing aid, not a clinical diagnosis."
+    },
+    {
+      "key": "interoception",
+      "term": "Interoception",
+      "definition": "Processing signals from inside the body, including sensing, attention, interpretation, prediction, and regulation."
+    },
+    {
+      "key": "continuity",
+      "term": "Continuity",
+      "definition": "Keeping an essential function operating through a named owner, backup, review time, and escalation route."
+    },
+    {
+      "key": "deployer",
+      "term": "Deployer",
+      "definition": "The person who adapts, prints, places, checks, and maintains a local copy of the guide."
+    },
+    {
+      "key": "reader",
+      "term": "Reader",
+      "definition": "Any person using the guide in the moment; the reader is never assumed to be the deployer."
+    },
+    {
+      "key": "public-ref",
+      "term": "Public reference ID",
+      "definition": "A stable typed address such as [BEG:C:S:004]. The ID stays stable even when page numbers or surrounding sections move."
+    },
+    {
+      "key": "source-limit",
+      "term": "Source limit",
+      "definition": "The boundary of what a source, study, protocol, or model can honestly establish."
+    },
+    {
+      "key": "vital-sign",
+      "term": "Vital sign",
+      "definition": "An observation such as breathing, pulse, temperature, oxygen saturation, blood pressure, or glucose that may help a handoff but cannot by itself clear a red flag."
+    }
+  ]
+}

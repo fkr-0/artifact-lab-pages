@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "reviewed_on": "2026-07-22",
+  "policy": {
+    "order": [
+      "information",
+      "air-hazard",
+      "care-power",
+      "water",
+      "temperature-shelter",
+      "food",
+      "sanitation",
+      "access-transport"
+    ],
+    "rules": [
+      "A continuity system protects a function, not an object.",
+      "Every active system has a named owner, a backup, a next review time, and a failure escalation.",
+      "Official hazard instructions and emergency routes override this catalog.",
+      "A household may leave a field blank only when it records who will resolve it and by when."
+    ]
+  },
+  "systems": [
+    {
+      "id": "information",
+      "label": "Information",
+      "question": "What is confirmed, by whom, and when will it be checked again?",
+      "protect": "Use official warnings and one shared update channel.",
+      "backup": "Keep a battery radio, written contacts, and a scheduled briefing.",
+      "failure_escalation": "Instructions conflict, the warning source is unavailable, or nobody can receive updates.",
+      "owner_prompt": "Who verifies and posts the next update?",
+      "dependencies": [
+        "access-transport"
+      ],
+      "source_ids": [
+        "bbk-warning"
+      ]
+    },
+    {
+      "id": "air-hazard",
+      "label": "Air and hazard",
+      "question": "Is the place safe to occupy?",
+      "protect": "Run the environmental override before troubleshooting or conserving supplies.",
+      "backup": "Leave by a safe route and report from outside.",
+      "failure_escalation": "Fire, smoke, CO alarm, gas, chemical exposure, electrical danger, symptoms, or uncertainty.",
+      "owner_prompt": "Who confirms the safe area and prevents re-entry?",
+      "dependencies": [
+        "information",
+        "access-transport"
+      ],
+      "source_ids": [
+        "bbk-fire",
+        "bbk-power",
+        "dvgw-gas",
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "care-power",
+      "label": "Care and power",
+      "question": "Which treatment, device, medicine, or caregiver function cannot pause?",
+      "protect": "Use the approved personal backup and call early while a safe bridge remains.",
+      "backup": "Move to a known staffed, powered, accessible destination.",
+      "failure_escalation": "A life-supporting function, critical dose, storage condition, or caregiver bridge cannot be maintained.",
+      "owner_prompt": "Who knows the remaining runtime and transfer route?",
+      "dependencies": [
+        "information",
+        "access-transport",
+        "temperature-shelter"
+      ],
+      "source_ids": [
+        "bbk-power",
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "question": "What water is safe, how much remains, and what use has priority?",
+      "protect": "Separate drinking and food-preparation water from washing and waste water.",
+      "backup": "Use sealed stores or official distribution and follow local water notices.",
+      "failure_escalation": "No safe drinking source, contamination warning, or essential care requires more than the safe reserve.",
+      "owner_prompt": "Who records stock, use, source status, and the next refill?",
+      "dependencies": [
+        "information",
+        "access-transport",
+        "sanitation"
+      ],
+      "source_ids": [
+        "bbk-bag",
+        "bbk-warning"
+      ]
+    },
+    {
+      "id": "temperature-shelter",
+      "label": "Temperature and shelter",
+      "question": "Can everyone remain dry, ventilated, and within a safe thermal environment?",
+      "protect": "Use the safest available shelter and reduce exposure before optimizing comfort.",
+      "backup": "Move early to a safer, cooler, warmer, or officially designated place.",
+      "failure_escalation": "Confusion, collapse, severe symptoms, unsafe structure, smoke, flooding, or inability to move a vulnerable person.",
+      "owner_prompt": "Who checks room conditions and people needing help?",
+      "dependencies": [
+        "air-hazard",
+        "care-power",
+        "access-transport"
+      ],
+      "source_ids": [
+        "bbk-warning",
+        "bbk-power",
+        "bbk-112"
+      ]
+    },
+    {
+      "id": "food",
+      "label": "Food and cooking",
+      "question": "What can be eaten safely with the available water, energy, and access needs?",
+      "protect": "Use safe perishables first, keep cold storage closed, and preserve familiar usable foods.",
+      "backup": "Shift to shelf-stable food that requires little water or power.",
+      "failure_escalation": "Food safety is uncertain, a medically necessary intake cannot be maintained, or cooking introduces fire or CO risk.",
+      "owner_prompt": "Who tracks refrigeration status, allergies, and the next meal?",
+      "dependencies": [
+        "water",
+        "care-power",
+        "air-hazard"
+      ],
+      "source_ids": [
+        "bbk-bag",
+        "bbk-power"
+      ]
+    },
+    {
+      "id": "sanitation",
+      "label": "Sanitation",
+      "question": "How are hands, toilets, waste, and clean zones kept separate?",
+      "protect": "Reserve safe water for drinking and essential food use; separate clean and dirty handling.",
+      "backup": "Use the household toilet-failure plan and current municipal instructions.",
+      "failure_escalation": "Waste contaminates living or food areas, handwashing fails, sewage enters the building, or local instructions require leaving.",
+      "owner_prompt": "Who owns toilet status, handwashing, waste route, and cleaning supplies?",
+      "dependencies": [
+        "water",
+        "information",
+        "access-transport"
+      ],
+      "source_ids": [
+        "bbk-bag",
+        "bbk-warning"
+      ]
+    },
+    {
+      "id": "access-transport",
+      "label": "People, access, and transport",
+      "question": "Who cannot receive a warning, leave, enter, communicate, or reach the destination without help?",
+      "protect": "Ask what support is wanted and name the destination, transport, entry, and communication method.",
+      "backup": "Use a second route, second helper, or staffed public destination.",
+      "failure_escalation": "A person, child, animal, essential device, or caregiver cannot be moved or supported before the safe window ends.",
+      "owner_prompt": "Who checks people, animals, keys, documents, transport, and entry?",
+      "dependencies": [
+        "information",
+        "care-power"
+      ],
+      "source_ids": [
+        "bbk-warning",
+        "bbk-112",
+        "wcag22"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "id": "coordination",
+      "label": "Coordination",
+      "owns": "task board, owners, deadlines, next briefing",
+      "backup": "a named deputy can read the same log",
+      "failure_mode": "one confident person becomes the entire system"
+    },
+    {
+      "id": "care",
+      "label": "Care",
+      "owns": "injury, medication, devices, children, dependants, animals",
+      "backup": "care contacts and transfer information are written down",
+      "failure_mode": "the calmest caregiver is assumed to need no relief"
+    },
+    {
+      "id": "supplies",
+      "label": "Supplies",
+      "owns": "water, food, batteries, hygiene, stock and rate of use",
+      "backup": "another person can find and count the stock",
+      "failure_mode": "inventory lives in one person's memory"
+    },
+    {
+      "id": "information",
+      "label": "Information",
+      "owns": "official sources, confirmed facts, uncertainty, update time",
+      "backup": "radio, written contacts, and a second verification route",
+      "failure_mode": "rumour and fact share the same channel"
+    },
+    {
+      "id": "access-logistics",
+      "label": "Access and logistics",
+      "owns": "exits, transport, entry, mobility, communication, destination",
+      "backup": "a second route and helper are named",
+      "failure_mode": "the plan assumes every body, device, and door works"
+    }
+  ],
+  "handoff_fields": [
+    "confirmed event and official instruction",
+    "people, dependants, animals, and essential care",
+    "system status: okay / limited / failed / unknown",
+    "named owner and backup",
+    "remaining safe window or stock",
+    "next action and review time",
+    "failure escalation and destination"
+  ]
+}

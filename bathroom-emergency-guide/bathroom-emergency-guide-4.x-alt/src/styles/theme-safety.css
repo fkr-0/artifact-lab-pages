@@ -1,0 +1,7 @@
+/* src/styles/theme-safety.css — The Blue Book */
+:root {
+  --sg-accent: #2563EB;
+  --sg-accent-dim: #1d4fbc;
+  --sg-accent-glow: rgba(37,99,235,0.06);
+  --sg-text-on-accent: #ffffff; /* #2563EB passes WCAG AA with white (≈4.81:1) */
+}

@@ -1,0 +1,7 @@
+/* src/styles/theme-calm.css — The Teal Book */
+:root {
+  --sg-accent: #2E8B7A;
+  --sg-accent-dim: #246f61;
+  --sg-accent-glow: rgba(46,139,122,0.06);
+  --sg-text-on-accent: #ffffff;
+}

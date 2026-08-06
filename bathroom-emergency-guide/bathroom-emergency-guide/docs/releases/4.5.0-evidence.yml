@@ -1,0 +1,84 @@
+release:
+  project: bathroom-emergency-guide
+  version: 4.5.0
+  base_tag: v4.4.1
+  branch: main
+  candidate_head_before_release_commit: 2f34fd149b5791400ca6797cb648c2d545f30314
+  proposed_local_tag: v4.5.0
+  publish_state: not_requested
+  push_state: not_requested
+  deployment_state: not_requested
+
+scope:
+  master_chapters: 13
+  graph_nodes: 9
+  standalone_nodes:
+    - B
+    - H
+  master_layouts:
+    - a4
+    - a4half
+    - largeprint
+  modes:
+    - color
+    - monochrome
+  additional_formats:
+    - markdown
+    - docx
+    - latex
+
+verification:
+  - command: npm test
+    result: passed
+    evidence:
+      - 7 pass-1 overrides, 6 pass-2 needs, 4 safe-place routes
+      - 9 frozen graph identities and reciprocal edges
+      - 8 offline Vega-Lite figures and 17 current non-Vega illustrations
+      - 12 B/H standalone PDF editions with layout and text parity
+      - 99-page A4 color/monochrome density and edge checks
+      - 6 HTML editions with no boxed-content overflow
+      - large-print accessibility and color/monochrome parity
+  - command: git diff --check
+    result: passed
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+  chrome_for_testing: 148.0.7778.96
+  weasyprint: 69.0
+
+artifacts:
+  - path: build/html/guide.html
+    sha256: 22c20a30cc80f87b5f897b8218c2e01e6baefc4bbdbbdb5ccee98c44391f429f
+  - path: build/html/guide_mono.html
+    sha256: 4a5a87b9cf07db6abb419e3b347d2018e78459982647ea2290c9002bff22f678
+  - path: build/pdf/guide.pdf
+    sha256: 69d435b750f7ea77e9f2cc35a13482c6ec363f36bc2080bffbb60df446732947
+  - path: build/pdf/guide_mono.pdf
+    sha256: 5caf8e32046f357d644a2af04a1b292cc9a1586934461140dbad1ccb932e5110
+  - path: build/pdf/guide_a4half.pdf
+    sha256: 02bb0e6b435e1a3cc626f408d8d8bb414d4bf5088b8c937652bf15ac669a11d4
+  - path: build/pdf/guide_a4half_mono.pdf
+    sha256: a22cdde966b6c91ced4e6fb1b68ac18130b206a7cdd839a9ed98221dc296c32a
+  - path: build/pdf/guide_largeprint.pdf
+    sha256: f8e4bc1787402130e01988450cc7f1d3020852bdf25f8bd3aad766e162db0ddd
+  - path: build/pdf/guide_largeprint_mono.pdf
+    sha256: c907f717b2480044a99257aa4c3a90067b3aa5720a913154b210eebeccbb032e
+  - path: build/docx/guide.docx
+    sha256: 34901a3f20f3dc44ca8e7d8fdbe5bf7e1d345331c94d03a10167c55fd4dc0011
+  - path: build/latex/guide.tex
+    sha256: a388bcd3b893901ef8557cf07c798295319d56a99210e4aadba4de7e89b5a424
+  - path: build/subguides/index.html
+    sha256: 5812da276afe2d0f889c8e6f937580710c0925c51e76aa0ac918bad66771d9fc
+  - path: build/subguides/B/manifest.json
+    sha256: 935e62c6b702a6e0f63602a975e8468c221bddf1843e9ab7f80d871eb8591205
+  - path: build/subguides/H/manifest.json
+    sha256: d1aa0d184a749ce59d2d60c5af871aa4eaf3571f4597398a25cc72722a711aa3
+
+known_limits:
+  - Only B and H are detached standalone vertical slices in 4.5.0; the other graph nodes remain available in the master guide.
+  - Build outputs are deliberately ignored and reproducible from tracked sources.
+  - The OpenCode independent-review task failed in the adapter before repository inspection; no review evidence is claimed from it.

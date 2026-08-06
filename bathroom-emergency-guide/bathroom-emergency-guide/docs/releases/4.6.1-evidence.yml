@@ -1,0 +1,118 @@
+release:
+  project: bathroom-emergency-guide
+  version: 4.6.1
+  release_date: 2026-07-26
+  source_revision: 42036b1418ed
+  implementation_commit: a04b669
+  documentation_commit: 42036b1
+  local_tag: v4.6.1
+  tag_target: commit containing this evidence record
+  push_performed: false
+  publish_performed: false
+  deployment_performed: false
+
+scope:
+  canonical_chapters: 14
+  graph_nodes: 10
+  active_stable_resources: 308
+  retired_stable_resources: 1
+  detachable_forms: 18
+  standalone_nodes: [B, H, T, R]
+  master_layouts: [a4, a4half, largeprint]
+  print_modes: [color, monochrome]
+  additional_formats: [markdown, docx, latex]
+  release_manifest_artifacts: 243
+  coverage_matrix:
+    path: src/data/coverage_matrix.json
+    nodes: 10
+    sections: 213
+    sources: 53
+    reader_visuals: 28
+
+verification:
+  exact_revision_build:
+    command: GUIDE_REVISION=42036b1418ed SOURCE_DATE_EPOCH=1785098063 npm run build
+    result: passed
+  independent_test:
+    command: GUIDE_REVISION=42036b1418ed SOURCE_DATE_EPOCH=1785098063 npm test
+    result: passed
+  generated_registry_checks:
+    commands:
+      - python3 bin/build_inventories.py --check
+      - python3 bin/build_source_inventory.py --check
+      - python3 bin/build_reference_index.py --check
+      - python3 bin/build_coverage_matrix.py --check
+    result: passed
+  whitespace_check:
+    command: git diff --check
+    result: passed
+  observed_gates:
+    - 308 stable active resources across six typed kinds
+    - ten-node source, section, visual, and standalone-readiness provenance
+    - 18 detachable Blue Book forms including installation, drill, review, and maintenance sheets
+    - 24 standalone B/H/T/R PDF editions with layout and semantic parity
+    - six master HTML/PDF editions plus Markdown, DOCX, and LaTeX
+    - tagged PDFs, native MathML, and color/monochrome text parity
+    - A4/2 physical geometry, blank-page, marker, and edge checks
+    - standard-A4 density, blank-page, physical-edge, and text-parity checks
+    - large-print heading order, alt text, page-edge safety, and color/mono parity
+    - six HTML editions with no boxed or content overflow
+    - landing, deployment, release-manifest, and complete-matrix validation
+
+render_metrics:
+  a4:
+    color_pages: 133
+    monochrome_pages: 133
+    median_span: 0.99
+    color_median_ink: 0.116
+    monochrome_median_ink: 0.116
+  a4half:
+    color_pages: 129
+    monochrome_pages: 129
+    page_points: 298.08x841.92
+  largeprint:
+    color_pages: 215
+    monochrome_pages: 215
+
+artifact_manifest:
+  path: build/release/manifest.json
+  bytes: 43197
+  sha256: 3b5fe37cc10e4ed656ef918b70c0f0b2253dc143e2977c89cd5967bee4b08225
+  embedded_revision: 42036b1418ed
+  publish_performed: false
+  deployment_performed: false
+
+artifact_samples:
+  - {path: build/pdf/guide.pdf, pages: 133, bytes: 6331239, sha256: 2125d2d77a1887db709cb886510940f82eb474d947231feb178901e33c1032a2}
+  - {path: build/pdf/guide_mono.pdf, pages: 133, bytes: 6611282, sha256: 6c93fd1359ebfd9437b88cbc79ee82e87e2416b49059809e68c30763c33a7b4f}
+  - {path: build/pdf/guide_a4half.pdf, pages: 129, bytes: 6339386, sha256: 5538ceed61815b92bf32aa1e0530d83093c707d43e4e65f5c0f744a4f53ffce6}
+  - {path: build/pdf/guide_a4half_mono.pdf, pages: 129, bytes: 4971694, sha256: c2ad438096090bc12cd9b2f5b3d27bc6acbfa961d8ebdd53939b806bdc5fe6b4}
+  - {path: build/pdf/guide_largeprint.pdf, pages: 215, bytes: 6536556, sha256: 0224ab03492caf6ed2fba8f6f9afec0ba2b6e9514205d2fba2d15901922f734d}
+  - {path: build/pdf/guide_largeprint_mono.pdf, pages: 215, bytes: 6687207, sha256: 85b21f25bd3d718bbfaa91f567f4f7a823a13c61161bf04695b32a568c6e261c}
+  - {path: build/html/guide.html, bytes: 5011717, sha256: c1b1e46df626b64f24740c5069fb2a1bf6000e636ccce773645a70790560b1f1}
+  - {path: build/subguides/index.html, bytes: 442225, sha256: 82d041349ce70f6c6910fd12ee727030f6a55146d615bc25fc4f50bde68bea4f}
+  - {path: build/site/index.html, bytes: 7816, sha256: 7155f7199499b5c284f086f4dcffa7350f8cf00730856c36f28996ef8773d587}
+  - {path: build/docx/guide.docx, bytes: 3077748, sha256: 46a52a737fe3854cd663f876f3c2ccdf6f4b7ab9a0d6c76851352d7144889f98}
+  - {path: build/latex/guide.tex, bytes: 390815, sha256: 1c1314be1905cb687419e11855690acccdf115f7e92bfd575ea11e0e9c718d0f}
+  - {path: src/data/coverage_matrix.json, bytes: 10195, sha256: 345cd69ede01f7d04cd1fffe767da48a27e1594314ad5133ec8d21578ebfc199}
+
+toolchain:
+  python: 3.14.6
+  node: 24.18.0
+  npm: 11.16.0
+  pandoc: 3.1.3
+  poppler_pdfinfo: 26.07.0
+
+release_decisions:
+  - Field-test forms capture observations and failure modes; they do not claim that instructor, novice-reader, or real-bathroom testing has already occurred.
+  - The coverage matrix is generated from canonical section, source, figure, illustration, and subguide registries rather than manually maintained totals.
+  - Numeric standalone readiness is only a screening gate; editorial, source, layout, accessibility, and usability review remain mandatory.
+  - C crosses the numeric standalone-candidate screen. P has sufficient local sources but remains below the four-owned-visual screen.
+  - No existing stable reference was renumbered or reused.
+
+known_limits:
+  - Actual first-aid figure usability sessions with instructors and readers without CPR practice remain outstanding.
+  - Actual wet-room installations and route drills remain outstanding; 4.6.1 supplies the protocol and recording forms.
+  - Local services and safe destinations still require dated deployer verification.
+  - Local Fontconfig emitted configuration warnings and unavailable font-weight fallbacks; tagging, geometry, text parity, accessibility, and edge checks passed.
+  - OpenCode provider preflight reported an exhausted active credential and fewer than two usable pooled keys, so no independent subagent review is claimed.

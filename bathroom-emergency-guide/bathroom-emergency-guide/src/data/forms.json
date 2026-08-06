@@ -1,0 +1,412 @@
+{
+  "schema_version": 1,
+  "release": "4.14.0-alt.2",
+  "status": "canonical-printable-form-registry",
+  "forms": [
+    {
+      "key": "deployment-cover",
+      "title": "Deployment cover and ownership card",
+      "purpose": "Identify this copy, its location, maintainer, revision, and next review.",
+      "responsibility": "deployer",
+      "privacy": "shared-safe",
+      "routes": [
+        "T",
+        "R"
+      ],
+      "figure_ids": [],
+      "support_keys": [],
+      "description": "Identity, ownership, version, and review date for this copy.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "location-access",
+      "title": "Location and access card",
+      "purpose": "Give callers and helpers a factual route to the room.",
+      "responsibility": "deployer",
+      "privacy": "shared-safe",
+      "routes": [
+        "O",
+        "A",
+        "C",
+        "D",
+        "P"
+      ],
+      "figure_ids": [
+        "professional-call-packet",
+        "safe-place-confirmation-packet"
+      ],
+      "support_keys": [
+        "112",
+        "110"
+      ],
+      "description": "Verified address, access barriers, exits, and meeting point.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "emergency-call",
+      "title": "Emergency call card",
+      "purpose": "Externalize the first useful facts while the dispatcher asks questions.",
+      "responsibility": "deployer-and-reader",
+      "privacy": "shared-safe",
+      "routes": [
+        "A",
+        "C",
+        "H",
+        "P"
+      ],
+      "figure_ids": [
+        "responsibility-clock-map",
+        "professional-call-packet",
+        "triage-flow"
+      ],
+      "support_keys": [
+        "112",
+        "110",
+        "116117"
+      ],
+      "description": "A writable launch pad for the facts a dispatcher needs.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "local-support",
+      "title": "Local professional contacts",
+      "purpose": "Replace generic service categories with verified local names, numbers, hours, access channels, and backups.",
+      "responsibility": "deployer",
+      "privacy": "shared-safe",
+      "routes": [
+        "A",
+        "D",
+        "H",
+        "Z",
+        "P"
+      ],
+      "figure_ids": [
+        "consent-authority-boundary",
+        "professional-route-selector",
+        "support-system-layers",
+        "safe-place-route-map"
+      ],
+      "support_keys": [
+        "115",
+        "116016",
+        "116111",
+        "116117",
+        "116123",
+        "men_violence_help",
+        "municipal_emergency_housing",
+        "accessible_emergency_place",
+        "youth_emergency_service",
+        "gas_network"
+      ],
+      "description": "Verified local names, channels, hours, and backups.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "comfort-inventory",
+      "title": "Comfort inventory",
+      "purpose": "Make ordinary regulation resources visible before alarm narrows attention.",
+      "responsibility": "reader-with-deployer-support",
+      "privacy": "shared-safe",
+      "routes": [
+        "O",
+        "B"
+      ],
+      "figure_ids": [
+        "observatory-scan",
+        "overload-control-map",
+        "breathing-techniques"
+      ],
+      "support_keys": [],
+      "description": "Ordinary regulation resources made findable before overload.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "five-minute-values",
+      "title": "Five-minute values bridge",
+      "purpose": "Turn one value into one bounded action rather than one heroic life overhaul.",
+      "responsibility": "reader",
+      "privacy": "private-or-shared",
+      "routes": [
+        "A",
+        "B"
+      ],
+      "figure_ids": [
+        "repair-sequence",
+        "consent-authority-boundary",
+        "overload-control-map"
+      ],
+      "support_keys": [],
+      "description": "One value translated into one bounded next action.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "observation-log",
+      "title": "Observation and vital-sign log",
+      "purpose": "Record change and actions for a clinician or dispatcher without treating devices as clearance.",
+      "responsibility": "reader-or-helper",
+      "privacy": "private",
+      "routes": [
+        "O",
+        "C"
+      ],
+      "figure_ids": [
+        "observatory-scan",
+        "triage-flow"
+      ],
+      "support_keys": [
+        "112",
+        "116117"
+      ],
+      "description": "Changes and actions recorded for a clinician or dispatcher.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "nice-place-map",
+      "title": "Nice-place and low-demand activity map",
+      "purpose": "Precompute safe, reversible destinations and activities.",
+      "responsibility": "reader-with-deployer-support",
+      "privacy": "private-or-shared",
+      "routes": [
+        "B",
+        "D"
+      ],
+      "figure_ids": [
+        "safe-place-route-map"
+      ],
+      "support_keys": [],
+      "description": "Preselected reversible places and low-demand activities.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "safe-place-map",
+      "title": "Safe-place and exit map",
+      "purpose": "Name exits, meeting points, barriers, transport, and confirmed backups.",
+      "responsibility": "deployer",
+      "privacy": "context-sensitive",
+      "routes": [
+        "D",
+        "P"
+      ],
+      "figure_ids": [
+        "safe-place-route-map",
+        "safe-place-confirmation-packet",
+        "communication-access-card",
+        "safe-reserve-clock"
+      ],
+      "support_keys": [
+        "110",
+        "112",
+        "116016",
+        "men_violence_help",
+        "municipal_emergency_housing",
+        "accessible_emergency_place",
+        "youth_emergency_service"
+      ],
+      "description": "Confirmed destinations, access routes, backups, and escalation.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "essential-care",
+      "title": "Medication, power, and care continuity card",
+      "purpose": "Keep essential dependencies, runtime, approved backups, and escalation routes visible.",
+      "responsibility": "deployer-with-affected-person",
+      "privacy": "private",
+      "routes": [
+        "A",
+        "C",
+        "H",
+        "Z",
+        "P"
+      ],
+      "figure_ids": [
+        "care-continuity-loop",
+        "dependency-continuity-map",
+        "vega-continuity-dependencies",
+        "safe-reserve-clock"
+      ],
+      "support_keys": [
+        "112",
+        "116117",
+        "accessible_emergency_place"
+      ],
+      "description": "Medication, power, care dependencies, runtime, and approved backup.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "household-board",
+      "title": "Household continuity board",
+      "purpose": "Assign one owner, backup, next check, and escalation for each essential function.",
+      "responsibility": "deployer-or-household",
+      "privacy": "shared-safe",
+      "routes": [
+        "A",
+        "Z"
+      ],
+      "figure_ids": [
+        "care-continuity-loop",
+        "household-continuity-board",
+        "first-meeting-roles",
+        "vega-communication-channels"
+      ],
+      "support_keys": [],
+      "description": "Owners, backups, checks, and escalation for essential functions.",
+      "resource_type": "figure",
+      "interaction": "read-only",
+      "prepared_by": "deployer"
+    },
+    {
+      "key": "feedback",
+      "title": "Feedback and field-note sheet",
+      "purpose": "Return corrections, local adaptations, failed routes, and useful inventions upstream.",
+      "responsibility": "reader-or-deployer",
+      "privacy": "do-not-send-private-medical-data",
+      "routes": [
+        "T",
+        "R"
+      ],
+      "figure_ids": [
+        "evidence-classes",
+        "two-pass-route-map"
+      ],
+      "support_keys": [],
+      "description": "Corrections, failed routes, local adaptations, and useful inventions.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "installation-audit",
+      "title": "Installation and wet-room audit",
+      "purpose": "Test water, glare, reach, page turning, privacy, stability, and visibility in the actual room.",
+      "responsibility": "deployer",
+      "privacy": "shared-safe",
+      "routes": [
+        "T",
+        "R"
+      ],
+      "figure_ids": [
+        "two-pass-route-map"
+      ],
+      "support_keys": [],
+      "description": "Wet-room readability, reach, privacy, glare, and physical handling.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "route-drill-log",
+      "title": "Route drill and timing log",
+      "purpose": "Run a calm-time scenario and record where finding, choosing, writing, calling, or handing off becomes slow or ambiguous.",
+      "responsibility": "deployer-with-willing-reader",
+      "privacy": "do-not-use-real-private-crisis-details",
+      "routes": [
+        "O",
+        "T",
+        "R"
+      ],
+      "figure_ids": [
+        "two-pass-route-map"
+      ],
+      "support_keys": [],
+      "description": "Calm-time timings and friction from finding to handoff.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "first-aid-figure-review",
+      "title": "First-aid figure usability review",
+      "purpose": "Test whether CPR, AED, recovery-position, and triage figures produce the intended action without coaching from the author.",
+      "responsibility": "reviewer-or-instructor",
+      "privacy": "anonymous-or-consented",
+      "routes": [
+        "C",
+        "R"
+      ],
+      "figure_ids": [
+        "triage-flow",
+        "cpr-body-orientation",
+        "aed-action-sequence",
+        "recovery-position-steps"
+      ],
+      "support_keys": [
+        "112"
+      ],
+      "description": "Usability test for action, sequence, geometry, and limits.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "maintenance-inspection",
+      "title": "Maintenance and replacement inspection",
+      "purpose": "Record physical damage, stale local facts, missing supplies, used forms, and the next replacement action.",
+      "responsibility": "deployer",
+      "privacy": "shared-safe",
+      "routes": [
+        "Z",
+        "T",
+        "R"
+      ],
+      "figure_ids": [
+        "household-continuity-board"
+      ],
+      "support_keys": [],
+      "description": "Damage, stale facts, used supplies, and replacement actions.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "remarks",
+      "title": "Blank remarks and handoff sheet",
+      "heading": "Remarks and handoff sheet",
+      "purpose": "Provide writable space without hiding it inside a content page.",
+      "responsibility": "reader",
+      "privacy": "private-or-shared",
+      "routes": [
+        "A",
+        "O",
+        "P",
+        "T"
+      ],
+      "figure_ids": [
+        "repair-sequence"
+      ],
+      "support_keys": [],
+      "description": "Blank space for observation, action, result, and next handoff.",
+      "resource_type": "template",
+      "interaction": "write"
+    },
+    {
+      "key": "quiet-activity",
+      "title": "Quiet activity sheet",
+      "purpose": "Offer dot-grid drawing, a card-house challenge, and a simple paper-folding practice without pretending they are treatment.",
+      "responsibility": "reader",
+      "privacy": "shared-safe",
+      "routes": [
+        "B",
+        "T"
+      ],
+      "figure_ids": [
+        "breathing-techniques"
+      ],
+      "support_keys": [],
+      "description": "Low-demand drawing, building, and folding prompts.",
+      "resource_type": "template",
+      "interaction": "write"
+    }
+  ]
+}

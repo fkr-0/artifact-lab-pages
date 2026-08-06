@@ -1,0 +1,168 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "width": 760,
+  "height": 300,
+  "padding": 18,
+  "data": {
+    "name": "table"
+  },
+  "encoding": {},
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 5
+      },
+      "encoding": {
+        "y": {
+          "field": "row_label",
+          "type": "nominal",
+          "sort": [
+            "Sensitivity — Original primary-care study",
+            "Sensitivity — Pooled diagnostic review",
+            "Specificity — Original primary-care study",
+            "Specificity — Pooled diagnostic review"
+          ],
+          "axis": {
+            "title": null,
+            "labelFontWeight": "bold",
+            "labelLimit": 285
+          }
+        },
+        "color": {
+          "field": "study",
+          "type": "nominal",
+          "sort": [
+            "Original primary-care study",
+            "Pooled diagnostic review"
+          ],
+          "scale": {
+            "range": [
+              "#175cd3",
+              "#b54708"
+            ]
+          },
+          "legend": null
+        },
+        "x": {
+          "field": "lower",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              45,
+              100
+            ]
+          },
+          "axis": {
+            "title": "Percent",
+            "format": ".0f",
+            "values": [
+              50,
+              60,
+              70,
+              80,
+              90,
+              100
+            ]
+          }
+        },
+        "x2": {
+          "field": "upper"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "size": 170,
+        "stroke": "#172033",
+        "strokeWidth": 1.2
+      },
+      "encoding": {
+        "y": {
+          "field": "row_label",
+          "type": "nominal",
+          "sort": [
+            "Sensitivity — Original primary-care study",
+            "Sensitivity — Pooled diagnostic review",
+            "Specificity — Original primary-care study",
+            "Specificity — Pooled diagnostic review"
+          ],
+          "axis": {
+            "title": null,
+            "labelFontWeight": "bold",
+            "labelLimit": 285
+          }
+        },
+        "color": {
+          "field": "study",
+          "type": "nominal",
+          "sort": [
+            "Original primary-care study",
+            "Pooled diagnostic review"
+          ],
+          "scale": {
+            "range": [
+              "#175cd3",
+              "#b54708"
+            ]
+          },
+          "legend": null
+        },
+        "shape": {
+          "field": "study",
+          "type": "nominal",
+          "sort": [
+            "Original primary-care study",
+            "Pooled diagnostic review"
+          ],
+          "scale": {
+            "range": [
+              "square",
+              "circle"
+            ]
+          },
+          "legend": null
+        },
+        "x": {
+          "field": "estimate",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 12,
+        "fontWeight": "bold",
+        "fontSize": 13
+      },
+      "encoding": {
+        "y": {
+          "field": "row_label",
+          "type": "nominal",
+          "sort": [
+            "Sensitivity — Original primary-care study",
+            "Sensitivity — Pooled diagnostic review",
+            "Specificity — Original primary-care study",
+            "Specificity — Pooled diagnostic review"
+          ],
+          "axis": {
+            "title": null,
+            "labelFontWeight": "bold",
+            "labelLimit": 285
+          }
+        },
+        "x": {
+          "field": "estimate",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "label"
+        }
+      }
+    }
+  ]
+}

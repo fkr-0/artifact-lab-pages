@@ -1,0 +1,42 @@
+[
+  {
+    "study": "Original primary-care study",
+    "measure": "Sensitivity",
+    "estimate": 89,
+    "lower": 89,
+    "upper": 89,
+    "label": "89%",
+    "interval_label": "single-study estimate",
+    "row_label": "Sensitivity — Original primary-care study"
+  },
+  {
+    "study": "Pooled diagnostic review",
+    "measure": "Sensitivity",
+    "estimate": 64,
+    "lower": 56,
+    "upper": 72,
+    "label": "64%",
+    "interval_label": "95% CI 56%–72%",
+    "row_label": "Sensitivity — Pooled diagnostic review"
+  },
+  {
+    "study": "Original primary-care study",
+    "measure": "Specificity",
+    "estimate": 82,
+    "lower": 82,
+    "upper": 82,
+    "label": "82%",
+    "interval_label": "single-study estimate",
+    "row_label": "Specificity — Original primary-care study"
+  },
+  {
+    "study": "Pooled diagnostic review",
+    "measure": "Specificity",
+    "estimate": 91,
+    "lower": 87,
+    "upper": 93,
+    "label": "91%",
+    "interval_label": "95% CI 87%–93%",
+    "row_label": "Specificity — Pooled diagnostic review"
+  }
+]
