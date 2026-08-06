@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "v11-peer-daw",
+  "title": "V11 Peer DAW",
+  "description": "Published independent submodule pinned to its parent-owned release revision; newer unpublished child commits remain outside the parent gitlink until explicitly promoted.",
+  "kind": "application",
+  "status": "provisional",
+  "required": true,
+  "tags": ["audio", "project", "submodule"],
+  "source": {
+    "kind": "project",
+    "path": "v11-peer-daw",
+    "git": {
+      "mode": "submodule",
+      "repository": "https://github.com/fkr-0/v11-peer-daw.git",
+      "revision": "37783861b7681852b0605a891a2b831c4cde82de"
+    }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "v11-peer-daw",
+    "command": ["pnpm", "run", "build"],
+    "output": "dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "dist",
+    "offline": false
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  }
+}

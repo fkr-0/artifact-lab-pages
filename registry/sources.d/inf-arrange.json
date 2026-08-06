@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "inf-arrange",
+  "version": "0.0.2",
+  "title": "Inf Arrange / Canvas Studio",
+  "description": "Root-owned infinite canvas application for arranging, slicing, cropping, resizing, annotating, and relating images and short text blocks.",
+  "kind": "application",
+  "status": "experimental",
+  "required": false,
+  "tags": ["canvas", "images", "project", "root-owned", "react"],
+  "source": {
+    "kind": "project",
+    "path": "inf-arrange",
+    "git": { "mode": "root" }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "inf-arrange",
+    "command": ["pnpm", "run", "build"],
+    "output": "dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "dist",
+    "offline": true
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "floating", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html"],
+    "commands": [
+      ["pnpm", "run", "test"],
+      ["pnpm", "run", "check"],
+      ["pnpm", "run", "build"]
+    ]
+  }
+}
