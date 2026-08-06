@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "git-recipe-book",
+  "version": "1.1.0",
+  "title": "Git Recipe Book",
+  "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
+  "kind": "application",
+  "status": "experimental",
+  "required": false,
+  "tags": ["education", "git", "project", "root-owned", "react"],
+  "source": {
+    "kind": "project",
+    "path": "git-recipe-book",
+    "git": { "mode": "root" }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "git-recipe-book",
+    "command": ["pnpm", "run", "build"],
+    "output": "dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "dist",
+    "offline": true
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "floating", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html"],
+    "commands": [
+      ["pnpm", "test"],
+      ["pnpm", "lint"],
+      ["pnpm", "build"],
+      ["pnpm", "test:e2e"]
+    ]
+  }
+}

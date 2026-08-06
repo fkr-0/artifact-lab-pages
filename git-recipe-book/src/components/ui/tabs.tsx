@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { cn } from '@/lib/utils'
+import * as React from 'react'
 
 interface TabsContextValue {
   value: string
@@ -32,9 +32,9 @@ function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
     <div
       className={cn(
         'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
-        className
+        className,
       )}
-      role='tablist'
+      role="tablist"
       {...props}
     />
   )
@@ -50,12 +50,12 @@ function TabsTrigger({ value, className, ...props }: TabsTriggerProps) {
 
   return (
     <button
-      role='tab'
+      role="tab"
       aria-selected={isActive}
       className={cn(
         'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
         isActive ? 'bg-background text-foreground shadow' : 'hover:bg-background/50',
-        className
+        className,
       )}
       onClick={() => ctx.onValueChange(value)}
       {...props}
@@ -73,10 +73,10 @@ function TabsContent({ value, className, ...props }: TabsContentProps) {
 
   return (
     <div
-      role='tabpanel'
+      role="tabpanel"
       className={cn(
         'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        className
+        className,
       )}
       {...props}
     />

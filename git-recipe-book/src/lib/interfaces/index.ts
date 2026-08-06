@@ -1,6 +1,6 @@
 // ─── Interface Exports ────────────────────────────────────────────────────────
 
-export type { IGitBackend, BackendType, IBackendFactory } from './IGitBackend';
+export type { IGitBackend, BackendType, IBackendFactory } from './IGitBackend'
 export type {
   ILessonProvider,
   ILessonRegistry,
@@ -12,7 +12,7 @@ export type {
   IRemoteSetup,
   IStepValidation,
   StepValidationType,
-} from './ILessonProvider';
+} from './ILessonProvider'
 export type {
   IHelpProvider,
   IHelpRegistry,
@@ -21,7 +21,7 @@ export type {
   IGlossaryEntry,
   IConceptExplanation,
   HelpCategory,
-} from './IHelpProvider';
+} from './IHelpProvider'
 export type {
   IUXRegistry,
   IUXFlow,
@@ -31,4 +31,4 @@ export type {
   IComponentOverride,
   ComponentSlot,
   UXTrigger,
-} from './IUXRegistry';
+} from './IUXRegistry'

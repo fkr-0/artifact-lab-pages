@@ -1,97 +1,76 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import GitLessonPanel from '../GitLessonPanel';
-import { useGitStore } from '@/stores/git-store';
-
-// Mock framer-motion
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
-      React.createElement('div', props, children),
-  },
-  AnimatePresence: ({ children }: React.PropsWithChildren) => children,
-}));
+import { useGitStore } from '@/stores/git-store'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it } from 'vitest'
+import GitLessonPanel from '../GitLessonPanel'
 
 describe('GitLessonPanel Integration', () => {
   beforeEach(() => {
-    useGitStore.getState().resetAll();
-  });
+    useGitStore.getState().resetAll()
+  })
 
-  it('renders lesson categories', () => {
-    render(<GitLessonPanel />);
-    expect(screen.getByText('Git Lessons')).toBeInTheDocument();
-    expect(screen.getByText('Basics')).toBeInTheDocument();
-  });
+  it('renders a compact curriculum map and mastery total', () => {
+    render(<GitLessonPanel />)
 
-  it('clicking a lesson loads it', async () => {
-    const user = userEvent.setup();
-    render(<GitLessonPanel />);
+    expect(screen.getByText('Git Lessons')).toBeInTheDocument()
+    expect(screen.getByText('Course mastery')).toBeInTheDocument()
+    expect(screen.getByText('Basics')).toBeInTheDocument()
+    expect(screen.getByLabelText(/course mastered/i)).toBeInTheDocument()
+  })
 
-    // Find and click the "Start Lesson" button for the basics lesson
-    const startButtons = screen.getAllByText('Start Lesson');
-    await user.click(startButtons[0]);
+  it('starts the first available lesson from its course card', async () => {
+    const user = userEvent.setup()
+    render(<GitLessonPanel />)
 
-    const state = useGitStore.getState();
-    expect(state.currentLessonId).toBeTruthy();
-  });
+    await user.click(screen.getAllByRole('button', { name: /start lesson/i })[0])
 
-  it('lesson steps show progress', async () => {
-    const user = userEvent.setup();
-    render(<GitLessonPanel />);
+    expect(useGitStore.getState().currentLessonId).toBe('orientation')
+    expect(screen.getByRole('button', { name: /continue lesson/i })).toBeInTheDocument()
+  })
 
-    // Start the basics lesson
-    const startButtons = screen.getAllByText('Start Lesson');
-    await user.click(startButtons[0]);
+  it('shows persisted step progress without duplicating lesson prose', async () => {
+    const user = userEvent.setup()
+    render(<GitLessonPanel />)
 
-    // Should show step titles
-    await waitFor(() => {
-      expect(screen.getByText('Why Git Exists')).toBeInTheDocument();
-    });
-  });
+    await user.click(screen.getAllByRole('button', { name: /start lesson/i })[0])
+    act(() => {
+      useGitStore.getState().completeKnowledgeStep('passed')
+    })
 
-  it('restart button works', async () => {
-    const user = userEvent.setup();
-    render(<GitLessonPanel />);
+    await waitFor(() => expect(screen.getByText('1/5 steps')).toBeInTheDocument())
+    expect(screen.queryByText('Before this command')).not.toBeInTheDocument()
+  })
 
-    // Start the basics lesson
-    const startButtons = screen.getAllByText('Start Lesson');
-    await user.click(startButtons[0]);
+  it('keeps prerequisite lessons technically locked', () => {
+    render(<GitLessonPanel />)
 
-    // Should show restart button after lesson is loaded
-    await waitFor(() => {
-      expect(screen.getByText('Restart Lesson')).toBeInTheDocument();
-    });
+    const lockedButtons = screen.getAllByRole('button', { name: /prerequisite locked/i })
+    expect(lockedButtons.length).toBeGreaterThan(0)
+    expect(lockedButtons.every((button) => button.hasAttribute('disabled'))).toBe(true)
+  })
 
-    // Click restart
-    await user.click(screen.getByText('Restart Lesson'));
+  it('shows an adaptive next-step recommendation', () => {
+    render(<GitLessonPanel />)
 
-    const state = useGitStore.getState();
-    expect(state.currentStepIndex).toBe(0);
-  });
+    expect(screen.getByText(/Recommended next/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Git Orientation/i).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Next unlocked lesson/i)).toBeInTheDocument()
+  })
 
+  it('turns a mastered lesson into deliberate replay practice', async () => {
+    const user = userEvent.setup()
+    render(<GitLessonPanel />)
+    await user.click(screen.getAllByRole('button', { name: /start lesson/i })[0])
 
-  it('shows an adaptive next-step recommendation', async () => {
-    render(<GitLessonPanel />);
+    act(() => {
+      useGitStore.getState().completeKnowledgeStep('passed')
+      useGitStore.getState().completeKnowledgeStep('passed')
+      useGitStore.getState().completeKnowledgeStep('passed')
+      useGitStore.getState().completeKnowledgeStep('passed')
+      useGitStore.getState().completeKnowledgeStep('passed')
+    })
 
-    expect(await screen.findByText(/Recommended next/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Git Orientation/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Next unlocked lesson/i)).toBeInTheDocument();
-  });
-
-  it('renders beginner tool explanations before the active command hint', async () => {
-    const user = userEvent.setup();
-    render(<GitLessonPanel />);
-
-    const startButtons = screen.getAllByText('Start Lesson');
-    await user.click(startButtons[0]);
-
-    await waitFor(() => {
-      expect(screen.getByText('Before this command')).toBeInTheDocument();
-      expect(screen.getByText(/A system for recording project history/i)).toBeInTheDocument();
-      expect(screen.getByText(/You know the human reason for Git/i)).toBeInTheDocument();
-    });
-  });
-
-});
+    expect(useGitStore.getState().completedLessons.has('orientation')).toBe(true)
+    await waitFor(() => expect(screen.getByRole('button', { name: /practice again/i })).toBeInTheDocument())
+  })
+})

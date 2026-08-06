@@ -1,188 +1,189 @@
-import React, { useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import {
-  FileText,
-  GitBranch,
-  GitCommitHorizontal,
-} from 'lucide-react'
-import { useGitStore, lessonProvider } from '@/stores/git-store'
 import AppHeader from '@/components/git/AppHeader'
-import GitGraph from '@/components/git/GitGraph'
-import GitTerminal from '@/components/git/GitTerminal'
+import CommandInsightPanel from '@/components/git/CommandInsightPanel'
 import GitLessonPanel from '@/components/git/GitLessonPanel'
-import GitFileExplorer from '@/components/git/GitFileExplorer'
-import GitCommitDetail from '@/components/git/GitCommitDetail'
-import GitBranchList from '@/components/git/GitBranchList'
-import GitHelpPanel from '@/components/git/GitHelpPanel'
-import GraphLegend from '@/components/git/GraphLegend'
-import StatusIndicator from '@/components/git/StatusIndicator'
+import GitStateFlow from '@/components/git/GitStateFlow'
+import GitTerminal from '@/components/git/GitTerminal'
+import LearningCompass from '@/components/git/LearningCompass'
+import LearningMission from '@/components/git/LearningMission'
 import OnboardingOverlay, { shouldShowOnboarding } from '@/components/git/OnboardingOverlay'
-import { ToastContainer, useToasts, showToast } from '@/components/ui/toast'
-import Confetti from '@/components/ui/confetti'
-import { useKeyboardShortcuts, SHORTCUT_HELP } from '@/hooks/use-keyboard-shortcuts'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ToastContainer, useToasts } from '@/components/ui/toast'
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
+import { useGitStore } from '@/stores/git-store'
+import { AnimatePresence } from 'framer-motion'
+import { FileText, GitBranch, GitCommitHorizontal, Network, TerminalSquare, X } from 'lucide-react'
+import { Suspense, lazy, useCallback, useState } from 'react'
+
+const GitGraph = lazy(() => import('@/components/git/GitGraph'))
+const GitFileExplorer = lazy(() => import('@/components/git/GitFileExplorer'))
+const GitCommitDetail = lazy(() => import('@/components/git/GitCommitDetail'))
+const GitBranchList = lazy(() => import('@/components/git/GitBranchList'))
+const GitHelpPanel = lazy(() => import('@/components/git/GitHelpPanel'))
+const GraphLegend = lazy(() => import('@/components/git/GraphLegend'))
+const StatusIndicator = lazy(() => import('@/components/git/StatusIndicator'))
+
+function PanelFallback({ label }: { label: string }) {
+  return <div className="panel-loading">Loading {label}…</div>
+}
 
 export default function App() {
-  const {
-    sidebarOpen,
-    setSidebarOpen,
-    gitState,
-    selectedCommitId,
-    activeTab,
-    setActiveTab,
-    currentLessonId,
-    currentStepIndex,
-    completedLessons,
-  } = useGitStore()
-
-  const commitCount = Object.keys(gitState.commits).length
+  const { sidebarOpen, evidenceOpen, focusMode, activeTab, setSidebarOpen, setEvidenceOpen, setActiveTab } =
+    useGitStore()
   const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding())
-  const [showConfetti, setShowConfetti] = useState(false)
-  const { toasts, addToast, removeToast } = useToasts()
+  const { toasts, removeToast } = useToasts()
 
   const handleOnboardingComplete = useCallback(() => {
     setShowOnboarding(false)
   }, [])
 
-  // Keyboard shortcuts
   useKeyboardShortcuts({
     onToggleHelp: () => {
-      const { helpPanelOpen } = useGitStore.getState()
-      useGitStore.getState().setHelpPanel(!helpPanelOpen)
+      const { helpPanelOpen, setHelpPanel } = useGitStore.getState()
+      setHelpPanel(!helpPanelOpen)
     },
     onToggleSidebar: () => {
-      useGitStore.getState().setSidebarOpen(!useGitStore.getState().sidebarOpen)
+      const { sidebarOpen: open, setSidebarOpen } = useGitStore.getState()
+      setSidebarOpen(!open)
     },
     onFocusTerminal: () => {
-      const input = document.querySelector<HTMLInputElement>(
-        'input[placeholder*="Type a git command"]'
-      )
-      input?.focus()
+      document.querySelector<HTMLInputElement>('input[placeholder*="Type a git command"]')?.focus()
     },
-    onClearTerminal: () => {
-      useGitStore.getState().clearTerminal()
-    },
+    onClearTerminal: () => useGitStore.getState().clearTerminal(),
   })
 
+  const courseVisible = sidebarOpen && !focusMode
+  const evidenceVisible = evidenceOpen && !focusMode
+
   return (
-    <div className='h-screen w-screen flex flex-col bg-background overflow-hidden'>
-      {/* Top Bar */}
+    <div className="git-learning-app">
       <AppHeader />
 
-      {/* Main Content */}
-      <div className='flex-1 min-h-0'>
-        <ResizablePanelGroup direction='horizontal'>
-          {/* Sidebar - Lessons */}
-          <AnimatePresence initial={false}>
-            {sidebarOpen && (
-              <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: 300, opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className='h-full overflow-hidden shrink-0'
-              >
-                <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-                  <GitLessonPanel />
-                </ResizablePanel>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      <div
+        className={`git-learning-shell ${courseVisible ? '' : 'is-sidebar-collapsed'} ${
+          evidenceVisible ? '' : 'is-evidence-collapsed'
+        } ${focusMode ? 'is-focus-mode' : ''}`}
+      >
+        {courseVisible && (
+          <aside className="curriculum-rail" aria-label="Git curriculum">
+            <GitLessonPanel onClose={() => setSidebarOpen(false)} />
+          </aside>
+        )}
 
-          {/* Center - Graph + Terminal */}
-          <ResizablePanel defaultSize={55}>
-            <ResizablePanelGroup direction='vertical'>
-              {/* Graph Area */}
-              <ResizablePanel defaultSize={60} minSize={30}>
-                <div className='h-full relative'>
-                  <GitGraph />
-                  {/* Floating legend */}
-                  {commitCount > 0 && <GraphLegend />}
-                  {/* Status indicator */}
-                  <StatusIndicator />
+        <main className="learning-workspace">
+          <LearningCompass />
+          <LearningMission />
+          <GitStateFlow />
+
+          <section
+            className="learning-graph-card"
+            id="repository-map"
+            data-workspace-section="graph"
+            aria-labelledby="learning-graph-title"
+          >
+            <header className="learning-card-header">
+              <div>
+                <p className="learning-kicker">Repository map</p>
+                <h2 id="learning-graph-title">See commits as snapshots and branches as pointers</h2>
+              </div>
+              <div className="learning-card-header__cue">
+                <Network />
+                <span>Select a commit to inspect its evidence.</span>
+              </div>
+            </header>
+            <div className="learning-graph-viewport">
+              <Suspense fallback={<PanelFallback label="the repository graph" />}>
+                <GitGraph />
+                <GraphLegend />
+                <StatusIndicator />
+              </Suspense>
+            </div>
+          </section>
+
+          <div className="practice-evidence-grid" id="learning-practice" data-workspace-section="practice">
+            <section className="learning-terminal-card" aria-labelledby="learning-terminal-title">
+              <header className="learning-card-header learning-card-header--compact">
+                <div>
+                  <p className="learning-kicker">Experiment console</p>
+                  <h2 id="learning-terminal-title">Run one intentional command</h2>
                 </div>
-              </ResizablePanel>
+                <TerminalSquare />
+              </header>
+              <div className="learning-terminal-viewport">
+                <GitTerminal />
+              </div>
+            </section>
 
-              <ResizableHandle withHandle />
+            <CommandInsightPanel />
+          </div>
+        </main>
 
-              {/* Terminal */}
-              <ResizablePanel
-                defaultSize={40}
-                minSize={20}
-                collapsible
+        {evidenceVisible && (
+          <aside className="evidence-drawer" id="repository-evidence" aria-label="Repository evidence">
+            <div className="evidence-drawer__intro">
+              <button
+                type="button"
+                className="evidence-drawer__close"
+                onClick={() => setEvidenceOpen(false)}
+                aria-label="Close evidence drawer"
               >
-                <div className='h-full p-2'>
-                  <GitTerminal />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
-
-          <ResizableHandle withHandle />
-
-          {/* Right Panel - Details */}
-          <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
+                <X aria-hidden="true" />
+              </button>
+              <p className="learning-kicker">Evidence drawer</p>
+              <h2>Inspect the object behind the picture</h2>
+              <p>Use these details after the graph has given you an orientation.</p>
+            </div>
             <Tabs
               value={activeTab}
-              onValueChange={(v) => setActiveTab(v as 'graph' | 'files' | 'detail')}
+              onValueChange={(value) => setActiveTab(value as 'graph' | 'files' | 'detail')}
+              className="evidence-tabs"
             >
-              <TabsList className='w-full justify-start rounded-none border-b border-border bg-card px-2 h-9'>
-                <TabsTrigger
-                  value='files'
-                  className='text-xs'
-                >
-                  <FileText className='w-3 h-3 mr-1' />
+              <TabsList className="evidence-tabs__list">
+                <TabsTrigger value="files">
+                  <FileText />
                   Files
                 </TabsTrigger>
-                <TabsTrigger
-                  value='detail'
-                  className='text-xs'
-                >
-                  <GitCommitHorizontal className='w-3 h-3 mr-1' />
+                <TabsTrigger value="detail">
+                  <GitCommitHorizontal />
                   Commit
                 </TabsTrigger>
-                <TabsTrigger
-                  value='graph'
-                  className='text-xs'
-                >
-                  <GitBranch className='w-3 h-3 mr-1' />
-                  Branches
+                <TabsTrigger value="graph">
+                  <GitBranch />
+                  Refs
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value='files' className='flex-1 min-h-0 m-0'>
-                <GitFileExplorer />
-              </TabsContent>
-              <TabsContent value='detail' className='flex-1 min-h-0 m-0'>
-                <GitCommitDetail />
-              </TabsContent>
-              <TabsContent value='graph' className='flex-1 min-h-0 m-0'>
-                <GitBranchList />
-              </TabsContent>
+              <Suspense fallback={<PanelFallback label="repository evidence" />}>
+                <TabsContent value="files" className="evidence-tabs__content">
+                  <GitFileExplorer />
+                </TabsContent>
+                <TabsContent value="detail" className="evidence-tabs__content">
+                  <GitCommitDetail />
+                </TabsContent>
+                <TabsContent value="graph" className="evidence-tabs__content">
+                  <GitBranchList />
+                </TabsContent>
+              </Suspense>
             </Tabs>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </aside>
+        )}
+
+        {(courseVisible || evidenceVisible) && (
+          <button
+            type="button"
+            className="mobile-panel-scrim"
+            onClick={() => {
+              setSidebarOpen(false)
+              setEvidenceOpen(false)
+            }}
+            aria-label="Close open workspace panel"
+          />
+        )}
       </div>
 
-      {/* Help Panel */}
-      <GitHelpPanel />
-
-      {/* Onboarding Overlay */}
-      <AnimatePresence>
-        {showOnboarding && (
-          <OnboardingOverlay onComplete={handleOnboardingComplete} />
-        )}
-      </AnimatePresence>
-
-      {/* Toast Notifications */}
+      <Suspense fallback={null}>
+        <GitHelpPanel />
+      </Suspense>
+      <AnimatePresence>{showOnboarding && <OnboardingOverlay onComplete={handleOnboardingComplete} />}</AnimatePresence>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-
-      {/* Confetti */}
-      <Confetti active={showConfetti} />
     </div>
   )
 }

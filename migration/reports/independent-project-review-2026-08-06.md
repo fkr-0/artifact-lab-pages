@@ -25,8 +25,8 @@ Current clean worktrees:
 | Hyperblast Shooter | `release/v0.8.0` | `5a1450f7c76a` | clean after generated-runtime restore |
 | V11 Peer DAW | detached at parent pin | `37783861b768` | published submodule aligned; local `main` preserved at `5a45fe665fb8` |
 | Inf Arrange | parent-owned | former child `dd0db5f204f7` | root-owned project; complete former history preserved as a verified bundle |
-| Bathroom Emergency Guide | `main` | `42eb11490941` | already clean; ownership conflict remains in parent |
-| Git Recipe Book | `main` | `de3b1bfb3b16` | already clean; ownership conflict remains in parent |
+| Bathroom Emergency Guide | `integration/v4-alt-full-synthesis` | `bee0f3e` plus active changes | canonical/alt restructuring is in progress; ownership conversion deferred until integration work is verified |
+| Git Recipe Book | parent-owned | former child `de3b1bfb3b16` | root-owned project; complete former history preserved as a verified bundle |
 | Bathroom Guide 4.3 candidate | `rescue/bathroom-guide-4.3-accessibility-20260806` | `e8c5dfae13cd` | clean rescue checkpoint |
 | Bathroom Guide alternate | `rescue/bathroom-guide-alt-20260806` | `e19763de3047` | clean rescue checkpoint |
 
@@ -344,30 +344,38 @@ Parent action:
 
 Preferred: convert the project to a real submodule after the parent records/removes its ordinary tracked copy. Alternative: remove the nested `.git` and keep it root-owned. Do not retain both owners.
 
-### Git Recipe Book child repository
+### Git Recipe Book ownership reconciliation
 
-State:
+The nested child repository had no canonical remote, while the parent already tracked the project directory. The project was therefore converted to one explicit root owner rather than creating an uncloneable submodule.
+
+Before conversion:
 
 ```text
 branch main
-HEAD de3b1bfb3b16
+HEAD de3b1bfb3b166e87b2c53d5b9682ab05ae56aae6
 worktree clean
+86 tracked files
 ```
 
-Problem:
-
-- same parent-tree plus nested-Git double ownership as the bathroom guide.
-
-Rescue bundle:
+Verification before adoption:
 
 ```text
-/tmp/artifacts-v12-rescue/2026-08-06/git-recipe-book.bundle
-SHA-256 61ff237bdd32786ca908744a3a24f9f279cf807a57ff6f57d70f5cd9339a9035
+10 Vitest files / 173 tests: pass
+Biome check: pass
+production build: pass
+Playwright Chromium: 19 tests pass
 ```
 
-Parent action:
+Recovery evidence:
 
-Choose one owner. Given its independent build/release lifecycle, a submodule or external pinned project is preferable to root ownership.
+```text
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/git-recipe-book-before-root-ownership.bundle
+SHA-256 61ff237bdd32786ca908744a3a24f9f279cf807a57ff6f57d70f5cd9339a9035
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/git-recipe-book.git/
+```
+
+The complete child history, tag `v1.1.0`, and ws-bridge review refs remain recoverable. The parent now owns the exact former child tree and the V12 manifest declares root ownership plus the test, lint, build, and browser verification commands.
 
 ### Bathroom Guide 4.3 candidate
 
@@ -547,7 +555,7 @@ Recommended parent commits, separately reviewed:
 3. Badger gitlink update only after rescue-to-release reconciliation.
 4. Ethic Brawl gitlink update only after rescue-to-1.7.x reconciliation and browser repair.
 5. Inf Arrange ownership reconciled as a root-owned parent project with recoverable former Git history.
-6. Convert Bathroom Emergency Guide and Git Recipe Book from double ownership to one declared ownership mode.
+6. Git Recipe Book ownership reconciled as root-owned; resolve the Bathroom Emergency Guide only after its active main/alt integration work is committed and verified.
 7. Remove recursive bathroom duplicates after snapshot verification.
 
 ## Recommended next execution order
@@ -557,7 +565,7 @@ Recommended parent commits, separately reviewed:
 3. Repair tagged-PDF generation for the canonical bathroom 4.3 branch.
 4. Port any unique CSS from the bathroom duplicate outer copy.
 5. Delete/archive the recursive duplicate bathroom trees.
-6. Convert Bathroom Emergency Guide and Git Recipe Book to single Git ownership.
+6. Resolve Bathroom Emergency Guide ownership after the active `integration/v4-alt-full-synthesis` workspace is clean and its two sibling histories are preserved.
 7. Normalize Hyperblast's parent gitlink after its recorded revision is reviewed.
 
 ## Definition of completion for this review phase
@@ -601,3 +609,20 @@ SHA-256 37d67d1d80a44f0d84db8d9dc469d115a34e839a32af4ce917c90d01f7633009
 ```
 
 The bundle was verified as complete and contains `refs/heads/main` plus `HEAD` at `dd0db5f204f7e2b09518d88967587703c9021647`.
+
+### Git Recipe Book
+
+Ownership changed from `parent-tree-plus-nested-git` to `root`. No remote was configured for the former child repository, so preserving it as a submodule would have produced a parent checkout that other clones could not initialize.
+
+The complete child object database was bundled before its `.git` directory was moved outside the checkout. The parent adopted all 86 child-tracked files and now owns the application directly. The manifest records version `1.1.0`, root ownership, the compile pipeline, and all verified checks.
+
+Recovery evidence:
+
+```text
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/git-recipe-book-before-root-ownership.bundle
+SHA-256 61ff237bdd32786ca908744a3a24f9f279cf807a57ff6f57d70f5cd9339a9035
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/git-recipe-book.git/
+```
+
+The bundle was verified as complete and preserves `main`, tag `v1.1.0`, HEAD `de3b1bfb3b166e87b2c53d5b9682ab05ae56aae6`, and the prior ws-bridge review refs.

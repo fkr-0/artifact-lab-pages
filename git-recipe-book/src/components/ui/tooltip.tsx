@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { cn } from '@/lib/utils'
+import * as React from 'react'
 
 interface TooltipProps {
   content: string
@@ -19,14 +19,14 @@ function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
   }
 
   return (
-    <div className='relative inline-flex' onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
+    <div className="relative inline-flex" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
       {children}
       {visible && (
         <div
           className={cn(
             'absolute z-50 px-3 py-1.5 text-xs text-white bg-foreground rounded-md shadow-md whitespace-nowrap pointer-events-none animate-in fade-in-0 zoom-in-95',
             positionClasses[side],
-            className
+            className,
           )}
         >
           {content}

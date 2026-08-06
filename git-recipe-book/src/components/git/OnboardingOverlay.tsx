@@ -1,127 +1,165 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, Check, ChevronRight, Eye, FlaskConical, GitBranch, Layers3 } from 'lucide-react'
+import { useState } from 'react'
 
 interface OnboardingOverlayProps {
-  onComplete: () => void;
+  onComplete: () => void
 }
 
 const STEPS = [
   {
-    title: 'Welcome! 👋',
-    description: 'This is your Git playground. Learn Git commands by typing them in the terminal and watching the graph update in real time.',
-    spotlight: 'center',
+    eyebrow: 'First principle',
+    title: 'Git is a set of connected states',
+    description:
+      'Files move from working tree to staging area to commit history. Branches and HEAD are pointers into that history; remotes are other repository copies.',
+    visual: 'layers',
   },
   {
-    title: 'Type Commands ⌨️',
-    description: 'Use the terminal below to type Git commands like `git init`, `git add .`, and `git commit -m "message"`. Press Tab to autocomplete!',
-    spotlight: 'terminal',
+    eyebrow: 'Learning loop',
+    title: 'Predict before every meaningful command',
+    description:
+      'Choose which layer you expect to change. A wrong prediction is useful evidence: it reveals exactly where your mental model needs repair.',
+    visual: 'loop',
   },
   {
-    title: 'Follow Lessons 📚',
-    description: 'The sidebar has step-by-step lessons. Start with "Git Basics" to learn the fundamentals, then progress to branching, merging, and more!',
-    spotlight: 'sidebar',
+    eyebrow: 'Proficiency',
+    title: 'Explain the graph, not just the command',
+    description:
+      'Run one operation, inspect the state delta and commit graph, then explain why it happened. Lessons advance only after that reflection.',
+    visual: 'mastery',
   },
-];
+] as const
 
-export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
-  const [step, setStep] = useState(0);
-  const [dontShowAgain, setDontShowAgain] = useState(false);
+function StepVisual({ kind }: { kind: (typeof STEPS)[number]['visual'] }) {
+  if (kind === 'layers') {
+    return (
+      <div className="onboarding-layers" aria-label="Working tree to staging to history to branches and remote">
+        {['Working', 'Staging', 'History', 'HEAD', 'Remote'].map((label, index) => (
+          <div key={label}>
+            <span>{label}</span>
+            {index < 4 && <ArrowRight aria-hidden="true" />}
+          </div>
+        ))}
+      </div>
+    )
+  }
 
-  const handleNext = () => {
-    if (step < STEPS.length - 1) {
-      setStep(step + 1);
-    } else {
-      if (dontShowAgain) {
-        localStorage.setItem('git-recipe-book-onboarding-done', 'permanent');
-      }
-      onComplete();
-    }
-  };
-
-  const handleSkip = () => {
-    if (dontShowAgain) {
-      localStorage.setItem('git-recipe-book-onboarding-done', 'permanent');
-    } else {
-      localStorage.setItem('git-recipe-book-onboarding-done', 'session');
-    }
-    onComplete();
-  };
-
-  const currentStep = STEPS[step];
+  if (kind === 'loop') {
+    return (
+      <div className="onboarding-loop">
+        <span>
+          <Layers3 />
+          Model
+        </span>
+        <ArrowRight />
+        <span>
+          <FlaskConical />
+          Predict
+        </span>
+        <ArrowRight />
+        <span>
+          <GitBranch />
+          Run
+        </span>
+        <ArrowRight />
+        <span>
+          <Eye />
+          Inspect
+        </span>
+      </div>
+    )
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-40 flex items-center justify-center"
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleSkip} />
+    <div className="onboarding-mastery">
+      <Check />
+      <div>
+        <strong>Command evidence secured</strong>
+        <p>You can explain what moved and why.</p>
+      </div>
+    </div>
+  )
+}
 
-      {/* Card */}
-      <motion.div
-        key={step}
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        transition={{ duration: 0.3 }}
-        className="relative z-50 bg-card border border-border rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
-      >
-        {/* Step indicator */}
-        <div className="flex items-center gap-1 mb-4">
-          {STEPS.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i <= step ? 'bg-primary w-8' : 'bg-muted w-4'
-              }`}
-            />
-          ))}
-        </div>
+export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
+  const [step, setStep] = useState(0)
+  const [dontShowAgain, setDontShowAgain] = useState(false)
+  const currentStep = STEPS[step]
 
-        {/* Content */}
-        <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-          {currentStep.description}
-        </p>
+  const finish = (mode: 'complete' | 'skip') => {
+    if (dontShowAgain) {
+      localStorage.setItem('git-recipe-book-onboarding-done', 'permanent')
+    } else if (mode === 'skip') {
+      localStorage.setItem('git-recipe-book-onboarding-done', 'session')
+    }
+    onComplete()
+  }
 
-        {/* Actions */}
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={dontShowAgain}
-              onChange={(e) => setDontShowAgain(e.target.checked)}
-              className="rounded"
-            />
-            Don&apos;t show again
-          </label>
+  const handleNext = () => {
+    if (step < STEPS.length - 1) setStep(step + 1)
+    else finish('complete')
+  }
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handleSkip}>
-              Skip
-            </Button>
-            <Button size="sm" onClick={handleNext}>
-              {step < STEPS.length - 1 ? (
-                <>
-                  Next
-                  <ChevronRight className="w-3 h-3 ml-1" />
-                </>
-              ) : (
-                'Get Started!'
-              )}
-            </Button>
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="onboarding-shell">
+      <button
+        type="button"
+        className="onboarding-backdrop"
+        onClick={() => finish('skip')}
+        aria-label="Close introduction"
+      />
+
+      <AnimatePresence mode="wait">
+        <motion.dialog
+          open
+          key={step}
+          initial={{ opacity: 0, y: 18, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -12, scale: 0.98 }}
+          transition={{ duration: 0.22 }}
+          className="onboarding-card"
+          aria-modal="true"
+          aria-labelledby="onboarding-title"
+          aria-describedby="onboarding-description"
+        >
+          <div className="onboarding-progress" aria-label={`Introduction step ${step + 1} of ${STEPS.length}`}>
+            {STEPS.map((item, index) => (
+              <span key={item.title} className={index <= step ? 'is-active' : ''} />
+            ))}
           </div>
-        </div>
-      </motion.div>
+
+          <p className="learning-kicker">{currentStep.eyebrow}</p>
+          <h2 id="onboarding-title">{currentStep.title}</h2>
+          <p id="onboarding-description">{currentStep.description}</p>
+          <StepVisual kind={currentStep.visual} />
+
+          <footer className="onboarding-actions">
+            <label>
+              <input
+                type="checkbox"
+                checked={dontShowAgain}
+                onChange={(event) => setDontShowAgain(event.target.checked)}
+              />
+              Do not show this introduction again
+            </label>
+            <div>
+              <Button variant="ghost" size="sm" onClick={() => finish('skip')}>
+                Skip
+              </Button>
+              <Button size="sm" onClick={handleNext}>
+                {step < STEPS.length - 1 ? 'Next principle' : 'Start learning'}
+                <ChevronRight />
+              </Button>
+            </div>
+          </footer>
+        </motion.dialog>
+      </AnimatePresence>
     </motion.div>
-  );
+  )
 }
 
 export function shouldShowOnboarding(): boolean {
-  const value = localStorage.getItem('git-recipe-book-onboarding-done');
-  return value !== 'session' && value !== 'permanent';
+  const value = localStorage.getItem('git-recipe-book-onboarding-done')
+  return value !== 'session' && value !== 'permanent'
 }

@@ -1,22 +1,13 @@
-import React from 'react';
-import { useGitStore } from '@/stores/git-store';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import {
-  GitCommitHorizontal,
-  User,
-  Clock,
-  GitBranch as BranchIcon,
-  Tag,
-  FileText,
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { useGitStore } from '@/stores/git-store'
+import { GitBranch as BranchIcon, Clock, FileText, GitCommitHorizontal, Tag, User } from 'lucide-react'
+import React from 'react'
 
 export default function GitCommitDetail() {
-  const { gitState, selectedCommitId, selectCommit } = useGitStore();
+  const { gitState, selectedCommitId, selectCommit } = useGitStore()
 
-  const commit = selectedCommitId
-    ? gitState.commits[selectedCommitId]
-    : null;
+  const commit = selectedCommitId ? gitState.commits[selectedCommitId] : null
 
   if (!commit) {
     return (
@@ -27,28 +18,24 @@ export default function GitCommitDetail() {
           <p className="text-xs mt-1">Click a node in the graph to inspect it</p>
         </div>
       </div>
-    );
+    )
   }
 
   // Find which branches point to this commit
   const pointingBranches = Object.entries(gitState.branches)
     .filter(([, b]) => b.commitId === commit.id)
-    .map(([name, b]) => ({ name, color: b.color }));
+    .map(([name, b]) => ({ name, color: b.color }))
 
   // Find tags pointing to this commit
   const pointingTags = Object.entries(gitState.tags)
     .filter(([, t]) => t.commitId === commit.id)
-    .map(([name]) => name);
+    .map(([name]) => name)
 
   // Find parent commits
-  const parents = commit.parentIds
-    .map((pid) => gitState.commits[pid])
-    .filter(Boolean);
+  const parents = commit.parentIds.map((pid) => gitState.commits[pid]).filter(Boolean)
 
   // Find children commits
-  const children = Object.values(gitState.commits).filter((c) =>
-    c.parentIds.includes(commit.id)
-  );
+  const children = Object.values(gitState.commits).filter((c) => c.parentIds.includes(commit.id))
 
   return (
     <ScrollArea className="h-full">
@@ -56,9 +43,7 @@ export default function GitCommitDetail() {
         {/* Commit Hash */}
         <div className="flex items-center gap-2">
           <GitCommitHorizontal className="w-4 h-4 text-primary" />
-          <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
-            {commit.id.slice(0, 12)}
-          </code>
+          <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{commit.id.slice(0, 12)}</code>
         </div>
 
         {/* Message */}
@@ -87,11 +72,7 @@ export default function GitCommitDetail() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {pointingBranches.map((b) => (
-                <Badge
-                  key={b.name}
-                  className="text-[10px] text-white"
-                  style={{ backgroundColor: b.color }}
-                >
+                <Badge key={b.name} className="text-[10px] text-white" style={{ backgroundColor: b.color }}>
                   {b.name}
                 </Badge>
               ))}
@@ -126,6 +107,7 @@ export default function GitCommitDetail() {
             <div className="text-xs font-medium">Parents</div>
             {parents.map((p) => (
               <button
+                type="button"
                 key={p.id}
                 onClick={() => selectCommit(p.id)}
                 className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -144,6 +126,7 @@ export default function GitCommitDetail() {
             <div className="text-xs font-medium">Children</div>
             {children.map((c) => (
               <button
+                type="button"
                 key={c.id}
                 onClick={() => selectCommit(c.id)}
                 className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -163,15 +146,17 @@ export default function GitCommitDetail() {
             Files in this commit ({Object.keys(commit.tree).length})
           </div>
           <div className="bg-muted/50 rounded-md p-2 space-y-1 max-h-48 overflow-y-auto">
-            {Object.keys(commit.tree).sort().map((fp) => (
-              <div key={fp} className="flex items-center gap-1.5 text-xs">
-                <FileText className="w-3 h-3 text-blue-500 shrink-0" />
-                <span className="truncate">{fp}</span>
-              </div>
-            ))}
+            {Object.keys(commit.tree)
+              .sort()
+              .map((fp) => (
+                <div key={fp} className="flex items-center gap-1.5 text-xs">
+                  <FileText className="w-3 h-3 text-blue-500 shrink-0" />
+                  <span className="truncate">{fp}</span>
+                </div>
+              ))}
           </div>
         </div>
       </div>
     </ScrollArea>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
+import * as React from 'react'
 
 interface AccordionContextValue {
   openItems: Set<string>
@@ -19,10 +19,15 @@ interface AccordionProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultValue?: string
 }
 
-function Accordion({ type = 'single', collapsible = true, defaultValue, className, children, ...props }: AccordionProps) {
-  const [openItems, setOpenItems] = React.useState<Set<string>>(
-    new Set(defaultValue ? [defaultValue] : [])
-  )
+function Accordion({
+  type = 'single',
+  collapsible = true,
+  defaultValue,
+  className,
+  children,
+  ...props
+}: AccordionProps) {
+  const [openItems, setOpenItems] = React.useState<Set<string>>(new Set(defaultValue ? [defaultValue] : []))
 
   const toggle = React.useCallback(
     (value: string) => {
@@ -41,7 +46,7 @@ function Accordion({ type = 'single', collapsible = true, defaultValue, classNam
         return next
       })
     },
-    [type, collapsible]
+    [type, collapsible],
   )
 
   return (
@@ -78,7 +83,7 @@ function AccordionTrigger({ className, children, ...props }: React.ButtonHTMLAtt
     <button
       className={cn(
         'flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left w-full cursor-pointer',
-        className
+        className,
       )}
       onClick={() => toggle(value)}
       aria-expanded={isOpen}
@@ -88,7 +93,7 @@ function AccordionTrigger({ className, children, ...props }: React.ButtonHTMLAtt
       <ChevronDown
         className={cn(
           'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
-          isOpen && 'rotate-180'
+          isOpen && 'rotate-180',
         )}
       />
     </button>
@@ -108,7 +113,7 @@ function AccordionContent({ className, children, ...props }: React.HTMLAttribute
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
-          className='overflow-hidden'
+          className="overflow-hidden"
         >
           <div className={cn('pb-4 pt-0 text-sm', className)} {...props}>
             {children}

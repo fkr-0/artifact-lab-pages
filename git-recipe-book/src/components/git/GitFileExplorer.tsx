@@ -1,65 +1,54 @@
-import React, { useState } from 'react';
-import { useGitStore } from '@/stores/git-store';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import {
-  FileText,
-  Folder,
-  ChevronRight,
-  ChevronDown,
-  Plus,
-  Edit3,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Textarea } from '@/components/ui/textarea'
+import { useGitStore } from '@/stores/git-store'
+import { ChevronDown, ChevronRight, Edit3, FileText, Folder, Plus } from 'lucide-react'
+import React, { useState } from 'react'
 
 interface FileNode {
-  name: string;
-  path: string;
-  content?: string;
-  children?: FileNode[];
-  isFolder: boolean;
+  name: string
+  path: string
+  content?: string
+  children?: FileNode[]
+  isFolder: boolean
 }
 
 function buildFileTree(files: Record<string, string>): FileNode[] {
-  const root: FileNode[] = [];
+  const root: FileNode[] = []
 
-  const sortedPaths = Object.keys(files).sort();
+  const sortedPaths = Object.keys(files).sort()
   for (const filePath of sortedPaths) {
-    const parts = filePath.split('/');
-    let currentLevel = root;
+    const parts = filePath.split('/')
+    let currentLevel = root
 
     for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      const isFile = i === parts.length - 1;
-      const existingNode = currentLevel.find((n) => n.name === part);
+      const part = parts[i]
+      const isFile = i === parts.length - 1
+      const existingNode = currentLevel.find((n) => n.name === part)
 
       if (existingNode) {
-        currentLevel = existingNode.children!;
+        existingNode.children ??= []
+        currentLevel = existingNode.children
       } else {
+        const children: FileNode[] = []
         const newNode: FileNode = {
           name: part,
           path: parts.slice(0, i + 1).join('/'),
           isFolder: !isFile,
-          ...(isFile ? { content: files[filePath] } : { children: [] }),
-        };
-        currentLevel.push(newNode);
+          ...(isFile ? { content: files[filePath] } : { children }),
+        }
+        currentLevel.push(newNode)
         if (!isFile) {
-          currentLevel = newNode.children!;
+          currentLevel = children
         }
       }
     }
   }
 
-  return root;
+  return root
 }
 
 function FileTreeNode({
@@ -67,18 +56,19 @@ function FileTreeNode({
   depth,
   onEdit,
 }: {
-  node: FileNode;
-  depth: number;
-  onEdit: (path: string, content: string) => void;
+  node: FileNode
+  depth: number
+  onEdit: (path: string, content: string) => void
 }) {
-  const [expanded, setExpanded] = useState(depth < 1);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(depth < 1)
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [previewContent, setPreviewContent] = useState<string | null>(null)
 
   if (node.isFolder) {
     return (
       <div>
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className="flex items-center gap-1.5 w-full px-2 py-1 hover:bg-accent/50 rounded text-sm transition-colors"
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -93,33 +83,34 @@ function FileTreeNode({
         </button>
         {expanded &&
           node.children?.map((child) => (
-            <FileTreeNode
-              key={child.path}
-              node={child}
-              depth={depth + 1}
-              onEdit={onEdit}
-            />
+            <FileTreeNode key={child.path} node={child} depth={depth + 1} onEdit={onEdit} />
           ))}
       </div>
-    );
+    )
   }
 
   return (
     <div
-      className="group flex items-center justify-between px-2 py-1 hover:bg-accent/50 rounded text-sm cursor-pointer transition-colors"
+      className="group flex items-center justify-between px-2 py-1 hover:bg-accent/50 rounded text-sm transition-colors"
       style={{ paddingLeft: `${depth * 12 + 20}px` }}
-      onClick={() => setSelectedFile(node.path)}
     >
-      <div className="flex items-center gap-1.5 min-w-0">
+      <button
+        type="button"
+        className="flex min-w-0 flex-1 items-center gap-1.5 text-left"
+        onClick={() => setSelectedFile(node.path)}
+        aria-label={`Preview ${node.path}`}
+      >
         <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
         <span className="truncate">{node.name}</span>
-      </div>
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      </button>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
         <button
+          type="button"
           className="p-0.5 hover:bg-accent rounded"
+          aria-label={`Edit ${node.path}`}
           onClick={(e) => {
-            e.stopPropagation();
-            onEdit(node.path, node.content || '');
+            e.stopPropagation()
+            onEdit(node.path, node.content || '')
           }}
         >
           <Edit3 className="w-3 h-3 text-muted-foreground" />
@@ -127,10 +118,7 @@ function FileTreeNode({
       </div>
 
       {/* File preview dialog */}
-      <Dialog
-        open={selectedFile === node.path}
-        onOpenChange={(open) => !open && setSelectedFile(null)}
-      >
+      <Dialog open={selectedFile === node.path} onOpenChange={(open) => !open && setSelectedFile(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{node.name}</DialogTitle>
@@ -141,7 +129,7 @@ function FileTreeNode({
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
 function FileEditor({
@@ -149,11 +137,11 @@ function FileEditor({
   initialContent,
   onSave,
 }: {
-  path: string;
-  initialContent: string;
-  onSave: (path: string, content: string) => void;
+  path: string
+  initialContent: string
+  onSave: (path: string, content: string) => void
 }) {
-  const [content, setContent] = useState(initialContent);
+  const [content, setContent] = useState(initialContent)
 
   return (
     <div className="space-y-3">
@@ -163,46 +151,42 @@ function FileEditor({
         className="font-mono text-xs min-h-48"
         placeholder="File content..."
       />
-      <Button
-        size="sm"
-        onClick={() => onSave(path, content)}
-        className="w-full"
-      >
+      <Button size="sm" onClick={() => onSave(path, content)} className="w-full">
         Save Changes
       </Button>
     </div>
-  );
+  )
 }
 
 export default function GitFileExplorer() {
-  const { gitState, executeCommand } = useGitStore();
-  const [newFileOpen, setNewFileOpen] = useState(false);
-  const [newFilePath, setNewFilePath] = useState('');
-  const [newFileContent, setNewFileContent] = useState('');
-  const [editFile, setEditFile] = useState<{ path: string; content: string } | null>(null);
+  const { gitState, executeCommand } = useGitStore()
+  const [newFileOpen, setNewFileOpen] = useState(false)
+  const [newFilePath, setNewFilePath] = useState('')
+  const [newFileContent, setNewFileContent] = useState('')
+  const [editFile, setEditFile] = useState<{ path: string; content: string } | null>(null)
 
-  const tree = buildFileTree(gitState.working);
-  const fileCount = Object.keys(gitState.working).length;
+  const tree = buildFileTree(gitState.working)
+  const fileCount = Object.keys(gitState.working).length
 
   const handleEdit = (path: string, content: string) => {
-    setEditFile({ path, content });
-  };
+    setEditFile({ path, content })
+  }
 
   const handleSaveEdit = () => {
     if (editFile) {
-      executeCommand(`edit ${editFile.path} ${editFile.content}`);
-      setEditFile(null);
+      executeCommand(`edit ${editFile.path} ${editFile.content}`)
+      setEditFile(null)
     }
-  };
+  }
 
   const handleNewFile = () => {
     if (newFilePath) {
-      executeCommand(`edit ${newFilePath} ${newFileContent}`);
-      setNewFileOpen(false);
-      setNewFilePath('');
-      setNewFileContent('');
+      executeCommand(`edit ${newFilePath} ${newFileContent}`)
+      setNewFileOpen(false)
+      setNewFilePath('')
+      setNewFileContent('')
     }
-  };
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -255,14 +239,7 @@ export default function GitFileExplorer() {
               No files yet. Run git init to start!
             </div>
           ) : (
-            tree.map((node) => (
-              <FileTreeNode
-                key={node.path}
-                node={node}
-                depth={0}
-                onEdit={handleEdit}
-              />
-            ))
+            tree.map((node) => <FileTreeNode key={node.path} node={node} depth={0} onEdit={handleEdit} />)
           )}
         </div>
       </ScrollArea>
@@ -281,5 +258,5 @@ export default function GitFileExplorer() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }

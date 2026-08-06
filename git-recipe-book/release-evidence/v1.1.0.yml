@@ -1,0 +1,62 @@
+schema_version: 1
+release:
+  unit: git-recipe-book
+  version_before: 1.0.0
+  version_after: 1.1.0
+  base_revision: 99d9f76aa0e5b83678fa7de71ffa6aeef6dd4c75
+  verified_revision: 4d4c27a2a6b680267460a2e58484e41b893ae9a1
+  release_revision: v1.1.0
+  generated_at: 2026-07-31T17:03:06+02:00
+  timezone: Europe/Berlin
+metadata:
+  changelog: CHANGELOG.md
+  package_manifest: package.json
+  bridge_manifest: bridge.yml
+  release_evidence: release-evidence/v1.1.0.yml
+verification:
+  - command: pnpm lint
+    status: passed
+    evidence: Biome checked 65 source files with zero diagnostics.
+  - command: pnpm test -- --run
+    status: passed
+    evidence: 172 tests passed across 10 Vitest files.
+  - command: pnpm build
+    status: passed
+    evidence: TypeScript project build and Vite production build completed; 2250 modules transformed.
+  - command: pnpm playwright test --project=chromium
+    status: passed
+    evidence: 18 Chromium journeys passed, including mastery progression and 390 px overflow containment.
+toolchain:
+  node: v24.18.0
+  pnpm: 11.3.0
+artifacts:
+  generated_directory: dist
+  tracked_in_git: false
+  files:
+    - path: dist/index.html
+      bytes: 1036
+      sha256: 580dce9541d405e6b4107e567f309a0163235ee10d11c3580d0ac29ab941e55a
+    - path: dist/assets/index-BLrpYpfT.css
+      bytes: 80412
+      sha256: c9623194ae7c4ae6bd52cc60c12cebeb03784bc4eddb0d54cf954683dd28d560
+    - path: dist/assets/index-CwQQs7IM.js
+      bytes: 128154
+      sha256: 78f521bd470d5bb3a39af9b62e025c711a705072354ae4ce1258893e1c2a079d
+    - path: dist/assets/learning-content-Cr-Q1BIL.js
+      bytes: 77801
+      sha256: 7b4320b7e881633a9abddc00d656a6d763bcc543ea0dec83df8fd87276c78bed
+limitations:
+  - The primary learning backend is a deterministic browser-side Git simulator rather than native Git.
+  - Remote repositories are modeled locally and do not contact a network service.
+  - Browser learning progress is local to one browser profile.
+non_blocking_warnings:
+  - Playwright workers reported that NO_COLOR was ignored because FORCE_COLOR was set.
+tag:
+  proposed: v1.1.0
+  kind: annotated
+  created_at_evidence_generation: false
+  expected_target: the commit containing this evidence file
+publication:
+  push: not_requested
+  package_publish: not_requested
+  deployment: not_requested

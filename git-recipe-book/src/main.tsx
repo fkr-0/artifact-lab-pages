@@ -1,13 +1,19 @@
-import React from 'react'
+import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import { ThemeProvider } from './hooks/use-theme'
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+const rootElement = document.getElementById('root')
+
+if (!rootElement) {
+  throw new Error('Git Recipe Book could not find its #root mount element.')
+}
+
+ReactDOM.createRoot(rootElement).render(
+  <StrictMode>
     <ThemeProvider>
       <App />
     </ThemeProvider>
-  </React.StrictMode>,
+  </StrictMode>,
 )
