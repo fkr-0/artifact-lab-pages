@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "ethic-brawl",
+  "title": "Ethic Brawl",
+  "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
+  "kind": "application",
+  "status": "provisional",
+  "required": true,
+  "tags": ["game", "project", "submodule"],
+  "source": {
+    "kind": "project",
+    "path": "ethic-brawl",
+    "git": {
+      "mode": "submodule",
+      "repository": "https://github.com/fkr-0/ethic-brawl.git",
+      "revision": "2f0a133d86a355b933f1e0f0be41b73aa219e968"
+    }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "ethic-brawl",
+    "command": ["pnpm", "run", "build"],
+    "output": "dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "dist",
+    "offline": true
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  }
+}

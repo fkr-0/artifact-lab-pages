@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "badger-sprawl-runner",
+  "title": "Badger Sprawl Runner",
+  "description": "Published independent submodule pinned to the parent-owned reachable revision; verified rescue and release worktrees remain local until reconciled and published.",
+  "kind": "application",
+  "status": "provisional",
+  "required": true,
+  "tags": ["game", "project", "submodule"],
+  "source": {
+    "kind": "project",
+    "path": "badger-sprawl-runner",
+    "git": {
+      "mode": "submodule",
+      "repository": "https://github.com/fkr-0/badger-sprawl-runner.git",
+      "revision": "fe1e96b0b11c2cd82b7be569a60a701d88355f82"
+    }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "badger-sprawl-runner",
+    "command": ["pnpm", "run", "build"],
+    "output": "apps/runner/dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "apps/runner/dist",
+    "offline": true
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  }
+}

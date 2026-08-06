@@ -19,9 +19,9 @@ Current clean worktrees:
 
 | Project | Branch | HEAD | Result |
 |---|---|---:|---|
-| Badger Sprawl Runner | `rescue/badger-mixed-worktree-20260805` | `5a7b946c9457` | clean rescue checkpoint |
+| Badger Sprawl Runner | detached at parent pin | `fe1e96b0b11c` | published submodule aligned; local rescue retained at `5a7b946c9457` |
 | Badger Pixi migration worktree | `worktree-pixi-migration` | `45072948b0eb` | clean verified prototype |
-| Ethic Brawl | `rescue/ethic-brawl-mixed-worktree-20260805` | `3e4d7ed94e20` | clean rescue checkpoint |
+| Ethic Brawl | detached at parent pin | `2f0a133d86a3` | published submodule aligned; local rescue retained at `3e4d7ed94e20` |
 | Hyperblast Shooter | detached at parent pin | `df79a2fc9dd4` | published submodule aligned; local `release/v0.8.0` preserved at `5a1450f7c76a` |
 | V11 Peer DAW | detached at parent pin | `37783861b768` | published submodule aligned; local `main` preserved at `5a45fe665fb8` |
 | Inf Arrange | parent-owned | former child `dd0db5f204f7` | root-owned project; complete former history preserved as a verified bundle |
@@ -206,9 +206,10 @@ SHA-256 232f491c10b15740e96ea083d85b63b8b0ddef1f52df014911337290b52c66ed
 Parent action:
 
 - do not promote `3e4d7ed` as a release gitlink;
+- the primary checkout is realigned to published parent pin `2f0a133d86a355b933f1e0f0be41b73aa219e968`;
 - compare/cherry-pick coherent portions into the existing 1.7.1/1.7.2 worktrees;
 - fix sprite startup and renderer performance E2E before selecting a canonical release branch;
-- after reconciliation, retire the rescue branch or retain it as immutable recovery evidence.
+- after reconciliation, publish a canonical branch before changing the parent gitlink.
 
 ### Badger Sprawl Runner
 
@@ -270,9 +271,10 @@ rescue/badger-mixed-worktree-20260805
 Parent action:
 
 - do not promote `5a7b946` directly as a release gitlink;
-- reconcile it against `release/v1.3.0` by subsystem or merge review;
+- the primary checkout is realigned to published parent pin `fe1e96b0b11c2cd82b7be569a60a701d88355f82`;
+- reconcile the rescue branch against `release/v1.3.0` by subsystem or merge review;
 - move ignored evidence/raw image corpora to an artifact/object store with manifests and hashes;
-- retain only tested prompt contracts, runtime sprites, and curated release evidence in Git.
+- publish a canonical release branch before changing the parent gitlink.
 
 ### Badger Pixi migration worktree
 
@@ -559,8 +561,8 @@ The duplicate trees intentionally remain dirty until this destructive deduplicat
 Current parent submodule status:
 
 ```text
-+5a7b946c94574b6764eef4850feb7bcf339ad8d7 badger-sprawl-runner
-+3e4d7ed94e20e23b983410bcbc1619aae73a48b3 ethic-brawl
+ fe1e96b0b11c2cd82b7be569a60a701d88355f82 badger-sprawl-runner
+ 2f0a133d86a355b933f1e0f0be41b73aa219e968 ethic-brawl
  df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204 hyperblast-shooter
  37783861b7681852b0605a891a2b831c4cde82de v11-peer-daw
 ```
@@ -571,8 +573,8 @@ Recommended parent commits, separately reviewed:
 
 1. V11 Peer DAW ownership reconciled: keep the published parent pin until the verified child commits are published and deliberately promoted.
 2. Hyperblast ownership normalized: retain the published parent pin until the verified `v0.8.0` branch and tag are published.
-3. Badger gitlink update only after rescue-to-release reconciliation.
-4. Ethic Brawl gitlink update only after rescue-to-1.7.x reconciliation and browser repair.
+3. Badger ownership normalized at its published pin; promote only after rescue-to-release reconciliation and publication.
+4. Ethic Brawl ownership normalized at its published pin; promote only after 1.7.x reconciliation, browser repair, and publication.
 5. Inf Arrange ownership reconciled as a root-owned parent project with recoverable former Git history.
 6. Git Recipe Book and Bathroom Emergency Guide ownership reconciled as root-owned, with former child histories preserved as complete bundles.
 7. Previously reported recursive bathroom duplicate paths are absent from the active checkout; retain their stored snapshots as recovery evidence.
@@ -685,3 +687,44 @@ git -C hyperblast-shooter switch release/v0.8.0
 ```
 
 Do not update the parent gitlink until `5a1450f7c76af6a725e384402ba7e5bd9595c296` is reachable from the canonical remote.
+
+### Badger Sprawl Runner and Ethic Brawl
+
+Both projects remain `submodule` owned. Their parent pins are the respective published `origin/main` revisions:
+
+```text
+badger-sprawl-runner  fe1e96b0b11c2cd82b7be569a60a701d88355f82
+ethic-brawl           2f0a133d86a355b933f1e0f0be41b73aa219e968
+```
+
+The verified rescue checkpoints are descendants of those pins but are absent from the canonical remotes:
+
+```text
+badger rescue/badger-mixed-worktree-20260805  5a7b946c94574b6764eef4850feb7bcf339ad8d7
+ethic  rescue/ethic-brawl-mixed-worktree-20260805  3e4d7ed94e20e23b983410bcbc1619aae73a48b3
+```
+
+The primary checkouts were realigned to the published pins without deleting rescue branches or affecting their dedicated release/feature worktrees. Because the ancestor checkouts expose the preserved rescue corpus as untracked, checkout-local `.git/info/exclude` blocks were added. These blocks are not committed project policy: they only suppress files already represented by a retained rescue branch or intentionally ignored corpus while the primary checkout sits on the older published pin.
+
+Local metadata evidence:
+
+```text
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/badger-sprawl-runner-source-state.txt
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/badger-sprawl-runner-refs.txt
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/badger-sprawl-runner-info-exclude.before
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/badger-sprawl-runner-info-exclude.after
+
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/ethic-brawl-source-state.txt
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/ethic-brawl-refs.txt
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/ethic-brawl-info-exclude.before
+/tmp/artifacts-v12-rescue/2026-08-06/ownership-reconcile-2/ethic-brawl-info-exclude.after
+```
+
+Resume the rescue branches with:
+
+```sh
+git -C badger-sprawl-runner switch rescue/badger-mixed-worktree-20260805
+git -C ethic-brawl switch rescue/ethic-brawl-mixed-worktree-20260805
+```
+
+Do not promote either rescue checkpoint directly. Reconcile against the existing release worktrees, repair Ethic's browser gate, publish the selected canonical commits, and only then update the parent gitlinks.
