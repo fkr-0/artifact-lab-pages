@@ -19,7 +19,7 @@ Current clean worktrees:
 
 | Project | Branch | HEAD | Result |
 |---|---|---:|---|
-| Badger Sprawl Runner | detached at parent pin | `fe1e96b0b11c` | published submodule aligned; local rescue retained at `5a7b946c9457` |
+| Badger Sprawl Runner | detached at parent pin | `fe1e96b0b11c` | published submodule aligned; verified local 1.4.0 integration candidate at `84241f82df85` |
 | Badger Pixi migration worktree | `worktree-pixi-migration` | `45072948b0eb` | clean verified prototype |
 | Ethic Brawl | detached at parent pin | `2f0a133d86a3` | published submodule aligned; local rescue retained at `3e4d7ed94e20` |
 | Hyperblast Shooter | detached at parent pin | `df79a2fc9dd4` | published submodule aligned; local `release/v0.8.0` preserved at `5a1450f7c76a` |
@@ -252,7 +252,7 @@ Bug fixed during review:
 - package-filtered Vitest therefore searched `apps/runner/apps/runner/src`;
 - root resolution now derives from `import.meta.url`, making the test independent of invocation directory.
 
-Verification:
+Initial rescue verification:
 
 ```text
 workspace tests: pass
@@ -268,13 +268,51 @@ rescue/badger-mixed-worktree-20260805
 5a7b946 checkpoint: preserve verified post-1.3 workspace
 ```
 
+Release reconciliation completed on 2026-08-07. `release/v1.3.0` (`7496a140`) and the rescue checkpoint are sibling commits from the v1.2.0 base, with only 11 overlapping paths. The rescue work implements the feature scope that the 1.3 release train reserved for the next minor and already requires Arcade Runtime 1.12.0, so it was integrated as a 1.4.0 candidate rather than misclassified as a 1.3 patch.
+
+Verified integration commit:
+
+```text
+integration/post-1.3-rescue-20260806
+84241f82df85dc372ef90c142d39e08e5ff922c6
+parents: 7496a140b24829c06b6eda25cd81b97ed64738a7 5a7b946c94574b6764eef4850feb7bcf339ad8d7
+version: 1.4.0
+Arcade Runtime: 1.12.0
+```
+
+Integration verification:
+
+```text
+release-plan contract: pass (1.4.1 patch / 1.5.0 next minor)
+workspace/package tests: pass
+runner: 181 files / 674 tests pass
+typecheck: pass
+production build: pass
+runner smoke: pass
+artifact browser smoke: pass
+Biome lint: pass
+focused repaired browser contracts: 13/13 Chromium pass
+cross-browser story-routing contracts: 6/6 pass
+full release browser gate: 245 pass, 1 skip, 0 fail across Chromium and Firefox
+worktree after commit: clean
+```
+
+The integration also repaired stale E2E assumptions introduced by the persistent-city and six-option title flow: renderer tests now use semantic `routeMode('endless')`, story tests route through the active SubwayMap district, and visual parity waits for a grounded deterministic capture point. An archival `comfy_badger_run_grid` sprite referenced by the manifest was added to source/public/build trees so a fresh clone no longer depends on an untracked local PNG.
+
+Recovery bundle:
+
+```text
+/tmp/artifacts-v12-rescue/2026-08-07/badger-reconcile/badger-1.4.0-integration.bundle
+SHA-256 932c8e3da44596b248e5e5d6d13f8b1f4e9133145b1e8d1d90e0fefa0f780981
+```
+
 Parent action:
 
-- do not promote `5a7b946` directly as a release gitlink;
-- the primary checkout is realigned to published parent pin `fe1e96b0b11c2cd82b7be569a60a701d88355f82`;
-- reconcile the rescue branch against `release/v1.3.0` by subsystem or merge review;
-- move ignored evidence/raw image corpora to an artifact/object store with manifests and hashes;
-- publish a canonical release branch before changing the parent gitlink.
+- do not promote the old rescue checkpoint directly;
+- keep the primary checkout and parent gitlink at published `fe1e96b0b11c2cd82b7be569a60a701d88355f82` for now;
+- publish `84241f82df85dc372ef90c142d39e08e5ff922c6` on the selected canonical 1.4 release branch/tag;
+- only then update the parent gitlink to the remotely reachable candidate;
+- move the remaining ignored evidence/raw-image corpora to an artifact/object store with manifests and hashes.
 
 ### Badger Pixi migration worktree
 
@@ -573,7 +611,7 @@ Recommended parent commits, separately reviewed:
 
 1. V11 Peer DAW ownership reconciled: keep the published parent pin until the verified child commits are published and deliberately promoted.
 2. Hyperblast ownership normalized: retain the published parent pin until the verified `v0.8.0` branch and tag are published.
-3. Badger ownership normalized at its published pin; promote only after rescue-to-release reconciliation and publication.
+3. Badger rescue-to-release reconciliation is complete at verified local 1.4.0 candidate `84241f82`; promote only after that commit is published.
 4. Ethic Brawl ownership normalized at its published pin; promote only after 1.7.x reconciliation, browser repair, and publication.
 5. Inf Arrange ownership reconciled as a root-owned parent project with recoverable former Git history.
 6. Git Recipe Book and Bathroom Emergency Guide ownership reconciled as root-owned, with former child histories preserved as complete bundles.
@@ -581,8 +619,8 @@ Recommended parent commits, separately reviewed:
 
 ## Recommended next execution order
 
-1. Compare Badger rescue branch against `release/v1.3.0` by subsystem.
-2. Compare Ethic rescue branch against 1.7.1/1.7.2 worktrees and repair browser startup.
+1. Compare Ethic rescue branch against 1.7.1/1.7.2 worktrees and repair browser startup.
+2. Publish Badger 1.4.0 candidate `84241f82`, then deliberately promote its parent gitlink.
 3. Review Bathroom Emergency Guide `4.14.0-alt.2` for promotion from experimental integration version to a normal release version/tag.
 4. Publish the verified Hyperblast `v0.8.0` branch/tag and V11 Peer DAW child commits before deliberately promoting either parent gitlink.
 
@@ -697,11 +735,13 @@ badger-sprawl-runner  fe1e96b0b11c2cd82b7be569a60a701d88355f82
 ethic-brawl           2f0a133d86a355b933f1e0f0be41b73aa219e968
 ```
 
-The verified rescue checkpoints are descendants of those pins but are absent from the canonical remotes:
+The Ethic rescue checkpoint and Badger's former rescue checkpoint are absent from the canonical remotes. Badger has since been reconciled into a separate verified integration candidate:
 
 ```text
-badger rescue/badger-mixed-worktree-20260805  5a7b946c94574b6764eef4850feb7bcf339ad8d7
-ethic  rescue/ethic-brawl-mixed-worktree-20260805  3e4d7ed94e20e23b983410bcbc1619aae73a48b3
+badger integration/post-1.3-rescue-20260806  84241f82df85dc372ef90c142d39e08e5ff922c6
+  merges release/v1.3.0 7496a140 + rescue 5a7b946
+  verified as version 1.4.0 / Arcade Runtime 1.12.0
+ethic rescue/ethic-brawl-mixed-worktree-20260805  3e4d7ed94e20e23b983410bcbc1619aae73a48b3
 ```
 
 The primary checkouts were realigned to the published pins without deleting rescue branches or affecting their dedicated release/feature worktrees. Because the ancestor checkouts expose the preserved rescue corpus as untracked, checkout-local `.git/info/exclude` blocks were added. These blocks are not committed project policy: they only suppress files already represented by a retained rescue branch or intentionally ignored corpus while the primary checkout sits on the older published pin.
@@ -727,4 +767,4 @@ git -C badger-sprawl-runner switch rescue/badger-mixed-worktree-20260805
 git -C ethic-brawl switch rescue/ethic-brawl-mixed-worktree-20260805
 ```
 
-Do not promote either rescue checkpoint directly. Reconcile against the existing release worktrees, repair Ethic's browser gate, publish the selected canonical commits, and only then update the parent gitlinks.
+Do not promote either old rescue checkpoint directly. Badger reconciliation is complete, but `84241f82` is still unpublished and therefore must not yet replace the parent pin. Ethic still requires 1.7.x reconciliation and browser repair before selecting and publishing its canonical commit.

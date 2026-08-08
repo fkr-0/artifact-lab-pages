@@ -2,7 +2,7 @@
   "schemaVersion": "artifacts.fkr.dev/v1",
   "id": "badger-sprawl-runner",
   "title": "Badger Sprawl Runner",
-  "description": "Published independent submodule pinned to the parent-owned reachable revision; verified rescue and release worktrees remain local until reconciled and published.",
+  "description": "Published independent submodule pinned to the parent-owned reachable revision; a fully verified local 1.4.0 integration candidate exists but remains outside the gitlink until published.",
   "kind": "application",
   "status": "provisional",
   "required": true,
