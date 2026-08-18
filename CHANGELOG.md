@@ -6,6 +6,8 @@ All notable changes to Artifact Lab are documented here. The repository follows
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-08-18
+
 ### Added
 
 - Deployed Nakamoto's Disciples `0.2.0-alpha.10` as a checksummed,
@@ -15,6 +17,11 @@ All notable changes to Artifact Lab are documented here. The repository follows
 
 ### Changed
 
+- Updated Badger Sprawl Runner to recovered `1.4.0` payload `f4ca009` with
+  repository revision `f19ce1b`, including the expanded Moss
+  carry/stealth/stim sprite atlas, regenerated 71-target sprite corpus, corrected
+  Chrome Arcology and Mirror Palace acceptance flows, and stabilized renderer
+  hardware benchmarking across Chromium and Firefox.
 - Updated the App Hub catalog entry for Nakamoto's Disciples to describe its
   hardened sequential mastery model and learner-visible repair behavior.
 - Replaced the previous vendored build with the tagged `v0.2.0-alpha.10` source
@@ -236,7 +243,8 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
-[Unreleased]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.0...v1.4.1

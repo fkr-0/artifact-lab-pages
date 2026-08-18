@@ -37,11 +37,12 @@ test('root release gate stays comprehensive and excludes independent release uni
   assert.match(bridge, /^  release:check:/m);
 });
 
-test('v1.5.1 release metadata is consistent and remains non-publishing', () => {
-  assert.equal(pkg.version, '1.5.1');
+test('v1.6.0 release metadata is prepared while prior release evidence remains non-publishing', () => {
+  assert.equal(pkg.version, '1.6.0');
   assert.match(changelog, /^## \[Unreleased\]/m);
-  assert.match(changelog, /^## \[1\.5\.1\] - 2026-07-24$/m);
-  assert.match(changelog, /^\[Unreleased\]: .*v1\.5\.1\.\.\.HEAD$/m);
+  assert.match(changelog, /^## \[1\.6\.0\] - 2026-08-18$/m);
+  assert.match(changelog, /^\[Unreleased\]: .*v1\.6\.0\.\.\.HEAD$/m);
+  assert.match(changelog, /^\[1\.6\.0\]: .*v1\.5\.1\.\.\.v1\.6\.0$/m);
   assert.match(changelog, /^\[1\.5\.1\]: .*v1\.5\.0\.\.\.v1\.5\.1$/m);
   assert.match(evidence, /candidate: 1.5.1/);
   assert.match(evidence, /releaseReady: true/);
