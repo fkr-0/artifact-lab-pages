@@ -35,6 +35,54 @@
   },
   "items": [
     {
+      "id": "badger-sprawl-runner",
+      "title": "Badger Sprawl Runner",
+      "kind": "html-path",
+      "href": "../badger-sprawl-runner/dist/index.html",
+      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
+      "tags": [
+        "game",
+        "runner",
+        "platformer",
+        "sprite",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "badger-sprawl-runner",
+          "command": "pnpm run build",
+          "dist": "apps/runner/dist"
+        },
+        "includePath": "badger-sprawl-runner/apps/runner/dist",
+        "targetPath": "badger-sprawl-runner/dist"
+      },
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow",
+        "actions": [
+          {
+            "id": "play-new-window",
+            "label": "Open game",
+            "mode": "newWindow"
+          },
+          {
+            "id": "fullscreen",
+            "label": "Fullscreen",
+            "mode": "fullscreen"
+          }
+        ]
+      },
+      "modifiedAt": "2026-08-18T08:58:58.000Z",
+      "changedAt": "2026-08-18T08:58:58.000Z"
+    },
+    {
       "id": "label-sheet-studio",
       "title": "Label Sheet Studio",
       "kind": "html-path",
@@ -65,7 +113,9 @@
           "newWindow"
         ],
         "defaultAction": "newWindow"
-      }
+      },
+      "changedAt": "2026-08-05T20:53:37.000Z",
+      "modifiedAt": "2026-08-05T20:53:37.000Z"
     },
     {
       "id": "file-diff-studio",
@@ -104,8 +154,8 @@
         ],
         "defaultAction": "newWindow"
       },
-      "modifiedAt": "2026-08-02T14:05:51.000Z",
-      "changedAt": "2026-08-02T14:05:51.000Z"
+      "modifiedAt": "2026-08-02T14:40:54.000Z",
+      "changedAt": "2026-08-02T14:40:54.000Z"
     },
     {
       "id": "nakamotos-disciples",
@@ -1122,54 +1172,6 @@
       },
       "modifiedAt": "2026-07-20T22:15:15.000Z",
       "changedAt": "2026-07-20T22:15:15.000Z"
-    },
-    {
-      "id": "badger-sprawl-runner",
-      "title": "Badger Sprawl Runner",
-      "kind": "html-path",
-      "href": "../badger-sprawl-runner/dist/index.html",
-      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
-      "tags": [
-        "game",
-        "runner",
-        "platformer",
-        "sprite",
-        "built"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "deploy": {
-        "build": {
-          "cwd": "badger-sprawl-runner",
-          "command": "pnpm run build",
-          "dist": "apps/runner/dist"
-        },
-        "includePath": "badger-sprawl-runner/apps/runner/dist",
-        "targetPath": "badger-sprawl-runner/dist"
-      },
-      "launch": {
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "newWindow",
-        "actions": [
-          {
-            "id": "play-new-window",
-            "label": "Open game",
-            "mode": "newWindow"
-          },
-          {
-            "id": "fullscreen",
-            "label": "Fullscreen",
-            "mode": "fullscreen"
-          }
-        ]
-      },
-      "modifiedAt": "2026-07-19T16:54:46.000Z",
-      "changedAt": "2026-07-19T16:54:46.000Z"
     },
     {
       "id": "v11-peer-daw",

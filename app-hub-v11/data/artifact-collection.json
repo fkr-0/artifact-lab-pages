@@ -4,7 +4,7 @@
     "title": "NEXUS App Hub v11",
     "description": "Data-driven modular portal based on v10, backed by a server-side artifact catalog compiler."
   },
-  "generatedAt": "2026-08-02T14:36:06.145Z",
+  "generatedAt": "2026-08-18T09:23:41.606Z",
   "deploy": {
     "basePath": "app-hub-v11",
     "copyRoot": "compiled",
@@ -46,13 +46,28 @@
     }
   },
   "summary": {
-    "total": 50,
+    "total": 51,
     "byKind": {
-      "html-path": 47,
+      "html-path": 48,
       "info": 3
     },
     "byTag": {
-      "tool": 24,
+      "game": 8,
+      "runner": 1,
+      "platformer": 1,
+      "sprite": 5,
+      "built": 5,
+      "tool": 25,
+      "pdf": 2,
+      "labels": 1,
+      "stickers": 1,
+      "printing": 1,
+      "typography": 1,
+      "image": 4,
+      "grid": 1,
+      "drag-and-drop": 1,
+      "local-first": 11,
+      "v11": 21,
       "developer": 2,
       "diff": 1,
       "merge": 1,
@@ -60,7 +75,6 @@
       "files": 1,
       "editor": 10,
       "keyboard": 1,
-      "local-first": 10,
       "accessibility": 1,
       "resizable": 1,
       "layout": 1,
@@ -71,15 +85,12 @@
       "simulation": 1,
       "protocol": 1,
       "pwa": 1,
-      "built": 5,
       "graphics": 12,
       "generative": 1,
       "node-based": 1,
       "visual": 1,
       "programming": 1,
       "creative": 2,
-      "v11": 20,
-      "game": 8,
       "arcade": 1,
       "multiplayer": 4,
       "p2p": 3,
@@ -109,7 +120,6 @@
       "ledger": 1,
       "accounting": 1,
       "json": 1,
-      "image": 3,
       "gif": 2,
       "preprocessor": 1,
       "transparency": 1,
@@ -134,7 +144,6 @@
       "compatibility": 2,
       "tooling": 2,
       "v9": 3,
-      "pdf": 1,
       "converter": 1,
       "audio": 2,
       "modular": 1,
@@ -146,7 +155,6 @@
       "export": 1,
       "plugin": 1,
       "presentation": 1,
-      "sprite": 5,
       "postprocessing": 1,
       "atlas": 1,
       "game-dev": 2,
@@ -170,8 +178,6 @@
       "code": 1,
       "textarea": 1,
       "brawler": 1,
-      "runner": 1,
-      "platformer": 1,
       "daw": 1,
       "procedural": 1,
       "shooter": 1,
@@ -202,6 +208,93 @@
     }
   },
   "items": [
+    {
+      "kind": "html-path",
+      "tags": [
+        "game",
+        "runner",
+        "platformer",
+        "sprite",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow",
+        "actions": [
+          {
+            "id": "play-new-window",
+            "label": "Open game",
+            "mode": "newWindow"
+          },
+          {
+            "id": "fullscreen",
+            "label": "Fullscreen",
+            "mode": "fullscreen"
+          }
+        ]
+      },
+      "id": "badger-sprawl-runner",
+      "title": "Badger Sprawl Runner",
+      "href": "../badger-sprawl-runner/dist/index.html",
+      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
+      "deploy": {
+        "build": {
+          "cwd": "badger-sprawl-runner",
+          "command": "pnpm run build",
+          "dist": "apps/runner/dist"
+        },
+        "includePath": "badger-sprawl-runner/apps/runner/dist",
+        "targetPath": "badger-sprawl-runner/dist",
+        "include": true
+      },
+      "modifiedAt": "2026-08-18T08:58:58.000Z",
+      "changedAt": "2026-08-18T08:58:58.000Z"
+    },
+    {
+      "kind": "html-path",
+      "tags": [
+        "tool",
+        "pdf",
+        "labels",
+        "stickers",
+        "printing",
+        "typography",
+        "image",
+        "grid",
+        "drag-and-drop",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "newWindow"
+      },
+      "id": "label-sheet-studio",
+      "title": "Label Sheet Studio",
+      "href": "../label-sheet-studio/index.html",
+      "description": "Local-first DIN A4 label designer with configurable equal-cell rows and columns, draggable grid positioning and resizing, repeated images or auto-fitting text, and exact-size print-ready PDF export.",
+      "changedAt": "2026-08-05T20:53:37.000Z",
+      "modifiedAt": "2026-08-05T20:53:37.000Z",
+      "deploy": {
+        "include": true
+      }
+    },
     {
       "kind": "html-path",
       "tags": [
@@ -240,8 +333,8 @@
         "targetPath": "file-diff-studio",
         "include": true
       },
-      "modifiedAt": "2026-08-02T14:05:51.000Z",
-      "changedAt": "2026-08-02T14:05:51.000Z"
+      "modifiedAt": "2026-08-02T14:40:54.000Z",
+      "changedAt": "2026-08-02T14:40:54.000Z"
     },
     {
       "kind": "html-path",
@@ -1343,55 +1436,6 @@
       },
       "modifiedAt": "2026-07-20T22:15:15.000Z",
       "changedAt": "2026-07-20T22:15:15.000Z"
-    },
-    {
-      "kind": "html-path",
-      "tags": [
-        "game",
-        "runner",
-        "platformer",
-        "sprite",
-        "built"
-      ],
-      "operations": [
-        "validate",
-        "index"
-      ],
-      "launch": {
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "defaultAction": "newWindow",
-        "actions": [
-          {
-            "id": "play-new-window",
-            "label": "Open game",
-            "mode": "newWindow"
-          },
-          {
-            "id": "fullscreen",
-            "label": "Fullscreen",
-            "mode": "fullscreen"
-          }
-        ]
-      },
-      "id": "badger-sprawl-runner",
-      "title": "Badger Sprawl Runner",
-      "href": "../badger-sprawl-runner/dist/index.html",
-      "description": "Built Vite artifact for the sprite-first cyber-badger 2D platformer.",
-      "deploy": {
-        "build": {
-          "cwd": "badger-sprawl-runner",
-          "command": "pnpm run build",
-          "dist": "apps/runner/dist"
-        },
-        "includePath": "badger-sprawl-runner/apps/runner/dist",
-        "targetPath": "badger-sprawl-runner/dist",
-        "include": true
-      },
-      "modifiedAt": "2026-07-19T16:54:46.000Z",
-      "changedAt": "2026-07-19T16:54:46.000Z"
     },
     {
       "kind": "html-path",
