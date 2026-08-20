@@ -2,14 +2,16 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const [packageText, bridge, changelog, evidence, gitignore] = await Promise.all([
+const [packageText, v13ManifestText, bridge, changelog, evidence, gitignore] = await Promise.all([
   readFile(new URL('../package.json', import.meta.url), 'utf8'),
+  readFile(new URL('../apps/app-hub-v13/artifact.json', import.meta.url), 'utf8'),
   readFile(new URL('../bridge.yml', import.meta.url), 'utf8'),
   readFile(new URL('../CHANGELOG.md', import.meta.url), 'utf8'),
-  readFile(new URL('../docs/release-evidence-v1.5.1.yml', import.meta.url), 'utf8'),
+  readFile(new URL('../docs/release-evidence-v1.7.0.yml', import.meta.url), 'utf8'),
   readFile(new URL('../.gitignore', import.meta.url), 'utf8'),
 ]);
 const pkg = JSON.parse(packageText);
+const v13Manifest = JSON.parse(v13ManifestText);
 
 test('root release gate stays comprehensive and excludes independent release units', () => {
   const rootE2e = pkg.scripts['test:e2e:root'];
@@ -37,21 +39,32 @@ test('root release gate stays comprehensive and excludes independent release uni
   assert.match(bridge, /^  release:check:/m);
 });
 
-test('v1.5.1 release metadata is consistent and remains non-publishing', () => {
-  assert.equal(pkg.version, '1.5.1');
+test('v1.7.0 App Hub V13 release metadata is consistent and remains non-publishing', () => {
+  assert.equal(pkg.version, '1.7.0');
+  assert.equal(v13Manifest.version, '1.0.0');
+  assert.equal(v13Manifest.status, 'active');
+  assert.equal(v13Manifest.id, 'app-hub-v13');
   assert.match(changelog, /^## \[Unreleased\]/m);
-  assert.match(changelog, /^## \[1\.5\.1\] - 2026-07-24$/m);
-  assert.match(changelog, /^\[Unreleased\]: .*v1\.5\.1\.\.\.HEAD$/m);
-  assert.match(changelog, /^\[1\.5\.1\]: .*v1\.5\.0\.\.\.v1\.5\.1$/m);
-  assert.match(evidence, /candidate: 1.5.1/);
-  assert.match(evidence, /releaseReady: true/);
-  assert.match(evidence, /releaseIsolation: selective-index/);
-  assert.match(evidence, /tagProposed: v1.5.1/);
+  assert.match(changelog, /^## \[1\.7\.0\] - 2026-08-20$/m);
+  assert.match(changelog, /^\[Unreleased\]: .*v1\.7\.0\.\.\.HEAD$/m);
+  assert.match(changelog, /^\[1\.7\.0\]: .*v1\.5\.1\.\.\.v1\.7\.0$/m);
+  assert.match(changelog, /App Hub V13/);
+  assert.match(evidence, /candidate: 1.7.0/);
+  assert.match(evidence, /v13Ready: true/);
+  assert.match(evidence, /releaseReady: false/);
+  assert.match(evidence, /releaseIsolation: preserve-dirty-selective-index/);
+  assert.match(evidence, /tagProposed: v1.7.0/);
   assert.match(evidence, /tagCreated: false/);
+  assert.match(evidence, /commitState: performed/);
   assert.match(evidence, /publishState: not_requested/);
-  assert.match(evidence, /pushState: requested/);
+  assert.match(evidence, /pushState: not_requested/);
   assert.match(evidence, /deployState: not_requested/);
-  assert.match(evidence, /independentIntegrationsExcludedFromRootMutation: 5/);
+  assert.match(evidence, /nativeArtifactJsonDiscovery: repository-wide/);
+  assert.match(evidence, /legacyV11BuildScript: build:catalog:v11/);
+  assert.match(evidence, /total: 55/);
+  assert.match(evidence, /dated: 55/);
+  assert.match(evidence, /selectiveIndexIsolation: true/);
+  assert.match(evidence, /unrelatedDirtyWorkPreserved: true/);
 });
 
 test('local dependency, test, bytecode, and agent outputs stay ignored', () => {

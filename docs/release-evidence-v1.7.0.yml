@@ -1,0 +1,227 @@
+schemaVersion: 1
+generatedAt: '2026-08-20T15:38:30+02:00'
+release:
+  unit: Artifact Lab App Hub V13 and repository cleanup candidate
+  branch: ownership/v11pd-infarrange-20260806
+  head: 1f8ac006932f9f546905a963a48dc9d3086da05c
+  baseRelease: 1.5.1
+  versionAfter: 1.7.0
+  candidate: 1.7.0
+  tagProposed: v1.7.0
+  tagCreated: false
+  v13Ready: true
+  releaseReady: false
+  releaseIsolation: preserve-dirty-selective-index
+  commitState: performed
+  publishState: not_requested
+  pushState: not_requested
+  deployState: not_requested
+  workingTreeWarnings:
+  - Requested cleanup commits 1-3 were already present at the start of this continuation and were validated rather than duplicated.
+  - App Hub V13 was committed through a selective index so extensive concurrent Sprite Fan, Peernet, Git Recipe Book, and child-repository work remains outside the release commits.
+  - Full current-tree release:check was executed and is blocked only by concurrent independent Peernet, Hyperblast, and Badger work recorded below; no tag, push, publish, deploy, or remote repository creation is performed by this phase.
+  commits:
+    binaryCleanup: 61b88bbe
+    htmlRelocation: f5fcc521
+    submoduleOwnership: bfeb6ff2
+    appHubV13: 1f8ac006
+scope:
+  appHubV13:
+    artifactVersion: 1.0.0
+    status: active
+    rootPublicationTarget: true
+    sourceTreeRuntime: true
+    assembledSiteRuntime: true
+    versionBuildHeader: true
+    responsiveSingleGrid: true
+    resizableDividerLegacyRemoved: true
+    accurateFooterCounts: true
+    runtimeLoadTelemetry: true
+    optionalBrowserHeapTelemetry: true
+    search: true
+    productFilter: true
+    availabilityFilter: true
+    mobileCards: true
+  catalog:
+    generator: artifactctl
+    buildScript: build:catalog
+    legacyV11BuildScript: build:catalog:v11
+    v11GenerationImplicitInV13Build: false
+    nativeArtifactJsonDiscovery: repository-wide
+    registrySidecars: registry/sources.d/*.json
+    v11CompatibilityBackfill: true
+    ordering: git-last-committed-change-desc
+    deterministicTieBreak: title-then-id
+    total: 55
+    dated: 55
+    unknownGitDates: 0
+    unknownGitDateIds: []
+    qrStudioMovedPathHistoryRecovered: true
+    qrStudioHistoryBasis: legacy
+  phase2Preservation:
+    stagedIndexPreserved: false
+    selectiveIndexIsolation: true
+    unrelatedDirtyWorkPreserved: true
+    submoduleCheckoutHeadsUntouched: true
+    staleLocalExportsPreserved: true
+revisionVector:
+  root:
+    checkout: 1f8ac006932f9f546905a963a48dc9d3086da05c
+    branch: ownership/v11pd-infarrange-20260806
+    dirty: true
+  stagedSubmodulePins:
+    ethic-brawl: e2f2c020d7ebd41945f8c316db75ae0ec64a9485
+    badger-sprawl-runner: ccd1c439e706c1397f48ed544a44712ff1d087df
+    hyperblast-shooter: c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a
+    v11-peer-daw: 37783861b7681852b0605a891a2b831c4cde82de
+verification:
+  focusedArtifactctlAndV13NodeTests:
+    tests: 24
+    passed: 24
+    failed: 0
+  v13ChromiumInteraction:
+    tests: 1
+    passed: 1
+    failed: 0
+    covers:
+    - root redirect
+    - source-tree bridge resolution
+    - release catalog loading
+    - version header
+    - accurate total and visible counts
+    - search
+    - availability filter
+    - filter clearing
+    - mobile overflow/card layout
+  artifactAudit:
+    errors: 0
+    warnings: 0
+  portfolioTests:
+    tests: 35
+    passed: 35
+    failed: 0
+  rootNodeTests:
+    tests: 171
+    passed: 169
+    failed: 2
+    status: blocked-by-unrelated-dirty-work
+  rootChromiumTests:
+    tests: 82
+    passed: 81
+    failed: 1
+    status: blocked-by-unrelated-dirty-work
+  fullReleaseCheck:
+    result: blocked-by-unrelated-dirty-work
+    stoppedAt: sync:peernet:check
+    spriteFanNodeTestsPassed: 50
+    peernetVendorDriftFiles: 2
+    remainingGatesExecutedIndividually: true
+  commands:
+  - command: pnpm run build:catalog
+    result: passed
+    details: 55 entries; 55 with Git history dates; generated catalog self-provenance excluded by declared source.git.ignorePaths
+  - command: node --check apps/app-hub-v13/app.js && node --test tooling/artifactctl/tests/*.test.mjs tests/app-hub-v13.test.mjs
+    result: passed
+    details: 24 tests passed across App Hub V13, publication builder, and artifactctl; focused catalog ignore-path regression included
+  - command: npx playwright test tests/e2e/app-hub-v13.spec.mjs --project=chromium --workers=1
+    result: passed
+    details: 1 Chromium interaction test passed
+  - command: pnpm run audit:artifacts
+    result: passed
+    details: 0 errors; 0 warnings
+  - command: pnpm run test:portfolio
+    result: passed
+    details: 35 tests passed
+  - command: pnpm run release:check
+    result: blocked-by-unrelated-dirty-work
+    details: Sprite Fan build/health and 50 tests passed; V13 catalog built 55 entries; sync:peernet:check then stopped on two dirty v11-peer-daw vendor copies.
+  - command: pnpm test
+    result: blocked-by-unrelated-dirty-work
+    details: 169 of 171 passed; failures are the two-file Peernet vendor sync contract and dirty Hyperblast encounter/story smoke expectation.
+  - command: pnpm run test:e2e:root
+    result: blocked-by-unrelated-dirty-work
+    details: 81 of 82 Chromium tests passed; dirty Badger data/sprites.json lacks the spriteSheets array expected by its concurrent Sprite Fan roundtrip fixture.
+  - command: node app-hub-v11/server/generate-build-stats.mjs --out /tmp/artifacts-build-stats.json
+    result: passed
+    details: version 1.7.0; commit 51c2b5b7 pre-evidence-amend; dirty true; 49 V11 compatibility artifacts
+  phase4Publication:
+    compositeBuilder: scripts/build-publication-site.mjs
+    rootIndex: hub/v13/index.html
+    legacyCompatibilityRoot: app-hub-v11/index.html
+    requiredPaths: 14
+    requiredPathsVerified: 14
+    v13CatalogEntries: 55
+    v13DatedEntries: 55
+    v13VerifiedNativeBuilds: 6
+    v11CompatibilityEntries: 49
+    fallbackCatalogMatchesAuthoritative: true
+    pagesRunsCompositeNoBuild: true
+    pagesExplicitChildBuilds:
+    - ethic-brawl
+    - v11-peer-daw
+    - badger-sprawl-runner
+    sourceTreeRuntime: apps/app-hub-v13 plus packages/artifact-bridge fallback
+    assembledRuntime: hub/v13 plus vendored artifact-bridge
+    publicationTest:
+      command: node --test tests/publication-site-v13.test.mjs
+      passed: 2
+      failed: 0
+    focusedPublicationAndReleaseTests:
+      passed: 13
+      failed: 0
+    assembledChromiumProbe:
+      passed: true
+      path: /hub/v13/index.html
+      portfolioVersion: v1.7.0
+      cards: 55
+      mobileViewportPx: 390
+      horizontalOverflow: false
+      pageErrors: 0
+      httpErrorResponses: 0
+      qrLaunch: /artifacts/qr-studio/0.1.0/index.html
+      clubLedgerLaunch: /club-ledger/index.html
+    publicationDryAssembly:
+      command: node scripts/build-publication-site.mjs --out .wsbridge/phase4-script-stage --no-build
+      result: passed
+      details: 14 required paths verified; V13 and fallback catalog files byte-identical
+  integration:
+    originMain: 8b17ec79092fc9fd0bba8fc48772c8659555aef2
+    originMainMergeBase: 92dc10c576ef35b7a87f663ebf45eef1173a00c4
+    originMainOnlyCommits: 14
+    ownershipBranchOnlyCommits: 12
+    localMainTrustedForIntegration: false
+    strategy: fresh origin/main clean worktree; explicit logical commits and path-limited conflict resolution
+publicationBlockers:
+- id: peernet-vendor-sync
+  scope: unrelated-pre-existing
+  description: Checked Peernet vendor copies differ in the dirty v11-peer-daw integration; Phase 3 does not rewrite independent-project vendor state.
+- id: hyperblast-shooter-smoke
+  scope: unrelated-pre-existing
+  description: Shooter implementation smoke expectations conflict with the dirty Hyperblast checkout returning story/contract behavior rather than encounter combat; this phase does not rewrite that independent game work.
+- id: badger-sprite-fan-roundtrip
+  scope: unrelated-concurrent
+  description: The dirty Badger sprite manifest does not expose spriteSheets for one concurrent Sprite Fan variable-grid roundtrip fixture; 81 of 82 root Chromium tests pass and this phase does not rewrite Badger project data.
+artifacts:
+- path: apps/app-hub-v13/index.html
+  sha256: 397ddd2950f26ec8ca824cae9c38b4e5cdbd9c5762635b05e02a9df0a3375dde
+- path: apps/app-hub-v13/app.js
+  sha256: 9b5b79d6bf9a1eeb82d15f8825f610d3293ae11fc217e5e16defa4410bf9a769
+- path: apps/app-hub-v13/styles.css
+  sha256: 3a5c6ac3d97680c7417926920df05fe1813fdb6cde69bf1bc483bcf0af2d9655
+- path: apps/app-hub-v13/catalog.json
+  sha256: a428b51a09a260b0f5a1a2f683eaa1940d6c30477bbe2be65ea560bf95498e9f
+- path: package.json
+  sha256: 960d25de7920145ba03f9c6895eedfd2fe7e5c6455ba85512c2d341d661caffa
+- path: CHANGELOG.md
+  sha256: 324e99e113752761cb7f4bcdc5ad45e7dc59fc90c8467d5ffcc0c58dc5051b18
+- path: scripts/build-publication-site.mjs
+  sha256: d55d047a92c900dd48d386579d0eb4a2181a8ad0c32d24e9f944127cee06fd7d
+- path: .github/workflows/pages.yml
+  sha256: 4c87966a33de73b135b68c34c2e2581e930c33dc7ba3513b1e2f6258cc85f09d
+- path: tests/publication-site-v13.test.mjs
+  sha256: dca42aaefa623dd41deda86e106555f86a72479afa5b931b30f124a76cf6fe3b
+- path: docs/plans/2026-08-20-artifact-lab-1.7.0-publication-readiness.md
+  sha256: 92d6fe6734253d1b2af4efde08c7c6a2df9534388bc4574b87c420cde2c805fb
+omittedActions:
+- name: Tag, push, publish, deploy, and remote repository creation
+  reason: Not requested. Local logical commits were explicitly requested and performed in this continuation.

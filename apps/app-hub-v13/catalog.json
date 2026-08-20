@@ -1,6 +1,6 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-08-20T13:24:33.224Z",
+  "generatedAt": "2026-08-20T13:35:55.925Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
@@ -14,9 +14,267 @@
     "inline": 1,
     "sourceOnly": 9,
     "active": 2,
-    "dated": 51
+    "dated": 55
   },
   "items": [
+    {
+      "id": "artifact-handling-standard",
+      "version": "1.0.0",
+      "title": "Artifact Handling Standard",
+      "description": "Normative V12 instructions for files, directories, projects, Git ownership, builds, Markdown, downloads, links, and inline text.",
+      "kind": "document",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "documentation",
+        "architecture",
+        "policy",
+        "v12"
+      ],
+      "sourceKind": "file",
+      "gitMode": "root",
+      "buildMode": "assemble",
+      "releaseKind": "file",
+      "availability": "source-only",
+      "url": "/docs/architecture/ARTIFACT_HANDLING.md",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "inline",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "manifest",
+        "path": "registry/sources.d/artifact-handling-standard.json"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "app-hub-v13",
+      "version": "1.0.0",
+      "title": "Artifacts Hub V13",
+      "description": "Catalog and launcher consuming generated artifact releases without owning their implementations.",
+      "kind": "application",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "hub",
+        "catalog",
+        "launcher",
+        "v13"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "assemble",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/apps/app-hub-v13/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "source",
+        "path": "apps/app-hub-v13"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "brickbreaker",
+      "version": "0.1.0",
+      "title": "BrickBreaker Coop",
+      "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "game",
+        "arcade",
+        "multiplayer",
+        "p2p"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/brickbreaker/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "source",
+        "path": "brickbreaker"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "chado-zen-tea",
+      "version": "0.1.0",
+      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+      "description": "Self-contained interactive guide to chanoyu and chadō.",
+      "kind": "document",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "document",
+        "education",
+        "tea",
+        "zen",
+        "interactive"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/chado-zen-tea/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "source",
+        "path": "chado-zen-tea"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "ethic-brawl-source",
+      "version": null,
+      "title": "Ethic Brawl source repository",
+      "description": "External source link modeled directly rather than as a fake local artifact release.",
+      "kind": "link",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "source",
+        "repository",
+        "game"
+      ],
+      "sourceKind": "external",
+      "gitMode": "none",
+      "buildMode": "external",
+      "releaseKind": "external",
+      "availability": "external",
+      "url": "https://github.com/fkr-0/ethic-brawl",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "manifest",
+        "path": "registry/sources.d/ethic-brawl-source.json"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "overlay-cam-apk",
+      "version": "0.1.0",
+      "title": "Overlay Cam — Intuitive UX APK",
+      "description": "Standalone landing page and Android debug APK download.",
+      "kind": "download",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "android",
+        "camera",
+        "apk",
+        "download"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "download",
+      "availability": "source-only",
+      "url": "/overlay-cam/index.html",
+      "launch": {
+        "default": "download",
+        "modes": [
+          "newWindow",
+          "download"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "source",
+        "path": "overlay-cam"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v12-migration-note",
+      "version": null,
+      "title": "V12 migration status",
+      "description": "Short catalog-native status text demonstrating the inline text contract.",
+      "kind": "text",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "v12",
+        "migration",
+        "status"
+      ],
+      "sourceKind": "inline",
+      "gitMode": "none",
+      "buildMode": "none",
+      "releaseKind": "inline",
+      "availability": "inline",
+      "url": null,
+      "text": "V12 is being introduced additively. V11 remains operational while artifacts move to verified independent release contracts.",
+      "launch": {
+        "default": "none",
+        "modes": [
+          "none"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "manifest",
+        "path": "registry/sources.d/v12-migration-note.json"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
     {
       "id": "bathroom-emergency-guide",
       "version": "4.14.0-alt.2",
@@ -852,83 +1110,6 @@
         "changedAt": "2026-07-24T01:39:07.000Z",
         "basis": "source",
         "path": "spc"
-      },
-      "changedAt": "2026-07-24T01:39:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "brickbreaker",
-      "version": "0.1.0",
-      "title": "BrickBreaker Coop",
-      "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "game",
-        "arcade",
-        "multiplayer",
-        "p2p"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/brickbreaker/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "revision": "92dc10c576ef35b7a87f663ebf45eef1173a00c4",
-        "changedAt": "2026-07-24T01:39:07.000Z",
-        "basis": "source",
-        "path": "brickbreaker"
-      },
-      "changedAt": "2026-07-24T01:39:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "chado-zen-tea",
-      "version": "0.1.0",
-      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
-      "description": "Self-contained interactive guide to chanoyu and chadō.",
-      "kind": "document",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "document",
-        "education",
-        "tea",
-        "zen",
-        "interactive"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/chado-zen-tea/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "92dc10c576ef35b7a87f663ebf45eef1173a00c4",
-        "changedAt": "2026-07-24T01:39:07.000Z",
-        "basis": "source",
-        "path": "chado-zen-tea"
       },
       "changedAt": "2026-07-24T01:39:07.000Z",
       "receipt": null
@@ -1894,43 +2075,6 @@
       "receipt": null
     },
     {
-      "id": "overlay-cam-apk",
-      "version": "0.1.0",
-      "title": "Overlay Cam — Intuitive UX APK",
-      "description": "Standalone landing page and Android debug APK download.",
-      "kind": "download",
-      "status": "experimental",
-      "required": false,
-      "tags": [
-        "android",
-        "camera",
-        "apk",
-        "download"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "download",
-      "availability": "source-only",
-      "url": "/overlay-cam/index.html",
-      "launch": {
-        "default": "download",
-        "modes": [
-          "newWindow",
-          "download"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f63834b94b9bb23d12358c942776a01043764862",
-        "changedAt": "2026-07-10T14:56:08.000Z",
-        "basis": "source",
-        "path": "overlay-cam"
-      },
-      "changedAt": "2026-07-10T14:56:08.000Z",
-      "receipt": null
-    },
-    {
       "id": "v11-roadmap",
       "version": null,
       "title": "v11 Modularization Roadmap",
@@ -2048,150 +2192,6 @@
         "path": "palette-studio"
       },
       "changedAt": "2026-05-18T20:41:14.000Z",
-      "receipt": null
-    },
-    {
-      "id": "artifact-handling-standard",
-      "version": "1.0.0",
-      "title": "Artifact Handling Standard",
-      "description": "Normative V12 instructions for files, directories, projects, Git ownership, builds, Markdown, downloads, links, and inline text.",
-      "kind": "document",
-      "status": "active",
-      "required": true,
-      "tags": [
-        "documentation",
-        "architecture",
-        "policy",
-        "v12"
-      ],
-      "sourceKind": "file",
-      "gitMode": "root",
-      "buildMode": "assemble",
-      "releaseKind": "file",
-      "availability": "source-only",
-      "url": "/docs/architecture/ARTIFACT_HANDLING.md",
-      "launch": {
-        "default": "newWindow",
-        "modes": [
-          "inline",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "changedAt": null,
-        "revision": null,
-        "basis": "unknown",
-        "path": "docs/architecture/ARTIFACT_HANDLING.md"
-      },
-      "changedAt": null,
-      "receipt": null
-    },
-    {
-      "id": "app-hub-v13",
-      "version": "1.0.0",
-      "title": "Artifacts Hub V13",
-      "description": "Catalog and launcher consuming generated artifact releases without owning their implementations.",
-      "kind": "application",
-      "status": "active",
-      "required": true,
-      "tags": [
-        "hub",
-        "catalog",
-        "launcher",
-        "v13"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "assemble",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/apps/app-hub-v13/index.html",
-      "launch": {
-        "default": "newWindow",
-        "modes": [
-          "newWindow"
-        ],
-        "sandbox": "none"
-      },
-      "git": {
-        "changedAt": null,
-        "revision": null,
-        "basis": "unknown",
-        "path": "apps/app-hub-v13"
-      },
-      "changedAt": null,
-      "receipt": null
-    },
-    {
-      "id": "ethic-brawl-source",
-      "version": null,
-      "title": "Ethic Brawl source repository",
-      "description": "External source link modeled directly rather than as a fake local artifact release.",
-      "kind": "link",
-      "status": "experimental",
-      "required": false,
-      "tags": [
-        "source",
-        "repository",
-        "game"
-      ],
-      "sourceKind": "external",
-      "gitMode": "none",
-      "buildMode": "external",
-      "releaseKind": "external",
-      "availability": "external",
-      "url": "https://github.com/fkr-0/ethic-brawl",
-      "launch": {
-        "default": "newWindow",
-        "modes": [
-          "newWindow"
-        ],
-        "sandbox": "none"
-      },
-      "git": {
-        "changedAt": null,
-        "revision": null,
-        "basis": "unknown",
-        "path": "registry/sources.d/ethic-brawl-source.json"
-      },
-      "changedAt": null,
-      "receipt": null
-    },
-    {
-      "id": "v12-migration-note",
-      "version": null,
-      "title": "V12 migration status",
-      "description": "Short catalog-native status text demonstrating the inline text contract.",
-      "kind": "text",
-      "status": "experimental",
-      "required": false,
-      "tags": [
-        "v12",
-        "migration",
-        "status"
-      ],
-      "sourceKind": "inline",
-      "gitMode": "none",
-      "buildMode": "none",
-      "releaseKind": "inline",
-      "availability": "inline",
-      "url": null,
-      "text": "V12 is being introduced additively. V11 remains operational while artifacts move to verified independent release contracts.",
-      "launch": {
-        "default": "none",
-        "modes": [
-          "none"
-        ],
-        "sandbox": "none"
-      },
-      "git": {
-        "changedAt": null,
-        "revision": null,
-        "basis": "unknown",
-        "path": "registry/sources.d/v12-migration-note.json"
-      },
-      "changedAt": null,
       "receipt": null
     }
   ]

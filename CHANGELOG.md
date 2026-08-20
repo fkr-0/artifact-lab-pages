@@ -6,6 +6,27 @@ All notable changes to Artifact Lab are documented here. The repository follows
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-08-20
+
+### Added
+
+- App Hub V13 as the root publication target, evolving the completed V12 catalog into the clean publication iteration while retaining manifest-driven discovery from native `artifact.json` / `registry/sources.d` descriptors and the V11 compatibility adapter.
+- Git last-committed-change metadata and deterministic newest-first catalog ordering, including explicit provenance for source paths, release-pinned submodules, legacy timestamps, and manifest fallbacks.
+- Responsive V13 search/product/availability filtering plus accurate catalog counts, build/version metadata, load-time telemetry, and optional browser heap statistics.
+- A complete repository cleanup plan and migration status updates covering submodule release pins, independent-project extraction blockers, stale binary snapshots, and registry coverage.
+
+### Changed
+
+- Existing submodules use absolute GitHub HTTPS URLs; parent gitlinks are prepared at verified public releases without changing dirty child checkouts.
+- Active single-file root artifacts now live in named artifact directories, while stale root media and historical HTML snapshots are removed from the parent index but retained as ignored local copies.
+- `pnpm run build:catalog` now generates the first-class V13 catalog through `artifactctl` while V11 catalog regeneration remains an explicit `build:catalog:v11` compatibility command.
+- GitHub Pages, packaging, VPS staging, and local launch helpers now share one composite publication builder that promotes V13 at the root while retaining V11 and relocated root-artifact URLs as compatibility content.
+
+### Fixed
+
+- V13 carries forward the V12 fixes for the V11 filtered-result headline, oversized/gapped layout, divider issues, stale footer counts, and fragile mobile presentation in a compact single-grid architecture.
+- Catalog launch URLs remain usable both from repository-root GitHub Pages deployments and from assembled `/hub/v13` site releases.
+
 ## [1.5.1] - 2026-07-24
 
 ### Added
@@ -222,7 +243,8 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V11 Peer DAW route counts, continuous controls, FM zero values, session isolation, peer presence, project convergence, and constrained-height sidebar interaction.
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
-[Unreleased]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...v1.7.0
 [1.5.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.0...v1.4.1
