@@ -51,3 +51,13 @@ app-hub-v11/data/build-stats.json
 /image.gif
 /Aster_Relay_Brand_Book-2.pdf
 /escape-collective-template.png
+
+# Historical root HTML snapshots superseded by named artifact directories
+/escape-collective-template-generator*.html
+/font_lab_browser.html
+/index (1).html
+/index(2).html
+/index(3).html
+/index(4).html
+/index_multitext.html
+/procedural-sharepic-studio.html

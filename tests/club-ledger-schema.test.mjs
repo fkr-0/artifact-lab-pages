@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const html = await readFile(new URL('../club-ledger.html', import.meta.url), 'utf8');
+const html = await readFile(new URL('../club-ledger/index.html', import.meta.url), 'utf8');
 
 test('Club Ledger exports and imports wrapped schema payloads', () => {
   assert.match(html, /const LEDGER_SCHEMA = 'club-ledger\/v2'/);

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "qr-studio",
+  "version": "0.1.0",
+  "title": "QR Studio",
+  "description": "Single-file local QR code generator staged independently from the hub.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": ["tool", "qr-code", "generator", "single-file"],
+  "source": {
+    "kind": "file",
+    "path": "qr-studio/index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "file",
+    "entrypoint": "index.html",
+    "offline": false,
+    "networkAllowlist": ["https://cdn.jsdelivr.net"]
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "floating", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html"]
+  }
+}

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const html = await readFile(new URL('../pdf-forge-nexus.html', import.meta.url), 'utf8');
+const html = await readFile(new URL('../pdf-forge-nexus/index.html', import.meta.url), 'utf8');
 const inlineScriptMatch = html.match(/<script>\s*([\s\S]*?)<\/script>\s*<\/body>/i);
 
 test('PDF Forge Nexus has no inline event attributes', () => {

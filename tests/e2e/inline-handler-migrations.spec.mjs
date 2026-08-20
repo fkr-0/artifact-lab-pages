@@ -54,7 +54,7 @@ test.describe('inline-handler migrations remain interactive', () => {
   test('PDF Forge settings, themes, and tab delegation work', async ({ page }) => {
     const errors = collectPageErrors(page);
 
-    await page.goto('/pdf-forge-nexus.html');
+    await page.goto('/pdf-forge-nexus/index.html');
     await expect(page.locator('[data-action="open-settings"]')).toBeVisible();
 
     await page.click('[data-action="open-settings"]');
@@ -76,7 +76,7 @@ test.describe('inline-handler migrations remain interactive', () => {
   test('Prompt Forge delegated prompt, tab, settings, and keyboard controls work', async ({ page }) => {
     const errors = collectPageErrors(page);
 
-    await page.goto('/prompt-gen-nexus.html');
+    await page.goto('/prompt-gen-nexus/index.html');
     await expect(page.locator('#promptList .prompt-list-item').first()).toBeVisible();
     const before = await page.locator('#promptList .prompt-list-item').count();
 

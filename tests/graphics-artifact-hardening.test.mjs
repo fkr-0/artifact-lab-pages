@@ -5,7 +5,7 @@ import test from 'node:test';
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('GIF transparency tool validates real GIF signatures and export results', async () => {
-  const html = await read('gif-white-to-transparent.html');
+  const html = await read('gif-white-to-transparent/index.html');
   assert.match(html, /function validateGifFile\(/);
   assert.match(html, /GIF87a/);
   assert.match(html, /GIF89a/);
@@ -14,7 +14,7 @@ test('GIF transparency tool validates real GIF signatures and export results', a
 });
 
 test('PDF Forge constrains imports and releases preview/download URLs', async () => {
-  const html = await read('pdf-forge-nexus.html');
+  const html = await read('pdf-forge-nexus/index.html');
   assert.match(html, /SUPPORTED_IMAGE_MIME = new Set\(\['image\/png', 'image\/jpeg'\]\)/);
   assert.match(html, /Only PDF, PNG, and JPEG files are supported/);
   assert.match(html, /async function loadImageFromBytes\(/);

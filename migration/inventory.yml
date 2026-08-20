@@ -1,0 +1,59 @@
+schemaVersion: artifacts.fkr.dev/migration-inventory-v1
+generatedReports: migration/reports
+states: [observed, classified, backed-up, reconciled, migrated, verified]
+records:
+  - path: app-hub-v11
+    observedOwnership: root
+    intendedOwnership: legacy-hub
+    status: classified
+    action: keep-operational-until-v12-parity
+  - path: badger-sprawl-runner
+    observedOwnership: submodule-release-pinned
+    intendedOwnership: independent-project
+    status: reconciled
+    action: retain-submodule-at-v1.5.2
+  - path: ethic-brawl
+    observedOwnership: submodule-release-pinned
+    intendedOwnership: independent-project
+    status: reconciled
+    action: retain-submodule-at-v1.7.4
+  - path: hyperblast-shooter
+    observedOwnership: submodule-release-pinned
+    intendedOwnership: independent-project
+    status: reconciled
+    action: retain-submodule-at-public-v0.2.0-unpublished-local-tags-excluded
+  - path: v11-peer-daw
+    observedOwnership: submodule-release-pinned
+    intendedOwnership: independent-project
+    status: reconciled
+    action: retain-submodule-at-v1.5.0
+  - path: bathroom-emergency-guide
+    observedOwnership: dirty-outer-nested-git-plus-clean-inner-project
+    intendedOwnership: independent-project
+    status: classified
+    action: preserve-outer-synthesis-and-extract-only-after-remote-baseline-reconciliation
+  - path: git-recipe-book
+    observedOwnership: parent-tree-no-child-git
+    intendedOwnership: independent-project
+    status: classified
+    action: create-or-identify-independent-repository-before-submodule-conversion
+  - path: inf-arrange
+    observedOwnership: parent-tree-no-child-git
+    intendedOwnership: independent-project
+    status: classified
+    action: create-or-identify-independent-repository-before-submodule-conversion
+  - path: overlay-cam
+    observedOwnership: parent-tree-no-child-git
+    intendedOwnership: independent-project
+    status: classified
+    action: create-or-identify-independent-repository-or-explicitly-reclassify-root-owned
+  - path: apps/app-hub-v12
+    observedOwnership: root
+    intendedOwnership: root-hub
+    status: classified
+    action: evolve-to-generated-catalog-consumer-and-release-with-1.7.0
+  - path: root-binary-and-html-cleanup
+    observedOwnership: tracked-root-export-snapshots
+    intendedOwnership: local-only-or-named-artifact-directories
+    status: migrated
+    action: keep-local-ignored-copies-and-remove-stale-snapshots-from-parent-index

@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const html = await readFile('club-ledger.html', 'utf8');
+const html = await readFile('club-ledger/index.html', 'utf8');
 const source = JSON.parse(await readFile('app-hub-v11/artifacts.source.json', 'utf8'));
 
 const item = source.items.find((entry) => entry.id === 'club-ledger');
 assert.ok(item, 'club-ledger should be present in the v11 app hub source catalog');
 assert.equal(item.title, 'Club Ledger');
 assert.equal(item.kind, 'html-path');
-assert.equal(item.href, '../club-ledger.html');
+assert.equal(item.href, '../club-ledger/index.html');
 assert.ok(item.tags.includes('finance'), 'club-ledger should be categorized as a finance tool');
 assert.ok(item.launch.modes.includes('inline'), 'club-ledger should be launchable inline');
 assert.ok(item.launch.modes.includes('newWindow'), 'club-ledger should be launchable in a new window');

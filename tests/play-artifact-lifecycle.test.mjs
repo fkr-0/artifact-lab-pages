@@ -100,7 +100,7 @@ test('Bomberman and collaborative editors tear down visibility and peer state', 
 });
 
 test('Sexy Love Chat pauses and tears down floating animation and peer state', async () => {
-  const html = await read('sexy_love_chat.html');
+  const html = await read('sexy-love-chat/index.html');
   assert.match(html, /let floatAnimationId = 0/);
   assert.match(html, /const emojis = \['💖'/);
   assert.doesNotMatch(html, /document\.createElement\('span'\)/);

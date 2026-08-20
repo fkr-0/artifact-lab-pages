@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const html = await readFile(new URL('../sprite_extractor.html', import.meta.url), 'utf8');
+const html = await readFile(new URL('../sprite-extractor/index.html', import.meta.url), 'utf8');
 
 assert.match(html, /<title>Sprite Extractor<\/title>/, 'artifact should have the extractor title');
 assert.match(html, /id="autoDetectBtn"/, 'artifact should offer automatic sprite detection');
@@ -83,6 +83,6 @@ assert.match(html, /applyBackgroundAlphaTool\(sprite\.originalCanvas/, 'backgrou
 
 const catalog = await readFile(new URL('../app-hub-v11/artifacts.source.json', import.meta.url), 'utf8');
 assert.match(catalog, /"id": "sprite-extractor"/, 'v11 artifact catalog should include the extractor');
-assert.match(catalog, /"href": "\.\.\/sprite_extractor\.html"/, 'catalog should launch the root extractor artifact');
+assert.match(catalog, /"href": "\.\.\/sprite-extractor\/index\.html"/, 'catalog should launch the named extractor artifact directory');
 
 console.log('sprite extractor artifact contract OK');

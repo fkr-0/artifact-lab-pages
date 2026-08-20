@@ -197,7 +197,7 @@ Sci-fi spaceship interface for indexing all artifacts.
 | `font_lab_browser.html` | Font laboratory browser | HTML/JS |
 | `index_multitext.html` | Multi-text index | HTML |
 | `procedural-sharepic-studio.html` | Sharepic studio (root duplicate) | HTML/JS |
-| `sexy_love_chat.html` | Chat interface | HTML/JS |
+| `sexy-love-chat/index.html` | Chat interface | HTML/JS |
 | `viewer_advanced.html` | Advanced viewer | HTML/JS |
 | `deep-research-report.md` | Research findings | Markdown |
 

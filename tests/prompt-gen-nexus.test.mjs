@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const html = await readFile(new URL('../prompt-gen-nexus.html', import.meta.url), 'utf8');
+const html = await readFile(new URL('../prompt-gen-nexus/index.html', import.meta.url), 'utf8');
 
 test('Prompt Forge keeps persistence guards and removes inline HTML handlers', () => {
   assert.match(html, /promptforge-store\/v2/);
