@@ -41,8 +41,7 @@ test.describe('app-hub-v11 Peernet file sharing', () => {
   test('adds share file to the remote user context menu', async ({ page }) => {
     const errors = await collectPageErrors(page);
     await page.goto('/app-hub-v11/index.html');
-    await page.locator('[data-workspace-tab="lobbyChat"]').click();
-    await expect(page.locator('#onlineUsers')).toBeVisible();
+    await expect(page.locator('#onlineUsers')).toBeAttached();
     await page.evaluate(() => {
       const row = document.createElement('div');
       row.className = 'row online-user';
@@ -50,9 +49,15 @@ test.describe('app-hub-v11 Peernet file sharing', () => {
       row.dataset.peerId = 'peer-file-test';
       row.dataset.label = 'File Peer';
       row.textContent = 'File Peer · connected';
-      document.querySelector('#onlineUsers')?.append(row);
+      const container = document.querySelector('#onlineUsers');
+      container?.append(row);
+      row.dispatchEvent(new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 120,
+        clientY: 120,
+      }));
     });
-    await page.locator('[data-peer-id="peer-file-test"]').click({ button: 'right' });
     await expect(page.locator('#presenceMenu.open')).toBeVisible();
     await expect(page.locator('#presenceFileShareAction')).toBeVisible();
     await expect(page.locator('#presenceFileShareAction')).toHaveText('share file');

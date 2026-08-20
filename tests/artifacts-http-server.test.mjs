@@ -133,7 +133,7 @@ class FailingServer:
     def __init__(self, *args, **kwargs):
         raise OSError(98, 'Address already in use')
 
-module.ThreadingHTTPServer = FailingServer
+module.ArtifactHTTPServer = FailingServer
 sys.argv = [
     'artifacts_http_server.py',
     '--directory',
