@@ -5,7 +5,7 @@
   "title": "BrickBreaker Coop",
   "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
   "kind": "application",
-  "status": "experimental",
+  "status": "provisional",
   "required": true,
   "tags": ["game", "arcade", "multiplayer", "p2p"],
   "source": {

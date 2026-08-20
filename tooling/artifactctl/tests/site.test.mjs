@@ -18,7 +18,9 @@ test('V13 site builds native releases and catalogs V11 as provisional', async (t
     outDir: join(temporary, 'site'),
   });
   assert.ok(result.catalog.summary.total >= 50);
-  assert.ok(result.catalog.summary.verified >= 6);
+  assert.ok(result.catalog.summary.verified >= 5);
+  assert.ok(result.catalog.items.some((item) => item.id === 'brickbreaker' && item.availability === 'provisional' && item.url === '/brickbreaker/index.html'));
+  assert.equal(result.builds.some((entry) => entry.manifest.id === 'brickbreaker'), false);
   assert.match(await readFile(join(temporary, 'site/hub/v13/app.js'), 'utf8'), /artifact-bridge/);
   assert.match(await readFile(join(temporary, 'site/hub/v13/catalog.json'), 'utf8'), /catalog-v1/);
   assert.match(await readFile(join(temporary, 'site/hub/v13/vendor/artifact-bridge/receipt.json'), 'utf8'), /library-receipt/);

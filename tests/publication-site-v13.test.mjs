@@ -26,7 +26,9 @@ test('publication stage promotes V13 while retaining V11 compatibility and reloc
   assert.equal(result.manifest.rootIndex, 'hub/v13/index.html');
   assert.equal(result.manifest.verifiedRequiredPaths, REQUIRED_PUBLICATION_PATHS.length);
   assert.equal(result.v13.catalog.summary.total, 55);
-  assert.equal(result.v13.catalog.summary.verified, 6);
+  assert.equal(result.v13.catalog.summary.verified, 5);
+  assert.ok(result.v13.catalog.items.some((item) => item.id === 'brickbreaker' && item.availability === 'provisional' && item.url === '/brickbreaker/index.html'));
+  assert.equal(result.v13.builds.some((entry) => entry.manifest.id === 'brickbreaker'), false);
   assert.ok(result.v13.builds.some((entry) => entry.manifest.id === 'app-hub-v13'));
 
   for (const path of REQUIRED_PUBLICATION_PATHS) {

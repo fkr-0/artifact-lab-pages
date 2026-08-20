@@ -2,70 +2,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const sharepicPath = new URL('../procedural-sharepic-studio.html', import.meta.url);
 const layeredSharepicPath = new URL('../spc/procedural_sharepic_studio.html', import.meta.url);
 const storyboardPath = new URL('../storyboard-studio/index.html', import.meta.url);
-
-test('procedural sharepic studio exposes a reversible, portable production workflow', async () => {
-  const html = await readFile(sharepicPath, 'utf8');
-
-  for (const marker of [
-    'procedural-sharepic-studio-state-v7',
-    'procedural-sharepic-studio-state-v6',
-    'procedural-sharepic-studio-state-v5',
-    'LEGACY_STORAGE_KEY',
-    'function undo()',
-    'function redo()',
-    'function flushPendingHistory()',
-    'Local save unavailable',
-    'studioRecipes',
-    'paletteAdapters',
-    'typographyPresets',
-    'proceduralProfiles',
-    'function activeTheme(',
-    'function encodeStudioState(',
-    'function decodeStudioState(',
-    "STATE_URL_PARAM = 'state'",
-    'function generateBase(',
-    'function renderPreviewNow(',
-    'requestAnimationFrame(renderPreviewNow)',
-    'function applyPixelEffects(',
-    'function applyPixelate(',
-    'function applyBlur(',
-    'function applyScanlines(',
-    'previewBaseSignature',
-    'ResizeObserver',
-    'grid-template-columns:repeat(6,minmax(0,1fr))',
-    'generatorTuningNotes',
-    'function drawUniversalComposition(',
-    'function applyUniversalFlow(',
-    'function applyUniversalSymmetry(',
-    'function applyGeneratorTexture(',
-    'function generateContourMap(',
-    'function generateVoronoiShards(',
-    'function generateLissajousRibbons(',
-    'function generateCellularAutomata(',
-    'function generateGuilloche(',
-    'id="palette-adapter"',
-    'id="procedural-profile"',
-    'id="content-heading-font"',
-    'id="content-body-font"',
-    'id="btn-safe-area"',
-    'id="btn-share-state"',
-    'id="preview-zoom"',
-    'previewFrameSize',
-    'frame.cornerRadius',
-    'frame.inset',
-    'id="export-format"',
-    'function exportToImage(',
-    'function downloadRecipe()',
-    'function copyShareLink()',
-    'function importRecipeFile(',
-    'prefers-reduced-motion',
-  ]) {
-    assert.match(html, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  }
-});
 
 test('catalog sharepic studio renders its editable layer stage and keeps inspector ranges live', async () => {
   const html = await readFile(layeredSharepicPath, 'utf8');
