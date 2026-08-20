@@ -38,3 +38,16 @@ brawl/ethic-brawl/
 app-hub-v11/data/build-stats.json
 
 *.sha256
+
+# Legacy root archive/export blobs retained only as local operator copies
+/workspace-*.tar
+/artifacts-collection-*.tar.gz
+/2-alpha.gif
+/2-alpsha.gif
+/bb.gif
+/bdg-alpha.gif
+/bdg.gif
+/bdgg.gif
+/image.gif
+/Aster_Relay_Brand_Book-2.pdf
+/escape-collective-template.png
