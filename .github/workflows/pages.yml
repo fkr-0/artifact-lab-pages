@@ -59,7 +59,11 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: badger-sprawl-runner
 
-      - name: Prepare CI source catalog
+      - name: Build (badger-sprawl-runner)
+        run: pnpm run build
+        working-directory: badger-sprawl-runner
+
+      - name: Prepare V11 compatibility source catalog
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
@@ -89,8 +93,8 @@ jobs:
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
 
-      - name: Materialize deploy stage
-        run: node app-hub-v11/server/artifact-build.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage
+      - name: Materialize V13 publication stage with V11 compatibility content
+        run: node scripts/build-publication-site.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage --no-build
 
       - name: Generate build statistics
         run: node app-hub-v11/server/generate-build-stats.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage/app-hub-v11/data/build-stats.json --commit "$GITHUB_SHA" --dirty false

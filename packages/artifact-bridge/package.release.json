@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/library-release-v1",
+  "name": "artifact-bridge",
+  "version": "0.1.0",
+  "description": "Optional postMessage bridge between standalone artifacts and a host hub.",
+  "files": ["bridge.js"]
+}

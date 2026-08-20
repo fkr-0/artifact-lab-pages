@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "overlay-cam-apk",
+  "version": "0.1.0",
+  "title": "Overlay Cam — Intuitive UX APK",
+  "description": "Standalone landing page and Android debug APK download.",
+  "kind": "download",
+  "status": "experimental",
+  "required": false,
+  "tags": ["android", "camera", "apk", "download"],
+  "source": {
+    "kind": "directory",
+    "path": "overlay-cam",
+    "entrypoint": "index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "download",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": ["artifact.json"]
+  },
+  "launch": {
+    "default": "download",
+    "modes": ["newWindow", "download"],
+    "sandbox": "strict"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html", "overlay-cam-intuitive-ux-debug.apk"]
+  }
+}

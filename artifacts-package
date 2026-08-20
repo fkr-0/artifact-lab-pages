@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# artifacts-package - Create distributable tgz package from app-hub-v11 manifest
+# artifacts-package - Create distributable tgz package from the V13 publication stage
 #
 # Usage: ./artifacts-package [output-dir]
 #
@@ -30,14 +30,15 @@ fi
 
 echo -e "${CYAN}📦 Artifacts Collection - Manifest Packaging${NC}"
 echo ""
-echo -e "${CYAN}Materializing app-hub-v11 manifest...${NC}"
+echo -e "${CYAN}Materializing App Hub V13 publication stage...${NC}"
 cd "$ARTIFACTS_DIR"
-node app-hub-v11/server/artifact-build.mjs --out "$STAGE"
+node scripts/build-publication-site.mjs --out "$STAGE"
 
 cat > "$STAGE/VERSION" <<EOF_VERSION
 $VERSION
 Packaged: $PACKAGE_TIMESTAMP
-Source manifest: app-hub-v11/artifacts.source.json
+Publication builder: scripts/build-publication-site.mjs
+Legacy compatibility source: app-hub-v11/artifacts.source.json
 EOF_VERSION
 echo -e "${GREEN}  ✓${NC} VERSION"
 
@@ -52,18 +53,16 @@ Manifest-built static artifact collection.
 ./artifacts-serve
 ```
 
-Then open http://localhost:8080/ . The root `index.html` is the v11 hub.
+Then open http://localhost:8080/ . The root `index.html` promotes App Hub V13.
 
 ## Build Model
 
-`app-hub-v11/artifacts.source.json` is the source of truth.
+`scripts/build-publication-site.mjs` composes the release stage from two layers:
 
-- `external-link` entries are indexed only.
-- local `html-path` / `info` hrefs are copied by inferred top-level path.
-- entries with `deploy.build` run their build command and copy configured `dist` output.
-- `deploy.rootIndex.source` is promoted to package root `index.html`.
+- native `artifactctl` discovery/site assembly produces App Hub V13, its generated catalog, vendored bridge, and verified native releases;
+- `app-hub-v11/artifacts.source.json` remains an explicit compatibility source for not-yet-migrated artifacts and stable legacy root URLs.
 
-Generated deployment details are written to `BUILD_MANIFEST.json`.
+The package root is V13. V11 remains available at `app-hub-v11/` for compatibility. Generated deployment details are written to `BUILD_MANIFEST.json`, with `BUILD_MANIFEST.v13.json` and `BUILD_MANIFEST.v11.json` retaining layer receipts.
 EOF_README
 echo -e "${GREEN}  ✓${NC} README.md"
 

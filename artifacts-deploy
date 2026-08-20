@@ -83,9 +83,9 @@ if [[ $FULL_MODE -eq 1 ]]; then
   exit 0
 fi
 
-echo -e "${CYAN}Materializing deploy stage from manifest...${NC}"
+echo -e "${CYAN}Materializing App Hub V13 publication stage...${NC}"
 cd "$ARTIFACTS_DIR"
-node app-hub-v11/server/artifact-build.mjs --out "$STAGE_DIR"
+node scripts/build-publication-site.mjs --out "$STAGE_DIR"
 
 echo ""
 echo -e "${CYAN}Syncing stage to ${VPS_HOST}:${VPS_PATH} ...${NC}"

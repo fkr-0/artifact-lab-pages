@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "v12-migration-note",
+  "title": "V12 migration status",
+  "description": "Short catalog-native status text demonstrating the inline text contract.",
+  "kind": "text",
+  "status": "experimental",
+  "required": false,
+  "tags": ["v12", "migration", "status"],
+  "source": {
+    "kind": "inline",
+    "text": "V12 is being introduced additively. V11 remains operational while artifacts move to verified independent release contracts.",
+    "format": "plain",
+    "git": { "mode": "none" }
+  },
+  "build": { "mode": "none" },
+  "release": { "kind": "inline" },
+  "launch": {
+    "default": "none",
+    "modes": ["none"],
+    "sandbox": "none"
+  }
+}

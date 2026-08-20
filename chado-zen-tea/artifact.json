@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "chado-zen-tea",
+  "version": "0.1.0",
+  "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+  "description": "Self-contained interactive guide to chanoyu and chadō.",
+  "kind": "document",
+  "status": "experimental",
+  "required": true,
+  "tags": ["document", "education", "tea", "zen", "interactive"],
+  "source": {
+    "kind": "directory",
+    "path": "chado-zen-tea",
+    "entrypoint": "index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": ["artifact.json"]
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "strict"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html"]
+  }
+}

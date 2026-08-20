@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "artifact-handling-standard",
+  "version": "1.0.0",
+  "title": "Artifact Handling Standard",
+  "description": "Normative V12 instructions for files, directories, projects, Git ownership, builds, Markdown, downloads, links, and inline text.",
+  "kind": "document",
+  "status": "active",
+  "required": true,
+  "tags": ["documentation", "architecture", "policy", "v12"],
+  "source": {
+    "kind": "file",
+    "path": "docs/architecture/ARTIFACT_HANDLING.md",
+    "git": { "mode": "root" }
+  },
+  "build": {
+    "mode": "assemble",
+    "renderer": "markdown-html"
+  },
+  "release": {
+    "kind": "file",
+    "entrypoint": "index.html",
+    "offline": true
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["inline", "newWindow"],
+    "sandbox": "strict"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html"]
+  }
+}

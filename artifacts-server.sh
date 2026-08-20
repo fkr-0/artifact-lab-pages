@@ -175,7 +175,7 @@ artifacts-restart() {
 # ============================================
 artifacts-open() {
     local port="${1:-$ARTIFACTS_PORT}"
-    local url="http://${ARTIFACTS_HOST}:${port}/app-hub-v11/index.html"
+    local url="http://${ARTIFACTS_HOST}:${port}/"
 
     # Start server if not running
     if ! artifacts-running; then
@@ -220,7 +220,7 @@ artifacts-status() {
         echo -e " ${GREEN}●${NC} Status: ${GREEN}Running${NC}"
         echo -e " ${CYAN}○${NC} PID:    ${pid}"
         echo -e " ${CYAN}○${NC} Port:   ${port}"
-        echo -e " ${CYAN}○${NC} URL:    ${GREEN}http://${ARTIFACTS_HOST}:${port}/app-hub-v11/index.html${NC}"
+        echo -e " ${CYAN}○${NC} URL:    ${GREEN}http://${ARTIFACTS_HOST}:${port}/${NC}"
         echo -e " ${CYAN}○${NC} Dir:    ${ARTIFACTS_DIR}"
         echo -e " ${CYAN}○${NC} Log:    ${ARTIFACTS_LOG_FILE}"
     else

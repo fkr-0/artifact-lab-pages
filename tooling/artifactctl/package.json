@@ -1,0 +1,13 @@
+{
+  "name": "@artifacts/artifactctl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "artifactctl": "src/cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check src/cli.mjs && node --test tests/*.test.mjs"
+  }
+}

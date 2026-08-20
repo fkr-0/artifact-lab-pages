@@ -11,7 +11,7 @@ assert.match(pagesWorkflow, /submodules: recursive/, 'Pages checkout should init
 assert.match(pagesWorkflow, /Run Hyperblast release gate/, 'Pages workflow should name the Hyperblast release gate step');
 assert.match(pagesWorkflow, /npm run check:hyperblast/, 'Pages workflow should run the gate before deploy materialization');
 assert.ok(
-  pagesWorkflow.indexOf('npm run check:hyperblast') < pagesWorkflow.indexOf('Materialize deploy stage'),
+  pagesWorkflow.indexOf('npm run check:hyperblast') < pagesWorkflow.indexOf('Materialize V13 publication stage with V11 compatibility content'),
   'Hyperblast release gate should run before materializing/uploading the Pages artifact',
 );
 

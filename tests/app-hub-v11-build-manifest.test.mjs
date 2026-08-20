@@ -63,12 +63,13 @@ assert.equal(await readFile(join(root, 'stage', 'docs', 'guide.md'), 'utf8'), '#
 assert.match(await readFile(join(root, 'stage', 'BUILD_MANIFEST.json'), 'utf8'), /"built"/);
 
 const packageScript = await readFile('artifacts-package', 'utf8');
-assert.match(packageScript, /artifact-build\.mjs/, 'package script should materialize from the hub manifest');
+assert.match(packageScript, /build-publication-site\.mjs/, 'package script should materialize the V13 publication stage');
 const deployScript = await readFile('artifacts-deploy', 'utf8');
-assert.match(deployScript, /\.artifacts-deploy-stage/, 'deploy should rsync a materialized manifest stage');
+assert.match(deployScript, /build-publication-site\.mjs/, 'deploy should materialize the V13 publication stage');
+assert.match(deployScript, /\.artifacts-deploy-stage/, 'deploy should rsync a materialized publication stage');
 const serveScript = await readFile('artifacts-serve', 'utf8');
-assert.match(serveScript, /app-hub-v11\/index\.html/, 'serve should open v11 by default');
+assert.doesNotMatch(serveScript, /URL=.*app-hub-v11\/index\.html/, 'serve should open the V13 root by default');
 const serverScript = await readFile('artifacts-server.sh', 'utf8');
-assert.match(serverScript, /app-hub-v11\/index\.html/, 'server helpers should open v11 by default');
+assert.doesNotMatch(serverScript, /local url=.*app-hub-v11\/index\.html/, 'server helpers should open the V13 root by default');
 const rootIndex = await readFile('index.html', 'utf8');
-assert.match(rootIndex, /app-hub-v11\/index\.html/, 'root index should redirect to v11');
+assert.match(rootIndex, /apps\/app-hub-v13\/index\.html/, 'root index should redirect to the V13 publication target');

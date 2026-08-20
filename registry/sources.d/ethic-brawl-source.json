@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "ethic-brawl-source",
+  "title": "Ethic Brawl source repository",
+  "description": "External source link modeled directly rather than as a fake local artifact release.",
+  "kind": "link",
+  "status": "experimental",
+  "required": false,
+  "tags": ["source", "repository", "game"],
+  "source": {
+    "kind": "external",
+    "url": "https://github.com/fkr-0/ethic-brawl",
+    "git": { "mode": "none" }
+  },
+  "build": { "mode": "external" },
+  "release": {
+    "kind": "external",
+    "url": "https://github.com/fkr-0/ethic-brawl"
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["newWindow"],
+    "sandbox": "none"
+  }
+}

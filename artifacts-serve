@@ -14,7 +14,7 @@ HOST="${ARTIFACTS_HOST:-localhost}"
 BIND="${ARTIFACTS_BIND:-127.0.0.1}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DIR="${ARTIFACTS_DIR:-$SCRIPT_DIR}"
-URL="http://${HOST}:${PORT}/app-hub-v11/index.html"
+URL="http://${HOST}:${PORT}/"
 PID_FILE="${ARTIFACTS_PID_FILE:-${DIR}/.artifacts-server.pid}"
 LOG_FILE="${ARTIFACTS_LOG_FILE:-${DIR}/.artifacts-server.log}"
 SERVER_SCRIPT="${DIR}/scripts/artifacts_http_server.py"
@@ -114,7 +114,7 @@ else
     echo -e "  ${URL}"
 fi
 
-echo -e "${GREEN}✓ Done! NEXUS App Hub v11 loading...${NC}"
+echo -e "${GREEN}✓ Done! App Hub V13 loading...${NC}"
 echo ""
 echo -e "${CYAN}Press Ctrl+C to stop the server${NC}"
 

@@ -6,10 +6,10 @@ const deployScript = await readFile('artifacts-deploy', 'utf8');
 const bridge = await readFile('bridge.yml', 'utf8');
 const source = JSON.parse(await readFile('app-hub-v11/artifacts.source.json', 'utf8'));
 
-assert.match(packageScript, /artifact-build\.mjs/);
+assert.match(packageScript, /build-publication-site\.mjs/);
 assert.match(packageScript, /app-hub-v11\/artifacts\.source\.json/);
 assert.match(deployScript, /\.artifacts-deploy-stage/);
-assert.match(deployScript, /artifact-build\.mjs/);
+assert.match(deployScript, /build-publication-site\.mjs/);
 assert.match(deployScript, /rsync -avz --checksum --delete/);
 assert.equal(source.deploy.rootIndex.source, 'app-hub-v11/index.html');
 assert.ok(source.deploy.includeDirs.includes('app-hub-v11'));

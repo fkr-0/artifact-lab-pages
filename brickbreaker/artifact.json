@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "brickbreaker",
+  "version": "0.1.0",
+  "title": "BrickBreaker Coop",
+  "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": ["game", "arcade", "multiplayer", "p2p"],
+  "source": {
+    "kind": "directory",
+    "path": "brickbreaker",
+    "entrypoint": "index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": false,
+    "exclude": ["artifact.json", "lib/*.test.mjs"],
+    "networkAllowlist": ["https://cdn.jsdelivr.net"]
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html",
+      "lib/brickbreaker-core.mjs",
+      "lib/brickbreaker-peernet.mjs",
+      "lib/peernet-lobby.mjs",
+      "lib/standalone-network.mjs"
+    ]
+  }
+}

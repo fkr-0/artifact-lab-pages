@@ -14,12 +14,12 @@ assert.match(
 
 const corepackIndex = workflow.indexOf('corepack enable');
 const installIndex = workflow.indexOf('Install dependencies (badger-sprawl-runner)');
-const materializeIndex = workflow.indexOf('Materialize deploy stage');
+const materializeIndex = workflow.indexOf('Materialize V13 publication stage with V11 compatibility content');
 
 assert.notEqual(corepackIndex, -1, 'Pages workflow must enable Corepack before invoking pnpm-based artifact builds');
 assert.notEqual(installIndex, -1, 'Pages workflow must install badger-sprawl-runner dependencies before materialization');
 assert.notEqual(materializeIndex, -1, 'Pages workflow must materialize the deploy stage');
 assert.ok(corepackIndex < installIndex, 'Corepack must be enabled before the badger pnpm install step');
-assert.ok(installIndex < materializeIndex, 'badger-sprawl-runner dependencies must be installed before artifact-build materializes builds');
+assert.ok(installIndex < materializeIndex, 'badger-sprawl-runner dependencies must be installed before the composite publication builder materializes builds');
 assert.match(workflow, /working-directory:\s+badger-sprawl-runner/);
 assert.match(workflow, /pnpm install --frozen-lockfile/);

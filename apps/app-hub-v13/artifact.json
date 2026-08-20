@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "app-hub-v13",
+  "version": "1.0.0",
+  "title": "Artifacts Hub V13",
+  "description": "Catalog and launcher consuming generated artifact releases without owning their implementations.",
+  "kind": "application",
+  "status": "active",
+  "required": true,
+  "tags": ["hub", "catalog", "launcher", "v13"],
+  "source": {
+    "kind": "directory",
+    "path": "apps/app-hub-v13",
+    "entrypoint": "index.html",
+    "git": { "mode": "root", "ignorePaths": ["catalog.json"] }
+  },
+  "build": { "mode": "assemble", "renderer": "copy" },
+  "libraries": [
+    {
+      "name": "artifact-bridge",
+      "version": "0.1.0",
+      "delivery": "vendor",
+      "target": "vendor/artifact-bridge"
+    }
+  ],
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": ["artifact.json"]
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["newWindow"],
+    "sandbox": "none"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html", "app.js", "styles.css", "catalog.json", "vendor/artifact-bridge/bridge.js"]
+  }
+}
