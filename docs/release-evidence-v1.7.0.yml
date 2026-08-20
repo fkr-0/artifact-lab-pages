@@ -1,9 +1,9 @@
 schemaVersion: 1
-generatedAt: '2026-08-20T15:38:30+02:00'
+generatedAt: '2026-08-20T20:09:16+02:00'
 release:
   unit: Artifact Lab App Hub V13 and repository cleanup candidate
   branch: ownership/v11pd-infarrange-20260806
-  head: 1f8ac006932f9f546905a963a48dc9d3086da05c
+  head: 3bbd33bf69e6e0bf2e7ec4dbc0c9b884554d022c
   baseRelease: 1.5.1
   versionAfter: 1.7.0
   candidate: 1.7.0
@@ -11,6 +11,7 @@ release:
   tagCreated: false
   v13Ready: true
   releaseReady: false
+  phase6RepairedCandidateReady: true
   releaseIsolation: preserve-dirty-selective-index
   commitState: performed
   publishState: not_requested
@@ -19,12 +20,17 @@ release:
   workingTreeWarnings:
   - Requested cleanup commits 1-3 were already present at the start of this continuation and were validated rather than duplicated.
   - App Hub V13 was committed through a selective index so extensive concurrent Sprite Fan, Peernet, Git Recipe Book, and child-repository work remains outside the release commits.
-  - Full current-tree release:check was executed and is blocked only by concurrent independent Peernet, Hyperblast, and Badger work recorded below; no tag, push, publish, deploy, or remote repository creation is performed by this phase.
+  - The original checkout remains intentionally dirty and its concurrent expanded release gate is not the Phase 6 verification authority; clean-worktree results are recorded separately below.
+  - No tag, push, publish, deploy, or remote repository creation is performed by Phase 6.
   commits:
     binaryCleanup: 61b88bbe
     htmlRelocation: f5fcc521
     submoduleOwnership: bfeb6ff2
     appHubV13: 1f8ac006
+    releasePreparation: ea4be54a
+    cleanCloneReproducibility: 0a3e8af7
+    catalogRefresh: 87f24335
+    verificationStability: 3bbd33bf
 scope:
   appHubV13:
     artifactVersion: 1.0.0
@@ -66,7 +72,7 @@ scope:
     staleLocalExportsPreserved: true
 revisionVector:
   root:
-    checkout: 1f8ac006932f9f546905a963a48dc9d3086da05c
+    checkout: 3bbd33bf69e6e0bf2e7ec4dbc0c9b884554d022c
     branch: ownership/v11pd-infarrange-20260806
     dirty: true
   stagedSubmodulePins:
@@ -74,7 +80,7 @@ revisionVector:
     badger-sprawl-runner: ccd1c439e706c1397f48ed544a44712ff1d087df
     hyperblast-shooter: c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a
     v11-peer-daw: 37783861b7681852b0605a891a2b831c4cde82de
-verification:
+phase5DirtyVerification:
   focusedArtifactctlAndV13NodeTests:
     tests: 24
     passed: 24
@@ -191,7 +197,103 @@ verification:
     ownershipBranchOnlyCommits: 12
     localMainTrustedForIntegration: false
     strategy: fresh origin/main clean worktree; explicit logical commits and path-limited conflict resolution
-publicationBlockers:
+phase6CleanWorktree:
+  baseHead: ea4be54aab6bfe4964250d04c5fb5073d38c8be7
+  repairedBranchHead: 3bbd33bf69e6e0bf2e7ec4dbc0c9b884554d022c
+  verificationAuthority: isolated-ws-bridge-worktree
+  publicationReady: true
+  tagCreated: false
+  pushed: false
+  published: false
+  deployed: false
+  rootInvariants:
+    packageVersion: 1.7.0
+    rootPublicationTarget: app-hub-v13
+    catalogEntries: 55
+    bridgeSymlink: .ws-bridge/bridge.yml -> ../bridge.yml
+  submodulePins:
+    ethic-brawl: e2f2c020d7ebd41945f8c316db75ae0ec64a9485
+    badger-sprawl-runner: ccd1c439e706c1397f48ed544a44712ff1d087df
+    bathroom-emergency-guide: 6d3ae5eba0f691059ef0db53287b1d9539486fd8
+    hyperblast-shooter: c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a
+    v11-peer-daw: 37783861b7681852b0605a891a2b831c4cde82de
+  candidateAttributableRepairs:
+  - commit: 0a3e8af7
+    summary: Make clean-clone publication reproducible by demoting non-standalone BrickBreaker to provisional, restoring the declared artifact-handling source document, and aligning stale Hyperblast/procedural-studio tests to committed sources.
+  - commit: 87f24335
+    summary: Refresh the V13 catalog after clean-clone publication repair while preserving the 55-entry root catalog.
+  - commit: 3bbd33bf
+    summary: Stabilize clean verification by bounding root Chromium to six workers, stubbing the actual ArtifactHTTPServer in the occupied-port test, and making the synthetic Hub file-share context-menu interaction atomic.
+  cleanGate:
+    command: pnpm run release:check
+    result: passed
+    artifactAuditErrors: 0
+    artifactAuditWarnings: 0
+    portfolioTests: 35
+    portfolioPassed: 35
+    rootNodeTests: 140
+    rootNodePassed: 140
+    rootChromiumTests: 63
+    rootChromiumPassed: 63
+  browserStability:
+    unboundedDefaultWorkers:
+      passed: 53
+      failedByTimeout: 10
+      interpretation: resource-contention-only; all 10 failures passed serially
+    serialFailedSetReplay:
+      tests: 10
+      passed: 10
+      failed: 0
+    boundedSixWorkers:
+      firstRunPassed: 63
+      firstRunFailed: 0
+      preRaceFixReleaseRunPassed: 62
+      preRaceFixReleaseRunFailed: 1
+    fileShareRaceRepeatAfterFix:
+      tests: 10
+      passed: 10
+      failed: 0
+    finalReleaseRun:
+      tests: 63
+      passed: 63
+      failed: 0
+  v13Publication:
+    focusedNodeTests: 27
+    focusedNodePassed: 27
+    chromiumTests: 1
+    chromiumPassed: 1
+    rootIndex: hub/v13/index.html
+    requiredPathsVerified: 14
+    catalogEntries: 55
+    verifiedNativeBuilds: 5
+    provisionalEntries: 45
+    externalEntries: 1
+    inlineEntries: 1
+    sourceOnlyEntries: 3
+    portfolioVersion: 1.7.0
+  dirtyTreeBlockerReproduction:
+    v11PeerDawPeernetVendorDrift:
+      reproducesAtCommittedPin: false
+      details: Both named v11-peer-daw vendor copies match the canonical Peernet sources at v1.5.0; separate PeerModGroove vendor drift is outside this five-commit candidate gate.
+    hyperblastEncounterStorySmoke:
+      reproducesAtCommittedPin: true
+      resolution: Root smoke expectations were stale relative to pinned Hyperblast v0.2.0 and were corrected without changing the child pin.
+    badgerSpriteSheetsFixture:
+      reproducesAtCommittedPin: false
+      conditionPresent: true
+      details: Pinned Badger v1.5.2 data/sprites.json exposes sheets (73) rather than spriteSheets, but the concurrent production-roundtrip test is absent from ea4be54a and the committed Sprite Fan runtime accepts sheets as a fallback.
+  dedicatedRepoGaps:
+    git-recipe-book: missing
+    inf-arrange: missing
+    overlay-cam: missing
+    probe: gh-api-read-only
+    remoteCreationPerformed: false
+  originalCheckout:
+    dirty: true
+    childCheckoutHeadsUntouched: true
+    unrelatedDirtyWorkPreserved: true
+    authoritativeForPhase6Verification: false
+phase5DirtyCheckoutBlockers:
 - id: peernet-vendor-sync
   scope: unrelated-pre-existing
   description: Checked Peernet vendor copies differ in the dirty v11-peer-daw integration; Phase 3 does not rewrite independent-project vendor state.
