@@ -1,6 +1,6 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-08-20T13:35:55.925Z",
+  "generatedAt": "2026-08-20T15:25:44.840Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
@@ -9,10 +9,10 @@
   "summary": {
     "total": 55,
     "verified": 0,
-    "provisional": 44,
+    "provisional": 45,
     "external": 1,
     "inline": 1,
-    "sourceOnly": 9,
+    "sourceOnly": 8,
     "active": 2,
     "dated": 55
   },
@@ -46,12 +46,50 @@
         "sandbox": "strict"
       },
       "git": {
-        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
-        "changedAt": "2026-08-20T13:33:14.000Z",
-        "basis": "manifest",
-        "path": "registry/sources.d/artifact-handling-standard.json"
+        "revision": "0a3e8af75afd8a29438df93307c8c576f661a7c4",
+        "changedAt": "2026-08-20T15:25:33.000Z",
+        "basis": "source",
+        "path": "docs/architecture/ARTIFACT_HANDLING.md"
       },
-      "changedAt": "2026-08-20T13:33:14.000Z",
+      "changedAt": "2026-08-20T15:25:33.000Z",
+      "receipt": null
+    },
+    {
+      "id": "brickbreaker",
+      "version": "0.1.0",
+      "title": "BrickBreaker Coop",
+      "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "arcade",
+        "multiplayer",
+        "p2p"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/brickbreaker/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "0a3e8af75afd8a29438df93307c8c576f661a7c4",
+        "changedAt": "2026-08-20T15:25:33.000Z",
+        "basis": "source",
+        "path": "brickbreaker"
+      },
+      "changedAt": "2026-08-20T15:25:33.000Z",
       "receipt": null
     },
     {
@@ -86,44 +124,6 @@
         "changedAt": "2026-08-20T13:33:14.000Z",
         "basis": "source",
         "path": "apps/app-hub-v13"
-      },
-      "changedAt": "2026-08-20T13:33:14.000Z",
-      "receipt": null
-    },
-    {
-      "id": "brickbreaker",
-      "version": "0.1.0",
-      "title": "BrickBreaker Coop",
-      "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "game",
-        "arcade",
-        "multiplayer",
-        "p2p"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/brickbreaker/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
-        "changedAt": "2026-08-20T13:33:14.000Z",
-        "basis": "source",
-        "path": "brickbreaker"
       },
       "changedAt": "2026-08-20T13:33:14.000Z",
       "receipt": null
