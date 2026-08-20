@@ -28,10 +28,10 @@ records:
     status: reconciled
     action: retain-submodule-at-v1.5.0
   - path: bathroom-emergency-guide
-    observedOwnership: dirty-outer-nested-git-plus-clean-inner-project
+    observedOwnership: dirty-local-submodule-worktree-plus-clean-canonical-inner-project
     intendedOwnership: independent-project
-    status: classified
-    action: preserve-outer-synthesis-and-extract-only-after-remote-baseline-reconciliation
+    status: migrated
+    action: parent-gitlink-pinned-to-fkr-0-bathroom-emergency-v5.1.2-preserve-local-outer-synthesis
   - path: git-recipe-book
     observedOwnership: parent-tree-no-child-git
     intendedOwnership: independent-project

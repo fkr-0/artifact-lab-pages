@@ -1,7 +1,0 @@
-/* src/styles/theme-templates.css — The Grey Book */
-:root {
-  --sg-accent: #6B7280;
-  --sg-accent-dim: #4B5563;
-  --sg-accent-glow: rgba(107,114,128,0.06);
-  --sg-text-on-accent: #ffffff;
-}

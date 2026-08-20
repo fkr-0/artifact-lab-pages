@@ -19,7 +19,8 @@ playwright-report/
 
 # Local agent/editor state
 .serena/
-.ws-bridge/
+.ws-bridge/*
+!.ws-bridge/bridge.yml
 
 # Archive/export bundles (keep source files in repo)
 *.zip

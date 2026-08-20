@@ -1,12 +1,15 @@
 [submodule "ethic-brawl"]
 	path = ethic-brawl
-	url = git@github.com:fkr-0/ethic-brawl.git
+	url = https://github.com/fkr-0/ethic-brawl.git
 [submodule "badger-sprawl-runner"]
 	path = badger-sprawl-runner
-	url = git@github.com:fkr-0/badger-sprawl-runner.git
+	url = https://github.com/fkr-0/badger-sprawl-runner.git
 [submodule "v11-peer-daw"]
 	path = v11-peer-daw
-	url = git@github.com:fkr-0/v11-peer-daw.git
+	url = https://github.com/fkr-0/v11-peer-daw.git
 [submodule "hyperblast-shooter"]
 	path = hyperblast-shooter
-	url = ../hyperblast-shooter
+	url = https://github.com/fkr-0/hyperblast-shooter.git
+[submodule "bathroom-emergency-guide"]
+	path = bathroom-emergency-guide
+	url = https://github.com/fkr-0/bathroom-emergency.git

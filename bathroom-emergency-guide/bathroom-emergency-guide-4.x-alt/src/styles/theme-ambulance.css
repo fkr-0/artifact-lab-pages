@@ -1,7 +1,0 @@
-/* src/styles/theme-ambulance.css — The Red Book */
-:root {
-  --sg-accent: #C23D2E;
-  --sg-accent-dim: #9b3024;
-  --sg-accent-glow: rgba(194,61,46,0.06);
-  --sg-text-on-accent: #ffffff; /* #C23D2E passes WCAG AA with white (≈4.87:1) */
-}

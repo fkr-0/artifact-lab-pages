@@ -1,7 +1,0 @@
-/* src/styles/theme-body.css — The Green Book */
-:root {
-  --sg-accent: #16A34A;
-  --sg-accent-dim: #11823b;
-  --sg-accent-glow: rgba(22,163,74,0.06);
-  --sg-text-on-accent: #ffffff;
-}

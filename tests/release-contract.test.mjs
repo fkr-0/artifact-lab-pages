@@ -64,8 +64,9 @@ test('local dependency, test, bytecode, and agent outputs stay ignored', () => {
     '.artifacts-test-module-fix/',
     '.test-build-stats.json',
     '.serena/',
-    '.ws-bridge/',
+    '.ws-bridge/*',
   ]) {
     assert.match(gitignore, new RegExp(`^${entry.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm'));
   }
+  assert.match(gitignore, /^!\.ws-bridge\/bridge\.yml$/m);
 });
