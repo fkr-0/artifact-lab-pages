@@ -362,9 +362,9 @@ artifacts:
 - path: apps/app-hub-v13/styles.css
   sha256: 3a5c6ac3d97680c7417926920df05fe1813fdb6cde69bf1bc483bcf0af2d9655
 - path: apps/app-hub-v13/catalog.json
-  sha256: a428b51a09a260b0f5a1a2f683eaa1940d6c30477bbe2be65ea560bf95498e9f
+  sha256: ab349955ff4beb5925df46b12e81c55cd2e47c14bcb9341acd5e90b4c226450c
 - path: package.json
-  sha256: 960d25de7920145ba03f9c6895eedfd2fe7e5c6455ba85512c2d341d661caffa
+  sha256: 51699659e51f9346996c063dbee5c631b31c03ba67a0c7d1760f3321d1ba1fd9
 - path: CHANGELOG.md
   sha256: 324e99e113752761cb7f4bcdc5ad45e7dc59fc90c8467d5ffcc0c58dc5051b18
 - path: scripts/build-publication-site.mjs
@@ -372,7 +372,7 @@ artifacts:
 - path: .github/workflows/pages.yml
   sha256: 4c87966a33de73b135b68c34c2e2581e930c33dc7ba3513b1e2f6258cc85f09d
 - path: tests/publication-site-v13.test.mjs
-  sha256: dca42aaefa623dd41deda86e106555f86a72479afa5b931b30f124a76cf6fe3b
+  sha256: 1c27a24fed5a739e607d69e48ca206a76a8c4c5ca024aebbcd742f47d6fc3ffb
 - path: docs/plans/2026-08-20-artifact-lab-1.7.0-publication-readiness.md
   sha256: 92d6fe6734253d1b2af4efde08c7c6a2df9534388bc4574b87c420cde2c805fb
 omittedActions:
