@@ -1,5 +1,5 @@
 schemaVersion: 1
-generatedAt: '2026-08-20T20:09:16+02:00'
+generatedAt: '2026-08-21T13:30:13+02:00'
 release:
   unit: Artifact Lab App Hub V13 and repository cleanup candidate
   branch: ownership/v11pd-infarrange-20260806
@@ -271,6 +271,57 @@ phase6CleanWorktree:
     inlineEntries: 1
     sourceOnlyEntries: 3
     portfolioVersion: 1.7.0
+  exactCommittedCandidateReplay:
+    verifiedAt: '2026-08-21T13:28:30+02:00'
+    head: 3bbd33bf69e6e0bf2e7ec4dbc0c9b884554d022c
+    initialRootWorktreeClean: true
+    submodulesInitializedAtParentPins: true
+    submoduleInitialization:
+      method: isolated-worktree-local-object-reuse
+      note: Initial HTTPS submodule update hit ws-bridge idle timeout during cloning; missing submodules were then initialized from the untouched original checkout's local Git objects and checked out at the same committed parent pins.
+    releaseGate:
+      command: pnpm run release:check
+      result: passed
+      exitCode: 0
+      artifactAuditErrors: 0
+      artifactAuditWarnings: 0
+      portfolioTests: 35
+      portfolioPassed: 35
+      rootNodeTests: 140
+      rootNodePassed: 140
+      rootChromiumTests: 63
+      rootChromiumPassed: 63
+    v13FocusedNode:
+      command: node --test tests/app-hub-v13.test.mjs tests/publication-site-v13.test.mjs tooling/artifactctl/tests/*.test.mjs
+      tests: 24
+      passed: 24
+      failed: 0
+    v13Chromium:
+      command: npx playwright test tests/e2e/app-hub-v13.spec.mjs --project=chromium --workers=1
+      tests: 1
+      passed: 1
+      failed: 0
+    publicationMaterialization:
+      command: node scripts/build-publication-site.mjs --out .wsbridge/phase6-exact-publication --no-build
+      result: passed
+      rootIndex: hub/v13/index.html
+      requiredPathsVerified: 14
+      catalogEntries: 55
+      verifiedNativeBuilds: 5
+      provisionalEntries: 45
+      externalEntries: 1
+      inlineEntries: 1
+      sourceOnlyEntries: 3
+    postGateWorktreeState:
+      gitDiffCheck: passed
+      trackedRootDiffs:
+      - path: apps/app-hub-v13/catalog.json
+        scope: generated-metadata-only
+        details: Canonical catalog regeneration changes only the top-level generatedAt timestamp; catalog contents, ordering, counts, and release semantics are unchanged.
+      childBuildDirtiness:
+      - badger-sprawl-runner
+      localEvidenceOutputsIgnoredOrUntracked: true
+      interpretation: Verification is green and publication-ready, but the canonical gate is not byte-clean because it intentionally rewrites catalog generatedAt during build:catalog.
   dirtyTreeBlockerReproduction:
     v11PeerDawPeernetVendorDrift:
       reproducesAtCommittedPin: false
