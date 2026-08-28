@@ -32,5 +32,8 @@ playwright-report/
 blob-report/
 .playwright/
 
+# local agent / coordination state
+.ws-bridge/
+
 # misc
 *.log

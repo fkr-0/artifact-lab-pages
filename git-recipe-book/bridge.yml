@@ -22,6 +22,30 @@ commands:
     run: ["pnpm", "vitest", "run", "src/components/git/__tests__/GitLessonPanel.integration.test.tsx"]
     timeoutMs: 120000
     category: test
+  test:curriculum-v2:
+    run: ["pnpm", "vitest", "run", "src/lib/__tests__/curriculum-v2.test.ts"]
+    timeoutMs: 120000
+    category: test
+  test:semantic-events:
+    run: ["pnpm", "vitest", "run", "src/lib/__tests__/git-semantic-events.test.ts"]
+    timeoutMs: 120000
+    category: test
+  test:roadmap-semantics:
+    run: ["pnpm", "vitest", "run", "src/lib/__tests__/roadmap-git-semantics.test.ts"]
+    timeoutMs: 120000
+    category: test
+  test:native-conformance:
+    run: ["pnpm", "vitest", "run", "src/lib/__tests__/native-git-conformance.test.ts"]
+    timeoutMs: 120000
+    category: test
+  test:a11y:
+    run: ["pnpm", "playwright", "test", "e2e/accessibility.spec.ts", "--project=chromium", "--workers=1"]
+    timeoutMs: 180000
+    category: test
+  test:e2e:learning:
+    run: ["pnpm", "playwright", "test", "e2e/lessons.spec.ts", "--project=chromium"]
+    timeoutMs: 300000
+    category: test
   test:e2e:
     run: ["pnpm", "playwright", "test", "--project=chromium"]
     timeoutMs: 300000
