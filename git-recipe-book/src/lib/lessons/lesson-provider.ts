@@ -1,3 +1,4 @@
+import { LESSONS_V2, adaptLessonV2 } from '@/curriculum'
 import type {
   ILesson,
   ILessonCategory,
@@ -46,7 +47,7 @@ const COMMAND_PEDAGOGY: Record<string, CommandPedagogy> = {
     meaning: 'Copies chosen changes into the staging area for the next commit.',
     usedHere: 'Use it to decide what belongs in the next snapshot.',
     pitfall: 'git add . stages everything under the current folder; use file names when you need a smaller snapshot.',
-    outcome: 'Selected changes move from working-directory changes into the staged set shown by git status.',
+    outcome: 'Selected content is copied into the index for the next snapshot; the working files remain in place.',
     checkpoint: 'Did you stage exactly the recipe changes you want in the next snapshot?',
   },
   commit: {
@@ -61,6 +62,18 @@ const COMMAND_PEDAGOGY: Record<string, CommandPedagogy> = {
     usedHere: 'Use it to inspect what happened before and where branches point.',
     outcome: 'Displays commit hashes, authors, dates, and messages in newest-first order.',
     checkpoint: 'Which commit is the newest, and what changed there?',
+  },
+  show: {
+    meaning: 'Shows one selected commit, branch, or tag target in detail.',
+    usedHere: 'Use it to connect a name or hash to the recorded snapshot it identifies.',
+    outcome: 'Displays the selected commit without changing repository state.',
+    checkpoint: 'Which recorded snapshot did the name resolve to?',
+  },
+  diff: {
+    meaning: 'Compares content between Git states without changing them.',
+    usedHere: 'Use plain diff for working tree vs index and --staged for index vs HEAD.',
+    outcome: 'Prints the content difference between the selected states without mutating them.',
+    checkpoint: 'Are you looking at unstaged changes or the candidate next snapshot?',
   },
   branch: {
     meaning: 'Creates or lists movable names that point to commits.',
@@ -113,7 +126,8 @@ const COMMAND_PEDAGOGY: Record<string, CommandPedagogy> = {
   pull: {
     meaning: 'Downloads and integrates remote changes into the current branch.',
     usedHere: 'Use it when you are ready to bring remote work into your local branch.',
-    pitfall: 'Pull is fetch plus integration; fetch first when you want a safer preview.',
+    pitfall:
+      'Pull performs fetch plus a configured integration strategy (commonly merge, rebase, or fast-forward-only); fetch first when you want a safer preview.',
     outcome: 'Your current branch receives remote commits through merge or configured rebase.',
     checkpoint: 'Did your branch become up to date, or did Git ask for conflict resolution?',
   },
@@ -141,10 +155,30 @@ const COMMAND_PEDAGOGY: Record<string, CommandPedagogy> = {
     meaning: 'Moves the current branch pointer and optionally changes staged or working files.',
     usedHere: 'Use it to undo local history during controlled practice.',
     pitfall: '--hard discards local file changes that are not saved elsewhere.',
-    outcome: 'The branch pointer moves; with --hard, files are overwritten to match the target commit.',
-    checkpoint: 'What history or file state did you intentionally discard?',
+    outcome:
+      'The branch pointer moves; soft keeps changes staged, mixed unstages them, and hard replaces working files.',
+    checkpoint: 'Which layers did the chosen reset mode intentionally change?',
     safetyNote:
       'reset --hard can destroy uncommitted work. In real repositories, run git status and consider a backup branch before using it.',
+  },
+  restore: {
+    meaning: 'Restores selected working or staged content without moving commit history.',
+    usedHere: 'Use it for local file/index recovery when the branch pointer is already correct.',
+    pitfall: 'Restoring an unstaged working edit discards that local edit.',
+    outcome: 'The selected working or staging entry returns to the requested recorded state while history stays put.',
+    checkpoint: 'Did you need to fix the working tree, the index, or history?',
+  },
+  revert: {
+    meaning: 'Creates a new commit that reverses the change introduced by an earlier commit.',
+    usedHere: 'Use it when recorded/shared history should remain intact but a change must be undone.',
+    outcome: 'A new inverse commit is added; existing commits keep their identities.',
+    checkpoint: 'Why is a new inverse commit safer for shared history than moving the branch backward?',
+  },
+  reflog: {
+    meaning: 'Lists recent local HEAD/ref movement, including positions no longer named by a branch.',
+    usedHere: 'Use it as recovery evidence after reset or other local pointer movement.',
+    outcome: 'Displays recent local ref positions without changing repository state.',
+    checkpoint: 'Which earlier pointer position could help recover a commit?',
   },
   'cherry-pick': {
     meaning: 'Copies the change introduced by one commit onto your current branch.',
@@ -162,17 +196,24 @@ function commandFromStep(step: ILessonStep): string | undefined {
 }
 
 function enrichStepForBeginners(step: ILessonStep): ILessonStep {
-  if (step.toolIntroductions?.length && step.expectedOutcome && step.checkpointQuestions?.length) {
-    return step
+  const normalizedStep: ILessonStep =
+    step.validation && step.requiresPrediction === undefined ? { ...step, requiresPrediction: true } : step
+
+  if (
+    normalizedStep.toolIntroductions?.length &&
+    normalizedStep.expectedOutcome &&
+    normalizedStep.checkpointQuestions?.length
+  ) {
+    return normalizedStep
   }
 
-  const command = commandFromStep(step)
+  const command = commandFromStep(normalizedStep)
   const pedagogy = command ? COMMAND_PEDAGOGY[command] : undefined
-  if (!command || !pedagogy) return step
+  if (!command || !pedagogy) return normalizedStep
 
   return {
-    ...step,
-    toolIntroductions: step.toolIntroductions ?? [
+    ...normalizedStep,
+    toolIntroductions: normalizedStep.toolIntroductions ?? [
       GIT_TOOL_INTRO,
       {
         term: command,
@@ -181,9 +222,9 @@ function enrichStepForBeginners(step: ILessonStep): ILessonStep {
         beginnerPitfall: pedagogy.pitfall,
       },
     ],
-    expectedOutcome: step.expectedOutcome ?? pedagogy.outcome,
-    checkpointQuestions: step.checkpointQuestions ?? [pedagogy.checkpoint],
-    safetyNote: step.safetyNote ?? pedagogy.safetyNote,
+    expectedOutcome: normalizedStep.expectedOutcome ?? pedagogy.outcome,
+    checkpointQuestions: normalizedStep.checkpointQuestions ?? [pedagogy.checkpoint],
+    safetyNote: normalizedStep.safetyNote ?? pedagogy.safetyNote,
   }
 }
 
@@ -208,19 +249,27 @@ const CATEGORIES: ILessonCategory[] = [
     color: '#8b5cf6',
   },
   {
+    id: 'recovery',
+    title: 'Recovery',
+    icon: '🛟',
+    description: 'Repair working, staged, and recorded state with the least destructive appropriate tool',
+    order: 3,
+    color: '#ef4444',
+  },
+  {
     id: 'remotes',
     title: 'Remotes',
     icon: '☁️',
-    description: 'Working with remote repositories',
-    order: 3,
+    description: 'Reason about two repository copies, remote-tracking refs, and collaboration',
+    order: 4,
     color: '#06b6d4',
   },
   {
     id: 'advanced',
-    title: 'Advanced',
+    title: 'Selective History & Mastery',
     icon: '🚀',
-    description: 'Stash, reset, cherry-pick, and more',
-    order: 4,
+    description: 'Tags, cherry-pick, abstract internals, spaced review, and transfer capstones',
+    order: 5,
     color: '#ef4444',
   },
 ]
@@ -660,7 +709,7 @@ const LESSONS_DATA: ILesson[] = [
         description: 'Bring the changes from another branch into your current branch.',
         hint: 'Type: git merge desserts',
         concept:
-          'A merge creates a new "merge commit" with two parents — one from each branch. This preserves the full history of both lines.',
+          'Merge has multiple outcomes. If the current branch can simply advance, Git fast-forwards it without a merge commit. When histories have diverged and Git performs a normal merge, it creates a two-parent merge commit that preserves both ancestries.',
         validation: { type: 'regex', pattern: '^git\\s+merge\\s+\\S+$' },
       },
       {
@@ -782,12 +831,12 @@ const LESSONS_DATA: ILesson[] = [
       },
       {
         id: 'remote-checkout-track',
-        title: 'Checkout the Remote Branch',
-        description: 'Create a local branch that tracks the remote branch.',
-        hint: 'Type: git checkout origin/main',
+        title: 'Create an Explicit Tracking Branch',
+        description: 'Create a local branch and explicitly connect it to the remote-tracking ref.',
+        hint: 'Type: git switch -c upstream-main --track origin/main',
         concept:
-          'When you checkout a remote-tracking branch, Git creates a local branch that "tracks" it. This means future pulls and pushes know exactly where to sync.',
-        validation: { type: 'regex', pattern: '^git\\s+(checkout|switch)\\s+\\S+/\\S+' },
+          'origin/main is a local remote-tracking ref, not your editable local main branch. Create or configure a local branch explicitly when you want an upstream relationship.',
+        validation: { type: 'regex', pattern: '^git\\s+(checkout|switch).+origin/main' },
       },
     ],
   },
@@ -833,10 +882,10 @@ const LESSONS_DATA: ILesson[] = [
       {
         id: 'pull-exec',
         title: 'Pull and Merge',
-        description: 'Pull = fetch + merge. This brings remote changes into your local branch.',
+        description: 'Pull fetches and then integrates according to the configured pull strategy.',
         hint: 'Type: git pull origin main',
         concept:
-          "git pull downloads changes from the remote and merges them into your current branch. If there are no conflicts, it's seamless. If there are, you'll need to resolve them. For more control, use fetch + merge separately.",
+          'git pull first fetches remote information, then applies the configured integration strategy. Merge is common; repositories may instead require rebase or fast-forward-only behavior. Fetch separately when you want to inspect before integrating.',
         validation: { type: 'regex', pattern: '^git\\s+pull\\s+\\S+\\s+\\S+' },
       },
       {
@@ -881,10 +930,10 @@ const LESSONS_DATA: ILesson[] = [
         id: 'push-exec',
         title: 'Push to Remote',
         description: 'Upload your commits to the remote repository.',
-        hint: 'Type: git push origin main',
+        hint: 'Type: git push -u origin main',
         concept:
-          'Push sends your local commits to the remote, updating the remote branch. It also sets up tracking so future pushes/pulls are simpler. If the remote has newer commits, Git will reject your push — you need to pull first.',
-        validation: { type: 'regex', pattern: '^git\\s+push\\s+\\S+\\s+\\S+' },
+          'Push sends local commits to the remote branch. The -u/--set-upstream flag additionally records the upstream relationship; a plain git push origin main does not imply that setup. If the remote has newer commits, inspect and integrate them before retrying.',
+        validation: { type: 'regex', pattern: '^git\\s+push\\s+(-u|--set-upstream)\\s+\\S+\\s+\\S+' },
       },
       {
         id: 'push-verify',
@@ -1199,6 +1248,11 @@ export class LessonProvider implements ILessonRegistry {
 
   constructor() {
     for (const l of LESSONS_DATA) this.lessons.set(l.id, enrichLessonForBeginners(l))
+    // Migrated v2 declarations deliberately override same-id legacy lessons while
+    // the rest of the curriculum continues through the compatibility adapter.
+    for (const definition of LESSONS_V2) {
+      this.lessons.set(definition.id, enrichLessonForBeginners(adaptLessonV2(definition)))
+    }
     for (const c of CATEGORIES) this.categories.set(c.id, c)
   }
 

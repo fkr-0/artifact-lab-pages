@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+const TERMINAL_TRANSCRIPT_CLASS = 'flex-1 overflow-y-auto p-3 font-mono text-sm space-y-1 custom-scrollbar'
+
 export default function GitTerminal() {
   const { terminalLines, executeCommand, navigateHistory, gitState, currentLessonId, currentStepIndex } = useGitStore()
   const [input, setInput] = useState('')
@@ -182,7 +184,7 @@ export default function GitTerminal() {
           <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
           <div className="w-3 h-3 rounded-full bg-[#28c840]" />
         </div>
-        <span className="text-xs text-[#565f89] font-mono ml-2">git-terminal — recipe-book</span>
+        <span className="text-xs text-[#9aa5ce] font-mono ml-2">git-terminal — recipe-book</span>
         {lastExitCode && (
           <span
             className={`ml-auto text-xs font-mono ${lastExitCode === 'success' ? 'text-emerald-400' : 'text-red-400'}`}
@@ -193,7 +195,8 @@ export default function GitTerminal() {
       </div>
 
       {/* Terminal Body */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 font-mono text-sm space-y-1 custom-scrollbar">
+      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: transcript overflow must be keyboard-scrollable (WCAG 2.1.1). */}
+      <div ref={scrollRef} className={TERMINAL_TRANSCRIPT_CLASS} tabIndex={0} aria-label="Terminal transcript">
         <AnimatePresence initial={false}>
           {terminalLines.map((line, i) => (
             <motion.div
@@ -218,7 +221,7 @@ export default function GitTerminal() {
 
         {/* Contextual hint for lesson */}
         {currentStep && terminalLines.length > 0 && terminalLines[terminalLines.length - 1]?.type === 'error' && (
-          <div className="text-[#565f89] text-xs mt-1">💡 Hint: {currentStep.hint}</div>
+          <div className="text-[#9aa5ce] text-xs mt-1">💡 Hint: {currentStep.hint}</div>
         )}
       </div>
 
@@ -262,7 +265,7 @@ export default function GitTerminal() {
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="w-full bg-transparent border-none outline-none text-[#c0caf5] font-mono text-sm placeholder-[#565f89]"
+              className="w-full bg-transparent border-none outline-none text-[#c0caf5] font-mono text-sm placeholder-[#9aa5ce]"
               placeholder="Type a git command... (Tab to autocomplete)"
               autoComplete="off"
               spellCheck={false}

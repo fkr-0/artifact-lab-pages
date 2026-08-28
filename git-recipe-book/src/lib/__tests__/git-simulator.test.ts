@@ -515,9 +515,10 @@ describe('GitSimulator', () => {
 
       const result = sim.reset(firstCommitId.slice(0, 7), 'soft')
       expect(result.success).toBe(true)
-      // In soft reset, staging should keep changes
+      // Soft reset moves the branch while keeping the removed commit's content selected in the index.
       const newState = sim.getState()
-      expect(newState.staging).toEqual({})
+      expect(newState.staging['new.txt']).toBe('hello')
+      expect(newState.working['new.txt']).toBe('hello')
     })
 
     it('resets with --mixed (default)', () => {
@@ -554,9 +555,11 @@ describe('GitSimulator', () => {
       const featureCommitId = Object.values(state.commits).find((c) => c.message === 'feature work')?.id
       if (!featureCommitId) throw new Error('cherry-pick fixture must contain the feature commit')
 
-      const result = sim.cherryPick(featureCommitId.slice(0, 7))
+      const result = sim.cherryPick(featureCommitId)
       expect(result.success).toBe(true)
-      expect(result.output).toContain('cherry-picked')
+      expect(result.output).toContain('feature work')
+      const cherryPickedTip = sim.getState().commits[sim.getState().branches.main.commitId]
+      expect(cherryPickedTip.message).toBe('feature work')
     })
 
     it('returns error for invalid hash', () => {

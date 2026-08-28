@@ -46,25 +46,11 @@ export function ThemeSwitcher({ currentTheme = 'dark', onThemeChange, variant = 
   }, [onThemeChange])
 
   const handleThemeChange = useCallback((theme: string) => {
-    // Apply theme to document
-    document.documentElement.classList.remove('light', 'dark')
-    if (theme !== 'v11-cyberpunk') {
-      document.documentElement.classList.add(theme)
-    }
-    document.body.setAttribute('data-theme', theme)
-
-    // Store preference
-    localStorage.setItem('git-recipe-book-theme', theme)
-
     onThemeChangeRef.current?.(theme)
     setIsOpen(false)
   }, [])
 
   useEffect(() => {
-    // Load saved theme on mount
-    const savedTheme = localStorage.getItem('git-recipe-book-theme') || 'dark'
-    handleThemeChange(savedTheme)
-
     // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -74,7 +60,7 @@ export function ThemeSwitcher({ currentTheme = 'dark', onThemeChange, variant = 
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [handleThemeChange])
+  }, [])
 
   const currentThemeData = themes.find((t) => t.id === currentTheme)
 

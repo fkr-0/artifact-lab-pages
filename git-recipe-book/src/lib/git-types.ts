@@ -1,10 +1,28 @@
 // ─── Core Git Types ──────────────────────────────────────────────────────────
 
+import type { RepositoryEvent } from '@/git-model/events'
+
 export interface FileEntry {
   name: string
   content: string
   type: 'file' | 'folder'
   children?: FileEntry[]
+}
+
+export interface ReflogEntry {
+  id: string
+  action: string
+  before: string
+  after: string
+  timestamp: number
+}
+
+export interface PendingOperation {
+  type: 'merge'
+  originalHeadCommitId: string
+  otherCommitId: string
+  otherRef: string
+  conflictPaths: string[]
 }
 
 export type FileTree = Map<string, FileEntry>
@@ -70,12 +88,20 @@ export interface GitState {
   remotes: Record<string, GitRemote>
   /** Tracking relationships: local branch → { remote, remoteBranch } */
   trackingBranches: Record<string, { remote: string; remoteBranch: string }>
+  /** Recent local ref/HEAD movement used to teach recovery. */
+  reflog: ReflogEntry[]
+  /** In-progress operation such as a merge stopped for conflict resolution. */
+  pendingOperation?: PendingOperation
 }
 
 export interface GitCommandResult {
   success: boolean
   output: string
   error?: string
+  /** Some Git commands stop with a non-zero status after intentionally mutating state (for example merge conflicts). */
+  mutated?: boolean
+  /** Semantic state transitions produced by this command in the teaching backend. */
+  events?: RepositoryEvent[]
 }
 
 // ─── Branch Colors ───────────────────────────────────────────────────────────

@@ -1,8 +1,19 @@
 import { Button } from '@/components/ui/button'
-import type { GitStateLayer } from '@/lib/learning/git-learning-model'
+import { type GitStateLayer, classifyGitCommand } from '@/lib/learning/git-learning-model'
 import { recommendNextLearningActions } from '@/lib/learning/learning-advisor'
 import { lessonProvider, useGitStore } from '@/stores/git-store'
-import { Check, ChevronRight, CircleHelp, Eye, FlaskConical, LockKeyhole, Sparkles } from 'lucide-react'
+import {
+  AlertTriangle,
+  Check,
+  ChevronRight,
+  CircleHelp,
+  Eye,
+  FlaskConical,
+  Lightbulb,
+  LockKeyhole,
+  RotateCcw,
+  Sparkles,
+} from 'lucide-react'
 import { useMemo } from 'react'
 
 const LAYER_CHOICES: Array<{ id: GitStateLayer; label: string }> = [
@@ -21,10 +32,14 @@ export default function LearningMission() {
     currentStepIndex,
     completedLessons,
     checkpointResults,
+    learningEvidence,
     predictedLayers,
     predictionMade,
     pendingReflectionStepId,
+    hintLevels,
     loadLesson,
+    restartCurrentLesson,
+    revealNextHint,
     setPredictedLayers,
     predictNoStateChange,
     completeKnowledgeStep,
@@ -32,8 +47,14 @@ export default function LearningMission() {
 
   const lessons = lessonProvider.getLessons()
   const recommendations = useMemo(
-    () => recommendNextLearningActions({ lessons, completedLessonIds: completedLessons, checkpointResults }),
-    [lessons, completedLessons, checkpointResults],
+    () =>
+      recommendNextLearningActions({
+        lessons,
+        completedLessonIds: completedLessons,
+        checkpointResults,
+        learningEvidence,
+      }),
+    [lessons, completedLessons, checkpointResults, learningEvidence],
   )
   const currentLesson = lessonProvider.getLesson(currentLessonId || '')
   const currentStep = currentLesson?.steps[currentStepIndex]
@@ -73,6 +94,19 @@ export default function LearningMission() {
   const lessonComplete = completedLessons.has(currentLesson.id)
   const activePhase = isKnowledgeStep ? 0 : awaitingReflection ? 4 : predictionMade ? 2 : 1
   const checkpointQuestion = currentStep.checkpointQuestions?.[0]
+  const mode = currentLesson.curriculum?.mode ?? 'guided'
+  const modeLabel =
+    mode === 'practice'
+      ? 'Practice Lab'
+      : mode === 'recovery'
+        ? 'Recovery Lab'
+        : mode === 'challenge'
+          ? 'Challenge'
+          : 'Guided Lesson'
+  const hintKey = `${currentLesson.id}/${currentStep.id}`
+  const hintLevel = hintLevels[hintKey] ?? 0
+  const visibleHint = hintLevel > 0 ? currentStep.progressiveHints?.[hintLevel - 1] : undefined
+  const classifiedCommand = currentStep.exactCommand ? classifyGitCommand(currentStep.exactCommand) : undefined
 
   const toggleLayer = (layer: GitStateLayer) => {
     const next = predictedLayers.includes(layer)
@@ -91,12 +125,19 @@ export default function LearningMission() {
       <header className="learning-mission__header">
         <div>
           <p className="learning-kicker">
-            {currentLesson.icon} {currentLesson.title}
+            {currentLesson.icon} {modeLabel} · {currentLesson.title}
           </p>
           <h2 id="learning-mission-title">{currentStep.title}</h2>
         </div>
-        <div className="learning-mission__step-count">
-          Step {Math.min(currentStepIndex + 1, currentLesson.steps.length)} of {currentLesson.steps.length}
+        <div className="learning-mission__header-actions">
+          {(mode === 'practice' || mode === 'recovery' || mode === 'challenge') && (
+            <Button type="button" variant="outline" size="sm" onClick={restartCurrentLesson}>
+              <RotateCcw /> Reset lab
+            </Button>
+          )}
+          <div className="learning-mission__step-count">
+            Step {Math.min(currentStepIndex + 1, currentLesson.steps.length)} of {currentLesson.steps.length}
+          </div>
         </div>
       </header>
 
@@ -125,41 +166,85 @@ export default function LearningMission() {
               </div>
             </div>
           )}
+          {classifiedCommand?.risk === 'destructive' && (
+            <div className="destructive-operation-preview">
+              <AlertTriangle />
+              <div>
+                <strong>Destructive-operation preview</strong>
+                <p>
+                  This operation can affect{' '}
+                  {classifiedCommand.expectedLayers.length > 0
+                    ? classifiedCommand.expectedLayers.join(', ')
+                    : 'repository state'}
+                  . Inspect the current state and predict the exact result before running it.
+                </p>
+                {currentStep.safetyNote && <small>{currentStep.safetyNote}</small>}
+              </div>
+            </div>
+          )}
         </div>
 
         {!isKnowledgeStep && !awaitingReflection && (
-          <div className="prediction-workbench">
-            <div>
-              <strong>Predict before typing</strong>
-              <p>
-                Which Git layers will this command change? Select all that apply. Observation commands may change none.
-              </p>
-            </div>
-            <div className="prediction-workbench__choices">
-              {LAYER_CHOICES.map((choice) => (
+          <>
+            <div className="prediction-workbench">
+              <div>
+                <strong>Predict before typing</strong>
+                <p>
+                  Which Git layers will this command change? Select all that apply. Observation commands may change
+                  none.
+                </p>
+              </div>
+              <div className="prediction-workbench__choices">
+                {LAYER_CHOICES.map((choice) => (
+                  <button
+                    type="button"
+                    key={choice.id}
+                    className={predictedLayers.includes(choice.id) ? 'is-selected' : ''}
+                    onClick={() => toggleLayer(choice.id)}
+                    aria-pressed={predictedLayers.includes(choice.id)}
+                  >
+                    {choice.label}
+                  </button>
+                ))}
                 <button
                   type="button"
-                  key={choice.id}
-                  className={predictedLayers.includes(choice.id) ? 'is-selected' : ''}
-                  onClick={() => toggleLayer(choice.id)}
-                  aria-pressed={predictedLayers.includes(choice.id)}
+                  className={predictionMade && predictedLayers.length === 0 ? 'is-selected' : ''}
+                  onClick={predictNoStateChange}
+                  aria-pressed={predictionMade && predictedLayers.length === 0}
                 >
-                  {choice.label}
+                  <Eye /> No state change
                 </button>
-              ))}
-              <button
-                type="button"
-                className={predictionMade && predictedLayers.length === 0 ? 'is-selected' : ''}
-                onClick={predictNoStateChange}
-                aria-pressed={predictionMade && predictedLayers.length === 0}
-              >
-                <Eye /> No state change
-              </button>
+              </div>
+              <p className="prediction-workbench__hint">
+                <LockKeyhole /> The answer stays hidden until you run the command.
+              </p>
             </div>
-            <p className="prediction-workbench__hint">
-              <LockKeyhole /> The answer stays hidden until you run the command.
-            </p>
-          </div>
+            {currentStep.progressiveHints?.length ? (
+              <div className="progressive-hint">
+                <div>
+                  <Lightbulb />
+                  <strong>Hint ladder</strong>
+                  <span>
+                    {hintLevel}/{currentStep.progressiveHints.length}
+                  </span>
+                </div>
+                {visibleHint ? (
+                  <p>{visibleHint}</p>
+                ) : (
+                  <p>Try from the goal first. Reveal help only when it is useful.</p>
+                )}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={revealNextHint}
+                  disabled={hintLevel >= currentStep.progressiveHints.length}
+                >
+                  {hintLevel >= currentStep.progressiveHints.length ? 'All hints revealed' : 'Reveal next hint'}
+                </Button>
+              </div>
+            ) : null}
+          </>
         )}
 
         {(isKnowledgeStep || awaitingReflection) && (
@@ -167,15 +252,37 @@ export default function LearningMission() {
             <CircleHelp />
             <div>
               <strong>{awaitingReflection ? 'Secure the mechanism' : 'Retrieval checkpoint'}</strong>
-              <p>{checkpointQuestion ?? 'Can you explain this distinction without reading the lesson text?'}</p>
-              <div className="reflection-checkpoint__actions">
-                <Button size="sm" onClick={() => completeKnowledgeStep('passed')}>
-                  I can explain it
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => completeKnowledgeStep('missed')}>
-                  Review once more
-                </Button>
-              </div>
+              <p>
+                {currentStep.knowledgeCheck?.question ??
+                  checkpointQuestion ??
+                  'Can you explain this distinction without reading the lesson text?'}
+              </p>
+              {currentStep.knowledgeCheck ? (
+                <fieldset className="knowledge-check-options">
+                  <legend className="sr-only">Retrieval check answers</legend>
+                  {currentStep.knowledgeCheck.options.map((option, index) => (
+                    <Button
+                      key={option}
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        completeKnowledgeStep(index === currentStep.knowledgeCheck?.correctOption ? 'passed' : 'missed')
+                      }
+                    >
+                      {option}
+                    </Button>
+                  ))}
+                </fieldset>
+              ) : (
+                <div className="reflection-checkpoint__actions">
+                  <Button size="sm" onClick={() => completeKnowledgeStep('passed')}>
+                    I can explain it
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => completeKnowledgeStep('missed')}>
+                    Review once more
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

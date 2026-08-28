@@ -5,7 +5,7 @@ import type { ILesson } from '@/lib/interfaces/ILessonProvider'
 import { recommendNextLearningActions } from '@/lib/learning/learning-advisor'
 import { lessonProvider, useGitStore } from '@/stores/git-store'
 import { CheckCircle2, ChevronRight, Circle, LockKeyhole, PlayCircle, RotateCcw, Sparkles, X } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 function lessonStatus(
   lesson: ILesson,
@@ -30,6 +30,15 @@ function LessonCard({ lesson }: { lesson: ILesson }) {
     3,
     Math.round(lesson.steps.reduce((total, step) => total + (step.estimatedTime ?? 60), 0) / 60),
   )
+  const mode = lesson.curriculum?.mode ?? 'guided'
+  const modeLabel =
+    mode === 'practice'
+      ? 'practice lab'
+      : mode === 'recovery'
+        ? 'recovery lab'
+        : mode === 'challenge'
+          ? 'capstone'
+          : 'guided lesson'
 
   return (
     <article className={`course-lesson-card course-lesson-card--${status}`}>
@@ -47,16 +56,13 @@ function LessonCard({ lesson }: { lesson: ILesson }) {
         <p>{lesson.description}</p>
         <div className="course-lesson-card__meta">
           <span>{estimatedMinutes} min</span>
-          <span>guided practice</span>
+          <span>{modeLabel}</span>
           <span>
             {progress}/{lesson.steps.length} steps
           </span>
         </div>
         {(status === 'active' || status === 'mastered') && (
-          <div
-            className="course-progressbar"
-            aria-label={`${Math.round(status === 'mastered' ? 100 : progressPercent)}% complete`}
-          >
+          <div className="course-progressbar" aria-hidden="true">
             <span style={{ width: `${status === 'mastered' ? 100 : progressPercent}%` }} />
           </div>
         )}
@@ -89,16 +95,34 @@ function LessonCard({ lesson }: { lesson: ILesson }) {
 }
 
 export default function GitLessonPanel({ onClose }: { onClose?: () => void }) {
-  const { currentLessonId, completedLessons, lessonProgress, checkpointResults, loadLesson } = useGitStore()
+  const { currentLessonId, completedLessons, lessonProgress, checkpointResults, learningEvidence, loadLesson } =
+    useGitStore()
+  const [showFullCourse, setShowFullCourse] = useState(false)
   const lessons = lessonProvider.getLessons()
   const categories = lessonProvider.getCategories()
   const completedCount = completedLessons.size
   const completionPercent = lessons.length > 0 ? (completedCount / lessons.length) * 100 : 0
   const recommendations = useMemo(
-    () => recommendNextLearningActions({ lessons, completedLessonIds: completedLessons, checkpointResults }),
-    [lessons, completedLessons, checkpointResults],
+    () =>
+      recommendNextLearningActions({
+        lessons,
+        completedLessonIds: completedLessons,
+        checkpointResults,
+        learningEvidence,
+      }),
+    [lessons, completedLessons, checkpointResults, learningEvidence],
   )
   const recommended = recommendations[0]
+  const focusedLessons = useMemo(() => {
+    const ids = new Set<string>()
+    if (currentLessonId) ids.add(currentLessonId)
+    for (const recommendation of recommendations.slice(0, 2)) ids.add(recommendation.lessonId)
+    const firstLocked = lessons.find(
+      (lesson) => !completedLessons.has(lesson.id) && !lessonProvider.arePrerequisitesMet(lesson.id, completedLessons),
+    )
+    if (firstLocked) ids.add(firstLocked.id)
+    return lessons.filter((lesson) => ids.has(lesson.id))
+  }, [lessons, recommendations, currentLessonId, completedLessons])
 
   return (
     <div className="course-map">
@@ -120,15 +144,12 @@ export default function GitLessonPanel({ onClose }: { onClose?: () => void }) {
         <p>Build proficiency through repeated prediction, action, inspection, and explanation.</p>
         <div className="course-map__progress">
           <div>
-            <span>Course mastery</span>
+            <span>Course progress</span>
             <strong>
               {completedCount}/{lessons.length}
             </strong>
           </div>
-          <div
-            className="course-progressbar course-progressbar--course"
-            aria-label={`${Math.round(completionPercent)}% of course mastered`}
-          >
+          <div className="course-progressbar course-progressbar--course" aria-hidden="true">
             <span style={{ width: `${completionPercent}%` }} />
           </div>
         </div>
@@ -143,32 +164,61 @@ export default function GitLessonPanel({ onClose }: { onClose?: () => void }) {
         </button>
       )}
 
+      <div className="course-map__reveal-controls">
+        <Button type="button" size="sm" variant="outline" onClick={() => setShowFullCourse((value) => !value)}>
+          {showFullCourse ? 'Show current path' : 'Show full course'}
+        </Button>
+        <span>
+          {showFullCourse
+            ? 'All stages and prerequisites are visible.'
+            : 'Only now, next, and one later stage are shown.'}
+        </span>
+      </div>
+
       <ScrollArea className="course-map__scroll">
         <div className="course-map__categories">
-          {categories.map((category) => {
-            const categoryLessons = lessons.filter((lesson) => lesson.category === category.id)
-            if (categoryLessons.length === 0) return null
-            const categoryCompleted = categoryLessons.filter((lesson) => completedLessons.has(lesson.id)).length
-            return (
-              <section className="course-category" key={category.id}>
-                <header>
-                  <div>
-                    <span aria-hidden="true">{category.icon}</span>
-                    <h3>{category.title}</h3>
-                  </div>
-                  <Badge variant="secondary">
-                    {categoryCompleted}/{categoryLessons.length}
-                  </Badge>
-                </header>
-                <p>{category.description}</p>
-                <div className="course-category__lessons">
-                  {categoryLessons.map((lesson) => (
-                    <LessonCard key={lesson.id} lesson={lesson} />
-                  ))}
+          {!showFullCourse && (
+            <section className="course-category course-category--focus">
+              <header>
+                <div>
+                  <span aria-hidden="true">🧭</span>
+                  <h3>Current learning path</h3>
                 </div>
-              </section>
-            )
-          })}
+                <Badge variant="secondary">Now → next → later</Badge>
+              </header>
+              <p>Finish the mechanism in front of you before expanding the whole map.</p>
+              <div className="course-category__lessons">
+                {focusedLessons.map((lesson) => (
+                  <LessonCard key={lesson.id} lesson={lesson} />
+                ))}
+              </div>
+            </section>
+          )}
+          {showFullCourse &&
+            categories.map((category) => {
+              const categoryLessons = lessons.filter((lesson) => lesson.category === category.id)
+              if (categoryLessons.length === 0) return null
+              const categoryCompleted = categoryLessons.filter((lesson) => completedLessons.has(lesson.id)).length
+              return (
+                <section className="course-category" key={category.id}>
+                  <header>
+                    <div>
+                      <span aria-hidden="true">{category.icon}</span>
+                      <h3>{category.title}</h3>
+                    </div>
+                    <Badge variant="secondary">
+                      {categoryCompleted}/{categoryLessons.length}
+                    </Badge>
+                  </header>
+                  <p>{category.description}</p>
+                  <div className="course-category__lessons">
+                    {categoryLessons.map((lesson) => (
+                      <LessonCard key={lesson.id} lesson={lesson} />
+                    ))}
+                  </div>
+                </section>
+              )
+            })}
         </div>
       </ScrollArea>
 

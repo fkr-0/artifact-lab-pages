@@ -93,6 +93,20 @@ export default function CommandInsightPanel() {
         ))}
       </div>
 
+      {lastCommandInsight.advancedDelta.length > 0 && (
+        <div className="command-event-timeline" aria-label="Semantic event timeline">
+          <div>
+            <strong>What actually moved</strong>
+            <span>{lastCommandInsight.advancedDelta.length} semantic event(s)</span>
+          </div>
+          <ol>
+            {lastCommandInsight.advancedDelta.map((event, index) => (
+              <li key={`${index}-${event}`}>{event}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       {lastCommandInsight.safetyNote && (
         <div className="command-safety-note">
           <AlertTriangle />

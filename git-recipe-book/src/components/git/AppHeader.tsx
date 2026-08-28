@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import ThemeSwitcher from '@/components/ui/theme-switcher'
-import { useTheme } from '@/hooks/use-theme'
+import { type Theme, useTheme } from '@/hooks/use-theme'
 import { lessonProvider, useGitStore } from '@/stores/git-store'
 import { motion } from 'framer-motion'
 import {
@@ -127,7 +127,7 @@ export default function AppHeader() {
               <ThemeSwitcher
                 currentTheme={theme}
                 onThemeChange={(newTheme) => {
-                  setTheme(newTheme as 'light' | 'dark')
+                  setTheme(newTheme as Theme)
                   setShowThemeSwitcher(false)
                 }}
                 variant="dropdown"

@@ -68,9 +68,36 @@ export interface ILessonStep {
   exactCommand?: string
   /** Estimated time in seconds for this step */
   estimatedTime?: number
+  /** Whether an assessed command must have an explicit learner prediction before execution */
+  requiresPrediction?: boolean
+  /** Whether the learning objective expects Git to succeed or reject/stop this action. */
+  expectedResult?: 'success' | 'failure' | 'either'
+  /** Concept IDs directly practiced or assessed by this step. */
+  concepts?: string[]
+  /** Objective retrieval check used instead of self-report when present. */
+  knowledgeCheck?: {
+    question: string
+    options: string[]
+    correctOption: number
+    explanation: string
+  }
 }
 
 // ─── Lesson ──────────────────────────────────────────────────────────────────
+
+export interface ILessonCurriculumMetadata {
+  version: 2
+  objective: string
+  scenarioId: string
+  mode: 'guided' | 'practice' | 'recovery' | 'challenge'
+  concepts: {
+    requires: string[]
+    introduces: string[]
+    practices: string[]
+    assesses: string[]
+  }
+  phases: Array<'model' | 'predict' | 'act' | 'inspect' | 'explain' | 'retrieve' | 'transfer'>
+}
 
 export interface ILesson {
   id: string
@@ -86,6 +113,8 @@ export interface ILesson {
   initialFiles?: Record<string, string>
   /** Remote setup for remote lessons */
   remoteSetup?: IRemoteSetup
+  /** Declarative v2 curriculum metadata when this lesson has been migrated */
+  curriculum?: ILessonCurriculumMetadata
   /** Order within category */
   order: number
 }

@@ -602,6 +602,19 @@
   align-items: flex-start;
 }
 
+.learning-mission__header-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.learning-mission__header-actions button svg {
+  width: 0.8rem;
+}
+
 .learning-mission__step-count {
   flex: none;
   border: 1px solid var(--border);
@@ -775,11 +788,84 @@
   width: 0.75rem;
 }
 
-.reflection-checkpoint__actions {
+.reflection-checkpoint__actions,
+.knowledge-check-options {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-top: 0.65rem;
+}
+
+.knowledge-check-options button {
+  height: auto;
+  min-height: 2rem;
+  white-space: normal;
+  text-align: left;
+}
+
+.progressive-hint {
+  margin-top: 0.65rem;
+  border: 1px dashed color-mix(in oklab, #f59e0b 42%, var(--border));
+  border-radius: 0.8rem;
+  padding: 0.7rem;
+  background: color-mix(in oklab, #f59e0b 5%, var(--background));
+}
+
+.progressive-hint > div {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.progressive-hint > div svg {
+  width: 0.9rem;
+  color: #f59e0b;
+}
+
+.progressive-hint > div strong {
+  font-size: 0.72rem;
+}
+
+.progressive-hint > div span {
+  margin-left: auto;
+  color: var(--muted-foreground);
+  font-size: 0.62rem;
+}
+
+.progressive-hint p {
+  margin: 0.45rem 0;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.destructive-operation-preview {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+  border: 1px solid color-mix(in oklab, #f97316 45%, var(--border));
+  border-radius: 0.8rem;
+  padding: 0.75rem;
+  background: color-mix(in oklab, #f97316 6%, var(--background));
+}
+
+.destructive-operation-preview > svg {
+  width: 1rem;
+  flex: none;
+  color: #f97316;
+}
+
+.destructive-operation-preview strong {
+  font-size: 0.72rem;
+}
+
+.destructive-operation-preview p,
+.destructive-operation-preview small {
+  display: block;
+  margin: 0.25rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  line-height: 1.45;
 }
 
 .next-learning-action {
@@ -857,6 +943,11 @@
   border-color: color-mix(in oklab, var(--primary) 65%, var(--border));
 }
 
+.git-state-layer.is-contextual:not(.is-changed):not(.is-predicted) {
+  border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+  background: color-mix(in oklab, var(--primary) 4%, var(--background));
+}
+
 .git-state-layer.is-changed {
   border-color: color-mix(in oklab, #10b981 70%, var(--border));
   background: color-mix(in oklab, #10b981 8%, var(--background));
@@ -873,7 +964,8 @@
 
 .git-state-layer__verb,
 .git-state-layer__change,
-.git-state-layer__prediction {
+.git-state-layer__prediction,
+.git-state-layer__context {
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -887,6 +979,10 @@
   color: #059669;
 }
 .git-state-layer__prediction {
+  color: var(--primary);
+}
+.git-state-layer__context {
+  margin-left: auto;
   color: var(--primary);
 }
 
@@ -921,6 +1017,66 @@
   width: 0.8rem;
   flex: none;
   color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+}
+
+.two-repository-model {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: stretch;
+  margin-top: 0.7rem;
+}
+
+.two-repository-model article {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.65rem;
+  background: color-mix(in oklab, var(--primary) 3%, var(--background));
+}
+
+.two-repository-model article > span {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.two-repository-model article strong,
+.two-repository-model article small {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.two-repository-model article strong {
+  font-size: 0.72rem;
+}
+
+.two-repository-model article small {
+  color: var(--muted-foreground);
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.two-repository-model__exchange {
+  display: grid;
+  place-content: center;
+  gap: 0.15rem;
+  color: var(--primary);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+@media (max-width: 44rem) {
+  .two-repository-model {
+    grid-template-columns: 1fr;
+  }
+
+  .two-repository-model__exchange {
+    grid-auto-flow: column;
+  }
 }
 
 .learning-graph-card {
@@ -1024,19 +1180,24 @@
 
 .command-risk--observe {
   background: color-mix(in oklab, #06b6d4 14%, var(--card));
-  color: #0891b2;
+  color: color-mix(in oklab, #06b6d4 58%, var(--foreground));
 }
 .command-risk--safe-change {
   background: color-mix(in oklab, #10b981 14%, var(--card));
-  color: #059669;
+  color: color-mix(in oklab, #10b981 58%, var(--foreground));
 }
 .command-risk--history-change {
   background: color-mix(in oklab, #f59e0b 16%, var(--card));
-  color: #b45309;
+  color: color-mix(in oklab, #f59e0b 58%, var(--foreground));
 }
 .command-risk--destructive {
   background: color-mix(in oklab, #ef4444 14%, var(--card));
-  color: #dc2626;
+  color: color-mix(in oklab, #ef4444 58%, var(--foreground));
+}
+
+.course-lesson-card--active .shadow {
+  background: var(--foreground);
+  color: var(--background);
 }
 
 .prediction-result,
@@ -1103,6 +1264,41 @@
 
 .command-delta-grid code {
   font-size: 0.67rem;
+}
+
+.command-event-timeline {
+  margin-top: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  background: color-mix(in oklab, var(--muted) 35%, transparent);
+}
+
+.command-event-timeline > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.command-event-timeline strong {
+  font-size: 0.72rem;
+}
+
+.command-event-timeline span {
+  color: var(--muted-foreground);
+  font-size: 0.62rem;
+}
+
+.command-event-timeline ol {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.command-event-timeline li {
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  line-height: 1.45;
 }
 
 .evidence-drawer {
@@ -1280,6 +1476,22 @@
   width: 0.9rem;
 }
 
+.course-map__reveal-controls {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.65rem 0.75rem 0;
+}
+
+.course-map__reveal-controls button {
+  justify-self: start;
+}
+
+.course-map__reveal-controls span {
+  color: var(--muted-foreground);
+  font-size: 0.6rem;
+  line-height: 1.35;
+}
+
 .course-map__scroll {
   min-height: 0;
   flex: 1;
@@ -1289,6 +1501,13 @@
   display: grid;
   gap: 1rem;
   padding: 0.75rem;
+}
+
+.course-category--focus {
+  border: 1px solid color-mix(in oklab, var(--primary) 28%, var(--border));
+  border-radius: 0.85rem;
+  padding: 0.7rem;
+  background: color-mix(in oklab, var(--primary) 4%, var(--background));
 }
 
 .course-category > header {
@@ -1342,7 +1561,7 @@
 }
 
 .course-lesson-card--locked {
-  opacity: 0.55;
+  opacity: 0.82;
 }
 
 .course-lesson-card__icon {
@@ -1587,6 +1806,21 @@
 }
 .onboarding-actions button svg {
   width: 0.8rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .react-flow__edge.animated path {
+    animation: none !important;
+  }
 }
 
 @media (max-width: 34rem) {

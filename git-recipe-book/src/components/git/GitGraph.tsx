@@ -293,6 +293,23 @@ export default function GitGraph() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutEdges)
+  const textualCommits = useMemo(
+    () =>
+      Object.values(commits)
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .map((commit) => {
+          const branchNames = Object.values(branches)
+            .filter((branch) => branch.commitId === commit.id && !branch.isRemote)
+            .map((branch) => branch.name)
+          const tagNames = Object.values(tags)
+            .filter((tag) => tag.commitId === commit.id)
+            .map((tag) => tag.name)
+          const isHead =
+            HEAD.type === 'detached' ? HEAD.commitId === commit.id : branches[HEAD.ref]?.commitId === commit.id
+          return { commit, branchNames, tagNames, isHead }
+        }),
+    [commits, branches, tags, HEAD],
+  )
 
   React.useEffect(() => {
     setNodes(layoutNodes)
@@ -437,6 +454,19 @@ export default function GitGraph() {
   // ─── Graph ──────────────────────────────────────────────────────────────
   return (
     <div className="w-full h-full">
+      <section className="sr-only" aria-labelledby="textual-git-graph-title">
+        <h3 id="textual-git-graph-title">Textual commit graph</h3>
+        <ol>
+          {textualCommits.map(({ commit, branchNames, tagNames, isHead }) => (
+            <li key={commit.id}>
+              {commit.shortId}: {commit.message}. {commit.parentIds.length} parent
+              {commit.parentIds.length === 1 ? '' : 's'}.{isHead ? ' HEAD.' : ''}
+              {branchNames.length ? ` Branches: ${branchNames.join(', ')}.` : ''}
+              {tagNames.length ? ` Tags: ${tagNames.join(', ')}.` : ''}
+            </li>
+          ))}
+        </ol>
+      </section>
       <ReactFlow
         nodes={nodes}
         edges={edges}

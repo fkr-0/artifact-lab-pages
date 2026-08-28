@@ -9,13 +9,20 @@ describe('GitLessonPanel Integration', () => {
     useGitStore.getState().resetAll()
   })
 
-  it('renders a compact curriculum map and mastery total', () => {
+  it('renders a progressive course path and can reveal the complete curriculum', async () => {
+    const user = userEvent.setup()
     render(<GitLessonPanel />)
 
     expect(screen.getByText('Git Lessons')).toBeInTheDocument()
-    expect(screen.getByText('Course mastery')).toBeInTheDocument()
+    expect(screen.getByText('Course progress')).toBeInTheDocument()
+    expect(screen.getByText('Current learning path')).toBeInTheDocument()
+    expect(screen.getByText(/^0\/\d+$/)).toBeInTheDocument()
+    expect(screen.queryByText('Selective History & Mastery')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /show full course/i }))
     expect(screen.getByText('Basics')).toBeInTheDocument()
-    expect(screen.getByLabelText(/course mastered/i)).toBeInTheDocument()
+    expect(screen.getByText('Recovery')).toBeInTheDocument()
+    expect(screen.getByText('Selective History & Mastery')).toBeInTheDocument()
   })
 
   it('starts the first available lesson from its course card', async () => {

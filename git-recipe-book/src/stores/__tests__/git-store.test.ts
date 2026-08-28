@@ -53,6 +53,53 @@ describe('GitStore', () => {
       const newState = useGitStore.getState()
       expect(newState.commandHistory).toContain('git init')
     })
+
+    it('blocks an assessed lesson command until a prediction exists', () => {
+      useGitStore.getState().loadLesson('basics')
+
+      const blocked = useGitStore.getState().executeCommand('git init')
+      const blockedState = useGitStore.getState()
+      expect(blocked.success).toBe(false)
+      expect(blocked.error).toMatch(/prediction required/i)
+      expect(blockedState.gitState.initialized).toBe(false)
+      expect(blockedState.currentStepIndex).toBe(0)
+      expect(blockedState.lessonAttempts[blockedState.lessonAttempts.length - 1]).toMatchObject({
+        stepId: 'init',
+        progressed: false,
+        blockedReason: 'prediction-required',
+      })
+
+      blockedState.setPredictedLayers(['refs'])
+      const executed = useGitStore.getState().executeCommand('git init')
+      expect(executed.success).toBe(true)
+      expect(useGitStore.getState().pendingReflectionStepId).toBe('init')
+    })
+
+    it('records a failed matching command without advancing the lesson', () => {
+      useGitStore.getState().loadLesson('basics')
+      useGitStore.getState().setPredictedLayers(['refs'])
+      useGitStore.getState().executeCommand('git init')
+      useGitStore.getState().completeKnowledgeStep('passed')
+      useGitStore.getState().predictNoStateChange()
+      useGitStore.getState().executeCommand('git status')
+      useGitStore.getState().completeKnowledgeStep('passed')
+
+      expect(useGitStore.getState().currentStepIndex).toBe(2)
+      useGitStore.getState().setPredictedLayers(['staging'])
+      const failed = useGitStore.getState().executeCommand('git add missing.md')
+      const state = useGitStore.getState()
+
+      expect(failed.success).toBe(false)
+      expect(state.currentStepIndex).toBe(2)
+      expect(state.pendingReflectionStepId).toBeNull()
+      expect(state.lessonAttempts[state.lessonAttempts.length - 1]).toMatchObject({
+        stepId: 'add1',
+        command: 'git add missing.md',
+        success: false,
+        progressed: false,
+        blockedReason: 'command-failed',
+      })
+    })
   })
 
   // ─── navigateHistory ─────────────────────────────────────────────────────

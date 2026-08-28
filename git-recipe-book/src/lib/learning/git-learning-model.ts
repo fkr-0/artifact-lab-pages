@@ -1,3 +1,5 @@
+import { type SemanticDeltaLine, eventLayer, projectAdvancedDelta, projectBeginnerDelta } from '@/git-model/delta'
+import { type RepositoryEvent, deriveRepositoryEvents } from '@/git-model/events'
 import type { GitCommandResult, GitState } from '../git-types'
 
 export type GitStateLayer = 'working' | 'staging' | 'history' | 'refs' | 'remote'
@@ -43,6 +45,12 @@ export interface CommandLearningInsight extends CommandClassification {
   after: GitStateSummary
   actualLayers: GitStateLayer[]
   changes: GitLayerChange[]
+  /** Typed semantic transitions behind the learner-facing layer summary. */
+  events: RepositoryEvent[]
+  /** Compact layer-grouped explanations for beginners. */
+  beginnerDelta: SemanticDeltaLine[]
+  /** Entity-level event descriptions for the optional internals view. */
+  advancedDelta: string[]
   explanation: string
 }
 
@@ -53,7 +61,7 @@ const CLASSIFICATIONS: Record<string, Omit<CommandClassification, 'command' | 'v
     title: 'Create the repository memory',
     intent: 'Create Git metadata and the first branch pointer without changing project files.',
     risk: 'safe-change',
-    expectedLayers: ['history', 'refs'],
+    expectedLayers: ['refs'],
   },
   status: {
     title: 'Orient without changing anything',
@@ -70,6 +78,12 @@ const CLASSIFICATIONS: Record<string, Omit<CommandClassification, 'command' | 'v
   log: {
     title: 'Read recorded history',
     intent: 'Inspect commits and their parent relationships.',
+    risk: 'observe',
+    expectedLayers: [],
+  },
+  show: {
+    title: 'Inspect one recorded snapshot',
+    intent: 'Read one commit, branch, or tag target without changing repository state.',
     risk: 'observe',
     expectedLayers: [],
   },
@@ -287,13 +301,21 @@ export function buildCommandInsight(
   const classification = classifyGitCommand(raw)
   const before = summarizeGitState(beforeState)
   const after = summarizeGitState(afterState)
-  const changes = LAYER_ORDER.map((layer) => ({
-    layer,
-    changed: layerChanged(layer, before, after),
-    before: layerValue(layer, before),
-    after: layerValue(layer, after),
-    explanation: layerExplanation(layer, before, after),
-  }))
+  const events = result.events ?? deriveRepositoryEvents(beforeState, afterState, result)
+  const beginnerDelta = projectBeginnerDelta(events)
+  const advancedDelta = projectAdvancedDelta(events)
+  const semanticByLayer = new Map(beginnerDelta.map((delta) => [delta.layer, delta.summary]))
+  const eventLayers = new Set(events.map(eventLayer))
+  const changes = LAYER_ORDER.map((layer) => {
+    const changed = eventLayers.has(layer) || layerChanged(layer, before, after)
+    return {
+      layer,
+      changed,
+      before: layerValue(layer, before),
+      after: layerValue(layer, after),
+      explanation: semanticByLayer.get(layer) ?? layerExplanation(layer, before, after),
+    }
+  })
   const actualLayers = changes.filter((change) => change.changed).map((change) => change.layer)
 
   let explanation: string
@@ -304,7 +326,7 @@ export function buildCommandInsight(
     explanation =
       classification.risk === 'observe'
         ? 'This was an observation command: it revealed repository state without changing a Git layer.'
-        : 'The command succeeded, but the summarized layer counts did not change. Inspect the detailed output for a pointer or content change that preserves counts.'
+        : 'The command succeeded without a semantic repository transition. Inspect the command output to confirm whether it was intentionally a no-op.'
   } else {
     explanation = `The command changed ${actualLayers.join(', ')}. Compare that evidence with the layer you expected before running it.`
   }
@@ -317,6 +339,9 @@ export function buildCommandInsight(
     after,
     actualLayers,
     changes,
+    events,
+    beginnerDelta,
+    advancedDelta,
     explanation,
   }
 }

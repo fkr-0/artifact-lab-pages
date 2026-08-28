@@ -1,8 +1,9 @@
 // ─── Isomorphic-Git Backend ──────────────────────────────────────────────────
 //
-// A real git backend using isomorphic-git that operates in the browser.
-// Uses an in-memory filesystem. This allows loading actual git repos
-// in the future (e.g., from a URL or uploaded .git bundle).
+// Experimental browser-backend facade reserved for a future isomorphic-git
+// implementation. It currently mirrors only a small state-machine subset and
+// MUST NOT be treated as the reference implementation; native Git differential
+// tests are the semantic reference for the teaching subset.
 //
 
 import {
@@ -20,7 +21,7 @@ import type { IGitBackend } from '../interfaces'
 
 export class IsoGitBackend implements IGitBackend {
   readonly backendType = 'isomorphic-git' as const
-  readonly isRealGit = true
+  readonly isRealGit = false
 
   private state: GitState
   private fs: Record<string, string> = {}
@@ -42,6 +43,7 @@ export class IsoGitBackend implements IGitBackend {
       stash: [],
       remotes: {},
       trackingBranches: {},
+      reflog: [],
     }
   }
 

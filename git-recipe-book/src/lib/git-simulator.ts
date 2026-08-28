@@ -1,8 +1,9 @@
+import { deriveRepositoryEvents } from '@/git-model/events'
 import {
   GitBranch,
   type GitCommandResult,
   type GitCommit,
-  GitRemote,
+  type GitRemote,
   type GitState,
   GitTag,
   HEADRef,
@@ -37,6 +38,66 @@ export class GitSimulator implements IGitBackend {
 
   constructor() {
     this.state = createEmptyState()
+  }
+
+  private applyCommitDelta(targetTree: Record<string, string>, sourceCommit: GitCommit): Record<string, string> {
+    const sourceParent = sourceCommit.parentIds[0] ? (this.state.commits[sourceCommit.parentIds[0]]?.tree ?? {}) : {}
+    const next = { ...targetTree }
+    const paths = new Set([...Object.keys(sourceParent), ...Object.keys(sourceCommit.tree)])
+    for (const path of paths) {
+      if (sourceParent[path] === sourceCommit.tree[path]) continue
+      if (sourceCommit.tree[path] === undefined) delete next[path]
+      else next[path] = sourceCommit.tree[path]
+    }
+    return next
+  }
+
+  private findMergeBase(leftId: string, rightId: string): string | null {
+    const leftAncestors = this.getAncestors(leftId)
+    const queue = [rightId]
+    const visited = new Set<string>()
+    while (queue.length > 0) {
+      const id = queue.shift()
+      if (!id || visited.has(id)) continue
+      if (leftAncestors.has(id)) return id
+      visited.add(id)
+      queue.push(...(this.state.commits[id]?.parentIds ?? []))
+    }
+    return null
+  }
+
+  private recordReflog(action: string, before: string, after: string): void {
+    if (before === after) return
+    this.state.reflog.push({ id: generateId(), action, before, after, timestamp: now() })
+    if (this.state.reflog.length > 100) this.state.reflog.splice(0, this.state.reflog.length - 100)
+  }
+
+  private isAncestorAcrossRemote(ancestorId: string, descendantId: string, remote: GitRemote): boolean {
+    const commits = { ...remote.commits, ...this.state.commits }
+    const queue = [descendantId]
+    const visited = new Set<string>()
+    while (queue.length > 0) {
+      const id = queue.shift()
+      if (!id) continue
+      if (id === ancestorId) return true
+      if (visited.has(id)) continue
+      visited.add(id)
+      queue.push(...(commits[id]?.parentIds ?? []))
+    }
+    return false
+  }
+
+  abortMerge(): GitCommandResult {
+    this.requireInit()
+    const operation = this.state.pendingOperation
+    if (!operation || operation.type !== 'merge') {
+      return { success: false, output: '', error: 'fatal: There is no merge to abort.' }
+    }
+    const original = this.state.commits[operation.originalHeadCommitId]
+    this.state.working = original ? { ...original.tree } : {}
+    this.state.staging = {}
+    this.state.pendingOperation = undefined
+    return { success: true, output: 'Merge aborted; restored the pre-merge working tree.\n' }
   }
 
   getState(): GitState {
@@ -107,13 +168,14 @@ export class GitSimulator implements IGitBackend {
     }
 
     const branchName = this.getCurrentBranch()
-    const parentIds: string[] = []
-
-    if (this.state.branches[branchName]?.commitId) {
-      parentIds.push(this.state.branches[branchName].commitId)
+    const previousTip = this.state.branches[branchName]?.commitId || ''
+    const parentIds: string[] = previousTip ? [previousTip] : []
+    if (this.state.pendingOperation?.type === 'merge' && this.state.pendingOperation.otherCommitId) {
+      parentIds.push(this.state.pendingOperation.otherCommitId)
     }
 
     const id = generateId()
+    const parentTree = parentIds[0] ? (this.state.commits[parentIds[0]]?.tree ?? {}) : {}
     const commit: GitCommit = {
       id,
       shortId: shortId(id),
@@ -121,15 +183,20 @@ export class GitSimulator implements IGitBackend {
       parentIds,
       author: 'You <you@recipe-book>',
       timestamp: now(),
-      tree: { ...this.state.staging },
+      // The staging map stores changed index entries, not a second complete
+      // project tree. A commit snapshot therefore overlays those entries on
+      // the parent snapshot so focused commits preserve untouched paths.
+      tree: { ...parentTree, ...this.state.staging },
       branchLabel: branchName,
     }
 
     this.state.commits[id] = commit
     this.state.branches[branchName].commitId = id
     this.state.staging = {}
+    this.state.pendingOperation = undefined
+    this.recordReflog('commit', previousTip, id)
 
-    const fileCount = Object.keys(commit.tree).length
+    const fileCount = stagedFiles.length
     return {
       success: true,
       output: `[${branchName} ${commit.shortId}] ${message}\n ${fileCount} file(s) changed\n`,
@@ -197,43 +264,27 @@ export class GitSimulator implements IGitBackend {
 
   checkout(target: string): GitCommandResult {
     this.requireInit()
+    if (this.state.pendingOperation) {
+      return {
+        success: false,
+        output: '',
+        error: 'fatal: resolve or abort the current merge before switching branches',
+      }
+    }
+    const beforeHead = this.getTipCommitId()
 
-    // Handle remote-tracking branch checkout (create local branch from remote)
-    const remoteTrackingPrefix = Object.keys(this.state.remotes).find((r) => target.startsWith(`${r}/`))
-    if (remoteTrackingPrefix) {
-      const remoteBranchName = target.slice(remoteTrackingPrefix.length + 1)
-      const remoteBranch = this.state.branches[target]
-      if (remoteBranch?.isRemote && remoteBranch.commitId) {
-        // Create local branch tracking the remote branch
-        const localBranchName = remoteBranchName
-        if (this.state.branches[localBranchName] && !this.state.branches[localBranchName].isRemote) {
-          // Local branch already exists, just switch
-          this.state.HEAD = { type: 'branch', ref: localBranchName }
-          const commitId = this.state.branches[localBranchName].commitId
-          if (commitId && this.state.commits[commitId]) {
-            this.state.working = { ...this.state.commits[commitId].tree }
-          }
-          this.state.staging = {}
-          return { success: true, output: `Switched to branch '${localBranchName}'\n` }
-        }
-        // Create new local branch from remote
-        const colorIdx = Object.keys(this.state.branches).filter((b) => !this.state.branches[b].isRemote).length
-        this.state.branches[localBranchName] = {
-          name: localBranchName,
-          commitId: remoteBranch.commitId,
-          color: getBranchColor(colorIdx),
-        }
-        this.state.trackingBranches[localBranchName] = {
-          remote: remoteTrackingPrefix,
-          remoteBranch: target,
-        }
-        this.state.HEAD = { type: 'branch', ref: localBranchName }
-        this.state.working = { ...this.state.commits[remoteBranch.commitId].tree }
-        this.state.staging = {}
-        return {
-          success: true,
-          output: `Branch '${localBranchName}' set up to track remote branch '${target}'.\nSwitched to a new branch '${localBranchName}'\n`,
-        }
+    // A remote-tracking ref is local knowledge of a remote branch. Checking it
+    // out directly detaches HEAD; it does not silently create upstream config.
+    const remoteBranch = this.state.branches[target]
+    if (remoteBranch?.isRemote && remoteBranch.commitId) {
+      const commit = this.state.commits[remoteBranch.commitId]
+      this.state.HEAD = { type: 'detached', commitId: remoteBranch.commitId }
+      this.state.working = commit ? { ...commit.tree } : {}
+      this.state.staging = {}
+      this.recordReflog(`checkout ${target}`, beforeHead, remoteBranch.commitId)
+      return {
+        success: true,
+        output: `HEAD is now at ${shortId(remoteBranch.commitId)} (${target})\nYou are in 'detached HEAD' state.\n`,
       }
     }
 
@@ -244,6 +295,7 @@ export class GitSimulator implements IGitBackend {
         this.state.working = { ...this.state.commits[commitId].tree }
       }
       this.state.staging = {}
+      this.recordReflog(`checkout ${target}`, beforeHead, commitId || beforeHead)
       return { success: true, output: `Switched to branch '${target}'\n` }
     }
 
@@ -253,16 +305,46 @@ export class GitSimulator implements IGitBackend {
       this.state.HEAD = { type: 'detached', commitId: commit.id }
       this.state.working = { ...commit.tree }
       this.state.staging = {}
+      this.recordReflog(`checkout ${target}`, beforeHead, commit.id)
       return { success: true, output: `HEAD is now at ${commit.shortId} ${commit.message}\n` }
     }
 
     return { success: false, output: '', error: `error: pathspec '${target}' did not match any branch or commit` }
   }
 
+  createTrackingBranch(localName: string, remoteRef: string): GitCommandResult {
+    this.requireInit()
+    if (!localName || this.state.branches[localName]) {
+      return { success: false, output: '', error: `fatal: a branch named '${localName}' already exists` }
+    }
+    const remoteBranch = this.state.branches[remoteRef]
+    if (!remoteBranch?.isRemote || !remoteBranch.commitId) {
+      return { success: false, output: '', error: `fatal: '${remoteRef}' is not a remote-tracking branch` }
+    }
+    const remoteName = remoteRef.split('/')[0]
+    const colorIdx = Object.values(this.state.branches).filter((branch) => !branch.isRemote).length
+    this.state.branches[localName] = {
+      name: localName,
+      commitId: remoteBranch.commitId,
+      color: getBranchColor(colorIdx),
+    }
+    this.state.trackingBranches[localName] = { remote: remoteName, remoteBranch: remoteRef }
+    this.state.HEAD = { type: 'branch', ref: localName }
+    this.state.working = { ...this.state.commits[remoteBranch.commitId].tree }
+    this.state.staging = {}
+    return {
+      success: true,
+      output: `Branch '${localName}' set up to track remote branch '${remoteRef}'.\nSwitched to a new branch '${localName}'\n`,
+    }
+  }
+
   // ─── git merge ───────────────────────────────────────────────────────────
 
   merge(branchName: string): GitCommandResult {
     this.requireInit()
+    if (this.state.pendingOperation) {
+      return { success: false, output: '', error: 'fatal: You have not concluded your merge (MERGE_HEAD exists).' }
+    }
     // Support merging remote-tracking branches
     const branch = this.state.branches[branchName]
     if (!branch) {
@@ -287,6 +369,7 @@ export class GitSimulator implements IGitBackend {
     if (!ourCommitId) {
       this.state.branches[currentBranch].commitId = theirCommitId
       this.state.working = { ...this.state.commits[theirCommitId].tree }
+      this.recordReflog(`merge ${branchName}: fast-forward`, ourCommitId, theirCommitId)
       return { success: true, output: `Fast-forward\n ${branchName} -> ${currentBranch}\n` }
     }
 
@@ -294,13 +377,51 @@ export class GitSimulator implements IGitBackend {
     if (isAncestor) {
       this.state.branches[currentBranch].commitId = theirCommitId
       this.state.working = { ...this.state.commits[theirCommitId].tree }
+      this.recordReflog(`merge ${branchName}: fast-forward`, ourCommitId, theirCommitId)
       return { success: true, output: `Fast-forward\n ${branchName} -> ${currentBranch}\n` }
     }
 
-    const mergedTree = { ...this.state.commits[ourCommitId].tree }
-    for (const [fp, content] of Object.entries(this.state.commits[theirCommitId].tree)) {
-      if (mergedTree[fp] === undefined) {
-        mergedTree[fp] = content
+    const ours = this.state.commits[ourCommitId].tree
+    const theirs = this.state.commits[theirCommitId].tree
+    const baseId = this.findMergeBase(ourCommitId, theirCommitId)
+    const base = baseId ? (this.state.commits[baseId]?.tree ?? {}) : {}
+    const mergedTree = { ...ours }
+    const autoStaged: Record<string, string> = {}
+    const conflicts: string[] = []
+    const paths = new Set([...Object.keys(base), ...Object.keys(ours), ...Object.keys(theirs)])
+    for (const path of paths) {
+      const baseContent = base[path]
+      const ourContent = ours[path]
+      const theirContent = theirs[path]
+      const oursChanged = ourContent !== baseContent
+      const theirsChanged = theirContent !== baseContent
+      if (oursChanged && theirsChanged && ourContent !== theirContent) {
+        conflicts.push(path)
+        mergedTree[path] = `<<<<<<< HEAD\n${ourContent ?? ''}\n=======\n${theirContent ?? ''}\n>>>>>>> ${branchName}\n`
+      } else if (theirsChanged) {
+        if (theirContent === undefined) delete mergedTree[path]
+        else {
+          mergedTree[path] = theirContent
+          autoStaged[path] = theirContent
+        }
+      }
+    }
+
+    if (conflicts.length > 0) {
+      this.state.working = mergedTree
+      this.state.staging = autoStaged
+      this.state.pendingOperation = {
+        type: 'merge',
+        originalHeadCommitId: ourCommitId,
+        otherCommitId: theirCommitId,
+        otherRef: branchName,
+        conflictPaths: conflicts,
+      }
+      return {
+        success: false,
+        mutated: true,
+        output: '',
+        error: `CONFLICT (content): Merge conflict in ${conflicts.join(', ')}\nAutomatic merge failed; fix conflicts and then commit the result.`,
       }
     }
 
@@ -320,6 +441,7 @@ export class GitSimulator implements IGitBackend {
     this.state.branches[currentBranch].commitId = id
     this.state.working = { ...mergedTree }
     this.state.staging = {}
+    this.recordReflog(`merge ${branchName}`, ourCommitId, id)
 
     return {
       success: true,
@@ -363,10 +485,7 @@ export class GitSimulator implements IGitBackend {
     let parentId = baseCommitId
     for (const oldCommit of uniqueCommits.reverse()) {
       const id = generateId()
-      const newTree = { ...this.state.commits[parentId].tree }
-      for (const [fp, content] of Object.entries(oldCommit.tree)) {
-        newTree[fp] = content
-      }
+      const newTree = this.applyCommitDelta(this.state.commits[parentId].tree, oldCommit)
       const newCommit: GitCommit = {
         id,
         shortId: shortId(id),
@@ -515,19 +634,25 @@ export class GitSimulator implements IGitBackend {
 
   // ─── git diff ────────────────────────────────────────────────────────────
 
-  diff(): GitCommandResult {
+  diff(staged = false): GitCommandResult {
     this.requireInit()
     const tipCommit = this.getTipCommit()
     const tipTree = tipCommit?.tree || {}
+    const indexTree = { ...tipTree, ...this.state.staging }
+    const sourceTree = staged ? indexTree : this.state.working
+    const baselineTree = staged ? tipTree : indexTree
     const lines: string[] = []
+    const paths = new Set([...Object.keys(baselineTree), ...Object.keys(sourceTree)])
 
-    for (const [fp, content] of Object.entries(this.state.working)) {
-      if (tipTree[fp] !== content) {
+    for (const fp of [...paths].sort()) {
+      const content = sourceTree[fp]
+      const baseline = baselineTree[fp]
+      if (baseline !== content) {
         lines.push(`diff --git a/${fp} b/${fp}`)
         lines.push(`--- a/${fp}`)
         lines.push(`+++ b/${fp}`)
-        const oldLines = (tipTree[fp] || '').split('\n')
-        const newLines = content.split('\n')
+        const oldLines = (baseline || '').split('\n')
+        const newLines = (content || '').split('\n')
         for (let i = 0; i < Math.max(oldLines.length, newLines.length); i++) {
           if (oldLines[i] !== newLines[i]) {
             if (oldLines[i] !== undefined) lines.push(`- ${oldLines[i]}`)
@@ -538,10 +663,27 @@ export class GitSimulator implements IGitBackend {
       }
     }
 
-    if (lines.length === 0) {
-      return { success: true, output: 'No differences found.\n' }
-    }
+    if (lines.length === 0) return { success: true, output: 'No differences found.\n' }
     return { success: true, output: lines.join('\n') }
+  }
+
+  show(target = 'HEAD'): GitCommandResult {
+    this.requireInit()
+    let commit: GitCommit | null = null
+    if (target === 'HEAD') commit = this.getTipCommit()
+    else if (this.state.tags[target]) commit = this.state.commits[this.state.tags[target].commitId] ?? null
+    else if (this.state.branches[target]) commit = this.state.commits[this.state.branches[target].commitId] ?? null
+    else commit = this.findCommit(target)
+
+    if (!commit) return { success: false, output: '', error: `fatal: bad object ${target}` }
+    const files = Object.keys(commit.tree)
+      .sort()
+      .map((path) => `  ${path}`)
+      .join('\n')
+    return {
+      success: true,
+      output: `commit ${commit.id}\nAuthor: ${commit.author}\n\n    ${commit.message}\n\nFiles:\n${files}\n`,
+    }
   }
 
   // ─── git tag ─────────────────────────────────────────────────────────────
@@ -620,6 +762,8 @@ export class GitSimulator implements IGitBackend {
     }
 
     const branch = this.getCurrentBranch()
+    const previousTip = this.getTipCommitId()
+    const previousTree = previousTip ? (this.state.commits[previousTip]?.tree ?? {}) : {}
     if (this.state.branches[branch]) {
       this.state.branches[branch].commitId = commit.id
     }
@@ -629,14 +773,85 @@ export class GitSimulator implements IGitBackend {
       this.state.staging = {}
     } else if (mode === 'mixed') {
       this.state.staging = {}
-      this.state.working = { ...commit.tree }
+    } else {
+      const staged: Record<string, string> = {}
+      const paths = new Set([...Object.keys(commit.tree), ...Object.keys(previousTree)])
+      for (const path of paths) {
+        if (commit.tree[path] !== previousTree[path] && previousTree[path] !== undefined)
+          staged[path] = previousTree[path]
+      }
+      this.state.staging = staged
     }
 
     if (this.state.HEAD.type === 'detached') {
       this.state.HEAD = { type: 'detached', commitId: commit.id }
     }
 
+    this.state.pendingOperation = undefined
+    this.recordReflog(`reset --${mode} ${target}`, previousTip, commit.id)
+
     return { success: true, output: `HEAD is now at ${commit.shortId} ${commit.message}\n` }
+  }
+
+  restore(path: string, staged = false): GitCommandResult {
+    this.requireInit()
+    if (!path) return { success: false, output: '', error: 'fatal: you must specify path(s) to restore' }
+    const headTree = this.getTipCommit()?.tree ?? {}
+    if (staged) {
+      if (this.state.staging[path] === undefined)
+        return { success: false, output: '', error: `error: pathspec '${path}' is not staged` }
+      delete this.state.staging[path]
+      return { success: true, output: `Unstaged ${path}\n` }
+    }
+    const source = this.state.staging[path] ?? headTree[path]
+    if (source === undefined) delete this.state.working[path]
+    else this.state.working[path] = source
+    return { success: true, output: `Restored ${path}\n` }
+  }
+
+  revert(target = 'HEAD'): GitCommandResult {
+    this.requireInit()
+    const targetCommit = this.findCommit(target)
+    if (!targetCommit) return { success: false, output: '', error: `fatal: bad revision '${target}'` }
+    const currentTip = this.getTipCommit()
+    if (!currentTip) return { success: false, output: '', error: 'fatal: no commits to revert' }
+    const parentTree = targetCommit.parentIds[0] ? (this.state.commits[targetCommit.parentIds[0]]?.tree ?? {}) : {}
+    const nextTree = { ...currentTip.tree }
+    const paths = new Set([...Object.keys(parentTree), ...Object.keys(targetCommit.tree)])
+    for (const path of paths) {
+      if (parentTree[path] === targetCommit.tree[path]) continue
+      if (parentTree[path] === undefined) delete nextTree[path]
+      else nextTree[path] = parentTree[path]
+    }
+    const branch = this.getCurrentBranch()
+    if (!this.state.branches[branch])
+      return { success: false, output: '', error: 'fatal: cannot revert while HEAD is detached' }
+    const id = generateId()
+    const commit: GitCommit = {
+      id,
+      shortId: shortId(id),
+      message: `Revert "${targetCommit.message}"`,
+      parentIds: [currentTip.id],
+      author: 'You <you@recipe-book>',
+      timestamp: now(),
+      tree: nextTree,
+      branchLabel: branch,
+    }
+    this.state.commits[id] = commit
+    this.state.branches[branch].commitId = id
+    this.state.working = { ...nextTree }
+    this.state.staging = {}
+    this.recordReflog(`revert ${target}`, currentTip.id, id)
+    return { success: true, output: `[${branch} ${commit.shortId}] ${commit.message}\n` }
+  }
+
+  reflog(): GitCommandResult {
+    this.requireInit()
+    if (this.state.reflog.length === 0) return { success: true, output: 'No reflog entries yet\n' }
+    const lines = [...this.state.reflog]
+      .reverse()
+      .map((entry, index) => `${shortId(entry.after)} HEAD@{${index}}: ${entry.action}`)
+    return { success: true, output: `${lines.join('\n')}\n` }
   }
 
   // ─── git cherry-pick ─────────────────────────────────────────────────────
@@ -652,15 +867,15 @@ export class GitSimulator implements IGitBackend {
     const parentId = this.state.branches[branch]?.commitId || ''
 
     const id = generateId()
-    const newTree = parentId ? { ...this.state.commits[parentId].tree } : {}
-    for (const [fp, content] of Object.entries(commit.tree)) {
-      newTree[fp] = content
-    }
+    const newTree = this.applyCommitDelta(parentId ? this.state.commits[parentId].tree : {}, commit)
 
     const newCommit: GitCommit = {
       id,
       shortId: shortId(id),
-      message: `${commit.message} (cherry-picked from ${commit.shortId})`,
+      // Native cherry-pick preserves the selected commit message by default.
+      // The new identity is visible through the new commit id/parentage, not by
+      // rewriting user-authored history text.
+      message: commit.message,
       parentIds: parentId ? [parentId] : [],
       author: commit.author,
       timestamp: now(),
@@ -764,16 +979,15 @@ export class GitSimulator implements IGitBackend {
       return { success: false, output: '', error: `fatal: couldn't find remote ref ${trackingBranchRef}` }
     }
 
-    // Set up tracking
-    this.state.trackingBranches[currentBranch] = {
-      remote: remote.name,
-      remoteBranch: trackingBranchRef,
-    }
-
     // Merge
     const mergeResult = this.merge(trackingBranchRef)
     if (!mergeResult.success) {
-      return { success: true, output: fetchResult.output + mergeResult.output }
+      return {
+        success: false,
+        mutated: mergeResult.mutated,
+        output: fetchResult.output,
+        error: mergeResult.error,
+      }
     }
 
     return {
@@ -784,7 +998,7 @@ export class GitSimulator implements IGitBackend {
 
   // ─── git push ────────────────────────────────────────────────────────────
 
-  push(remoteName?: string, branchName?: string): GitCommandResult {
+  push(remoteName?: string, branchName?: string, setUpstream = false): GitCommandResult {
     this.requireInit()
     const remote = remoteName ? this.state.remotes[remoteName] : Object.values(this.state.remotes)[0]
     if (!remote) {
@@ -802,6 +1016,15 @@ export class GitSimulator implements IGitBackend {
     const localCommitId = localBranch.commitId
     if (!localCommitId) {
       return { success: false, output: '', error: `fatal: branch '${branchToPush}' has no commits` }
+    }
+
+    const remoteTip = remote.branches[branchToPush]?.commitId
+    if (remoteTip && remoteTip !== localCommitId && !this.isAncestorAcrossRemote(remoteTip, localCommitId, remote)) {
+      return {
+        success: false,
+        output: '',
+        error: `! [rejected] ${branchToPush} -> ${branchToPush} (non-fast-forward)\nerror: failed to push some refs; fetch and integrate the remote work first.`,
+      }
     }
 
     // Push commits to remote
@@ -833,10 +1056,13 @@ export class GitSimulator implements IGitBackend {
       tracksRemote: remote.name,
     }
 
-    // Set up tracking
-    this.state.trackingBranches[branchToPush] = {
-      remote: remote.name,
-      remoteBranch: trackingBranchRef,
+    // A plain `git push origin branch` does not create upstream configuration.
+    // Only -u/--set-upstream records that relationship.
+    if (setUpstream) {
+      this.state.trackingBranches[branchToPush] = {
+        remote: remote.name,
+        remoteBranch: trackingBranchRef,
+      }
     }
 
     return {
@@ -871,6 +1097,12 @@ export class GitSimulator implements IGitBackend {
   // ─── Command Parser & Dispatcher ─────────────────────────────────────────
 
   execute(raw: string): GitCommandResult {
+    const beforeState = structuredClone(this.state)
+    const result = this.executeRaw(raw)
+    return { ...result, events: deriveRepositoryEvents(beforeState, this.state, result) }
+  }
+
+  private executeRaw(raw: string): GitCommandResult {
     const trimmed = raw.trim()
     if (!trimmed) return { success: false, output: '', error: 'Empty command' }
 
@@ -906,18 +1138,28 @@ export class GitSimulator implements IGitBackend {
           return this.createBranch(args[0])
         }
         case 'checkout':
-        case 'switch':
           return this.checkout(args[0])
+        case 'switch': {
+          if (flags.c && flags.track && args.length >= 2) return this.createTrackingBranch(args[0], args[1])
+          if (flags.c && args[0]) {
+            const created = this.createBranch(args[0])
+            return created.success ? this.checkout(args[0]) : created
+          }
+          return this.checkout(args[0])
+        }
         case 'merge':
+          if (flags.abort) return this.abortMerge()
           return this.merge(args[0])
         case 'rebase':
           return this.rebase(args[0])
         case 'log':
           return this.log(flags.n ? Number.parseInt(flags.n) : undefined)
+        case 'show':
+          return this.show(args[0] || 'HEAD')
         case 'status':
           return this.status()
         case 'diff':
-          return this.diff()
+          return this.diff(Boolean(flags.staged || flags.cached))
         case 'tag': {
           if (args.length === 0) return this.listTags()
           return this.createTag(args[0], flags.m)
@@ -931,6 +1173,12 @@ export class GitSimulator implements IGitBackend {
           const mode = flags.hard ? 'hard' : flags.soft ? 'soft' : 'mixed'
           return this.reset(args[0] || '', mode)
         }
+        case 'restore':
+          return this.restore(args[0], Boolean(flags.staged))
+        case 'revert':
+          return this.revert(args[0] || 'HEAD')
+        case 'reflog':
+          return this.reflog()
         case 'cherry-pick':
           return this.cherryPick(args[0])
         case 'remote': {
@@ -943,7 +1191,7 @@ export class GitSimulator implements IGitBackend {
         case 'pull':
           return this.pull(args[0], args[1])
         case 'push':
-          return this.push(args[0], args[1])
+          return this.push(args[0], args[1], Boolean(flags.u || flags['set-upstream']))
         case 'touch':
           return this.addFile(args[0], '')
         case 'edit': {
@@ -976,30 +1224,38 @@ export class GitSimulator implements IGitBackend {
         '  SNAPSHOTTING',
         '  git add <file|.>                      Stage files',
         '  git commit -m "msg"                  Create a commit',
-        '  git diff                              Show unstaged changes',
+        '  git diff                              Show working tree vs index',
+        '  git diff --staged                     Show index vs current commit',
         '  git stash                             Stash changes',
         '  git stash pop                         Restore stashed changes',
+        '  git restore <file>                    Restore working content from index/HEAD',
+        '  git restore --staged <file>           Unstage a selected path',
         '',
         '  BRANCHING & MERGING',
         '  git branch [name]                     List or create branches',
         '  git branch -d <name>                  Delete a branch',
         '  git checkout <branch|hash>            Switch branches',
         '  git merge <branch>                    Merge branch into current',
+        '  git merge --abort                     Abort a conflicted merge',
         '  git rebase <branch>                   Rebase current onto branch',
         '',
         '  REMOTES',
         '  git remote add <name> <url>           Add a remote',
         '  git remote -v                         List remotes',
         '  git fetch <remote>                    Fetch from remote',
-        '  git pull [<remote> [<branch>]]        Pull = fetch + merge',
+        '  git pull [<remote> [<branch>]]        Fetch then configured integration',
         '  git push [<remote> [<branch>]]        Push to remote',
+        '  git push -u <remote> <branch>          Push and set upstream',
         '',
         '  INSPECTION',
         '  git log                               Show commit history',
+        '  git show [<commit|branch|tag>]         Inspect one recorded snapshot',
         '  git tag [name]                        List or create tags',
         '',
         '  ADVANCED',
         '  git reset [--hard|--soft] <hash>      Reset HEAD',
+        '  git revert <commit>                   Undo a commit with a new commit',
+        '  git reflog                            Inspect recent local ref movement',
         '  git cherry-pick <hash>                Apply a specific commit',
         '',
         '  OTHER',
@@ -1035,6 +1291,19 @@ export class GitSimulator implements IGitBackend {
   }
 
   private findCommit(hash: string): GitCommit | null {
+    if (hash === 'HEAD') return this.getTipCommit()
+    const relative = hash.match(/^HEAD~(\d+)$/)
+    if (relative) {
+      let commit = this.getTipCommit()
+      let remaining = Number.parseInt(relative[1], 10)
+      while (commit && remaining > 0) {
+        commit = commit.parentIds[0] ? (this.state.commits[commit.parentIds[0]] ?? null) : null
+        remaining -= 1
+      }
+      return commit
+    }
+    if (this.state.branches[hash]?.commitId) return this.state.commits[this.state.branches[hash].commitId] ?? null
+    if (this.state.tags[hash]?.commitId) return this.state.commits[this.state.tags[hash].commitId] ?? null
     if (this.state.commits[hash]) return this.state.commits[hash]
     for (const [id, commit] of Object.entries(this.state.commits)) {
       if (id.startsWith(hash) || commit.shortId === hash) return commit
@@ -1193,5 +1462,6 @@ function createEmptyState(): GitState {
     stash: [],
     remotes: {},
     trackingBranches: {},
+    reflog: [],
   }
 }

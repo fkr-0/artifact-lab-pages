@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { GitSimulator } from '../git-simulator'
 import type { ILesson, ILessonCategory } from '../interfaces'
 import { LessonProvider } from '../lessons/lesson-provider'
 
@@ -51,7 +52,7 @@ describe('LessonProvider', () => {
       const lesson = provider.getLesson('basics')
       expect(lesson).toBeDefined()
       expect(lesson?.id).toBe('basics')
-      expect(lesson?.title).toBe('Git Basics')
+      expect(lesson?.title).toBe('Local Snapshots')
     })
 
     it('returns undefined for non-existent lesson', () => {
@@ -86,12 +87,14 @@ describe('LessonProvider', () => {
     })
 
     it('returns false when prerequisites not met', () => {
-      // 'branches' lesson requires 'basics' to be completed
-      expect(provider.arePrerequisitesMet('branches', new Set())).toBe(false)
+      // Branching follows the explicit snapshot transfer lab, not only the guided command lesson.
+      expect(provider.arePrerequisitesMet('branches', new Set(['orientation', 'basics']))).toBe(false)
     })
 
     it('returns true when prerequisites are met', () => {
-      expect(provider.arePrerequisitesMet('branches', new Set(['basics']))).toBe(true)
+      expect(provider.arePrerequisitesMet('branches', new Set(['orientation', 'basics', 'snapshot-transfer']))).toBe(
+        true,
+      )
     })
 
     it('returns true for unknown lesson', () => {
@@ -102,13 +105,27 @@ describe('LessonProvider', () => {
   // ─── validateStep ────────────────────────────────────────────────────────
 
   describe('validateStep', () => {
-    it('validates with regex pattern', () => {
-      const result = provider.validateStep('basics', 0, 'git init', {})
+    it('validates command text together with the declared repository-state goal', () => {
+      const backend = new GitSimulator()
+      backend.execute('git init')
+      const result = provider.validateStep(
+        'basics',
+        0,
+        'git init',
+        backend.getState() as unknown as Record<string, unknown>,
+      )
       expect(result).toBe(true)
     })
 
-    it('fails regex validation with wrong command', () => {
-      const result = provider.validateStep('basics', 0, 'git status', {})
+    it('fails validation with the wrong command even when repository state satisfies the goal', () => {
+      const backend = new GitSimulator()
+      backend.execute('git init')
+      const result = provider.validateStep(
+        'basics',
+        0,
+        'git status',
+        backend.getState() as unknown as Record<string, unknown>,
+      )
       expect(result).toBe(false)
     })
 
