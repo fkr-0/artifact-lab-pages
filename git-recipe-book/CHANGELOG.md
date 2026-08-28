@@ -53,7 +53,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Verification
 
 - `pnpm lint`
-- `pnpm test` — 213 tests passed across 14 files, including curriculum reachability and curriculum-linked native-Git differential checks.
+- `pnpm test` — 214 tests passed across 14 files, including curriculum reachability, curriculum-linked native-Git differential checks, and theme-selection regression coverage.
 - `pnpm build` — TypeScript and Vite production build passed (2,269 modules transformed).
 - `pnpm playwright test --project=chromium` — 34/34 browser journeys passed, including 390 px mobile coverage for snapshot, merge, recovery, remote, and capstone stages plus the formal accessibility suite.
 - `test:a11y` / `e2e/accessibility.spec.ts` — 5/5 axe + keyboard scenarios passed with no serious or critical axe violations in the audited stable states.
