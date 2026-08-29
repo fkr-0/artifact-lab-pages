@@ -77,7 +77,7 @@ engine.on('task:completed', (completed) => {
 });
 ```
 
-Task handlers automatically become advertised capabilities. A scheduler chooses the least-loaded discovered peer in the same active session that advertises every required capability. If no eligible remote peer exists but the local node has the handler, the task runs locally. Assigned work has a lease; `engine.tick()` expires stale leases and tries another eligible worker.
+Task handlers automatically become advertised capabilities. A scheduler chooses the least-loaded discovered peer in the same active session that advertises every required capability. Local fallback is held to the same required-capability gate. Assigned work has a lease; `engine.tick()` expires stale leases and tries another eligible worker. Bounded heartbeats keep quiet healthy peers discoverable, and a fresh peer announcement reconsiders queued work after transient delivery or partition failures.
 
 For explicit logical sessions:
 
@@ -87,7 +87,7 @@ engine.requestSession('orca:ABCDE');                            // participant
 engine.leaveSession();
 ```
 
-The browser bootstrap performs this negotiation automatically from the existing create/join/disconnect room lifecycle.
+The browser bootstrap performs this negotiation automatically from the existing create/join/disconnect room lifecycle. It also propagates the legacy display name to the shared core identity when that core is available. The initializer is exported for deterministic qualification while `index.html` retains automatic module startup.
 
 ## Shared-core adapter contract
 
@@ -134,7 +134,7 @@ npm test
 npm run check
 ```
 
-The adapter tests load the real sibling `../peernetjs/peernet-shared-core.js` into an isolated VM and exercise it with a deterministic in-memory PeerJS network. They cover initial hub election/connection, message delivery, network-partition reconnection, and the missing-shared-core degradation path.
+The adapter tests load the real sibling `../peernetjs/peernet-shared-core.js` into an isolated VM and exercise it with a deterministic in-memory PeerJS network. They cover initial hub election/connection, message delivery, network-partition reconnection, startup failure reporting, the missing-shared-core degradation path, and compatibility reconnect behavior for the older shared-core contract.
 
-The orchestration tests use a transport-only in-memory mesh so discovery/session/task logic is verified independently from PeerJS.
+The orchestration tests use a transport-only in-memory mesh so discovery/session/task logic is verified independently from PeerJS. Bootstrap tests drive the legacy host/guest/disconnect lifecycle against a headless browser target and statically verify that `index.html` still emits the lifecycle hooks and loads the module bootstrap.
 
