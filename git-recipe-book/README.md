@@ -74,4 +74,4 @@ Automated accessibility coverage lives in `e2e/accessibility.spec.ts`, with the 
 
 ## Release state
 
-See `CHANGELOG.md` for the exact 1.1.0 history and current unreleased hardening, `ROADMAP.md` for the educational architecture, and `release-evidence/v1.1.0.yml` for the existing 1.1.0 release evidence. Version/tag/publish work is separate from ordinary curriculum development and is not performed implicitly.
+See `CHANGELOG.md` for the exact 1.1.0 history and current unreleased hardening, `ROADMAP.md` for the educational architecture, and `release-evidence/v1.1.0.yml` for the preserved 1.1.0 release evidence. That evidence predates the 2026-08-06 adoption into the parent artifacts repository: its recorded standalone commit IDs are not part of the parent history, and the parent repository's existing `v1.1.0` tag belongs to Artifact Lab rather than Git Recipe Book. Version/tag/publish work is separate from ordinary curriculum development and is not performed implicitly.
