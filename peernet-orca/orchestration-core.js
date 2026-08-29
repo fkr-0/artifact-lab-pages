@@ -31,6 +31,7 @@ export class OrcaOrchestrationEngine {
     now = () => Date.now(),
     taskLeaseMs = 15000,
     peerTimeoutMs = 45000,
+    peerHeartbeatMs = 0,
     maintenanceIntervalMs = 1000,
   } = {}) {
     this.nodeId = String(nodeId);
@@ -39,6 +40,11 @@ export class OrcaOrchestrationEngine {
     this.now = now;
     this.taskLeaseMs = Math.max(100, Number(taskLeaseMs) || 15000);
     this.peerTimeoutMs = Math.max(this.taskLeaseMs, Number(peerTimeoutMs) || 45000);
+    const defaultHeartbeatMs = Math.max(100, Math.floor(this.peerTimeoutMs / 3));
+    this.peerHeartbeatMs = Math.max(
+      100,
+      Math.min(Number(peerHeartbeatMs) || defaultHeartbeatMs, this.peerTimeoutMs)
+    );
     this.maintenanceIntervalMs = Math.max(100, Number(maintenanceIntervalMs) || 1000);
 
     this.started = false;
@@ -56,6 +62,7 @@ export class OrcaOrchestrationEngine {
     this.messageOrder = [];
     this.messageCounter = 0;
     this.taskCounter = 0;
+    this.lastAnnounceAt = 0;
     this.transportUnsubscribe = null;
     this.healthUnsubscribe = null;
     this.maintenanceTimer = null;
@@ -194,6 +201,7 @@ export class OrcaOrchestrationEngine {
     }
     this.handlers.set(taskKind, handler);
     if (this.started) this.announce('capabilities-changed');
+    this.retryQueuedTasks();
     return () => {
       this.handlers.delete(taskKind);
       if (this.started) this.announce('capabilities-changed');
@@ -202,6 +210,7 @@ export class OrcaOrchestrationEngine {
 
   announce(reason = 'update') {
     if (!this.started) return 0;
+    this.lastAnnounceAt = this.now();
     return this.sendEnvelope('peer:hello', {
       reason,
       capabilities: this.capabilities(),
@@ -216,6 +225,27 @@ export class OrcaOrchestrationEngine {
       if (task.state === 'assigned' || task.state === 'running') load += 1;
     }
     return load;
+  }
+
+  canExecuteLocally(task) {
+    if (!task || !this.handlers.has(task.kind)) return false;
+    const available = new Set(this.capabilities());
+    return [task.kind, ...(task.requires || [])].every((capability) => available.has(capability));
+  }
+
+  retryQueuedTasks() {
+    for (const task of this.tasks.values()) {
+      if (task.state !== 'queued') continue;
+      if (this.selectWorker(task)) this.scheduleTask(task);
+    }
+  }
+
+  reconsiderQueuedTasksForPeer(peerId) {
+    for (const task of this.tasks.values()) {
+      if (task.state !== 'queued') continue;
+      task.rejectedWorkers.delete(peerId);
+    }
+    this.retryQueuedTasks();
   }
 
   openSession({ id = defaultId('session'), title = 'Orca Session', metadata = {} } = {}) {
@@ -350,7 +380,7 @@ export class OrcaOrchestrationEngine {
     if (!task || task.state === 'completed' || task.state === 'failed') return false;
     const worker = this.selectWorker(task);
     if (worker && worker !== this.nodeId) return this.assignRemote(task, worker);
-    if (this.handlers.has(task.kind)) {
+    if (worker === this.nodeId && this.canExecuteLocally(task)) {
       this.executeLocalTask(task);
       return true;
     }
@@ -373,7 +403,7 @@ export class OrcaOrchestrationEngine {
     }
     candidates.sort((a, b) => a.load - b.load || a.id.localeCompare(b.id));
     if (candidates.length) return candidates[0].id;
-    return this.handlers.has(task.kind) ? this.nodeId : '';
+    return this.canExecuteLocally(task) ? this.nodeId : '';
   }
 
   assignRemote(task, workerId) {
@@ -450,6 +480,9 @@ export class OrcaOrchestrationEngine {
 
   tick() {
     const current = this.now();
+    if (this.started && current - this.lastAnnounceAt >= this.peerHeartbeatMs) {
+      this.announce('heartbeat');
+    }
     for (const [peerId, peer] of this.peers) {
       if (current - peer.lastSeen > this.peerTimeoutMs) {
         this.peers.delete(peerId);
@@ -583,6 +616,7 @@ export class OrcaOrchestrationEngine {
       load: Number(body.load) || 0,
     });
     this.emit(wasKnown ? 'peer:update' : 'peer:discover', this.peerSnapshot(peer));
+    this.reconsiderQueuedTasksForPeer(peerId);
   }
 
   handleSessionJoinRequest(peerId, body) {
@@ -664,6 +698,17 @@ export class OrcaOrchestrationEngine {
       this.sendEnvelope('task:reject', { taskId, reason: 'unsupported-task-kind' }, peerId);
       return;
     }
+    const requires = normalizeCapabilities(incoming.requires || []);
+    const available = new Set(this.capabilities());
+    const missingCapability = requires.find((capability) => !available.has(capability));
+    if (missingCapability) {
+      this.sendEnvelope(
+        'task:reject',
+        { taskId, reason: 'unsupported-required-capability', capability: missingCapability },
+        peerId
+      );
+      return;
+    }
 
     const previous = this.incomingTasks.get(taskId);
     if (previous && previous.state === 'completed') {
@@ -679,6 +724,7 @@ export class OrcaOrchestrationEngine {
       id: taskId,
       kind,
       payload: cloneValue(incoming.payload),
+      requires,
       sessionId: incoming.sessionId || '',
       originId: String(incoming.originId || peerId),
       attempt: Number(incoming.attempt) || 1,
@@ -690,6 +736,7 @@ export class OrcaOrchestrationEngine {
     this.incomingTasks.set(taskId, task);
     this.sendEnvelope('task:accepted', { taskId, attempt: task.attempt }, peerId);
     this.emit('task:received', cloneValue(task));
+    this.announce('load-changed');
 
     Promise.resolve()
       .then(() =>

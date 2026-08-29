@@ -241,3 +241,190 @@ test('gracefully degrades without a transport and still executes local work', as
   assert.equal(completed.assignedTo, 'solo');
   engine.stop();
 });
+
+test('heartbeats keep quiet healthy peers discoverable beyond the stale timeout', async (t) => {
+  let now = 0;
+  const mesh = new MemoryMesh();
+  const options = {
+    now: () => now,
+    taskLeaseMs: 100,
+    peerTimeoutMs: 300,
+    peerHeartbeatMs: 100,
+    maintenanceIntervalMs: 100000,
+  };
+  const owner = new OrcaOrchestrationEngine({ ...options, nodeId: 'owner', transport: mesh.transport('owner') });
+  const worker = new OrcaOrchestrationEngine({ ...options, nodeId: 'worker', transport: mesh.transport('worker') });
+
+  t.after(() => {
+    owner.stop({ stopTransport: true });
+    worker.stop({ stopTransport: true });
+  });
+
+  owner.start();
+  worker.start();
+  await waitFor(() => owner.getPeer('worker') && worker.getPeer('owner'));
+
+  for (const timestamp of [110, 220, 330, 440]) {
+    now = timestamp;
+    owner.tick();
+    worker.tick();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  assert.ok(owner.getPeer('worker'));
+  assert.ok(worker.getPeer('owner'));
+  assert.equal(owner.getPeer('worker').lastSeen, 440);
+  assert.equal(worker.getPeer('owner').lastSeen, 440);
+});
+
+test('a task queued before peer discovery runs when a capable peer appears', async (t) => {
+  const mesh = new MemoryMesh();
+  const owner = new OrcaOrchestrationEngine({ nodeId: 'owner', transport: mesh.transport('owner') });
+  const worker = new OrcaOrchestrationEngine({ nodeId: 'worker', transport: mesh.transport('worker') });
+
+  t.after(() => {
+    owner.stop({ stopTransport: true });
+    worker.stop({ stopTransport: true });
+  });
+
+  owner.start();
+  const queued = owner.submitTask({ kind: 'late-worker', payload: { value: 9 } });
+  assert.equal(owner.getTask(queued.id).state, 'queued');
+
+  worker.registerTaskHandler('late-worker', async ({ value }) => ({ value, executor: 'worker' }));
+  worker.start();
+
+  const completed = await waitFor(() => {
+    const task = owner.getTask(queued.id);
+    return task?.state === 'completed' ? task : null;
+  });
+  assert.equal(completed.assignedTo, 'worker');
+  assert.deepEqual(completed.result, { value: 9, executor: 'worker' });
+});
+
+test('a transiently rejected worker becomes eligible again after it reannounces', async (t) => {
+  const mesh = new MemoryMesh();
+  const owner = new OrcaOrchestrationEngine({ nodeId: 'owner', transport: mesh.transport('owner') });
+  const worker = new OrcaOrchestrationEngine({ nodeId: 'worker', transport: mesh.transport('worker') });
+
+  t.after(() => {
+    owner.stop({ stopTransport: true });
+    worker.stop({ stopTransport: true });
+  });
+
+  worker.registerTaskHandler('recoverable', async ({ value }) => ({ value, recovered: true }));
+  owner.start();
+  worker.start();
+  await waitFor(() => owner.getPeer('worker')?.capabilities.includes('recoverable'));
+
+  mesh.setPartition('owner', 'worker', true);
+  const queued = owner.submitTask({ kind: 'recoverable', payload: { value: 11 } });
+  await waitFor(() => owner.getTask(queued.id)?.state === 'queued');
+  assert.equal(owner.getTask(queued.id).attempt, 1);
+
+  mesh.setPartition('owner', 'worker', false);
+  worker.announce('partition-healed');
+
+  const completed = await waitFor(() => {
+    const task = owner.getTask(queued.id);
+    return task?.state === 'completed' ? task : null;
+  });
+  assert.equal(completed.assignedTo, 'worker');
+  assert.equal(completed.attempt, 2);
+  assert.deepEqual(completed.result, { value: 11, recovered: true });
+});
+
+test('registering a local handler wakes compatible queued work', async () => {
+  const engine = new OrcaOrchestrationEngine({ nodeId: 'solo' });
+  engine.start();
+  const queued = engine.submitTask({ kind: 'late-local', payload: { value: 5 } });
+  assert.equal(engine.getTask(queued.id).state, 'queued');
+
+  engine.registerTaskHandler('late-local', async ({ value }) => ({ doubled: value * 2 }));
+  const completed = await waitFor(() => {
+    const task = engine.getTask(queued.id);
+    return task?.state === 'completed' ? task : null;
+  });
+  assert.equal(completed.assignedTo, 'solo');
+  assert.deepEqual(completed.result, { doubled: 10 });
+  engine.stop();
+});
+
+test('local fallback respects every declared required capability', async () => {
+  let calls = 0;
+  const engine = new OrcaOrchestrationEngine({ nodeId: 'solo' });
+  engine.registerTaskHandler('render', async () => {
+    calls += 1;
+    return { ok: true };
+  });
+  engine.start();
+
+  const queued = engine.submitTask({ kind: 'render', requires: ['gpu'] });
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(engine.getTask(queued.id).state, 'queued');
+  assert.equal(engine.getTask(queued.id).assignedTo, null);
+  assert.equal(calls, 0);
+  engine.stop();
+});
+
+test('workers revalidate required capabilities before accepting stale assignments', async (t) => {
+  const mesh = new MemoryMesh();
+  const owner = new OrcaOrchestrationEngine({ nodeId: 'owner', transport: mesh.transport('owner') });
+  const worker = new OrcaOrchestrationEngine({ nodeId: 'worker', transport: mesh.transport('worker') });
+  let calls = 0;
+  worker.registerTaskHandler('render', async () => {
+    calls += 1;
+    return { ok: true };
+  });
+
+  t.after(() => {
+    owner.stop({ stopTransport: true });
+    worker.stop({ stopTransport: true });
+  });
+
+  owner.start();
+  worker.start();
+  await waitFor(() => owner.getPeer('worker')?.capabilities.includes('render'));
+
+  // Simulate an origin with stale capability knowledge. The worker must still fail closed.
+  owner.peers.get('worker').capabilities.add('gpu');
+  let rejection = null;
+  owner.on('task:rejected', (task) => {
+    rejection = task;
+  });
+  const queued = owner.submitTask({ kind: 'render', requires: ['gpu'] });
+  await waitFor(() => rejection);
+
+  assert.equal(rejection.reason, 'unsupported-required-capability');
+  assert.equal(owner.getTask(queued.id).state, 'queued');
+  assert.equal(calls, 0);
+});
+
+test('workers advertise load when remote work starts and clears it on completion', async (t) => {
+  const mesh = new MemoryMesh();
+  const owner = new OrcaOrchestrationEngine({ nodeId: 'owner', transport: mesh.transport('owner') });
+  const worker = new OrcaOrchestrationEngine({ nodeId: 'worker', transport: mesh.transport('worker') });
+  let finish;
+  worker.registerTaskHandler(
+    'slow-remote',
+    async () => new Promise((resolve) => {
+      finish = resolve;
+    })
+  );
+
+  t.after(() => {
+    owner.stop({ stopTransport: true });
+    worker.stop({ stopTransport: true });
+  });
+
+  owner.start();
+  worker.start();
+  await waitFor(() => owner.getPeer('worker')?.capabilities.includes('slow-remote'));
+  const queued = owner.submitTask({ kind: 'slow-remote' });
+
+  await waitFor(() => owner.getTask(queued.id)?.state === 'running');
+  await waitFor(() => owner.getPeer('worker')?.load === 1);
+  finish({ ok: true });
+  await waitFor(() => owner.getTask(queued.id)?.state === 'completed');
+  await waitFor(() => owner.getPeer('worker')?.load === 0);
+});

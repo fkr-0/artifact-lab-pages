@@ -244,8 +244,13 @@
     options = options || {};
     lastOptions = Object.assign({}, lastOptions, options);
     if (core) {
-      if (!core.started && typeof core.start === 'function') core.start();
-      setEnabled(true);
+      var resumed = true;
+      if (!core.started && typeof core.start === 'function') resumed = core.start() !== false;
+      setEnabled(resumed);
+      if (!resumed) {
+        lastHealth = readHealth();
+        emit('degraded', { reason: 'shared-core-start-failed', health: lastHealth });
+      }
       return core;
     }
     if (!global.PeernetSharedCore) {
@@ -322,7 +327,8 @@
 
     return {
       start: function () {
-        return Boolean(start(options));
+        var instance = start(options);
+        return Boolean(instance && instance.started !== false);
       },
 
       stop: function () {

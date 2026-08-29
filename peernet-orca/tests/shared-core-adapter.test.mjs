@@ -474,6 +474,41 @@ test('adapter fails soft when PeernetSharedCore is unavailable', () => {
   assert.ok(states.includes('offline'));
 });
 
+test('transport start reports failure when an allocated shared core cannot start', () => {
+  class StartFailSharedCore extends Emitter {
+    constructor() {
+      super();
+      this.started = false;
+      this.connections = new Map();
+    }
+
+    start() {
+      this.started = false;
+      return false;
+    }
+
+    stop() {}
+
+    health() {
+      return {
+        state: 'offline',
+        connected: false,
+        role: 'offline',
+        peerCount: 0,
+        lastError: 'start failed',
+      };
+    }
+  }
+
+  const context = createContext({ includeSharedCore: false });
+  context.PeernetSharedCore = StartFailSharedCore;
+  const transport = context.OrcaSharedPeernet.createTransport({ channel: 'orca-test-channel' });
+
+  assert.equal(transport.start(), false);
+  assert.equal(context.OrcaSharedPeernet.isEnabled(), false);
+  assert.equal(transport.health().state, 'offline');
+});
+
 test('adapter supplies bounded reconnect fallback for the committed legacy shared-core contract', async () => {
   const network = new FakePeerNetwork();
   const hostContext = createContext({ includeSharedCore: false });
