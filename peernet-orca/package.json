@@ -1,0 +1,10 @@
+{
+  "name": "peernet-orca",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check shared-core-adapter.js && node --check orchestration-core.js && node --check orchestration-bootstrap.js && npm test"
+  }
+}

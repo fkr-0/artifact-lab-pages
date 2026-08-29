@@ -1569,6 +1569,14 @@
       })
 
       /* ===== NETWORK MANAGER ===== */
+      function emitLegacySession(phase, detail) {
+        window.dispatchEvent(
+          new CustomEvent('orca:legacy-session', {
+            detail: Object.assign({ phase: phase }, detail || {}),
+          })
+        )
+      }
+
       var net = {
         peer: null,
         conns: [],
@@ -1799,6 +1807,12 @@
           this.peer.on('open', function (id) {
             self.myId = id
             self.connected = true
+            emitLegacySession('connected', {
+              role: 'host',
+              code: self.sessionCode,
+              name: self.myName,
+              peerId: self.myId,
+            })
             document.getElementById('sessCodeDisplay').textContent = self.sessionCode
             document.getElementById('sessionInfo').style.display = 'block'
             self.showMsg('Session created! Share the code.', 'ok')
@@ -1841,6 +1855,12 @@
             conn.on('open', function () {
               self.conns = [conn]
               self.connected = true
+              emitLegacySession('connected', {
+                role: 'guest',
+                code: self.sessionCode,
+                name: self.myName,
+                peerId: self.myId,
+              })
               conn.send({ type: 'join', name: self.myName, color: self.myColor })
               document.getElementById('sessCodeDisplay').textContent = self.sessionCode
               document.getElementById('sessionInfo').style.display = 'block'
@@ -1854,6 +1874,12 @@
             conn.on('close', function () {
               self.conns = []
               self.connected = false
+              emitLegacySession('disconnected', {
+                role: 'guest',
+                code: self.sessionCode,
+                name: self.myName,
+                reason: 'host-disconnected',
+              })
               self.showMsg('Host disconnected.', 'err')
               self.updateBadge()
             })
@@ -1866,12 +1892,24 @@
         },
 
         goSolo: function () {
+          emitLegacySession('disconnected', {
+            role: this.isHost ? 'host' : 'guest',
+            code: this.sessionCode,
+            name: this.myName,
+            reason: 'solo',
+          })
           this.connected = false
           this.updateBadge()
           document.getElementById('lobbyOverlay').classList.add('hidden')
         },
 
         disconnect: function () {
+          var disconnectDetail = {
+            role: this.isHost ? 'host' : 'guest',
+            code: this.sessionCode,
+            name: this.myName,
+            reason: 'manual',
+          }
           if (this.peer) {
             this.peer.destroy()
             this.peer = null
@@ -1886,6 +1924,7 @@
           this.updateBadge()
           this.showMsg('Disconnected.', 'err')
           document.getElementById('sessionInfo').style.display = 'none'
+          emitLegacySession('disconnected', disconnectDetail)
           renderGrid(null)
         },
 
@@ -1924,6 +1963,7 @@
           else this.sendToHost(msg)
         },
       }
+      window.OrcaLegacyNet = net
 
       /* ===== LOBBY UI ===== */
       document.getElementById('createSessBtn').addEventListener('click', function () {
@@ -2700,6 +2740,7 @@
         { once: true }
       )
     </script>
+    <script type="module" src="orchestration-bootstrap.js"></script>
 
     <!--[if lt IE 8]>
       <p class="browserupgrade">
