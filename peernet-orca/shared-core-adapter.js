@@ -77,14 +77,33 @@
     }
   }
 
+  function normalizeHealth(health) {
+    return Object.assign(
+      {
+        state: 'idle',
+        connected: false,
+        role: 'offline',
+        peerCount: 0,
+        reconnectAttempts: adapterReconnectAttempts,
+        reconnectLimit: Math.max(
+          0,
+          Number(lastOptions.reconnectMaxAttempts == null ? 8 : lastOptions.reconnectMaxAttempts)
+        ),
+        nextReconnectAt: null,
+        lastError: null
+      },
+      health || {}
+    );
+  }
+
   function readHealth() {
-    if (adapterHealthOverride) return Object.assign({}, adapterHealthOverride);
+    if (adapterHealthOverride) return normalizeHealth(adapterHealthOverride);
     if (core && typeof core.health === 'function') {
       try {
-        return core.health();
+        return normalizeHealth(core.health());
       } catch (_) {}
     }
-    return Object.assign({}, lastHealth);
+    return normalizeHealth(lastHealth);
   }
 
   function clearAdapterReconnect(resetAttempts) {
@@ -201,7 +220,7 @@
             instance.connections.has(instance.hubId))
         );
         if (payload.connected && hasHubConnection) clearAdapterReconnect(true);
-        if (adapterHealthOverride) forwarded = readHealth();
+        forwarded = readHealth();
       }
       if (event === 'open' || event === 'hub:join' || event === 'hub:ready') bindPeerFallback(instance);
       if (
