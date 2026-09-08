@@ -1,0 +1,35 @@
+{
+  "name": "@peernet/peernetjs",
+  "version": "0.1.0-dev.0",
+  "private": true,
+  "description": "Transport-neutral Peernet messaging with a PeerJS hub/mesh compatibility adapter",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./peerjs": "./src/transports/peerjs-hub.js",
+    "./testing": "./src/testing/index.js",
+    "./legacy/peernet-lib": "./peernet-lib.js",
+    "./legacy/peernet-shared-core": "./peernet-shared-core.js",
+    "./legacy/user-manager": "./peernet-user-manager.js",
+    "./legacy/session-manager": "./peernet-session-manager.js",
+    "./legacy/storage-manager": "./peernet-storage-manager.js"
+  },
+  "files": [
+    "src/",
+    "docs/",
+    "README.md",
+    "CHANGELOG.md",
+    "peernet-lib.js",
+    "peernet-shared-core.js",
+    "peernet-user-manager.js",
+    "peernet-session-manager.js",
+    "peernet-storage-manager.js"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/client.js && node --check src/protocol.js && node --check src/transports/peerjs-hub.js && node --check src/testing/in-memory.js && node --check src/testing/conformance.js && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
