@@ -63,6 +63,22 @@ jobs:
         run: pnpm run build
         working-directory: badger-sprawl-runner
 
+      - name: Install dependencies (git-recipe-book)
+        run: pnpm install --frozen-lockfile
+        working-directory: git-recipe-book
+
+      - name: Build (git-recipe-book)
+        run: pnpm run build
+        working-directory: git-recipe-book
+
+      - name: Install dependencies (inf-arrange)
+        run: pnpm install --frozen-lockfile
+        working-directory: inf-arrange
+
+      - name: Build (inf-arrange)
+        run: pnpm run build
+        working-directory: inf-arrange
+
       - name: Install dependencies (revealive)
         run: pnpm install --frozen-lockfile
         working-directory: revealive
@@ -96,6 +112,9 @@ jobs:
 
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
+
+      - name: Run V13 publication contract tests
+        run: pnpm run test:v13hub
 
       - name: Materialize V13 publication stage with V11 compatibility content
         run: |

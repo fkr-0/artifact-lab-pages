@@ -34,7 +34,7 @@ echo -e "${CYAN}Materializing App Hub V13 publication stage...${NC}"
 cd "$ARTIFACTS_DIR"
 echo -e "${CYAN}Preparing pinned Revealive dependencies...${NC}"
 pnpm --dir "$ARTIFACTS_DIR/revealive" install --frozen-lockfile
-node scripts/build-publication-site.mjs --out "$STAGE"
+node scripts/build-publication-site.mjs --out "$STAGE" --no-build
 node scripts/stage-compiled-publication.mjs --stage "$STAGE" --id revealive
 
 cat > "$STAGE/VERSION" <<EOF_VERSION

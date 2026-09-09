@@ -112,9 +112,13 @@ test('deploy, package, and Pages workflows opt into Revealive only after frozen 
 
   for (const source of [deploy, pack]) {
     assert.match(source, /pnpm --dir "\$ARTIFACTS_DIR\/revealive" install --frozen-lockfile/);
+    assert.match(source, /build-publication-site\.mjs --out .* --no-build/);
     assert.match(source, /stage-compiled-publication\.mjs --stage .* --id revealive/);
   }
+  assert.match(pages, /Install dependencies \(git-recipe-book\)[\s\S]*Build \(git-recipe-book\)/);
+  assert.match(pages, /Install dependencies \(inf-arrange\)[\s\S]*Build \(inf-arrange\)/);
   assert.match(pages, /Install dependencies \(revealive\)[\s\S]*working-directory: revealive/);
+  assert.match(pages, /Run V13 publication contract tests[\s\S]*pnpm run test:v13hub/);
   assert.match(
     pages,
     /stage-compiled-publication\.mjs --stage \.artifacts-pages-stage --id revealive/,
