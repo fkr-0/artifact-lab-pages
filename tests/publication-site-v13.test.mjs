@@ -25,7 +25,7 @@ test('publication stage promotes V13 while retaining V11 compatibility and reloc
   const result = await buildPublicationSite({ rootDir, outDir, runBuilds: false });
   assert.equal(result.manifest.rootIndex, 'hub/v13/index.html');
   assert.equal(result.manifest.verifiedRequiredPaths, REQUIRED_PUBLICATION_PATHS.length);
-  assert.equal(result.v13.catalog.summary.total, 55);
+  assert.equal(result.v13.catalog.summary.total, 56);
   assert.equal(result.v13.catalog.summary.verified, 5);
   assert.ok(result.v13.catalog.items.some((item) => item.id === 'brickbreaker' && item.availability === 'provisional' && item.url === '/brickbreaker/index.html'));
   assert.equal(result.v13.builds.some((entry) => entry.manifest.id === 'brickbreaker'), false);
@@ -54,9 +54,17 @@ test('Pages workflow and package scripts use the composite V13 publication build
     readFile(join(rootDir, 'artifacts-deploy'), 'utf8'),
   ]);
   assert.match(workflow, /Build \(badger-sprawl-runner\)[\s\S]*pnpm run build/);
+  assert.match(workflow, /Install dependencies \(git-recipe-book\)[\s\S]*working-directory: git-recipe-book/);
+  assert.match(workflow, /Build \(git-recipe-book\)[\s\S]*pnpm run build[\s\S]*working-directory: git-recipe-book/);
   assert.match(workflow, /node scripts\/build-publication-site\.mjs --source \.artifacts\.source\.ci\.json --out \.artifacts-pages-stage --no-build/);
   assert.doesNotMatch(workflow, /Materialize deploy stage[\s\S]*artifact-build\.mjs/);
   assert.equal(pkg.scripts['build:site'], 'node scripts/build-publication-site.mjs --out dist/site');
+  assert.match(packageScript, /ARTIFACTS_DIR="\$\{ARTIFACTS_DIR:-\$SCRIPT_DIR\}"/);
+  assert.doesNotMatch(packageScript, /\/home\/user\/work\/code\/artifacts/);
+  assert.match(packageScript, /git-recipe-book" install --frozen-lockfile/);
   assert.match(packageScript, /node scripts\/build-publication-site\.mjs --out "\$STAGE"/);
+  assert.match(deployScript, /ARTIFACTS_DIR="\$\{ARTIFACTS_DIR:-\$SCRIPT_DIR\}"/);
+  assert.doesNotMatch(deployScript, /\/home\/user\/work\/code\/artifacts/);
+  assert.match(deployScript, /git-recipe-book" install --frozen-lockfile/);
   assert.match(deployScript, /node scripts\/build-publication-site\.mjs --out "\$STAGE_DIR"/);
 });

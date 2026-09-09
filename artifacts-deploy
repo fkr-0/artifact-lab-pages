@@ -17,7 +17,8 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-ARTIFACTS_DIR="${ARTIFACTS_DIR:-/home/user/work/code/artifacts}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-$SCRIPT_DIR}"
 VPS_HOST="${ARTIFACTS_VPS_HOST:-vps}"
 VPS_PATH="${ARTIFACTS_VPS_PATH:-/home/user/data/artifacts}"
 STAGE_DIR="$ARTIFACTS_DIR/.artifacts-deploy-stage"
@@ -86,7 +87,9 @@ fi
 echo -e "${CYAN}Materializing App Hub V13 publication stage...${NC}"
 cd "$ARTIFACTS_DIR"
 echo -e "${CYAN}Preparing pinned Revealive dependencies...${NC}"
-pnpm --dir "$ARTIFACTS_DIR/revealive" install --frozen-lockfile
+CI=true pnpm --dir "$ARTIFACTS_DIR/revealive" install --frozen-lockfile
+echo -e "${CYAN}Preparing Git Recipe Book dependencies...${NC}"
+CI=true pnpm --dir "$ARTIFACTS_DIR/git-recipe-book" install --frozen-lockfile
 node scripts/build-publication-site.mjs --out "$STAGE_DIR"
 node scripts/stage-compiled-publication.mjs --stage "$STAGE_DIR" --id revealive
 

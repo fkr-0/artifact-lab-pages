@@ -67,6 +67,14 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: revealive
 
+      - name: Install dependencies (git-recipe-book)
+        run: pnpm install --frozen-lockfile
+        working-directory: git-recipe-book
+
+      - name: Build (git-recipe-book)
+        run: pnpm run build
+        working-directory: git-recipe-book
+
       - name: Prepare V11 compatibility source catalog
         run: |
           node - <<'NODE'

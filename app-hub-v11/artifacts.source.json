@@ -693,6 +693,11 @@
         "index"
       ],
       "deploy": {
+        "build": {
+          "cwd": "git-recipe-book",
+          "command": "pnpm run build",
+          "dist": "dist"
+        },
         "includePath": "git-recipe-book/dist",
         "targetPath": "git-recipe-book"
       },
