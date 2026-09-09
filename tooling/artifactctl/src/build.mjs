@@ -26,9 +26,10 @@ async function copyTree(source, target, exclude = []) {
     recursive: true,
     force: true,
     filter: (path) => {
-      if (EXCLUDED_NAMES.has(basename(path))) return false;
       const rel = relative(source, path).replaceAll('\\', '/');
-      return !rel || !excludedByPattern(rel, exclude);
+      if (!rel) return true;
+      if (EXCLUDED_NAMES.has(basename(path))) return false;
+      return !excludedByPattern(rel, exclude);
     },
   });
 }

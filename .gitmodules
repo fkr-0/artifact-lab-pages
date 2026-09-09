@@ -13,3 +13,6 @@
 [submodule "bathroom-emergency-guide"]
 	path = bathroom-emergency-guide
 	url = https://github.com/fkr-0/bathroom-emergency.git
+[submodule "revealive"]
+	path = revealive
+	url = https://github.com/fkr-0/revealive.git
