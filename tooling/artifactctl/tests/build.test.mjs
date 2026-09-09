@@ -49,6 +49,40 @@ test('markdown assembles into standalone HTML', async (t) => {
   assert.match(html, /<li>one<\/li>/);
 });
 
+test('compile output rooted at dist is copied instead of excluded as generated input', async (t) => {
+  const rootDir = await fixture();
+  t.after(() => rm(rootDir, { recursive: true, force: true }));
+  await mkdir(join(rootDir, 'demo-app'), { recursive: true });
+  const result = await buildArtifact(
+    {
+      schemaVersion: 'artifacts.fkr.dev/v1',
+      id: 'compiled-app',
+      version: '1.0.0',
+      title: 'Compiled App',
+      kind: 'application',
+      status: 'active',
+      required: true,
+      source: { kind: 'project', path: 'demo-app', git: { mode: 'root' } },
+      build: {
+        mode: 'compile',
+        cwd: 'demo-app',
+        command: [
+          process.execPath,
+          '-e',
+          "require('node:fs').mkdirSync('dist',{recursive:true});require('node:fs').writeFileSync('dist/index.html','<!doctype html><title>Compiled</title>\\n')",
+        ],
+        output: 'dist',
+      },
+      release: { kind: 'directory', path: 'dist', entrypoint: 'index.html', offline: true },
+      launch: { default: 'newWindow', modes: ['newWindow'] },
+    },
+    { rootDir, outDir: join(rootDir, 'out/artifacts'), allowCompile: true },
+  );
+
+  assert.equal(result.receipt.verification.ok, true);
+  assert.match(await readFile(join(result.stageRoot, 'index.html'), 'utf8'), /Compiled/);
+});
+
 test('release-escaping references fail standalone verification', async (t) => {
   const rootDir = await fixture();
   t.after(() => rm(rootDir, { recursive: true, force: true }));

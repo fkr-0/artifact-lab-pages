@@ -85,7 +85,10 @@ fi
 
 echo -e "${CYAN}Materializing App Hub V13 publication stage...${NC}"
 cd "$ARTIFACTS_DIR"
+echo -e "${CYAN}Preparing pinned Revealive dependencies...${NC}"
+pnpm --dir "$ARTIFACTS_DIR/revealive" install --frozen-lockfile
 node scripts/build-publication-site.mjs --out "$STAGE_DIR"
+node scripts/stage-compiled-publication.mjs --stage "$STAGE_DIR" --id revealive
 
 echo ""
 echo -e "${CYAN}Syncing stage to ${VPS_HOST}:${VPS_PATH} ...${NC}"

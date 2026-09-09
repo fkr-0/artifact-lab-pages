@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "revealive",
+  "title": "Revealive",
+  "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to an independently verified standalone release candidate.",
+  "version": "0.1.0",
+  "kind": "application",
+  "status": "active",
+  "required": true,
+  "tags": ["presentation", "authoring", "offline", "project", "submodule"],
+  "source": {
+    "kind": "project",
+    "path": "revealive",
+    "git": {
+      "mode": "submodule",
+      "repository": "https://github.com/fkr-0/revealive.git",
+      "revision": "777bf7eadd888a9e494eb7e69e9ecae995dfc59f"
+    }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "revealive",
+    "command": ["pnpm", "run", "build"],
+    "output": "dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "dist",
+    "offline": true
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  }
+}
