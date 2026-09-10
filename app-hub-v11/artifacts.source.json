@@ -1690,6 +1690,44 @@
       },
       "modifiedAt": "2026-05-11T05:57:14.000Z",
       "changedAt": "2026-05-11T05:57:14.000Z"
+    },
+    {
+      "id": "revealive",
+      "title": "Revealive",
+      "kind": "html-path",
+      "href": "../revealive/index.html",
+      "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to the independently verified v0.1.0 release candidate.",
+      "tags": [
+        "tool",
+        "presentation",
+        "authoring",
+        "revealjs",
+        "offline",
+        "built"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "deploy": {
+        "build": {
+          "cwd": "revealive",
+          "command": "CI=true pnpm install --frozen-lockfile && pnpm run build",
+          "dist": "dist"
+        },
+        "includePath": "revealive/dist",
+        "targetPath": "revealive"
+      },
+      "launch": {
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "changedAt": null,
+      "modifiedAt": null
     }
   ]
 }

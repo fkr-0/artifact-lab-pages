@@ -10,3 +10,6 @@
 [submodule "hyperblast-shooter"]
 	path = hyperblast-shooter
 	url = ../hyperblast-shooter
+[submodule "revealive"]
+	path = revealive
+	url = https://github.com/fkr-0/revealive.git
