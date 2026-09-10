@@ -111,6 +111,9 @@ test('deploy, package, and Pages workflows opt into Revealive only after frozen 
   ]);
 
   for (const source of [deploy, pack]) {
+    assert.match(source, /SCRIPT_DIR="\$\(cd -- "\$\(dirname -- "\$\{BASH_SOURCE\[0\]\}"\)" && pwd -P\)"/);
+    assert.match(source, /ARTIFACTS_DIR="\$\{ARTIFACTS_DIR:-\$SCRIPT_DIR\}"/);
+    assert.doesNotMatch(source, /ARTIFACTS_DIR=.*\/home\/user\/work\/code\/artifacts/);
     assert.match(source, /pnpm --dir "\$ARTIFACTS_DIR\/revealive" install --frozen-lockfile/);
     assert.match(source, /build-publication-site\.mjs --out .* --no-build/);
     assert.match(source, /stage-compiled-publication\.mjs --stage .* --id revealive/);

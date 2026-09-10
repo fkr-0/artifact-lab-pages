@@ -12,7 +12,8 @@ CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-ARTIFACTS_DIR="${ARTIFACTS_DIR:-/home/user/work/code/artifacts}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-$SCRIPT_DIR}"
 PACKAGE_NAME="artifacts-collection"
 OUTPUT_DIR="${1:-$ARTIFACTS_DIR}"
 STAGE_ROOT="$(mktemp -d)"
