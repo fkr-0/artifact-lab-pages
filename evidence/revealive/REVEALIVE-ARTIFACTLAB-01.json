@@ -2,12 +2,13 @@
   "schemaVersion": "artifact-lab/evidence-v1",
   "taskId": "REVEALIVE-ARTIFACTLAB-01",
   "generatedAt": "2026-09-10T07:53:20+02:00",
-  "result": "complete-with-unrelated-portfolio-blockers",
+  "result": "implementation-complete-with-external-lifecycle-and-portfolio-blockers",
   "repository": {
     "path": "/home/user/work/code/artifacts",
     "baselineIntegrationCommit": "6c48335708c52fdc892eb6f3f7f6183c77dbdbb2",
     "baselineIntegrationSubject": "feat(publication): integrate Revealive release",
-    "classificationCommit": "4e20666e1121d1405d8afb6dfa4138641bf50e9c"
+    "classificationCommit": "4e20666e1121d1405d8afb6dfa4138641bf50e9c",
+    "evidenceCommit": "30ca9ce4f200d50dfb4082b7170ab399d68dd14a"
   },
   "revealive": {
     "path": "revealive",
@@ -131,6 +132,18 @@
       "note": "The dry-run only previews the VPS mirror. The repository deploy script explicitly states that public artifacts.fkr.dev publication is GitHub Pages; this task intentionally did not push or deploy."
     }
   },
+  "ocpLifecycleClose": {
+    "requestedCommand": "chatgpt-ops task complete REVEALIVE-ARTIFACTLAB-01",
+    "attemptedWith": {
+      "checkpointRef": "/home/user/work/code/artifacts/.ws-bridge/agent-checkpoints/REVEALIVE-ARTIFACTLAB-01.json",
+      "authorityRef": "user:REVEALIVE-ARTIFACTLAB-01",
+      "resultRef": "evidence/revealive/REVEALIVE-ARTIFACTLAB-01.json"
+    },
+    "exitCode": 1,
+    "closed": false,
+    "error": "Task REVEALIVE-ARTIFACTLAB-01 not found",
+    "note": "The canonical OCP task did not exist in the active OCP store before this work. A post-hoc synthetic task was not created because doing so would fabricate lifecycle history."
+  },
   "changes": [
     "README.md: added Revealive to the Lab project catalog as an independent submodule with Experimental registry status.",
     "registry/sources.d/revealive.json: changed lifecycle status from active to experimental and described the pinned v0.1.0 release.",
@@ -148,6 +161,11 @@
       "scope": "README commit isolation",
       "blockingThisRevealivePublication": false,
       "detail": "README.md contained inherited unstaged V13Hub edits before this task. The Revealive row is present but is intentionally not absorbed into the task's guarded commit to avoid committing unrelated work."
+    },
+    {
+      "scope": "Canonical OCP lifecycle closure",
+      "blockingThisRevealivePublication": false,
+      "detail": "chatgpt-ops task show and task complete both report that REVEALIVE-ARTIFACTLAB-01 does not exist in the active OCP store. The implementation checkpoint exists, but no synthetic post-hoc OCP task was created merely to make completion appear successful."
     }
   ]
 }
