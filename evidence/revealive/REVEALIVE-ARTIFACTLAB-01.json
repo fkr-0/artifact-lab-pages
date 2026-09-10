@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "artifact-lab/evidence-v1",
+  "taskId": "REVEALIVE-ARTIFACTLAB-01",
+  "generatedAt": "2026-09-10T07:53:20+02:00",
+  "result": "complete-with-unrelated-portfolio-blockers",
+  "repository": {
+    "path": "/home/user/work/code/artifacts",
+    "baselineIntegrationCommit": "6c48335708c52fdc892eb6f3f7f6183c77dbdbb2",
+    "baselineIntegrationSubject": "feat(publication): integrate Revealive release",
+    "classificationCommit": "4e20666e1121d1405d8afb6dfa4138641bf50e9c"
+  },
+  "revealive": {
+    "path": "revealive",
+    "version": "0.1.0",
+    "revision": "777bf7eadd888a9e494eb7e69e9ecae995dfc59f",
+    "gitlinkRevision": "777bf7eadd888a9e494eb7e69e9ecae995dfc59f",
+    "manifestRevision": "777bf7eadd888a9e494eb7e69e9ecae995dfc59f",
+    "worktreeCleanAfterVerify": true,
+    "registryStatus": "experimental",
+    "registryManifest": "registry/sources.d/revealive.json",
+    "readmeCatalogEntry": "README.md"
+  },
+  "verification": {
+    "buildCatalog": {
+      "command": "pnpm run build:catalog",
+      "exitCode": 0,
+      "catalogEntries": 16,
+      "revealivePresent": true,
+      "revealiveStatus": "experimental",
+      "revealiveAvailabilityBeforeSelectiveCompile": "source-only",
+      "revealiveGitBasis": "submodule-pin"
+    },
+    "buildSite": {
+      "command": "pnpm run build:site",
+      "exitCode": 0,
+      "nativeCatalogEntries": 16,
+      "stagedReleases": 5,
+      "requiredV13PathsVerified": 11,
+      "revealivePresent": true
+    },
+    "v13RenderSmoke": {
+      "method": "headless Chromium against dist/site/hub/v13/index.html",
+      "exitCode": 0,
+      "exactRevealiveTextMatches": 1
+    },
+    "testV13Hub": {
+      "command": "pnpm run test:v13hub",
+      "exitCode": 0,
+      "tests": 12,
+      "passed": 12,
+      "failed": 0
+    },
+    "testV13HubE2E": {
+      "command": "pnpm run test:e2e:v13hub",
+      "exitCode": 0,
+      "tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "browser": "chromium"
+    },
+    "revealiveIntegrationTests": {
+      "command": "node --test tests/revealive-source-registry.test.mjs tests/revealive-publication-stage.test.mjs tooling/artifactctl/tests/build.test.mjs",
+      "exitCode": 0,
+      "tests": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    "revealiveStandaloneVerify": {
+      "command": "cd revealive && pnpm run verify",
+      "exitCode": 0,
+      "typecheck": "pass",
+      "lint": "pass",
+      "testFiles": 13,
+      "tests": 75,
+      "passed": 75,
+      "failed": 0,
+      "build": "pass",
+      "nonBlockingWarnings": [
+        "Vite reported chunks larger than 500 kB after minification."
+      ]
+    },
+    "testPortfolio": {
+      "command": "pnpm run test:portfolio",
+      "exitCode": 1,
+      "tests": 35,
+      "passed": 32,
+      "failed": 3,
+      "revealiveRelatedFailures": 0,
+      "classification": "inherited legacy-tree deletions outside Revealive integration scope",
+      "failures": [
+        {
+          "path": "app-hub/v9-portal.html",
+          "error": "ENOENT"
+        },
+        {
+          "path": "app-hub-v11/artifacts.source.json",
+          "error": "ENOENT"
+        },
+        {
+          "path": "app-hub/bomberman.html",
+          "error": "ENOENT"
+        }
+      ]
+    }
+  },
+  "deploymentDryRun": {
+    "command": "./artifacts-deploy --dry-run",
+    "exitCode": 0,
+    "actualDeployPerformed": false,
+    "targetMirror": "vps:/home/user/data/artifacts",
+    "rawEvidence": {
+      "path": "evidence/revealive/REVEALIVE-ARTIFACTLAB-01.deploy-dry-run.txt",
+      "sha256": "350a8435f91f4ecad3865243a4cbc14ba8bff57eea1c6aa004cab72623c47b2d",
+      "lines": 1081,
+      "bytes": 56526,
+      "revealivePathLines": 404
+    },
+    "stagedRevealive": {
+      "path": ".artifacts-deploy-stage/artifacts/revealive/0.1.0/index.html",
+      "indexSha256": "460e0d5edd02453afd634481d93598a309a1c57785775a8c7f723c0883e00bde",
+      "receiptFiles": 401,
+      "availability": "verified",
+      "catalogRoute": "/artifacts/revealive/0.1.0/index.html"
+    },
+    "publicPublication": {
+      "origin": "https://artifacts.fkr.dev",
+      "route": "https://artifacts.fkr.dev/artifacts/revealive/0.1.0/index.html",
+      "publisher": "GitHub Pages",
+      "workflow": ".github/workflows/pages.yml",
+      "status": "verified-as-next-build-route-not-published-by-this-task",
+      "note": "The dry-run only previews the VPS mirror. The repository deploy script explicitly states that public artifacts.fkr.dev publication is GitHub Pages; this task intentionally did not push or deploy."
+    }
+  },
+  "changes": [
+    "README.md: added Revealive to the Lab project catalog as an independent submodule with Experimental registry status.",
+    "registry/sources.d/revealive.json: changed lifecycle status from active to experimental and described the pinned v0.1.0 release.",
+    "tests/revealive-source-registry.test.mjs: aligned the registry contract with Experimental lifecycle status.",
+    "evidence/revealive/REVEALIVE-ARTIFACTLAB-01.json: durable integration/deployment evidence.",
+    "evidence/revealive/REVEALIVE-ARTIFACTLAB-01.deploy-dry-run.txt: sanitized full dry-run rsync/build evidence."
+  ],
+  "blockers": [
+    {
+      "scope": "Artifact Lab portfolio regression suite",
+      "blockingThisRevealivePublication": false,
+      "detail": "Three pre-existing tests reference legacy app-hub/app-hub-v11 files that are already deleted in the inherited dirty worktree. Restoring or rewriting those migration-owned paths would violate the task boundary."
+    },
+    {
+      "scope": "README commit isolation",
+      "blockingThisRevealivePublication": false,
+      "detail": "README.md contained inherited unstaged V13Hub edits before this task. The Revealive row is present but is intentionally not absorbed into the task's guarded commit to avoid committing unrelated work."
+    }
+  ]
+}
