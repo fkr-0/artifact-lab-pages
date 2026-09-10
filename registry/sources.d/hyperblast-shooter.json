@@ -14,7 +14,7 @@
     "git": {
       "mode": "submodule",
       "repository": "https://github.com/fkr-0/hyperblast-shooter.git",
-      "revision": "df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204"
+      "revision": "c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a"
     }
   },
   "build": { "mode": "none" },

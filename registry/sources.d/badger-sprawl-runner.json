@@ -13,7 +13,7 @@
     "git": {
       "mode": "submodule",
       "repository": "https://github.com/fkr-0/badger-sprawl-runner.git",
-      "revision": "fe1e96b0b11c2cd82b7be569a60a701d88355f82"
+      "revision": "ccd1c439e706c1397f48ed544a44712ff1d087df"
     }
   },
   "build": {
