@@ -8,7 +8,7 @@ import { validateManifest } from '../tooling/artifactctl/src/core.mjs';
 
 const rootDir = fileURLToPath(new URL('../', import.meta.url));
 const manifestPath = join(rootDir, 'registry/sources.d/revealive.json');
-const expectedRevision = '777bf7eadd888a9e494eb7e69e9ecae995dfc59f';
+const expectedRevision = '7df572d0f14165c4596765575f91c99b34a4b4b7';
 
 test('Revealive registry entry pins the verified standalone submodule and publication contract', async () => {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
