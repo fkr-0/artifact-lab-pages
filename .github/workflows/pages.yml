@@ -119,7 +119,7 @@ jobs:
       - name: Materialize V13 publication stage with V11 compatibility content
         run: |
           node scripts/build-publication-site.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage --no-build
-          node scripts/stage-compiled-publication.mjs --stage .artifacts-pages-stage --id revealive
+          node scripts/stage-compiled-publication.mjs --source .artifacts.source.ci.json --stage .artifacts-pages-stage --id revealive
 
       - name: Generate build statistics
         run: node app-hub-v11/server/generate-build-stats.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage/app-hub-v11/data/build-stats.json --commit "$GITHUB_SHA" --dirty false

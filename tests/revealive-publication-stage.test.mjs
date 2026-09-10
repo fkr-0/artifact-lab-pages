@@ -10,6 +10,20 @@ const rootDir = fileURLToPath(new URL('../', import.meta.url));
 const manifest = JSON.parse(
   await readFile(join(rootDir, 'registry/sources.d/revealive.json'), 'utf8'),
 );
+const legacyManifest = {
+  schemaVersion: 'artifacts.fkr.dev/v1',
+  id: 'legacy-adapted',
+  title: 'Legacy adapted',
+  kind: 'text',
+  status: 'provisional',
+  required: false,
+  tags: ['legacy'],
+  source: { kind: 'inline', text: 'Legacy compatibility item.', format: 'plain', git: { mode: 'none' } },
+  build: { mode: 'none' },
+  release: { kind: 'inline' },
+  launch: { default: 'none', modes: ['none'], sandbox: 'none' },
+  legacy: { adapter: 'app-hub-v11', changedAt: '2026-01-01T00:00:00.000Z' },
+};
 
 test('selective publication stages only Revealive and rewrites catalog/manifest as verified', async (t) => {
   const scratch = await mkdtemp(join(tmpdir(), 'revealive-publication-stage-'));
@@ -22,11 +36,16 @@ test('selective publication stages only Revealive and rewrites catalog/manifest 
   );
 
   const calls = [];
+  const discoveryCalls = [];
   const result = await stageCompiledPublication({
     rootDir,
     stageDir,
     ids: ['revealive'],
-    manifests: [manifest],
+    sourcePath: 'ci-source.json',
+    discoverManifestsImpl: async (options) => {
+      discoveryCalls.push(options);
+      return [manifest, legacyManifest];
+    },
     requireParentGitlink: false,
     buildArtifactImpl: async (selected, options) => {
       calls.push({ id: selected.id, options });
@@ -53,6 +72,9 @@ test('selective publication stages only Revealive and rewrites catalog/manifest 
     },
   });
 
+  assert.equal(discoveryCalls.length, 1);
+  assert.equal(discoveryCalls[0].adapter, 'app-hub-v11');
+  assert.equal(discoveryCalls[0].sourcePath, 'ci-source.json');
   assert.equal(calls.length, 1);
   assert.equal(calls[0].id, 'revealive');
   assert.equal(calls[0].options.allowCompile, true);
@@ -60,6 +82,7 @@ test('selective publication stages only Revealive and rewrites catalog/manifest 
 
   const catalog = JSON.parse(await readFile(join(stageDir, 'catalog/catalog.json'), 'utf8'));
   const item = catalog.items.find((entry) => entry.id === 'revealive');
+  assert.ok(catalog.items.some((entry) => entry.id === 'legacy-adapted'));
   assert.equal(item.availability, 'verified');
   assert.equal(item.url, '/artifacts/revealive/0.1.0/index.html');
   assert.equal(item.receipt.version, '0.1.0');
@@ -124,6 +147,6 @@ test('deploy, package, and Pages workflows opt into Revealive only after frozen 
   assert.match(pages, /Run V13 publication contract tests[\s\S]*pnpm run test:v13hub/);
   assert.match(
     pages,
-    /stage-compiled-publication\.mjs --stage \.artifacts-pages-stage --id revealive/,
+    /stage-compiled-publication\.mjs --source \.artifacts\.source\.ci\.json --stage \.artifacts-pages-stage --id revealive/,
   );
 });

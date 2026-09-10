@@ -57,7 +57,11 @@ export async function buildPublicationSite(options = {}) {
       outDir: legacyDir,
       runBuilds: options.runBuilds !== false,
     });
-    const manifests = await discoverManifests({ rootDir, adapter: 'app-hub-v11' });
+    const manifests = await discoverManifests({
+      rootDir,
+      adapter: 'app-hub-v11',
+      sourcePath: legacySourcePath,
+    });
     const v13 = await assembleSite(manifests, {
       rootDir,
       outDir: v13Dir,
