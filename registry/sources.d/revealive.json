@@ -2,10 +2,10 @@
   "schemaVersion": "artifacts.fkr.dev/v1",
   "id": "revealive",
   "title": "Revealive",
-  "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to an independently verified standalone release candidate.",
+  "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to the independently verified standalone v0.1.0 release.",
   "version": "0.1.0",
   "kind": "application",
-  "status": "active",
+  "status": "experimental",
   "required": true,
   "tags": ["presentation", "authoring", "offline", "project", "submodule"],
   "source": {
