@@ -1,10 +1,12 @@
 schemaVersion: artifacts.fkr.dev/release-evidence-v1
-generatedAt: '2026-09-16T02:19:53+02:00'
+generatedAt: '2026-09-16T16:29:30+02:00'
 release:
-  unit: Artifact Lab v1.7.0 reconciled publication
+  unit: Artifact Lab v1.7.0 reconciled publication hotfix
   candidate: 1.7.0
   versionAfter: 1.7.0
   mergeCommit: 9a167b535f115024380f29c1795c64e874044ac2
+  reconciliationEvidenceCommit: dd95bd6a2dddfa4ce9e7fd1ef73a495ea944f55c
+  hotfixCommit: fb37e34d25dd6bf32b9959973e71ec3526e75977
   releaseParent: d5d9c2ebdb56e9bc6591fcf426370b4083c8ec10
   mainParent: ba6cc749157bf512f956a6dae46f508b0a162417
   tagProposed: v1.7.0
@@ -13,18 +15,18 @@ release:
   v13Ready: true
   releaseIsolation: isolated-main-reconciliation-worktree
   commitState: performed
-  publishState: authorized_pending
-  pushState: authorized_pending
-  deployState: github_pages_pending_vps_mirror_blocked_auth
-  authority: user-requested-release-push
+  publishState: hotfix_authorized_pending
+  pushState: hotfix_authorized_pending
+  deployState: github_pages_hotfix_pending_vps_mirror_blocked_auth
+  authority: user-requested-release-push-override
 revisionVector:
-  root: 9a167b535f115024380f29c1795c64e874044ac2
+  root: fb37e34d25dd6bf32b9959973e71ec3526e75977
   submodules:
     badger-sprawl-runner: ccd1c439e706c1397f48ed544a44712ff1d087df
     bathroom-emergency-guide: 6d3ae5eba0f691059ef0db53287b1d9539486fd8
     ethic-brawl: 2754b6e9d12216613b615300cc9179687fda4e19
     hyperblast-shooter: c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a
-    revealive: 7df572d0f14165c4596765575f91c99b34a4b4b7
+    revealive: 5d09136642085d2d0a795e902771c2d8ab516efe
     v11-peer-daw: 37783861b7681852b0605a891a2b831c4cde82de
 catalog:
   nativeAndCompatibility:
@@ -49,8 +51,8 @@ catalog:
     version: 0.1.0
     availability: verified
     url: /artifacts/revealive/0.1.0/index.html
-    revision: 7df572d0f14165c4596765575f91c99b34a4b4b7
-    receiptFiles: 401
+    revision: 5d09136642085d2d0a795e902771c2d8ab516efe
+    relocatableReleaseRequired: true
 verification:
   dependencyBuilds:
     ethicBrawl:
@@ -72,15 +74,22 @@ verification:
     revealive:
       frozenInstall: passed
       build: passed
-  hyperblast:
-    packageTests: 31
-    packagePassed: 31
-    rootSmokeTests: 20
-    rootSmokePassed: 20
+      relativeAssetReferences: passed
+      absoluteAssetReferences: 0
+  revealiveStandalone:
+    revision: 5d09136642085d2d0a795e902771c2d8ab516efe
+    unitIntegrationTests: 77
+    unitIntegrationPassed: 77
+    chromiumTests: 10
+    chromiumPassed: 10
+    typecheck: passed
+    lint: passed
+    build: passed
   artifactctl:
-    tests: 21
-    passed: 21
+    tests: 22
+    passed: 22
     failed: 0
+    relocatableReleaseRegression: passed
   v13Hub:
     tests: 10
     passed: 10
@@ -96,6 +105,7 @@ verification:
     rootNodePassed: 145
     chromiumTests: 63
     chromiumPassed: 63
+    note: one unrelated App Hub file-share timing failure occurred once during a rerun; the spec then passed 2/2 in isolation and the complete Chromium suite passed 63/63 immediately afterward
   packagingFixtures:
     tests: 4
     passed: 4
@@ -103,16 +113,28 @@ verification:
   gitDiffCheck: passed
 package:
   filename: artifacts-collection-2026.09.16.tar.gz
-  bytes: 239621867
+  bytes: 239622588
   humanSize: 229M
-  sha256: e540ba03853e2c25d7d36d5bdd03190673d6f3b92cfe72df70dd805106f5df50
+  sha256: e60a1f663b002c54b6e88e00f069b40cd89775d61fb7c573c8ebe86a803c01e1
   checksumVerified: true
   sourceDateEpochDate: '2026-09-16T00:00:00Z'
 publication:
   githubPages:
     workflow: .github/workflows/pages.yml
     trigger: push-main
-    state: pending_push
+    firstReconciledDeploy:
+      commit: dd95bd6a2dddfa4ce9e7fd1ef73a495ea944f55c
+      workflowRun: 35039642031
+      workflowState: success
+      publicHtmlStatus: 200
+      rootAbsoluteAssetStatus: 404
+      result: failed_app_bootstrap_due_to_root_absolute_asset_urls
+    hotfix:
+      artifactLabCommit: fb37e34d25dd6bf32b9959973e71ec3526e75977
+      revealiveRevision: 5d09136642085d2d0a795e902771c2d8ab516efe
+      stagedRelativeAssets: passed
+      rootAbsoluteAssetReferences: 0
+      state: pending_push
   vpsMirror:
     command: ./artifacts-deploy --dry-run
     stageMaterialization: passed

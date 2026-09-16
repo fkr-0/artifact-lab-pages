@@ -57,14 +57,16 @@ test('v1.7.0 reconciled publication metadata is consistent and authorized for pu
   assert.match(evidence, /tagProposed: v1.7.0/);
   assert.match(evidence, /tagCreated: false/);
   assert.match(evidence, /commitState: performed/);
-  assert.match(evidence, /publishState: authorized_pending/);
-  assert.match(evidence, /pushState: authorized_pending/);
-  assert.match(evidence, /deployState: github_pages_pending_vps_mirror_blocked_auth/);
+  assert.match(evidence, /publishState: hotfix_authorized_pending/);
+  assert.match(evidence, /pushState: hotfix_authorized_pending/);
+  assert.match(evidence, /deployState: github_pages_hotfix_pending_vps_mirror_blocked_auth/);
   assert.match(evidence, /total: 58/);
   assert.match(evidence, /dated: 58/);
   assert.match(evidence, /rootNodeTests: 145/);
   assert.match(evidence, /chromiumTests: 63/);
-  assert.match(evidence, /sha256: e540ba03853e2c25d7d36d5bdd03190673d6f3b92cfe72df70dd805106f5df50/);
+  assert.match(evidence, /hotfixCommit: fb37e34d25dd6bf32b9959973e71ec3526e75977/);
+  assert.match(evidence, /revealive: 5d09136642085d2d0a795e902771c2d8ab516efe/);
+  assert.match(evidence, /sha256: e60a1f663b002c54b6e88e00f069b40cd89775d61fb7c573c8ebe86a803c01e1/);
 });
 
 test('local dependency, test, bytecode, and agent outputs stay ignored', () => {
