@@ -1,0 +1,133 @@
+schemaVersion: artifacts.fkr.dev/release-evidence-v1
+generatedAt: '2026-09-16T02:19:53+02:00'
+release:
+  unit: Artifact Lab v1.7.0 reconciled publication
+  candidate: 1.7.0
+  versionAfter: 1.7.0
+  mergeCommit: 9a167b535f115024380f29c1795c64e874044ac2
+  releaseParent: d5d9c2ebdb56e9bc6591fcf426370b4083c8ec10
+  mainParent: ba6cc749157bf512f956a6dae46f508b0a162417
+  tagProposed: v1.7.0
+  tagCreated: false
+  releaseReady: true
+  v13Ready: true
+  releaseIsolation: isolated-main-reconciliation-worktree
+  commitState: performed
+  publishState: authorized_pending
+  pushState: authorized_pending
+  deployState: github_pages_pending_vps_mirror_blocked_auth
+  authority: user-requested-release-push
+revisionVector:
+  root: 9a167b535f115024380f29c1795c64e874044ac2
+  submodules:
+    badger-sprawl-runner: ccd1c439e706c1397f48ed544a44712ff1d087df
+    bathroom-emergency-guide: 6d3ae5eba0f691059ef0db53287b1d9539486fd8
+    ethic-brawl: 2754b6e9d12216613b615300cc9179687fda4e19
+    hyperblast-shooter: c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a
+    revealive: 7df572d0f14165c4596765575f91c99b34a4b4b7
+    v11-peer-daw: 37783861b7681852b0605a891a2b831c4cde82de
+catalog:
+  nativeAndCompatibility:
+    total: 58
+    dated: 58
+    valid: 58
+    invalid: 0
+    warnings: 0
+  v11Compatibility:
+    total: 51
+    uniqueIds: 51
+    includedPaths: 61
+  stagedPublication:
+    total: 58
+    verified: 6
+    provisional: 47
+    external: 1
+    inline: 1
+    sourceOnly: 3
+    requiredPathsVerified: 14
+  revealive:
+    version: 0.1.0
+    availability: verified
+    url: /artifacts/revealive/0.1.0/index.html
+    revision: 7df572d0f14165c4596765575f91c99b34a4b4b7
+    receiptFiles: 401
+verification:
+  dependencyBuilds:
+    ethicBrawl:
+      frozenInstall: passed
+      generatedPrompts: 270
+      build: passed
+    v11PeerDaw:
+      frozenInstall: passed
+      build: passed
+    badgerSprawlRunner:
+      frozenInstall: passed
+      build: passed
+    gitRecipeBook:
+      frozenInstall: passed
+      build: passed
+    infArrange:
+      frozenInstall: passed
+      build: passed
+    revealive:
+      frozenInstall: passed
+      build: passed
+  hyperblast:
+    packageTests: 31
+    packagePassed: 31
+    rootSmokeTests: 20
+    rootSmokePassed: 20
+  artifactctl:
+    tests: 21
+    passed: 21
+    failed: 0
+  v13Hub:
+    tests: 10
+    passed: 10
+    failed: 0
+  rootReleaseGate:
+    command: pnpm run release:check
+    result: passed
+    artifactAuditErrors: 0
+    artifactAuditWarnings: 0
+    portfolioTests: 35
+    portfolioPassed: 35
+    rootNodeTests: 145
+    rootNodePassed: 145
+    chromiumTests: 63
+    chromiumPassed: 63
+  packagingFixtures:
+    tests: 4
+    passed: 4
+    failed: 0
+  gitDiffCheck: passed
+package:
+  filename: artifacts-collection-2026.09.16.tar.gz
+  bytes: 239621867
+  humanSize: 229M
+  sha256: e540ba03853e2c25d7d36d5bdd03190673d6f3b92cfe72df70dd805106f5df50
+  checksumVerified: true
+  sourceDateEpochDate: '2026-09-16T00:00:00Z'
+publication:
+  githubPages:
+    workflow: .github/workflows/pages.yml
+    trigger: push-main
+    state: pending_push
+  vpsMirror:
+    command: ./artifacts-deploy --dry-run
+    stageMaterialization: passed
+    catalogEntries: 58
+    requiredPathsVerified: 14
+    revealiveSelectiveCompile: passed
+    rsyncDryRun: blocked
+    blocker: ssh-authentication-rejected
+    remote: vps:/home/user/data/artifacts
+  actualTransferPerformed: false
+knownWarnings:
+  - Revealive production build reports a Vite chunk-size warning; build exits successfully.
+  - Ethic Brawl reports 30 declared sprite assets still unrendered while its build and 270 generated-prompt drift check pass.
+  - VPS mirror SSH authentication is currently rejected; this does not affect the independent GitHub Pages publication path.
+omittedActions:
+  tag:
+    performed: false
+    reason: release push was requested, but tag creation was not explicitly requested.
