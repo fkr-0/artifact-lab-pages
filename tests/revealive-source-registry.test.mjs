@@ -8,7 +8,7 @@ import { validateManifest } from '../tooling/artifactctl/src/core.mjs';
 
 const rootDir = fileURLToPath(new URL('../', import.meta.url));
 const manifestPath = join(rootDir, 'registry/sources.d/revealive.json');
-const expectedRevision = '7df572d0f14165c4596765575f91c99b34a4b4b7';
+const expectedRevision = '5d09136642085d2d0a795e902771c2d8ab516efe';
 
 test('Revealive registry entry pins the verified standalone submodule and publication contract', async () => {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
@@ -40,6 +40,7 @@ test('Revealive registry entry pins the verified standalone submodule and public
     path: 'dist',
     offline: true,
   });
+  assert.deepEqual(manifest.verify, { relocatable: true });
   assert.deepEqual(manifest.launch, {
     default: 'inline',
     modes: ['inline', 'fullscreen', 'newWindow'],

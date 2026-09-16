@@ -1,6 +1,6 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-09-16T00:16:21.654Z",
+  "generatedAt": "2026-09-16T00:30:36.197Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
@@ -17,6 +17,364 @@
     "dated": 58
   },
   "items": [
+    {
+      "id": "label-sheet-studio",
+      "version": null,
+      "title": "Label Sheet Studio",
+      "description": "Local-first DIN A4 label designer with configurable equal-cell rows and columns, draggable grid positioning and resizing, repeated images or auto-fitting text, and exact-size print-ready PDF export.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "tool",
+        "pdf",
+        "labels",
+        "stickers",
+        "printing",
+        "typography",
+        "image",
+        "grid",
+        "drag-and-drop",
+        "local-first",
+        "v11"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/label-sheet-studio/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "label-sheet-studio"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "nakamotos-disciples",
+      "version": null,
+      "title": "Nakamoto's Disciples",
+      "description": "Interactive local-first Bitcoin course with six sequential mastery flows, fail-closed phase and persisted-state integrity, accessible repair feedback, read-only completed evidence, real protocol experiments, and gated implementation references from bytes through Nakamoto consensus.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "education",
+        "bitcoin",
+        "blockchain",
+        "cryptography",
+        "simulation",
+        "protocol",
+        "pwa",
+        "local-first",
+        "built"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/nakamotos-disciples/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "nakamotos-disciples"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v10-local-first-notepad",
+      "version": null,
+      "title": "v10 Local-first Notepad",
+      "description": "v10 enhanced portal notepad concept extracted into the v11 utility host with hub-scoped persistence.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "editor",
+        "notepad",
+        "local-first",
+        "v10"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/legacy-tools.html?tool=v10-notepad",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "app-hub-v11"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v10-shared-text-pad",
+      "version": null,
+      "title": "v10 Shared Text Pad",
+      "description": "v10 shared text pad ported to the v11 utility host, using BroadcastChannel for same-browser live sync and local fallback storage.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "editor",
+        "collaborative",
+        "text",
+        "v10"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/legacy-tools.html?tool=v10-shared-pad",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "app-hub-v11"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v4-console-notes",
+      "version": null,
+      "title": "v4 Console Notes",
+      "description": "Operator notes surface for the v4 console lineage, ported into the v11 legacy utility host.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "editor",
+        "notes",
+        "v4",
+        "console"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/legacy-tools.html?tool=v4-console-notes",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "app-hub-v11"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v8-native-scratchpad",
+      "version": null,
+      "title": "v8 Native Scratchpad",
+      "description": "Native textarea-based v8 scratchpad port in the v11 legacy utility host with local-first autosave.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "editor",
+        "notepad",
+        "native",
+        "v8",
+        "local-first"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/legacy-tools.html?tool=v8-native-scratchpad",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "app-hub-v11"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v9-quick-notepad",
+      "version": null,
+      "title": "v9 Quick Notepad",
+      "description": "v9 embedded Quick Notepad ported to the v11 utility host with local-first autosave.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "editor",
+        "tool",
+        "notepad",
+        "local-first",
+        "v9"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/legacy-tools.html?tool=v9-notepad",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "app-hub-v11"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "v9-sci-fi-calculator",
+      "version": null,
+      "title": "v9 Sci-Fi Calculator",
+      "description": "Cyberpunk calculator from the v9 embedded utility deck, ported as a standalone v11 tool with history tape.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "calculator",
+        "math",
+        "tool",
+        "v9"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/legacy-tools.html?tool=v9-calculator",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "app-hub-v11"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
+      "receipt": null
+    },
+    {
+      "id": "revealive",
+      "version": "0.1.0",
+      "title": "Revealive",
+      "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to an independently verified standalone release candidate.",
+      "kind": "application",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "presentation",
+        "authoring",
+        "offline",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-09-11T00:39:01.000Z",
+        "revision": "5d09136642085d2d0a795e902771c2d8ab516efe",
+        "basis": "submodule-pin",
+        "path": "revealive"
+      },
+      "changedAt": "2026-09-11T00:39:01.000Z",
+      "receipt": null
+    },
     {
       "id": "ethic-brawl",
       "version": null,
@@ -52,45 +410,6 @@
         "path": "ethic-brawl"
       },
       "changedAt": "2026-09-09T23:47:32.000Z",
-      "receipt": null
-    },
-    {
-      "id": "revealive",
-      "version": "0.1.0",
-      "title": "Revealive",
-      "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to an independently verified standalone release candidate.",
-      "kind": "application",
-      "status": "active",
-      "required": true,
-      "tags": [
-        "presentation",
-        "authoring",
-        "offline",
-        "project",
-        "submodule"
-      ],
-      "sourceKind": "project",
-      "gitMode": "submodule",
-      "buildMode": "compile",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": null,
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": "2026-09-09T23:35:50.000Z",
-        "revision": "7df572d0f14165c4596765575f91c99b34a4b4b7",
-        "basis": "submodule-pin",
-        "path": "revealive"
-      },
-      "changedAt": "2026-09-09T23:35:50.000Z",
       "receipt": null
     },
     {
@@ -722,236 +1041,6 @@
       "receipt": null
     },
     {
-      "id": "v10-local-first-notepad",
-      "version": null,
-      "title": "v10 Local-first Notepad",
-      "description": "v10 enhanced portal notepad concept extracted into the v11 utility host with hub-scoped persistence.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "editor",
-        "notepad",
-        "local-first",
-        "v10"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/legacy-tools.html?tool=v10-notepad",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
-        "changedAt": "2026-08-20T11:28:07.000Z",
-        "basis": "source",
-        "path": "app-hub-v11"
-      },
-      "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "v10-shared-text-pad",
-      "version": null,
-      "title": "v10 Shared Text Pad",
-      "description": "v10 shared text pad ported to the v11 utility host, using BroadcastChannel for same-browser live sync and local fallback storage.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "editor",
-        "collaborative",
-        "text",
-        "v10"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/legacy-tools.html?tool=v10-shared-pad",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
-        "changedAt": "2026-08-20T11:28:07.000Z",
-        "basis": "source",
-        "path": "app-hub-v11"
-      },
-      "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "v4-console-notes",
-      "version": null,
-      "title": "v4 Console Notes",
-      "description": "Operator notes surface for the v4 console lineage, ported into the v11 legacy utility host.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "editor",
-        "notes",
-        "v4",
-        "console"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/legacy-tools.html?tool=v4-console-notes",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
-        "changedAt": "2026-08-20T11:28:07.000Z",
-        "basis": "source",
-        "path": "app-hub-v11"
-      },
-      "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "v8-native-scratchpad",
-      "version": null,
-      "title": "v8 Native Scratchpad",
-      "description": "Native textarea-based v8 scratchpad port in the v11 legacy utility host with local-first autosave.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "editor",
-        "notepad",
-        "native",
-        "v8",
-        "local-first"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/legacy-tools.html?tool=v8-native-scratchpad",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
-        "changedAt": "2026-08-20T11:28:07.000Z",
-        "basis": "source",
-        "path": "app-hub-v11"
-      },
-      "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "v9-quick-notepad",
-      "version": null,
-      "title": "v9 Quick Notepad",
-      "description": "v9 embedded Quick Notepad ported to the v11 utility host with local-first autosave.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "editor",
-        "tool",
-        "notepad",
-        "local-first",
-        "v9"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/legacy-tools.html?tool=v9-notepad",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
-        "changedAt": "2026-08-20T11:28:07.000Z",
-        "basis": "source",
-        "path": "app-hub-v11"
-      },
-      "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "v9-sci-fi-calculator",
-      "version": null,
-      "title": "v9 Sci-Fi Calculator",
-      "description": "Cyberpunk calculator from the v9 embedded utility deck, ported as a standalone v11 tool with history tape.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "calculator",
-        "math",
-        "tool",
-        "v9"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/legacy-tools.html?tool=v9-calculator",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
-        "changedAt": "2026-08-20T11:28:07.000Z",
-        "basis": "source",
-        "path": "app-hub-v11"
-      },
-      "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
       "id": "badger-sprawl-runner",
       "version": null,
       "title": "Badger Sprawl Runner",
@@ -1068,52 +1157,6 @@
       "receipt": null
     },
     {
-      "id": "label-sheet-studio",
-      "version": null,
-      "title": "Label Sheet Studio",
-      "description": "Local-first DIN A4 label designer with configurable equal-cell rows and columns, draggable grid positioning and resizing, repeated images or auto-fitting text, and exact-size print-ready PDF export.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "tool",
-        "pdf",
-        "labels",
-        "stickers",
-        "printing",
-        "typography",
-        "image",
-        "grid",
-        "drag-and-drop",
-        "local-first",
-        "v11"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/label-sheet-studio/index.html",
-      "launch": {
-        "default": "newWindow",
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "changedAt": "2026-08-05T20:53:37.000Z",
-        "revision": null,
-        "basis": "legacy",
-        "path": "../label-sheet-studio/index.html"
-      },
-      "changedAt": "2026-08-05T20:53:37.000Z",
-      "receipt": null
-    },
-    {
       "id": "file-diff-studio",
       "version": null,
       "title": "File Diff Studio",
@@ -1152,55 +1195,12 @@
         "sandbox": "strict"
       },
       "git": {
-        "revision": "6058257c5c846d79852c4cec616eb41662a418d0",
-        "changedAt": "2026-08-02T14:06:40.000Z",
+        "revision": "a1805acf6a58d2a683f03df4b451957bec5a630f",
+        "changedAt": "2026-08-02T14:40:54.000Z",
         "basis": "source",
         "path": "file-diff-studio"
       },
-      "changedAt": "2026-08-02T14:06:40.000Z",
-      "receipt": null
-    },
-    {
-      "id": "nakamotos-disciples",
-      "version": null,
-      "title": "Nakamoto's Disciples",
-      "description": "Interactive local-first Bitcoin course with six sequential mastery flows, fail-closed phase and persisted-state integrity, accessible repair feedback, read-only completed evidence, real protocol experiments, and gated implementation references from bytes through Nakamoto consensus.",
-      "kind": "application",
-      "status": "provisional",
-      "required": false,
-      "tags": [
-        "education",
-        "bitcoin",
-        "blockchain",
-        "cryptography",
-        "simulation",
-        "protocol",
-        "pwa",
-        "local-first",
-        "built"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/nakamotos-disciples/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "changedAt": "2026-07-31T14:58:46.000Z",
-        "revision": null,
-        "basis": "legacy",
-        "path": "../nakamotos-disciples/index.html"
-      },
-      "changedAt": "2026-07-31T14:58:46.000Z",
+      "changedAt": "2026-08-02T14:40:54.000Z",
       "receipt": null
     },
     {

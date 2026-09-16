@@ -14,7 +14,7 @@
     "git": {
       "mode": "submodule",
       "repository": "https://github.com/fkr-0/revealive.git",
-      "revision": "7df572d0f14165c4596765575f91c99b34a4b4b7"
+      "revision": "5d09136642085d2d0a795e902771c2d8ab516efe"
     }
   },
   "build": {
@@ -28,6 +28,9 @@
     "entrypoint": "index.html",
     "path": "dist",
     "offline": true
+  },
+  "verify": {
+    "relocatable": true
   },
   "launch": {
     "default": "inline",
