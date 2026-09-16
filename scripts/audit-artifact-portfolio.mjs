@@ -12,6 +12,7 @@ const INDEPENDENT_PROJECT_ROOTS = new Set([
   'git-recipe-book',
   'hyperblast-shooter',
   'inf-arrange',
+  'nakamotos-disciples',
   'v11-peer-daw',
 ]);
 

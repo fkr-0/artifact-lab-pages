@@ -47,7 +47,8 @@ test('v1.7.0 App Hub V13 release metadata is consistent and remains non-publishi
   assert.match(changelog, /^## \[Unreleased\]/m);
   assert.match(changelog, /^## \[1\.7\.0\] - 2026-08-20$/m);
   assert.match(changelog, /^\[Unreleased\]: .*v1\.7\.0\.\.\.HEAD$/m);
-  assert.match(changelog, /^\[1\.7\.0\]: .*v1\.5\.1\.\.\.v1\.7\.0$/m);
+  assert.match(changelog, /^\[1\.7\.0\]: .*v1\.6\.0\.\.\.v1\.7\.0$/m);
+  assert.match(changelog, /^\[1\.6\.0\]: .*v1\.5\.1\.\.\.v1\.6\.0$/m);
   assert.match(changelog, /App Hub V13/);
   assert.match(evidence, /candidate: 1.7.0/);
   assert.match(evidence, /v13Ready: true/);

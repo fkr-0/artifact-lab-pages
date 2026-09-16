@@ -1,22 +1,138 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-08-20T15:25:44.840Z",
+  "generatedAt": "2026-09-16T00:16:21.654Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
     "generator": "artifactctl"
   },
   "summary": {
-    "total": 55,
+    "total": 58,
     "verified": 0,
-    "provisional": 45,
+    "provisional": 47,
     "external": 1,
     "inline": 1,
-    "sourceOnly": 8,
-    "active": 2,
-    "dated": 55
+    "sourceOnly": 9,
+    "active": 3,
+    "dated": 58
   },
   "items": [
+    {
+      "id": "ethic-brawl",
+      "version": null,
+      "title": "Ethic Brawl",
+      "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/ethic-brawl/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-09-09T23:47:32.000Z",
+        "revision": "2754b6e9d12216613b615300cc9179687fda4e19",
+        "basis": "submodule-pin",
+        "path": "ethic-brawl"
+      },
+      "changedAt": "2026-09-09T23:47:32.000Z",
+      "receipt": null
+    },
+    {
+      "id": "revealive",
+      "version": "0.1.0",
+      "title": "Revealive",
+      "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to an independently verified standalone release candidate.",
+      "kind": "application",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "presentation",
+        "authoring",
+        "offline",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-09-09T23:35:50.000Z",
+        "revision": "7df572d0f14165c4596765575f91c99b34a4b4b7",
+        "basis": "submodule-pin",
+        "path": "revealive"
+      },
+      "changedAt": "2026-09-09T23:35:50.000Z",
+      "receipt": null
+    },
+    {
+      "id": "git-recipe-book",
+      "version": "1.1.0",
+      "title": "Git Recipe Book",
+      "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
+      "kind": "application",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "education",
+        "git",
+        "project",
+        "root-owned",
+        "react"
+      ],
+      "sourceKind": "project",
+      "gitMode": "root",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/git-recipe-book/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "07214ea36ef7951a520e5466e0c4fda34ddfe897",
+        "changedAt": "2026-08-29T16:08:38.000Z",
+        "basis": "source",
+        "path": "git-recipe-book"
+      },
+      "changedAt": "2026-08-29T16:08:38.000Z",
+      "receipt": null
+    },
     {
       "id": "artifact-handling-standard",
       "version": "1.0.0",
@@ -273,46 +389,6 @@
         "path": "registry/sources.d/v12-migration-note.json"
       },
       "changedAt": "2026-08-20T13:33:14.000Z",
-      "receipt": null
-    },
-    {
-      "id": "bathroom-emergency-guide",
-      "version": "4.14.0-alt.2",
-      "title": "Bathroom Emergency Guide",
-      "description": "Root-owned, sourced, print-first decision guide with an accessible static site, master editions, and eleven standalone route books.",
-      "kind": "document",
-      "status": "experimental",
-      "required": false,
-      "tags": [
-        "accessibility",
-        "decision-guide",
-        "document",
-        "offline",
-        "print",
-        "root-owned"
-      ],
-      "sourceKind": "project",
-      "gitMode": "root",
-      "buildMode": "compile",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": null,
-      "launch": {
-        "default": "newWindow",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "bfeb6ff2b804d8bacf1d5365f3623111f0826371",
-        "changedAt": "2026-08-20T11:31:17.000Z",
-        "basis": "source",
-        "path": "bathroom-emergency-guide/bathroom-emergency-guide"
-      },
-      "changedAt": "2026-08-20T11:31:17.000Z",
       "receipt": null
     },
     {
@@ -876,43 +952,6 @@
       "receipt": null
     },
     {
-      "id": "ethic-brawl",
-      "version": null,
-      "title": "Ethic Brawl",
-      "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
-      "kind": "application",
-      "status": "provisional",
-      "required": true,
-      "tags": [
-        "game",
-        "project",
-        "submodule"
-      ],
-      "sourceKind": "project",
-      "gitMode": "submodule",
-      "buildMode": "compile",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/ethic-brawl/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": "2026-08-19T22:17:54.000Z",
-        "revision": "e2f2c020d7ebd41945f8c316db75ae0ec64a9485",
-        "basis": "submodule-pin",
-        "path": "ethic-brawl"
-      },
-      "changedAt": "2026-08-19T22:17:54.000Z",
-      "receipt": null
-    },
-    {
       "id": "badger-sprawl-runner",
       "version": null,
       "title": "Badger Sprawl Runner",
@@ -949,43 +988,43 @@
       "receipt": null
     },
     {
-      "id": "git-recipe-book",
-      "version": "1.1.0",
-      "title": "Git Recipe Book",
-      "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
-      "kind": "application",
+      "id": "bathroom-emergency-guide",
+      "version": "5.1.2",
+      "title": "Bathroom Emergency Guide",
+      "description": "Independent submodule-sourced, print-first decision guide with an accessible static site, master editions, and eleven standalone route books.",
+      "kind": "document",
       "status": "experimental",
       "required": false,
       "tags": [
-        "education",
-        "git",
-        "project",
-        "root-owned",
-        "react"
+        "accessibility",
+        "decision-guide",
+        "document",
+        "offline",
+        "print",
+        "submodule"
       ],
       "sourceKind": "project",
-      "gitMode": "root",
+      "gitMode": "submodule",
       "buildMode": "compile",
       "releaseKind": "directory",
       "availability": "source-only",
-      "url": "/git-recipe-book/index.html",
+      "url": null,
       "launch": {
-        "default": "inline",
+        "default": "newWindow",
         "modes": [
           "inline",
-          "floating",
           "fullscreen",
           "newWindow"
         ],
-        "sandbox": "trusted"
+        "sandbox": "strict"
       },
       "git": {
-        "revision": "565a86287ed9434aa1a72e8e60669bd06a39b428",
-        "changedAt": "2026-08-06T14:32:00.000Z",
-        "basis": "source",
-        "path": "git-recipe-book"
+        "changedAt": "2026-08-14T21:09:56.000Z",
+        "revision": "6d3ae5eba0f691059ef0db53287b1d9539486fd8",
+        "basis": "submodule-pin",
+        "path": "bathroom-emergency-guide"
       },
-      "changedAt": "2026-08-06T14:32:00.000Z",
+      "changedAt": "2026-08-14T21:09:56.000Z",
       "receipt": null
     },
     {
@@ -1029,22 +1068,72 @@
       "receipt": null
     },
     {
-      "id": "file-diff-studio",
+      "id": "label-sheet-studio",
       "version": null,
-      "title": "File Diff Studio",
-      "description": "Local-first visual file comparison and merge workbench with DWIM paste, uploads, live line diffs, keyboard navigation, per-change choices, editable result output, undo/redo, and a portable JSON operation journal.",
+      "title": "Label Sheet Studio",
+      "description": "Local-first DIN A4 label designer with configurable equal-cell rows and columns, draggable grid positioning and resizing, repeated images or auto-fitting text, and exact-size print-ready PDF export.",
       "kind": "application",
       "status": "provisional",
       "required": false,
       "tags": [
         "tool",
-        "developer-tools",
+        "pdf",
+        "labels",
+        "stickers",
+        "printing",
+        "typography",
+        "image",
+        "grid",
+        "drag-and-drop",
+        "local-first",
+        "v11"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/label-sheet-studio/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "changedAt": "2026-08-05T20:53:37.000Z",
+        "revision": null,
+        "basis": "legacy",
+        "path": "../label-sheet-studio/index.html"
+      },
+      "changedAt": "2026-08-05T20:53:37.000Z",
+      "receipt": null
+    },
+    {
+      "id": "file-diff-studio",
+      "version": null,
+      "title": "File Diff Studio",
+      "description": "Self-contained local-first text and file comparison studio with DWIM two-slot paste, uploads and drop, live Myers line diffing, a persistent diff-first workspace, collapsible regions, draggable and keyboard-operable dividers, stacked or side-by-side long-line review, non-destructive result assembly, undo and redo, and an exportable replayable JSON journal.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "tool",
+        "developer",
         "diff",
         "merge",
         "text",
-        "local-first",
+        "files",
+        "editor",
         "keyboard",
-        "v11"
+        "local-first",
+        "accessibility",
+        "resizable",
+        "layout"
       ],
       "sourceKind": "directory",
       "gitMode": "root",
@@ -1053,7 +1142,7 @@
       "availability": "provisional",
       "url": "/file-diff-studio/index.html",
       "launch": {
-        "default": "inline",
+        "default": "newWindow",
         "modes": [
           "inline",
           "floating",
@@ -1069,6 +1158,49 @@
         "path": "file-diff-studio"
       },
       "changedAt": "2026-08-02T14:06:40.000Z",
+      "receipt": null
+    },
+    {
+      "id": "nakamotos-disciples",
+      "version": null,
+      "title": "Nakamoto's Disciples",
+      "description": "Interactive local-first Bitcoin course with six sequential mastery flows, fail-closed phase and persisted-state integrity, accessible repair feedback, read-only completed evidence, real protocol experiments, and gated implementation references from bytes through Nakamoto consensus.",
+      "kind": "application",
+      "status": "provisional",
+      "required": false,
+      "tags": [
+        "education",
+        "bitcoin",
+        "blockchain",
+        "cryptography",
+        "simulation",
+        "protocol",
+        "pwa",
+        "local-first",
+        "built"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/nakamotos-disciples/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "changedAt": "2026-07-31T14:58:46.000Z",
+        "revision": null,
+        "basis": "legacy",
+        "path": "../nakamotos-disciples/index.html"
+      },
+      "changedAt": "2026-07-31T14:58:46.000Z",
       "receipt": null
     },
     {

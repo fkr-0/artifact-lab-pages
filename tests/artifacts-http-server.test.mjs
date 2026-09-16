@@ -177,11 +177,14 @@ exit 99
 echo rsync >> '${logFile}'
 exit 99
 `);
+  await writeFixture(join(root, 'bin'), 'pnpm', `#!/usr/bin/env bash
+exit 0
+`);
   await writeFixture(join(root, 'bin'), 'node', `#!/usr/bin/env bash
 set -euo pipefail
 out=''
 while [[ $# -gt 0 ]]; do
-  if [[ "$1" == '--out' ]]; then
+  if [[ "$1" == '--out' || "$1" == '--stage' ]]; then
     out="$2"
     shift 2
   else
@@ -194,7 +197,7 @@ printf 'artifact build\\n' > "$out/index.html"
   await writeFixture(join(root, 'bin'), 'tar', `#!/usr/bin/env bash
 exec /usr/bin/tar "$@"
 `);
-  for (const command of ['ssh', 'scp', 'rsync', 'node', 'tar']) {
+  for (const command of ['ssh', 'scp', 'rsync', 'pnpm', 'node', 'tar']) {
     await chmod(join(stubBin, command), 0o755);
   }
   await chmod(join(root, 'artifacts-package'), 0o755);
@@ -262,11 +265,14 @@ test('artifacts-package produces a stable archive when SOURCE_DATE_EPOCH is set'
   await mkdir(outputOne, { recursive: true });
   await mkdir(outputTwo, { recursive: true });
 
+  await writeFixture(join(root, 'bin'), 'pnpm', `#!/usr/bin/env bash
+exit 0
+`);
   await writeFixture(join(root, 'bin'), 'node', `#!/usr/bin/env bash
 set -euo pipefail
 out=''
 while [[ $# -gt 0 ]]; do
-  if [[ "$1" == '--out' ]]; then
+  if [[ "$1" == '--out' || "$1" == '--stage' ]]; then
     out="$2"
     shift 2
   else
@@ -277,6 +283,7 @@ mkdir -p "$out/assets"
 printf 'artifact build\\n' > "$out/index.html"
 printf 'console.log(1);\\n' > "$out/assets/app.js"
 `);
+  await chmod(join(stubBin, 'pnpm'), 0o755);
   await chmod(join(stubBin, 'node'), 0o755);
 
   const first = await runPackage(root, outputOne, stubBin);
