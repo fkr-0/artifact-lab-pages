@@ -31,6 +31,7 @@
       "reveal-peer-plugin",
       "storyboard-studio",
       "chado-zen-tea",
+      "oeffentliches-dienstrecht-quiz",
       "file-diff-studio"
     ]
   },
@@ -612,6 +613,39 @@
       },
       "modifiedAt": "2026-07-24T01:39:07.000Z",
       "changedAt": "2026-07-24T01:39:07.000Z"
+    },
+    {
+      "id": "oeffentliches-dienstrecht-quiz",
+      "title": "Dienstrecht: Aktenlauf",
+      "kind": "html-path",
+      "href": "../oeffentliches-dienstrecht-quiz/index.html",
+      "description": "Clientseitiges Lernquiz zum öffentlichen Dienstrecht mit 19 kapitelweisen Stages nach der öffentlich einsehbaren Wichmann/Langer-Gliederung, aktuellen Bundesrechtsquellen, Browser-Fortschritt, Sounds und Animationen.",
+      "tags": [
+        "tool",
+        "education",
+        "quiz",
+        "law",
+        "public-service",
+        "german",
+        "offline",
+        "local-first",
+        "v11"
+      ],
+      "operations": [
+        "validate",
+        "index"
+      ],
+      "launch": {
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "defaultAction": "inline"
+      },
+      "modifiedAt": "2026-09-17T10:54:00.000Z",
+      "changedAt": "2026-09-17T10:54:00.000Z"
     },
     {
       "id": "minesweeper",

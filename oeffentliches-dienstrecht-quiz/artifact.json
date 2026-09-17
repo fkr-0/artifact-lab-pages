@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "oeffentliches-dienstrecht-quiz",
+  "version": "0.1.0",
+  "title": "Dienstrecht: Aktenlauf",
+  "description": "Clientseitiges Lernquiz zum öffentlichen Dienstrecht mit 19 kapitelweisen Stages, Quellenhinweisen, Browser-Fortschritt, Sounds und Animationen.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": ["education", "quiz", "law", "public-service", "german", "offline"],
+  "source": {
+    "kind": "directory",
+    "path": "oeffentliches-dienstrecht-quiz",
+    "entrypoint": "index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": ["artifact.json"]
+  },
+  "launch": {
+    "default": "inline",
+    "modes": ["inline", "fullscreen", "newWindow"],
+    "sandbox": "strict"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["index.html", "styles.css", "questions.js", "app.js"]
+  }
+}

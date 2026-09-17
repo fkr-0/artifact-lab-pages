@@ -1,0 +1,69 @@
+release:
+  artifact_id: oeffentliches-dienstrecht-quiz
+  title: "Dienstrecht: Aktenlauf"
+  version: 0.1.0
+  target_tag: oeffentliches-dienstrecht-quiz-v0.1.0
+  source_base: 9d5caed9dd2e4c2717c08f5746fc6dbabe5b5c00
+  target_branch: main
+  generated_at: "2026-09-17T10:58:00Z"
+  publication_url: "https://artifacts.fkr.dev/oeffentliches-dienstrecht-quiz/"
+
+scope:
+  - oeffentliches-dienstrecht-quiz/
+  - app-hub-v11/artifacts.source.json
+  - tests/oeffentliches-dienstrecht-quiz.test.mjs
+
+content:
+  stages: 19
+  questions: 76
+  difficulty_per_stage: [1, 2, 3, 4]
+  structure_authority: "Wichmann/Langer, Öffentliches Dienstrecht, 8th ed. (2017), public table of contents"
+  legal_update_basis: "official federal law sources linked per answer, checked September 2026"
+
+verification:
+  syntax_and_contract_tests:
+    status: pass
+    command: "node --check oeffentliches-dienstrecht-quiz/questions.js && node --check oeffentliches-dienstrecht-quiz/app.js && node --test tests/oeffentliches-dienstrecht-quiz.test.mjs"
+    result: "5/5 focused tests pass"
+  browser_smoke:
+    status: pass
+    browser: chromium
+    assertions:
+      - "19 stage controls render"
+      - "third wrong answer fails a stage"
+      - "successful retry completes stage 1"
+      - "stage 2 unlocks"
+      - "completion and unlock survive reload via localStorage"
+      - "no page errors observed"
+  artifact_validation:
+    status: pass_for_artifact
+    result: "oeffentliches-dienstrecht-quiz/artifact.json ok=true, no errors or warnings"
+    inherited_repository_blocker: "one unrelated hyperblast-shooter source.entrypoint-missing error remains on origin/main"
+  portfolio_audit:
+    status: pass
+    result: "0 errors, 4 pre-existing independent-build warnings"
+  publication_stage:
+    status: pass
+    method: "same source-filtering strategy as Pages CI, then build-publication-site --no-build"
+    result: "59 V13 catalog entries, 6 verified native builds, 48 legacy compatibility entries, required paths verified; quiz HTML/CSS/JS present"
+  diff_check:
+    status: pass
+    command: "git diff --check"
+
+operator_abc:
+  preflight: pass
+  health: healthy
+  requested_parallel_lanes:
+    - implementation
+    - specification
+    - multi-stage-content
+    - release
+  dispatch_status: blocked_by_existing_fleet_leases
+  evidence: "all four configured ChatGPT fleet windows were already leased by androidjtools-design-completion workers; explicit lease acquisition returned already leased/releasing"
+  safety_decision: "did not steal or terminate another workflow's leases; completed the requested artifact in an isolated ws-bridge worktree instead"
+
+release_authority:
+  gh_cli_auth: "authenticated as fkr-0 with repo/workflow scopes"
+  origin_main_at_preflight: 9d5caed9dd2e4c2717c08f5746fc6dbabe5b5c00
+  force_push_allowed: false
+  publish_condition: "fast-forward only after final checks and remote-main recheck"
