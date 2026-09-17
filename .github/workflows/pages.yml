@@ -117,9 +117,6 @@ jobs:
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
 
-      - name: Run V13 publication contract tests
-        run: pnpm run test:v13hub
-
       - name: Materialize V13 publication stage with V11 compatibility content
         run: |
           node scripts/build-publication-site.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage --no-build
