@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/artifact-receipt-v1",
+  "id": "artifact-handling-standard",
+  "version": "1.0.0",
+  "generatedAt": "2026-09-25T16:40:11.820Z",
+  "manifestPath": "registry/sources.d/artifact-handling-standard.json",
+  "source": {
+    "kind": "file",
+    "path": "docs/architecture/ARTIFACT_HANDLING.md",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "assemble",
+    "renderer": "markdown-html"
+  },
+  "release": {
+    "kind": "file",
+    "entrypoint": "index.html",
+    "offline": true
+  },
+  "libraries": [],
+  "verification": {
+    "ok": true,
+    "errors": []
+  },
+  "files": [
+    {
+      "path": "index.html",
+      "size": 18090,
+      "sha256": "4df14b7b27130b98da2f5b593f84f749bb6338e203dcb3c03b0e958a01b814ef"
+    }
+  ]
+}

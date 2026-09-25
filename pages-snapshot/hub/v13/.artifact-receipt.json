@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/artifact-receipt-v1",
+  "id": "app-hub-v13",
+  "version": "2.1.0",
+  "generatedAt": "2026-09-25T16:40:11.818Z",
+  "manifestPath": "registry/sources.d/app-hub-v13.json",
+  "source": {
+    "kind": "directory",
+    "path": "src/v13hub",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "assemble",
+    "renderer": "copy"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": false,
+    "networkAllowlist": [
+      "https://cdn.jsdelivr.net"
+    ]
+  },
+  "libraries": [],
+  "verification": {
+    "ok": true,
+    "errors": []
+  },
+  "files": [
+    {
+      "path": "app.js",
+      "size": 7578,
+      "sha256": "c08d548334a985a5ac8918a0ac0d494340091593657a515ee493e94051a83437"
+    },
+    {
+      "path": "arcade-tools.js",
+      "size": 1440,
+      "sha256": "6910770bc1edf5990b3a8b4ca554fdf5dd6e59058bf984abbb4282936ad7af24"
+    },
+    {
+      "path": "catalog.js",
+      "size": 3366,
+      "sha256": "2e9b0428b04671defcc8f3427cb9dd0ca9a9ae2f1dbdd3e398e21540506e35d5"
+    },
+    {
+      "path": "collection.js",
+      "size": 5616,
+      "sha256": "64342be0d10b76317cacf59ce9f8b819bd86793ac879b6debe35d053828408ad"
+    },
+    {
+      "path": "contracts.js",
+      "size": 10327,
+      "sha256": "07c97b2dad839defef8c2ea15e4f71f177efda525fff3af53bfa8d95695e4b33"
+    },
+    {
+      "path": "index.html",
+      "size": 7438,
+      "sha256": "0e7fa88748369722325d5a9b5be3ea6774e61fec66924903ec11f19d20266951"
+    },
+    {
+      "path": "peer-boundary.js",
+      "size": 4046,
+      "sha256": "39a460054bb943ea08b83ac7e35b90087923ada852769a37990f28d882bcabc2"
+    },
+    {
+      "path": "peer-lobby.js",
+      "size": 5732,
+      "sha256": "66ac076a90f05e5f3ef54d6aa947293aa8b9e1a64433ced6f11203f8714628c8"
+    },
+    {
+      "path": "search.js",
+      "size": 2048,
+      "sha256": "a4fceeaa8099235a7fba0452a3c3188584942400140371d2c94797c5bbc4dc19"
+    },
+    {
+      "path": "state.js",
+      "size": 1502,
+      "sha256": "9dbf3c3b8906bb1404845189746642ee02270d8c7a66adce0ebd02e63b19aafa"
+    },
+    {
+      "path": "styles.css",
+      "size": 15505,
+      "sha256": "545a66a86ea80b92f33507471feeb541b3e1e7e08d610b9a3545edc036b8c572"
+    },
+    {
+      "path": "view.js",
+      "size": 14405,
+      "sha256": "ff38d8e44ecf9d28fd520c60b2b89e5e0cafc917cbb6991c07fc8f67901a05b2"
+    }
+  ]
+}

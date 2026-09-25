@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/publication-site-v2",
+  "generatedAt": "2026-09-25T16:40:11.913Z",
+  "root": "dist/site",
+  "rootIndex": "hub/v13/index.html",
+  "catalog": {
+    "total": 16,
+    "verified": 6,
+    "provisional": 5,
+    "external": 1,
+    "inline": 1,
+    "sourceOnly": 3,
+    "active": 2,
+    "dated": 15
+  },
+  "builds": [
+    {
+      "id": "chado-zen-tea",
+      "version": "0.1.0",
+      "files": 1
+    },
+    {
+      "id": "overlay-cam-apk",
+      "version": "0.1.0",
+      "files": 2
+    },
+    {
+      "id": "app-hub-v13",
+      "version": "2.1.0",
+      "files": 12
+    },
+    {
+      "id": "artifact-handling-standard",
+      "version": "1.0.0",
+      "files": 1
+    },
+    {
+      "id": "qr-studio",
+      "version": "0.1.0",
+      "files": 1
+    },
+    {
+      "id": "sprite-fan-atlas-studio",
+      "version": "1.0.0",
+      "files": 1
+    }
+  ],
+  "compatibility": {
+    "legacyHubBundled": false,
+    "reason": "V13 publication now consumes native manifests directly; deleted V11 hub source is not restored as an implicit build dependency."
+  },
+  "requiredPaths": [
+    "hub/v13/index.html",
+    "hub/v13/app.js",
+    "hub/v13/catalog.js",
+    "hub/v13/collection.js",
+    "hub/v13/contracts.js",
+    "hub/v13/arcade-tools.js",
+    "hub/v13/peer-boundary.js",
+    "hub/v13/peer-lobby.js",
+    "hub/v13/search.js",
+    "hub/v13/state.js",
+    "hub/v13/styles.css",
+    "hub/v13/view.js",
+    "catalog/catalog.json"
+  ],
+  "verifiedRequiredPaths": 13
+}

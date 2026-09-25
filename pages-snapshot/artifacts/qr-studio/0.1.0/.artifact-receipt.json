@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/artifact-receipt-v1",
+  "id": "qr-studio",
+  "version": "0.1.0",
+  "generatedAt": "2026-09-25T16:40:11.822Z",
+  "manifestPath": "registry/sources.d/qr-studio.json",
+  "source": {
+    "kind": "file",
+    "path": "qr-studio/index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "file",
+    "entrypoint": "index.html",
+    "offline": false,
+    "networkAllowlist": [
+      "https://cdn.jsdelivr.net"
+    ]
+  },
+  "libraries": [],
+  "verification": {
+    "ok": true,
+    "errors": []
+  },
+  "files": [
+    {
+      "path": "index.html",
+      "size": 47915,
+      "sha256": "0c69b03f58642301f132f31363aba658271bb077cad230a2e2e91e8ead774838"
+    }
+  ]
+}

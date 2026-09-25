@@ -1,0 +1,650 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/catalog-v1",
+  "generatedAt": "2026-09-25T16:40:11.912Z",
+  "build": {
+    "portfolioVersion": "1.7.0",
+    "ordering": "git-last-committed-change-desc",
+    "generator": "artifactctl"
+  },
+  "summary": {
+    "total": 16,
+    "verified": 6,
+    "provisional": 5,
+    "external": 1,
+    "inline": 1,
+    "sourceOnly": 3,
+    "active": 2,
+    "dated": 15
+  },
+  "items": [
+    {
+      "id": "revealive",
+      "version": "0.1.0",
+      "title": "Revealive",
+      "description": "Client-only Markdown/Org Reveal.js authoring studio, pinned to the independently verified standalone v0.1.0 release.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "presentation",
+        "authoring",
+        "offline",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-09-09T18:50:55.000Z",
+        "revision": "777bf7eadd888a9e494eb7e69e9ecae995dfc59f",
+        "basis": "submodule-pin",
+        "path": "revealive"
+      },
+      "changedAt": "2026-09-09T18:50:55.000Z",
+      "receipt": null
+    },
+    {
+      "id": "git-recipe-book",
+      "version": "1.1.0",
+      "title": "Git Recipe Book",
+      "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
+      "kind": "application",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "education",
+        "git",
+        "project",
+        "root-owned",
+        "react"
+      ],
+      "sourceKind": "project",
+      "gitMode": "root",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "07214ea36ef7951a520e5466e0c4fda34ddfe897",
+        "changedAt": "2026-08-29T16:08:38.000Z",
+        "basis": "source",
+        "path": "git-recipe-book"
+      },
+      "changedAt": "2026-08-29T16:08:38.000Z",
+      "receipt": null
+    },
+    {
+      "id": "artifact-handling-standard",
+      "version": "1.0.0",
+      "title": "Artifact Handling Standard",
+      "description": "Normative V12 instructions for files, directories, projects, Git ownership, builds, Markdown, downloads, links, and inline text.",
+      "kind": "document",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "documentation",
+        "architecture",
+        "policy",
+        "v12"
+      ],
+      "sourceKind": "file",
+      "gitMode": "root",
+      "buildMode": "assemble",
+      "releaseKind": "file",
+      "availability": "verified",
+      "url": "/artifacts/artifact-handling-standard/1.0.0/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "inline",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "0a3e8af75afd8a29438df93307c8c576f661a7c4",
+        "changedAt": "2026-08-20T15:25:33.000Z",
+        "basis": "source",
+        "path": "docs/architecture/ARTIFACT_HANDLING.md"
+      },
+      "changedAt": "2026-08-20T15:25:33.000Z",
+      "receipt": {
+        "version": "1.0.0",
+        "files": 1,
+        "generatedAt": "2026-09-25T16:40:11.820Z"
+      }
+    },
+    {
+      "id": "brickbreaker",
+      "version": "0.1.0",
+      "title": "BrickBreaker Coop",
+      "description": "Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "arcade",
+        "multiplayer",
+        "p2p"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/brickbreaker/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "0a3e8af75afd8a29438df93307c8c576f661a7c4",
+        "changedAt": "2026-08-20T15:25:33.000Z",
+        "basis": "source",
+        "path": "brickbreaker"
+      },
+      "changedAt": "2026-08-20T15:25:33.000Z",
+      "receipt": null
+    },
+    {
+      "id": "chado-zen-tea",
+      "version": "0.1.0",
+      "title": "Chadō: Interactive Zen Tea Ceremony Guide",
+      "description": "Self-contained interactive guide to chanoyu and chadō.",
+      "kind": "document",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "document",
+        "education",
+        "tea",
+        "zen",
+        "interactive"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "verified",
+      "url": "/artifacts/chado-zen-tea/0.1.0/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "source",
+        "path": "chado-zen-tea"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": {
+        "version": "0.1.0",
+        "files": 1,
+        "generatedAt": "2026-09-25T16:40:11.786Z"
+      }
+    },
+    {
+      "id": "ethic-brawl-source",
+      "version": null,
+      "title": "Ethic Brawl source repository",
+      "description": "External source link modeled directly rather than as a fake local artifact release.",
+      "kind": "link",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "source",
+        "repository",
+        "game"
+      ],
+      "sourceKind": "external",
+      "gitMode": "none",
+      "buildMode": "external",
+      "releaseKind": "external",
+      "availability": "external",
+      "url": "https://github.com/fkr-0/ethic-brawl",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "manifest",
+        "path": "registry/sources.d/ethic-brawl-source.json"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "overlay-cam-apk",
+      "version": "0.1.0",
+      "title": "Overlay Cam — Intuitive UX APK",
+      "description": "Standalone landing page and Android debug APK download.",
+      "kind": "download",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "android",
+        "camera",
+        "apk",
+        "download"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "download",
+      "availability": "verified",
+      "url": "/artifacts/overlay-cam-apk/0.1.0/index.html",
+      "launch": {
+        "default": "download",
+        "modes": [
+          "newWindow",
+          "download"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "source",
+        "path": "overlay-cam"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": {
+        "version": "0.1.0",
+        "files": 2,
+        "generatedAt": "2026-09-25T16:40:11.811Z"
+      }
+    },
+    {
+      "id": "v12-migration-note",
+      "version": null,
+      "title": "V12 migration status",
+      "description": "Short catalog-native status text demonstrating the inline text contract.",
+      "kind": "text",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "v12",
+        "migration",
+        "status"
+      ],
+      "sourceKind": "inline",
+      "gitMode": "none",
+      "buildMode": "none",
+      "releaseKind": "inline",
+      "availability": "inline",
+      "url": null,
+      "text": "V12 is being introduced additively. V11 remains operational while artifacts move to verified independent release contracts.",
+      "launch": {
+        "default": "none",
+        "modes": [
+          "none"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "revision": "1f8ac006932f9f546905a963a48dc9d3086da05c",
+        "changedAt": "2026-08-20T13:33:14.000Z",
+        "basis": "manifest",
+        "path": "registry/sources.d/v12-migration-note.json"
+      },
+      "changedAt": "2026-08-20T13:33:14.000Z",
+      "receipt": null
+    },
+    {
+      "id": "qr-studio",
+      "version": "0.1.0",
+      "title": "QR Studio",
+      "description": "Single-file local QR code generator staged independently from the hub.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "tool",
+        "qr-code",
+        "generator",
+        "single-file"
+      ],
+      "sourceKind": "file",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "file",
+      "availability": "verified",
+      "url": "/artifacts/qr-studio/0.1.0/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "f5fcc52163096883323aca29428ef0e573bbbf14",
+        "changedAt": "2026-08-20T11:28:07.000Z",
+        "basis": "source",
+        "path": "qr-studio/index.html"
+      },
+      "changedAt": "2026-08-20T11:28:07.000Z",
+      "receipt": {
+        "version": "0.1.0",
+        "files": 1,
+        "generatedAt": "2026-09-25T16:40:11.822Z"
+      }
+    },
+    {
+      "id": "ethic-brawl",
+      "version": null,
+      "title": "Ethic Brawl",
+      "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-08-19T22:17:54.000Z",
+        "revision": "e2f2c020d7ebd41945f8c316db75ae0ec64a9485",
+        "basis": "submodule-pin",
+        "path": "ethic-brawl"
+      },
+      "changedAt": "2026-08-19T22:17:54.000Z",
+      "receipt": null
+    },
+    {
+      "id": "badger-sprawl-runner",
+      "version": null,
+      "title": "Badger Sprawl Runner",
+      "description": "Published independent submodule pinned to the parent-owned reachable revision; a fully verified local 1.4.0 integration candidate exists but remains outside the gitlink until published.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": null,
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-08-19T21:25:46.000Z",
+        "revision": "ccd1c439e706c1397f48ed544a44712ff1d087df",
+        "basis": "submodule-pin",
+        "path": "badger-sprawl-runner"
+      },
+      "changedAt": "2026-08-19T21:25:46.000Z",
+      "receipt": null
+    },
+    {
+      "id": "inf-arrange",
+      "version": "0.0.2",
+      "title": "Inf Arrange / Canvas Studio",
+      "description": "Root-owned infinite canvas application for arranging, slicing, cropping, resizing, annotating, and relating images and short text blocks.",
+      "kind": "application",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "canvas",
+        "images",
+        "project",
+        "root-owned",
+        "react"
+      ],
+      "sourceKind": "project",
+      "gitMode": "root",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "c781a8c92ad6f4811d051564441b80543d5c2387",
+        "changedAt": "2026-08-06T09:33:17.000Z",
+        "basis": "source",
+        "path": "inf-arrange"
+      },
+      "changedAt": "2026-08-06T09:33:17.000Z",
+      "receipt": null
+    },
+    {
+      "id": "sprite-fan-atlas-studio",
+      "version": "1.0.0",
+      "title": "Sprite Fan Atlas Studio",
+      "description": "Standalone production workbench for sprite slicing, cleanup, review, atlas assembly, geometry, evidence, and Arcade consumer integration.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "sprite",
+        "atlas",
+        "arcade",
+        "pixel-art",
+        "production",
+        "tooling"
+      ],
+      "sourceKind": "file",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "file",
+      "availability": "verified",
+      "url": "/artifacts/sprite-fan-atlas-studio/1.0.0/atlas-studio.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow",
+          "fullscreen"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "92dc10c576ef35b7a87f663ebf45eef1173a00c4",
+        "changedAt": "2026-07-24T01:39:07.000Z",
+        "basis": "source",
+        "path": "sprite-fan/atlas-studio.html"
+      },
+      "changedAt": "2026-07-24T01:39:07.000Z",
+      "receipt": {
+        "version": "1.0.0",
+        "files": 1,
+        "generatedAt": "2026-09-25T16:40:11.827Z"
+      }
+    },
+    {
+      "id": "v11-peer-daw",
+      "version": null,
+      "title": "V11 Peer DAW",
+      "description": "Published independent submodule pinned to its parent-owned release revision; newer unpublished child commits remain outside the parent gitlink until explicitly promoted.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "audio",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-07-19T02:48:09.000Z",
+        "revision": "37783861b7681852b0605a891a2b831c4cde82de",
+        "basis": "submodule-pin",
+        "path": "v11-peer-daw"
+      },
+      "changedAt": "2026-07-19T02:48:09.000Z",
+      "receipt": null
+    },
+    {
+      "id": "hyperblast-shooter",
+      "version": null,
+      "title": "Hyperblast Shooter",
+      "description": "Published independent submodule pinned to the parent-owned reachable revision; newer locally verified release branches remain outside the parent gitlink until published.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/hyperblast-shooter/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-07-19T02:44:31.000Z",
+        "revision": "c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a",
+        "basis": "submodule-pin",
+        "path": "hyperblast-shooter"
+      },
+      "changedAt": "2026-07-19T02:44:31.000Z",
+      "receipt": null
+    },
+    {
+      "id": "app-hub-v13",
+      "version": "2.1.0",
+      "title": "V13Hub Artifact Observatory",
+      "description": "Local-first discovery, provenance, artifact-health, preview, permissioned collection, opt-in PeerJSNet lobby, and Arcade sprite-atlas tooling surface for Artifact Lab catalogs.",
+      "kind": "application",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "hub",
+        "catalog",
+        "discovery",
+        "provenance",
+        "local-first",
+        "peernet",
+        "v13"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "assemble",
+      "releaseKind": "directory",
+      "availability": "verified",
+      "url": "/artifacts/app-hub-v13/2.1.0/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "changedAt": null,
+        "revision": null,
+        "basis": "unknown",
+        "path": "src/v13hub"
+      },
+      "changedAt": null,
+      "receipt": {
+        "version": "2.1.0",
+        "files": 12,
+        "generatedAt": "2026-09-25T16:40:11.818Z"
+      }
+    }
+  ]
+}

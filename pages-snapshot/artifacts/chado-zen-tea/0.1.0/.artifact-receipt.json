@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/artifact-receipt-v1",
+  "id": "chado-zen-tea",
+  "version": "0.1.0",
+  "generatedAt": "2026-09-25T16:40:11.786Z",
+  "manifestPath": "chado-zen-tea/artifact.json",
+  "source": {
+    "kind": "directory",
+    "path": "chado-zen-tea",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": [
+      "artifact.json"
+    ]
+  },
+  "libraries": [],
+  "verification": {
+    "ok": true,
+    "errors": []
+  },
+  "files": [
+    {
+      "path": "index.html",
+      "size": 68585,
+      "sha256": "29742096c10981ff6cc178d4f56dbc2f0fa36e7cce735b92e6019ef1ffcdfbb6"
+    }
+  ]
+}

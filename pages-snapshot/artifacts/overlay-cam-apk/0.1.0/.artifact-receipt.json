@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/artifact-receipt-v1",
+  "id": "overlay-cam-apk",
+  "version": "0.1.0",
+  "generatedAt": "2026-09-25T16:40:11.811Z",
+  "manifestPath": "overlay-cam/artifact.json",
+  "source": {
+    "kind": "directory",
+    "path": "overlay-cam",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "download",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": [
+      "artifact.json"
+    ]
+  },
+  "libraries": [],
+  "verification": {
+    "ok": true,
+    "errors": []
+  },
+  "files": [
+    {
+      "path": "index.html",
+      "size": 1246,
+      "sha256": "06c1f9460bbafa9e144d85e94e847707169466cbe59a7462dfd3c13eb296a4c4"
+    },
+    {
+      "path": "overlay-cam-intuitive-ux-debug.apk",
+      "size": 14704670,
+      "sha256": "24d43b7b33884790e845867b0c763653622b15b5f3e8f2c24cc477d8a6b00338"
+    }
+  ]
+}

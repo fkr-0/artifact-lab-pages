@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Artifact Handling Standard</title>
+  <style>
+    :root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.55}
+    body{max-width:76ch;margin:0 auto;padding:clamp(1rem,4vw,3rem)}
+    pre{overflow:auto;padding:1rem;background:color-mix(in srgb,CanvasText 8%,Canvas);border-radius:.5rem}
+    code{font-family:ui-monospace,monospace}a{color:LinkText}img{max-width:100%}
+  </style>
+</head>
+<body><main><h1>Artifact Handling Standard</h1>
+<p>Status: normative V12 repository contract Applies to: every item exposed by an artifacts catalog, deployment, download page, or hub</p>
+<h2>1. Core rule</h2>
+<p>An artifact is a product boundary, not a location inside a hub.</p>
+<p>Every catalog item must be classified independently along five axes:</p>
+<ol><li>product kind;</li><li>source shape;</li><li>Git ownership;</li><li>build mode;</li><li>release shape.</li></ol>
+<p>These axes must not be collapsed into one overloaded <code>type</code> field. For example, a Markdown document may be a one-file source, assembled into one HTML release, owned by the root Git repository. A game may be a project source, compiled into a directory release, and owned by a submodule.</p>
+<p>The hub consumes releases and metadata. It does not own artifact implementations, project build commands, shared libraries, or deployment inclusion rules.</p>
+<h2>2. Required invariants</h2>
+<p>Every active local artifact MUST:</p>
+<ul><li>have one stable ID and one canonical manifest;</li><li>identify its source root and ownership unambiguously;</li><li>produce or identify a self-contained release boundary;</li><li>run or remain readable without the hub;</li><li>avoid imports from the hub, parent paths, or sibling artifacts at runtime;</li><li>declare every shared library and network dependency;</li><li>be staged into a fresh output directory before publication;</li><li>receive a release receipt containing source identity and file hashes;</li><li>pass the verification profile appropriate to its product kind.</li></ul>
+<p>Every catalog-only item MUST still have a manifest, but links and inline text do not need a local release directory.</p>
+<h2>3. Classification axes</h2>
+<h3>3.1 Product kind</h3>
+<p>| Kind | Use | Local release required | |---|---|---:| | <code>application</code> | Interactive browser application, game, editor, studio, or tool. | yes | | <code>document</code> | Markdown, HTML, PDF, guide, report, tutorial, or other readable publication. | normally yes | | <code>download</code> | APK, archive, executable, dataset, image pack, or another primary downloadable file. | yes | | <code>link</code> | A deliberately external URL not built or mirrored by this repository. | no | | <code>text</code> | A short catalog note, announcement, warning, or explanatory block. | no | | <code>legacy</code> | Preserved compatibility surface that is not governed as a current application. | yes or external |</p>
+<p><code>text</code> is not a substitute for a document. Use it only when the complete content is small enough to live in the manifest and does not need its own URL, history, download, or renderer.</p>
+<h3>3.2 Source shape</h3>
+<p>| <code>source.kind</code> | Correct use | |---|---| | <code>file</code> | Exactly one authored source file. A sidecar manifest is kept in <code>registry/sources.d/</code> so the product can remain genuinely one-file. | | <code>directory</code> | A root-owned folder containing one artifact or a package that publishes several explicit artifact entries. | | <code>project</code> | A full software/document project with its own tests, dependencies, build process, or release cadence. | | <code>external</code> | A remote resource the repository intentionally does not build. | | <code>inline</code> | Manifest-contained text only. Never use for executable HTML or scripts. |</p>
+<h3>3.3 Git ownership</h3>
+<p>| <code>source.git.mode</code> | Meaning | |---|---| | <code>root</code> | Source is tracked by the artifacts repository. No nested <code>.git</code> may exist below the source root. | | <code>submodule</code> | Source is a declared Git submodule and the parent tracks only its gitlink. | | <code>external</code> | Source is an external checkout or fetched release pinned by repository URL and revision/hash. The parent does not track its mutable files. | | <code>none</code> | Only valid for external links, inline text, or generated inputs with another declared provenance source. |</p>
+<p>The following state is prohibited:</p>
+<pre><code>parent repository tracks a directory as ordinary files
+AND
+that directory contains its own .git repository</code></pre>
+<p>A project does not automatically require a separate Git repository. A small project may use <code>source.kind: project</code> with <code>source.git.mode: root</code>. The distinction is build and lifecycle complexity, not Git fashion.</p>
+<h3>3.4 Build mode</h3>
+<p>| <code>build.mode</code> | Correct use | |---|---| | <code>none</code> | Source bytes are already release bytes. Verification and staging still occur. | | <code>assemble</code> | Deterministic composition transforms source into release: Markdown rendering, HTML inlining, vendoring, generated indexes, or document conversion. | | <code>compile</code> | A compiler, bundler, package-manager script, or project pipeline produces the release. | | <code>external</code> | No local build is performed because the item is a deliberate external link. |</p>
+<p>Build commands MUST be argument arrays. Shell strings are rejected unless a migration adapter marks them provisional. Commands execute with an explicit working directory, clean stage, bounded environment, and no implicit hub directory.</p>
+<h3>3.5 Release shape</h3>
+<p>| <code>release.kind</code> | Meaning | |---|---| | <code>file</code> | One distributable file, commonly HTML, Markdown, PDF, image, or archive. | | <code>directory</code> | A self-contained static directory with an entrypoint. | | <code>download</code> | One or more downloadable files, optionally with a standalone landing page. | | <code>external</code> | A validated remote URL. | | <code>inline</code> | Manifest-contained catalog text. |</p>
+<h2>4. Decision table</h2>
+<p>| Case | Product | Source | Git | Build | Release | Manifest location | |---|---|---|---|---|---|---| | Single self-contained HTML | application/document | file | root | none | file | <code>registry/sources.d/&lt;id&gt;.json</code> | | HTML plus local JS/CSS/assets | application | directory | root | none | directory | source root <code>artifact.json</code> | | Single HTML that uses shared libraries but must remain one file | application | file | root | assemble | file | registry sidecar | | Static folder requiring copied versioned libraries | application | directory | root | assemble | directory | source root | | Vite/React/game/software project | application | project | root/submodule/external | compile | directory or file | project root; root keeps a reference for non-root ownership | | Markdown published as a web page | document | file | root | assemble with <code>markdown-html</code> | file | registry sidecar | | Markdown intentionally offered raw | document/download | file | root | none | file/download | registry sidecar | | PDF or DOCX generated from sources | document/download | project or directory | root/submodule | compile/assemble | file/download | source/project root | | APK/archive with landing page | download | directory/project | root/submodule | none/compile | download | source/project root | | Remote website or repository link | link | external | none | external | external | registry sidecar | | Short informational catalog note | text | inline | none | none | inline | registry sidecar | | Old hub/tool preserved unchanged | legacy | file/directory/project | root/submodule | none/compile | file/directory | source root or sidecar |</p>
+<h2>5. Case instructions</h2>
+<h3>5.1 One-file artifacts</h3>
+<p>Use when the complete executable/readable product is one file and no local runtime dependency is required.</p>
+<p>Required handling:</p>
+<ol><li>Keep the source file independent; do not move its implementation into the hub.</li><li>Store metadata in <code>registry/sources.d/&lt;id&gt;.json</code>.</li><li>Use <code>source.kind: file</code>, <code>build.mode: none</code>, and <code>release.kind: file</code>.</li><li>Stage the file under <code>dist/artifacts/&lt;id&gt;/&lt;version&gt;/</code>.</li><li>Verify it from that directory with the hub unavailable.</li></ol>
+<p>If it imports local JavaScript, CSS, fonts, images, or WASM, it is not a one-file artifact. Either change it to a directory artifact or use an <code>assemble</code> step that embeds those dependencies and proves the emitted release is one file.</p>
+<h3>5.2 Directory artifacts without a build</h3>
+<p>Use for authored static folders whose existing files are already deployable.</p>
+<p>Required handling:</p>
+<p>inference;</p>
+<p>outputs;</p>
+<ul><li>place <code>artifact.json</code> at the source root;</li><li>declare the entrypoint and explicit include/exclude policy;</li><li>stage only the declared artifact closure, never the entire top-level directory by</li><li>exclude tests, reports, caches, source-only docs, nested VCS data, and temporary</li><li>audit every relative URL from the staged entrypoint.</li></ul>
+<p>A directory may publish several artifacts, but each published entry receives a stable ID, release root, entrypoint, and receipt. A shared source directory is not permission to deploy every file in that directory.</p>
+<h3>5.3 Directory artifacts with assembly</h3>
+<p>Use when the authored directory needs deterministic preparation but not a general software compiler.</p>
+<p>Examples:</p>
+<ul><li>vendor exact shared-library releases;</li><li>inline CSS/JavaScript into one HTML output;</li><li>render a Markdown collection into static HTML;</li><li>generate an index from declared files;</li><li>copy a curated subset of assets.</li></ul>
+<p>Assembly MUST be reproducible, path-contained, receipt-producing, and unable to mutate the source directory.</p>
+<h3>5.4 Projects without a build</h3>
+<p>Use <code>source.kind: project</code> even when no compile step exists if the artifact has a project lifecycle: extensive tests, release evidence, package metadata, several products, or independent versioning.</p>
+<p>Use <code>build.mode: none</code>; do not misclassify it as a simple directory merely to avoid modeling ownership. The release selector must still identify the exact deployable subtree.</p>
+<h3>5.5 Projects with a build</h3>
+<p>Required handling:</p>
+<p>output, not project-specific implementation steps scattered through root CI.</p>
+<ol><li>The project owns its dependencies, tests, and build command.</li><li>The parent manifest/reference declares the project checkout and expected release</li><li>The build runs in the project root and writes to a project output directory.</li><li>Artifact tooling copies only the declared release output into a fresh stage.</li><li>The parent records child revision, command argv, output hashes, and verification.</li></ol>
+<p>For submodules, commit child work first and update the parent gitlink in a separate commit. For external checkouts, pin an immutable revision or release hash.</p>
+<h3>5.6 Markdown</h3>
+<p>Choose one of two explicit contracts:</p>
+<h4>Published document</h4>
+<pre><code>{
+  &quot;kind&quot;: &quot;document&quot;,
+  &quot;source&quot;: { &quot;kind&quot;: &quot;file&quot;, &quot;path&quot;: &quot;docs/example.md&quot;, &quot;git&quot;: { &quot;mode&quot;: &quot;root&quot; } },
+  &quot;build&quot;: { &quot;mode&quot;: &quot;assemble&quot;, &quot;renderer&quot;: &quot;markdown-html&quot; },
+  &quot;release&quot;: { &quot;kind&quot;: &quot;file&quot;, &quot;entrypoint&quot;: &quot;index.html&quot; }
+}</code></pre>
+<p>The result is standalone HTML and does not depend on a hub Markdown viewer.</p>
+<h4>Raw source/download</h4>
+<p>Use <code>build.mode: none</code> and <code>release.kind: file</code> or <code>download</code>. The launch action must make clear that the user receives raw Markdown.</p>
+<p>Do not make a current document depend permanently on a query string into a hub-owned Markdown renderer. A generic renderer may be a versioned assembly package, not a hub implementation dependency.</p>
+<h3>5.7 Simple external links</h3>
+<p>Use <code>kind: link</code>, <code>source.kind: external</code>, <code>build.mode: external</code>, and <code>release.kind: external</code>.</p>
+<p>Required fields:</p>
+<ul><li>HTTPS URL unless an explicit local-development policy allows otherwise;</li><li>title and description explaining that the destination is external;</li><li>optional health-check policy;</li><li>no fake local release path;</li><li>no silent mirroring assumption.</li></ul>
+<p>Links are catalog records, not artifacts built by the repository. They remain subject to ID uniqueness, URL safety, and availability reporting.</p>
+<h3>5.8 Simple text</h3>
+<p>Use <code>kind: text</code>, <code>source.kind: inline</code>, <code>build.mode: none</code>, and <code>release.kind: inline</code>.</p>
+<p>Inline text MUST:</p>
+<p>manifest&#39;s declared format;</p>
+<ul><li>contain no executable HTML or scripts;</li><li>remain short and presentation-neutral;</li><li>be rendered by the hub as escaped text or sanitized Markdown according to the</li><li>not claim launch modes that require a URL.</li></ul>
+<p>When content grows into a tutorial, essay, changelog, or policy, move it into a document artifact.</p>
+<h3>5.9 Downloads</h3>
+<p>A download artifact identifies the downloadable file as the product. A landing page is optional but, when present, must itself be standalone inside the release directory.</p>
+<p>The receipt records hashes and media types for every downloadable file. Catalog launch actions distinguish <code>open landing page</code>, <code>view</code>, and <code>download</code>.</p>
+<h3>5.10 Legacy items</h3>
+<p>Legacy status is explicit and does not exempt an item from path containment or safe launching.</p>
+<p>Preserve a whole legacy host as one artifact unless individual embedded tools are actually extracted into independent releases. Query routes such as <code>legacy-tools.html?tool=x</code> are migration aliases, not durable modern product boundaries.</p>
+<h2>6. Shared libraries</h2>
+<p>Shared code lives under <code>packages/</code>, has a version and release descriptor, and is delivered through one of:</p>
+<p>| Delivery | Rule | |---|---| | <code>inline</code> | Assembly embeds exact library bytes into a file release. | | <code>vendor</code> | Assembly copies exact library release files into the artifact stage and records hashes. | | <code>bundle</code> | A project compiler includes the dependency; its lockfile/build receipt proves the version. |</p>
+<p>An artifact MUST NOT import <code>app-hub-v12/lib/...</code>, <code>app-hub-v11/lib/...</code>, or a sibling artifact path. Generated vendor files are not edited manually.</p>
+<h2>7. Manifest location and authority</h2>
+<pre><code>file source       -&gt; registry/sources.d/&lt;id&gt;.json
+inline/link       -&gt; registry/sources.d/&lt;id&gt;.json
+directory source  -&gt; &lt;source-root&gt;/artifact.json
+root project      -&gt; &lt;project-root&gt;/artifact.json
+submodule project -&gt; canonical child manifest + root reference descriptor
+external project  -&gt; canonical remote manifest or root locked reference descriptor</code></pre>
+<p>JSON is the canonical enforcement format for the first V12 implementation. YAML may be added as an input syntax later, but tooling must normalize it to the same schema before validation.</p>
+<h2>8. Lifecycle</h2>
+<pre><code>author source
+  -&gt; validate manifest and ownership
+  -&gt; resolve/build libraries
+  -&gt; build or assemble in isolation
+  -&gt; stage a fresh release root
+  -&gt; audit dependency closure
+  -&gt; run standalone verification
+  -&gt; emit receipt and hashes
+  -&gt; generate catalog entry
+  -&gt; assemble site
+  -&gt; run site launch smoke
+  -&gt; deploy immutable release</code></pre>
+<p>No step may copy an inferred top-level directory merely because an entrypoint happens to be inside it.</p>
+<h2>9. Enforcement levels</h2>
+<h3>Level 1: descriptive</h3>
+<ul><li>manifest parses;</li><li>ID and classification fields exist;</li><li>source is discoverable.</li></ul>
+<h3>Level 2: structural</h3>
+<ul><li>paths are contained;</li><li>ownership matches Git topology;</li><li>source/build/release combinations are legal;</li><li>local entrypoints exist.</li></ul>
+<h3>Level 3: release</h3>
+<ul><li>stage is fresh and attributed;</li><li>file hashes and library provenance exist;</li><li>no undeclared local dependency escapes the stage;</li><li>required output files exist.</li></ul>
+<h3>Level 4: behavioral</h3>
+<ul><li>artifact works without the hub;</li><li>browser/document/download checks pass;</li><li>accessibility, security, lifecycle, and offline claims are verified.</li></ul>
+<p>New artifacts should reach Level 4 before being marked <code>active</code>. V11-adapted entries may initially be marked <code>provisional</code> and must expose their missing level explicitly.</p>
+<h2>10. Review checklist</h2>
+<p>Before accepting an artifact or migration, answer all of these:</p>
+<pre><code>[ ] Is the product kind accurate?
+[ ] Is the source shape accurate?
+[ ] Is exactly one Git owner authoritative?
+[ ] Is the build mode explicit and reproducible?
+[ ] Is the release boundary self-contained?
+[ ] Does the artifact work without a hub?
+[ ] Are shared libraries versioned and delivered explicitly?
+[ ] Are Markdown, text, links, and downloads modeled directly?
+[ ] Does staging avoid source mutation and path inference?
+[ ] Does the receipt attribute every released file?
+[ ] Can the catalog omit the hub and still describe the release?
+[ ] Can the release be rolled back without reconstructing source state?</code></pre></main></body>
+</html>
