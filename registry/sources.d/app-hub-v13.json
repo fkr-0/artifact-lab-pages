@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "app-hub-v13",
+  "version": "2.1.0",
+  "title": "V13Hub Artifact Observatory",
+  "description": "Local-first discovery, provenance, artifact-health, preview, permissioned collection, opt-in PeerJSNet lobby, and Arcade sprite-atlas tooling surface for Artifact Lab catalogs.",
+  "kind": "application",
+  "status": "active",
+  "required": true,
+  "tags": ["hub", "catalog", "discovery", "provenance", "local-first", "peernet", "v13"],
+  "source": {
+    "kind": "directory",
+    "path": "src/v13hub",
+    "entrypoint": "index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "assemble", "renderer": "copy" },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": false,
+    "networkAllowlist": ["https://cdn.jsdelivr.net"]
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["newWindow"],
+    "sandbox": "none"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html",
+      "app.js",
+      "catalog.js",
+      "collection.js",
+      "contracts.js",
+      "arcade-tools.js",
+      "peer-boundary.js",
+      "peer-lobby.js",
+      "search.js",
+      "state.js",
+      "styles.css",
+      "view.js"
+    ]
+  }
+}

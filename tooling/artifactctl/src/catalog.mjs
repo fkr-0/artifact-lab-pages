@@ -17,13 +17,14 @@ function sourceUrl(manifest) {
   return `/${posix.join(source.path, entrypoint).replace(/^\/+/, '')}`;
 }
 
-function releaseUrl(manifest, receipt) {
+function releaseUrl(manifest, receipt, { publicationStage = false } = {}) {
   if (manifest.kind === 'link') return manifest.release.url || manifest.source.url;
   if (manifest.kind === 'text') return null;
   if (receipt) {
     const entrypoint = manifest.release.entrypoint || receipt.files?.[0]?.path || '';
     return `/artifacts/${manifest.id}/${receipt.version}/${entrypoint}`;
   }
+  if (publicationStage) return null;
   if (manifest.legacy?.href) return `/${String(manifest.legacy.href).replace(/^\.\.\//, '')}`;
   return sourceUrl(manifest);
 }
@@ -120,9 +121,11 @@ export async function loadReceiptBuilds(manifests, receiptRoot) {
 export function generateCatalog(manifests, builds = [], options = {}) {
   const receipts = new Map(builds.map((entry) => [entry.manifest.id, entry.receipt]));
   const gitMetadata = options.gitMetadata || new Map();
-  const items = manifests.map((manifest) => {
+  const items = manifests
+    .filter((manifest) => manifest.status !== 'archived')
+    .map((manifest) => {
     const receipt = receipts.get(manifest.id);
-    const url = releaseUrl(manifest, receipt);
+    const url = releaseUrl(manifest, receipt, { publicationStage: options.publicationStage === true });
     const gitInfo = gitMetadata.get(manifest.id) || {
       changedAt: null,
       revision: null,

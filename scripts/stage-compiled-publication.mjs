@@ -12,7 +12,7 @@ import {
   writeCatalog,
 } from '../tooling/artifactctl/src/catalog.mjs';
 import { validateManifest } from '../tooling/artifactctl/src/core.mjs';
-import { discoverManifests } from '../tooling/artifactctl/src/discover.mjs';
+import { discoverNativeManifests } from '../tooling/artifactctl/src/discover.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -77,14 +77,7 @@ export async function stageCompiledPublication(options = {}) {
   if (!ids.length) throw new Error('At least one compiled artifact id is required');
   if (!(await exists(stageDir))) throw new Error(`Publication stage does not exist: ${stageDir}`);
 
-  const discoverManifestsImpl = options.discoverManifestsImpl || discoverManifests;
-  const manifests =
-    options.manifests ||
-    (await discoverManifestsImpl({
-      rootDir,
-      adapter: 'app-hub-v11',
-      sourcePath: options.sourcePath,
-    }));
+  const manifests = options.manifests || (await discoverNativeManifests({ rootDir }));
   const manifestsById = new Map(manifests.map((manifest) => [manifest.id, manifest]));
   const selected = ids.map((id) => {
     const manifest = manifestsById.get(id);
@@ -130,6 +123,7 @@ export async function stageCompiledPublication(options = {}) {
   const catalog = generateCatalog(manifests, builds, {
     gitMetadata,
     portfolioVersion: await portfolioVersion(rootDir),
+    publicationStage: true,
   });
   await writeCatalog(catalog, join(stageDir, 'catalog/catalog.json'));
 
@@ -171,7 +165,6 @@ function parseArgs(args) {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--root') options.rootDir = args[++index];
-    else if (arg === '--source') options.sourcePath = args[++index];
     else if (arg === '--stage') options.stageDir = args[++index];
     else if (arg === '--id') options.ids.push(args[++index]);
     else throw new Error(`Unknown argument: ${arg}`);

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "sprite-fan-atlas-studio",
+  "version": "1.0.0",
+  "title": "Sprite Fan Atlas Studio",
+  "description": "Standalone production workbench for sprite slicing, cleanup, review, atlas assembly, geometry, evidence, and Arcade consumer integration.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": ["sprite", "atlas", "arcade", "pixel-art", "production", "tooling"],
+  "source": {
+    "kind": "file",
+    "path": "sprite-fan/atlas-studio.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "file",
+    "entrypoint": "atlas-studio.html",
+    "offline": true
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": ["newWindow", "fullscreen"],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": ["atlas-studio.html"]
+  }
+}
