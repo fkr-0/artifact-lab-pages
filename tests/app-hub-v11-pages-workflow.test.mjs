@@ -11,6 +11,7 @@ assert.match(workflow, /Install dependencies \(revealive\)[\s\S]*pnpm install --
 assert.match(workflow, /stage-compiled-publication\.mjs --stage \.artifacts-pages-stage --id revealive/);
 assert.match(workflow, /upload-pages-artifact@v5[\s\S]*path: \.artifacts-pages-stage/);
 assert.doesNotMatch(workflow, /app-hub-v11|build-artifacts-order|generate-build-stats|\.artifacts\.source\.ci\.json/);
+assert.doesNotMatch(workflow, /check:hyperblast|Run Hyperblast release gate/, 'independently owned provisional projects must not block V13 Pages publication');
 
 const installIndex = workflow.indexOf('Install dependencies (revealive)');
 const materializeIndex = workflow.indexOf('Materialize native V13 publication stage');

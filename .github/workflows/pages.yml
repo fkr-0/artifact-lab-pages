@@ -35,9 +35,6 @@ jobs:
       - name: Enable Corepack package-manager shims
         run: corepack enable
 
-      - name: Run Hyperblast release gate
-        run: npm run check:hyperblast
-
       - name: Install dependencies (revealive)
         run: pnpm install --frozen-lockfile
         working-directory: revealive
