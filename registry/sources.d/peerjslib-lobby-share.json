@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "peerjslib-lobby-share",
+  "version": "0.3.2-sample.1",
+  "title": "Peerjslib Lobby Share",
+  "description": "Capability-link PeerJS lobby sample demonstrating typed group chat and bounded binary file sharing from the standalone peerjslib package.",
+  "kind": "application",
+  "status": "experimental",
+  "required": false,
+  "tags": [
+    "peerjs",
+    "webrtc",
+    "chat",
+    "file-sharing",
+    "sample",
+    "project",
+    "submodule"
+  ],
+  "source": {
+    "kind": "project",
+    "path": "peerjslib",
+    "git": {
+      "mode": "submodule",
+      "repository": "https://github.com/fkr-0/peerjslib.git",
+      "revision": "2350af380a93a6c2a7d27fcdc5a05bfb2d10b78d"
+    }
+  },
+  "build": {
+    "mode": "compile",
+    "cwd": "peerjslib",
+    "command": [
+      "pnpm",
+      "run",
+      "sample:build"
+    ],
+    "output": "examples/lobby-chat-file-share/dist"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "path": "examples/lobby-chat-file-share/dist",
+    "offline": false
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": [
+      "newWindow"
+    ],
+    "sandbox": "none"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html"
+    ]
+  }
+}
