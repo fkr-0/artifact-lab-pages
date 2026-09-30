@@ -2,11 +2,15 @@
   "schemaVersion": "artifacts.fkr.dev/v1",
   "id": "hyperblast-shooter",
   "title": "Hyperblast Shooter",
-  "description": "Published independent submodule pinned to the parent-owned reachable revision; newer locally verified release branches remain outside the parent gitlink until published.",
+  "description": "Published independent Hyperblast Shooter 0.2.0 submodule pinned to the parent-owned reachable revision.",
   "kind": "application",
   "status": "provisional",
   "required": true,
-  "tags": ["game", "project", "submodule"],
+  "tags": [
+    "game",
+    "project",
+    "submodule"
+  ],
   "source": {
     "kind": "project",
     "path": "hyperblast-shooter",
@@ -14,19 +18,34 @@
     "git": {
       "mode": "submodule",
       "repository": "https://github.com/fkr-0/hyperblast-shooter.git",
-      "revision": "c9ea7ffb7d24ef6125521eadf6ffec8e2cb6082a"
+      "revision": "df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204"
     }
   },
-  "build": { "mode": "none" },
+  "build": {
+    "mode": "none"
+  },
   "release": {
     "kind": "directory",
     "entrypoint": "index.html",
     "offline": false,
-    "exclude": [".github/**", ".ws-bridge/**", "tests/**", "test-results/**", "docs/**", "package*.json", "playwright.config.mjs", "bridge.yml"]
+    "exclude": [
+      ".github/**",
+      ".ws-bridge/**",
+      "tests/**",
+      "test-results/**",
+      "docs/**",
+      "package*.json",
+      "playwright.config.mjs",
+      "bridge.yml"
+    ]
   },
   "launch": {
     "default": "inline",
-    "modes": ["inline", "floating", "newWindow"],
+    "modes": [
+      "inline",
+      "floating",
+      "newWindow"
+    ],
     "sandbox": "trusted"
   }
 }

@@ -39,6 +39,9 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: revealive
 
+      - name: Run Hyperblast release gate
+        run: npm run check:hyperblast
+
       - name: Materialize native V13 publication stage
         run: node scripts/build-publication-site.mjs --out .artifacts-pages-stage
 
