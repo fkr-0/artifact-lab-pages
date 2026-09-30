@@ -17,7 +17,7 @@
       <span class="brand-mark" aria-hidden="true">V13</span>
       <span><strong>Artifact Lab</strong><small>collection observatory</small></span>
     </a>
-    <div class="masthead-status" aria-label="Hub safety posture">
+    <div class="masthead-status" role="status" aria-label="Hub safety posture">
       <span class="status-dot" aria-hidden="true"></span>
       <span id="build-header">portfolio loading · peer opt-in</span>
     </div>
@@ -31,9 +31,9 @@
         <p class="lede">A catalog for experiments becoming products: searchable metadata, release health, source provenance, local collections, and a peer boundary that stays shut until a host proves a connection.</p>
       </div>
       <dl class="hero-metrics" aria-label="Catalog summary">
-        <div><dt>Catalog</dt><dd id="metric-total">—</dd><small id="metric-catalog-state">loading</small></div>
-        <div><dt>Evidence</dt><dd id="metric-verified">—</dd><small>receipt-backed releases</small></div>
-        <div><dt>Collected</dt><dd id="metric-collected">0</dd><small>this browser only</small></div>
+        <div><dt>Catalog <small id="metric-catalog-state">loading</small></dt><dd id="metric-total">—</dd></div>
+        <div><dt>Evidence <small>receipt-backed releases</small></dt><dd id="metric-verified">—</dd></div>
+        <div><dt>Collected <small>this browser only</small></dt><dd id="metric-collected">0</dd></div>
       </dl>
     </section>
 
@@ -50,7 +50,7 @@
         <span class="rail-index">03</span>
         <div>
           <h2>PeerJSNet lobby</h2>
-          <p id="peer-summary">Disabled by default. Networking starts only after an explicit connect action.</p>
+          <p id="peer-summary" role="status" aria-live="polite" aria-atomic="true">Disabled by default. Networking starts only after an explicit connect action.</p>
           <div class="peer-controls">
             <label>Lobby <input id="peer-lobby-id" value="artifact-lab-v13" maxlength="80"></label>
             <label>Name <input id="peer-username" value="guest" maxlength="48"></label>
@@ -58,7 +58,7 @@
             <button class="button button-small button-quiet" type="button" data-action="peer-disconnect" disabled>Disconnect</button>
           </div>
           <p id="peer-proof" class="proof-line"></p>
-          <p id="peer-list" class="proof-line">Peers: none</p>
+          <p id="peer-list" class="proof-line" aria-live="polite" aria-atomic="true">Peers: none</p>
         </div>
       </article>
     </section>
@@ -89,7 +89,7 @@
         <button id="clear-filters" class="button button-quiet" type="button">Reset filters</button>
       </form>
 
-      <div id="facet-strip" class="facet-strip" aria-label="Catalog facets"></div>
+      <div id="facet-strip" class="facet-strip" role="group" aria-label="Catalog facets"></div>
       <section id="catalog" class="catalog" aria-label="Artifacts" tabindex="-1"></section>
       <section id="empty-state" class="empty-state" role="status" aria-live="polite" aria-atomic="true" hidden>
         <p class="eyebrow">No signal</p><h3>No artifacts match this view.</h3><p>Change the search or evidence filters. V13Hub does not synthesize fallback catalog entries.</p>

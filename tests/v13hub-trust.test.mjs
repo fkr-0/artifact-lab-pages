@@ -75,6 +75,24 @@ test('catalog loader rejects cross-origin final response URLs before parsing pay
   assert.equal(catalog.requestedUrl, 'https://artifacts.example/deploy/hub/v13/catalog.json');
 });
 
+test('catalog loader rejects same-origin redirects even when a custom fetch ignores redirect:error', async () => {
+  const calls = [];
+  const catalog = await loadCatalog({
+    pageUrl,
+    candidates: ['./redirected.json', './catalog.json'],
+    fetchImpl: async (url) => {
+      calls.push(url);
+      if (url.endsWith('/redirected.json')) {
+        return okResponse('https://artifacts.example/deploy/hub/v13/elsewhere.json', rawCatalog(), { redirected: true });
+      }
+      return okResponse(url, rawCatalog());
+    },
+  });
+
+  assert.equal(calls.length, 2);
+  assert.equal(catalog.sourceUrl, 'https://artifacts.example/deploy/hub/v13/catalog.json');
+});
+
 test('catalog loader rejects a successful response when its final URL cannot be verified', async () => {
   await assert.rejects(
     loadCatalog({

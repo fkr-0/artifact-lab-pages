@@ -124,7 +124,6 @@ document.addEventListener('click', (event) => {
     if (peerLobby) peerLobby.disconnect();
     peerLobby = createPeerJsNetLobby({
       lobbyId: document.querySelector('#peer-lobby-id').value,
-      username: document.querySelector('#peer-username').value,
     });
     peerLobby.addEventListener('health', (peerEvent) => {
       dispatch({ type: 'peer.changed', peer: readPeerSnapshot({ health: () => peerEvent.detail }) });

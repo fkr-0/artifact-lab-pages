@@ -22,10 +22,11 @@ function authoritativeCatalogUrl(value, page) {
 }
 
 function finalCatalogUrl(response, requested, page) {
+  if (response?.redirected === true) {
+    throw new TypeError('catalog redirects are not allowed');
+  }
   if (!response?.url) {
-    throw new TypeError(response?.redirected === true
-      ? 'catalog redirect cannot be verified'
-      : 'catalog response URL cannot be verified');
+    throw new TypeError('catalog response URL cannot be verified');
   }
   let final;
   try { final = new URL(response.url); } catch { throw new TypeError('catalog response URL is malformed'); }

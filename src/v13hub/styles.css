@@ -48,7 +48,7 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
 .hero-metrics div { display: grid; grid-template-columns: 1fr auto; gap: .2rem 1rem; padding: 1.15rem 0; border-bottom: 1px solid var(--line); }
 .hero-metrics dt { color: var(--muted); font: 700 .68rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; letter-spacing: .1em; }
 .hero-metrics dd { grid-row: span 2; margin: 0; color: var(--ink); font-size: 2rem; font-weight: 720; letter-spacing: -.05em; }
-.hero-metrics small { color: var(--dim); font-size: .72rem; }
+.hero-metrics small { display: block; margin-top: .2rem; color: var(--dim); font-size: .72rem; font-weight: 400; line-height: 1.35; letter-spacing: normal; text-transform: none; }
 
 .trust-rail { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
 .trust-rail article { display: grid; grid-template-columns: auto 1fr; gap: 1rem; min-height: 185px; padding: 2rem; border-right: 1px solid var(--line); }
@@ -61,7 +61,8 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
 .rail-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
 .peer-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) auto auto; gap: .45rem; margin-top: .9rem; }
 .peer-controls label { display: grid; gap: .28rem; color: var(--dim); font: 700 .58rem/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; }
-.peer-controls input { min-width: 0; min-height: 40px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); padding: 0 .6rem; }
+.peer-controls input { min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); padding: 0 .6rem; }
+.peer-controls input:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; border-color: var(--mint); }
 
 .arcade-rail { padding: 3.5rem 0; border-bottom: 1px solid var(--line); }
 .compact-heading { margin-bottom: 1.3rem; }

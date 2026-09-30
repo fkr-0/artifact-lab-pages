@@ -29,10 +29,9 @@ function loadPeerJs(url = DEFAULT_PEERJS_URL) {
 }
 
 export class PeerJsNetLobby extends EventTarget {
-  constructor({ lobbyId = 'artifact-lab-v13', username = 'guest', peerFactory = null, peerJsUrl = DEFAULT_PEERJS_URL } = {}) {
+  constructor({ lobbyId = 'artifact-lab-v13', peerFactory = null, peerJsUrl = DEFAULT_PEERJS_URL } = {}) {
     super();
     this.lobbyId = cleanId(lobbyId, 'artifact-lab-v13');
-    this.username = String(username || 'guest').trim().slice(0, 48) || 'guest';
     this.peerFactory = peerFactory;
     this.peerJsUrl = peerJsUrl;
     this.peer = null;
@@ -108,10 +107,9 @@ export class PeerJsNetLobby extends EventTarget {
       candidate.on('open', (id) => {
         this.myId = id;
         this._transition('joining', 'client');
-        const hub = candidate.connect(this.lobbyId, { reliable: true, metadata: { username: this.username } });
+        const hub = candidate.connect(this.lobbyId, { reliable: true });
         hub.on('open', () => {
           this._bindConnection(hub);
-          hub.send({ type: 'v13:hello', username: this.username });
           this._transition('online', 'client');
           resolve(this.health());
         });
@@ -133,17 +131,6 @@ export class PeerJsNetLobby extends EventTarget {
       this._transition('hosting', 'host');
       resolve(this.health());
     });
-  }
-
-  broadcast(data) {
-    let delivered = 0;
-    for (const connection of this.connections.values()) {
-      if (connection.open) {
-        connection.send(data);
-        delivered += 1;
-      }
-    }
-    return delivered;
   }
 
   disconnect() {

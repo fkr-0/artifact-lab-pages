@@ -67,8 +67,13 @@ test('skip, status, error, and collection state semantics are explicit', () => {
   assert.match(html, /<section id="catalog"[^>]*tabindex="-1"/);
   assert.match(html, /id="result-summary"[^>]*role="status"[^>]*aria-live="polite"/);
   assert.match(html, /id="collection-summary"[^>]*role="status"[^>]*aria-live="polite"[^>]*aria-atomic="true"/);
+  assert.match(html, /id="peer-summary"[^>]*role="status"[^>]*aria-live="polite"[^>]*aria-atomic="true"/);
+  assert.match(html, /id="peer-list"[^>]*aria-live="polite"[^>]*aria-atomic="true"/);
   assert.match(html, /id="empty-state"[^>]*role="status"[^>]*aria-live="polite"/);
   assert.match(html, /id="catalog-error"[^>]*role="alert"/);
+  assert.match(html, /class="masthead-status"[^>]*role="status"[^>]*aria-label="Hub safety posture"/);
+  assert.match(html, /id="facet-strip"[^>]*role="group"[^>]*aria-label="Catalog facets"/);
+  assert.doesNotMatch(html, /<dl class="hero-metrics"[\s\S]*?<div>[^<]*<dt>[\s\S]*?<\/dd>\s*<small[\s\S]*?<\/div>[\s\S]*?<\/dl>/);
   assert.match(html, /<dialog id="inspector"[^>]*aria-labelledby="inspector-title"/);
   assert.match(view, /setAttribute\('aria-pressed',/);
   assert.match(view, /\.disabled\s*=\s*!/);
@@ -81,9 +86,11 @@ test('focus, touch-target, reflow, and reduced-motion contracts are durable CSS 
   assert.match(css, /\.button-small\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.icon-button\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px/s);
   assert.match(css, /catalog-tools input\[type="search"\][^}]*min-height:\s*44px/s);
+  assert.match(css, /\.peer-controls input\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.toggle-field\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.button:focus-visible[^}]*outline:\s*2px solid var\(--mint\)/s);
   assert.match(css, /catalog-tools input:focus-visible[^}]*outline:\s*2px solid var\(--mint\)/s);
+  assert.match(css, /\.peer-controls input:focus-visible[^}]*outline:\s*2px solid var\(--mint\)/s);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.catalog-tools\s*\{[^}]*grid-template-columns:\s*1fr/);
   assert.match(css, /@media \(max-width: 420px\)[\s\S]*\.card-facts, \.inspector-facts\s*\{[^}]*grid-template-columns:\s*1fr/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*scroll-behavior:\s*auto/);
