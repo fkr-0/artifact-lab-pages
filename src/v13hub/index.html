@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="V13Hub is Artifact Lab's local-first discovery, provenance, health, and collection surface.">
+  <title>V13Hub · Artifact Observatory</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#catalog">Skip to artifacts</a>
+  <div class="ambient-grid" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <a class="brand" href="./" aria-label="V13Hub home">
+      <span class="brand-mark" aria-hidden="true">V13</span>
+      <span><strong>Artifact Lab</strong><small>collection observatory</small></span>
+    </a>
+    <div class="masthead-status" role="status" aria-label="Hub safety posture">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span id="build-header">portfolio loading · peer opt-in</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">V13Hub / evidence-first artifact catalog</p>
+        <h1 id="hero-title">Find the artifact.<br><em>See the evidence.</em></h1>
+        <p class="lede">A catalog for experiments becoming products: searchable metadata, release health, source provenance, local collections, and a peer boundary that stays shut until a host proves a connection.</p>
+      </div>
+      <dl class="hero-metrics" aria-label="Catalog summary">
+        <div><dt>Catalog <small id="metric-catalog-state">loading</small></dt><dd id="metric-total">—</dd></div>
+        <div><dt>Evidence <small>receipt-backed releases</small></dt><dd id="metric-verified">—</dd></div>
+        <div><dt>Collected <small>this browser only</small></dt><dd id="metric-collected">0</dd></div>
+      </dl>
+    </section>
+
+    <section class="trust-rail" aria-label="Trust and collection boundaries">
+      <article>
+        <span class="rail-index">01</span>
+        <div><h2>Provenance first</h2><p>Source shape, Git basis, revisions, release receipts, and unknowns remain visible instead of being collapsed into a green badge.</p></div>
+      </article>
+      <article id="collection-boundary">
+        <span class="rail-index">02</span>
+        <div><h2>Collection is opt-in</h2><p id="collection-summary" role="status" aria-live="polite" aria-atomic="true">Nothing is stored until you enable a browser-local collection.</p><div id="collection-actions" class="rail-actions"></div></div>
+      </article>
+      <article id="peer-boundary">
+        <span class="rail-index">03</span>
+        <div>
+          <h2>PeerJSNet lobby</h2>
+          <p id="peer-summary" role="status" aria-live="polite" aria-atomic="true">Disabled by default. Networking starts only after an explicit connect action.</p>
+          <div class="peer-controls">
+            <label>Lobby <input id="peer-lobby-id" value="artifact-lab-v13" maxlength="80"></label>
+            <label>Name <input id="peer-username" value="guest" maxlength="48"></label>
+            <button class="button button-small" type="button" data-action="peer-connect">Connect</button>
+            <button class="button button-small button-quiet" type="button" data-action="peer-disconnect" disabled>Disconnect</button>
+          </div>
+          <p id="peer-proof" class="proof-line"></p>
+          <p id="peer-list" class="proof-line" aria-live="polite" aria-atomic="true">Peers: none</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="arcade-rail" aria-labelledby="arcade-heading">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow">Arcade production tooling</p><h2 id="arcade-heading">Sprite atlas workbench</h2></div>
+        <p id="arcade-summary" class="result-summary">Resolving catalog-backed tools…</p>
+      </div>
+      <div id="arcade-tools" class="arcade-tools"></div>
+    </section>
+
+    <section class="workbench" aria-labelledby="catalog-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">Discovery workbench</p><h2 id="catalog-heading">Artifact field</h2></div>
+        <p id="result-summary" class="result-summary" role="status" aria-live="polite">Loading catalog…</p>
+      </div>
+
+      <form class="catalog-tools" id="catalog-tools" role="search" aria-label="Search and filter artifacts">
+        <label class="search-field" for="search">
+          <span>Search</span>
+          <input id="search" name="search" type="search" autocomplete="off" placeholder="title, tag, source, description…">
+        </label>
+        <label for="kind-filter"><span>Product</span><select id="kind-filter" name="kind"><option value="">All products</option></select></label>
+        <label for="availability-filter"><span>Evidence</span><select id="availability-filter" name="availability"><option value="">All evidence</option></select></label>
+        <label for="sort-order"><span>Order</span><select id="sort-order" name="sort"><option value="recent">Recent evidence</option><option value="title">Title A–Z</option></select></label>
+        <label class="toggle-field"><input id="collected-only" type="checkbox"><span>Collected only</span></label>
+        <button id="clear-filters" class="button button-quiet" type="button">Reset filters</button>
+      </form>
+
+      <div id="facet-strip" class="facet-strip" role="group" aria-label="Catalog facets"></div>
+      <section id="catalog" class="catalog" aria-label="Artifacts" tabindex="-1"></section>
+      <section id="empty-state" class="empty-state" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <p class="eyebrow">No signal</p><h3>No artifacts match this view.</h3><p>Change the search or evidence filters. V13Hub does not synthesize fallback catalog entries.</p>
+      </section>
+      <section id="catalog-error" class="empty-state error-state" hidden role="alert">
+        <p class="eyebrow">Catalog closed</p><h3>Authoritative metadata is unavailable.</h3><p id="catalog-error-message"></p>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="inspector" class="inspector" aria-labelledby="inspector-title">
+    <div class="inspector-shell">
+      <header><p class="eyebrow">Artifact preview / metadata only</p><button class="icon-button" type="button" data-action="close-inspector" aria-label="Close preview">×</button></header>
+      <div id="inspector-content"></div>
+    </div>
+  </dialog>
+
+  <footer class="site-footer">
+    <p><strong>V13Hub</strong> is a catalog consumer. Artifact source and publication authority remain in manifests, receipts, and owned repositories.</p>
+    <p><span id="catalog-source">catalog pending</span> · <span id="footer-counts">counts pending</span> · <span id="runtime-state">local runtime</span></p>
+  </footer>
+
+  <template id="artifact-card-template">
+    <article class="artifact-card">
+      <header class="card-topline"><span class="health-chip"></span><span class="changed-at"></span></header>
+      <div class="card-copy"><p class="card-kind"></p><h3></h3><p class="card-description"></p></div>
+      <dl class="card-facts"></dl>
+      <div class="card-tags"></div>
+      <div class="card-actions"><button class="button button-primary" type="button" data-action="inspect">Preview</button><button class="button button-quiet collect-button" type="button" data-action="toggle-collection">Collect</button></div>
+    </article>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
