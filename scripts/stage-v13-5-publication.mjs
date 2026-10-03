@@ -25,6 +25,46 @@ async function gitHead(root) {
   const { stdout } = await execFileAsync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8', maxBuffer: 1024 * 1024 });
   return stdout.trim();
 }
+async function gitSourceTransition(root, pinnedRevision, currentRevision) {
+  try {
+    await execFileAsync('git', ['-C', root, 'merge-base', '--is-ancestor', pinnedRevision, currentRevision], {
+      encoding: 'utf8',
+      maxBuffer: 1024 * 1024,
+    });
+  } catch {
+    return { pinnedIsAncestor: false, changedPaths: [] };
+  }
+  const { stdout } = await execFileAsync(
+    'git',
+    ['-C', root, 'diff', '--name-only', pinnedRevision + '..' + currentRevision],
+    { encoding: 'utf8', maxBuffer: 1024 * 1024 },
+  );
+  return {
+    pinnedIsAncestor: true,
+    changedPaths: stdout.split(/\r?\n/u).map((path) => path.trim()).filter(Boolean),
+  };
+}
+const INTEGRATION_ONLY_PATHS = new Set([
+  '.github/workflows/pages.yml',
+  'docs/v13-5-publication-integration.md',
+  'package.json',
+  'scripts/stage-v13-5-publication.mjs',
+  'tests/v13-5-publication-adapter.test.mjs',
+]);
+export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths }) {
+  if (pinnedRevision === currentRevision) return { mode: 'exact', changedPaths: [] };
+  if (!pinnedIsAncestor) {
+    throw new Error('Canonical Artifact Lab revision mismatch: ' + currentRevision + ' is not a descendant of ' + pinnedRevision);
+  }
+  const disallowed = changedPaths.filter((path) => !INTEGRATION_ONLY_PATHS.has(path));
+  if (disallowed.length) {
+    throw new Error(
+      'Canonical Artifact Lab changed after the V13.5 handoff pin outside integration-only paths: ' +
+      disallowed.join(', '),
+    );
+  }
+  return { mode: 'integration-descendant', changedPaths: [...changedPaths] };
+}
 function safeRelative(path) {
   const value = String(path || '').replace(/^\/+/, '');
   const parts = value.split('/');
@@ -78,8 +118,25 @@ export async function stageQualifiedV13_5({
   const handoff = validateHandoff(JSON.parse(await readFile(handoffPath, 'utf8')));
   const currentSourceRevision = artifactSourceRevision || await gitHead(sourceRoot);
   const currentV13Revision = v13Revision || await gitHead(releaseRoot);
-  if (handoff.canonicalSource?.revision !== currentSourceRevision) {
-    throw new Error('Canonical Artifact Lab revision mismatch: ' + currentSourceRevision + ' != ' + handoff.canonicalSource?.revision);
+  let sourceTransition;
+  if (artifactSourceRevision) {
+    sourceTransition = validateSourceTransition({
+      pinnedRevision: handoff.canonicalSource?.revision,
+      currentRevision: currentSourceRevision,
+      pinnedIsAncestor: false,
+      changedPaths: [],
+    });
+  } else {
+    const transition = await gitSourceTransition(
+      sourceRoot,
+      handoff.canonicalSource?.revision,
+      currentSourceRevision,
+    );
+    sourceTransition = validateSourceTransition({
+      pinnedRevision: handoff.canonicalSource?.revision,
+      currentRevision: currentSourceRevision,
+      ...transition,
+    });
   }
   if (handoff.release?.commit !== currentV13Revision) {
     throw new Error('V13.5 release revision mismatch: ' + currentV13Revision + ' != ' + handoff.release?.commit);
@@ -116,7 +173,12 @@ export async function stageQualifiedV13_5({
   const receipt = {
     schemaVersion: INTEGRATION_SCHEMA,
     generatedAt: new Date().toISOString(),
-    source: { repository: CANONICAL_SOURCE_REPOSITORY, revision: currentSourceRevision },
+    source: {
+      repository: CANONICAL_SOURCE_REPOSITORY,
+      inputRevision: handoff.canonicalSource.revision,
+      currentRevision: currentSourceRevision,
+      transition: sourceTransition,
+    },
     v13_5: {
       revision: currentV13Revision,
       handoffSha256: await sha256(handoffPath),

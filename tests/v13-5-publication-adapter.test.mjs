@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
-import { HANDOFF_SCHEMA, INTEGRATION_SCHEMA, stageQualifiedV13_5 } from '../scripts/stage-v13-5-publication.mjs';
+import { HANDOFF_SCHEMA, INTEGRATION_SCHEMA, stageQualifiedV13_5, validateSourceTransition } from '../scripts/stage-v13-5-publication.mjs';
 
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 
@@ -90,5 +90,32 @@ test('adapter fails closed when Meme Lab payload no longer matches handoff evide
   await assert.rejects(
     stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13, outDir: output, artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) }),
     /hash mismatch for meme-lab\/meme-lab\.html/,
+  );
+});
+
+test('integration-only descendants may consume the pinned handoff', () => {
+  const result = validateSourceTransition({
+    pinnedRevision: 'a'.repeat(40),
+    currentRevision: 'b'.repeat(40),
+    pinnedIsAncestor: true,
+    changedPaths: [
+      'package.json',
+      'scripts/stage-v13-5-publication.mjs',
+      'tests/v13-5-publication-adapter.test.mjs',
+      'docs/v13-5-publication-integration.md',
+    ],
+  });
+  assert.equal(result.mode, 'integration-descendant');
+});
+
+test('artifact-source changes require a fresh V13.5 handoff', () => {
+  assert.throws(
+    () => validateSourceTransition({
+      pinnedRevision: 'a'.repeat(40),
+      currentRevision: 'b'.repeat(40),
+      pinnedIsAncestor: true,
+      changedPaths: ['meme-lab/meme-lab.html'],
+    }),
+    /outside integration-only paths: meme-lab\/meme-lab\.html/,
   );
 });
