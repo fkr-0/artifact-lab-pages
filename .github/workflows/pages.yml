@@ -16,12 +16,13 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ARTIFACTS_V13_5_REVISION: a962e64e73a74e536235cc1a53ea80c77d033312
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Artifact Lab
         uses: actions/checkout@v5
         with:
           submodules: recursive
@@ -67,43 +68,51 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: revealive
 
-      - name: Prepare V11 compatibility source catalog
-        run: |
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const sourcePath = path.resolve('app-hub-v11/artifacts.source.json');
-          const outPath = path.resolve('.artifacts.source.ci.json');
-          const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
-          source.items = (source.items || []).filter((item) => {
-            const includePath = item?.deploy?.includePath;
-            const buildCwd = item?.deploy?.build?.cwd;
-            const href = String(item?.href || '').split('?')[0].split('#')[0];
-            if (buildCwd && !fs.existsSync(path.resolve(buildCwd))) return false;
-            if (includePath && !fs.existsSync(path.resolve(includePath))) return false;
-            if ((href.startsWith('../') || href.startsWith('./')) && !item?.deploy?.includePath) {
-              const local = href.replace(/^\.\.\//, '').replace(/^\.\//, '');
-              const top = local.split('/')[0];
-              if (top && !fs.existsSync(path.resolve(top))) return false;
-            }
-            return true;
-          });
-          fs.writeFileSync(outPath, JSON.stringify(source, null, 2));
-          NODE
-
-      - name: Refresh v11 git artifact ordering
-        run: node app-hub-v11/build-artifacts-order.js --source .artifacts.source.ci.json --out .artifacts.source.ci.json
+      - name: Build (revealive)
+        run: pnpm run build
+        working-directory: revealive
 
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
 
-      - name: Materialize V13 publication stage with V11 compatibility content
-        run: |
-          node scripts/build-publication-site.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage --no-build
-          node scripts/stage-compiled-publication.mjs --stage .artifacts-pages-stage --id revealive
+      - name: Checkout qualified Artifacts V13.5
+        uses: actions/checkout@v5
+        with:
+          repository: fkr-0/artifacts-v13.5
+          ref: ${{ env.ARTIFACTS_V13_5_REVISION }}
+          fetch-depth: 0
+          path: .artifacts-v13.5
 
-      - name: Generate build statistics
-        run: node app-hub-v11/server/generate-build-stats.mjs --source .artifacts.source.ci.json --out .artifacts-pages-stage/app-hub-v11/data/build-stats.json --commit "$GITHUB_SHA" --dirty false
+      - name: Build and qualify V13.5 publication handoff
+        run: npm run publication:handoff
+        working-directory: .artifacts-v13.5
+        env:
+          ARTIFACTS_SOURCE_ROOT: ${{ github.workspace }}
+
+      - name: Materialize verified V13.5 Pages stage
+        run: npm run stage:v13.5 -- --out .artifacts-pages-stage
+        env:
+          ARTIFACTS_V13_5_ROOT: ${{ github.workspace }}/.artifacts-v13.5
+
+      - name: Verify staged publication receipt
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const receipt = JSON.parse(fs.readFileSync('.artifacts-pages-stage/V13_5_PAGES_INTEGRATION.json', 'utf8'));
+          if (receipt?.v13_5?.revision !== process.env.ARTIFACTS_V13_5_REVISION) {
+            throw new Error('V13.5 revision mismatch in staged publication receipt');
+          }
+          if (receipt?.v13_5?.stagedV12Local !== 44 || receipt?.v13_5?.missingV12Local !== 0) {
+            throw new Error('V13.5 V12 parity gate failed');
+          }
+          if (receipt?.v13_5?.catalogItems !== 56) {
+            throw new Error('V13.5 catalog-size gate failed');
+          }
+          if (receipt?.deployment?.performed !== false) {
+            throw new Error('Stage receipt must not claim deployment before deploy-pages');
+          }
+          console.log('V13.5 Pages receipt verified:', receipt.v13_5);
+          NODE
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
