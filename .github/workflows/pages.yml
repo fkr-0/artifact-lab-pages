@@ -16,7 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: f881f4d78da9efb33c478dc3489aaf3fec214c10
+  ARTIFACTS_V13_5_REVISION: 625009f513ca74a01b6e3d5d1f49801450c85783
 
 jobs:
   build:
@@ -89,15 +89,6 @@ jobs:
           }
           console.log('V13.5 Pages receipt verified:', receipt.v13_5);
           NODE
-
-      - name: Materialize native V13 publication stage
-        run: node scripts/build-publication-site.mjs --out .artifacts-pages-stage
-
-      - name: Materialize V13 publication stage with V11 compatibility content
-        run: echo "V11 compatibility content integrated via native manifests"
-
-      - name: Stage explicitly compiled Revealive release
-        run: node scripts/stage-compiled-publication.mjs --stage .artifacts-pages-stage --id revealive
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

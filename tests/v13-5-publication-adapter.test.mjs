@@ -99,8 +99,13 @@ test('integration-only descendants may consume the pinned handoff', () => {
     currentRevision: 'b'.repeat(40),
     pinnedIsAncestor: true,
     changedPaths: [
+      '.github/workflows/pages.yml',
+      '.gitignore',
       'package.json',
+      'registry/generated/catalog.json',
       'scripts/stage-v13-5-publication.mjs',
+      'tests/app-hub-v11-pages-workflow.test.mjs',
+      'tests/hyperblast-release-smoke.mjs',
       'tests/v13-5-publication-adapter.test.mjs',
       'docs/v13-5-publication-integration.md',
     ],

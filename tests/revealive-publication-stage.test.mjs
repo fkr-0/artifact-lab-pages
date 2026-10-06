@@ -109,11 +109,9 @@ test('selective publication rejects a checkout that does not match its immutable
   );
 });
 
-test('Pages explicitly prepares and compiles pinned Revealive', async () => {
+test('Pages builds Revealive for V13.5 consumption', async () => {
   const pages = await readFile(join(rootDir, '.github/workflows/pages.yml'), 'utf8');
   assert.match(pages, /Install dependencies \(revealive\)[\s\S]*working-directory: revealive/);
-  assert.match(
-    pages,
-    /stage-compiled-publication\.mjs --stage \.artifacts-pages-stage --id revealive/,
-  );
+  assert.match(pages, /Build \(revealive\)[\s\S]*pnpm run build[\s\S]*working-directory: revealive/);
+  assert.doesNotMatch(pages, /stage-compiled-publication\.mjs/, 'V13.5 handoff owns Revealive staging; no post-verification re-staging');
 });

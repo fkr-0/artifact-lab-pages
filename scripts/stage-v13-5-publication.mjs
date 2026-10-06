@@ -46,9 +46,15 @@ async function gitSourceTransition(root, pinnedRevision, currentRevision) {
 }
 const INTEGRATION_ONLY_PATHS = new Set([
   '.github/workflows/pages.yml',
+  '.gitignore',
   'docs/v13-5-publication-integration.md',
   'package.json',
+  'registry/generated/catalog.json',
   'scripts/stage-v13-5-publication.mjs',
+  'tests/badger-sprawl-runner-pages-build.test.mjs',
+  'tests/app-hub-v11-pages-workflow.test.mjs',
+  'tests/hyperblast-release-smoke.mjs',
+  'tests/revealive-publication-stage.test.mjs',
   'tests/v13-5-publication-adapter.test.mjs',
 ]);
 export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths }) {
