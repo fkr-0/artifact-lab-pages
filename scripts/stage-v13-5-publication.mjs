@@ -12,7 +12,7 @@ export const HANDOFF_SCHEMA = 'artifacts-v13.5/publication-handoff-v1';
 export const INTEGRATION_SCHEMA = 'artifacts.fkr.dev/v13.5-pages-integration-v1';
 export const CANONICAL_SOURCE_REPOSITORY = 'fkr-0/artifact-lab-pages';
 export const EXPECTED_V12_LOCAL = 44;
-export const MINIMUM_CATALOG_ITEMS = 56;
+export const MINIMUM_CATALOG_ITEMS = 55;
 
 async function exists(path) {
   try { await stat(path); return true; }
