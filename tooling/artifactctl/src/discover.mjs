@@ -11,6 +11,7 @@ const SKIP_DIRS = new Set([
   'node_modules',
   'dist',
   'build',
+  'apps',
   'coverage',
   'generated',
   '.cache',

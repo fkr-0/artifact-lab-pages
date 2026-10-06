@@ -15,7 +15,7 @@ const [rootIndex, html, app, css, manifest, peerBoundary, collection, packageJso
 ]);
 
 test('V13Hub is a first-class registered product and the root source-tree target', () => {
-  assert.match(rootIndex, /src\/v13hub\/index\.html/);
+  assert.match(rootIndex, /apps\/app-hub-v13\/index\.html/);
   assert.equal(manifest.id, 'app-hub-v13');
   assert.equal(manifest.version, '2.1.0');
   assert.equal(manifest.source.path, 'src/v13hub');

@@ -1,0 +1,7 @@
+{
+  "id": "app-hub-v13",
+  "version": "1.0.0",
+  "status": "active",
+  "title": "V13Hub Artifact Observatory",
+  "description": "Local-first discovery, provenance, artifact-health, preview, permissioned collection, and PeerJSNet lobby surface for Artifact Lab catalogs."
+}
