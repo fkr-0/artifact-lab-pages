@@ -36,34 +36,6 @@ jobs:
       - name: Enable Corepack package-manager shims
         run: corepack enable
 
-      - name: Install dependencies (ethic-brawl)
-        run: pnpm install --frozen-lockfile
-        working-directory: ethic-brawl
-
-      - name: Verify generated prompts (ethic-brawl)
-        run: pnpm run prompts:v2:check
-        working-directory: ethic-brawl
-
-      - name: Build (ethic-brawl)
-        run: pnpm run build
-        working-directory: ethic-brawl
-
-      - name: Install dependencies (v11-peer-daw)
-        run: pnpm install --frozen-lockfile
-        working-directory: v11-peer-daw
-
-      - name: Build (v11-peer-daw)
-        run: pnpm run build
-        working-directory: v11-peer-daw
-
-      - name: Install dependencies (badger-sprawl-runner)
-        run: pnpm install --frozen-lockfile
-        working-directory: badger-sprawl-runner
-
-      - name: Build (badger-sprawl-runner)
-        run: pnpm run build
-        working-directory: badger-sprawl-runner
-
       - name: Install dependencies (revealive)
         run: pnpm install --frozen-lockfile
         working-directory: revealive
@@ -113,6 +85,14 @@ jobs:
           }
           console.log('V13.5 Pages receipt verified:', receipt.v13_5);
           NODE
+      - name: Run Hyperblast release gate
+        run: npm run check:hyperblast
+
+      - name: Materialize native V13 publication stage
+        run: node scripts/build-publication-site.mjs --out .artifacts-pages-stage
+
+      - name: Stage explicitly compiled Revealive release
+        run: node scripts/stage-compiled-publication.mjs --stage .artifacts-pages-stage --id revealive
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

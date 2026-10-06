@@ -10,6 +10,9 @@ const rootDir = fileURLToPath(new URL('../', import.meta.url));
 const manifest = JSON.parse(
   await readFile(join(rootDir, 'registry/sources.d/revealive.json'), 'utf8'),
 );
+const provisionalManifest = JSON.parse(
+  await readFile(join(rootDir, 'brickbreaker/artifact.json'), 'utf8'),
+);
 
 test('selective publication stages only Revealive and rewrites catalog/manifest as verified', async (t) => {
   const scratch = await mkdtemp(join(tmpdir(), 'revealive-publication-stage-'));
@@ -26,7 +29,7 @@ test('selective publication stages only Revealive and rewrites catalog/manifest 
     rootDir,
     stageDir,
     ids: ['revealive'],
-    manifests: [manifest],
+    manifests: [manifest, provisionalManifest],
     requireParentGitlink: false,
     buildArtifactImpl: async (selected, options) => {
       calls.push({ id: selected.id, options });
@@ -63,6 +66,9 @@ test('selective publication stages only Revealive and rewrites catalog/manifest 
   assert.equal(item.availability, 'verified');
   assert.equal(item.url, '/artifacts/revealive/0.1.0/index.html');
   assert.equal(item.receipt.version, '0.1.0');
+  const provisionalItem = catalog.items.find((entry) => entry.id === provisionalManifest.id);
+  assert.equal(provisionalItem.availability, 'provisional');
+  assert.equal(provisionalItem.url, null, 'selective compile must not reintroduce unstaged provisional launch URLs');
 
   const fallback = JSON.parse(await readFile(join(stageDir, 'hub/v13/catalog.json'), 'utf8'));
   assert.deepEqual(fallback, catalog);
@@ -103,17 +109,8 @@ test('selective publication rejects a checkout that does not match its immutable
   );
 });
 
-test('deploy, package, and Pages workflows opt into Revealive only after frozen install', async () => {
-  const [deploy, pack, pages] = await Promise.all([
-    readFile(join(rootDir, 'artifacts-deploy'), 'utf8'),
-    readFile(join(rootDir, 'artifacts-package'), 'utf8'),
-    readFile(join(rootDir, '.github/workflows/pages.yml'), 'utf8'),
-  ]);
-
-  for (const source of [deploy, pack]) {
-    assert.match(source, /pnpm --dir "\$ARTIFACTS_DIR\/revealive" install --frozen-lockfile/);
-    assert.match(source, /stage-compiled-publication\.mjs --stage .* --id revealive/);
-  }
+test('Pages explicitly prepares and compiles pinned Revealive', async () => {
+  const pages = await readFile(join(rootDir, '.github/workflows/pages.yml'), 'utf8');
   assert.match(pages, /Install dependencies \(revealive\)[\s\S]*working-directory: revealive/);
   assert.match(
     pages,

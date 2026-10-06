@@ -123,6 +123,7 @@ export async function stageCompiledPublication(options = {}) {
   const catalog = generateCatalog(manifests, builds, {
     gitMetadata,
     portfolioVersion: await portfolioVersion(rootDir),
+    publicationStage: true,
   });
   await writeCatalog(catalog, join(stageDir, 'catalog/catalog.json'));
 

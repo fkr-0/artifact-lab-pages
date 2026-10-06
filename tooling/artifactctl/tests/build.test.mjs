@@ -94,3 +94,32 @@ test('release-escaping references fail standalone verification', async (t) => {
     release: { kind: 'file', entrypoint: 'index.html' },
   }, { rootDir, outDir: join(rootDir, 'out/artifacts') }), /release-escaping reference/);
 });
+
+test('relocatable releases reject root-absolute asset references', async (t) => {
+  const rootDir = await fixture();
+  t.after(() => rm(rootDir, { recursive: true, force: true }));
+  await writeFile(
+    join(rootDir, 'absolute.html'),
+    '<!doctype html><html lang="en"><head><title>Absolute</title></head><body><script src="/assets/app.js"></script></body></html>',
+  );
+
+  await assert.rejects(
+    () =>
+      buildArtifact(
+        {
+          schemaVersion: 'artifacts.fkr.dev/v1',
+          id: 'absolute',
+          title: 'Absolute',
+          kind: 'application',
+          status: 'active',
+          required: true,
+          source: { kind: 'file', path: 'absolute.html', git: { mode: 'root' } },
+          build: { mode: 'none' },
+          release: { kind: 'file', entrypoint: 'index.html' },
+          verify: { relocatable: true },
+        },
+        { rootDir, outDir: join(rootDir, 'out/artifacts') },
+      ),
+    /root-absolute reference incompatible with relocatable release/,
+  );
+});

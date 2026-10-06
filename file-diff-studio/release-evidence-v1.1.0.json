@@ -1,0 +1,98 @@
+{
+  "schema": "artifact-release-evidence/v1",
+  "artifact": "file-diff-studio",
+  "version": "1.1.0",
+  "generatedAt": "2026-08-02T14:40:00.000Z",
+  "baseCommit": "e0a39947deddf54cc46e37ebb644c7baf54a8ef8",
+  "releaseTag": "file-diff-studio-v1.1.0",
+  "review": {
+    "input": "User-supplied 1728x863 screenshot of a 701/772-line PowerShell comparison",
+    "findings": [
+      "Source editors, change occurrences, result, and journal had similar visual permanence despite the change list being the primary review task.",
+      "The two source editors consumed substantial vertical space after their documents had already been loaded.",
+      "The result column permanently reduced available diff width even when the user was only reviewing occurrences.",
+      "Long changed lines were forced into narrow fixed columns with no stacked or wrapped presentation.",
+      "Panel boundaries looked structural but were not interactive and provided no resizing affordance.",
+      "A single fixed layout did not support the distinct compare, review, and merge phases of the workflow."
+    ],
+    "resolution": [
+      "Added Balanced, Diff focus, and Merge presets plus independent Sources, Result, and Journal visibility controls.",
+      "Added pointer-draggable and keyboard-operable source-height, diff/result, and Original/Changed splitters.",
+      "Added stacked and side-by-side diff presentation and optional long-line wrapping.",
+      "Made Diff focus a full-width, viewport-oriented occurrence workspace with sources, result, and journal collapsed.",
+      "Persisted layout preferences separately from the replayable document operation journal.",
+      "Added keyboard shortcuts, visible pressed states, ARIA separator semantics, double-click resets, and responsive fallbacks."
+    ]
+  },
+  "files": {
+    "file-diff-studio/index.html": "e5f360f2c00bbde20ee006c1f429c0fca8d40b0cfb34392b489efc0b64759e04",
+    "file-diff-studio/README.md": "519a49982fe117a328645a0c8d389d540c3b081ba616a438b19a49054cb0bc1b",
+    "tests/file-diff-studio.test.mjs": "17cc1c6a6c1c1edf5c99ab76997603a5dd09b77b6719d08d7c80c077fc823cca",
+    "tests/e2e/file-diff-studio.spec.mjs": "53235bc28ecb60fbd6bc354d0db692a93dd1343523d5a277169b5ef50546aab6",
+    "app-hub-v11/artifacts.source.json": "41e4a8ef4e7891d896838146fcb8fda6157193e7b6af68b0a0913bb288504887",
+    "app-hub-v11/data/artifact-collection.json": "c8e5617985ce027f1b61695ed84102c3d2acbd297a67b9dbc383714d147df108"
+  },
+  "checks": [
+    {
+      "name": "embedded-script-syntax",
+      "command": "node --check /tmp/file-diff-studio-v1.1.js",
+      "status": "passed"
+    },
+    {
+      "name": "focused-node-contracts",
+      "command": "node --test tests/file-diff-studio.test.mjs tests/app-hub-v11-catalog.test.mjs tests/app-hub-v11-deploy-inclusion.test.mjs tests/artifact-portfolio-audit.test.mjs",
+      "status": "passed",
+      "tests": 7
+    },
+    {
+      "name": "chromium-e2e",
+      "command": "ARTIFACTS_E2E_PORT=4196 npx playwright test tests/e2e/file-diff-studio.spec.mjs --project=chromium",
+      "status": "passed",
+      "tests": 4,
+      "coverage": [
+        "DWIM paste and merge choices",
+        "diff reconstruction and replayable journal round-trip",
+        "layout presets, panel collapse, keyboard resize, pointer drag, persistence, stacked presentation, and wrapping",
+        "native editor paste and file upload"
+      ]
+    },
+    {
+      "name": "portfolio-audit",
+      "command": "node scripts/audit-artifact-portfolio.mjs",
+      "status": "passed",
+      "catalogEntries": 50,
+      "errors": 0,
+      "knownWarnings": 4,
+      "warningScope": "Independent game project build outputs are absent in the clean release worktree."
+    },
+    {
+      "name": "focused-deployment-materialization",
+      "command": "node app-hub-v11/server/artifact-build.mjs --source /tmp/file-diff-source-v1.1.json --out /tmp/file-diff-v1.1-deploy-stage --no-build",
+      "status": "passed",
+      "byteIdenticalArtifact": true,
+      "artifactSha256": "e5f360f2c00bbde20ee006c1f429c0fca8d40b0cfb34392b489efc0b64759e04"
+    },
+    {
+      "name": "visual-geometry-review",
+      "status": "passed",
+      "viewport": "1728x960",
+      "preset": "Diff focus",
+      "diffPanelWidthPx": 1712,
+      "hunkListWidthPx": 1710,
+      "sourceVisible": false,
+      "resultVisible": false,
+      "journalVisible": false,
+      "diffPresentation": "stacked"
+    },
+    {
+      "name": "whitespace-validation",
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "deployment": {
+    "authorized": true,
+    "target": "origin/main and GitHub Pages",
+    "statusAtEvidenceGeneration": "pending"
+  }
+}

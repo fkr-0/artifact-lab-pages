@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#162a3a">
+  <meta name="description" content="Clientseitiges Lernquiz zum öffentlichen Dienstrecht in 19 Stages, orientiert an der Gliederung von Wichmann/Langer.">
+  <title>Dienstrecht: Aktenlauf</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Zum Quiz springen</a>
+
+  <header class="masthead">
+    <div class="masthead-copy">
+      <p class="eyebrow">Öffentliches Dienstrecht · Lernquiz</p>
+      <h1>Dienstrecht: <span>Aktenlauf</span></h1>
+      <p class="lede">19 Stages. Drei Fehler, und die Akte geht zurück. Kein Server, kein Konto – dein Fortschritt bleibt im Browser.</p>
+    </div>
+    <div class="header-actions" aria-label="Quiz-Einstellungen">
+      <button id="audio-toggle" class="icon-button" type="button" aria-pressed="true" title="Töne an- oder ausschalten">
+        <span aria-hidden="true">🔊</span><span class="sr-only">Töne an</span>
+      </button>
+      <button id="reset-progress" class="secondary-button danger" type="button">Fortschritt löschen</button>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="overview-grid" aria-labelledby="overview-title">
+      <div>
+        <p class="section-kicker">Aktenstand</p>
+        <h2 id="overview-title">Dein Lernlauf</h2>
+        <p id="structure-note" class="muted"></p>
+      </div>
+      <dl class="stats" aria-label="Gesamtstatistik">
+        <div><dt>Stages</dt><dd id="stat-stages">0/19</dd></div>
+        <div><dt>Trefferquote</dt><dd id="stat-accuracy">—</dd></div>
+        <div><dt>Antworten</dt><dd id="stat-answers">0</dd></div>
+        <div><dt>Beste Serie</dt><dd id="stat-streak">0</dd></div>
+      </dl>
+    </section>
+
+    <div id="storage-warning" class="notice warning" role="status" hidden>
+      <strong>Lokalspeicher blockiert.</strong> Das Quiz funktioniert weiter, aber Fortschritt kann in dieser Sitzung verloren gehen.
+    </div>
+
+    <section id="stage-map" class="stage-map" aria-labelledby="stages-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Inhaltsfolge</p>
+          <h2 id="stages-title">19 Kapitel · 19 Stages</h2>
+        </div>
+        <p class="legend"><span aria-hidden="true">✓</span> bestanden · <span aria-hidden="true">●</span> offen · <span aria-hidden="true">🔒</span> gesperrt</p>
+      </div>
+      <div id="stage-list" class="stage-list"></div>
+    </section>
+
+    <section id="quiz-panel" class="quiz-panel" aria-labelledby="quiz-stage-title" hidden>
+      <div class="quiz-toolbar">
+        <button id="back-to-map" class="secondary-button" type="button">← Stage-Übersicht</button>
+        <div class="hearts" aria-label="Fehlerversuche">
+          <span id="mistake-1" aria-hidden="true">●</span>
+          <span id="mistake-2" aria-hidden="true">●</span>
+          <span id="mistake-3" aria-hidden="true">●</span>
+          <span class="sr-only" id="mistake-label">0 von 3 Fehlern</span>
+        </div>
+      </div>
+
+      <div class="stage-meta">
+        <p id="quiz-part" class="eyebrow"></p>
+        <h2 id="quiz-stage-title"></h2>
+        <p id="quiz-stage-summary" class="muted"></p>
+      </div>
+
+      <div class="question-progress-wrap" aria-label="Fragenfortschritt">
+        <div class="question-progress-track"><span id="question-progress"></span></div>
+        <p id="question-counter">Frage 1 von 4</p>
+      </div>
+
+      <article id="question-card" class="question-card">
+        <div class="difficulty-row">
+          <span id="difficulty-label" class="difficulty">Stufe 1 · Einstieg</span>
+          <span id="score-label">0 richtig</span>
+        </div>
+        <h3 id="question-text"></h3>
+        <div id="answer-list" class="answer-list" role="group" aria-labelledby="question-text"></div>
+
+        <div id="feedback" class="feedback" aria-live="polite" hidden>
+          <div id="feedback-title" class="feedback-title"></div>
+          <p id="feedback-explanation"></p>
+          <div id="feedback-sources" class="source-links"></div>
+        </div>
+
+        <div class="question-actions">
+          <button id="next-question" class="primary-button" type="button" hidden>Nächste Frage →</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="result-panel" class="result-panel" aria-live="polite" hidden>
+      <div id="result-stamp" class="result-stamp" aria-hidden="true"></div>
+      <p id="result-kicker" class="eyebrow"></p>
+      <h2 id="result-title"></h2>
+      <p id="result-copy"></p>
+      <dl class="result-stats">
+        <div><dt>Richtig</dt><dd id="result-correct"></dd></div>
+        <div><dt>Fehler</dt><dd id="result-wrong"></dd></div>
+        <div><dt>Versuche</dt><dd id="result-attempts"></dd></div>
+      </dl>
+      <div class="result-actions">
+        <button id="result-primary" class="primary-button" type="button"></button>
+        <button id="result-map" class="secondary-button" type="button">Zur Übersicht</button>
+      </div>
+    </section>
+
+    <section class="about" aria-labelledby="about-title">
+      <p class="section-kicker">Quellen & Einordnung</p>
+      <h2 id="about-title">Was dieses Quiz abbildet</h2>
+      <p id="legal-as-of"></p>
+      <p>Die Kapitelreihenfolge orientiert sich ausschließlich an der öffentlich einsehbaren Inhaltsübersicht der 8. Auflage von Wichmann/Langer, <em>Öffentliches Dienstrecht</em>. Die Fragen und Erläuterungen sind eigenständig formuliert; sie ersetzen keine Rechtsberatung und kein aktuelles Lehrbuch.</p>
+      <div id="core-sources" class="core-sources"></div>
+    </section>
+  </main>
+
+  <div id="effect-layer" class="effect-layer" aria-hidden="true"></div>
+  <div id="live-status" class="sr-only" aria-live="assertive"></div>
+
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

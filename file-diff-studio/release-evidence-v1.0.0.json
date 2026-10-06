@@ -1,0 +1,59 @@
+{
+  "schema": "artifact-release-evidence/v1",
+  "artifact": "file-diff-studio",
+  "version": "1.0.0",
+  "generatedAt": "2026-08-02T14:05:00.000Z",
+  "baseCommit": "5484d83cb223027f85e677fc93859be05b670ec4",
+  "releaseTag": "file-diff-studio-v1.0.0",
+  "files": {
+    "file-diff-studio/index.html": "e30a0d5b48501e7a3830d69bb41e7bc7c4b10e373439afca40faa3d8f25e343b",
+    "file-diff-studio/README.md": "62d4a8f17e3c0d3fb22da34eb541a07bf9009719b9d929f3a69215417696c3a5",
+    "tests/file-diff-studio.test.mjs": "9d607871ba788640fd91849f5c321b6fd9bb53d1272798ab743002906482686b",
+    "tests/e2e/file-diff-studio.spec.mjs": "157e86f2b4ed99baf3c933bca6855886a48897d676c1371fdac8c4707164adc7",
+    "app-hub-v11/artifacts.source.json": "06cb20689c5ad7d0700f4f660c4f81847ac4650b190862014e9839c3d5773d46",
+    "app-hub-v11/data/artifact-collection.json": "a062f2ba48227c201f74ff3bbccabda38ca5515721064991866a7d0fa9f6b275"
+  },
+  "checks": [
+    {
+      "name": "embedded-script-syntax",
+      "command": "node --check /tmp/file-diff-studio.js",
+      "status": "passed"
+    },
+    {
+      "name": "focused-node-contracts",
+      "command": "node --test tests/file-diff-studio.test.mjs tests/app-hub-v11-catalog.test.mjs tests/app-hub-v11-deploy-inclusion.test.mjs tests/artifact-portfolio-audit.test.mjs",
+      "status": "passed",
+      "tests": 7
+    },
+    {
+      "name": "chromium-e2e",
+      "command": "ARTIFACTS_E2E_PORT=4187 npx playwright test tests/e2e/file-diff-studio.spec.mjs --project=chromium",
+      "status": "passed",
+      "tests": 3
+    },
+    {
+      "name": "portfolio-audit",
+      "command": "node scripts/audit-artifact-portfolio.mjs",
+      "status": "passed",
+      "errors": 0,
+      "knownWarnings": 4
+    },
+    {
+      "name": "focused-deployment-materialization",
+      "command": "node app-hub-v11/server/artifact-build.mjs --source /tmp/file-diff-source.json --out /tmp/file-diff-studio-stage --no-build",
+      "status": "passed",
+      "byteIdenticalArtifact": true
+    },
+    {
+      "name": "full-root-test-suite",
+      "command": "npm test",
+      "status": "incomplete",
+      "reason": "An unrelated existing artifacts-http-server occupied-port test timed out and the runner did not terminate; the process was stopped after 60 seconds. All artifact, catalog, portfolio, and E2E checks listed above passed independently."
+    }
+  ],
+  "deploymentNotes": [
+    "The full no-build materializer cannot complete in this clean worktree because independent project outputs such as ethic-brawl/dist are intentionally absent.",
+    "A focused materialization copied File Diff Studio and its compiled catalog byte-for-byte.",
+    "Publishing is authorized by the user and targets origin/main plus the artifact-specific annotated tag."
+  ]
+}

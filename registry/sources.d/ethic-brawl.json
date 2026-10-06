@@ -13,7 +13,7 @@
     "git": {
       "mode": "submodule",
       "repository": "https://github.com/fkr-0/ethic-brawl.git",
-      "revision": "2f0a133d86a355b933f1e0f0be41b73aa219e968"
+      "revision": "2754b6e9d12216613b615300cc9179687fda4e19"
     }
   },
   "build": {

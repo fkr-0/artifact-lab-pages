@@ -19,11 +19,15 @@ const SKIP_DIRS = new Set([
   'playwright-report',
 ]);
 
+function shouldSkipDirectory(name) {
+  return SKIP_DIRS.has(name) || name.startsWith('.artifacts-');
+}
+
 async function findNamedFiles(root, name, results = []) {
   if (!(await pathExists(root))) return results;
   for (const entry of await readdir(root, { withFileTypes: true })) {
     if (entry.name === name && entry.isFile()) results.push(join(root, entry.name));
-    if (entry.isDirectory() && !SKIP_DIRS.has(entry.name)) {
+    if (entry.isDirectory() && !shouldSkipDirectory(entry.name)) {
       await findNamedFiles(join(root, entry.name), name, results);
     }
   }

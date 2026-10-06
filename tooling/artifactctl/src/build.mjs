@@ -106,12 +106,18 @@ export async function verifyStage(manifest, stageRoot) {
     for (const match of content.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/gi)) {
       const value = match[1];
       if (value.startsWith('../')) errors.push(`${file} contains release-escaping reference: ${value}`);
+      if (manifest.verify?.relocatable && /^\/(?!\/)/.test(value)) {
+        errors.push(`${file} contains root-absolute reference incompatible with relocatable release: ${value}`);
+      }
       if (/app-hub-v1[12]\/lib\//.test(value)) errors.push(`${file} imports a hub-owned library: ${value}`);
     }
     if (/\.(?:js|mjs)$/i.test(file)) {
       for (const match of content.matchAll(/(?:\bfrom\s*|\bimport\s*)["']([^"']+)["']/g)) {
         const value = match[1];
         if (value.startsWith('../')) errors.push(`${file} contains release-escaping module import: ${value}`);
+        if (manifest.verify?.relocatable && /^\/(?!\/)/.test(value)) {
+          errors.push(`${file} contains root-absolute module import incompatible with relocatable release: ${value}`);
+        }
         if (/app-hub-v1[12]\/lib\//.test(value)) errors.push(`${file} imports a hub-owned library: ${value}`);
       }
     }

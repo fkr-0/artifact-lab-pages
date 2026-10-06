@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Nakamoto's Disciples">
+  <rect width="512" height="512" rx="88" fill="#101922"/>
+  <path d="M118 360V152h48l93 126V152h55v208h-47l-94-127v127z" fill="#fbf8f0"/>
+  <path d="M330 152h64v208h-64z" fill="#ad5728"/>
+  <path d="M94 392h324" stroke="#0b6267" stroke-width="24" stroke-linecap="round"/>
+</svg>

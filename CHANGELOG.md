@@ -27,6 +27,27 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - V13 carries forward the V12 fixes for the V11 filtered-result headline, oversized/gapped layout, divider issues, stale footer counts, and fragile mobile presentation in a compact single-grid architecture.
 - Catalog launch URLs remain usable both from repository-root GitHub Pages deployments and from assembled `/hub/v13` site releases.
 
+## [1.6.0] - 2026-08-18
+
+### Added
+
+- Deployed Nakamoto's Disciples `0.2.0-alpha.10` as a checksummed,
+  provenance-recorded static PWA with fail-closed lesson progression, semantic
+  schema-3 state validation, accessible repair feedback, read-only completed
+  evidence, and safe whole-satoshi transaction input.
+
+### Changed
+
+- Updated Badger Sprawl Runner to recovered `1.4.0` payload `f4ca009` with
+  repository revision `f19ce1b`, including the expanded Moss
+  carry/stealth/stim sprite atlas, regenerated 71-target sprite corpus, corrected
+  Chrome Arcology and Mirror Palace acceptance flows, and stabilized renderer
+  hardware benchmarking across Chromium and Firefox.
+- Updated the App Hub catalog entry for Nakamoto's Disciples to describe its
+  hardened sequential mastery model and learner-visible repair behavior.
+- Replaced the previous vendored build with the tagged `v0.2.0-alpha.10` source
+  revision while retaining relocatable subpath assets and excluding source maps.
+
 ## [1.5.1] - 2026-07-24
 
 ### Added
@@ -244,7 +265,8 @@ All notable changes to Artifact Lab are documented here. The repository follows
 - Parallel DAW browser tests no longer share an unintended default collaboration room.
 
 [Unreleased]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.7.0...HEAD
-[1.7.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...v1.7.0
+[1.7.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fkr-0/artifact-lab-pages/compare/v1.4.0...v1.4.1

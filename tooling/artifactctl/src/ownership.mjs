@@ -25,6 +25,15 @@ export function validateManifestOwnership(manifest, ownershipReport) {
   if (manifest.source.git.mode === 'submodule' && !exactGitlink) {
     errors.push({ code: 'ownership.missing-gitlink', message: `${manifest.id}: ${normalized} declares submodule ownership but is not a parent gitlink.` });
   }
+  if (manifest.source.git.mode === 'submodule' && exactGitlink) {
+    const repository = manifest.source.git.repository;
+    const revision = manifest.source.git.revision;
+    if (!repository || !revision) {
+      errors.push({ code: 'ownership.submodule-unpinned', message: `${manifest.id}: submodule source requires repository and immutable revision metadata.` });
+    } else if (revision !== exactGitlink.commit) {
+      errors.push({ code: 'ownership.submodule-revision-mismatch', message: `${manifest.id}: manifest revision ${revision} does not match parent gitlink ${exactGitlink.commit} for ${normalized}.` });
+    }
+  }
   if (manifest.source.git.mode === 'external' && exactGitlink) {
     errors.push({ code: 'ownership.external-is-submodule', message: `${manifest.id}: ${normalized} is a submodule, not an external checkout.` });
   }

@@ -13,6 +13,7 @@ export async function assembleSite(manifests, options = {}) {
 
   const buildable = manifests.filter((manifest) =>
     manifest.status !== 'provisional'
+    && manifest.status !== 'archived'
     && !['link', 'text'].includes(manifest.kind)
     && (manifest.build?.mode !== 'compile' || options.allowCompile === true));
   const builds = [];
@@ -40,7 +41,11 @@ export async function assembleSite(manifests, options = {}) {
   try {
     portfolioVersion = JSON.parse(await readFile(join(rootDir, 'package.json'), 'utf8')).version || null;
   } catch {}
-  const catalog = generateCatalog(manifests, builds, { gitMetadata, portfolioVersion });
+  const catalog = generateCatalog(manifests, builds, {
+    gitMetadata,
+    portfolioVersion,
+    publicationStage: true,
+  });
   await writeCatalog(catalog, join(outDir, 'catalog/catalog.json'));
   await writeFile(join(outDir, 'index.html'), `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=hub/v13/index.html"><title>Artifacts Hub V13</title><script>location.replace('hub/v13/index.html')</script></head><body><a href="hub/v13/index.html">Open Artifacts Hub V13</a></body></html>\n`);

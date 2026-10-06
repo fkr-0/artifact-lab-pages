@@ -7,7 +7,7 @@ const [packageText, v13ManifestText, bridge, changelog, evidence, gitignore] = a
   readFile(new URL('../apps/app-hub-v13/artifact.json', import.meta.url), 'utf8'),
   readFile(new URL('../bridge.yml', import.meta.url), 'utf8'),
   readFile(new URL('../CHANGELOG.md', import.meta.url), 'utf8'),
-  readFile(new URL('../docs/release-evidence-v1.7.0.yml', import.meta.url), 'utf8'),
+  readFile(new URL('../docs/release-evidence-v1.7.0-20260916.yml', import.meta.url), 'utf8'),
   readFile(new URL('../.gitignore', import.meta.url), 'utf8'),
 ]);
 const pkg = JSON.parse(packageText);
@@ -39,7 +39,7 @@ test('root release gate stays comprehensive and excludes independent release uni
   assert.match(bridge, /^  release:check:/m);
 });
 
-test('v1.7.0 App Hub V13 release metadata is consistent and remains non-publishing', () => {
+test('v1.7.0 reconciled publication metadata is consistent and authorized for push', () => {
   assert.equal(pkg.version, '1.7.0');
   assert.equal(v13Manifest.version, '1.0.0');
   assert.equal(v13Manifest.status, 'active');
@@ -47,24 +47,26 @@ test('v1.7.0 App Hub V13 release metadata is consistent and remains non-publishi
   assert.match(changelog, /^## \[Unreleased\]/m);
   assert.match(changelog, /^## \[1\.7\.0\] - 2026-08-20$/m);
   assert.match(changelog, /^\[Unreleased\]: .*v1\.7\.0\.\.\.HEAD$/m);
-  assert.match(changelog, /^\[1\.7\.0\]: .*v1\.5\.1\.\.\.v1\.7\.0$/m);
+  assert.match(changelog, /^\[1\.7\.0\]: .*v1\.6\.0\.\.\.v1\.7\.0$/m);
+  assert.match(changelog, /^\[1\.6\.0\]: .*v1\.5\.1\.\.\.v1\.6\.0$/m);
   assert.match(changelog, /App Hub V13/);
   assert.match(evidence, /candidate: 1.7.0/);
   assert.match(evidence, /v13Ready: true/);
-  assert.match(evidence, /releaseReady: false/);
-  assert.match(evidence, /releaseIsolation: preserve-dirty-selective-index/);
+  assert.match(evidence, /releaseReady: true/);
+  assert.match(evidence, /releaseIsolation: isolated-main-reconciliation-worktree/);
   assert.match(evidence, /tagProposed: v1.7.0/);
   assert.match(evidence, /tagCreated: false/);
   assert.match(evidence, /commitState: performed/);
-  assert.match(evidence, /publishState: not_requested/);
-  assert.match(evidence, /pushState: not_requested/);
-  assert.match(evidence, /deployState: not_requested/);
-  assert.match(evidence, /nativeArtifactJsonDiscovery: repository-wide/);
-  assert.match(evidence, /legacyV11BuildScript: build:catalog:v11/);
-  assert.match(evidence, /total: 55/);
-  assert.match(evidence, /dated: 55/);
-  assert.match(evidence, /selectiveIndexIsolation: true/);
-  assert.match(evidence, /unrelatedDirtyWorkPreserved: true/);
+  assert.match(evidence, /publishState: hotfix_authorized_pending/);
+  assert.match(evidence, /pushState: hotfix_authorized_pending/);
+  assert.match(evidence, /deployState: github_pages_hotfix_pending_vps_mirror_blocked_auth/);
+  assert.match(evidence, /total: 58/);
+  assert.match(evidence, /dated: 58/);
+  assert.match(evidence, /rootNodeTests: 145/);
+  assert.match(evidence, /chromiumTests: 63/);
+  assert.match(evidence, /hotfixCommit: fb37e34d25dd6bf32b9959973e71ec3526e75977/);
+  assert.match(evidence, /revealive: 5d09136642085d2d0a795e902771c2d8ab516efe/);
+  assert.match(evidence, /sha256: e60a1f663b002c54b6e88e00f069b40cd89775d61fb7c573c8ebe86a803c01e1/);
 });
 
 test('local dependency, test, bytecode, and agent outputs stay ignored', () => {
