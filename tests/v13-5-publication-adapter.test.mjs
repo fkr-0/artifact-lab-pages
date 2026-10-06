@@ -139,6 +139,7 @@ test('integration-only descendants may consume the pinned handoff', () => {
     changedPaths: [
       '.github/workflows/pages.yml',
       '.gitignore',
+      'apps/app-hub-v13/artifact.json',
       'package.json',
       'registry/generated/catalog.json',
       'scripts/stage-v13-5-publication.mjs',

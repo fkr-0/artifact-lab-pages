@@ -47,6 +47,7 @@ async function gitSourceTransition(root, pinnedRevision, currentRevision) {
 const INTEGRATION_ONLY_PATHS = new Set([
   '.github/workflows/pages.yml',
   '.gitignore',
+  'apps/app-hub-v13/artifact.json',
   'docs/v13-5-publication-integration.md',
   'package.json',
   'registry/generated/catalog.json',
