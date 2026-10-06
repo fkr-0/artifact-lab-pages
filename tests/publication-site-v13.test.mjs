@@ -24,6 +24,9 @@ test('publication stage builds V13Hub from native manifests without resurrecting
   assert.equal(result.manifest.verifiedRequiredPaths, REQUIRED_PUBLICATION_PATHS.length);
   assert.ok(result.catalog.items.some((item) => item.id === 'app-hub-v13' && item.availability === 'verified'));
   assert.ok(result.catalog.items.some((item) => item.id === 'qr-studio'));
+  assert.equal(result.catalog.items.some((item) => item.id === 'bathroom-emergency-guide'), false, 'archived records must not remain in the live catalog');
+  assert.ok(result.builds.some((entry) => entry.manifest.id === 'app-hub-v13'));
+  assert.equal(result.builds.some((entry) => entry.manifest.id === 'bathroom-emergency-guide'), false, 'archived records must not be built into the live site');
   assert.equal(result.catalog.items.some((item) => item.status === 'archived'), false, 'archived records must not remain in the live catalog');
   assert.ok(result.builds.some((entry) => entry.manifest.id === 'app-hub-v13'));
   assert.equal(result.builds.some((entry) => entry.manifest.status === 'archived'), false, 'archived records must not be built into the live site');

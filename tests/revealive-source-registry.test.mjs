@@ -18,7 +18,7 @@ test('Revealive registry entry pins the verified standalone submodule and public
   assert.equal(validation.ok, true);
   assert.equal(manifest.id, 'revealive');
   assert.equal(manifest.version, '0.1.0');
-  assert.equal(manifest.status, 'active');
+  assert.equal(manifest.status, 'experimental');
   assert.deepEqual(manifest.source, {
     kind: 'project',
     path: 'revealive',

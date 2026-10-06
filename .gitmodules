@@ -16,3 +16,7 @@
 [submodule "revealive"]
 	path = revealive
 	url = https://github.com/fkr-0/revealive.git
+
+[submodule "peerjslib"]
+	path = peerjslib
+	url = https://github.com/fkr-0/peerjslib.git

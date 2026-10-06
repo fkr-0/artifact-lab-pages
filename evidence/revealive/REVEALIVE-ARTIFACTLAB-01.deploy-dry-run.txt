@@ -1,0 +1,1081 @@
+=== Artifacts Deploy ===
+  [dry-run: no files will be transferred]
+
+Materializing App Hub V13 publication stage...
+Preparing pinned Revealive dependencies...
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 385ms using pnpm v10.15.1
+Publication site: 16 native catalog entries, 5 staged releases -> /home/user/work/code/artifacts/.artifacts-deploy-stage
+V13Hub required paths verified: 11
+Selective publication: revealive@0.1.0 -> /home/user/work/code/artifacts/.artifacts-deploy-stage
+
+Syncing stage to vps:/home/user/data/artifacts ...
+sending incremental file list
+deleting v11-peer-daw/vendor/peernet/peernet-user-manager.js
+deleting v11-peer-daw/vendor/peernet/peernet-storage-manager.js
+deleting v11-peer-daw/vendor/peernet/peernet-shared-core.js
+deleting v11-peer-daw/vendor/peernet/peernet-session-manager.js
+deleting v11-peer-daw/vendor/peernet/
+deleting v11-peer-daw/vendor/peernet-lib.js
+deleting v11-peer-daw/vendor/
+deleting v11-peer-daw/docs/plans/2026-07-14-workspace-ux-1.3.md
+deleting v11-peer-daw/docs/plans/2026-07-14-v1.4.0-collaboration-confidence.md
+deleting v11-peer-daw/docs/plans/2026-07-14-remote-project-sync.md
+deleting v11-peer-daw/docs/plans/2026-06-09-session-clip-chain-ux-fix.md
+deleting v11-peer-daw/docs/plans/
+deleting v11-peer-daw/docs/USABILITY_PLAN.md
+deleting v11-peer-daw/docs/MODULE_UI_BACKLOG.md
+deleting v11-peer-daw/docs/CONTRACT_MAP.md
+deleting v11-peer-daw/docs/COLLABORATION_PROTOCOL.md
+deleting v11-peer-daw/docs/ARCHITECTURE.md
+deleting v11-peer-daw/docs/
+deleting v11-peer-daw/assets/vendor-peernet.DoZVvIAI.js.map
+deleting v11-peer-daw/assets/vendor-peernet.DoZVvIAI.js
+deleting v11-peer-daw/assets/ui-patch.N4M_lSSZ.js.map
+deleting v11-peer-daw/assets/ui-patch.N4M_lSSZ.js
+deleting v11-peer-daw/assets/index.CeRYFFDs.js.map
+deleting v11-peer-daw/assets/index.CeRYFFDs.js
+deleting v11-peer-daw/assets/index.C6pe6pqq.css
+deleting v11-peer-daw/assets/core-audio.AWJsGCgZ.js.map
+deleting v11-peer-daw/assets/core-audio.AWJsGCgZ.js
+deleting v11-peer-daw/assets/
+deleting v11-peer-daw/index.html
+deleting v11-peer-daw/
+deleting telegram-bot-api-workbench/index.html
+deleting telegram-bot-api-workbench/README.md
+deleting telegram-bot-api-workbench/
+deleting storyboard-studio/index.html
+deleting storyboard-studio/README.md
+deleting storyboard-studio/
+deleting sprite-fan/src/studio.js
+deleting sprite-fan/src/studio.css
+deleting sprite-fan/src/atlas-studio.html
+deleting sprite-fan/src/README.md
+deleting sprite-fan/src/
+deleting sprite-fan/reqs/animation.yml
+deleting sprite-fan/reqs/INSTR.md
+deleting sprite-fan/reqs/
+deleting sprite-fan/lib/sprite-postprocess.mjs
+deleting sprite-fan/lib/
+deleting sprite-fan/todo.md
+deleting sprite-fan/source-split-plan.md
+deleting sprite-fan/island.html
+deleting sprite-fan/dual-bg.html
+deleting sprite-fan/build-atlas-studio.mjs
+deleting sprite-fan/atlas-studio.html
+deleting sprite-fan/architecture.md
+deleting sprite-fan/alpha-rem.html
+deleting sprite-fan/TUTORIAL.md
+deleting sprite-fan/FIX.yml
+deleting sprite-fan/
+deleting spc/templateengine.html
+deleting spc/template_engine.html
+deleting spc/sprite-gif-creator.html
+deleting spc/sprite-gif-creator-v2.html
+deleting spc/sharepic_studio.html
+deleting spc/sharepic-studio-ultimate.html
+deleting spc/procedural_sharepic_studio.html
+deleting spc/aether_node.html
+deleting spc/SHAREPIC_COMPARISON.md
+deleting spc/README.md
+deleting spc/
+deleting solitaire/index.html
+deleting solitaire/
+deleting reveal-peer-plugin/reveal-peerjs.js
+deleting reveal-peer-plugin/index.html
+deleting reveal-peer-plugin/
+deleting peernetjs/peernet-user-manager.js
+deleting peernetjs/peernet-storage-manager.js
+deleting peernetjs/peernet-shared-core.js
+deleting peernetjs/peernet-session-router.js
+deleting peernetjs/peernet-session-manager.js
+deleting peernetjs/peernet-mini-apps.js
+deleting peernetjs/peernet-lib.js
+deleting peernetjs/peernet-file-share.js
+deleting peernetjs/peernet-app-loader.js
+deleting peernetjs/README.md
+deleting peernetjs/
+deleting palette-studio/index.html
+deleting palette-studio/
+deleting overlay-cam/overlay-cam-intuitive-ux-debug.apk
+deleting overlay-cam/index.html
+deleting overlay-cam/
+deleting minesweeper/index.html
+deleting minesweeper/
+deleting meme-lab/meme-template.example.json
+deleting meme-lab/meme-lab.html
+deleting meme-lab/MEME_TEMPLATE_SPEC.md
+deleting meme-lab/
+deleting markdown-viewer/lib/markdown-renderer.mjs
+deleting markdown-viewer/lib/
+deleting markdown-viewer/index.html
+deleting markdown-viewer/
+deleting lib/ui/spaceship-ui.js
+deleting lib/ui/resizable-panels.js
+deleting lib/ui/image-palette.mjs
+deleting lib/ui/floating-panels.js
+deleting lib/ui/README.md
+deleting lib/ui/
+deleting lib/storage/local-storage-manager.js
+deleting lib/storage/README.md
+deleting lib/storage/
+deleting lib/secret-storage/secret-storage.js
+deleting lib/secret-storage/README.md
+deleting lib/secret-storage/
+deleting lib/peernet/peernet-user-manager.js
+deleting lib/peernet/peernet-storage-manager.js
+deleting lib/peernet/peernet-shared-core.js
+deleting lib/peernet/peernet-session-router.js
+deleting lib/peernet/peernet-session-manager.js
+deleting lib/peernet/peernet-mini-apps.js
+deleting lib/peernet/peernet-lib.js
+deleting lib/peernet/peernet-app-loader.js
+deleting lib/peernet/README.md
+deleting lib/peernet/
+deleting lib/artifact-motion/demo.html
+deleting lib/artifact-motion/artifact-motion.js
+deleting lib/artifact-motion/artifact-motion.css
+deleting lib/artifact-motion/README.md
+deleting lib/artifact-motion/
+deleting lib/
+deleting hyperblast-shooter/vendor/pixi.min.mjs
+deleting hyperblast-shooter/vendor/peernet-lib.js
+deleting hyperblast-shooter/vendor/peerjs.min.js
+deleting hyperblast-shooter/vendor/arcade-runtime.mjs
+deleting hyperblast-shooter/vendor/arcade-runtime.meta.json
+deleting hyperblast-shooter/vendor/arcade-runtime.d.mts
+deleting hyperblast-shooter/vendor/arcade-pixi-runtime.mjs
+deleting hyperblast-shooter/vendor/arcade-pixi-runtime.d.mts
+deleting hyperblast-shooter/vendor/arcade-core.mjs
+deleting hyperblast-shooter/vendor/arcade-core.d.mts
+deleting hyperblast-shooter/vendor/PIXIJS-LICENSE.txt
+deleting hyperblast-shooter/vendor/PEERJS-LICENSE.txt
+deleting hyperblast-shooter/vendor/
+deleting hyperblast-shooter/tests/e2e/versus-peerjs.spec.mjs
+deleting hyperblast-shooter/tests/e2e/stage-story.spec.mjs
+deleting hyperblast-shooter/tests/e2e/pixi-renderer.spec.mjs
+deleting hyperblast-shooter/tests/e2e/merchant-shipyard.spec.mjs
+deleting hyperblast-shooter/tests/e2e/fake-peerjs.mjs
+deleting hyperblast-shooter/tests/e2e/README.md
+deleting hyperblast-shooter/tests/e2e/
+deleting hyperblast-shooter/tests/versus.test.mjs
+deleting hyperblast-shooter/tests/story.test.mjs
+deleting hyperblast-shooter/tests/stage-story.test.mjs
+deleting hyperblast-shooter/tests/runtime-architecture.test.mjs
+deleting hyperblast-shooter/tests/progress-persistence.test.mjs
+deleting hyperblast-shooter/tests/
+deleting hyperblast-shooter/test-results/.last-run.json
+deleting hyperblast-shooter/test-results/
+deleting hyperblast-shooter/scripts/vendor-pixi.mjs
+deleting hyperblast-shooter/scripts/build-ship-atlas.mjs
+deleting hyperblast-shooter/scripts/
+deleting hyperblast-shooter/lib/shooter-balance.test.mjs
+deleting hyperblast-shooter/lib/shooter-balance.mjs
+deleting hyperblast-shooter/lib/shipyard-state.test.mjs
+deleting hyperblast-shooter/lib/shipyard-state.mjs
+deleting hyperblast-shooter/lib/ship-catalog.test.mjs
+deleting hyperblast-shooter/lib/ship-catalog.mjs
+deleting hyperblast-shooter/lib/ship-atlas.test.mjs
+deleting hyperblast-shooter/lib/ship-atlas.mjs
+deleting hyperblast-shooter/lib/ship-animation.test.mjs
+deleting hyperblast-shooter/lib/ship-animation.mjs
+deleting hyperblast-shooter/lib/merchants.test.mjs
+deleting hyperblast-shooter/lib/merchants.mjs
+deleting hyperblast-shooter/lib/merchant-transactions.test.mjs
+deleting hyperblast-shooter/lib/merchant-transactions.mjs
+deleting hyperblast-shooter/lib/merchant-inventory.test.mjs
+deleting hyperblast-shooter/lib/merchant-inventory.mjs
+deleting hyperblast-shooter/lib/frame-object-pool.test.mjs
+deleting hyperblast-shooter/lib/frame-object-pool.mjs
+deleting hyperblast-shooter/lib/flight-replay.test.mjs
+deleting hyperblast-shooter/lib/flight-replay.mjs
+deleting hyperblast-shooter/lib/
+deleting hyperblast-shooter/js/worlds.js
+deleting hyperblast-shooter/js/versus.js
+deleting hyperblast-shooter/js/ui.js
+deleting hyperblast-shooter/js/story.js
+deleting hyperblast-shooter/js/stage-story.js
+deleting hyperblast-shooter/js/signals.js
+deleting hyperblast-shooter/js/render-safe.js
+deleting hyperblast-shooter/js/quests.js
+deleting hyperblast-shooter/js/puzzles.js
+deleting hyperblast-shooter/js/progress.js
+deleting hyperblast-shooter/js/pixi-renderer.js
+deleting hyperblast-shooter/js/objectives.js
+deleting hyperblast-shooter/js/multiplayer.js
+deleting hyperblast-shooter/js/milestones.js
+deleting hyperblast-shooter/js/landmarks.js
+deleting hyperblast-shooter/js/intel.js
+deleting hyperblast-shooter/js/input.js
+deleting hyperblast-shooter/js/game.js
+deleting hyperblast-shooter/js/flight.js
+deleting hyperblast-shooter/js/contracts.js
+deleting hyperblast-shooter/js/config.js
+deleting hyperblast-shooter/js/chapters.js
+deleting hyperblast-shooter/js/
+deleting hyperblast-shooter/docs/shooter-story.yml
+deleting hyperblast-shooter/docs/shooter-story-mode.md
+deleting hyperblast-shooter/docs/shooter-stage-narrative-expansion.yml
+deleting hyperblast-shooter/docs/pixi-pixel-art-review.md
+deleting hyperblast-shooter/docs/multiplayer-input-remaining-tasks.md
+deleting hyperblast-shooter/docs/e2e-testing-strategy.md
+deleting hyperblast-shooter/docs/
+deleting hyperblast-shooter/assets/sprites/ships/manifest.json
+deleting hyperblast-shooter/assets/sprites/ships/hyperblast-ships.png
+deleting hyperblast-shooter/assets/sprites/ships/README.md
+deleting hyperblast-shooter/assets/sprites/ships/
+deleting hyperblast-shooter/assets/sprites/
+deleting hyperblast-shooter/assets/
+deleting hyperblast-shooter/.ws-bridge/agent-checkpoints/agent_checkpoint_1784038494628_ffa4b158.json
+deleting hyperblast-shooter/.ws-bridge/agent-checkpoints/
+deleting hyperblast-shooter/.ws-bridge/
+deleting hyperblast-shooter/.github/workflows/ci.yml
+deleting hyperblast-shooter/.github/workflows/
+deleting hyperblast-shooter/.github/
+deleting hyperblast-shooter/todo.yml
+deleting hyperblast-shooter/styles.css
+deleting hyperblast-shooter/release-todo.yml
+deleting hyperblast-shooter/project-review.yml
+deleting hyperblast-shooter/playwright.config.mjs
+deleting hyperblast-shooter/package.json
+deleting hyperblast-shooter/package-lock.json
+deleting hyperblast-shooter/index.html
+deleting hyperblast-shooter/changelog.md
+deleting hyperblast-shooter/bridge.yml
+deleting hyperblast-shooter/README.md
+deleting hyperblast-shooter/CHANGELOG.md
+deleting hyperblast-shooter/.gitignore
+deleting hyperblast-shooter/
+deleting git-recipe-book/assets/index-BrUasdNR.js
+deleting git-recipe-book/assets/index-B7e5bjrJ.css
+deleting git-recipe-book/assets/
+deleting git-recipe-book/index.html
+deleting git-recipe-book/
+deleting font-lab-browser/index.html
+deleting font-lab-browser/
+deleting ethic-brawl/assets/sprites/roster/stirner/source/stirner_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/stirner/source/stirner_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/stirner/source/
+deleting ethic-brawl/assets/sprites/roster/stirner/
+deleting ethic-brawl/assets/sprites/roster/socrates/source/socrates_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/socrates/source/socrates_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/socrates/source/
+deleting ethic-brawl/assets/sprites/roster/socrates/
+deleting ethic-brawl/assets/sprites/roster/schmitt/source/schmitt_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/schmitt/source/schmitt_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/schmitt/source/
+deleting ethic-brawl/assets/sprites/roster/schmitt/
+deleting ethic-brawl/assets/sprites/roster/nietzsche/source/nietzsche_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/nietzsche/source/
+deleting ethic-brawl/assets/sprites/roster/nietzsche/
+deleting ethic-brawl/assets/sprites/roster/marx/source/marx_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/marx/source/marx_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/marx/source/
+deleting ethic-brawl/assets/sprites/roster/marx/
+deleting ethic-brawl/assets/sprites/roster/machiavelli/source/machiavelli_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/machiavelli/source/machiavelli_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/machiavelli/source/
+deleting ethic-brawl/assets/sprites/roster/machiavelli/
+deleting ethic-brawl/assets/sprites/roster/leibniz/source/leibniz_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/leibniz/source/leibniz_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/leibniz/source/
+deleting ethic-brawl/assets/sprites/roster/leibniz/
+deleting ethic-brawl/assets/sprites/roster/kierkegaard/source/kierkegaard_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/kierkegaard/source/kierkegaard_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/kierkegaard/source/
+deleting ethic-brawl/assets/sprites/roster/kierkegaard/
+deleting ethic-brawl/assets/sprites/roster/kant/source/kant_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/kant/source/kant_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/kant/source/
+deleting ethic-brawl/assets/sprites/roster/kant/
+deleting ethic-brawl/assets/sprites/roster/hegel/source/hegel_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/hegel/source/hegel_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/hegel/source/
+deleting ethic-brawl/assets/sprites/roster/hegel/
+deleting ethic-brawl/assets/sprites/roster/foucault/source/foucault_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/foucault/source/foucault_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/foucault/source/
+deleting ethic-brawl/assets/sprites/roster/foucault/
+deleting ethic-brawl/assets/sprites/roster/diogenes/source/diogenes_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/diogenes/source/diogenes_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/diogenes/source/
+deleting ethic-brawl/assets/sprites/roster/diogenes/
+deleting ethic-brawl/assets/sprites/roster/deleuze_guattari/source/deleuze_guattari_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/deleuze_guattari/source/deleuze_guattari_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/deleuze_guattari/source/
+deleting ethic-brawl/assets/sprites/roster/deleuze_guattari/
+deleting ethic-brawl/assets/sprites/roster/camus/source/camus_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/camus/source/camus_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/camus/source/
+deleting ethic-brawl/assets/sprites/roster/camus/
+deleting ethic-brawl/assets/sprites/roster/bakunin/source/bakunin_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/bakunin/source/bakunin_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/bakunin/source/
+deleting ethic-brawl/assets/sprites/roster/bakunin/
+deleting ethic-brawl/assets/sprites/roster/aristotle/source/aristotle_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/aristotle/source/aristotle_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/aristotle/source/
+deleting ethic-brawl/assets/sprites/roster/aristotle/
+deleting ethic-brawl/assets/sprites/roster/aquinas/source/aquinas_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/aquinas/source/aquinas_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/aquinas/source/
+deleting ethic-brawl/assets/sprites/roster/aquinas/
+deleting ethic-brawl/assets/sprites/roster/anselm/source/anselm_extended_4x4.png
+deleting ethic-brawl/assets/sprites/roster/anselm/source/anselm_core_4x4.png
+deleting ethic-brawl/assets/sprites/roster/anselm/source/
+deleting ethic-brawl/assets/sprites/roster/anselm/
+deleting ethic-brawl/assets/sprites/roster/
+deleting ethic-brawl/assets/sprites/machiavelli/source/machiavelli.png
+deleting ethic-brawl/assets/sprites/machiavelli/source/
+deleting ethic-brawl/assets/sprites/machiavelli/frames/
+deleting ethic-brawl/assets/sprites/machiavelli/
+deleting ethic-brawl/assets/sprites/leibniz/source/leibniz.png
+deleting ethic-brawl/assets/sprites/leibniz/source/
+deleting ethic-brawl/assets/sprites/leibniz/frames/
+deleting ethic-brawl/assets/sprites/leibniz/
+deleting ethic-brawl/assets/sprites/items/icons-2.png
+deleting ethic-brawl/assets/sprites/items/icons-1.png
+deleting ethic-brawl/assets/sprites/items/
+deleting ethic-brawl/assets/sprites/enemies/street.png
+deleting ethic-brawl/assets/sprites/enemies/machines-apocalypse.png
+deleting ethic-brawl/assets/sprites/enemies/crowd.png
+deleting ethic-brawl/assets/sprites/enemies/
+deleting ethic-brawl/assets/sprites/diogenes/source/diogenes.png
+deleting ethic-brawl/assets/sprites/diogenes/source/
+deleting ethic-brawl/assets/sprites/diogenes/frames/
+deleting ethic-brawl/assets/sprites/diogenes/
+deleting ethic-brawl/assets/sprites/camus/source/camus.png
+deleting ethic-brawl/assets/sprites/camus/source/
+deleting ethic-brawl/assets/sprites/camus/frames/
+deleting ethic-brawl/assets/sprites/camus/
+deleting ethic-brawl/assets/sprites/frame_labels.template.json
+deleting ethic-brawl/assets/sprites/
+deleting ethic-brawl/assets/webworkerAll-pTKe-4J8.js.map
+deleting ethic-brawl/assets/webworkerAll-pTKe-4J8.js
+deleting ethic-brawl/assets/index-Dffj5Tbn.js.map
+deleting ethic-brawl/assets/index-Dffj5Tbn.js
+deleting ethic-brawl/assets/browserAll-CWzNYjsd.js.map
+deleting ethic-brawl/assets/browserAll-CWzNYjsd.js
+deleting ethic-brawl/assets/
+deleting ethic-brawl/index.html
+deleting ethic-brawl/
+deleting clausewitz-on-war-interactive/index.html
+deleting clausewitz-on-war-interactive/
+deleting chado-zen-tea/index.html
+deleting chado-zen-tea/
+deleting brickbreaker/lib/brickbreaker-sprites.test.mjs
+deleting brickbreaker/lib/brickbreaker-sprites.mjs
+deleting brickbreaker/lib/brickbreaker-peernet.mjs
+deleting brickbreaker/lib/brickbreaker-core.test.mjs
+deleting brickbreaker/lib/brickbreaker-core.mjs
+deleting brickbreaker/lib/brickbreaker-audio.mjs
+deleting brickbreaker/lib/
+deleting brickbreaker/index.html
+deleting brickbreaker/
+deleting badger-sprawl-runner/dist/generated/sprites/comfy_badger_run/badger_running_grid_4x2_1024x512.png
+deleting badger-sprawl-runner/dist/generated/sprites/comfy_badger_run/
+deleting badger-sprawl-runner/dist/generated/sprites/
+deleting badger-sprawl-runner/dist/generated/
+deleting badger-sprawl-runner/dist/data/sprites.json
+deleting badger-sprawl-runner/dist/data/
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/straylight_mirage_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/straylight_mirage_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/orbital_lift_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/orbital_lift_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/mirror_palace_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/lower_sprawl_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/lower_sprawl_backdrop.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/dub_colony_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/dub_colony_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/drainmarket_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/drainmarket_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/chrome_arcology_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/chrome_arcology_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/asteroid_redoubt_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/asteroid_redoubt_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/antenna_barrens_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/antenna_barrens_parallax.png
+deleting badger-sprawl-runner/dist/assets/sprites/worlds/
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/vane_air_bailiff.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/turnstile_mite.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/signal_jammer_bat.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/rent_cop_piker.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/mirror_sentinel.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/masque_duelist.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/manifest_monk.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/knife_drone.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/feedback_guard.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/error_mite.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/debt_wraith.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/customs_lancer.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/contract_servitor.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/command_lock_partisan.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/clinic_repo.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/chrome_bellhop.png
+deleting badger-sprawl-runner/dist/assets/sprites/enemies/
+deleting badger-sprawl-runner/dist/assets/sprites/characters/sister_version.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/rook_null.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/reflection_judge.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/naya_root.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/murr_murrby.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/mara_modulo.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/madame_vitrine.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/little_ix.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/lio.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/king_feedback.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/juno_jar.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/foreman_pell.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/elevator_angel.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/dr_mina_suture.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/dj_calculus.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/director_vane.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/command_lock_faction.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/cobalt_carmine.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/black_ice_fox.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/auntie_subharmonic.png
+deleting badger-sprawl-runner/dist/assets/sprites/characters/
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_reflection_judge_court.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_madame_vitrine_glasscourt.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_knife_drone_nest.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_king_feedback_ampthrone.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_elevator_angel_counterweight.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_director_vane_skylock.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_captain_grin_tollmech.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/boss_black_ice_fox_node.png
+deleting badger-sprawl-runner/dist/assets/sprites/bosses/
+deleting badger-sprawl-runner/dist/assets/sprites/vfx_combat.png
+deleting badger-sprawl-runner/dist/assets/sprites/skill_icons.png
+deleting badger-sprawl-runner/dist/assets/sprites/moss_badger_v2.png
+deleting badger-sprawl-runner/dist/assets/sprites/moss_badger_production.png
+deleting badger-sprawl-runner/dist/assets/sprites/moss_badger.png
+deleting badger-sprawl-runner/dist/assets/sprites/lower_sprawl_tiles.png
+deleting badger-sprawl-runner/dist/assets/sprites/items_extended.png
+deleting badger-sprawl-runner/dist/assets/sprites/items_core.png
+deleting badger-sprawl-runner/dist/assets/sprites/item_icons_extended.png
+deleting badger-sprawl-runner/dist/assets/sprites/item_icons.png
+deleting badger-sprawl-runner/dist/assets/sprites/
+deleting badger-sprawl-runner/dist/assets/vite-runtime-DH9yCMdR.js.map
+deleting badger-sprawl-runner/dist/assets/vite-runtime-DH9yCMdR.js
+deleting badger-sprawl-runner/dist/assets/validate-DvQkhco5.js.map
+deleting badger-sprawl-runner/dist/assets/validate-DvQkhco5.js
+deleting badger-sprawl-runner/dist/assets/sprite-review-CifBJgOE.js.map
+deleting badger-sprawl-runner/dist/assets/sprite-review-CifBJgOE.js
+deleting badger-sprawl-runner/dist/assets/pixi-runtime-D0pa_D1m.js.map
+deleting badger-sprawl-runner/dist/assets/pixi-runtime-D0pa_D1m.js
+deleting badger-sprawl-runner/dist/assets/main-Ckd6WF8S.js.map
+deleting badger-sprawl-runner/dist/assets/main-Ckd6WF8S.js
+deleting badger-sprawl-runner/dist/assets/main-B9S0JC2_.css
+deleting badger-sprawl-runner/dist/assets/arcade-runtime-Do5VWivh.js.map
+deleting badger-sprawl-runner/dist/assets/arcade-runtime-Do5VWivh.js
+deleting badger-sprawl-runner/dist/assets/BadgerPixiBridge-Bz8TWFTm.js.map
+deleting badger-sprawl-runner/dist/assets/BadgerPixiBridge-Bz8TWFTm.js
+deleting badger-sprawl-runner/dist/assets/
+deleting badger-sprawl-runner/dist/sprite-review.html
+deleting badger-sprawl-runner/dist/index.html
+deleting badger-sprawl-runner/dist/
+deleting badger-sprawl-runner/
+deleting app-hub/lib/transport-clock.js
+deleting app-hub/lib/sequencer-core.js
+deleting app-hub/lib/bomberman-core.mjs
+deleting app-hub/lib/
+deleting app-hub/js/
+deleting app-hub/docs/
+deleting app-hub/v9-portal.html
+deleting app-hub/v8-portal.html
+deleting app-hub/v7.html
+deleting app-hub/v6.html
+deleting app-hub/v5.html
+deleting app-hub/v4.html
+deleting app-hub/v3.html
+deleting app-hub/v2.html
+deleting app-hub/v10-portal.html
+deleting app-hub/v10-portal-enhanced.html
+deleting app-hub/v1.html
+deleting app-hub/shooter.html
+deleting app-hub/index.html
+deleting app-hub/index-redirect.html
+deleting app-hub/index-fieldrecorder-backup.html
+deleting app-hub/font_lab_browser.html
+deleting app-hub/collab-editor.html
+deleting app-hub/collab-editor-lite.html
+deleting app-hub/bomberman.html
+deleting app-hub/V10_NOTES.md
+deleting app-hub/
+deleting app-hub-v11/server/legacy-utilities-catalog.test.mjs
+deleting app-hub-v11/server/generate-build-stats.mjs
+deleting app-hub-v11/server/artifact-catalog.mjs
+deleting app-hub-v11/server/artifact-build.mjs
+deleting app-hub-v11/server/
+deleting app-hub-v11/lib/v9-shell.css
+deleting app-hub-v11/lib/themes.js
+deleting app-hub-v11/lib/storage.js
+deleting app-hub-v11/lib/sound.js
+deleting app-hub-v11/lib/qr.js
+deleting app-hub-v11/lib/profile.js
+deleting app-hub-v11/lib/network.js
+deleting app-hub-v11/lib/menu.js
+deleting app-hub-v11/lib/markdown-renderer.mjs
+deleting app-hub-v11/lib/legacy-tools.mjs
+deleting app-hub-v11/lib/launcher.js
+deleting app-hub-v11/lib/event-log.js
+deleting app-hub-v11/lib/artifact-observer-bridge.js
+deleting app-hub-v11/lib/
+deleting app-hub-v11/docs/ROADMAP.md
+deleting app-hub-v11/docs/
+deleting app-hub-v11/data/build-stats.json
+deleting app-hub-v11/data/artifact-collection.json
+deleting app-hub-v11/data/
+deleting app-hub-v11/pnpm-lock.yaml
+deleting app-hub-v11/package.json
+deleting app-hub-v11/markdown-viewer.html
+deleting app-hub-v11/legacy-tools.html
+deleting app-hub-v11/index.html
+deleting app-hub-v11/build-artifacts-order.js
+deleting app-hub-v11/bdg.gif
+deleting app-hub-v11/artifacts.source.json
+deleting app-hub-v11/V11_LIB_ARCHITECTURE.md
+deleting app-hub-v11/README.md
+deleting app-hub-v11/
+deleting PeerModGroove/vendor/peernet/peernet-user-manager.js
+deleting PeerModGroove/vendor/peernet/peernet-storage-manager.js
+deleting PeerModGroove/vendor/peernet/peernet-shared-core.js
+deleting PeerModGroove/vendor/peernet/peernet-session-manager.js
+deleting PeerModGroove/vendor/peernet/
+deleting PeerModGroove/vendor/v9-portal.html
+deleting PeerModGroove/vendor/peernet-orca-index.html
+deleting PeerModGroove/vendor/peernet-lib.js
+deleting PeerModGroove/vendor/peer-music-groove-index.html
+deleting PeerModGroove/vendor/peer-music-groove-app.js
+deleting PeerModGroove/vendor/
+deleting PeerModGroove/tests/integration/transport-runtime-smoke.mjs
+deleting PeerModGroove/tests/integration/
+deleting PeerModGroove/tests/transport-sync-smoke.mjs
+deleting PeerModGroove/tests/smoke-contracts.mjs
+deleting PeerModGroove/tests/sequencer-v2-smoke.mjs
+deleting PeerModGroove/tests/scheduler-smoke.mjs
+deleting PeerModGroove/tests/routing-graph-smoke.mjs
+deleting PeerModGroove/tests/expanded-modules-smoke.mjs
+deleting PeerModGroove/tests/crdt-selection-smoke.mjs
+deleting PeerModGroove/tests/crdt-cursor-smoke.mjs
+deleting PeerModGroove/tests/crdt-core-smoke.mjs
+deleting PeerModGroove/tests/crdt-adapter-smoke.mjs
+deleting PeerModGroove/tests/
+deleting PeerModGroove/src/ui/patch-canvas.js
+deleting PeerModGroove/src/ui/
+deleting PeerModGroove/src/modules/piano-roll.js
+deleting PeerModGroove/src/modules/peer-bridge.js
+deleting PeerModGroove/src/modules/ocra-grid.js
+deleting PeerModGroove/src/modules/multisampler.js
+deleting PeerModGroove/src/modules/mixer.js
+deleting PeerModGroove/src/modules/field-recorder.js
+deleting PeerModGroove/src/modules/effects.js
+deleting PeerModGroove/src/modules/clock.js
+deleting PeerModGroove/src/modules/clean-synth.js
+deleting PeerModGroove/src/modules/clean-sampler.js
+deleting PeerModGroove/src/modules/channel-strip.js
+deleting PeerModGroove/src/modules/basic-synth.js
+deleting PeerModGroove/src/modules/advanced-sequencer.js
+deleting PeerModGroove/src/modules/
+deleting PeerModGroove/src/crdt/text-crdt.js
+deleting PeerModGroove/src/crdt/
+deleting PeerModGroove/src/core/transport-sync.js
+deleting PeerModGroove/src/core/scheduler.js
+deleting PeerModGroove/src/core/routing-graph.js
+deleting PeerModGroove/src/core/peernet-stack.js
+deleting PeerModGroove/src/core/patchbay.js
+deleting PeerModGroove/src/core/jitter-buffer.js
+deleting PeerModGroove/src/core/contracts.js
+deleting PeerModGroove/src/core/audio.js
+deleting PeerModGroove/src/core/audio-graph-sync.js
+deleting PeerModGroove/src/core/
+deleting PeerModGroove/src/adapters/monaco-crdt-editor-adapter.js
+deleting PeerModGroove/src/adapters/crdt-editor-adapter.js
+deleting PeerModGroove/src/adapters/
+deleting PeerModGroove/src/app.js
+deleting PeerModGroove/src/
+deleting PeerModGroove/docs/ARCHITECTURE.md
+deleting PeerModGroove/docs/
+deleting PeerModGroove/style.css
+deleting PeerModGroove/index.html
+deleting PeerModGroove/README.md
+deleting PeerModGroove/
+deleting sprite_extractor.html
+deleting sexy_love_chat.html
+deleting qrcode.html
+deleting prompt-gen-nexus.html
+deleting pdf-forge-nexus.html
+deleting gif-white-to-transparent.html
+deleting club-ledger.html
+deleting bridge.yml
+deleting bdg.gif
+deleting artifacts-server.sh
+deleting artifacts-serve
+deleting artifacts-package
+deleting artifacts-deploy
+deleting SETUP_ALIASES.sh
+deleting SERVER_GUIDE.md
+deleting CNAME
+deleting ARTIFACTS_TOC.md
+./
+BUILD_MANIFEST.json
+index.html
+artifacts/
+artifacts/app-hub-v13/
+artifacts/app-hub-v13/2.0.0/
+artifacts/app-hub-v13/2.0.0/.artifact-receipt.json
+artifacts/app-hub-v13/2.0.0/app.js
+artifacts/app-hub-v13/2.0.0/catalog.js
+artifacts/app-hub-v13/2.0.0/collection.js
+artifacts/app-hub-v13/2.0.0/contracts.js
+artifacts/app-hub-v13/2.0.0/index.html
+artifacts/app-hub-v13/2.0.0/peer-boundary.js
+artifacts/app-hub-v13/2.0.0/search.js
+artifacts/app-hub-v13/2.0.0/state.js
+artifacts/app-hub-v13/2.0.0/styles.css
+artifacts/app-hub-v13/2.0.0/view.js
+artifacts/artifact-handling-standard/
+artifacts/artifact-handling-standard/1.0.0/
+artifacts/artifact-handling-standard/1.0.0/.artifact-receipt.json
+artifacts/artifact-handling-standard/1.0.0/index.html
+artifacts/chado-zen-tea/
+artifacts/chado-zen-tea/0.1.0/
+artifacts/chado-zen-tea/0.1.0/.artifact-receipt.json
+artifacts/chado-zen-tea/0.1.0/index.html
+artifacts/overlay-cam-apk/
+artifacts/overlay-cam-apk/0.1.0/
+artifacts/overlay-cam-apk/0.1.0/.artifact-receipt.json
+artifacts/overlay-cam-apk/0.1.0/index.html
+artifacts/overlay-cam-apk/0.1.0/overlay-cam-intuitive-ux-debug.apk
+artifacts/qr-studio/
+artifacts/qr-studio/0.1.0/
+artifacts/qr-studio/0.1.0/.artifact-receipt.json
+artifacts/qr-studio/0.1.0/index.html
+artifacts/revealive/
+artifacts/revealive/0.1.0/
+artifacts/revealive/0.1.0/.artifact-receipt.json
+artifacts/revealive/0.1.0/index.html
+artifacts/revealive/0.1.0/assets/
+artifacts/revealive/0.1.0/assets/abnfDiagram-VCTEODGH-Br_Mm4ht.js
+artifacts/revealive/0.1.0/assets/abnfDiagram-VCTEODGH-Br_Mm4ht.js.map
+artifacts/revealive/0.1.0/assets/apl-gfMMiTNf.js
+artifacts/revealive/0.1.0/assets/apl-gfMMiTNf.js.map
+artifacts/revealive/0.1.0/assets/arc-Dksv8StD.js
+artifacts/revealive/0.1.0/assets/arc-Dksv8StD.js.map
+artifacts/revealive/0.1.0/assets/architecture-7GRP2DOG-BlUn_RTZ.js
+artifacts/revealive/0.1.0/assets/architectureDiagram-5GKGNRK7-C_iaP49m.js
+artifacts/revealive/0.1.0/assets/architectureDiagram-5GKGNRK7-C_iaP49m.js.map
+artifacts/revealive/0.1.0/assets/array-BifhSqXX.js
+artifacts/revealive/0.1.0/assets/array-BifhSqXX.js.map
+artifacts/revealive/0.1.0/assets/asciiarmor-C_eisQCp.js
+artifacts/revealive/0.1.0/assets/asciiarmor-C_eisQCp.js.map
+artifacts/revealive/0.1.0/assets/asn1-DCl_8MCW.js
+artifacts/revealive/0.1.0/assets/asn1-DCl_8MCW.js.map
+artifacts/revealive/0.1.0/assets/asterisk-BEn0Cwpx.js
+artifacts/revealive/0.1.0/assets/asterisk-BEn0Cwpx.js.map
+artifacts/revealive/0.1.0/assets/blockDiagram-I7D4REHJ-CB1RzPuy.js
+artifacts/revealive/0.1.0/assets/blockDiagram-I7D4REHJ-CB1RzPuy.js.map
+artifacts/revealive/0.1.0/assets/brainfuck-D5EjA2JK.js
+artifacts/revealive/0.1.0/assets/brainfuck-D5EjA2JK.js.map
+artifacts/revealive/0.1.0/assets/c4Diagram-7LVT6UL2-Cx1SX4sb.js
+artifacts/revealive/0.1.0/assets/c4Diagram-7LVT6UL2-Cx1SX4sb.js.map
+artifacts/revealive/0.1.0/assets/channel-DoHdUMLB.js
+artifacts/revealive/0.1.0/assets/channel-DoHdUMLB.js.map
+artifacts/revealive/0.1.0/assets/chunk-2Q5K7J3B-C1jixKkw.js
+artifacts/revealive/0.1.0/assets/chunk-2Q5K7J3B-C1jixKkw.js.map
+artifacts/revealive/0.1.0/assets/chunk-4HAMMTFA--JkFCh0o.js
+artifacts/revealive/0.1.0/assets/chunk-4HAMMTFA--JkFCh0o.js.map
+artifacts/revealive/0.1.0/assets/chunk-5VM5RSS4-ZNzvKenW.js
+artifacts/revealive/0.1.0/assets/chunk-5VM5RSS4-ZNzvKenW.js.map
+artifacts/revealive/0.1.0/assets/chunk-75Z2AOVW-DHUuRCQP.js
+artifacts/revealive/0.1.0/assets/chunk-75Z2AOVW-DHUuRCQP.js.map
+artifacts/revealive/0.1.0/assets/chunk-DU6HZSFF-BYcVAtnS.js
+artifacts/revealive/0.1.0/assets/chunk-DU6HZSFF-BYcVAtnS.js.map
+artifacts/revealive/0.1.0/assets/chunk-F27PBJKO-ZgADqfzb.js
+artifacts/revealive/0.1.0/assets/chunk-F27PBJKO-ZgADqfzb.js.map
+artifacts/revealive/0.1.0/assets/chunk-FOHPRMQF-DzxwRta7.js
+artifacts/revealive/0.1.0/assets/chunk-FOHPRMQF-DzxwRta7.js.map
+artifacts/revealive/0.1.0/assets/chunk-GMAD6QVW-Ci6mQbtz.js
+artifacts/revealive/0.1.0/assets/chunk-GMAD6QVW-Ci6mQbtz.js.map
+artifacts/revealive/0.1.0/assets/chunk-GVQU2GXP-DwN2AdqU.js
+artifacts/revealive/0.1.0/assets/chunk-GVQU2GXP-DwN2AdqU.js.map
+artifacts/revealive/0.1.0/assets/chunk-IMKFNOWR-BB-73OtD.js
+artifacts/revealive/0.1.0/assets/chunk-IMKFNOWR-BB-73OtD.js.map
+artifacts/revealive/0.1.0/assets/chunk-JWPE2WC7-DVXcaiue.js
+artifacts/revealive/0.1.0/assets/chunk-JWPE2WC7-DVXcaiue.js.map
+artifacts/revealive/0.1.0/assets/chunk-P2QGCYS3-BRE8KlyE.js
+artifacts/revealive/0.1.0/assets/chunk-P2QGCYS3-BRE8KlyE.js.map
+artifacts/revealive/0.1.0/assets/chunk-POPQ4Y6H-CVWULkkd.js
+artifacts/revealive/0.1.0/assets/chunk-POPQ4Y6H-CVWULkkd.js.map
+artifacts/revealive/0.1.0/assets/chunk-PWAF6VOD-DgUkI1fH.js
+artifacts/revealive/0.1.0/assets/chunk-PWAF6VOD-DgUkI1fH.js.map
+artifacts/revealive/0.1.0/assets/chunk-SHT3W25Y-DtGez0qc.js
+artifacts/revealive/0.1.0/assets/chunk-SHT3W25Y-DtGez0qc.js.map
+artifacts/revealive/0.1.0/assets/chunk-SVP7TREG-BSarW-4X.js
+artifacts/revealive/0.1.0/assets/chunk-SVP7TREG-BSarW-4X.js.map
+artifacts/revealive/0.1.0/assets/chunk-TICWLB2K-CkJL_wN9.js
+artifacts/revealive/0.1.0/assets/chunk-TICWLB2K-CkJL_wN9.js.map
+artifacts/revealive/0.1.0/assets/chunk-XXDRQBXY-07j8Bflc.js
+artifacts/revealive/0.1.0/assets/chunk-XXDRQBXY-07j8Bflc.js.map
+artifacts/revealive/0.1.0/assets/chunk-Y2CYZVJY-DsF7k-Jl.js
+artifacts/revealive/0.1.0/assets/chunk-Y2CYZVJY-DsF7k-Jl.js.map
+artifacts/revealive/0.1.0/assets/classDiagram-ZZMXUADV-DhZhESff.js
+artifacts/revealive/0.1.0/assets/classDiagram-ZZMXUADV-DhZhESff.js.map
+artifacts/revealive/0.1.0/assets/classDiagram-v2-VYDZK3BY-DhZhESff.js
+artifacts/revealive/0.1.0/assets/classDiagram-v2-VYDZK3BY-DhZhESff.js.map
+artifacts/revealive/0.1.0/assets/clike-D_6L3tnO.js
+artifacts/revealive/0.1.0/assets/clike-D_6L3tnO.js.map
+artifacts/revealive/0.1.0/assets/clojure-BflJGmDX.js
+artifacts/revealive/0.1.0/assets/clojure-BflJGmDX.js.map
+artifacts/revealive/0.1.0/assets/cmake-84nbDH0I.js
+artifacts/revealive/0.1.0/assets/cmake-84nbDH0I.js.map
+artifacts/revealive/0.1.0/assets/cobol-DHLQUbN7.js
+artifacts/revealive/0.1.0/assets/cobol-DHLQUbN7.js.map
+artifacts/revealive/0.1.0/assets/coffeescript-De_zI4J0.js
+artifacts/revealive/0.1.0/assets/coffeescript-De_zI4J0.js.map
+artifacts/revealive/0.1.0/assets/commonlisp-DgAKBe0r.js
+artifacts/revealive/0.1.0/assets/commonlisp-DgAKBe0r.js.map
+artifacts/revealive/0.1.0/assets/cose-bilkent-JH36ORCC-BW8NUo7P.js
+artifacts/revealive/0.1.0/assets/cose-bilkent-JH36ORCC-BW8NUo7P.js.map
+artifacts/revealive/0.1.0/assets/crystal-Bsdphhtm.js
+artifacts/revealive/0.1.0/assets/crystal-Bsdphhtm.js.map
+artifacts/revealive/0.1.0/assets/css-CnaYoQib.js
+artifacts/revealive/0.1.0/assets/css-CnaYoQib.js.map
+artifacts/revealive/0.1.0/assets/cynefin-OW5HDTMX-CxHi-pWn.js
+artifacts/revealive/0.1.0/assets/cynefinDiagram-5FMLGOSQ-DkGUNmTa.js
+artifacts/revealive/0.1.0/assets/cynefinDiagram-5FMLGOSQ-DkGUNmTa.js.map
+artifacts/revealive/0.1.0/assets/cypher-p9eYesGn.js
+artifacts/revealive/0.1.0/assets/cypher-p9eYesGn.js.map
+artifacts/revealive/0.1.0/assets/cytoscape.esm-Yq6u8L66.js
+artifacts/revealive/0.1.0/assets/cytoscape.esm-Yq6u8L66.js.map
+artifacts/revealive/0.1.0/assets/d-DWkQyNnU.js
+artifacts/revealive/0.1.0/assets/d-DWkQyNnU.js.map
+artifacts/revealive/0.1.0/assets/dagre-DkxvJBds.js
+artifacts/revealive/0.1.0/assets/dagre-DkxvJBds.js.map
+artifacts/revealive/0.1.0/assets/dagre-GXQ25YYZ-D61hJ7Pv.js
+artifacts/revealive/0.1.0/assets/dagre-GXQ25YYZ-D61hJ7Pv.js.map
+artifacts/revealive/0.1.0/assets/defaultLocale-BFoDCU3G.js
+artifacts/revealive/0.1.0/assets/defaultLocale-BFoDCU3G.js.map
+artifacts/revealive/0.1.0/assets/diagram-S7CK7UJ4-Cy68sBxm.js
+artifacts/revealive/0.1.0/assets/diagram-S7CK7UJ4-Cy68sBxm.js.map
+artifacts/revealive/0.1.0/assets/diagram-UQ7AKVKN-D0ulAvdQ.js
+artifacts/revealive/0.1.0/assets/diagram-UQ7AKVKN-D0ulAvdQ.js.map
+artifacts/revealive/0.1.0/assets/diagram-VSXAHHWV-Bz7lZzdh.js
+artifacts/revealive/0.1.0/assets/diagram-VSXAHHWV-Bz7lZzdh.js.map
+artifacts/revealive/0.1.0/assets/diagram-VX7I27RA-Bnx0pvvB.js
+artifacts/revealive/0.1.0/assets/diagram-VX7I27RA-Bnx0pvvB.js.map
+artifacts/revealive/0.1.0/assets/diagram-Z3DM3KII-Bx-91FRL.js
+artifacts/revealive/0.1.0/assets/diagram-Z3DM3KII-Bx-91FRL.js.map
+artifacts/revealive/0.1.0/assets/diff-ChtP43wD.js
+artifacts/revealive/0.1.0/assets/diff-ChtP43wD.js.map
+artifacts/revealive/0.1.0/assets/dist-75wmYfK_.js
+artifacts/revealive/0.1.0/assets/dist-75wmYfK_.js.map
+artifacts/revealive/0.1.0/assets/dist-8nBPiHVj.js
+artifacts/revealive/0.1.0/assets/dist-8nBPiHVj.js.map
+artifacts/revealive/0.1.0/assets/dist-B-ESGdsx.js
+artifacts/revealive/0.1.0/assets/dist-B-ESGdsx.js.map
+artifacts/revealive/0.1.0/assets/dist-BbGI-miv.js
+artifacts/revealive/0.1.0/assets/dist-BbGI-miv.js.map
+artifacts/revealive/0.1.0/assets/dist-Bce_1UOU.js
+artifacts/revealive/0.1.0/assets/dist-Bce_1UOU.js.map
+artifacts/revealive/0.1.0/assets/dist-Bu2b6trr.js
+artifacts/revealive/0.1.0/assets/dist-Bu2b6trr.js.map
+artifacts/revealive/0.1.0/assets/dist-C-Eh5Ja_.js
+artifacts/revealive/0.1.0/assets/dist-C-Eh5Ja_.js.map
+artifacts/revealive/0.1.0/assets/dist-CCyhbAQ_.js
+artifacts/revealive/0.1.0/assets/dist-CCyhbAQ_.js.map
+artifacts/revealive/0.1.0/assets/dist-CNhwslrf.js
+artifacts/revealive/0.1.0/assets/dist-CNhwslrf.js.map
+artifacts/revealive/0.1.0/assets/dist-DGdjl6Ft.js
+artifacts/revealive/0.1.0/assets/dist-DGdjl6Ft.js.map
+artifacts/revealive/0.1.0/assets/dist-DVWeC6pQ.js
+artifacts/revealive/0.1.0/assets/dist-DVWeC6pQ.js.map
+artifacts/revealive/0.1.0/assets/dist-Dt0I5N7K.js
+artifacts/revealive/0.1.0/assets/dist-Dt0I5N7K.js.map
+artifacts/revealive/0.1.0/assets/dist-VUIzspGn.js
+artifacts/revealive/0.1.0/assets/dist-VUIzspGn.js.map
+artifacts/revealive/0.1.0/assets/dist-YulezcvU.js
+artifacts/revealive/0.1.0/assets/dist-YulezcvU.js.map
+artifacts/revealive/0.1.0/assets/dist-aE83Uoc0.js
+artifacts/revealive/0.1.0/assets/dist-aE83Uoc0.js.map
+artifacts/revealive/0.1.0/assets/dist-g9KSBzjF.js
+artifacts/revealive/0.1.0/assets/dist-g9KSBzjF.js.map
+artifacts/revealive/0.1.0/assets/dist-gAhs0Kab.js
+artifacts/revealive/0.1.0/assets/dist-gAhs0Kab.js.map
+artifacts/revealive/0.1.0/assets/dist-t0oTq91Z.js
+artifacts/revealive/0.1.0/assets/dist-t0oTq91Z.js.map
+artifacts/revealive/0.1.0/assets/dist-xdvqSQjy.js
+artifacts/revealive/0.1.0/assets/dist-xdvqSQjy.js.map
+artifacts/revealive/0.1.0/assets/dockerfile-DJkHQgkl.js
+artifacts/revealive/0.1.0/assets/dockerfile-DJkHQgkl.js.map
+artifacts/revealive/0.1.0/assets/dtd-DTF72YNO.js
+artifacts/revealive/0.1.0/assets/dtd-DTF72YNO.js.map
+artifacts/revealive/0.1.0/assets/dylan-BCDoL_-p.js
+artifacts/revealive/0.1.0/assets/dylan-BCDoL_-p.js.map
+artifacts/revealive/0.1.0/assets/ebnf-D4c0_ac3.js
+artifacts/revealive/0.1.0/assets/ebnf-D4c0_ac3.js.map
+artifacts/revealive/0.1.0/assets/ebnfDiagram-PWID7BFC-D9d_BZlu.js
+artifacts/revealive/0.1.0/assets/ebnfDiagram-PWID7BFC-D9d_BZlu.js.map
+artifacts/revealive/0.1.0/assets/ecl-BVIeWmwY.js
+artifacts/revealive/0.1.0/assets/ecl-BVIeWmwY.js.map
+artifacts/revealive/0.1.0/assets/eiffel-BEjRio4Q.js
+artifacts/revealive/0.1.0/assets/eiffel-BEjRio4Q.js.map
+artifacts/revealive/0.1.0/assets/elm-Cshzl8qu.js
+artifacts/revealive/0.1.0/assets/elm-Cshzl8qu.js.map
+artifacts/revealive/0.1.0/assets/erDiagram-RLTQ6QDP-CNgE7_qQ.js
+artifacts/revealive/0.1.0/assets/erDiagram-RLTQ6QDP-CNgE7_qQ.js.map
+artifacts/revealive/0.1.0/assets/erlang-BV0c4Hdn.js
+artifacts/revealive/0.1.0/assets/erlang-BV0c4Hdn.js.map
+artifacts/revealive/0.1.0/assets/eventmodeling-NTZA5JFV-DoM10wqQ.js
+artifacts/revealive/0.1.0/assets/factor-LKH5gN8L.js
+artifacts/revealive/0.1.0/assets/factor-LKH5gN8L.js.map
+artifacts/revealive/0.1.0/assets/fcl-ClOhbFR7.js
+artifacts/revealive/0.1.0/assets/fcl-ClOhbFR7.js.map
+artifacts/revealive/0.1.0/assets/flowDiagram-HODETNUW-BqmVBCAI.js
+artifacts/revealive/0.1.0/assets/forth-D6RzAl64.js
+artifacts/revealive/0.1.0/assets/forth-D6RzAl64.js.map
+artifacts/revealive/0.1.0/assets/fortran-Bt6PBEDR.js
+artifacts/revealive/0.1.0/assets/fortran-Bt6PBEDR.js.map
+artifacts/revealive/0.1.0/assets/ganttDiagram-EL5Y4UJY-DleJjUwp.js
+artifacts/revealive/0.1.0/assets/ganttDiagram-EL5Y4UJY-DleJjUwp.js.map
+artifacts/revealive/0.1.0/assets/gas-BHEdbvp9.js
+artifacts/revealive/0.1.0/assets/gas-BHEdbvp9.js.map
+artifacts/revealive/0.1.0/assets/gherkin-oBAE_ms0.js
+artifacts/revealive/0.1.0/assets/gherkin-oBAE_ms0.js.map
+artifacts/revealive/0.1.0/assets/gitGraph-4MIJSDKK-CPkZvVY9.js
+artifacts/revealive/0.1.0/assets/gitGraphDiagram-WWUBYQGX-C3nkHyap.js
+artifacts/revealive/0.1.0/assets/gitGraphDiagram-WWUBYQGX-C3nkHyap.js.map
+artifacts/revealive/0.1.0/assets/groovy-CUpZ7dEl.js
+artifacts/revealive/0.1.0/assets/groovy-CUpZ7dEl.js.map
+artifacts/revealive/0.1.0/assets/haskell-BRsoo5mP.js
+artifacts/revealive/0.1.0/assets/haskell-BRsoo5mP.js.map
+artifacts/revealive/0.1.0/assets/haxe-DjVOVvNP.js
+artifacts/revealive/0.1.0/assets/haxe-DjVOVvNP.js.map
+artifacts/revealive/0.1.0/assets/http-CLVgA2GD.js
+artifacts/revealive/0.1.0/assets/http-CLVgA2GD.js.map
+artifacts/revealive/0.1.0/assets/idl-BUZw3wgd.js
+artifacts/revealive/0.1.0/assets/idl-BUZw3wgd.js.map
+artifacts/revealive/0.1.0/assets/index-BGrHPKRl.css
+artifacts/revealive/0.1.0/assets/index-D38hkiwc.js
+artifacts/revealive/0.1.0/assets/index-D38hkiwc.js.map
+artifacts/revealive/0.1.0/assets/info-A6RAGUB7-CPBYXQt6.js
+artifacts/revealive/0.1.0/assets/infoDiagram-27XIBGKW-YW6x0FrV.js
+artifacts/revealive/0.1.0/assets/infoDiagram-27XIBGKW-YW6x0FrV.js.map
+artifacts/revealive/0.1.0/assets/init-C-OQMol4.js
+artifacts/revealive/0.1.0/assets/init-C-OQMol4.js.map
+artifacts/revealive/0.1.0/assets/ishikawaDiagram-5VMMS53U-Cx7pf8FU.js
+artifacts/revealive/0.1.0/assets/ishikawaDiagram-5VMMS53U-Cx7pf8FU.js.map
+artifacts/revealive/0.1.0/assets/javascript-Bu8mWwtz.js
+artifacts/revealive/0.1.0/assets/javascript-Bu8mWwtz.js.map
+artifacts/revealive/0.1.0/assets/journeyDiagram-3NMN7TZE-DY8BFzjl.js
+artifacts/revealive/0.1.0/assets/journeyDiagram-3NMN7TZE-DY8BFzjl.js.map
+artifacts/revealive/0.1.0/assets/julia-CQfgDRfP.js
+artifacts/revealive/0.1.0/assets/julia-CQfgDRfP.js.map
+artifacts/revealive/0.1.0/assets/kanban-definition-UXKFOSKX-DS7rKcrl.js
+artifacts/revealive/0.1.0/assets/kanban-definition-UXKFOSKX-DS7rKcrl.js.map
+artifacts/revealive/0.1.0/assets/katex-ZlcWpGUi.js
+artifacts/revealive/0.1.0/assets/katex-ZlcWpGUi.js.map
+artifacts/revealive/0.1.0/assets/line-B4-nEJ3y.js
+artifacts/revealive/0.1.0/assets/line-B4-nEJ3y.js.map
+artifacts/revealive/0.1.0/assets/linear-Dho8zvsW.js
+artifacts/revealive/0.1.0/assets/linear-Dho8zvsW.js.map
+artifacts/revealive/0.1.0/assets/livescript-BXxG0Yva.js
+artifacts/revealive/0.1.0/assets/livescript-BXxG0Yva.js.map
+artifacts/revealive/0.1.0/assets/lua-DPCEkfD_.js
+artifacts/revealive/0.1.0/assets/lua-DPCEkfD_.js.map
+artifacts/revealive/0.1.0/assets/mathematica-u8YMmbU0.js
+artifacts/revealive/0.1.0/assets/mathematica-u8YMmbU0.js.map
+artifacts/revealive/0.1.0/assets/mbox-BEMVcqjs.js
+artifacts/revealive/0.1.0/assets/mbox-BEMVcqjs.js.map
+artifacts/revealive/0.1.0/assets/mermaid-parser.core-De77BKfc.js
+artifacts/revealive/0.1.0/assets/mermaid-parser.core-De77BKfc.js.map
+artifacts/revealive/0.1.0/assets/mindmap-definition-YA3MSWOX-CwOREqwk.js
+artifacts/revealive/0.1.0/assets/mindmap-definition-YA3MSWOX-CwOREqwk.js.map
+artifacts/revealive/0.1.0/assets/mirc-C9zpzAZU.js
+artifacts/revealive/0.1.0/assets/mirc-C9zpzAZU.js.map
+artifacts/revealive/0.1.0/assets/mllike-B45xgp2S.js
+artifacts/revealive/0.1.0/assets/mllike-B45xgp2S.js.map
+artifacts/revealive/0.1.0/assets/modelica-CqHI_q-D.js
+artifacts/revealive/0.1.0/assets/modelica-CqHI_q-D.js.map
+artifacts/revealive/0.1.0/assets/monokai-KXizb-vU.css
+artifacts/revealive/0.1.0/assets/mscgen-qgSLujhx.js
+artifacts/revealive/0.1.0/assets/mscgen-qgSLujhx.js.map
+artifacts/revealive/0.1.0/assets/mumps-BSzj6Xyz.js
+artifacts/revealive/0.1.0/assets/mumps-BSzj6Xyz.js.map
+artifacts/revealive/0.1.0/assets/nginx-8H7HVH4w.js
+artifacts/revealive/0.1.0/assets/nginx-8H7HVH4w.js.map
+artifacts/revealive/0.1.0/assets/nsis-viPvXFiq.js
+artifacts/revealive/0.1.0/assets/nsis-viPvXFiq.js.map
+artifacts/revealive/0.1.0/assets/ntriples-B9h1VB_g.js
+artifacts/revealive/0.1.0/assets/ntriples-B9h1VB_g.js.map
+artifacts/revealive/0.1.0/assets/octave-D2Q8cUp1.js
+artifacts/revealive/0.1.0/assets/octave-D2Q8cUp1.js.map
+artifacts/revealive/0.1.0/assets/ordinal-BDEzSJ7C.js
+artifacts/revealive/0.1.0/assets/ordinal-BDEzSJ7C.js.map
+artifacts/revealive/0.1.0/assets/oz-BwTct_5T.js
+artifacts/revealive/0.1.0/assets/oz-BwTct_5T.js.map
+artifacts/revealive/0.1.0/assets/packet-AYTQ26CC-EWx0Wg9m.js
+artifacts/revealive/0.1.0/assets/pascal-Dp_KdFgX.js
+artifacts/revealive/0.1.0/assets/pascal-Dp_KdFgX.js.map
+artifacts/revealive/0.1.0/assets/path-fybaL0A-.js
+artifacts/revealive/0.1.0/assets/path-fybaL0A-.js.map
+artifacts/revealive/0.1.0/assets/pegDiagram-XKGWAZYB-CXpCOkgU.js
+artifacts/revealive/0.1.0/assets/pegDiagram-XKGWAZYB-CXpCOkgU.js.map
+artifacts/revealive/0.1.0/assets/perl-BkSkiI9m.js
+artifacts/revealive/0.1.0/assets/perl-BkSkiI9m.js.map
+artifacts/revealive/0.1.0/assets/pie-WAS4IAKB-B1UGAD5l.js
+artifacts/revealive/0.1.0/assets/pieDiagram-E7YTZNPT-DY3e6GOf.js
+artifacts/revealive/0.1.0/assets/pieDiagram-E7YTZNPT-DY3e6GOf.js.map
+artifacts/revealive/0.1.0/assets/pig-AF4Hwhju.js
+artifacts/revealive/0.1.0/assets/pig-AF4Hwhju.js.map
+artifacts/revealive/0.1.0/assets/plugin-BVSWsYi6.js
+artifacts/revealive/0.1.0/assets/plugin-BVSWsYi6.js.map
+artifacts/revealive/0.1.0/assets/plugin-Do2DrG0f.js
+artifacts/revealive/0.1.0/assets/plugin-Do2DrG0f.js.map
+artifacts/revealive/0.1.0/assets/powershell-BcIto6Sf.js
+artifacts/revealive/0.1.0/assets/powershell-BcIto6Sf.js.map
+artifacts/revealive/0.1.0/assets/properties-C357ku5U.js
+artifacts/revealive/0.1.0/assets/properties-C357ku5U.js.map
+artifacts/revealive/0.1.0/assets/protobuf-D1ij_kNL.js
+artifacts/revealive/0.1.0/assets/protobuf-D1ij_kNL.js.map
+artifacts/revealive/0.1.0/assets/pug-3K-JMW4g.js
+artifacts/revealive/0.1.0/assets/pug-3K-JMW4g.js.map
+artifacts/revealive/0.1.0/assets/puppet-BZyAS7I4.js
+artifacts/revealive/0.1.0/assets/puppet-BZyAS7I4.js.map
+artifacts/revealive/0.1.0/assets/python-B_1Jd8HM.js
+artifacts/revealive/0.1.0/assets/python-B_1Jd8HM.js.map
+artifacts/revealive/0.1.0/assets/q-B9NhS7L_.js
+artifacts/revealive/0.1.0/assets/q-B9NhS7L_.js.map
+artifacts/revealive/0.1.0/assets/quadrantDiagram-AXDQQJYC-BjLkv20i.js
+artifacts/revealive/0.1.0/assets/quadrantDiagram-AXDQQJYC-BjLkv20i.js.map
+artifacts/revealive/0.1.0/assets/r-CxDmU1I4.js
+artifacts/revealive/0.1.0/assets/r-CxDmU1I4.js.map
+artifacts/revealive/0.1.0/assets/radar-RG4KPBEZ-Dl2t4EwN.js
+artifacts/revealive/0.1.0/assets/railroad-74A4TZTK-C5NfMmB9.js
+artifacts/revealive/0.1.0/assets/railroad-abnf-HS5TGJTU-CKAjsMRE.js
+artifacts/revealive/0.1.0/assets/railroad-ebnf-LZEXJU2U-DoqRoBWr.js
+artifacts/revealive/0.1.0/assets/railroad-peg-WCYAUIDC-B4BRB6Dj.js
+artifacts/revealive/0.1.0/assets/railroadDiagram-O6MQD6OU-CH-0yHcr.js
+artifacts/revealive/0.1.0/assets/railroadDiagram-O6MQD6OU-CH-0yHcr.js.map
+artifacts/revealive/0.1.0/assets/requirementDiagram-BXWQKSXE-BGATWgjI.js
+artifacts/revealive/0.1.0/assets/requirementDiagram-BXWQKSXE-BGATWgjI.js.map
+artifacts/revealive/0.1.0/assets/rough.esm-Dy-Kn_BL.js
+artifacts/revealive/0.1.0/assets/rough.esm-Dy-Kn_BL.js.map
+artifacts/revealive/0.1.0/assets/rpm-gpDK5sbt.js
+artifacts/revealive/0.1.0/assets/rpm-gpDK5sbt.js.map
+artifacts/revealive/0.1.0/assets/ruby-ChfNwlCY.js
+artifacts/revealive/0.1.0/assets/ruby-ChfNwlCY.js.map
+artifacts/revealive/0.1.0/assets/sankeyDiagram-P5KCCOFB-Cv4n3a0H.js
+artifacts/revealive/0.1.0/assets/sankeyDiagram-P5KCCOFB-Cv4n3a0H.js.map
+artifacts/revealive/0.1.0/assets/sas-C2OyD2Y6.js
+artifacts/revealive/0.1.0/assets/sas-C2OyD2Y6.js.map
+artifacts/revealive/0.1.0/assets/scheme-D9qYN0V5.js
+artifacts/revealive/0.1.0/assets/scheme-D9qYN0V5.js.map
+artifacts/revealive/0.1.0/assets/sequenceDiagram-WJ2MYXX4-CEqta_cq.js
+artifacts/revealive/0.1.0/assets/sequenceDiagram-WJ2MYXX4-CEqta_cq.js.map
+artifacts/revealive/0.1.0/assets/shell-DwuoZtxw.js
+artifacts/revealive/0.1.0/assets/shell-DwuoZtxw.js.map
+artifacts/revealive/0.1.0/assets/sieve-tLWDfEkZ.js
+artifacts/revealive/0.1.0/assets/sieve-tLWDfEkZ.js.map
+artifacts/revealive/0.1.0/assets/simple-mode-DXiLM1-G.js
+artifacts/revealive/0.1.0/assets/simple-mode-DXiLM1-G.js.map
+artifacts/revealive/0.1.0/assets/sizeCapture-INFHLROL-B0uUizjq.js
+artifacts/revealive/0.1.0/assets/sizeCapture-INFHLROL-B0uUizjq.js.map
+artifacts/revealive/0.1.0/assets/smalltalk-BLp5-jwC.js
+artifacts/revealive/0.1.0/assets/smalltalk-BLp5-jwC.js.map
+artifacts/revealive/0.1.0/assets/solr-B78wSQJQ.js
+artifacts/revealive/0.1.0/assets/solr-B78wSQJQ.js.map
+artifacts/revealive/0.1.0/assets/sparql-Dz-mlCAC.js
+artifacts/revealive/0.1.0/assets/sparql-Dz-mlCAC.js.map
+artifacts/revealive/0.1.0/assets/spreadsheet-CTIncYxj.js
+artifacts/revealive/0.1.0/assets/spreadsheet-CTIncYxj.js.map
+artifacts/revealive/0.1.0/assets/sql-DuQMFDvy.js
+artifacts/revealive/0.1.0/assets/sql-DuQMFDvy.js.map
+artifacts/revealive/0.1.0/assets/src-DiyhtlPM.js
+artifacts/revealive/0.1.0/assets/src-DiyhtlPM.js.map
+artifacts/revealive/0.1.0/assets/stateDiagram-D77RDMKH-CDQMysAj.js
+artifacts/revealive/0.1.0/assets/stateDiagram-D77RDMKH-CDQMysAj.js.map
+artifacts/revealive/0.1.0/assets/stateDiagram-v2-MP3YSRHH-Baq3rcWl.js
+artifacts/revealive/0.1.0/assets/stateDiagram-v2-MP3YSRHH-Baq3rcWl.js.map
+artifacts/revealive/0.1.0/assets/stex-DNzd62Q_.js
+artifacts/revealive/0.1.0/assets/stex-DNzd62Q_.js.map
+artifacts/revealive/0.1.0/assets/style-CvtdEgjp.css
+artifacts/revealive/0.1.0/assets/style-VBwPcGk1.css
+artifacts/revealive/0.1.0/assets/stylus-BOVgKnng.js
+artifacts/revealive/0.1.0/assets/stylus-BOVgKnng.js.map
+artifacts/revealive/0.1.0/assets/swift-DKB6_1j6.js
+artifacts/revealive/0.1.0/assets/swift-DKB6_1j6.js.map
+artifacts/revealive/0.1.0/assets/swimlanes-42K2YHIH-Cl4wO_fi.js
+artifacts/revealive/0.1.0/assets/swimlanes-42K2YHIH-Cl4wO_fi.js.map
+artifacts/revealive/0.1.0/assets/swimlanesDiagram-VR7AAH4N-B-uS8YGX.js
+artifacts/revealive/0.1.0/assets/swimlanesDiagram-VR7AAH4N-B-uS8YGX.js.map
+artifacts/revealive/0.1.0/assets/tcl-BGfruO1u.js
+artifacts/revealive/0.1.0/assets/tcl-BGfruO1u.js.map
+artifacts/revealive/0.1.0/assets/textile-C4jVoHG1.js
+artifacts/revealive/0.1.0/assets/textile-C4jVoHG1.js.map
+artifacts/revealive/0.1.0/assets/tiddlywiki-VlUiK86J.js
+artifacts/revealive/0.1.0/assets/tiddlywiki-VlUiK86J.js.map
+artifacts/revealive/0.1.0/assets/tiki-AK6FwT8q.js
+artifacts/revealive/0.1.0/assets/tiki-AK6FwT8q.js.map
+artifacts/revealive/0.1.0/assets/timeline-definition-24CTP7MA-D6vP759j.js
+artifacts/revealive/0.1.0/assets/timeline-definition-24CTP7MA-D6vP759j.js.map
+artifacts/revealive/0.1.0/assets/toml-BPTmHmyx.js
+artifacts/revealive/0.1.0/assets/toml-BPTmHmyx.js.map
+artifacts/revealive/0.1.0/assets/treeView-Q6P3EWNA-BvyfGnCT.js
+artifacts/revealive/0.1.0/assets/treemap-WGGIJYW6-mJHxFrmC.js
+artifacts/revealive/0.1.0/assets/troff-C2dAgh7P.js
+artifacts/revealive/0.1.0/assets/troff-C2dAgh7P.js.map
+artifacts/revealive/0.1.0/assets/ttcn-PPSTk1ow.js
+artifacts/revealive/0.1.0/assets/ttcn-PPSTk1ow.js.map
+artifacts/revealive/0.1.0/assets/ttcn-cfg-2b4Gb5sE.js
+artifacts/revealive/0.1.0/assets/ttcn-cfg-2b4Gb5sE.js.map
+artifacts/revealive/0.1.0/assets/turtle-Cx3rYX2g.js
+artifacts/revealive/0.1.0/assets/turtle-Cx3rYX2g.js.map
+artifacts/revealive/0.1.0/assets/vb-BthdM_4N.js
+artifacts/revealive/0.1.0/assets/vb-BthdM_4N.js.map
+artifacts/revealive/0.1.0/assets/vbscript-D9f6rSsU.js
+artifacts/revealive/0.1.0/assets/vbscript-D9f6rSsU.js.map
+artifacts/revealive/0.1.0/assets/velocity-CqftRsjg.js
+artifacts/revealive/0.1.0/assets/velocity-CqftRsjg.js.map
+artifacts/revealive/0.1.0/assets/vennDiagram-4TSXK5OY-DqI2dsEQ.js
+artifacts/revealive/0.1.0/assets/vennDiagram-4TSXK5OY-DqI2dsEQ.js.map
+artifacts/revealive/0.1.0/assets/verilog-CjI9Y6RI.js
+artifacts/revealive/0.1.0/assets/verilog-CjI9Y6RI.js.map
+artifacts/revealive/0.1.0/assets/vhdl-kS471soi.js
+artifacts/revealive/0.1.0/assets/vhdl-kS471soi.js.map
+artifacts/revealive/0.1.0/assets/wardley-WFR3VGLG-P44wUDT8.js
+artifacts/revealive/0.1.0/assets/wardleyDiagram-VM6X3IG4-4_tBSJn6.js
+artifacts/revealive/0.1.0/assets/wardleyDiagram-VM6X3IG4-4_tBSJn6.js.map
+artifacts/revealive/0.1.0/assets/webidl-D5jiJvOU.js
+artifacts/revealive/0.1.0/assets/webidl-D5jiJvOU.js.map
+artifacts/revealive/0.1.0/assets/xquery-BKJx4mf9.js
+artifacts/revealive/0.1.0/assets/xquery-BKJx4mf9.js.map
+artifacts/revealive/0.1.0/assets/xychartDiagram-S5SC5T6Z-CrFW5Gxk.js
+artifacts/revealive/0.1.0/assets/xychartDiagram-S5SC5T6Z-CrFW5Gxk.js.map
+artifacts/revealive/0.1.0/assets/yacas-CXXgtw0p.js
+artifacts/revealive/0.1.0/assets/yacas-CXXgtw0p.js.map
+artifacts/revealive/0.1.0/assets/z80-Co3PbHdE.js
+artifacts/revealive/0.1.0/assets/z80-Co3PbHdE.js.map
+catalog/
+catalog/catalog.json
+hub/
+hub/v13/
+hub/v13/.artifact-receipt.json
+hub/v13/app.js
+hub/v13/catalog.js
+hub/v13/catalog.json
+hub/v13/collection.js
+hub/v13/contracts.js
+hub/v13/index.html
+hub/v13/peer-boundary.js
+hub/v13/search.js
+hub/v13/state.js
+hub/v13/styles.css
+hub/v13/view.js
+
+sent 24,263 bytes  received 28,584 bytes  35,231.33 bytes/sec
+total size is 40,357,641  speedup is 763.67 (DRY RUN)
+
+VPS mirror sync complete → vps:/home/user/data/artifacts
+Public artifacts.fkr.dev is GitHub Pages; push the Pages repository main branch to publish it.
