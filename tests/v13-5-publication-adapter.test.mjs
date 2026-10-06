@@ -8,7 +8,10 @@ import { HANDOFF_SCHEMA, INTEGRATION_SCHEMA, stageQualifiedV13_5, validateSource
 
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 
-async function fixture() {
+async function fixture({
+  catalogItems = 55,
+  sourceRevision = 'a'.repeat(40),
+} = {}) {
   const root = await mkdtemp(join(tmpdir(), 'v13-5-pages-adapter-'));
   const artifacts = join(root, 'artifacts');
   const v13 = join(root, 'v13');
@@ -36,8 +39,13 @@ async function fixture() {
   await writeFile(join(dist, 'asset-manifest.json'), assetText);
   const handoff = {
     schemaVersion: HANDOFF_SCHEMA,
-    release: { commit: 'b'.repeat(40), catalogItems: 56, expectedV12Local: 44, stagedV12Local: 44, missingV12Local: 0 },
-    canonicalSource: { repository: 'fkr-0/artifact-lab-pages', revision: 'a'.repeat(40) },
+    release: { commit: 'b'.repeat(40), catalogItems, expectedV12Local: 44, stagedV12Local: 44, missingV12Local: 0 },
+    canonicalSource: {
+      repository: 'fkr-0/artifact-lab-pages',
+      revision: 'a'.repeat(40),
+      currentRevision: sourceRevision,
+      transition: sourceRevision === 'a'.repeat(40) ? 'exact' : 'descendant',
+    },
     catalog: { currentNativeAdded: ['revealive'] },
     regressions: {
       memeLab: { url: '/meme-lab/meme-lab.html', sha256: digest(files['meme-lab/meme-lab.html']) },
@@ -71,14 +79,44 @@ test('qualified V13.5 handoff becomes the complete Pages stage', async () => {
     v13Revision: 'b'.repeat(40),
   });
   assert.equal(result.receipt.schemaVersion, INTEGRATION_SCHEMA);
+  assert.equal(result.receipt.v13_5.catalogItems, 55);
   assert.equal(result.receipt.v13_5.stagedV12Local, 44);
   assert.equal(result.receipt.v13_5.missingV12Local, 0);
   assert.match(await readFile(join(output, 'meme-lab', 'meme-lab.html'), 'utf8'), /Meme Lab/);
   assert.match(await readFile(join(output, 'artifacts', 'revealive', '0.1.0', 'index.html'), 'utf8'), /Revealive/);
   assert.equal(JSON.parse(await readFile(join(output, 'V13_5_PAGES_INTEGRATION.json'), 'utf8')).deployment.performed, false);
 });
-test('adapter fails closed when the Artifact Lab source revision differs', async () => {
-  const { artifacts, v13, output } = await fixture();
+
+test('adapter rejects a handoff below the 55-item catalog floor', async () => {
+  const { artifacts, v13, output } = await fixture({ catalogItems: 54 });
+  await assert.rejects(
+    stageQualifiedV13_5({
+      artifactRoot: artifacts,
+      v13Root: v13,
+      outDir: output,
+      artifactSourceRevision: 'a'.repeat(40),
+      v13Revision: 'b'.repeat(40),
+    }),
+    /catalog is smaller than the qualified superset floor/,
+  );
+});
+
+test('adapter rejects a handoff generated from a different Artifact Lab checkout', async () => {
+  const { artifacts, v13, output } = await fixture({ sourceRevision: 'c'.repeat(40) });
+  await assert.rejects(
+    stageQualifiedV13_5({
+      artifactRoot: artifacts,
+      v13Root: v13,
+      outDir: output,
+      artifactSourceRevision: 'a'.repeat(40),
+      v13Revision: 'b'.repeat(40),
+    }),
+    /does not match the source checkout recorded by the V13\.5 handoff/,
+  );
+});
+
+test('adapter fails closed when the Artifact Lab source revision differs from the qualification pin', async () => {
+  const { artifacts, v13, output } = await fixture({ sourceRevision: 'c'.repeat(40) });
   await assert.rejects(
     stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13, outDir: output, artifactSourceRevision: 'c'.repeat(40), v13Revision: 'b'.repeat(40) }),
     /Canonical Artifact Lab revision mismatch/,

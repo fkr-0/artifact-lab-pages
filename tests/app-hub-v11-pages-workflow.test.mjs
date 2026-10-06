@@ -12,10 +12,13 @@ assert.match(workflow, /Run Hyperblast release gate/, 'Hyperblast release gate i
 assert.match(workflow, /Materialize verified V13\.5 Pages stage/, 'V13.5 stage is the publication source');
 assert.match(workflow, /Verify staged publication receipt/, 'receipt verification gates the upload');
 assert.doesNotMatch(workflow, /build-publication-site\.mjs --out \.artifacts-pages-stage/, 'verified V13.5 stage must not be destroyed by a post-verification native rebuild');
+assert.doesNotMatch(workflow, /stage-compiled-publication\.mjs --stage \.artifacts-pages-stage/, 'verified V13.5 stage must not be rewritten by a post-verification selective compile');
 
 const v13_5StageIndex = workflow.indexOf('Materialize verified V13.5 Pages stage');
 const receiptIndex = workflow.indexOf('Verify staged publication receipt');
 const uploadIndex = workflow.indexOf('Upload Pages artifact');
 assert.ok(v13_5StageIndex < receiptIndex && receiptIndex < uploadIndex, 'V13.5 stage -> receipt verification -> upload must be the terminal pipeline');
+const postVerificationSteps = workflow.slice(receiptIndex, uploadIndex);
+assert.doesNotMatch(postVerificationSteps, /run:\s+(?!\|)/, 'no command step may mutate the verified stage between receipt verification and upload');
 
 console.log('V13 Pages workflow contract OK');

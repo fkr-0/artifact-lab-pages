@@ -124,6 +124,13 @@ export async function stageQualifiedV13_5({
   const handoff = validateHandoff(JSON.parse(await readFile(handoffPath, 'utf8')));
   const currentSourceRevision = artifactSourceRevision || await gitHead(sourceRoot);
   const currentV13Revision = v13Revision || await gitHead(releaseRoot);
+  if (handoff.canonicalSource?.currentRevision &&
+      handoff.canonicalSource.currentRevision !== currentSourceRevision) {
+    throw new Error(
+      'Canonical Artifact Lab checkout does not match the source checkout recorded by the V13.5 handoff: ' +
+      currentSourceRevision + ' != ' + handoff.canonicalSource.currentRevision,
+    );
+  }
   let sourceTransition;
   if (artifactSourceRevision) {
     sourceTransition = validateSourceTransition({
