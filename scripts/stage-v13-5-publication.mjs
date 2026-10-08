@@ -70,6 +70,15 @@ const REVIEWED_NATIVE_ADDITIONS = new Map([
     'tests/e2e/sudoku-lab.spec.mjs',
     'tests/sudoku-lab.test.mjs',
   ])],
+  ['killer-sudoku-lab', new Set([
+    'registry/sources.d/killer-sudoku-lab.json',
+    'killer-sudoku-lab/app.mjs',
+    'killer-sudoku-lab/engine.mjs',
+    'killer-sudoku-lab/index.html',
+    'killer-sudoku-lab/styles.css',
+    'tests/e2e/killer-sudoku-lab.spec.mjs',
+    'tests/killer-sudoku-lab.test.mjs',
+  ])],
 ]);
 export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths, currentNativeAdded = [] }) {
   if (pinnedRevision === currentRevision) return { mode: 'exact', changedPaths: [] };
@@ -207,6 +216,23 @@ export async function stageQualifiedV13_5({
     }
     for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) {
       const path = 'artifacts/sudoku-lab/1.0.0/' + name;
+      await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
+    }
+  }
+
+  // Each new Killer Sudoku release is accepted only after catalog, route, and
+  // byte-for-byte asset evidence agree. Never trust a source-path exception alone.
+  if (handoff.catalog?.currentNativeAdded?.includes('killer-sudoku-lab')) {
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const route = 'artifacts/killer-sudoku-lab/1.0.0/index.html';
+    const item = catalog.items?.find((entry) => entry.id === 'killer-sudoku-lab');
+    if (item?.availability !== 'verified' || item.url !== '/' + route ||
+        !routes.entries?.some((entry) => entry.id === 'killer-sudoku-lab' && entry.path === route && entry.state === 'staged')) {
+      throw new Error('Killer Sudoku Lab is not a verified staged native release.');
+    }
+    for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) {
+      const path = 'artifacts/killer-sudoku-lab/1.0.0/' + name;
       await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
     }
   }

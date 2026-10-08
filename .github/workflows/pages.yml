@@ -67,8 +67,8 @@ jobs:
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
 
-      - name: Verify Sudoku uniqueness and solving logic
-        run: node --test tests/sudoku-lab.test.mjs
+      - name: Verify Sudoku and Killer Sudoku uniqueness and solving logic
+        run: node --test tests/sudoku-lab.test.mjs tests/killer-sudoku-lab.test.mjs
 
       - name: Refresh native source catalog
         run: node tooling/artifactctl/src/cli.mjs catalog --out registry/generated/catalog.json

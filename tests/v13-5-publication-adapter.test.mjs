@@ -11,6 +11,7 @@ const digest = (value) => createHash('sha256').update(value).digest('hex');
 async function fixture({
   catalogItems = 55,
   sourceRevision = 'a'.repeat(40),
+  killer = false,
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'v13-5-pages-adapter-'));
   const artifacts = join(root, 'artifacts');
@@ -27,6 +28,12 @@ async function fixture({
     'parity-report.json': '{"summary":{}}',
     'route-manifest.json': '{"entries":[]}',
   };
+  if (killer) {
+    const prefix = 'artifacts/killer-sudoku-lab/1.0.0/';
+    for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) files[prefix + name] = 'qualified Killer Sudoku ' + name;
+    files['catalog.json'] = JSON.stringify({items:[{id:'killer-sudoku-lab',availability:'verified',url:'/' + prefix + 'index.html'}]});
+    files['route-manifest.json'] = JSON.stringify({entries:[{id:'killer-sudoku-lab',path:prefix + 'index.html',state:'staged'}]});
+  }
   for (const [path, contents] of Object.entries(files)) {
     const target = join(dist, path);
     await mkdir(dirname(target), { recursive: true });
@@ -46,7 +53,7 @@ async function fixture({
       currentRevision: sourceRevision,
       transition: sourceRevision === 'a'.repeat(40) ? 'exact' : 'descendant',
     },
-    catalog: { currentNativeAdded: ['revealive'] },
+    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : ['revealive'] },
     regressions: {
       memeLab: { url: '/meme-lab/meme-lab.html', sha256: digest(files['meme-lab/meme-lab.html']) },
       revealive: { url: '/artifacts/revealive/0.1.0/index.html', sha256: digest(files['artifacts/revealive/0.1.0/index.html']) },
@@ -109,6 +116,27 @@ test('reviewed Sudoku source changes require the handoff to contain the native a
     currentNativeAdded: ['sudoku-lab'],
     changedPaths: [...transition.changedPaths, 'sudoku-lab/unreviewed.js'],
   }), /unreviewed\.js/);
+});
+
+test('Killer Sudoku source changes require a separately qualified native addition', () => {
+  const changedPaths = [
+    'registry/sources.d/killer-sudoku-lab.json',
+    'killer-sudoku-lab/app.mjs', 'killer-sudoku-lab/engine.mjs',
+    'killer-sudoku-lab/index.html', 'killer-sudoku-lab/styles.css',
+    'tests/e2e/killer-sudoku-lab.spec.mjs', 'tests/killer-sudoku-lab.test.mjs',
+  ];
+  const transition = { pinnedRevision: 'a'.repeat(40), currentRevision: 'b'.repeat(40), pinnedIsAncestor: true, changedPaths };
+  assert.throws(() => validateSourceTransition(transition), /outside reviewed publication paths/);
+  assert.equal(validateSourceTransition({ ...transition, currentNativeAdded: ['killer-sudoku-lab'] }).mode, 'integration-descendant');
+  assert.throws(() => validateSourceTransition({ ...transition, currentNativeAdded: ['killer-sudoku-lab'], changedPaths: [...changedPaths, 'killer-sudoku-lab/hidden.js'] }), /hidden.js/);
+});
+
+test('Killer Sudoku staged native route and executable hashes are checked', async () => {
+  const { artifacts, v13, output } = await fixture({ killer: true });
+  await stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13, outDir: output, artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) });
+  assert.match(await readFile(join(output, 'artifacts/killer-sudoku-lab/1.0.0/index.html'), 'utf8'), /qualified Killer Sudoku/);
+  await writeFile(join(v13, 'dist/artifacts/killer-sudoku-lab/1.0.0/app.mjs'), 'tampered');
+  await assert.rejects(stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13, outDir: output, artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) }), /hash mismatch.*killer-sudoku-lab.*app.mjs/);
 });
 
 test('adapter rejects a handoff below the 55-item catalog floor', async () => {

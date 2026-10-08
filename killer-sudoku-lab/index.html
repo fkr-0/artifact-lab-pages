@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1019"><meta name="description" content="Killer Sudoku: sum cages, no repeated cage digits, no givens. An offline logic puzzle.">
+<title>Killer Sudoku / The Sum Grid</title><link rel="icon" href="data:,">
+<link rel="stylesheet" href="./styles.css"><script type="module" src="./app.mjs"></script>
+</head><body>
+<div class="shell">
+<header class="mast"><a class="brand" href="/" aria-label="Back to Artifacts">◈ <span>ARTIFACTS <small>/ GAMES</small></span></a><span class="edition">KILLER SUDOKU <b>02</b> / CAGE EDITION</span><button id="share" class="ghost">↗ Share puzzle</button></header>
+<section class="intro"><div><p class="eyebrow">THE CAGE / NUMBER LOGIC REINVENTED</p><h1>Make every<br><em>sum</em> count.</h1><p class="deck">81 squares. No starting digits. Match every cage total without repeating a digit — and solve the classic row, column and 3 × 3 constraints.</p></div><div class="challenge"><span class="challenge-kicker">CURRENT CHALLENGE</span><strong>KILLER<span class="star"> ✳</span></strong><small><span id="cage-count">— CAGES</span> · ZERO GIVENS</small><span id="puzzle-id">SEED —</span></div></section>
+<main class="layout">
+<section class="game" aria-label="Killer Sudoku puzzle">
+<div class="game-head"><div><span class="label">BOARD / 09 × 09</span><div class="status" id="message" role="status" aria-live="polite">Find your first deduction.</div></div><button id="pause" class="ghost">Ⅱ Pause</button></div>
+<div class="board-shell"><div id="grid" class="grid" role="grid" aria-label="Killer Sudoku grid with numbered sum cages"></div><div id="veil" class="veil" hidden><b>GAME PAUSED</b><p>Your grid is hidden. The clock has stopped.</p><button id="resume" class="primary">Resume puzzle →</button></div></div>
+<p class="cage-legend"><b>∑</b> Dashed outlines group cages. Each small upper-left number is the cage's exact target sum. Digits may not repeat in a cage.</p><div class="num-pad" id="keypad" aria-label="Enter a digit"></div>
+<div class="toolbar">
+<button id="notes" aria-pressed="false" class="tool"><span>✎</span><b>Notes</b><small>OFF</small></button>
+<button id="erase" class="tool"><span>⌫</span><b>Erase</b><small>DEL</small></button>
+<button id="undo" class="tool"><span>↶</span><b>Undo</b><small>CTRL Z</small></button>
+<button id="redo" class="tool"><span>↷</span><b>Redo</b><small>CTRL Y</small></button>
+</div>
+</section>
+<aside class="sidebar">
+<div class="card metrics"><p class="eyebrow">SESSION / LIVE</p><div class="metric"><span>TIME IN GRID</span><strong id="clock">00:00</strong></div><div class="metric"><span>SQUARES FILLED</span><strong id="progress">0 / 81</strong></div><div class="meter"><span id="meter-fill"></span></div><div class="metric"><span>CHECKS WITH ERRORS</span><strong id="mistakes">00</strong></div></div>
+<div class="card mentor"><p class="eyebrow">YOUR DEDUCTION ASSISTANT</p><h2>Every cage<br>is a clue.</h2><p id="hint-text">Use the totals and missing digits to find your next deduction — or reveal one digit as a last resort.</p><div class="mentor-actions"><button class="primary" id="hint">◎ Get a hint</button><button class="ghost" id="reveal">Reveal 1</button></div></div>
+<div class="card controls"><p class="eyebrow">SESSION CONTROLS</p><button id="check" class="row-action">Check your work <span>↗</span></button><button id="restart" class="row-action">Restart this puzzle <span>↻</span></button><button id="new" class="row-action">New killer puzzle <span>＋</span></button><label class="switch"><input id="auto" type="checkbox"> <span>Show candidate suggestions</span></label></div>
+<div class="footnote">KEYS: 1–9 ENTER · 0 / DEL ERASE · ARROWS MOVE · N NOTES · H HINT · CTRL Z UNDO<br>Progress saves locally on this device.</div>
+</aside>
+</main>
+<footer class="footer"><span>◈ ARTIFACTS / FKR.DEV</span><span>SOLVE THE SUMS. MASTER THE GRID.</span></footer>
+</div></body></html>
