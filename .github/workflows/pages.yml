@@ -67,6 +67,12 @@ jobs:
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
 
+      - name: Verify Sudoku uniqueness and solving logic
+        run: node --test tests/sudoku-lab.test.mjs
+
+      - name: Refresh native source catalog
+        run: node tooling/artifactctl/src/cli.mjs catalog --out registry/generated/catalog.json
+
       - name: Checkout qualified Artifacts V13.5
         uses: actions/checkout@v5
         with:
