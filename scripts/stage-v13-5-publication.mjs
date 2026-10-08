@@ -79,6 +79,29 @@ const REVIEWED_NATIVE_ADDITIONS = new Map([
     'tests/e2e/killer-sudoku-lab.spec.mjs',
     'tests/killer-sudoku-lab.test.mjs',
   ])],
+  // Explicitly enumerate every alpha.10 removal and qualified alpha.13 addition.
+  ['nakamotos-disciples', new Set([
+    'registry/sources.d/nakamotos-disciples.json',
+    'nakamotos-disciples/BUILD_PROVENANCE.json',
+    'nakamotos-disciples/SHA256SUMS',
+    'nakamotos-disciples/index.html',
+    'nakamotos-disciples/sw.js',
+    'nakamotos-disciples/assets/GuidedProtocolCourse-Ci_BzAw0.js',
+    'nakamotos-disciples/assets/GuidedProtocolCourse-DSsCQnSX.js',
+    'nakamotos-disciples/assets/P2wshNetworkFlow-EutsmtyW.js',
+    'nakamotos-disciples/assets/ProtocolSystemsLab-p2JTHImk.js',
+    'nakamotos-disciples/assets/ProtocolSystemsLab-DrrhvDr7.js',
+    'nakamotos-disciples/assets/SegwitV0Laboratory-WMmAO39B.js',
+    'nakamotos-disciples/assets/exact-demo-CoALGFae.js',
+    'nakamotos-disciples/assets/index-C_YuxLmP.js',
+    'nakamotos-disciples/assets/index-DcoQQdgp.css',
+    'nakamotos-disciples/assets/index-B0Seuggu.css',
+    'nakamotos-disciples/assets/index-BuEFNEWl.js',
+    'nakamotos-disciples/assets/model-DXSsuBDH.js',
+    'nakamotos-disciples/assets/probability-Dc-K_v0K.js',
+    'nakamotos-disciples/assets/probability-BnYTSDyw.js',
+    'nakamotos-disciples/assets/segwit-v0-lab-C1mLqn49.js',
+  ])],
 ]);
 export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths, currentNativeAdded = [] }) {
   if (pinnedRevision === currentRevision) return { mode: 'exact', changedPaths: [] };
@@ -234,6 +257,42 @@ export async function stageQualifiedV13_5({
     for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) {
       const path = 'artifacts/killer-sudoku-lab/1.0.0/' + name;
       await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
+    }
+  }
+
+  // A native addition is publishable only if the new qualified handoff
+  // contains a complete, hashed, provenance-matching PWA distribution.
+  if (handoff.catalog?.currentNativeAdded?.includes('nakamotos-disciples')) {
+    const prefix = 'artifacts/nakamotos-disciples/0.2.0-alpha.13/';
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const item = catalog.items?.find((entry) => entry.id === 'nakamotos-disciples');
+    if (item?.availability !== 'verified' || item.version !== '0.2.0-alpha.13' ||
+        item.url !== '/' + prefix + 'index.html' ||
+        !routes.entries?.some((entry) => entry.id === 'nakamotos-disciples' &&
+          entry.path === prefix + 'index.html' && entry.state === 'staged')) {
+      throw new Error('Nakamotos Disciples alpha.13 is not a verified staged native release.');
+    }
+    const runtimeFiles = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith(prefix));
+    if (runtimeFiles.length < 16 || !runtimeFiles.some((path) => path.startsWith(prefix + 'assets/'))) {
+      throw new Error('Nakamotos Disciples runtime asset inventory is incomplete.');
+    }
+    for (const name of ['index.html', 'icon.svg', 'manifest.webmanifest', 'sw.js',
+      'BUILD_PROVENANCE.json', 'SHA256SUMS']) {
+      if (!runtimeFiles.includes(prefix + name)) {
+        throw new Error('Nakamotos Disciples missing required release asset: ' + name);
+      }
+    }
+    for (const path of runtimeFiles) {
+      if (path.endsWith('.map')) throw new Error('Nakamotos Disciples source map unexpectedly published: ' + path);
+      await assertHash(v13Dist, path, assetManifest.files[path].sha256);
+    }
+    const provenance = JSON.parse(await readFile(join(v13Dist, prefix, 'BUILD_PROVENANCE.json'), 'utf8'));
+    if (provenance.artifactId !== 'nakamotos-disciples' ||
+        provenance.sourceVersion !== '0.2.0-alpha.13' ||
+        provenance.sourceRevision !== '3d6f5360efdffa1b247c08dc0b9a6041df56eec7' ||
+        provenance.sourceMapsIncluded !== false) {
+      throw new Error('Nakamotos Disciples release provenance does not match the qualified app.');
     }
   }
 

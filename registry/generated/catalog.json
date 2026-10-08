@@ -1,22 +1,64 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-10-08T09:22:01.570Z",
+  "generatedAt": "2026-10-08T21:32:04.916Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
     "generator": "artifactctl"
   },
   "summary": {
-    "total": 19,
+    "total": 21,
     "verified": 0,
     "provisional": 5,
     "external": 1,
     "inline": 1,
-    "sourceOnly": 12,
+    "sourceOnly": 14,
     "active": 2,
-    "dated": 19
+    "dated": 21
   },
   "items": [
+    {
+      "id": "killer-sudoku-lab",
+      "version": "1.0.0",
+      "title": "Killer Sudoku Lab — The Sum Grid",
+      "description": "An offline Killer Sudoku game with numbered cages, no prefilled digits, unique puzzles, cage-sum and no-repeat logic, pencil marks, hints, undo/redo, keyboard control, and local autosave.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "game",
+        "killer sudoku",
+        "sudoku",
+        "arithmetic",
+        "logic",
+        "puzzle",
+        "offline",
+        "expert"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/killer-sudoku-lab/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "f996f8b6c63d51d6db6319d3aaba2c66efe3844f",
+        "changedAt": "2026-10-08T09:42:37.000Z",
+        "basis": "source",
+        "path": "killer-sudoku-lab"
+      },
+      "changedAt": "2026-10-08T09:42:37.000Z",
+      "receipt": null
+    },
     {
       "id": "sudoku-lab",
       "version": "1.0.0",
@@ -173,6 +215,46 @@
         "path": "oeffentliches-dienstrecht-quiz"
       },
       "changedAt": "2026-09-17T10:59:07.000Z",
+      "receipt": null
+    },
+    {
+      "id": "nakamotos-disciples",
+      "version": "0.2.0-alpha.13",
+      "title": "Nakamoto's Disciples",
+      "description": "Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic inspectors, and guided protocol lessons.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "bitcoin",
+        "education",
+        "simulation",
+        "cryptography",
+        "protocol",
+        "offline",
+        "pwa"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/nakamotos-disciples/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
+        "changedAt": "2026-09-16T00:19:00.000Z",
+        "basis": "source",
+        "path": "nakamotos-disciples"
+      },
+      "changedAt": "2026-09-16T00:19:00.000Z",
       "receipt": null
     },
     {

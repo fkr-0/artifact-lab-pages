@@ -12,6 +12,7 @@ async function fixture({
   catalogItems = 55,
   sourceRevision = 'a'.repeat(40),
   killer = false,
+  nakamoto = false,
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'v13-5-pages-adapter-'));
   const artifacts = join(root, 'artifacts');
@@ -34,6 +35,25 @@ async function fixture({
     files['catalog.json'] = JSON.stringify({items:[{id:'killer-sudoku-lab',availability:'verified',url:'/' + prefix + 'index.html'}]});
     files['route-manifest.json'] = JSON.stringify({entries:[{id:'killer-sudoku-lab',path:prefix + 'index.html',state:'staged'}]});
   }
+  if (nakamoto) {
+    const prefix = 'artifacts/nakamotos-disciples/0.2.0-alpha.13/';
+    for (const name of ['index.html', 'icon.svg', 'manifest.webmanifest',
+      'sw.js', 'SHA256SUMS']) files[prefix + name] = 'qualified Nakamoto ' + name;
+    files[prefix + 'BUILD_PROVENANCE.json'] = JSON.stringify({
+      artifactId: 'nakamotos-disciples',
+      sourceVersion: '0.2.0-alpha.13',
+      sourceRevision: '3d6f5360efdffa1b247c08dc0b9a6041df56eec7',
+      sourceMapsIncluded: false,
+    });
+    for (let i = 0; i < 10; i += 1) files[prefix + 'assets/asset-' + i + '.js'] = 'qualified asset ' + i;
+    files['catalog.json'] = JSON.stringify({items:[{
+      id:'nakamotos-disciples', version:'0.2.0-alpha.13',
+      availability:'verified', url:'/' + prefix + 'index.html',
+    }]});
+    files['route-manifest.json'] = JSON.stringify({entries:[{
+      id:'nakamotos-disciples', path:prefix + 'index.html', state:'staged',
+    }]});
+  }
   for (const [path, contents] of Object.entries(files)) {
     const target = join(dist, path);
     await mkdir(dirname(target), { recursive: true });
@@ -53,7 +73,7 @@ async function fixture({
       currentRevision: sourceRevision,
       transition: sourceRevision === 'a'.repeat(40) ? 'exact' : 'descendant',
     },
-    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : ['revealive'] },
+    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : nakamoto ? ['revealive', 'nakamotos-disciples'] : ['revealive'] },
     regressions: {
       memeLab: { url: '/meme-lab/meme-lab.html', sha256: digest(files['meme-lab/meme-lab.html']) },
       revealive: { url: '/artifacts/revealive/0.1.0/index.html', sha256: digest(files['artifacts/revealive/0.1.0/index.html']) },
@@ -137,6 +157,36 @@ test('Killer Sudoku staged native route and executable hashes are checked', asyn
   assert.match(await readFile(join(output, 'artifacts/killer-sudoku-lab/1.0.0/index.html'), 'utf8'), /qualified Killer Sudoku/);
   await writeFile(join(v13, 'dist/artifacts/killer-sudoku-lab/1.0.0/app.mjs'), 'tampered');
   await assert.rejects(stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13, outDir: output, artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) }), /hash mismatch.*killer-sudoku-lab.*app.mjs/);
+});
+
+test('Nakamoto publication requires reviewed source paths and qualified catalog membership', () => {
+  const transition = {
+    pinnedRevision: 'a'.repeat(40),
+    currentRevision: 'b'.repeat(40),
+    pinnedIsAncestor: true,
+    changedPaths: [
+      'registry/sources.d/nakamotos-disciples.json',
+      'nakamotos-disciples/BUILD_PROVENANCE.json',
+      'nakamotos-disciples/assets/segwit-v0-lab-C1mLqn49.js',
+    ],
+  };
+  assert.throws(() => validateSourceTransition(transition), /outside reviewed publication paths/);
+  assert.equal(validateSourceTransition({...transition, currentNativeAdded:['nakamotos-disciples']}).mode, 'integration-descendant');
+  assert.throws(() => validateSourceTransition({
+    ...transition, currentNativeAdded:['nakamotos-disciples'],
+    changedPaths:[...transition.changedPaths, 'nakamotos-disciples/assets/unreviewed.js'],
+  }), /unreviewed.js/);
+});
+
+test('Nakamoto qualified release requires intact, hashed PWA assets and pinned provenance', async () => {
+  const { artifacts, v13, output } = await fixture({ nakamoto: true });
+  const args = { artifactRoot: artifacts, v13Root: v13, outDir: output,
+    artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) };
+  const success = await stageQualifiedV13_5(args);
+  assert.equal(success.receipt.v13_5.stagedV12Local, 44);
+  assert.match(await readFile(join(output, 'artifacts/nakamotos-disciples/0.2.0-alpha.13/index.html'), 'utf8'), /qualified Nakamoto/);
+  await writeFile(join(v13, 'dist/artifacts/nakamotos-disciples/0.2.0-alpha.13/assets/asset-0.js'), 'tampered');
+  await assert.rejects(stageQualifiedV13_5(args), /hash mismatch.*nakamotos-disciples.*asset-0.js/);
 });
 
 test('adapter rejects a handoff below the 55-item catalog floor', async () => {
