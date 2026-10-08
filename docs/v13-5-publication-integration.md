@@ -24,7 +24,14 @@ The live Pages workflow checks out an immutable V13.5 revision, generates its
 handoff against the current Artifact Lab checkout, stages that qualified output,
 and verifies V13_5_PAGES_INTEGRATION.json. The adapter permits an Artifact Lab
 checkout newer than the V13.5 qualification pin only when all intervening
-changes are in the reviewed integration-only path set.
+changes are in the reviewed integration-only path set, or in an explicitly
+allowlisted current-native addition listed in the newly produced handoff.
+Sudoku Lab's initial source/manifest/test paths are a bounded exception. They
+are accepted only if the handoff includes `sudoku-lab` as a native addition, the
+assembled catalog and route manifest mark its versioned URL as staged and
+verified, and every executable Sudoku asset matches the stage asset manifest's
+SHA-256 digest. Unreviewed Sudoku source paths and unrelated artifact changes
+continue to fail the source-transition gate.
 
 The verified .artifacts-pages-stage directory is the terminal upload input.
 Nothing may rebuild or selectively rewrite that directory after receipt

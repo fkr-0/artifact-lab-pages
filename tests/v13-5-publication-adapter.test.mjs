@@ -87,6 +87,30 @@ test('qualified V13.5 handoff becomes the complete Pages stage', async () => {
   assert.equal(JSON.parse(await readFile(join(output, 'V13_5_PAGES_INTEGRATION.json'), 'utf8')).deployment.performed, false);
 });
 
+test('reviewed Sudoku source changes require the handoff to contain the native addition', () => {
+  const transition = {
+    pinnedRevision: 'a'.repeat(40),
+    currentRevision: 'b'.repeat(40),
+    pinnedIsAncestor: true,
+    changedPaths: [
+      'registry/sources.d/sudoku-lab.json',
+      'sudoku-lab/app.mjs',
+      'sudoku-lab/engine.mjs',
+      'sudoku-lab/index.html',
+      'sudoku-lab/styles.css',
+      'tests/e2e/sudoku-lab.spec.mjs',
+      'tests/sudoku-lab.test.mjs',
+    ],
+  };
+  assert.throws(() => validateSourceTransition(transition), /outside reviewed publication paths/);
+  assert.equal(validateSourceTransition({ ...transition, currentNativeAdded: ['sudoku-lab'] }).mode, 'integration-descendant');
+  assert.throws(() => validateSourceTransition({
+    ...transition,
+    currentNativeAdded: ['sudoku-lab'],
+    changedPaths: [...transition.changedPaths, 'sudoku-lab/unreviewed.js'],
+  }), /unreviewed\.js/);
+});
+
 test('adapter rejects a handoff below the 55-item catalog floor', async () => {
   const { artifacts, v13, output } = await fixture({ catalogItems: 54 });
   await assert.rejects(
@@ -160,6 +184,6 @@ test('artifact-source changes require a fresh V13.5 handoff', () => {
       pinnedIsAncestor: true,
       changedPaths: ['meme-lab/meme-lab.html'],
     }),
-    /outside integration-only paths: meme-lab\/meme-lab\.html/,
+    /outside reviewed publication paths: meme-lab\/meme-lab\.html/,
   );
 });

@@ -58,15 +58,32 @@ const INTEGRATION_ONLY_PATHS = new Set([
   'tests/revealive-publication-stage.test.mjs',
   'tests/v13-5-publication-adapter.test.mjs',
 ]);
-export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths }) {
+// Reviewed post-pin native additions are exact-path exceptions, gated by the
+// current V13.5 handoff inventory and separately verified staged assets.
+const REVIEWED_NATIVE_ADDITIONS = new Map([
+  ['sudoku-lab', new Set([
+    'registry/sources.d/sudoku-lab.json',
+    'sudoku-lab/app.mjs',
+    'sudoku-lab/engine.mjs',
+    'sudoku-lab/index.html',
+    'sudoku-lab/styles.css',
+    'tests/e2e/sudoku-lab.spec.mjs',
+    'tests/sudoku-lab.test.mjs',
+  ])],
+]);
+export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths, currentNativeAdded = [] }) {
   if (pinnedRevision === currentRevision) return { mode: 'exact', changedPaths: [] };
   if (!pinnedIsAncestor) {
     throw new Error('Canonical Artifact Lab revision mismatch: ' + currentRevision + ' is not a descendant of ' + pinnedRevision);
   }
-  const disallowed = changedPaths.filter((path) => !INTEGRATION_ONLY_PATHS.has(path));
+  const approved = new Set(INTEGRATION_ONLY_PATHS);
+  for (const id of currentNativeAdded) {
+    for (const path of REVIEWED_NATIVE_ADDITIONS.get(id) || []) approved.add(path);
+  }
+  const disallowed = changedPaths.filter((path) => !approved.has(path));
   if (disallowed.length) {
     throw new Error(
-      'Canonical Artifact Lab changed after the V13.5 handoff pin outside integration-only paths: ' +
+      'Canonical Artifact Lab changed after the V13.5 handoff pin outside reviewed publication paths: ' +
       disallowed.join(', '),
     );
   }
@@ -139,6 +156,7 @@ export async function stageQualifiedV13_5({
       currentRevision: currentSourceRevision,
       pinnedIsAncestor: false,
       changedPaths: [],
+      currentNativeAdded: handoff.catalog?.currentNativeAdded || [],
     });
   } else {
     const transition = await gitSourceTransition(
@@ -150,6 +168,7 @@ export async function stageQualifiedV13_5({
       pinnedRevision: handoff.canonicalSource?.revision,
       currentRevision: currentSourceRevision,
       ...transition,
+      currentNativeAdded: handoff.catalog?.currentNativeAdded || [],
     });
   }
   if (handoff.release?.commit !== currentV13Revision) {
@@ -173,6 +192,23 @@ export async function stageQualifiedV13_5({
   const hashedFileCount = Object.keys(assetManifest.files || {}).length;
   if (hashedFileCount !== handoff.evidence?.hashedFiles) {
     throw new Error('V13.5 asset manifest count mismatch: ' + hashedFileCount + ' != ' + handoff.evidence?.hashedFiles);
+  }
+
+  // A post-pin Sudoku addition is allowed only when the *new* handoff
+  // publishes it as a verified route and hashes every executable asset.
+  if (handoff.catalog?.currentNativeAdded?.includes('sudoku-lab')) {
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const route = 'artifacts/sudoku-lab/1.0.0/index.html';
+    const item = catalog.items?.find((entry) => entry.id === 'sudoku-lab');
+    if (item?.availability !== 'verified' || item.url !== '/' + route ||
+        !routes.entries?.some((entry) => entry.id === 'sudoku-lab' && entry.path === route && entry.state === 'staged')) {
+      throw new Error('Sudoku Lab is not a verified staged native release.');
+    }
+    for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) {
+      const path = 'artifacts/sudoku-lab/1.0.0/' + name;
+      await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
+    }
   }
 
   const sourceFiles = await walkRegularFiles(v13Dist);
