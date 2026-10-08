@@ -1,22 +1,62 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-10-06T13:34:12.820Z",
+  "generatedAt": "2026-10-08T09:22:01.570Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
     "generator": "artifactctl"
   },
   "summary": {
-    "total": 18,
+    "total": 19,
     "verified": 0,
     "provisional": 5,
     "external": 1,
     "inline": 1,
-    "sourceOnly": 11,
+    "sourceOnly": 12,
     "active": 2,
-    "dated": 18
+    "dated": 19
   },
   "items": [
+    {
+      "id": "sudoku-lab",
+      "version": "1.0.0",
+      "title": "Sudoku Lab — Expert Grid",
+      "description": "A fully offline, client-side expert Sudoku game with unique puzzles, local autosave, pencil marks, keyboard controls, undo/redo, contextual hints and reveal.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "game",
+        "sudoku",
+        "logic",
+        "puzzle",
+        "offline",
+        "expert"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/sudoku-lab/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "ced5bcf1b9ab1b97c5903dbae4b0748becf1bda5",
+        "changedAt": "2026-10-08T09:21:56.000Z",
+        "basis": "source",
+        "path": "sudoku-lab"
+      },
+      "changedAt": "2026-10-08T09:21:56.000Z",
+      "receipt": null
+    },
     {
       "id": "app-hub-v13",
       "version": "2.1.0",
