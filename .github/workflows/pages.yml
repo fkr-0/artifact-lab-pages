@@ -16,7 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: 60817c7cd982b22c5e4b9727c6cf9927e9b93fa7
+  ARTIFACTS_V13_5_REVISION: 53c397650860b03bbed12f0da476dd0ae1a88abe
 
 jobs:
   build:
@@ -63,6 +63,19 @@ jobs:
       - name: Build (peerjslib-lobby-share)
         run: pnpm run sample:build
         working-directory: peerjslib
+
+      # Git Recipe Book must be built; its tracked index.html is only a Vite dev entrypoint.
+      - name: Install dependencies (git-recipe-book)
+        run: pnpm install --frozen-lockfile
+        working-directory: git-recipe-book
+
+      - name: Verify Git Recipe Book
+        run: pnpm lint && pnpm test
+        working-directory: git-recipe-book
+
+      - name: Build (git-recipe-book)
+        run: pnpm build
+        working-directory: git-recipe-book
 
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast

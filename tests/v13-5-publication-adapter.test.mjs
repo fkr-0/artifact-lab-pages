@@ -25,6 +25,9 @@ async function fixture({
     'styles.css': 'body{}',
     'meme-lab/meme-lab.html': '<!doctype html><title>Meme Lab</title>',
     'artifacts/revealive/0.1.0/index.html': '<!doctype html><title>Revealive</title>',
+    'git-recipe-book/index.html': '<script type="module" src="./assets/main.js"></script><link rel="stylesheet" href="./assets/main.css">',
+    'git-recipe-book/assets/main.js': 'console.log("git recipe");',
+    'git-recipe-book/assets/main.css': 'body{display:block}',
     'catalog.json': '{"items":[]}',
     'parity-report.json': '{"summary":{}}',
     'route-manifest.json': '{"entries":[]}',
@@ -75,6 +78,8 @@ async function fixture({
     },
     catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : nakamoto ? ['revealive', 'nakamotos-disciples'] : ['revealive'] },
     regressions: {
+      gitRecipeBook: { url: '/git-recipe-book/index.html', version: '1.1.0', assets: 2,
+        sha256: digest(files['git-recipe-book/index.html']) },
       memeLab: { url: '/meme-lab/meme-lab.html', sha256: digest(files['meme-lab/meme-lab.html']) },
       revealive: { url: '/artifacts/revealive/0.1.0/index.html', sha256: digest(files['artifacts/revealive/0.1.0/index.html']) },
     },
@@ -187,6 +192,24 @@ test('Nakamoto qualified release requires intact, hashed PWA assets and pinned p
   assert.match(await readFile(join(output, 'artifacts/nakamotos-disciples/0.2.0-alpha.13/index.html'), 'utf8'), /qualified Nakamoto/);
   await writeFile(join(v13, 'dist/artifacts/nakamotos-disciples/0.2.0-alpha.13/assets/asset-0.js'), 'tampered');
   await assert.rejects(stageQualifiedV13_5(args), /hash mismatch.*nakamotos-disciples.*asset-0.js/);
+});
+
+test('Git Recipe Book baseline correction is allowed only with qualified handoff', () => {
+  const sourceTransition = { pinnedRevision: 'a'.repeat(40), currentRevision: 'b'.repeat(40),
+    pinnedIsAncestor: true, changedPaths: ['git-recipe-book/index.html'] };
+  assert.throws(() => validateSourceTransition(sourceTransition), /outside reviewed publication paths/);
+  assert.equal(validateSourceTransition({ ...sourceTransition, gitRecipeBookQualified: true }).mode, 'integration-descendant');
+  assert.throws(() => validateSourceTransition({ ...sourceTransition, gitRecipeBookQualified: true,
+    changedPaths: ['git-recipe-book/index.html', 'git-recipe-book/hidden.js'] }), /hidden.js/);
+});
+
+test('Git Recipe Book release hash and compiled assets cannot be tampered with', async () => {
+  const { artifacts, v13, output } = await fixture();
+  const args = { artifactRoot: artifacts, v13Root: v13, outDir: output,
+    artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) };
+  await stageQualifiedV13_5(args);
+  await writeFile(join(v13, 'dist/git-recipe-book/assets/main.js'), 'tampered');
+  await assert.rejects(stageQualifiedV13_5(args), /hash mismatch.*git-recipe-book.*main.js/);
 });
 
 test('adapter rejects a handoff below the 55-item catalog floor', async () => {

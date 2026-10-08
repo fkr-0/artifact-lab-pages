@@ -103,12 +103,16 @@ const REVIEWED_NATIVE_ADDITIONS = new Map([
     'nakamotos-disciples/assets/segwit-v0-lab-C1mLqn49.js',
   ])],
 ]);
-export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths, currentNativeAdded = [] }) {
+export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths, currentNativeAdded = [], gitRecipeBookQualified = false }) {
   if (pinnedRevision === currentRevision) return { mode: 'exact', changedPaths: [] };
   if (!pinnedIsAncestor) {
     throw new Error('Canonical Artifact Lab revision mismatch: ' + currentRevision + ' is not a descendant of ' + pinnedRevision);
   }
   const approved = new Set(INTEGRATION_ONLY_PATHS);
+  // The only source change permitted for the baseline compile upgrade is the
+  // reviewed correction to the source HTML's dangling favicon reference.
+  // The published build itself is generated reproducibly by Pages.
+  if (gitRecipeBookQualified) approved.add('git-recipe-book/index.html');
   for (const id of currentNativeAdded) {
     for (const path of REVIEWED_NATIVE_ADDITIONS.get(id) || []) approved.add(path);
   }
@@ -152,6 +156,11 @@ function validateHandoff(handoff) {
   if (!Number.isInteger(handoff.release?.catalogItems) || handoff.release.catalogItems < MINIMUM_CATALOG_ITEMS) throw new Error('V13.5 handoff catalog is smaller than the qualified superset floor.');
   if (!handoff.catalog?.currentNativeAdded?.includes('revealive')) throw new Error('V13.5 handoff is missing the qualified Revealive native addition.');
   if (handoff.regressions?.memeLab?.url !== '/meme-lab/meme-lab.html') throw new Error('V13.5 handoff does not preserve the Meme Lab route.');
+  if (handoff.regressions?.gitRecipeBook?.url !== '/git-recipe-book/index.html' ||
+      handoff.regressions.gitRecipeBook.version !== '1.1.0' ||
+      handoff.regressions.gitRecipeBook.assets < 2) {
+    throw new Error('V13.5 handoff lacks the verified compiled Git Recipe Book baseline upgrade.');
+  }
   return handoff;
 }
 export async function stageQualifiedV13_5({
@@ -189,6 +198,7 @@ export async function stageQualifiedV13_5({
       pinnedIsAncestor: false,
       changedPaths: [],
       currentNativeAdded: handoff.catalog?.currentNativeAdded || [],
+      gitRecipeBookQualified: true,
     });
   } else {
     const transition = await gitSourceTransition(
@@ -201,6 +211,7 @@ export async function stageQualifiedV13_5({
       currentRevision: currentSourceRevision,
       ...transition,
       currentNativeAdded: handoff.catalog?.currentNativeAdded || [],
+      gitRecipeBookQualified: true,
     });
   }
   if (handoff.release?.commit !== currentV13Revision) {
@@ -209,6 +220,7 @@ export async function stageQualifiedV13_5({
 
   const requiredHashes = [
     ['index.html', handoff.rootLauncher?.indexSha256],
+    ['git-recipe-book/index.html', handoff.regressions?.gitRecipeBook?.sha256],
     ['app.js', handoff.rootLauncher?.appSha256],
     ['styles.css', handoff.rootLauncher?.stylesSha256],
     ['meme-lab/meme-lab.html', handoff.regressions?.memeLab?.sha256],
@@ -295,6 +307,20 @@ export async function stageQualifiedV13_5({
       throw new Error('Nakamotos Disciples release provenance does not match the qualified app.');
     }
   }
+
+  // Refuse a renamed source-only HTML page or broken script/style dependency.
+  const gitRecipeHtml = await readFile(join(v13Dist, 'git-recipe-book/index.html'), 'utf8');
+  if (gitRecipeHtml.includes('src/main.tsx') || !gitRecipeHtml.includes('src="./assets/') ||
+      !gitRecipeHtml.includes('href="./assets/')) {
+    throw new Error('Git Recipe Book release is not compiled HTML.');
+  }
+  const gitRecipeAssets = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith('git-recipe-book/assets/'));
+  if (gitRecipeAssets.length !== handoff.regressions.gitRecipeBook.assets ||
+      !gitRecipeAssets.some((path) => path.endsWith('.js')) ||
+      !gitRecipeAssets.some((path) => path.endsWith('.css'))) {
+    throw new Error('Git Recipe Book stage is missing compiled runtime assets.');
+  }
+  for (const path of gitRecipeAssets) await assertHash(v13Dist, path, assetManifest.files[path].sha256);
 
   const sourceFiles = await walkRegularFiles(v13Dist);
   if (!sourceFiles.includes('PUBLICATION_HANDOFF.json')) throw new Error('V13.5 stage inventory omitted PUBLICATION_HANDOFF.json');
