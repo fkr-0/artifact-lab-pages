@@ -54,6 +54,16 @@ jobs:
         run: pnpm run build
         working-directory: badger-sprawl-runner
 
+      # The V13.5 native superset includes the generated lobby sample. The
+      # pinned peerjslib submodule does not check its dist output into Git.
+      - name: Install dependencies (peerjslib)
+        run: pnpm install --frozen-lockfile
+        working-directory: peerjslib
+
+      - name: Build (peerjslib-lobby-share)
+        run: pnpm run sample:build
+        working-directory: peerjslib
+
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
 
