@@ -13,6 +13,7 @@ async function fixture({
   sourceRevision = 'a'.repeat(40),
   killer = false,
   nakamoto = false,
+  vim = false,
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'v13-5-pages-adapter-'));
   const artifacts = join(root, 'artifacts');
@@ -57,6 +58,29 @@ async function fixture({
       id:'nakamotos-disciples', path:prefix + 'index.html', state:'staged',
     }]});
   }
+  if (vim) {
+    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.2/';
+    files[prefix + 'index.html'] = '<script type="module" src="./assets/index-CGqy7tDU.js"></script><link rel="stylesheet" href="./assets/index-UZOijEoK.css">';
+    files[prefix + 'assets/index-CGqy7tDU.js'] = 'console.log("Vim Tomb Raider");';
+    files[prefix + 'assets/index-UZOijEoK.css'] = 'body{margin:0}';
+    files[prefix + 'assets/sprites/explorer-core.png'] = 'mock-sprite';
+    files[prefix + 'BUILD_PROVENANCE.json'] = JSON.stringify({
+      artifactId: 'vim-tomb-raider', sourceVersion: '1.0.0-rc.2',
+      sourceTag: 'v1.0.0-rc.2', sourceRevision: 'd851f478276c27048633fb6822bfb72eaa2569ef',
+      sourceReleaseArchiveSha256: '7d415136b1552d58f8248aa6d2f1bcf687171ced6880c8aaf4702eb5ebe6bf42',
+      sourceMapsIncluded: false, vendoredRuntimeFiles: 4,
+    });
+    files[prefix + 'SHA256SUMS'] = Object.entries(files)
+      .filter(([path]) => path.startsWith(prefix) && !path.endsWith('/SHA256SUMS'))
+      .map(([path, value]) => digest(value) + '  ' + path.slice(prefix.length)).join('\n') + '\n';
+    files['catalog.json'] = JSON.stringify({items:[{
+      id: 'vim-tomb-raider', version: '1.0.0-rc.2', availability: 'verified',
+      url: '/' + prefix + 'index.html',
+    }]});
+    files['route-manifest.json'] = JSON.stringify({entries:[{
+      id:'vim-tomb-raider', path:prefix + 'index.html', state:'staged',
+    }]});
+  }
   for (const [path, contents] of Object.entries(files)) {
     const target = join(dist, path);
     await mkdir(dirname(target), { recursive: true });
@@ -76,7 +100,7 @@ async function fixture({
       currentRevision: sourceRevision,
       transition: sourceRevision === 'a'.repeat(40) ? 'exact' : 'descendant',
     },
-    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : nakamoto ? ['revealive', 'nakamotos-disciples'] : ['revealive'] },
+    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : nakamoto ? ['revealive', 'nakamotos-disciples'] : vim ? ['revealive', 'vim-tomb-raider'] : ['revealive'] },
     regressions: {
       gitRecipeBook: { url: '/git-recipe-book/index.html', version: '1.1.0', assets: 2,
         sha256: digest(files['git-recipe-book/index.html']) },
@@ -117,6 +141,48 @@ test('qualified V13.5 handoff becomes the complete Pages stage', async () => {
   assert.match(await readFile(join(output, 'meme-lab', 'meme-lab.html'), 'utf8'), /Meme Lab/);
   assert.match(await readFile(join(output, 'artifacts', 'revealive', '0.1.0', 'index.html'), 'utf8'), /Revealive/);
   assert.equal(JSON.parse(await readFile(join(output, 'V13_5_PAGES_INTEGRATION.json'), 'utf8')).deployment.performed, false);
+});
+
+test('Vim Tomb Raider source changes require an exact reviewed release file set', () => {
+  const transition = {
+    pinnedRevision: 'a'.repeat(40), currentRevision: 'b'.repeat(40),
+    pinnedIsAncestor: true,
+    changedPaths: [
+      'registry/sources.d/vim-tomb-raider.json',
+      'vim-tomb-raider/index.html',
+      'vim-tomb-raider/BUILD_PROVENANCE.json',
+      'vim-tomb-raider/SHA256SUMS',
+      'vim-tomb-raider/assets/index-CGqy7tDU.js',
+    ],
+  };
+  assert.throws(() => validateSourceTransition(transition), /outside reviewed publication paths/);
+  assert.equal(validateSourceTransition({
+    ...transition, currentNativeAdded: ['vim-tomb-raider'],
+  }).mode, 'integration-descendant');
+  assert.throws(() => validateSourceTransition({
+    ...transition, currentNativeAdded: ['vim-tomb-raider'],
+    changedPaths: [...transition.changedPaths, 'vim-tomb-raider/assets/unreviewed.js'],
+  }), /unreviewed\.js/);
+});
+
+test('Vim Tomb Raider release requires proven source, route and every intact runtime hash', async () => {
+  const { artifacts, v13, output } = await fixture({ vim: true });
+  const args = { artifactRoot: artifacts, v13Root: v13, outDir: output,
+    artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) };
+  await stageQualifiedV13_5(args);
+  assert.match(await readFile(join(output, 'artifacts/vim-tomb-raider/1.0.0-rc.2/index.html'), 'utf8'), /assets\/index-CGqy7tDU.js/);
+  await writeFile(join(v13, 'dist/artifacts/vim-tomb-raider/1.0.0-rc.2/assets/index-CGqy7tDU.js'), 'tampered');
+  await assert.rejects(stageQualifiedV13_5(args), /hash mismatch.*vim-tomb-raider.*index-CGqy7tDU/);
+});
+
+test('Vim Tomb Raider provenance and checksums fail closed on inconsistent release evidence', async () => {
+  const { artifacts, v13, output } = await fixture({ vim: true });
+  const args = { artifactRoot: artifacts, v13Root: v13, outDir: output,
+    artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) };
+  const prefix = join(v13, 'dist/artifacts/vim-tomb-raider/1.0.0-rc.2');
+  const sumsPath = join(prefix, 'SHA256SUMS');
+  await writeFile(sumsPath, 'a'.repeat(64) + '  nonexistent.js\n');
+  await assert.rejects(stageQualifiedV13_5(args), /SHA256SUMS has an invalid entry/);
 });
 
 test('reviewed Sudoku source changes require the handoff to contain the native addition', () => {

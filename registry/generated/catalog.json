@@ -1,22 +1,102 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-10-08T21:32:04.916Z",
+  "generatedAt": "2026-10-08T22:08:37.848Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
     "generator": "artifactctl"
   },
   "summary": {
-    "total": 21,
+    "total": 22,
     "verified": 0,
     "provisional": 5,
     "external": 1,
     "inline": 1,
-    "sourceOnly": 14,
+    "sourceOnly": 15,
     "active": 2,
     "dated": 21
   },
   "items": [
+    {
+      "id": "git-recipe-book",
+      "version": "1.1.0",
+      "title": "Git Recipe Book",
+      "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
+      "kind": "application",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "education",
+        "git",
+        "project",
+        "root-owned",
+        "react"
+      ],
+      "sourceKind": "project",
+      "gitMode": "root",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "829048a38d8be5965132aa5f35cc789ca16de257",
+        "changedAt": "2026-10-08T21:46:55.000Z",
+        "basis": "source",
+        "path": "git-recipe-book"
+      },
+      "changedAt": "2026-10-08T21:46:55.000Z",
+      "receipt": null
+    },
+    {
+      "id": "nakamotos-disciples",
+      "version": "0.2.0-alpha.13",
+      "title": "Nakamoto's Disciples",
+      "description": "Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic inspectors, and guided protocol lessons.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "bitcoin",
+        "education",
+        "simulation",
+        "cryptography",
+        "protocol",
+        "offline",
+        "pwa"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/nakamotos-disciples/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "b21b7f1645e2319b0f268173669dec8b07d3888c",
+        "changedAt": "2026-10-08T21:34:12.000Z",
+        "basis": "source",
+        "path": "nakamotos-disciples"
+      },
+      "changedAt": "2026-10-08T21:34:12.000Z",
+      "receipt": null
+    },
     {
       "id": "killer-sudoku-lab",
       "version": "1.0.0",
@@ -218,46 +298,6 @@
       "receipt": null
     },
     {
-      "id": "nakamotos-disciples",
-      "version": "0.2.0-alpha.13",
-      "title": "Nakamoto's Disciples",
-      "description": "Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic inspectors, and guided protocol lessons.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "bitcoin",
-        "education",
-        "simulation",
-        "cryptography",
-        "protocol",
-        "offline",
-        "pwa"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/nakamotos-disciples/index.html",
-      "launch": {
-        "default": "fullscreen",
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "revision": "9a167b535f115024380f29c1795c64e874044ac2",
-        "changedAt": "2026-09-16T00:19:00.000Z",
-        "basis": "source",
-        "path": "nakamotos-disciples"
-      },
-      "changedAt": "2026-09-16T00:19:00.000Z",
-      "receipt": null
-    },
-    {
       "id": "revealive",
       "version": "0.1.0",
       "title": "Revealive",
@@ -331,46 +371,6 @@
         "path": "ethic-brawl"
       },
       "changedAt": "2026-09-09T23:47:32.000Z",
-      "receipt": null
-    },
-    {
-      "id": "git-recipe-book",
-      "version": "1.1.0",
-      "title": "Git Recipe Book",
-      "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
-      "kind": "application",
-      "status": "experimental",
-      "required": false,
-      "tags": [
-        "education",
-        "git",
-        "project",
-        "root-owned",
-        "react"
-      ],
-      "sourceKind": "project",
-      "gitMode": "root",
-      "buildMode": "compile",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": null,
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "revision": "07214ea36ef7951a520e5466e0c4fda34ddfe897",
-        "changedAt": "2026-08-29T16:08:38.000Z",
-        "basis": "source",
-        "path": "git-recipe-book"
-      },
-      "changedAt": "2026-08-29T16:08:38.000Z",
       "receipt": null
     },
     {
@@ -821,6 +821,46 @@
         "path": "v11-peer-daw"
       },
       "changedAt": "2026-07-19T02:48:09.000Z",
+      "receipt": null
+    },
+    {
+      "id": "vim-tomb-raider",
+      "version": "1.0.0-rc.2",
+      "title": "Vim Tomb Raider",
+      "description": "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum, command-composition puzzles, and evidence-driven practice.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "vim",
+        "education",
+        "keyboard",
+        "game",
+        "puzzle",
+        "curriculum",
+        "react"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/vim-tomb-raider/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": null,
+        "revision": null,
+        "basis": "unknown",
+        "path": "vim-tomb-raider"
+      },
+      "changedAt": null,
       "receipt": null
     }
   ]

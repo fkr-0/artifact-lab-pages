@@ -61,6 +61,26 @@ const INTEGRATION_ONLY_PATHS = new Set([
 // Reviewed post-pin native additions are exact-path exceptions, gated by the
 // current V13.5 handoff inventory and separately verified staged assets.
 const REVIEWED_NATIVE_ADDITIONS = new Map([
+  ['vim-tomb-raider', new Set([
+    'registry/sources.d/vim-tomb-raider.json',
+    'vim-tomb-raider/index.html',
+    'vim-tomb-raider/BUILD_PROVENANCE.json',
+    'vim-tomb-raider/SHA256SUMS',
+    'vim-tomb-raider/assets/BitmapFont-DNFokSKf.js',
+    'vim-tomb-raider/assets/BufferResource-BpYMc-UG.js',
+    'vim-tomb-raider/assets/CanvasRenderer-CKytugyQ.js',
+    'vim-tomb-raider/assets/Filter-DKrualp8.js',
+    'vim-tomb-raider/assets/GameScreen-C-DPdz1i.js',
+    'vim-tomb-raider/assets/RenderTargetSystem-BRmGIRH_.js',
+    'vim-tomb-raider/assets/WebGLRenderer-DdgWhJwJ.js',
+    'vim-tomb-raider/assets/WebGPURenderer-Dp408ng5.js',
+    'vim-tomb-raider/assets/browserAll-BW1IJdJa.js',
+    'vim-tomb-raider/assets/canvasUtils-Bs5RrmAe.js',
+    'vim-tomb-raider/assets/index-CGqy7tDU.js',
+    'vim-tomb-raider/assets/index-UZOijEoK.css',
+    'vim-tomb-raider/assets/sprites/explorer-core.png',
+    'vim-tomb-raider/assets/webworkerAll-B_l9o-t6.js',
+  ])],
   ['sudoku-lab', new Set([
     'registry/sources.d/sudoku-lab.json',
     'sudoku-lab/app.mjs',
@@ -307,6 +327,66 @@ export async function stageQualifiedV13_5({
       throw new Error('Nakamotos Disciples release provenance does not match the qualified app.');
     }
   }
+
+  // A vendored release-candidate is accepted only if the catalog, route,
+  // immutable source provenance and SHA-256 inventory all agree.
+  if (handoff.catalog?.currentNativeAdded?.includes('vim-tomb-raider')) {
+    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.2/';
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const item = catalog.items?.find((entry) => entry.id === 'vim-tomb-raider');
+    if (item?.availability !== 'verified' || item.version !== '1.0.0-rc.2' ||
+        item.url !== '/' + prefix + 'index.html' ||
+        !routes.entries?.some((entry) => entry.id === 'vim-tomb-raider' &&
+          entry.path === prefix + 'index.html' && entry.state === 'staged')) {
+      throw new Error('Vim Tomb Raider rc.2 is not a verified staged native release.');
+    }
+    const runtimeFiles = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith(prefix));
+    const required = ['index.html', 'assets/index-CGqy7tDU.js',
+      'assets/index-UZOijEoK.css', 'assets/sprites/explorer-core.png',
+      'BUILD_PROVENANCE.json', 'SHA256SUMS'];
+    for (const name of required) {
+      if (!runtimeFiles.includes(prefix + name)) throw new Error('Vim Tomb Raider missing release asset: ' + name);
+    }
+    const provenance = JSON.parse(await readFile(join(v13Dist, prefix, 'BUILD_PROVENANCE.json'), 'utf8'));
+    if (provenance.artifactId !== 'vim-tomb-raider' ||
+        provenance.sourceVersion !== '1.0.0-rc.2' ||
+        provenance.sourceTag !== 'v1.0.0-rc.2' ||
+        provenance.sourceRevision !== 'd851f478276c27048633fb6822bfb72eaa2569ef' ||
+        provenance.sourceReleaseArchiveSha256 !== '7d415136b1552d58f8248aa6d2f1bcf687171ced6880c8aaf4702eb5ebe6bf42' ||
+        provenance.sourceMapsIncluded !== false ||
+        provenance.vendoredRuntimeFiles !== runtimeFiles.length - 2) {
+      throw new Error('Vim Tomb Raider release provenance does not match the qualified source.');
+    }
+    const html = await readFile(join(v13Dist, prefix, 'index.html'), 'utf8');
+    if (html.includes('src/main.tsx') ||
+        /(?:src|href)=["']\//u.test(html) ||
+        !html.includes('./assets/index-CGqy7tDU.js') ||
+        !html.includes('./assets/index-UZOijEoK.css')) {
+      throw new Error('Vim Tomb Raider release HTML is not relocatable compiled output.');
+    }
+    const checksums = await readFile(join(v13Dist, prefix, 'SHA256SUMS'), 'utf8');
+    const sums = new Map();
+    for (const line of checksums.trim().split(/\r?\n/u)) {
+      const match = /^([a-f0-9]{64})  ([^\s]+)$/u.exec(line);
+      if (!match || sums.has(match[2]) || !runtimeFiles.includes(prefix + match[2]) ||
+          match[2] === 'SHA256SUMS') {
+        throw new Error('Vim Tomb Raider release SHA256SUMS has an invalid entry.');
+      }
+      sums.set(match[2], match[1]);
+    }
+    if (sums.size !== runtimeFiles.length - 1) {
+      throw new Error('Vim Tomb Raider release SHA256SUMS inventory is incomplete.');
+    }
+    for (const path of runtimeFiles) {
+      if (path.endsWith('.map')) throw new Error('Vim Tomb Raider release unexpectedly includes a source map: ' + path);
+      const hash = await assertHash(v13Dist, path, assetManifest.files[path].sha256);
+      if (path !== prefix + 'SHA256SUMS' && sums.get(path.slice(prefix.length)) !== hash) {
+        throw new Error('Vim Tomb Raider SHA256SUMS mismatch for ' + path);
+      }
+    }
+  }
+
 
   // Refuse a renamed source-only HTML page or broken script/style dependency.
   const gitRecipeHtml = await readFile(join(v13Dist, 'git-recipe-book/index.html'), 'utf8');
