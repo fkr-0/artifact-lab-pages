@@ -72,6 +72,9 @@ jobs:
       - name: Verify Git Recipe Book
         run: pnpm lint && pnpm test
         working-directory: git-recipe-book
+        env:
+          # Avoid Node's experimental global Web Storage shadowing jsdom storage.
+          NODE_OPTIONS: --no-experimental-webstorage
 
       - name: Build (git-recipe-book)
         run: pnpm build
