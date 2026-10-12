@@ -1,10 +1,10 @@
 {
   "schemaVersion": "artifacts.fkr.dev/build-provenance-v1",
   "artifactId": "vim-tomb-raider",
-  "sourceVersion": "1.0.0-rc.5",
-  "sourceTag": "v1.0.0-rc.5",
-  "sourceRevision": "0618707def03d0f9edbc6ce548fda1db5c29df95",
-  "sourceReleaseArchiveSha256": "df06a54f6de2ec7a23566ca6aa7ca834234e262828b9f0046199a4edb0c27bec",
+  "sourceVersion": "1.0.0-rc.6",
+  "sourceTag": "v1.0.0-rc.6",
+  "sourceRevision": "011396e5e85182ed55fd3cd3c15bd27e0132b16e",
+  "sourceReleaseArchiveSha256": "c60312197166834c810ea676e4722f8ab2457361cc32aad51f2b881aff458c50",
   "buildCommand": "pnpm verify && pnpm package:release",
   "sourceMapsIncluded": false,
   "vendoredRuntimeFiles": 16
