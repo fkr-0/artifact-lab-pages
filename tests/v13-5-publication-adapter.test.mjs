@@ -59,23 +59,23 @@ async function fixture({
     }]});
   }
   if (vim) {
-    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.4/';
-    files[prefix + 'index.html'] = '<script type="module" src="./assets/index-DTIFtPYb.js"></script><link rel="stylesheet" href="./assets/index-CqYVR9bx.css">';
-    files[prefix + 'assets/index-DTIFtPYb.js'] = 'console.log("Vim Tomb Raider");';
-    files[prefix + 'assets/index-CqYVR9bx.css'] = 'body{margin:0}';
+    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.5/';
+    files[prefix + 'index.html'] = '<script type="module" src="./assets/index-qleDCHQm.js"></script><link rel="stylesheet" href="./assets/index-Cm9akizc.css">';
+    files[prefix + 'assets/index-qleDCHQm.js'] = 'console.log("Vim Tomb Raider");';
+    files[prefix + 'assets/index-Cm9akizc.css'] = 'body{margin:0}';
     files[prefix + 'assets/sprites/explorer-core.png'] = 'mock-sprite';
     files[prefix + 'assets/sprites/pixel-adventurer-bonus.png'] = 'mock-bonus-sprite';
     files[prefix + 'BUILD_PROVENANCE.json'] = JSON.stringify({
-      artifactId: 'vim-tomb-raider', sourceVersion: '1.0.0-rc.4',
-      sourceTag: 'v1.0.0-rc.4', sourceRevision: '674a372bb69e2eadfd3c23f4bab04855bb2c86fd',
-      sourceReleaseArchiveSha256: '4e6a6cb11cdb647dd7d083a7d75551977af7b1b3f18dba52abd91172489ce98f',
+      artifactId: 'vim-tomb-raider', sourceVersion: '1.0.0-rc.5',
+      sourceTag: 'v1.0.0-rc.5', sourceRevision: '0618707def03d0f9edbc6ce548fda1db5c29df95',
+      sourceReleaseArchiveSha256: 'df06a54f6de2ec7a23566ca6aa7ca834234e262828b9f0046199a4edb0c27bec',
       sourceMapsIncluded: false, vendoredRuntimeFiles: 5,
     });
     files[prefix + 'SHA256SUMS'] = Object.entries(files)
       .filter(([path]) => path.startsWith(prefix) && !path.endsWith('/SHA256SUMS'))
       .map(([path, value]) => digest(value) + '  ' + path.slice(prefix.length)).join('\n') + '\n';
     files['catalog.json'] = JSON.stringify({items:[{
-      id: 'vim-tomb-raider', version: '1.0.0-rc.4', availability: 'verified',
+      id: 'vim-tomb-raider', version: '1.0.0-rc.5', availability: 'verified',
       url: '/' + prefix + 'index.html',
     }]});
     files['route-manifest.json'] = JSON.stringify({entries:[{
@@ -153,7 +153,7 @@ test('Vim Tomb Raider source changes require an exact reviewed release file set'
       'vim-tomb-raider/index.html',
       'vim-tomb-raider/BUILD_PROVENANCE.json',
       'vim-tomb-raider/SHA256SUMS',
-      'vim-tomb-raider/assets/index-DTIFtPYb.js',
+      'vim-tomb-raider/assets/index-qleDCHQm.js',
     ],
   };
   assert.throws(() => validateSourceTransition(transition), /outside reviewed publication paths/);
@@ -171,16 +171,16 @@ test('Vim Tomb Raider release requires proven source, route and every intact run
   const args = { artifactRoot: artifacts, v13Root: v13, outDir: output,
     artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) };
   await stageQualifiedV13_5(args);
-  assert.match(await readFile(join(output, 'artifacts/vim-tomb-raider/1.0.0-rc.4/index.html'), 'utf8'), /assets\/index-DTIFtPYb.js/);
-  await writeFile(join(v13, 'dist/artifacts/vim-tomb-raider/1.0.0-rc.4/assets/index-DTIFtPYb.js'), 'tampered');
-  await assert.rejects(stageQualifiedV13_5(args), /hash mismatch.*vim-tomb-raider.*index-DTIFtPYb/);
+  assert.match(await readFile(join(output, 'artifacts/vim-tomb-raider/1.0.0-rc.5/index.html'), 'utf8'), /assets\/index-qleDCHQm.js/);
+  await writeFile(join(v13, 'dist/artifacts/vim-tomb-raider/1.0.0-rc.5/assets/index-qleDCHQm.js'), 'tampered');
+  await assert.rejects(stageQualifiedV13_5(args), /hash mismatch.*vim-tomb-raider.*index-qleDCHQm/);
 });
 
 test('Vim Tomb Raider provenance and checksums fail closed on inconsistent release evidence', async () => {
   const { artifacts, v13, output } = await fixture({ vim: true });
   const args = { artifactRoot: artifacts, v13Root: v13, outDir: output,
     artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40) };
-  const prefix = join(v13, 'dist/artifacts/vim-tomb-raider/1.0.0-rc.4');
+  const prefix = join(v13, 'dist/artifacts/vim-tomb-raider/1.0.0-rc.5');
   const sumsPath = join(prefix, 'SHA256SUMS');
   await writeFile(sumsPath, 'a'.repeat(64) + '  nonexistent.js\n');
   await assert.rejects(stageQualifiedV13_5(args), /SHA256SUMS has an invalid entry/);

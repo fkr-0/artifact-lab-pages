@@ -1,7 +1,7 @@
 {
   "schemaVersion": "artifacts.fkr.dev/v1",
   "id": "vim-tomb-raider",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "title": "Vim Tomb Raider",
   "description": "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum, command-composition puzzles, and evidence-driven practice.",
   "kind": "application",
@@ -48,8 +48,8 @@
     "standaloneSmoke": true,
     "expectedFiles": [
       "index.html",
-      "assets/index-DTIFtPYb.js",
-      "assets/index-CqYVR9bx.css",
+      "assets/index-qleDCHQm.js",
+      "assets/index-Cm9akizc.css",
       "assets/sprites/explorer-core.png",
       "assets/sprites/pixel-adventurer-bonus.png",
       "BUILD_PROVENANCE.json",

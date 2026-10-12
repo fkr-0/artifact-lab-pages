@@ -65,33 +65,34 @@ const REVIEWED_NATIVE_ADDITIONS = new Map([
     'registry/sources.d/vim-tomb-raider.json',
     'vim-tomb-raider/BUILD_PROVENANCE.json',
     'vim-tomb-raider/SHA256SUMS',
-    'vim-tomb-raider/assets/BitmapFont-CD2wRd2e.js',
+    'vim-tomb-raider/assets/BitmapFont-CnyqSKzD.js',
     'vim-tomb-raider/assets/BitmapFont-T4TavOiS.js',
-    'vim-tomb-raider/assets/BufferResource-BENnGMI_.js',
+    'vim-tomb-raider/assets/BufferResource-0C-3DK2f.js',
     'vim-tomb-raider/assets/BufferResource-BrvacGop.js',
-    'vim-tomb-raider/assets/CanvasRenderer-CsacvFB0.js',
+    'vim-tomb-raider/assets/CanvasRenderer-Duick-4E.js',
     'vim-tomb-raider/assets/CanvasRenderer-vjgkX3UM.js',
-    'vim-tomb-raider/assets/Filter-CNimNuzi.js',
+    'vim-tomb-raider/assets/Filter-CD1Drx4p.js',
     'vim-tomb-raider/assets/Filter-DLzwasxA.js',
-    'vim-tomb-raider/assets/GameScreen-BB5TF1ik.js',
     'vim-tomb-raider/assets/GameScreen-DGJnxwHq.js',
-    'vim-tomb-raider/assets/RenderTargetSystem-CLmYDvMg.js',
+    'vim-tomb-raider/assets/GameScreen-Dl3ZNBGA.js',
+    'vim-tomb-raider/assets/RenderTargetSystem-CHlYkfiL.js',
     'vim-tomb-raider/assets/RenderTargetSystem-DXfp3hWh.js',
     'vim-tomb-raider/assets/WebGLRenderer-BKuBQ0va.js',
-    'vim-tomb-raider/assets/WebGLRenderer-D9gwBcRG.js',
-    'vim-tomb-raider/assets/WebGPURenderer-CeijiNFL.js',
+    'vim-tomb-raider/assets/WebGLRenderer-agR0Pmzz.js',
     'vim-tomb-raider/assets/WebGPURenderer-CmgxcpAN.js',
+    'vim-tomb-raider/assets/WebGPURenderer-zL1TziT5.js',
     'vim-tomb-raider/assets/browserAll-BlG2dWap.js',
-    'vim-tomb-raider/assets/browserAll-prsw4-hK.js',
-    'vim-tomb-raider/assets/canvasUtils-RVGvefUB.js',
+    'vim-tomb-raider/assets/browserAll-NZ0gKRlN.js',
+    'vim-tomb-raider/assets/canvasUtils-BX_sEMZ7.js',
     'vim-tomb-raider/assets/canvasUtils-_jA0k1Kj.js',
-    'vim-tomb-raider/assets/index-C4Q9ebKF.js',
+    'vim-tomb-raider/assets/index-Cm9akizc.css',
     'vim-tomb-raider/assets/index-CqYVR9bx.css',
     'vim-tomb-raider/assets/index-DTIFtPYb.js',
+    'vim-tomb-raider/assets/index-qleDCHQm.js',
     'vim-tomb-raider/assets/sprites/explorer-core.png',
     'vim-tomb-raider/assets/sprites/pixel-adventurer-bonus.png',
     'vim-tomb-raider/assets/webworkerAll-CQiUSeOh.js',
-    'vim-tomb-raider/assets/webworkerAll-DBXZcngN.js',
+    'vim-tomb-raider/assets/webworkerAll-mfDyHGR4.js',
     'vim-tomb-raider/index.html',
   ])],
   ['sudoku-lab', new Set([
@@ -344,29 +345,29 @@ export async function stageQualifiedV13_5({
   // A vendored release-candidate is accepted only if the catalog, route,
   // immutable source provenance and SHA-256 inventory all agree.
   if (handoff.catalog?.currentNativeAdded?.includes('vim-tomb-raider')) {
-    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.4/';
+    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.5/';
     const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
     const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
     const item = catalog.items?.find((entry) => entry.id === 'vim-tomb-raider');
-    if (item?.availability !== 'verified' || item.version !== '1.0.0-rc.4' ||
+    if (item?.availability !== 'verified' || item.version !== '1.0.0-rc.5' ||
         item.url !== '/' + prefix + 'index.html' ||
         !routes.entries?.some((entry) => entry.id === 'vim-tomb-raider' &&
           entry.path === prefix + 'index.html' && entry.state === 'staged')) {
-      throw new Error('Vim Tomb Raider rc.3 is not a verified staged native release.');
+      throw new Error('Vim Tomb Raider rc.5 is not a verified staged native release.');
     }
     const runtimeFiles = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith(prefix));
-    const required = ['index.html', 'assets/index-DTIFtPYb.js',
-      'assets/index-CqYVR9bx.css', 'assets/sprites/explorer-core.png', 'assets/sprites/pixel-adventurer-bonus.png',
+    const required = ['index.html', 'assets/index-qleDCHQm.js',
+      'assets/index-Cm9akizc.css', 'assets/sprites/explorer-core.png', 'assets/sprites/pixel-adventurer-bonus.png',
       'BUILD_PROVENANCE.json', 'SHA256SUMS'];
     for (const name of required) {
       if (!runtimeFiles.includes(prefix + name)) throw new Error('Vim Tomb Raider missing release asset: ' + name);
     }
     const provenance = JSON.parse(await readFile(join(v13Dist, prefix, 'BUILD_PROVENANCE.json'), 'utf8'));
     if (provenance.artifactId !== 'vim-tomb-raider' ||
-        provenance.sourceVersion !== '1.0.0-rc.4' ||
-        provenance.sourceTag !== 'v1.0.0-rc.4' ||
-        provenance.sourceRevision !== '674a372bb69e2eadfd3c23f4bab04855bb2c86fd' ||
-        provenance.sourceReleaseArchiveSha256 !== '4e6a6cb11cdb647dd7d083a7d75551977af7b1b3f18dba52abd91172489ce98f' ||
+        provenance.sourceVersion !== '1.0.0-rc.5' ||
+        provenance.sourceTag !== 'v1.0.0-rc.5' ||
+        provenance.sourceRevision !== '0618707def03d0f9edbc6ce548fda1db5c29df95' ||
+        provenance.sourceReleaseArchiveSha256 !== 'df06a54f6de2ec7a23566ca6aa7ca834234e262828b9f0046199a4edb0c27bec' ||
         provenance.sourceMapsIncluded !== false ||
         provenance.vendoredRuntimeFiles !== runtimeFiles.length - 2) {
       throw new Error('Vim Tomb Raider release provenance does not match the qualified source.');
@@ -374,8 +375,8 @@ export async function stageQualifiedV13_5({
     const html = await readFile(join(v13Dist, prefix, 'index.html'), 'utf8');
     if (html.includes('src/main.tsx') ||
         /(?:src|href)=["']\//u.test(html) ||
-        !html.includes('./assets/index-DTIFtPYb.js') ||
-        !html.includes('./assets/index-CqYVR9bx.css')) {
+        !html.includes('./assets/index-qleDCHQm.js') ||
+        !html.includes('./assets/index-Cm9akizc.css')) {
       throw new Error('Vim Tomb Raider release HTML is not relocatable compiled output.');
     }
     const checksums = await readFile(join(v13Dist, prefix, 'SHA256SUMS'), 'utf8');
