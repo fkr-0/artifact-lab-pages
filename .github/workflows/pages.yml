@@ -16,7 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: 53c397650860b03bbed12f0da476dd0ae1a88abe
+  ARTIFACTS_V13_5_REVISION: dddd2bc5f27ab2ac2f4383564a60d0b0678ddd42
 
 jobs:
   build:
@@ -125,6 +125,17 @@ jobs:
           if (receipt?.deployment?.performed !== false) {
             throw new Error('Stage receipt must not claim deployment before deploy-pages');
           }
+          const article = 'research/roborock-local-cloud/index.html';
+          if (!fs.existsSync('.artifacts-pages-stage/' + article)) {
+            throw new Error('Roborock security report is missing from the staged release');
+          }
+          const catalog = JSON.parse(fs.readFileSync('.artifacts-pages-stage/catalog.json', 'utf8'));
+          const entry = catalog.items.find(item => item.id === 'roborock-local-cloud');
+          if (entry?.availability !== 'verified' || entry.url !== '/' + article) {
+            throw new Error('Roborock report is missing from the launchable catalog');
+          }
+          const assets = JSON.parse(fs.readFileSync('.artifacts-pages-stage/asset-manifest.json', 'utf8'));
+          if (!assets.files?.[article]?.sha256) throw new Error('Roborock report has no asset hash evidence');
           console.log('V13.5 Pages receipt verified:', receipt.v13_5);
           NODE
 
