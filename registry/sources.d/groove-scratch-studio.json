@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "groove-scratch-studio",
+  "version": "1.4.0",
+  "title": "GROOVE / Scratch Studio",
+  "description": "Offline client-side turntable and scratch-pattern editor with stable GROOVE Scratch Project v1 JSON interchange and a separate agent-friendly local CLI capable of parameterized pattern generation and WAV rendering.",
+  "kind": "application",
+  "status": "experimental",
+  "required": false,
+  "tags": [
+    "audio",
+    "turntable",
+    "scratch",
+    "dj",
+    "waveform",
+    "offline",
+    "single-file",
+    "automation",
+    "crossfader",
+    "pattern-generator",
+    "project-json",
+    "wav-render",
+    "cli"
+  ],
+  "source": {
+    "kind": "file",
+    "path": "groove-scratch-studio/index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "file",
+    "entrypoint": "index.html",
+    "offline": true
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": [
+      "newWindow",
+      "fullscreen"
+    ],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html"
+    ]
+  }
+}
