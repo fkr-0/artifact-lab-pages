@@ -16,7 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: 5a0cb1f566651fe9393caf8254d010428d11447c
+  ARTIFACTS_V13_5_REVISION: 57abb37e8709467ce06e727e6b72eac1c9ff7326
 
 jobs:
   build:
@@ -136,6 +136,22 @@ jobs:
           }
           const assets = JSON.parse(fs.readFileSync('.artifacts-pages-stage/asset-manifest.json', 'utf8'));
           if (!assets.files?.[article]?.sha256) throw new Error('Roborock report has no asset hash evidence');
+          const figureNames = [
+            '01-onboarding', '02-service-channels', '03-registration-sequence',
+            '04-trust-boundaries', '05-five-gates', '06-ca-chain',
+            '07-identity-comparison', '08-persistence',
+          ];
+          if (entry.version !== '1.2.0' || entry.receipt?.files !== 17) {
+            throw new Error('Roborock report lacks complete v1.2 Mermaid figure receipt');
+          }
+          for (const name of figureNames) {
+            for (const ext of ['svg', 'mmd']) {
+              const figure = 'research/roborock-local-cloud/figures/' + name + '.' + ext;
+              if (!fs.existsSync('.artifacts-pages-stage/' + figure) || !assets.files?.[figure]?.sha256) {
+                throw new Error('Missing or unverified Mermaid figure: ' + figure);
+              }
+            }
+          }
           console.log('V13.5 Pages receipt verified:', receipt.v13_5);
           NODE
 
