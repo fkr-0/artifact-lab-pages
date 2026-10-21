@@ -28,7 +28,7 @@
     'audio-toggle', 'reset-progress', 'structure-note', 'stat-stages', 'stat-accuracy',
     'stat-answers', 'stat-streak', 'storage-warning', 'stage-map', 'stage-list',
     'quiz-panel', 'back-to-map', 'mistake-label', 'quiz-part', 'quiz-stage-title',
-    'quiz-stage-summary', 'question-progress', 'question-counter', 'difficulty-label',
+    'quiz-stage-summary', 'question-progress-track', 'question-progress', 'question-counter', 'difficulty-label',
     'score-label', 'question-text', 'answer-list', 'feedback', 'feedback-title',
     'feedback-explanation', 'feedback-sources', 'next-question', 'question-card',
     'result-panel', 'result-stamp', 'result-kicker', 'result-title', 'result-copy',
@@ -231,6 +231,9 @@
     els['answer-list'].replaceChildren();
 
     els['question-counter'].textContent = `Frage ${questionIndex + 1} von ${stage.questions.length}`;
+    els['question-progress-track'].setAttribute('aria-valuemax', String(stage.questions.length));
+    els['question-progress-track'].setAttribute('aria-valuenow', String(questionIndex + 1));
+    els['question-progress-track'].setAttribute('aria-valuetext', `Frage ${questionIndex + 1} von ${stage.questions.length}`);
     els['question-progress'].style.width = `${((questionIndex + 1) / stage.questions.length) * 100}%`;
     const difficulty = Math.min(4, Math.max(1, question.difficulty || questionIndex + 1));
     els['difficulty-label'].textContent = `Stufe ${difficulty} · ${difficultyNames[difficulty - 1]}`;
@@ -316,7 +319,11 @@
     els['next-question'].hidden = false;
     els['next-question'].textContent = questionIndex === stage.questions.length - 1 ? 'Stage abschließen →' : 'Nächste Frage →';
     els['next-question'].focus({ preventScroll: true });
-    announce(correct ? 'Richtig. Erläuterung eingeblendet.' : `Falsch. ${stageWrong} von 3 Fehlern.`);
+    announce(
+      correct
+        ? `Richtig. Punktestand: ${stageCorrect} richtig. Erläuterung eingeblendet.`
+        : `Falsch. Punktestand: ${stageCorrect} richtig. ${stageWrong} von 3 Fehlern.`
+    );
   }
 
   function nextQuestion() {

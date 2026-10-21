@@ -48,7 +48,7 @@
       <div class="section-heading">
         <div>
           <p class="section-kicker">Inhaltsfolge</p>
-          <h2 id="stages-title">19 Kapitel · 19 Stages</h2>
+          <h2 id="stages-title" tabindex="-1">19 Kapitel · 19 Stages</h2>
         </div>
         <p class="legend"><span aria-hidden="true">✓</span> bestanden · <span aria-hidden="true">●</span> offen · <span aria-hidden="true">🔒</span> gesperrt</p>
       </div>
@@ -58,7 +58,7 @@
     <section id="quiz-panel" class="quiz-panel" aria-labelledby="quiz-stage-title" hidden>
       <div class="quiz-toolbar">
         <button id="back-to-map" class="secondary-button" type="button">← Stage-Übersicht</button>
-        <div class="hearts" aria-label="Fehlerversuche">
+        <div class="hearts" role="status" aria-live="polite" aria-atomic="true" aria-labelledby="mistake-label">
           <span id="mistake-1" aria-hidden="true">●</span>
           <span id="mistake-2" aria-hidden="true">●</span>
           <span id="mistake-3" aria-hidden="true">●</span>
@@ -68,19 +68,21 @@
 
       <div class="stage-meta">
         <p id="quiz-part" class="eyebrow"></p>
-        <h2 id="quiz-stage-title"></h2>
+        <h2 id="quiz-stage-title" tabindex="-1"></h2>
         <p id="quiz-stage-summary" class="muted"></p>
       </div>
 
-      <div class="question-progress-wrap" aria-label="Fragenfortschritt">
-        <div class="question-progress-track"><span id="question-progress"></span></div>
-        <p id="question-counter">Frage 1 von 4</p>
+      <div class="question-progress-wrap">
+        <div id="question-progress-track" class="question-progress-track" role="progressbar" aria-label="Fragenfortschritt" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1">
+          <span id="question-progress"></span>
+        </div>
+        <p id="question-counter" role="status" aria-live="polite" aria-atomic="true">Frage 1 von 4</p>
       </div>
 
       <article id="question-card" class="question-card">
         <div class="difficulty-row">
           <span id="difficulty-label" class="difficulty">Stufe 1 · Einstieg</span>
-          <span id="score-label">0 richtig</span>
+          <span id="score-label" role="status" aria-live="polite" aria-atomic="true">0 richtig</span>
         </div>
         <h3 id="question-text"></h3>
         <div id="answer-list" class="answer-list" role="group" aria-labelledby="question-text"></div>
@@ -100,7 +102,7 @@
     <section id="result-panel" class="result-panel" aria-live="polite" hidden>
       <div id="result-stamp" class="result-stamp" aria-hidden="true"></div>
       <p id="result-kicker" class="eyebrow"></p>
-      <h2 id="result-title"></h2>
+      <h2 id="result-title" tabindex="-1"></h2>
       <p id="result-copy"></p>
       <dl class="result-stats">
         <div><dt>Richtig</dt><dd id="result-correct"></dd></div>
