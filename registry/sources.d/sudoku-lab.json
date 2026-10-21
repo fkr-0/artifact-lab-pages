@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "sudoku-lab",
+  "version": "1.0.0",
+  "title": "Sudoku Lab — Expert Grid",
+  "description": "A fully offline, client-side expert Sudoku game with unique puzzles, local autosave, pencil marks, keyboard controls, undo/redo, contextual hints and reveal.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": [
+    "game",
+    "sudoku",
+    "logic",
+    "puzzle",
+    "offline",
+    "expert"
+  ],
+  "source": {
+    "kind": "directory",
+    "path": "sudoku-lab",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true
+  },
+  "launch": {
+    "default": "fullscreen",
+    "modes": [
+      "inline",
+      "fullscreen",
+      "newWindow"
+    ],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html",
+      "engine.mjs",
+      "app.mjs",
+      "styles.css"
+    ]
+  }
+}

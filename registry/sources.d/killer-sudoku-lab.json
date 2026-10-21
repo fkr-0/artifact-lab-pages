@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "killer-sudoku-lab",
+  "version": "1.0.0",
+  "title": "Killer Sudoku Lab — The Sum Grid",
+  "description": "An offline Killer Sudoku game with numbered cages, no prefilled digits, unique puzzles, cage-sum and no-repeat logic, pencil marks, hints, undo/redo, keyboard control, and local autosave.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": [
+    "game",
+    "killer sudoku",
+    "sudoku",
+    "arithmetic",
+    "logic",
+    "puzzle",
+    "offline",
+    "expert"
+  ],
+  "source": {
+    "kind": "directory",
+    "path": "killer-sudoku-lab",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true
+  },
+  "launch": {
+    "default": "fullscreen",
+    "modes": [
+      "inline",
+      "fullscreen",
+      "newWindow"
+    ],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html",
+      "engine.mjs",
+      "app.mjs",
+      "styles.css"
+    ]
+  }
+}

@@ -58,15 +58,102 @@ const INTEGRATION_ONLY_PATHS = new Set([
   'tests/revealive-publication-stage.test.mjs',
   'tests/v13-5-publication-adapter.test.mjs',
 ]);
-export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths }) {
+// Reviewed post-pin native additions are exact-path exceptions, gated by the
+// current V13.5 handoff inventory and separately verified staged assets.
+const REVIEWED_NATIVE_ADDITIONS = new Map([
+  ['vim-tomb-raider', new Set([
+    'registry/sources.d/vim-tomb-raider.json',
+    'vim-tomb-raider/BUILD_PROVENANCE.json',
+    'vim-tomb-raider/SHA256SUMS',
+    'vim-tomb-raider/assets/BitmapFont-CW4jIeul.js',
+    'vim-tomb-raider/assets/BitmapFont-CnyqSKzD.js',
+    'vim-tomb-raider/assets/BufferResource-0C-3DK2f.js',
+    'vim-tomb-raider/assets/BufferResource-z8QIiAhb.js',
+    'vim-tomb-raider/assets/CanvasRenderer-CdQ-h4x7.js',
+    'vim-tomb-raider/assets/CanvasRenderer-Duick-4E.js',
+    'vim-tomb-raider/assets/Filter--e4e9-QQ.js',
+    'vim-tomb-raider/assets/Filter-CD1Drx4p.js',
+    'vim-tomb-raider/assets/GameScreen-8Qy1nIYj.js',
+    'vim-tomb-raider/assets/GameScreen-Dl3ZNBGA.js',
+    'vim-tomb-raider/assets/RenderTargetSystem-CHlYkfiL.js',
+    'vim-tomb-raider/assets/RenderTargetSystem-CNctLdLG.js',
+    'vim-tomb-raider/assets/WebGLRenderer-Bneh5aDA.js',
+    'vim-tomb-raider/assets/WebGLRenderer-agR0Pmzz.js',
+    'vim-tomb-raider/assets/WebGPURenderer-pprxO92E.js',
+    'vim-tomb-raider/assets/WebGPURenderer-zL1TziT5.js',
+    'vim-tomb-raider/assets/browserAll-BWaguivW.js',
+    'vim-tomb-raider/assets/browserAll-NZ0gKRlN.js',
+    'vim-tomb-raider/assets/canvasUtils-BX_sEMZ7.js',
+    'vim-tomb-raider/assets/canvasUtils-zV_nYnL-.js',
+    'vim-tomb-raider/assets/index-Bf9ZOCxE.css',
+    'vim-tomb-raider/assets/index-Cm9akizc.css',
+    'vim-tomb-raider/assets/index-CrgHCnyl.js',
+    'vim-tomb-raider/assets/index-qleDCHQm.js',
+    'vim-tomb-raider/assets/sprites/explorer-core.png',
+    'vim-tomb-raider/assets/sprites/pixel-adventurer-bonus.png',
+    'vim-tomb-raider/assets/webworkerAll-DZFXkDpS.js',
+    'vim-tomb-raider/assets/webworkerAll-mfDyHGR4.js',
+    'vim-tomb-raider/index.html',
+  ])],
+  ['sudoku-lab', new Set([
+    'registry/sources.d/sudoku-lab.json',
+    'sudoku-lab/app.mjs',
+    'sudoku-lab/engine.mjs',
+    'sudoku-lab/index.html',
+    'sudoku-lab/styles.css',
+    'tests/e2e/sudoku-lab.spec.mjs',
+    'tests/sudoku-lab.test.mjs',
+  ])],
+  ['killer-sudoku-lab', new Set([
+    'registry/sources.d/killer-sudoku-lab.json',
+    'killer-sudoku-lab/app.mjs',
+    'killer-sudoku-lab/engine.mjs',
+    'killer-sudoku-lab/index.html',
+    'killer-sudoku-lab/styles.css',
+    'tests/e2e/killer-sudoku-lab.spec.mjs',
+    'tests/killer-sudoku-lab.test.mjs',
+  ])],
+  // Explicitly enumerate every alpha.10 removal and qualified alpha.13 addition.
+  ['nakamotos-disciples', new Set([
+    'registry/sources.d/nakamotos-disciples.json',
+    'nakamotos-disciples/BUILD_PROVENANCE.json',
+    'nakamotos-disciples/SHA256SUMS',
+    'nakamotos-disciples/index.html',
+    'nakamotos-disciples/sw.js',
+    'nakamotos-disciples/assets/GuidedProtocolCourse-Ci_BzAw0.js',
+    'nakamotos-disciples/assets/GuidedProtocolCourse-DSsCQnSX.js',
+    'nakamotos-disciples/assets/P2wshNetworkFlow-EutsmtyW.js',
+    'nakamotos-disciples/assets/ProtocolSystemsLab-p2JTHImk.js',
+    'nakamotos-disciples/assets/ProtocolSystemsLab-DrrhvDr7.js',
+    'nakamotos-disciples/assets/SegwitV0Laboratory-WMmAO39B.js',
+    'nakamotos-disciples/assets/exact-demo-CoALGFae.js',
+    'nakamotos-disciples/assets/index-C_YuxLmP.js',
+    'nakamotos-disciples/assets/index-DcoQQdgp.css',
+    'nakamotos-disciples/assets/index-B0Seuggu.css',
+    'nakamotos-disciples/assets/index-BuEFNEWl.js',
+    'nakamotos-disciples/assets/model-DXSsuBDH.js',
+    'nakamotos-disciples/assets/probability-Dc-K_v0K.js',
+    'nakamotos-disciples/assets/probability-BnYTSDyw.js',
+    'nakamotos-disciples/assets/segwit-v0-lab-C1mLqn49.js',
+  ])],
+]);
+export function validateSourceTransition({ pinnedRevision, currentRevision, pinnedIsAncestor, changedPaths, currentNativeAdded = [], gitRecipeBookQualified = false }) {
   if (pinnedRevision === currentRevision) return { mode: 'exact', changedPaths: [] };
   if (!pinnedIsAncestor) {
     throw new Error('Canonical Artifact Lab revision mismatch: ' + currentRevision + ' is not a descendant of ' + pinnedRevision);
   }
-  const disallowed = changedPaths.filter((path) => !INTEGRATION_ONLY_PATHS.has(path));
+  const approved = new Set(INTEGRATION_ONLY_PATHS);
+  // The only source change permitted for the baseline compile upgrade is the
+  // reviewed correction to the source HTML's dangling favicon reference.
+  // The published build itself is generated reproducibly by Pages.
+  if (gitRecipeBookQualified) approved.add('git-recipe-book/index.html');
+  for (const id of currentNativeAdded) {
+    for (const path of REVIEWED_NATIVE_ADDITIONS.get(id) || []) approved.add(path);
+  }
+  const disallowed = changedPaths.filter((path) => !approved.has(path));
   if (disallowed.length) {
     throw new Error(
-      'Canonical Artifact Lab changed after the V13.5 handoff pin outside integration-only paths: ' +
+      'Canonical Artifact Lab changed after the V13.5 handoff pin outside reviewed publication paths: ' +
       disallowed.join(', '),
     );
   }
@@ -103,6 +190,11 @@ function validateHandoff(handoff) {
   if (!Number.isInteger(handoff.release?.catalogItems) || handoff.release.catalogItems < MINIMUM_CATALOG_ITEMS) throw new Error('V13.5 handoff catalog is smaller than the qualified superset floor.');
   if (!handoff.catalog?.currentNativeAdded?.includes('revealive')) throw new Error('V13.5 handoff is missing the qualified Revealive native addition.');
   if (handoff.regressions?.memeLab?.url !== '/meme-lab/meme-lab.html') throw new Error('V13.5 handoff does not preserve the Meme Lab route.');
+  if (handoff.regressions?.gitRecipeBook?.url !== '/git-recipe-book/index.html' ||
+      handoff.regressions.gitRecipeBook.version !== '1.1.0' ||
+      handoff.regressions.gitRecipeBook.assets < 2) {
+    throw new Error('V13.5 handoff lacks the verified compiled Git Recipe Book baseline upgrade.');
+  }
   return handoff;
 }
 export async function stageQualifiedV13_5({
@@ -139,6 +231,8 @@ export async function stageQualifiedV13_5({
       currentRevision: currentSourceRevision,
       pinnedIsAncestor: false,
       changedPaths: [],
+      currentNativeAdded: handoff.catalog?.currentNativeAdded || [],
+      gitRecipeBookQualified: true,
     });
   } else {
     const transition = await gitSourceTransition(
@@ -150,6 +244,8 @@ export async function stageQualifiedV13_5({
       pinnedRevision: handoff.canonicalSource?.revision,
       currentRevision: currentSourceRevision,
       ...transition,
+      currentNativeAdded: handoff.catalog?.currentNativeAdded || [],
+      gitRecipeBookQualified: true,
     });
   }
   if (handoff.release?.commit !== currentV13Revision) {
@@ -158,6 +254,7 @@ export async function stageQualifiedV13_5({
 
   const requiredHashes = [
     ['index.html', handoff.rootLauncher?.indexSha256],
+    ['git-recipe-book/index.html', handoff.regressions?.gitRecipeBook?.sha256],
     ['app.js', handoff.rootLauncher?.appSha256],
     ['styles.css', handoff.rootLauncher?.stylesSha256],
     ['meme-lab/meme-lab.html', handoff.regressions?.memeLab?.sha256],
@@ -174,6 +271,150 @@ export async function stageQualifiedV13_5({
   if (hashedFileCount !== handoff.evidence?.hashedFiles) {
     throw new Error('V13.5 asset manifest count mismatch: ' + hashedFileCount + ' != ' + handoff.evidence?.hashedFiles);
   }
+
+  // A post-pin Sudoku addition is allowed only when the *new* handoff
+  // publishes it as a verified route and hashes every executable asset.
+  if (handoff.catalog?.currentNativeAdded?.includes('sudoku-lab')) {
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const route = 'artifacts/sudoku-lab/1.0.0/index.html';
+    const item = catalog.items?.find((entry) => entry.id === 'sudoku-lab');
+    if (item?.availability !== 'verified' || item.url !== '/' + route ||
+        !routes.entries?.some((entry) => entry.id === 'sudoku-lab' && entry.path === route && entry.state === 'staged')) {
+      throw new Error('Sudoku Lab is not a verified staged native release.');
+    }
+    for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) {
+      const path = 'artifacts/sudoku-lab/1.0.0/' + name;
+      await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
+    }
+  }
+
+  // Each new Killer Sudoku release is accepted only after catalog, route, and
+  // byte-for-byte asset evidence agree. Never trust a source-path exception alone.
+  if (handoff.catalog?.currentNativeAdded?.includes('killer-sudoku-lab')) {
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const route = 'artifacts/killer-sudoku-lab/1.0.0/index.html';
+    const item = catalog.items?.find((entry) => entry.id === 'killer-sudoku-lab');
+    if (item?.availability !== 'verified' || item.url !== '/' + route ||
+        !routes.entries?.some((entry) => entry.id === 'killer-sudoku-lab' && entry.path === route && entry.state === 'staged')) {
+      throw new Error('Killer Sudoku Lab is not a verified staged native release.');
+    }
+    for (const name of ['index.html', 'app.mjs', 'engine.mjs', 'styles.css']) {
+      const path = 'artifacts/killer-sudoku-lab/1.0.0/' + name;
+      await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
+    }
+  }
+
+  // A native addition is publishable only if the new qualified handoff
+  // contains a complete, hashed, provenance-matching PWA distribution.
+  if (handoff.catalog?.currentNativeAdded?.includes('nakamotos-disciples')) {
+    const prefix = 'artifacts/nakamotos-disciples/0.2.0-alpha.13/';
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const item = catalog.items?.find((entry) => entry.id === 'nakamotos-disciples');
+    if (item?.availability !== 'verified' || item.version !== '0.2.0-alpha.13' ||
+        item.url !== '/' + prefix + 'index.html' ||
+        !routes.entries?.some((entry) => entry.id === 'nakamotos-disciples' &&
+          entry.path === prefix + 'index.html' && entry.state === 'staged')) {
+      throw new Error('Nakamotos Disciples alpha.13 is not a verified staged native release.');
+    }
+    const runtimeFiles = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith(prefix));
+    if (runtimeFiles.length < 16 || !runtimeFiles.some((path) => path.startsWith(prefix + 'assets/'))) {
+      throw new Error('Nakamotos Disciples runtime asset inventory is incomplete.');
+    }
+    for (const name of ['index.html', 'icon.svg', 'manifest.webmanifest', 'sw.js',
+      'BUILD_PROVENANCE.json', 'SHA256SUMS']) {
+      if (!runtimeFiles.includes(prefix + name)) {
+        throw new Error('Nakamotos Disciples missing required release asset: ' + name);
+      }
+    }
+    for (const path of runtimeFiles) {
+      if (path.endsWith('.map')) throw new Error('Nakamotos Disciples source map unexpectedly published: ' + path);
+      await assertHash(v13Dist, path, assetManifest.files[path].sha256);
+    }
+    const provenance = JSON.parse(await readFile(join(v13Dist, prefix, 'BUILD_PROVENANCE.json'), 'utf8'));
+    if (provenance.artifactId !== 'nakamotos-disciples' ||
+        provenance.sourceVersion !== '0.2.0-alpha.13' ||
+        provenance.sourceRevision !== '3d6f5360efdffa1b247c08dc0b9a6041df56eec7' ||
+        provenance.sourceMapsIncluded !== false) {
+      throw new Error('Nakamotos Disciples release provenance does not match the qualified app.');
+    }
+  }
+
+  // A vendored release-candidate is accepted only if the catalog, route,
+  // immutable source provenance and SHA-256 inventory all agree.
+  if (handoff.catalog?.currentNativeAdded?.includes('vim-tomb-raider')) {
+    const prefix = 'artifacts/vim-tomb-raider/1.0.0-rc.6/';
+    const catalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+    const routes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+    const item = catalog.items?.find((entry) => entry.id === 'vim-tomb-raider');
+    if (item?.availability !== 'verified' || item.version !== '1.0.0-rc.6' ||
+        item.url !== '/' + prefix + 'index.html' ||
+        !routes.entries?.some((entry) => entry.id === 'vim-tomb-raider' &&
+          entry.path === prefix + 'index.html' && entry.state === 'staged')) {
+      throw new Error('Vim Tomb Raider rc.5 is not a verified staged native release.');
+    }
+    const runtimeFiles = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith(prefix));
+    const required = ['index.html', 'assets/index-CrgHCnyl.js',
+      'assets/index-Bf9ZOCxE.css', 'assets/sprites/explorer-core.png', 'assets/sprites/pixel-adventurer-bonus.png',
+      'BUILD_PROVENANCE.json', 'SHA256SUMS'];
+    for (const name of required) {
+      if (!runtimeFiles.includes(prefix + name)) throw new Error('Vim Tomb Raider missing release asset: ' + name);
+    }
+    const provenance = JSON.parse(await readFile(join(v13Dist, prefix, 'BUILD_PROVENANCE.json'), 'utf8'));
+    if (provenance.artifactId !== 'vim-tomb-raider' ||
+        provenance.sourceVersion !== '1.0.0-rc.6' ||
+        provenance.sourceTag !== 'v1.0.0-rc.6' ||
+        provenance.sourceRevision !== '011396e5e85182ed55fd3cd3c15bd27e0132b16e' ||
+        provenance.sourceReleaseArchiveSha256 !== 'c60312197166834c810ea676e4722f8ab2457361cc32aad51f2b881aff458c50' ||
+        provenance.sourceMapsIncluded !== false ||
+        provenance.vendoredRuntimeFiles !== runtimeFiles.length - 2) {
+      throw new Error('Vim Tomb Raider release provenance does not match the qualified source.');
+    }
+    const html = await readFile(join(v13Dist, prefix, 'index.html'), 'utf8');
+    if (html.includes('src/main.tsx') ||
+        /(?:src|href)=["']\//u.test(html) ||
+        !html.includes('./assets/index-CrgHCnyl.js') ||
+        !html.includes('./assets/index-Bf9ZOCxE.css')) {
+      throw new Error('Vim Tomb Raider release HTML is not relocatable compiled output.');
+    }
+    const checksums = await readFile(join(v13Dist, prefix, 'SHA256SUMS'), 'utf8');
+    const sums = new Map();
+    for (const line of checksums.trim().split(/\r?\n/u)) {
+      const match = /^([a-f0-9]{64})  ([^\s]+)$/u.exec(line);
+      if (!match || sums.has(match[2]) || !runtimeFiles.includes(prefix + match[2]) ||
+          match[2] === 'SHA256SUMS') {
+        throw new Error('Vim Tomb Raider release SHA256SUMS has an invalid entry.');
+      }
+      sums.set(match[2], match[1]);
+    }
+    if (sums.size !== runtimeFiles.length - 1) {
+      throw new Error('Vim Tomb Raider release SHA256SUMS inventory is incomplete.');
+    }
+    for (const path of runtimeFiles) {
+      if (path.endsWith('.map')) throw new Error('Vim Tomb Raider release unexpectedly includes a source map: ' + path);
+      const hash = await assertHash(v13Dist, path, assetManifest.files[path].sha256);
+      if (path !== prefix + 'SHA256SUMS' && sums.get(path.slice(prefix.length)) !== hash) {
+        throw new Error('Vim Tomb Raider SHA256SUMS mismatch for ' + path);
+      }
+    }
+  }
+
+
+  // Refuse a renamed source-only HTML page or broken script/style dependency.
+  const gitRecipeHtml = await readFile(join(v13Dist, 'git-recipe-book/index.html'), 'utf8');
+  if (gitRecipeHtml.includes('src/main.tsx') || !gitRecipeHtml.includes('src="./assets/') ||
+      !gitRecipeHtml.includes('href="./assets/')) {
+    throw new Error('Git Recipe Book release is not compiled HTML.');
+  }
+  const gitRecipeAssets = Object.keys(assetManifest.files || {}).filter((path) => path.startsWith('git-recipe-book/assets/'));
+  if (gitRecipeAssets.length !== handoff.regressions.gitRecipeBook.assets ||
+      !gitRecipeAssets.some((path) => path.endsWith('.js')) ||
+      !gitRecipeAssets.some((path) => path.endsWith('.css'))) {
+    throw new Error('Git Recipe Book stage is missing compiled runtime assets.');
+  }
+  for (const path of gitRecipeAssets) await assertHash(v13Dist, path, assetManifest.files[path].sha256);
 
   const sourceFiles = await walkRegularFiles(v13Dist);
   if (!sourceFiles.includes('PUBLICATION_HANDOFF.json')) throw new Error('V13.5 stage inventory omitted PUBLICATION_HANDOFF.json');

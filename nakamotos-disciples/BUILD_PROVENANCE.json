@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "artifactId": "nakamotos-disciples",
-  "sourceRevision": "b4de8ea5b0add02dfbf808c90a27396146114bf0",
-  "sourceVersion": "0.2.0-alpha.10",
-  "buildCommand": "CI=1 pnpm release:check",
-  "builtAt": "2026-07-31T14:52:15Z",
+  "sourceRevision": "3d6f5360efdffa1b247c08dc0b9a6041df56eec7",
+  "sourceVersion": "0.2.0-alpha.13",
+  "buildCommand": "pnpm release:check",
+  "builtAt": "2026-10-08T21:28:27.906Z",
   "deploymentMode": "vendored-static-dist",
   "deploymentBase": "./",
   "sourceMapsIncluded": false

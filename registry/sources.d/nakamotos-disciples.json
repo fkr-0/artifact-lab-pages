@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "nakamotos-disciples",
+  "version": "0.2.0-alpha.13",
+  "title": "Nakamoto's Disciples",
+  "description": "Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic inspectors, and guided protocol lessons.",
+  "kind": "application",
+  "status": "experimental",
+  "required": true,
+  "tags": ["bitcoin", "education", "simulation", "cryptography", "protocol", "offline", "pwa"],
+  "source": {
+    "kind": "directory",
+    "path": "nakamotos-disciples",
+    "entrypoint": "index.html",
+    "git": { "mode": "root" }
+  },
+  "build": { "mode": "none" },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true,
+    "exclude": ["**/*.map"]
+  },
+  "launch": {
+    "default": "fullscreen",
+    "modes": ["fullscreen", "newWindow"],
+    "sandbox": "trusted"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html",
+      "icon.svg",
+      "manifest.webmanifest",
+      "sw.js",
+      "BUILD_PROVENANCE.json",
+      "SHA256SUMS"
+    ]
+  }
+}

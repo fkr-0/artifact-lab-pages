@@ -16,7 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: 60817c7cd982b22c5e4b9727c6cf9927e9b93fa7
+  ARTIFACTS_V13_5_REVISION: 53c397650860b03bbed12f0da476dd0ae1a88abe
 
 jobs:
   build:
@@ -64,8 +64,30 @@ jobs:
         run: pnpm run sample:build
         working-directory: peerjslib
 
+      # Git Recipe Book must be built; its tracked index.html is only a Vite dev entrypoint.
+      - name: Install dependencies (git-recipe-book)
+        run: pnpm install --frozen-lockfile
+        working-directory: git-recipe-book
+
+      - name: Verify Git Recipe Book
+        run: pnpm lint && pnpm test
+        working-directory: git-recipe-book
+        env:
+          # Avoid Node's experimental global Web Storage shadowing jsdom storage.
+          NODE_OPTIONS: --no-experimental-webstorage
+
+      - name: Build (git-recipe-book)
+        run: pnpm build
+        working-directory: git-recipe-book
+
       - name: Run Hyperblast release gate
         run: npm run check:hyperblast
+
+      - name: Verify Sudoku and Killer Sudoku uniqueness and solving logic
+        run: node --test tests/sudoku-lab.test.mjs tests/killer-sudoku-lab.test.mjs
+
+      - name: Refresh native source catalog
+        run: node tooling/artifactctl/src/cli.mjs catalog --out registry/generated/catalog.json
 
       - name: Checkout qualified Artifacts V13.5
         uses: actions/checkout@v5
