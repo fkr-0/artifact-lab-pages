@@ -63,3 +63,8 @@ app-hub-v11/data/build-stats.json
 /index(4).html
 /index_multitext.html
 /procedural-sharepic-studio.html
+
+# Canonical build output and transient operator/validation state
+/dist/
+/.wsbridge/
+/registry/generated/validation.json
