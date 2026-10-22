@@ -35,10 +35,10 @@ A history-preserving `git subtree` migration is possible.
 
 ## Why not remove the standalone V13.5 repository today?
 
-The current `.github/workflows/pages.yml` in Artifact Lab explicitly:
+The deployed `.github/workflows/pages.yml` on the remote `main` branch still:
 
 1. checks out `fkr-0/artifacts-v13.5` at the exact
-   `ARTIFACTS_V13_5_REVISION` (currently `53c397650860b03bbed12f0da476dd0ae1a88abe`);
+   `ARTIFACTS_V13_5_REVISION` (updated on remote `main` to `7f4c563942aa6d756760d7cd6870019c09e5a72a`);
 2. runs `publication:handoff` **inside that second Git repository**;
 3. validates and publishes via the source project's
    `stage-v13-5-publication.mjs`, requiring a separately attested hub
@@ -49,9 +49,9 @@ still point to `~/code/artifacts`, and the adapter deliberately verifies
 both Git roots. An unmodified deployment workflow would continue fetching the
 standalone repository, ignoring the new subtree.
 
-The other, newer, locally committed hub dashboard at `e6eb490` is not the
-version presently pinned by Pages. A migration needs an explicit, reviewed
-promotion of that code; do not label a local build as deployed.
+The remote Pages pin includes the newer hub dashboard, but it still fetches
+its code from a separate repository. The monorepo branch changes that release
+authority without claiming its candidate has already been deployed.
 
 ## Proposed complete monorepo migration
 
@@ -102,5 +102,43 @@ unpublished commits or change the pin to remove a dirty status.
 - Playwright supports `ARTIFACTS_CHROMIUM_EXECUTABLE` for system Chromium.
 - Two stale historical tests were corrected after earlier release imports;
   the full root `npm test` suite now passes **218/218**.
+
+## Isolated finalization candidate (2026-10-22; not deployed)
+
+- **Local worktree branch:** `consolidation/hub-v13-5-ready-20261022`.
+  It merges the history-preserving hub prototype with the remote Pages
+  `main` at `a51908026306f0787a7302ca421b26fbca7810b0`, preserving
+  the public release additions while removing the secondary hub checkout from
+  the candidate workflow.
+- **One-checkout implementation:** `hub-v13.5/` is tracked directly;
+  `scripts/qualify-monorepo.mjs` builds its catalog and release stage from
+  the same immutable Git commit. The stage receipt binds that commit and the
+  `HEAD:hub-v13.5` tree. The site upload consumes exactly the validated stage,
+  with per-file SHA-256 and strict 44/44 V12 parity.
+- **Verified in an isolated worktree:** initialized all seven pinned Git
+  submodules, including the independent Ethic Brawl release pin. Built
+  Revealive, Badger, PeerJS lobby, Git Recipe Book and the V11 DAW; passed
+  Hyperblast release checks. Node suites passed **221/221** root,
+  **26/26** embedded hub, and **20/20** publication-adapter tests. The
+  registry validated **24/24** descriptors without errors/warnings.
+- **Publication stage:** **64** catalog entries, **44/44** expected legacy
+  routes, zero missing, **706** files (**704** content-hashed stage files).
+  Chromium browser smoke rendered all 64, located Meme Lab and successfully
+  navigated its launch route.
+- **Immutable-source guard:** both tracked changes and non-ignored untracked
+  source files must be rejected; only intentionally ignored generated build
+  outputs are admissible. Pinned submodules must match their Git links.
+  Badger's known generated `packages/{progression,sprite-contracts}/dist`
+  tracked differences are explicitly recognized during qualification.
+- **Release boundary:** no external push, merge to production `main`,
+  GitHub Pages deployment or public-site verification is claimed. The old
+  `artifacts-v13.5` checkout and the compatibility adapter remain in place
+  until the candidate is published and rollback constraints are reviewed.
+
+**Cutover gates:** re-run qualification on the exact final commit; review the
+published Pages workflow diff; promote the branch to the deployment owner's
+`main`, verify the Pages artifact and public URL, then retire the separate
+hub checkout. Do not remove application submodules or V11 compatibility routes
+solely because the hub/publisher migration has succeeded.
 
 **No push, deployment or destructive Git reset has been performed.**
