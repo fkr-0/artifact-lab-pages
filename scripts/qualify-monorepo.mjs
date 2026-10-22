@@ -31,7 +31,10 @@ async function assertSourceClean() {
   // The commit must account for every authored source file and every gitlink.
   const status = await git('status', '--porcelain', '--untracked-files=no', '--ignore-submodules=all');
   if (status) throw new Error('Refusing tracked source changes:\n' + status);
-  const submodules = await git('submodule', 'status');
+  // Preserve the leading status byte (' ' means pinned; '+' means drift).
+  const { stdout: submoduleStatus } = await exec('git', ['-C', root, 'submodule', 'status'],
+    { encoding: 'utf8', maxBuffer: 1024 * 1024 });
+  const submodules = submoduleStatus.trimEnd();
   for (const line of submodules.split(/\r?\n/u).filter(Boolean)) {
     if (line[0] !== ' ') throw new Error('Submodule is not at its pinned Git revision: ' + line);
     const match = /^ [a-f0-9]{40} ([^ ]+)/u.exec(line);
