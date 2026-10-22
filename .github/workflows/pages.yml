@@ -16,7 +16,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: 57abb37e8709467ce06e727e6b72eac1c9ff7326
+  ARTIFACTS_V13_5_REVISION: 7f4c563942aa6d756760d7cd6870019c09e5a72a
 
 jobs:
   build:
@@ -141,7 +141,7 @@ jobs:
             '04-trust-boundaries', '05-five-gates', '06-ca-chain',
             '07-identity-comparison', '08-persistence',
           ];
-          if (entry.version !== '1.2.0' || entry.receipt?.files !== 17) {
+          if (entry.version !== '1.2.1' || entry.receipt?.files !== 17) {
             throw new Error('Roborock report lacks complete v1.2 Mermaid figure receipt');
           }
           for (const name of figureNames) {
