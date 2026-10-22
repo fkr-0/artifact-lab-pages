@@ -28,8 +28,28 @@ async function run(command, args, opts = {}) {
   if (stderr) process.stderr.write(stderr);
 }
 async function assertSourceClean() {
-  const status = await git('status', '--porcelain', '--untracked-files=no');
-  if (status) throw new Error('Refusing a dirty monorepo source or advanced submodule pointer:\n' + status);
+  // The commit must account for every authored source file and every gitlink.
+  const status = await git('status', '--porcelain', '--untracked-files=no', '--ignore-submodules=all');
+  if (status) throw new Error('Refusing tracked source changes:\n' + status);
+  const submodules = await git('submodule', 'status');
+  for (const line of submodules.split(/\r?\n/u).filter(Boolean)) {
+    if (line[0] !== ' ') throw new Error('Submodule is not at its pinned Git revision: ' + line);
+    const match = /^ [a-f0-9]{40} ([^ ]+)/u.exec(line);
+    if (!match) throw new Error('Invalid submodule status: ' + line);
+    const subPath = match[1];
+    const { stdout } = await exec('git', ['-C', join(root, subPath),
+      'status', '--porcelain', '--untracked-files=no'],
+      { encoding: 'utf8', maxBuffer: 1024 * 1024 });
+    for (const changed of stdout.split(/\r?\n/u).filter(Boolean)) {
+      const path = changed.slice(3);
+      // Badger's release build rewrites only its tracked derived dist files.
+      if (subPath !== 'badger-sprawl-runner' ||
+          !/^packages\/(?:progression|sprite-contracts)\/dist\//u.test(path) ||
+          !/^ M /u.test(changed)) {
+        throw new Error('Unreviewed tracked submodule change: ' + subPath + '/' + path);
+      }
+    }
+  }
 }
 const sourceRevision = await git('rev-parse', 'HEAD');
 const hubTree = await git('rev-parse', 'HEAD:hub-v13.5');
