@@ -28,9 +28,10 @@ async function run(command, args, opts = {}) {
   if (stderr) process.stderr.write(stderr);
 }
 async function assertSourceClean() {
-  // The commit must account for every authored source file and every gitlink.
-  const status = await git('status', '--porcelain', '--untracked-files=no', '--ignore-submodules=all');
-  if (status) throw new Error('Refusing tracked source changes:\n' + status);
+  // The commit must account for all authored source, including non-ignored
+  // untracked files. Build outputs are ignored explicitly by .gitignore.
+  const status = await git('status', '--porcelain', '--untracked-files=normal', '--ignore-submodules=all');
+  if (status) throw new Error('Refusing uncommitted or untracked source changes:\n' + status);
   // Preserve the leading status byte (' ' means pinned; '+' means drift).
   const { stdout: submoduleStatus } = await exec('git', ['-C', root, 'submodule', 'status'],
     { encoding: 'utf8', maxBuffer: 1024 * 1024 });
