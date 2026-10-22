@@ -24,7 +24,7 @@ async function readJson(path) {
   }
 }
 
-const nativeCatalog = await readJson(resolve(sourceRoot, 'registry/generated/catalog.json'));
+const nativeCatalog = await readJson(resolve(process.env.ARTIFACTS_NATIVE_CATALOG_FILE || resolve(sourceRoot, 'registry/generated/catalog.json')));
 const nativeManifests = {};
 if (nativeCatalog && Array.isArray(nativeCatalog.items)) {
   for (const item of nativeCatalog.items) {

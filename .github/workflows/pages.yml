@@ -16,7 +16,6 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  ARTIFACTS_V13_5_REVISION: 53c397650860b03bbed12f0da476dd0ae1a88abe
 
 jobs:
   build:
@@ -86,35 +85,28 @@ jobs:
       - name: Verify Sudoku and Killer Sudoku uniqueness and solving logic
         run: node --test tests/sudoku-lab.test.mjs tests/killer-sudoku-lab.test.mjs
 
-      - name: Refresh native source catalog
-        run: node tooling/artifactctl/src/cli.mjs catalog --out registry/generated/catalog.json
+      - name: Validate native source registry
+        run: node tooling/artifactctl/src/cli.mjs validate
 
-      - name: Checkout qualified Artifacts V13.5
-        uses: actions/checkout@v5
-        with:
-          repository: fkr-0/artifacts-v13.5
-          ref: ${{ env.ARTIFACTS_V13_5_REVISION }}
-          fetch-depth: 0
-          path: .artifacts-v13.5
-
-      - name: Build and qualify V13.5 publication handoff
-        run: npm run publication:handoff
-        working-directory: .artifacts-v13.5
-        env:
-          ARTIFACTS_SOURCE_ROOT: ${{ github.workspace }}
-
+      # One checkout is the full release authority. The qualification runner
+      # regenerates its catalog under an ignored build directory, checks the
+      # Git commit and hub subtree, stages every route, and hashes all assets.
       - name: Materialize verified V13.5 Pages stage
-        run: npm run stage:v13.5 -- --out .artifacts-pages-stage
-        env:
-          ARTIFACTS_V13_5_ROOT: ${{ github.workspace }}/.artifacts-v13.5
+        run: node scripts/qualify-monorepo.mjs
 
       - name: Verify staged publication receipt
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
           const receipt = JSON.parse(fs.readFileSync('.artifacts-pages-stage/V13_5_PAGES_INTEGRATION.json', 'utf8'));
-          if (receipt?.v13_5?.revision !== process.env.ARTIFACTS_V13_5_REVISION) {
-            throw new Error('V13.5 revision mismatch in staged publication receipt');
+          const { execFileSync } = require('node:child_process');
+          const expectedTree = execFileSync('git', ['rev-parse', 'HEAD:hub-v13.5'], {encoding:'utf8'}).trim();
+          if (receipt?.v13_5?.revision !== process.env.GITHUB_SHA ||
+              receipt?.source?.currentRevision !== process.env.GITHUB_SHA ||
+              receipt?.provenance?.commit !== process.env.GITHUB_SHA ||
+              receipt?.provenance?.mode !== 'monorepo' ||
+              receipt?.provenance?.hubTree !== expectedTree) {
+            throw new Error('Monorepo revision/subtree mismatch in staged publication receipt');
           }
           if (receipt?.v13_5?.stagedV12Local !== 44 || receipt?.v13_5?.missingV12Local !== 0) {
             throw new Error('V13.5 V12 parity gate failed');

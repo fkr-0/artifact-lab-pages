@@ -68,3 +68,7 @@ app-hub-v11/data/build-stats.json
 /dist/
 /.wsbridge/
 /registry/generated/validation.json
+
+# Monorepo V13.5 generated release stage and synthesized native catalog
+/hub-v13.5/dist/
+/hub-v13.5/.generated/
