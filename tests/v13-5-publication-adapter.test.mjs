@@ -87,6 +87,16 @@ async function fixture({
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, contents);
   }
+  const supplements = {
+    'publications/bewusstsein/index.html': '<a href="./bewusstsein.pdf">PDF</a><a href="./lesen.html">HTML</a>',
+    'publications/bewusstsein/build/bewusstsein.html': '<!doctype html><title>Bewusstsein</title>',
+    'publications/bewusstsein/build/bewusstsein.pdf': '%PDF-1.7\\nmock pdf bytes',
+  };
+  for (const [path, contents] of Object.entries(supplements)) {
+    const target = join(artifacts, path);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, contents);
+  }
   const assetManifest = {
     files: Object.fromEntries(Object.entries(files).map(([path, contents]) => [path, { sha256: digest(contents), bytes: Buffer.byteLength(contents) }])),
   };
@@ -141,7 +151,35 @@ test('qualified V13.5 handoff becomes the complete Pages stage', async () => {
   assert.equal(result.receipt.v13_5.missingV12Local, 0);
   assert.match(await readFile(join(output, 'meme-lab', 'meme-lab.html'), 'utf8'), /Meme Lab/);
   assert.match(await readFile(join(output, 'artifacts', 'revealive', '0.1.0', 'index.html'), 'utf8'), /Revealive/);
+  assert.match(await readFile(join(output, 'bewusstsein/index.html'), 'utf8'), /bewusstsein.pdf/);
+  assert.match(await readFile(join(output, 'bewusstsein/lesen.html'), 'utf8'), /Bewusstsein/);
+  assert.ok((await readFile(join(output, 'bewusstsein/bewusstsein.pdf'))).subarray(0, 5).equals(Buffer.from('%PDF-')));
+  assert.equal(result.receipt.supplements.bewusstsein.files.length, 3);
+  for (const file of result.receipt.supplements.bewusstsein.files) {
+    assert.equal(digest(await readFile(join(output, file.path))), file.sha256);
+  }
   assert.equal(JSON.parse(await readFile(join(output, 'V13_5_PAGES_INTEGRATION.json'), 'utf8')).deployment.performed, false);
+});
+
+test('Bewusstsein transition includes only reviewed static publication files', () => {
+  const changedPaths = [
+    'publications/bewusstsein/index.html',
+    'publications/bewusstsein/build/bewusstsein.html',
+    'publications/bewusstsein/build/bewusstsein.pdf',
+  ];
+  const transition = { pinnedRevision: 'a'.repeat(40), currentRevision: 'b'.repeat(40),
+    pinnedIsAncestor: true, changedPaths };
+  assert.equal(validateSourceTransition(transition).mode, 'integration-descendant');
+  assert.throws(() => validateSourceTransition({ ...transition,
+    changedPaths: [...changedPaths, 'publications/bewusstsein/unknown.js'] }), /outside reviewed publication paths/);
+});
+
+test('Bewusstsein stage rejects corrupted PDF', async () => {
+  const { artifacts, v13, output } = await fixture();
+  await writeFile(join(artifacts, 'publications/bewusstsein/build/bewusstsein.pdf'), 'invalid');
+  await assert.rejects(stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13,
+    outDir: output, artifactSourceRevision: 'a'.repeat(40),
+    v13Revision: 'b'.repeat(40) }), /not a valid PDF payload/);
 });
 
 test('Vim Tomb Raider source changes require an exact reviewed release file set', () => {

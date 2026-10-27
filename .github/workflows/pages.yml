@@ -152,6 +152,20 @@ jobs:
               }
             }
           }
+          const supplement = receipt?.supplements?.bewusstsein;
+          if (supplement?.route !== '/bewusstsein/' ||
+              supplement?.pdf !== '/bewusstsein/bewusstsein.pdf' ||
+              supplement?.files?.length !== 3) {
+            throw new Error('Bewusstsein publication is missing or unqualified');
+          }
+          const crypto = require('node:crypto');
+          for (const file of supplement.files) {
+            const contents = fs.readFileSync('.artifacts-pages-stage/' + file.path);
+            if (crypto.createHash('sha256').update(contents).digest('hex') !== file.sha256 ||
+                contents.length !== file.bytes) {
+              throw new Error('Bewusstsein stage integrity mismatch: ' + file.path);
+            }
+          }
           console.log('V13.5 Pages receipt verified:', receipt.v13_5);
           NODE
 

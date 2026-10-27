@@ -47,6 +47,9 @@ async function gitSourceTransition(root, pinnedRevision, currentRevision) {
 const INTEGRATION_ONLY_PATHS = new Set([
   '.github/workflows/pages.yml',
   '.gitignore',
+  'publications/bewusstsein/index.html',
+  'publications/bewusstsein/build/bewusstsein.html',
+  'publications/bewusstsein/build/bewusstsein.pdf',
   'apps/app-hub-v13/artifact.json',
   'docs/v13-5-publication-integration.md',
   'package.json',
@@ -58,6 +61,12 @@ const INTEGRATION_ONLY_PATHS = new Set([
   'tests/revealive-publication-stage.test.mjs',
   'tests/v13-5-publication-adapter.test.mjs',
 ]);
+// Editorial supplement is introduced only into the verified Pages assembly.
+const BEWUSSTSEIN_FILES = [
+  ['publications/bewusstsein/index.html', 'bewusstsein/index.html'],
+  ['publications/bewusstsein/build/bewusstsein.html', 'bewusstsein/lesen.html'],
+  ['publications/bewusstsein/build/bewusstsein.pdf', 'bewusstsein/bewusstsein.pdf'],
+];
 // Reviewed post-pin native additions are exact-path exceptions, gated by the
 // current V13.5 handoff inventory and separately verified staged assets.
 const REVIEWED_NATIVE_ADDITIONS = new Map([
@@ -422,8 +431,32 @@ export async function stageQualifiedV13_5({
   await rm(stageRoot, { recursive: true, force: true });
   await mkdir(dirname(stageRoot), { recursive: true });
   await cp(v13Dist, stageRoot, { recursive: true, dereference: false, errorOnExist: false });
+  // Hash every additional byte *before* the integration receipt is finalized.
+  const supplementalFiles = [];
+  for (const [sourcePath, targetPath] of BEWUSSTSEIN_FILES) {
+    const input = join(sourceRoot, sourcePath);
+    const output = join(stageRoot, targetPath);
+    const info = await lstat(input);
+    if (!info.isFile() || info.isSymbolicLink()) throw new Error('Invalid Bewusstsein source: ' + sourcePath);
+    const bytes = await readFile(input);
+    if (targetPath.endsWith('.pdf') && !bytes.subarray(0, 5).equals(Buffer.from('%PDF-'))) {
+      throw new Error('Bewusstsein PDF is not a valid PDF payload');
+    }
+    if (targetPath.endsWith('index.html') &&
+        (!bytes.includes(Buffer.from('href="./bewusstsein.pdf"')) ||
+         !bytes.includes(Buffer.from('href="./lesen.html"')))) {
+      throw new Error('Bewusstsein landing page is missing its relative download/read links');
+    }
+    await mkdir(dirname(output), { recursive: true });
+    await cp(input, output, { errorOnExist: true, force: false });
+    const hash = await sha256(input);
+    if (await sha256(output) !== hash) throw new Error('Bewusstsein publication hash mismatch: ' + targetPath);
+    supplementalFiles.push({ path: targetPath, sha256: hash, bytes: info.size });
+  }
   const stagedFiles = await walkRegularFiles(stageRoot);
-  if (stagedFiles.length !== sourceFiles.length) throw new Error('Staged V13.5 file count changed during publication copy.');
+  if (stagedFiles.length !== sourceFiles.length + supplementalFiles.length) {
+    throw new Error('Staged V13.5 file count changed during publication copy.');
+  }
 
   const receipt = {
     schemaVersion: INTEGRATION_SCHEMA,
@@ -446,6 +479,14 @@ export async function stageQualifiedV13_5({
       root: relative(sourceRoot, stageRoot).split(sep).join('/') || '.',
       files: stagedFiles.length,
       hashedFiles: hashedFileCount,
+    },
+    supplements: {
+      bewusstsein: {
+        route: '/bewusstsein/',
+        pdf: '/bewusstsein/bewusstsein.pdf',
+        html: '/bewusstsein/lesen.html',
+        files: supplementalFiles,
+      },
     },
     deployment: { provider: 'github-pages', ownerWorkflow: '.github/workflows/pages.yml', performed: false },
   };
