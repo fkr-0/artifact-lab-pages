@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#faf9f6">
+  <meta name="description" content="Bewusstsein als semantische Selbstzuschreibung. Ein Entwurf einer sprachlich-reflexiven Minimaltheorie. Online lesen oder als PDF herunterladen.">
+  <title>Bewusstsein als semantische Selbstzuschreibung — Arbeitsfassung</title>
+  <style>
+    :root { --paper: #faf9f6; --ink: #22292a; --muted: #66706e; --line: #d7d9d3; --accent: #314e49; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.7 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-underline-offset: .21em; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .wrap { width: min(calc(100% - 48px), 1020px); margin-inline: auto; }
+    .mast { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+    .brand { font-weight: 750; letter-spacing: -.015em; color: var(--ink); text-decoration: none; font-size: 15px; }
+    nav { display: flex; gap: 24px; font-size: 13px; }
+    nav a { color: var(--muted); text-decoration: none; }
+    nav a:hover { color: var(--ink); text-decoration: underline; }
+    .intro { max-width: 820px; padding: clamp(50px, 8vw, 91px) 0 68px; }
+    .kicker { color: var(--accent); font-size: 12px; font-weight: 720; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 18px; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.024em; font-weight: 400; line-height: 1.18; }
+    h1 { font-size: clamp(36px, 5vw, 59px); margin: 0 0 21px; max-width: 800px; }
+    .subtitle { font-size: clamp(17px, 2vw, 20px); margin: 0; color: #46514e; max-width: 700px; line-height: 1.65; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 29px; }
+    .button { display: inline-flex; gap: 18px; justify-content: space-between; align-items: center; min-height: 46px; padding: 10px 19px; border: 1px solid var(--accent); text-decoration: none; font-weight: 690; font-size: 14px; border-radius: 3px; }
+    .button.primary { background: var(--accent); color: white; }
+    .button.secondary { background: transparent; color: var(--accent); }
+    .button:hover { filter: brightness(.93); }
+    .meta { border-block: 1px solid var(--line); display: flex; gap: 10px 28px; flex-wrap: wrap; padding: 16px 0; color: var(--muted); font-size: 12px; }
+    main section.content { padding: 63px 0 35px; }
+    h2 { font-size: clamp(27px, 3.2vw, 34px); margin: 0 0 22px; }
+    .section-label { color: var(--accent); font-size: 12px; font-weight: 700; margin: 0 0 10px; }
+    .abstract { max-width: 750px; }
+    .abstract p { margin: 0 0 20px; }
+    .points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 31px; padding: 45px 0 60px; border-bottom: 1px solid var(--line); }
+    .point { border-top: 2px solid var(--line); padding-top: 17px; }
+    .point h3 { font-size: 16px; margin: 0 0 8px; }
+    .point p { font-size: 14px; color: #57605e; margin: 0; line-height: 1.7; }
+    .reading { display: flex; justify-content: space-between; align-items: flex-start; gap: 26px; padding: 57px 0 83px; }
+    .reading p { margin: 0; max-width: 600px; color: #57605e; }
+    footer { padding: 22px 0 40px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
+    @media (max-width: 670px) {
+      .wrap { width: min(calc(100% - 36px), 1020px); }
+      .mast { align-items: flex-start; }
+      nav { gap: 12px; }
+      .intro { padding-top: 52px; padding-bottom: 50px; }
+      .points { grid-template-columns: 1fr; gap: 23px; }
+      .reading { flex-direction: column; }
+    }
+    @media (max-width: 410px) {
+      .mast { flex-direction: column; gap: 7px; }
+      .button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="mast">
+      <a class="brand" href="./">Bewusstsein — Essay</a>
+      <nav aria-label="Navigation">
+        <a href="#abstract">Abstract</a>
+        <a href="#argument">Ansatz</a>
+        <a href="#publikation">Publikation</a>
+      </nav>
+    </header>
+    <main>
+      <header class="intro">
+        <p class="kicker">Philosophie · Forschungsessay</p>
+        <h1>Bewusstsein als semantische Selbstzuschreibung</h1>
+        <p class="subtitle">Entwurf einer sprachlich-reflexiven Minimaltheorie. Eine begriffliche Untersuchung über Selbstreferenz, reflexive Zuschreibung und die Grenzen des Fremdnachweises.</p>
+        <div class="actions">
+          <a class="button primary" href="./bewusstsein.pdf" download="Bewusstsein-als-semantische-Selbstzuschreibung.pdf">PDF herunterladen <span aria-hidden="true">↓</span></a>
+          <a class="button secondary" href="./lesen.html">Im Browser lesen <span aria-hidden="true">↗</span></a>
+        </div>
+      </header>
+      <div class="meta" aria-label="Publikationsdetails">
+        <span>Arbeitsfassung · 27. Oktober 2026</span>
+        <span>45 Seiten</span>
+        <span>Deutsch · A4</span>
+        <span>PDF und HTML</span>
+      </div>
+      <section class="content" id="abstract" aria-labelledby="abstract-title">
+        <p class="section-label">Zusammenfassung</p>
+        <div class="abstract">
+          <h2 id="abstract-title">Eine begriffliche Minimaltheorie</h2>
+          <p>Der Ausdruck „Bewusstsein“ umfasst sehr unterschiedliche Phänomene: Wachheit, Wahrnehmung, Aufmerksamkeit, subjektives Erleben und Selbstkenntnis. Der Text schlägt keine Theorie sämtlicher dieser Phänomene vor, sondern eine bewusst eng gefasste, revisionäre Explikation.</p>
+          <p>Untersucht wird die Fähigkeit eines Systems, sich selbst als Träger einer eigenen semantischen Selbstzuschreibungsoperation zu erfassen und diese Einsicht begrifflich verbindlich zu verwenden. Dabei werden die interne Kompetenz, ihr tatsächlicher Vollzug, die bloße Zeichenproduktion und der stets fehlbare Fremdnachweis unterschieden.</p>
+          <p>Die Theorie ist ein zu prüfender Vorschlag, kein definitorischer Beweis phänomenalen Erlebens. Ihre Tragfähigkeit hängt insbesondere von einer nichtzirkulären Erklärung semantischer Kompetenz und ihrem Erklärungsgewinn gegenüber etablierten Begriffen ab.</p>
+        </div>
+      </section>
+      <section id="argument" aria-labelledby="argument-title">
+        <p class="section-label">Struktur des Arguments</p>
+        <h2 id="argument-title">Drei notwendige Unterscheidungen</h2>
+        <div class="points">
+          <article class="point"><h3>Selbstreferenz <em>de se</em></h3><p>Sich selbst als sich selbst erfassen, statt lediglich über eine identifizierte Person oder Instanz zu sprechen.</p></article>
+          <article class="point"><h3>Reflexive Selbstzuschreibung</h3><p>Die eigene Zuschreibungsoperation selbst zum Gegenstand eines Urteils machen.</p></article>
+          <article class="point"><h3>Inferenzielle Verbindlichkeit</h3><p>Aus dem Urteil begriffliche Konsequenzen ziehen, statt nur entsprechende Zeichen zu reproduzieren.</p></article>
+        </div>
+      </section>
+      <section class="reading" id="publikation" aria-labelledby="publikation-title">
+        <div>
+          <p class="section-label">Aktuelle Arbeitsfassung</p>
+          <h2 id="publikation-title">Lesen und herunterladen</h2>
+          <p>Mit philosophiegeschichtlicher Einordnung, formaler Rekonstruktion, Einwänden, Gegenmodellen und einem empirischen Forschungsprogramm. Die Fassung wird fortlaufend überarbeitet.</p>
+        </div>
+        <div class="actions">
+          <a class="button primary" href="./bewusstsein.pdf" download="Bewusstsein-als-semantische-Selbstzuschreibung.pdf">PDF herunterladen <span aria-hidden="true">↓</span></a>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span>Bewusstsein als semantische Selbstzuschreibung · Arbeitsfassung</span>
+      <span>fkr.dev</span>
+    </footer>
+  </div>
+</body>
+</html>

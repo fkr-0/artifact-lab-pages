@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "artifacts.fkr.dev/v1",
+  "id": "bewusstsein",
+  "version": "0.1.0",
+  "title": "Bewusstsein als semantische Selbstzuschreibung",
+  "description": "Philosophischer Forschungsessay über sprachlich-reflexives Bewusstsein, semantische Selbstzuschreibung und den fehlbaren Fremdnachweis. 45 Seiten, PDF und HTML.",
+  "kind": "document",
+  "status": "active",
+  "required": true,
+  "tags": [
+    "philosophie",
+    "bewusstsein",
+    "essay",
+    "sprache",
+    "selbstreferenz",
+    "lesen",
+    "pdf"
+  ],
+  "source": {
+    "kind": "directory",
+    "path": "publications/bewusstsein/site",
+    "entrypoint": "index.html",
+    "git": {
+      "mode": "root"
+    }
+  },
+  "build": {
+    "mode": "none"
+  },
+  "release": {
+    "kind": "directory",
+    "entrypoint": "index.html",
+    "offline": true
+  },
+  "launch": {
+    "default": "newWindow",
+    "modes": [
+      "newWindow"
+    ],
+    "sandbox": "none"
+  },
+  "verify": {
+    "static": true,
+    "standaloneSmoke": true,
+    "expectedFiles": [
+      "index.html",
+      "lesen.html",
+      "bewusstsein.pdf"
+    ]
+  }
+}

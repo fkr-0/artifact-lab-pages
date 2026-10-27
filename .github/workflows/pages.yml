@@ -152,6 +152,17 @@ jobs:
               }
             }
           }
+          // The AppHub catalog must expose the same verified PDF/HTML release.
+          const catalog = JSON.parse(fs.readFileSync('.artifacts-pages-stage/catalog.json', 'utf8'));
+          const routes = JSON.parse(fs.readFileSync('.artifacts-pages-stage/route-manifest.json', 'utf8'));
+          const item = catalog.items?.find((entry) => entry.id === 'bewusstsein');
+          if (item?.availability !== 'verified' || item.kind !== 'document' ||
+              item.url !== '/artifacts/bewusstsein/0.1.0/index.html' ||
+              !routes.entries?.some((entry) => entry.id === 'bewusstsein' &&
+                entry.path === 'artifacts/bewusstsein/0.1.0/index.html' &&
+                entry.state === 'staged')) {
+            throw new Error('Bewusstsein is not discoverable in the AppHub catalog');
+          }
           const supplement = receipt?.supplements?.bewusstsein;
           if (supplement?.route !== '/bewusstsein/' ||
               supplement?.pdf !== '/bewusstsein/bewusstsein.pdf' ||

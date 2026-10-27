@@ -82,15 +82,31 @@ async function fixture({
       id:'vim-tomb-raider', path:prefix + 'index.html', state:'staged',
     }]});
   }
+  // The canonical V13.5 stage must register the essay, not merely ship files.
+  const bewPrefix = 'artifacts/bewusstsein/0.1.0/';
+  const bewFiles = {
+    [bewPrefix + 'index.html']: '<a href="./bewusstsein.pdf">PDF</a><a href="./lesen.html">HTML</a>',
+    [bewPrefix + 'lesen.html']: '<!doctype html><title>Bewusstsein</title>',
+    [bewPrefix + 'bewusstsein.pdf']: '%PDF-1.7\\nmock bytes',
+  };
+  Object.assign(files, bewFiles);
+  const mockCatalog = JSON.parse(files['catalog.json']);
+  mockCatalog.items.push({ id: 'bewusstsein', kind: 'document', version: '0.1.0',
+    availability: 'verified', url: '/' + bewPrefix + 'index.html' });
+  files['catalog.json'] = JSON.stringify(mockCatalog);
+  const mockRoutes = JSON.parse(files['route-manifest.json']);
+  mockRoutes.entries.push({ id: 'bewusstsein', path: bewPrefix + 'index.html', state: 'staged' });
+  files['route-manifest.json'] = JSON.stringify(mockRoutes);
+
   for (const [path, contents] of Object.entries(files)) {
     const target = join(dist, path);
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, contents);
   }
   const supplements = {
-    'publications/bewusstsein/index.html': '<a href="./bewusstsein.pdf">PDF</a><a href="./lesen.html">HTML</a>',
-    'publications/bewusstsein/build/bewusstsein.html': '<!doctype html><title>Bewusstsein</title>',
-    'publications/bewusstsein/build/bewusstsein.pdf': '%PDF-1.7\\nmock pdf bytes',
+    'publications/bewusstsein/site/index.html': '<a href="./bewusstsein.pdf">PDF</a><a href="./lesen.html">HTML</a>',
+    'publications/bewusstsein/site/lesen.html': '<!doctype html><title>Bewusstsein</title>',
+    'publications/bewusstsein/site/bewusstsein.pdf': '%PDF-1.7\\nmock pdf bytes',
   };
   for (const [path, contents] of Object.entries(supplements)) {
     const target = join(artifacts, path);
@@ -111,7 +127,7 @@ async function fixture({
       currentRevision: sourceRevision,
       transition: sourceRevision === 'a'.repeat(40) ? 'exact' : 'descendant',
     },
-    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab'] : nakamoto ? ['revealive', 'nakamotos-disciples'] : vim ? ['revealive', 'vim-tomb-raider'] : ['revealive'] },
+    catalog: { currentNativeAdded: killer ? ['revealive', 'killer-sudoku-lab', 'bewusstsein'] : nakamoto ? ['revealive', 'nakamotos-disciples', 'bewusstsein'] : vim ? ['revealive', 'vim-tomb-raider', 'bewusstsein'] : ['revealive', 'bewusstsein'] },
     regressions: {
       gitRecipeBook: { url: '/git-recipe-book/index.html', version: '1.1.0', assets: 2,
         sha256: digest(files['git-recipe-book/index.html']) },
@@ -161,22 +177,38 @@ test('qualified V13.5 handoff becomes the complete Pages stage', async () => {
   assert.equal(JSON.parse(await readFile(join(output, 'V13_5_PAGES_INTEGRATION.json'), 'utf8')).deployment.performed, false);
 });
 
+test('Bewusstsein static publication is an AppHub-native document with working relative links', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../registry/sources.d/bewusstsein.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.id, 'bewusstsein');
+  assert.equal(manifest.kind, 'document');
+  assert.equal(manifest.source.path, 'publications/bewusstsein/site');
+  assert.deepEqual(manifest.verify.expectedFiles.sort(),
+    ['index.html', 'lesen.html', 'bewusstsein.pdf'].sort());
+  const landing = await readFile(new URL('../publications/bewusstsein/site/index.html', import.meta.url), 'utf8');
+  assert.match(landing, /<h1>Bewusstsein als semantische Selbstzuschreibung<\/h1>/);
+  assert.doesNotMatch(landing, /class="hero"|class="hero-art"|Was heißt es,/);
+  assert.match(landing, /href="\.\/bewusstsein\.pdf"/);
+  assert.match(landing, /href="\.\/lesen\.html"/);
+  const pdf = await readFile(new URL('../publications/bewusstsein/site/bewusstsein.pdf', import.meta.url));
+  assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+});
+
 test('Bewusstsein transition includes only reviewed static publication files', () => {
   const changedPaths = [
-    'publications/bewusstsein/index.html',
-    'publications/bewusstsein/build/bewusstsein.html',
-    'publications/bewusstsein/build/bewusstsein.pdf',
+    'publications/bewusstsein/site/index.html',
+    'publications/bewusstsein/site/lesen.html',
+    'publications/bewusstsein/site/bewusstsein.pdf',
   ];
   const transition = { pinnedRevision: 'a'.repeat(40), currentRevision: 'b'.repeat(40),
     pinnedIsAncestor: true, changedPaths };
   assert.equal(validateSourceTransition(transition).mode, 'integration-descendant');
   assert.throws(() => validateSourceTransition({ ...transition,
-    changedPaths: [...changedPaths, 'publications/bewusstsein/unknown.js'] }), /outside reviewed publication paths/);
+    changedPaths: [...changedPaths, 'publications/bewusstsein/site/unknown.js'] }), /outside reviewed publication paths/);
 });
 
 test('Bewusstsein stage rejects corrupted PDF', async () => {
   const { artifacts, v13, output } = await fixture();
-  await writeFile(join(artifacts, 'publications/bewusstsein/build/bewusstsein.pdf'), 'invalid');
+  await writeFile(join(artifacts, 'publications/bewusstsein/site/bewusstsein.pdf'), 'invalid');
   await assert.rejects(stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: v13,
     outDir: output, artifactSourceRevision: 'a'.repeat(40),
     v13Revision: 'b'.repeat(40) }), /not a valid PDF payload/);

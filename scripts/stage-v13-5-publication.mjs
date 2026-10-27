@@ -50,6 +50,10 @@ const INTEGRATION_ONLY_PATHS = new Set([
   'publications/bewusstsein/index.html',
   'publications/bewusstsein/build/bewusstsein.html',
   'publications/bewusstsein/build/bewusstsein.pdf',
+  'publications/bewusstsein/site/index.html',
+  'publications/bewusstsein/site/lesen.html',
+  'publications/bewusstsein/site/bewusstsein.pdf',
+  'registry/sources.d/bewusstsein.json',
   'apps/app-hub-v13/artifact.json',
   'docs/v13-5-publication-integration.md',
   'package.json',
@@ -63,9 +67,9 @@ const INTEGRATION_ONLY_PATHS = new Set([
 ]);
 // Editorial supplement is introduced only into the verified Pages assembly.
 const BEWUSSTSEIN_FILES = [
-  ['publications/bewusstsein/index.html', 'bewusstsein/index.html'],
-  ['publications/bewusstsein/build/bewusstsein.html', 'bewusstsein/lesen.html'],
-  ['publications/bewusstsein/build/bewusstsein.pdf', 'bewusstsein/bewusstsein.pdf'],
+  ['publications/bewusstsein/site/index.html', 'bewusstsein/index.html'],
+  ['publications/bewusstsein/site/lesen.html', 'bewusstsein/lesen.html'],
+  ['publications/bewusstsein/site/bewusstsein.pdf', 'bewusstsein/bewusstsein.pdf'],
 ];
 // Reviewed post-pin native additions are exact-path exceptions, gated by the
 // current V13.5 handoff inventory and separately verified staged assets.
@@ -424,6 +428,27 @@ export async function stageQualifiedV13_5({
     throw new Error('Git Recipe Book stage is missing compiled runtime assets.');
   }
   for (const path of gitRecipeAssets) await assertHash(v13Dist, path, assetManifest.files[path].sha256);
+
+  // The publication is a first-class V13.5 AppHub entry, not just an alias.
+  // Require the qualified handoff to cover its versioned route and assets.
+  const bewusstseinVersion = '0.1.0';
+  const bewusstseinPrefix = 'artifacts/bewusstsein/' + bewusstseinVersion + '/';
+  const nativeCatalog = JSON.parse(await readFile(join(v13Dist, 'catalog.json'), 'utf8'));
+  const nativeRoutes = JSON.parse(await readFile(join(v13Dist, 'route-manifest.json'), 'utf8'));
+  const nativeItem = nativeCatalog.items?.find((item) => item.id === 'bewusstsein');
+  if (!handoff.catalog?.currentNativeAdded?.includes('bewusstsein') ||
+      nativeItem?.availability !== 'verified' ||
+      nativeItem?.kind !== 'document' ||
+      nativeItem?.url !== '/' + bewusstseinPrefix + 'index.html' ||
+      !nativeRoutes.entries?.some((entry) =>
+        entry.id === 'bewusstsein' && entry.path === bewusstseinPrefix + 'index.html' &&
+        entry.state === 'staged')) {
+    throw new Error('Bewusstsein AppHub entry is not qualified and discoverable');
+  }
+  for (const name of ['index.html', 'lesen.html', 'bewusstsein.pdf']) {
+    const path = bewusstseinPrefix + name;
+    await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
+  }
 
   const sourceFiles = await walkRegularFiles(v13Dist);
   if (!sourceFiles.includes('PUBLICATION_HANDOFF.json')) throw new Error('V13.5 stage inventory omitted PUBLICATION_HANDOFF.json');
