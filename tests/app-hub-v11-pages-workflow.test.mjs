@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { Script } from 'node:vm';
 
 // Historical filename retained as the Pages migration regression.
 const workflow = await readFile('.github/workflows/pages.yml', 'utf8');
@@ -21,4 +22,9 @@ assert.ok(v13_5StageIndex < receiptIndex && receiptIndex < uploadIndex, 'V13.5 s
 const postVerificationSteps = workflow.slice(receiptIndex, uploadIndex);
 assert.doesNotMatch(postVerificationSteps, /run:\s+(?!\|)/, 'no command step may mutate the verified stage between receipt verification and upload');
 
+// CI embeds Node code in a YAML shell heredoc. Parse it before waiting
+// for a remote deploy to discover a syntax error (for example a repeated const).
+const receiptCheck = workflow.match(/^\s*node - <<'NODE'\s*\n([\s\S]*?)^\s*NODE\s*$/m);
+assert.ok(receiptCheck, 'the Pages receipt verification heredoc must be present');
+assert.doesNotThrow(() => new Script(receiptCheck[1]), 'the embedded Node receipt verification must parse');
 console.log('V13 Pages workflow contract OK');
