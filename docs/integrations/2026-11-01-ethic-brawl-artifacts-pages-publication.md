@@ -35,8 +35,10 @@ The game's current committed HTML bundles CSS in a `<style>` element and referen
 
 - **Committed source qualified locally:** clean, pinned `9e53636`; `pnpm run build` succeeded at `1.9.3`; compiled `dist/index.html`, hashed JS, projected runtime sprites; 304 runtime files excluding source maps and Vite internal metadata, approximately 186.6 MiB.
 - **Automated checks:** `node --test tests/ethic-brawl-pages-publication.test.mjs tests/v13-5-publication-adapter.test.mjs tests/app-hub-v11-pages-workflow.test.mjs tests/badger-sprawl-runner-pages-build.test.mjs` — 30/30 passed at integration development checkpoint. These check missing/mismatched gitlinks, stale manifest versions, dirty submodule, absent compiled output, wrong source link, parity gate, corrupted staged JS and modified catalog bytes.
-- **V13.5 full handoff and production stage:** **not yet verified** at the initial integration checkpoint; do not substitute fixture tests for a full release qualification.
-- **GitHub Pages deployment:** **not verified** at the initial integration checkpoint. A GitHub Actions build/upload step or a local stage is not proof of deployment.
+- **V13.5 full handoff and production stage:** **verified locally** against Artifact Lab integration commit `4605f195ff22b75ba0d04d792a018c8880fbca32` and V13.5 `7f4c563942aa6d756760d7cd6870019c09e5a72a`: 44/44 expected V12 routes, 0 unresolved, 64 catalog entries; base stage 711 files, after overlay 1,017 files; game runtime 304 files / 195,696,573 bytes; `npm run publish:ethic-brawl` and `npm run verify:ethic-brawl-pages` passed. The game receipt lists final asset manifest SHA-256 `091bc28f499b79e532240f4607bca0da8d83aefb5d08d0cb0b9e99b74e112769` and pinned V13.5 handoff SHA-256 `c9e0c5b53f3e8ab2883c58775c9ba76303915b87160a55b97d2032af040343fe`.
+- **Related workflow checks:** Hyperblast release gate succeeded; Sudoku and Killer Sudoku 10/10 passed; Git Recipe Book lint and its 214 tests succeeded with the workflow's `NODE_OPTIONS=--no-experimental-webstorage`; the root-scoped 28/28 Ethic Brawl/V13.5 adapter tests passed. Two broader `artifactctl` tests failed for unrelated pre-existing Bewusstsein link verification and an initially uninitialized Hyperblast submodule; the latter was initialized in this clean worktree. No unrelated source edits were committed.
+- **Chromium smoke:** disposable browser served actual staged bytes with HTTP 200 on the game and Hub; detected one game canvas, zero JS page errors, and visible Ethic Brawl in Hub. Legacy redirect resolved to versioned route. Chromium also requested an implicit `/favicon.ico`, which returned HTTP 404; no referenced compiled JS or image assets failed.
+- **GitHub Pages deployment:** **not verified** at the local acceptance checkpoint. A GitHub Actions build/upload step or a local stage is not proof of deployment.
 - **Live HTTP response and asset fetches:** **not verified** at the initial integration checkpoint; only record a deployment run SHA and HTTP results if independently checked.
 
 ## Release gate and failure handling
@@ -51,10 +53,10 @@ The publication pipeline aborts if a submodule is missing, a gitlink or version 
 | --- | --- |
 | Pinned source/build | Verified locally |
 | Artifact Lab integration and tests | Implemented in isolated branch; tests passing |
-| Full V13.5 handoff and versioned stage | Pending final integration run |
-| GitHub Pages workflow and deployment | Pending merge/release approval and successful run |
-| Hosted HTTP HTML/JS/assets and Hub entry | Pending external verification |
+| Full V13.5 handoff and versioned stage | Verified locally: 44/44 parity, 64 catalog entries; runtime integrity passed |
+| GitHub Pages workflow and deployment | Pending remote PR promotion, successful workflow and deployment |
+| Hosted HTTP HTML/JS/assets and Hub entry | Chromium staging smoke passed; public-host verification still pending |
 
-**Final integration commit:** pending final scoped commit.
+**Reviewed integration source commit:** `4605f195ff22b75ba0d04d792a018c8880fbca32`; later documentation-only receipt revision, if any, must be separately recorded.
 **Deployment run / SHA:** none verified.
 **Public URL HTTP status:** not asserted.
