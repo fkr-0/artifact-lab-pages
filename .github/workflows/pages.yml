@@ -64,6 +64,18 @@ jobs:
         run: pnpm run sample:build
         working-directory: peerjslib
 
+      # Ethic Brawl is a pinned independent source repo, never the local dirty game tree.
+      - name: Install dependencies (ethic-brawl)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+        working-directory: ethic-brawl
+
+      - name: Build (ethic-brawl)
+        run: pnpm run build
+        working-directory: ethic-brawl
+
+      - name: Qualify pinned Ethic Brawl runtime
+        run: npm run check:ethic-brawl && npm run test:ethic-brawl-pages
+
       # Git Recipe Book must be built; its tracked index.html is only a Vite dev entrypoint.
       - name: Install dependencies (git-recipe-book)
         run: pnpm install --frozen-lockfile
@@ -107,6 +119,12 @@ jobs:
         run: npm run stage:v13.5 -- --out .artifacts-pages-stage
         env:
           ARTIFACTS_V13_5_ROOT: ${{ github.workspace }}/.artifacts-v13.5
+
+      - name: Overlay versioned, verified Ethic Brawl runtime and refresh Pages catalog
+        run: npm run publish:ethic-brawl
+
+      - name: Verify compiled Ethic Brawl Pages stage
+        run: npm run verify:ethic-brawl-pages
 
       - name: Verify staged publication receipt
         run: |

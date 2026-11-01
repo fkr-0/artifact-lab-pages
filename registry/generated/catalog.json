@@ -1,22 +1,138 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-10-08T22:08:37.848Z",
+  "generatedAt": "2026-11-01T05:19:57.494Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
     "generator": "artifactctl"
   },
   "summary": {
-    "total": 22,
+    "total": 23,
     "verified": 0,
-    "provisional": 5,
+    "provisional": 4,
     "external": 1,
     "inline": 1,
-    "sourceOnly": 15,
-    "active": 2,
-    "dated": 21
+    "sourceOnly": 17,
+    "active": 4,
+    "dated": 23
   },
   "items": [
+    {
+      "id": "bewusstsein",
+      "version": "0.1.0",
+      "title": "Bewusstsein als semantische Selbstzuschreibung",
+      "description": "Philosophischer Forschungsessay über sprachlich-reflexives Bewusstsein, semantische Selbstzuschreibung und den fehlbaren Fremdnachweis. 45 Seiten, PDF und HTML.",
+      "kind": "document",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "philosophie",
+        "bewusstsein",
+        "essay",
+        "sprache",
+        "selbstreferenz",
+        "lesen",
+        "pdf"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/publications/bewusstsein/site/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow"
+        ],
+        "sandbox": "none"
+      },
+      "git": {
+        "revision": "057d4cd4005402b149839130aff204bac6203d0d",
+        "changedAt": "2026-10-27T11:19:19.000Z",
+        "basis": "source",
+        "path": "publications/bewusstsein/site"
+      },
+      "changedAt": "2026-10-27T11:19:19.000Z",
+      "receipt": null
+    },
+    {
+      "id": "ethic-brawl",
+      "version": "1.9.3",
+      "title": "Ethic Brawl",
+      "description": "Playable Ethic Brawl 1.9.3, compiled from the independently owned, immutable Git revision in the Artifact Lab submodule and published as a self-contained Pages runtime.",
+      "kind": "application",
+      "status": "active",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": null,
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "changedAt": "2026-10-12T21:41:12.000Z",
+        "revision": "9e53636e65831ecacc489f034f665e7afc79d152",
+        "basis": "submodule-pin",
+        "path": "ethic-brawl"
+      },
+      "changedAt": "2026-10-12T21:41:12.000Z",
+      "receipt": null
+    },
+    {
+      "id": "vim-tomb-raider",
+      "version": "1.0.0-rc.6",
+      "title": "Vim Tomb Raider",
+      "description": "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum, command-composition puzzles, and evidence-driven practice.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "vim",
+        "education",
+        "keyboard",
+        "game",
+        "puzzle",
+        "curriculum",
+        "react"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/vim-tomb-raider/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "890fdfec83a331cf65a6a39aa245ad4b8070002d",
+        "changedAt": "2026-10-12T07:07:35.000Z",
+        "basis": "source",
+        "path": "vim-tomb-raider"
+      },
+      "changedAt": "2026-10-12T07:07:35.000Z",
+      "receipt": null
+    },
     {
       "id": "git-recipe-book",
       "version": "1.1.0",
@@ -180,6 +296,43 @@
       "receipt": null
     },
     {
+      "id": "hyperblast-shooter",
+      "version": null,
+      "title": "Hyperblast Shooter",
+      "description": "Published independent Hyperblast Shooter 0.2.0 submodule pinned to the parent-owned reachable revision.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": "/hyperblast-shooter/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "floating",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "2318e705b6310ad6b7a903b46d816b17c3e4ee18",
+        "changedAt": "2026-09-30T14:33:54.000Z",
+        "basis": "source",
+        "path": "hyperblast-shooter"
+      },
+      "changedAt": "2026-09-30T14:33:54.000Z",
+      "receipt": null
+    },
+    {
       "id": "app-hub-v13",
       "version": "2.1.0",
       "title": "V13Hub Artifact Observatory",
@@ -249,12 +402,12 @@
         "sandbox": "none"
       },
       "git": {
-        "changedAt": "2026-09-29T18:08:40.000Z",
-        "revision": "2350af380a93a6c2a7d27fcdc5a05bfb2d10b78d",
-        "basis": "submodule-pin",
+        "revision": "b043e183e41a0a5b92386fc4875e084a3e382840",
+        "changedAt": "2026-09-29T18:14:34.000Z",
+        "basis": "source",
         "path": "peerjslib"
       },
-      "changedAt": "2026-09-29T18:08:40.000Z",
+      "changedAt": "2026-09-29T18:14:34.000Z",
       "receipt": null
     },
     {
@@ -328,49 +481,12 @@
         "sandbox": "trusted"
       },
       "git": {
-        "changedAt": "2026-09-11T00:39:01.000Z",
-        "revision": "5d09136642085d2d0a795e902771c2d8ab516efe",
-        "basis": "submodule-pin",
+        "revision": "fb37e34d25dd6bf32b9959973e71ec3526e75977",
+        "changedAt": "2026-09-16T00:32:25.000Z",
+        "basis": "source",
         "path": "revealive"
       },
-      "changedAt": "2026-09-11T00:39:01.000Z",
-      "receipt": null
-    },
-    {
-      "id": "ethic-brawl",
-      "version": null,
-      "title": "Ethic Brawl",
-      "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
-      "kind": "application",
-      "status": "provisional",
-      "required": true,
-      "tags": [
-        "game",
-        "project",
-        "submodule"
-      ],
-      "sourceKind": "project",
-      "gitMode": "submodule",
-      "buildMode": "compile",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": null,
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": "2026-09-09T23:47:32.000Z",
-        "revision": "2754b6e9d12216613b615300cc9179687fda4e19",
-        "basis": "submodule-pin",
-        "path": "ethic-brawl"
-      },
-      "changedAt": "2026-09-09T23:47:32.000Z",
+      "changedAt": "2026-09-16T00:32:25.000Z",
       "receipt": null
     },
     {
@@ -596,6 +712,42 @@
       "receipt": null
     },
     {
+      "id": "badger-sprawl-runner",
+      "version": null,
+      "title": "Badger Sprawl Runner",
+      "description": "Published independent submodule pinned to the parent-owned reachable revision; a fully verified local 1.4.0 integration candidate exists but remains outside the gitlink until published.",
+      "kind": "application",
+      "status": "provisional",
+      "required": true,
+      "tags": [
+        "game",
+        "project",
+        "submodule"
+      ],
+      "sourceKind": "project",
+      "gitMode": "submodule",
+      "buildMode": "compile",
+      "releaseKind": "directory",
+      "availability": "provisional",
+      "url": null,
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "bfeb6ff2b804d8bacf1d5365f3623111f0826371",
+        "changedAt": "2026-08-20T11:31:17.000Z",
+        "basis": "source",
+        "path": "badger-sprawl-runner"
+      },
+      "changedAt": "2026-08-20T11:31:17.000Z",
+      "receipt": null
+    },
+    {
       "id": "qr-studio",
       "version": "0.1.0",
       "title": "QR Studio",
@@ -632,42 +784,6 @@
         "path": "qr-studio/index.html"
       },
       "changedAt": "2026-08-20T11:28:07.000Z",
-      "receipt": null
-    },
-    {
-      "id": "badger-sprawl-runner",
-      "version": null,
-      "title": "Badger Sprawl Runner",
-      "description": "Published independent submodule pinned to the parent-owned reachable revision; a fully verified local 1.4.0 integration candidate exists but remains outside the gitlink until published.",
-      "kind": "application",
-      "status": "provisional",
-      "required": true,
-      "tags": [
-        "game",
-        "project",
-        "submodule"
-      ],
-      "sourceKind": "project",
-      "gitMode": "submodule",
-      "buildMode": "compile",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": null,
-      "launch": {
-        "default": "newWindow",
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": "2026-08-19T21:25:46.000Z",
-        "revision": "ccd1c439e706c1397f48ed544a44712ff1d087df",
-        "basis": "submodule-pin",
-        "path": "badger-sprawl-runner"
-      },
-      "changedAt": "2026-08-19T21:25:46.000Z",
       "receipt": null
     },
     {
@@ -750,43 +866,6 @@
       "receipt": null
     },
     {
-      "id": "hyperblast-shooter",
-      "version": null,
-      "title": "Hyperblast Shooter",
-      "description": "Published independent Hyperblast Shooter 0.2.0 submodule pinned to the parent-owned reachable revision.",
-      "kind": "application",
-      "status": "provisional",
-      "required": true,
-      "tags": [
-        "game",
-        "project",
-        "submodule"
-      ],
-      "sourceKind": "project",
-      "gitMode": "submodule",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "provisional",
-      "url": "/hyperblast-shooter/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "floating",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": "2026-07-19T14:29:51.000Z",
-        "revision": "df79a2fc9dd4e911cbc5e94c115cf8ad2a80c204",
-        "basis": "submodule-pin",
-        "path": "hyperblast-shooter"
-      },
-      "changedAt": "2026-07-19T14:29:51.000Z",
-      "receipt": null
-    },
-    {
       "id": "v11-peer-daw",
       "version": null,
       "title": "V11 Peer DAW",
@@ -815,52 +894,12 @@
         "sandbox": "trusted"
       },
       "git": {
-        "changedAt": "2026-07-19T02:48:09.000Z",
-        "revision": "37783861b7681852b0605a891a2b831c4cde82de",
-        "basis": "submodule-pin",
+        "revision": "edc4c0ad315770df84ccd64785b8c796cdfc29dd",
+        "changedAt": "2026-07-19T02:52:31.000Z",
+        "basis": "source",
         "path": "v11-peer-daw"
       },
-      "changedAt": "2026-07-19T02:48:09.000Z",
-      "receipt": null
-    },
-    {
-      "id": "vim-tomb-raider",
-      "version": "1.0.0-rc.6",
-      "title": "Vim Tomb Raider",
-      "description": "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum, command-composition puzzles, and evidence-driven practice.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "vim",
-        "education",
-        "keyboard",
-        "game",
-        "puzzle",
-        "curriculum",
-        "react"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/vim-tomb-raider/index.html",
-      "launch": {
-        "default": "fullscreen",
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": null,
-        "revision": null,
-        "basis": "unknown",
-        "path": "vim-tomb-raider"
-      },
-      "changedAt": null,
+      "changedAt": "2026-07-19T02:52:31.000Z",
       "receipt": null
     }
   ]

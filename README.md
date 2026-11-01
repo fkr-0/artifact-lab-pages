@@ -29,7 +29,7 @@ Statuses below follow the V13 catalog/registry where a project is represented th
 
 | Project | Status | Release pinned here | Link |
 |---|---|---:|---|
-| Ethic Brawl | **Graduated** — independent repository | `v1.7.4` | [GitHub](https://github.com/fkr-0/ethic-brawl) |
+| Ethic Brawl | **Graduated** — independent repository; built and published through Artifact Lab Pages | `1.9.3` at `9e53636` | [GitHub](https://github.com/fkr-0/ethic-brawl) |
 | Badger Sprawl Runner | **Graduated** — independent repository | `v1.5.2` | [GitHub](https://github.com/fkr-0/badger-sprawl-runner) |
 | Hyperblast Shooter | **Graduated** — independent repository | `v0.2.0` | [GitHub](https://github.com/fkr-0/hyperblast-shooter) |
 

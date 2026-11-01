@@ -46,6 +46,12 @@ async function gitSourceTransition(root, pinnedRevision, currentRevision) {
 }
 const INTEGRATION_ONLY_PATHS = new Set([
   '.github/workflows/pages.yml',
+  'ethic-brawl',
+  'README.md',
+  'registry/sources.d/ethic-brawl.json',
+  'scripts/publish-ethic-brawl-pages.mjs',
+  'tests/ethic-brawl-pages-publication.test.mjs',
+  'docs/integrations/2026-11-01-ethic-brawl-artifacts-pages-publication.md',
   '.gitignore',
   'publications/bewusstsein/index.html',
   'publications/bewusstsein/build/bewusstsein.html',
