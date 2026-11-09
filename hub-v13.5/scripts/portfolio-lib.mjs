@@ -450,7 +450,8 @@ async function stageCurrentNativeAdditions({
 
   const baselineIds = new Set(baselineItems.map((item) => item.id));
   const candidates = nativeCatalog.items.filter(
-    (item) => !baselineIds.has(item.id) && item.id !== 'app-hub-v13',
+    (item) => item.id !== 'app-hub-v13' && (!baselineIds.has(item.id) ||
+      (preparedReleases[item.id] && !routePath(baselineItems.find(entry=>entry.id===item.id)?.url))),
   );
   const items = [];
   const routes = [];
@@ -815,8 +816,9 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
 
   const editorialReports = hubRoot ? await stageEditorialReports(resolve(hubRoot), output) : { items: [], routes: [] };
 
+  const promotedNativeIds = new Set(nativeAdditions.items.map(item=>item.id));
   const deployedBaselineItems = baseline.items
-    .filter((item) => item.id !== 'app-hub-v12')
+    .filter((item) => item.id !== 'app-hub-v12' && !promotedNativeIds.has(item.id))
     .map((item) => {
       const entry = entries.find((candidate) => candidate.id === item.id);
       if (item.id === 'git-recipe-book') {
@@ -872,7 +874,7 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
     schemaVersion: ROUTE_SCHEMA,
     entries: [
       ...entries
-        .filter((entry) => entry.id !== 'app-hub-v12')
+        .filter((entry) => entry.id !== 'app-hub-v12' && !promotedNativeIds.has(entry.id))
         .map((entry) => ({
           id: entry.id, url: entry.url, path: entry.routePath, state: entry.state, classification: entry.classification,
         })),

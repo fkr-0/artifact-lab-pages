@@ -166,3 +166,13 @@ test('public parity metadata does not disclose the build checkout path',async()=
  const result=await assemblePortfolio({baseline:baseline([meme]),sourceRoot:source,outputRoot:join(root,'out')});
  assert.equal(result.parity.sourceRoot,'.');
 });
+
+test('an inventoried built project replaces its old metadata-only record with one launchable release',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'promoted-native-')),source=join(root,'source'),output=join(root,'out'),release=join(source,'.cache/prepared/dist');
+ await mkdir(join(source,'meme-lab'),{recursive:true});await writeFile(join(source,'meme-lab/meme-lab.html'),'Meme');await mkdir(release,{recursive:true});await writeFile(join(release,'index.html'),'COMPILED');
+ const item={id:'canvas',title:'Canvas',version:'1',sourceKind:'project',buildMode:'compile',availability:'source-only',url:null};
+ const manifest={source:{kind:'project',path:'unused'},build:{mode:'compile',cwd:'unused',output:'dist'},release:{entrypoint:'index.html'}};
+ const result=await assemblePortfolio({baseline:baseline([meme,item]),sourceRoot:source,outputRoot:output,nativeCatalog:{items:[item]},nativeManifests:{canvas:manifest},preparedReleases:{canvas:{outputRoot:release,revision:'a'.repeat(40)}}});
+ const records=result.deploymentCatalog.items.filter(x=>x.id==='canvas');assert.equal(records.length,1);assert.equal(records[0].availability,'verified');assert.equal(records[0].url,'/artifacts/canvas/1/index.html');
+ assert.equal(await readFile(join(output,'artifacts/canvas/1/index.html'),'utf8'),'COMPILED');
+});
