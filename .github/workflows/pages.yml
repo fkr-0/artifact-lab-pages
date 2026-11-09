@@ -72,7 +72,9 @@ jobs:
         if: ${{ !inputs.site_url }}
         run: |
           pnpm exec playwright install --with-deps chromium
-          CHROMIUM_BIN="$(node -e "console.log(require('playwright').chromium.executablePath())")" node hub-v13.5/tests/qualification/browser-smoke.mjs dist/site
+          CHROMIUM_BIN="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")"
+          export CHROMIUM_BIN
+          node hub-v13.5/tests/qualification/browser-smoke.mjs dist/site
 
       - name: Verify exact publication file inventory
         run: pnpm verify:site

@@ -14,3 +14,7 @@ assert.ok(deploy.if.includes("refs/heads/main"));assert.ok(deploy.if.includes('p
 assert.equal(deploy.permissions.pages,'write');assert.equal(deploy.permissions['id-token'],'write');
 assert.ok(!build.steps.some(x=>x['working-directory']==='revealive'),'project builds belong in recipes');
 console.log('YAML portfolio Pages workflow contract OK');
+const packageJson=JSON.parse(await readFile('package.json','utf8'));
+const browserStep=build.steps.find(step=>step.name==='Browser smoke against publication output');
+const browserModule=browserStep.run.match(/require\('([^']+)'\)/)?.[1];
+assert.ok(Object.hasOwn(packageJson.devDependencies||{},browserModule)||Object.hasOwn(packageJson.dependencies||{},browserModule),'browser executable lookup must use a direct locked dependency');
