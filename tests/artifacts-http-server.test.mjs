@@ -21,6 +21,8 @@ function runPythonSnippet(code, args = [], env = {}) {
   const child = spawn('python3', ['-c', code, ...args], {
     env: {
       ...process.env,
+      ARTIFACTS_LEGACY_TOOLS: '1',
+      ARTIFACTS_SOURCE_PREVIEW: '1',
       ...env,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -206,6 +208,8 @@ exec /usr/bin/tar "$@"
     cwd: repositoryRoot,
     env: {
       ...process.env,
+      ARTIFACTS_LEGACY_TOOLS: '1',
+      ARTIFACTS_SOURCE_PREVIEW: '1',
       ARTIFACTS_DIR: root,
       PATH: `${stubBin}:${process.env.PATH}`,
     },
@@ -232,6 +236,8 @@ exec /usr/bin/tar "$@"
     cwd: repositoryRoot,
     env: {
       ...process.env,
+      ARTIFACTS_LEGACY_TOOLS: '1',
+      ARTIFACTS_SOURCE_PREVIEW: '1',
       ARTIFACTS_DIR: root,
       PATH: `${stubBin}:${process.env.PATH}`,
     },
@@ -299,6 +305,8 @@ async function runPackage(root, outputDir, stubBin) {
     cwd: repositoryRoot,
     env: {
       ...process.env,
+      ARTIFACTS_LEGACY_TOOLS: '1',
+      ARTIFACTS_SOURCE_PREVIEW: '1',
       ARTIFACTS_DIR: root,
       PATH: `${stubBin}:${process.env.PATH}`,
       SOURCE_DATE_EPOCH: '1784764800',

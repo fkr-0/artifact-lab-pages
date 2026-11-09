@@ -16,14 +16,28 @@ Artifact Lab keeps only the release/integration reference it needs
 
 Graduation does not mean an experiment stops being available through the Lab. It means source ownership and releases have become durable enough to live independently while the Lab can retain a release-pinned submodule or catalog link.
 
-## Release
+## Build, preview and publish
 
-- **Current version metadata:** `1.7.0` — changelog entry dated 2026-08-20
-- **Latest reachable repository tag:** `v1.5.1` — the `1.7.0` metadata is not currently backed by a reachable `v1.7.0` tag
-- **Current publication hub:** [Artifacts Hub V13](./apps/app-hub-v13/) (`1.0.0`)
-- **V13 catalog build:** portfolio version `1.7.0`, 55 catalog entries
+The publication inventory and per-project recipes live in [`inventory.yml`](./inventory.yml).
+Acquisition (`local`, recursive `submodule`, pinned `git`, or verified `release`)
+is independent of preparation (`copy`, `assemble`, or `build`). Independent apps
+keep their own repositories. The embedded [`hub-v13.5/`](./hub-v13.5/) contains
+the current launcher and publisher.
 
-Statuses below follow the V13 catalog/registry where a project is represented there. `Incubating / uncataloged` means the project is tracked in this repository but is not currently a first-class V13 catalog project. The catalog intentionally lists project roots rather than every legacy hub view, document, or embedded sub-tool.
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm inventory
+pnpm build
+pnpm check
+pnpm serve
+```
+
+Builds require committed source and resolve the selected recipes. Preview and CI
+publication both use the qualified `dist/site` directory. See
+[the inventory and deployment contract](./docs/PORTFOLIO.md) for fresh checkout,
+prebuilt releases, packaging and rollback. Version/status tables below are historical
+project summaries; YAML selects the current publication.
 
 ## Graduated projects
 
@@ -72,6 +86,6 @@ Statuses below follow the V13 catalog/registry where a project is represented th
 
 ## Lab infrastructure
 
-[Artifacts Hub V13](./apps/app-hub-v13/) is the current catalog and launcher. [App Hub V11](./app-hub-v11/) and the older [App Hub](./app-hub/) remain compatibility/legacy surfaces; registry, tooling, tests, migration data, and shared libraries are Lab infrastructure rather than artifact projects.
+[Artifacts Hub](./hub-v13.5/) is the current catalog and launcher. [App Hub V11](./app-hub-v11/) and the older [App Hub](./app-hub/) remain compatibility/legacy surfaces; registry, tooling, tests, migration data, and shared libraries are Lab infrastructure rather than artifact projects.
 
-The machine-readable catalog and ownership metadata live under [`registry/`](./registry/). Historical [`ARTIFACTS_TOC.md`](./ARTIFACTS_TOC.md) is retained for compatibility but is not the status authority.
+The authored inventory and ownership metadata live in [`inventory.yml`](./inventory.yml); generated catalogs and compatibility snapshots live under [`registry/`](./registry/). Historical [`ARTIFACTS_TOC.md`](./ARTIFACTS_TOC.md) is retained for compatibility but is not the status authority.

@@ -1,3 +1,17 @@
+# Preview the published portfolio
+
+Run `pnpm build` from a clean committed checkout, then `pnpm serve` or
+`./artifacts-serve [port]`. This serves the qualified `dist/site` on loopback,
+with no source fallback or implicit rebuild.
+
+See [the complete inventory/build/deployment guide](docs/PORTFOLIO.md).
+
+The historical source-server instructions below apply only to explicit development
+preview (`ARTIFACTS_SOURCE_PREVIEW=1 ./artifacts-serve`) and the older sourced shell
+helpers. They do not describe the Pages publication output.
+
+---
+
 # Artifacts Server - Quick Start Guide
 
 ## Two Ways to Use

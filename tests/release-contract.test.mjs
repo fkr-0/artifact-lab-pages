@@ -41,7 +41,8 @@ test('root release gate stays comprehensive and excludes independent release uni
 
 test('v1.7.0 reconciled publication metadata is consistent and authorized for push', () => {
   assert.equal(pkg.version, '1.7.0');
-  assert.equal(v13Manifest.version, '1.0.0');
+  // This manifest is the current V13 source, not the frozen 2026-08-20 release evidence.
+  assert.equal(v13Manifest.version, '2.1.0');
   assert.equal(v13Manifest.status, 'active');
   assert.equal(v13Manifest.id, 'app-hub-v13');
   assert.match(changelog, /^## \[Unreleased\]/m);

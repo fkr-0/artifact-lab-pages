@@ -53,7 +53,24 @@ The app explicitly warns that state law and individual cases can differ and that
 - Audio is user-toggleable and the setting is persisted.
 - `prefers-reduced-motion` disables decorative motion.
 - All answer choices and navigation controls are native keyboard-operable buttons.
-- Feedback uses live regions; source links open with `noopener noreferrer`.
+- Stage/result headings are programmatic focus targets so transitions remain explicit for keyboard and screen-reader users.
+- Feedback, score, mistake count, and question progress expose live/status semantics; the visual progress bar has `progressbar` value metadata.
+- Source links open with `noopener noreferrer`.
+
+### Accessibility and E2E audit — 2026-10-06
+
+- All 19 stage controls use native buttons. The browser E2E suite unlocks the complete map and verifies that all 19 are reachable in sequence with `Tab`, retain a visible focus indicator, and can be activated from the keyboard.
+- Starting a stage now moves focus to the stage heading; advancing a question moves focus to the first answer; answering moves focus to the continuation control; result and map transitions move focus to their respective headings.
+- Reduced-motion mode suppresses the JS stamp, shake, and confetti effects as well as CSS animation/transition motion and hover translations.
+- Screen-reader status coverage is explicit for per-question score, mistake count, question number/progress, answer feedback, and stage results.
+- Playwright coverage lives in `tests/e2e/oeffentliches-dienstrecht-quiz.spec.mjs` and covers full-map keyboard traversal, transition focus/live-region semantics, golden-path scoring plus persistence, and reduced-motion behavior.
+
+### Content/freshness notes
+
+- The 2017 Wichmann/Langer edition is used only as the chapter/order scaffold; substantive answers are intended to follow the linked official federal sources.
+- The current question bank records its legal-source snapshot as September 2026. This is static metadata, not an automated freshness guarantee; the official source links can change after publication.
+- Higher-risk facts to revalidate at each content release include numeric/time-sensitive rules (for example BeamtVG pension percentages and TzBfG limits) and reform/transition statements such as the BDG procedure applying from 1 April 2024.
+- The bank is deliberately federal-law oriented. State beamten-, besoldungs-, versorgungs-, disciplinary, and personalvertretungs law can differ, so the existing state-law disclaimer remains material.
 
 ## Persistence schema
 

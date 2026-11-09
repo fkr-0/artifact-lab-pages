@@ -1,5 +1,9 @@
 # V13.5 publication integration
 
+> Historical two-repository handoff contract. The current embedded publisher is built
+> through the repository root commands in [the portfolio guide](../docs/PORTFOLIO.md). Pages uses the single-checkout pipeline and `dist/site`.
+
+
 This repository remains the sole GitHub Pages deployment owner for artifacts.fkr.dev.
 
 The V13.5 convergence project produces a qualified, non-publishing stage and a

@@ -5,7 +5,7 @@
   "title": "Git Recipe Book",
   "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
   "kind": "application",
-  "status": "experimental",
+  "status": "active",
   "required": false,
   "tags": ["education", "git", "project", "root-owned", "react"],
   "source": {

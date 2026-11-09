@@ -1,0 +1,64 @@
+name: V13.5 qualification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V13.5
+        uses: actions/checkout@v5
+
+      - name: Checkout canonical artifact portfolio
+        uses: actions/checkout@v5
+        with:
+          repository: fkr-0/artifact-lab-pages
+          ref: 6e6480e0295ae2ca7a05ee11e641ed2b518aa4f6
+          path: .deps/artifacts
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.ARTIFACT_SOURCE_TOKEN || github.token }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Prepare pinned Revealive release
+        working-directory: .deps/artifacts/revealive
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Model and contract tests
+        run: npm test
+
+      - name: Strict release assembly
+        env:
+          ARTIFACTS_SOURCE_ROOT: ${{ github.workspace }}/.deps/artifacts
+        run: npm run release:check
+
+      - name: Install browser smoke runtime
+        run: |
+          npm install --no-save --package-lock=false playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Browser smoke
+        run: |
+          CHROMIUM_BIN="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+          CHROMIUM_BIN="$CHROMIUM_BIN" node tests/qualification/browser-smoke.mjs dist
+
+      - name: Upload qualified static release
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-v13.5-static
+          path: dist/
+          if-no-files-found: error

@@ -27,7 +27,14 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      // Explicit system Chromium override for hosts with a missing browser-cache
+      // revision. CI defaults to Playwright's pinned browser when unset.
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env.ARTIFACTS_CHROMIUM_EXECUTABLE
+          ? { launchOptions: { executablePath: process.env.ARTIFACTS_CHROMIUM_EXECUTABLE } }
+          : {}),
+      },
     },
   ],
 });

@@ -8,6 +8,12 @@
 
 set -euo pipefail
 
+# Serve exactly the qualified publication output by default.
+if [[ "${ARTIFACTS_SOURCE_PREVIEW:-0}" != "1" ]]; then
+    PORTFOLIO_SCRIPT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+    exec node "$PORTFOLIO_SCRIPT_ROOT/scripts/portfolio.mjs" serve "${1:-8080}"
+fi
+
 # Default configuration
 PORT="${1:-8080}"
 HOST="${ARTIFACTS_HOST:-localhost}"

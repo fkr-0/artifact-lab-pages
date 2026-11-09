@@ -1,0 +1,128 @@
+schema: artifacts.fkr.dev/release-browser-evidence-v1
+artifact: ethic-brawl
+version: 1.7.4
+recorded_at: 2026-10-06T15:42:15.206Z
+
+operator_control_plane:
+  task: ARTIFACTS-ETHIC-BRAWL-RELEASE-METADATA-R2-20261006
+  catalog_prompt: artifacts-ethic-brawl-release-metadata-v1
+  prompt_operation: "-"
+  scheduling_priority: 7500
+  dispatch_attempt: a3682dba265843cda3ca2ebd5691c95a
+
+source:
+  superproject_head: 2fee0f119019e09a79da69d33c268b2b9f587ab9
+  submodule_path: ethic-brawl
+  pinned_revision: 2754b6e9d12216613b615300cc9179687fda4e19
+  checkout_revision: 2754b6e9d12216613b615300cc9179687fda4e19
+  checkout_clean: true
+  package_version: 1.7.4
+  release_train_current: 1.7.4
+  explicit_release_commit:
+    revision: e2f2c020d7ebd41945f8c316db75ae0ec64a9485
+    subject: "release: ethic brawl 1.7.4"
+  provenance_note: >-
+    The parent pin and checked-out submodule agree and the checked-out package/release-train
+    metadata declare 1.7.4. The pin is two commits after the explicit 1.7.4 release commit:
+    35e4299 adds the reproducible desktop icon and 2754b6e refreshes animation render jobs.
+    CHANGELOG.md lists the desktop-icon work under 1.7.5 Unreleased.
+
+metadata:
+  sidecar: registry/sources.d/ethic-brawl.json
+  sidecar_sha256: 78d099c19136ec54247c2a16354b28e6439a5cd243bb7e1f8e1a8964702d583e
+  sidecar_version: 1.7.4
+  sidecar_status: provisional
+  description_scope:
+    - local Versus
+    - complete three-encounter Babylon campaign
+    - curated 13-fighter release roster with command specials and unique gimmicks
+    - AI showcase play
+    - accessibility settings
+    - deterministic Canvas2D combat
+    - optional PixiJS and desktop runtime paths
+    - later story routes remain locked authored previews
+
+release_gate:
+  command: pnpm release:check
+  result: pass
+  assets:
+    audited: 298
+    errors: 0
+    warnings: 265
+    note: warnings are accepted by the repository release gate
+  lint:
+    result: pass
+    files_checked: 280
+  typecheck: pass
+  unit:
+    result: pass
+    test_files: 65
+    tests: 202
+  build:
+    result: pass
+    vite_modules_transformed: 831
+  bundle_budget: pass
+  browser:
+    command: pnpm test:e2e
+    result: pass
+    total_cases: 30
+    passed: 28
+    skipped: 2
+    failed: 0
+    engines:
+      chromium:
+        passed: 15
+        skipped: 0
+      firefox:
+        passed: 13
+        skipped: 2
+    environment_note: >-
+      Playwright Chromium v1223 and Firefox v1522 were provisioned together after initial
+      environment-only failures caused by missing cached browser executables. The final
+      canonical release-check run passed with both engines installed.
+  release_plan_check:
+    result: pass
+    planned_patch: 1.7.5
+    planned_minor: 1.8.0
+
+artifact_receipt:
+  command: >-
+    node ../tooling/artifactctl/src/cli.mjs build ethic-brawl --root ..
+    --allow-compile --include-provisional
+  result: pass
+  path: dist/artifacts/ethic-brawl/1.7.4/.artifact-receipt.json
+  sha256: 763c11e03ce817e0cc265b1170277cb173709f8dfd311d87e26f3d9c1af53f1b
+  verification_ok: true
+  files: 310
+  generated_at: 2026-10-06T15:42:15.206Z
+
+catalog:
+  command: node ../tooling/artifactctl/src/cli.mjs catalog --root ..
+  result: pass
+  path: registry/generated/catalog.json
+  sha256: 5693a767f2de8eb3c1e4f3c5783a44221af76719ecaa9707049e0a95ff115c40
+  version: 1.7.4
+  availability: verified
+  url: /artifacts/ethic-brawl/1.7.4/index.html
+  receipt_files: 310
+  git_basis: submodule-pin
+  git_revision: 2754b6e9d12216613b615300cc9179687fda4e19
+
+promotion_readiness:
+  functional_gate: ready
+  metadata_gate: ready
+  receipt_gate: ready
+  recommendation: hold_for_provenance_decision
+  blockers:
+    - >-
+      Decide whether active releases may carry post-release commits while retaining the previous
+      package version. For provenance-exact active status, either repin to
+      e2f2c020d7ebd41945f8c316db75ae0ec64a9485 or cut/version the current pin as 1.7.5.
+  non_blocking_observations:
+    - Asset audit warnings remain, but the repository's canonical release gate accepts them.
+    - The two skipped Firefox cases are visual-capture-only cases intentionally skipped by the suite.
+
+publication:
+  pushed: false
+  tagged: false
+  deployed: false

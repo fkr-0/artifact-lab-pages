@@ -1,29 +1,115 @@
 {
   "schemaVersion": "artifacts.fkr.dev/catalog-v1",
-  "generatedAt": "2026-10-08T22:08:37.848Z",
+  "generatedAt": "2026-10-21T22:56:20.306Z",
   "build": {
     "portfolioVersion": "1.7.0",
     "ordering": "git-last-committed-change-desc",
     "generator": "artifactctl"
   },
   "summary": {
-    "total": 22,
-    "verified": 0,
-    "provisional": 5,
+    "total": 23,
+    "verified": 2,
+    "provisional": 4,
     "external": 1,
     "inline": 1,
     "sourceOnly": 15,
-    "active": 2,
-    "dated": 21
+    "active": 3,
+    "dated": 23
   },
   "items": [
+    {
+      "id": "groove-scratch-studio",
+      "version": "1.4.0",
+      "title": "GROOVE / Scratch Studio",
+      "description": "Offline client-side turntable and scratch-pattern editor with stable GROOVE Scratch Project v1 JSON interchange and a separate agent-friendly local CLI capable of parameterized pattern generation and WAV rendering.",
+      "kind": "application",
+      "status": "experimental",
+      "required": false,
+      "tags": [
+        "audio",
+        "turntable",
+        "scratch",
+        "dj",
+        "waveform",
+        "offline",
+        "single-file",
+        "automation",
+        "crossfader",
+        "pattern-generator",
+        "project-json",
+        "wav-render",
+        "cli"
+      ],
+      "sourceKind": "file",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "file",
+      "availability": "source-only",
+      "url": "/groove-scratch-studio/index.html",
+      "launch": {
+        "default": "newWindow",
+        "modes": [
+          "newWindow",
+          "fullscreen"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "95a11240bdfcfa7c73638cbe20c831cd4daf3627",
+        "changedAt": "2026-10-21T22:56:06.000Z",
+        "basis": "source",
+        "path": "groove-scratch-studio/index.html"
+      },
+      "changedAt": "2026-10-21T22:56:06.000Z",
+      "receipt": null
+    },
+    {
+      "id": "oeffentliches-dienstrecht-quiz",
+      "version": "0.1.0",
+      "title": "Dienstrecht: Aktenlauf",
+      "description": "Clientseitiges Lernquiz zum öffentlichen Dienstrecht mit 19 kapitelweisen Stages, Quellenhinweisen, Browser-Fortschritt, Sounds und Animationen.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "education",
+        "quiz",
+        "law",
+        "public-service",
+        "german",
+        "offline"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/oeffentliches-dienstrecht-quiz/index.html",
+      "launch": {
+        "default": "inline",
+        "modes": [
+          "inline",
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "strict"
+      },
+      "git": {
+        "revision": "5fedae7da3caf46a4218219ecd0948322b551813",
+        "changedAt": "2026-10-21T22:55:17.000Z",
+        "basis": "source",
+        "path": "oeffentliches-dienstrecht-quiz"
+      },
+      "changedAt": "2026-10-21T22:55:17.000Z",
+      "receipt": null
+    },
     {
       "id": "git-recipe-book",
       "version": "1.1.0",
       "title": "Git Recipe Book",
       "description": "Root-owned interactive Git learning application with progressive lessons, an in-browser repository simulator, contextual help, and graph-based workspace views.",
       "kind": "application",
-      "status": "experimental",
+      "status": "active",
       "required": false,
       "tags": [
         "education",
@@ -36,8 +122,8 @@
       "gitMode": "root",
       "buildMode": "compile",
       "releaseKind": "directory",
-      "availability": "source-only",
-      "url": null,
+      "availability": "verified",
+      "url": "/artifacts/git-recipe-book/1.1.0/index.html",
       "launch": {
         "default": "inline",
         "modes": [
@@ -49,53 +135,17 @@
         "sandbox": "trusted"
       },
       "git": {
-        "revision": "829048a38d8be5965132aa5f35cc789ca16de257",
-        "changedAt": "2026-10-08T21:46:55.000Z",
+        "revision": "5c973c7c00d6c9141adbee869691461fac1198d9",
+        "changedAt": "2026-10-21T22:42:10.000Z",
         "basis": "source",
         "path": "git-recipe-book"
       },
-      "changedAt": "2026-10-08T21:46:55.000Z",
-      "receipt": null
-    },
-    {
-      "id": "nakamotos-disciples",
-      "version": "0.2.0-alpha.13",
-      "title": "Nakamoto's Disciples",
-      "description": "Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic inspectors, and guided protocol lessons.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "bitcoin",
-        "education",
-        "simulation",
-        "cryptography",
-        "protocol",
-        "offline",
-        "pwa"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/nakamotos-disciples/index.html",
-      "launch": {
-        "default": "fullscreen",
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "revision": "b21b7f1645e2319b0f268173669dec8b07d3888c",
-        "changedAt": "2026-10-08T21:34:12.000Z",
-        "basis": "source",
-        "path": "nakamotos-disciples"
-      },
-      "changedAt": "2026-10-08T21:34:12.000Z",
-      "receipt": null
+      "changedAt": "2026-10-21T22:42:10.000Z",
+      "receipt": {
+        "version": "1.1.0",
+        "files": 16,
+        "generatedAt": "2026-10-06T15:22:32.060Z"
+      }
     },
     {
       "id": "killer-sudoku-lab",
@@ -131,12 +181,52 @@
         "sandbox": "trusted"
       },
       "git": {
-        "revision": "f996f8b6c63d51d6db6319d3aaba2c66efe3844f",
-        "changedAt": "2026-10-08T09:42:37.000Z",
+        "revision": "5c973c7c00d6c9141adbee869691461fac1198d9",
+        "changedAt": "2026-10-21T22:42:10.000Z",
         "basis": "source",
         "path": "killer-sudoku-lab"
       },
-      "changedAt": "2026-10-08T09:42:37.000Z",
+      "changedAt": "2026-10-21T22:42:10.000Z",
+      "receipt": null
+    },
+    {
+      "id": "nakamotos-disciples",
+      "version": "0.2.0-alpha.13",
+      "title": "Nakamoto's Disciples",
+      "description": "Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic inspectors, and guided protocol lessons.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "bitcoin",
+        "education",
+        "simulation",
+        "cryptography",
+        "protocol",
+        "offline",
+        "pwa"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/nakamotos-disciples/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "5c973c7c00d6c9141adbee869691461fac1198d9",
+        "changedAt": "2026-10-21T22:42:10.000Z",
+        "basis": "source",
+        "path": "nakamotos-disciples"
+      },
+      "changedAt": "2026-10-21T22:42:10.000Z",
       "receipt": null
     },
     {
@@ -171,12 +261,52 @@
         "sandbox": "trusted"
       },
       "git": {
-        "revision": "ced5bcf1b9ab1b97c5903dbae4b0748becf1bda5",
-        "changedAt": "2026-10-08T09:21:56.000Z",
+        "revision": "5c973c7c00d6c9141adbee869691461fac1198d9",
+        "changedAt": "2026-10-21T22:42:10.000Z",
         "basis": "source",
         "path": "sudoku-lab"
       },
-      "changedAt": "2026-10-08T09:21:56.000Z",
+      "changedAt": "2026-10-21T22:42:10.000Z",
+      "receipt": null
+    },
+    {
+      "id": "vim-tomb-raider",
+      "version": "1.0.0-rc.6",
+      "title": "Vim Tomb Raider",
+      "description": "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum, command-composition puzzles, and evidence-driven practice.",
+      "kind": "application",
+      "status": "experimental",
+      "required": true,
+      "tags": [
+        "vim",
+        "education",
+        "keyboard",
+        "game",
+        "puzzle",
+        "curriculum",
+        "react"
+      ],
+      "sourceKind": "directory",
+      "gitMode": "root",
+      "buildMode": "none",
+      "releaseKind": "directory",
+      "availability": "source-only",
+      "url": "/vim-tomb-raider/index.html",
+      "launch": {
+        "default": "fullscreen",
+        "modes": [
+          "fullscreen",
+          "newWindow"
+        ],
+        "sandbox": "trusted"
+      },
+      "git": {
+        "revision": "5c973c7c00d6c9141adbee869691461fac1198d9",
+        "changedAt": "2026-10-21T22:42:10.000Z",
+        "basis": "source",
+        "path": "vim-tomb-raider"
+      },
+      "changedAt": "2026-10-21T22:42:10.000Z",
       "receipt": null
     },
     {
@@ -258,46 +388,6 @@
       "receipt": null
     },
     {
-      "id": "oeffentliches-dienstrecht-quiz",
-      "version": "0.1.0",
-      "title": "Dienstrecht: Aktenlauf",
-      "description": "Clientseitiges Lernquiz zum öffentlichen Dienstrecht mit 19 kapitelweisen Stages, Quellenhinweisen, Browser-Fortschritt, Sounds und Animationen.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "education",
-        "quiz",
-        "law",
-        "public-service",
-        "german",
-        "offline"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/oeffentliches-dienstrecht-quiz/index.html",
-      "launch": {
-        "default": "inline",
-        "modes": [
-          "inline",
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "strict"
-      },
-      "git": {
-        "revision": "fc2b6af29a0bc5220456a6d5ddd8ef1da3a21e1b",
-        "changedAt": "2026-09-17T10:59:07.000Z",
-        "basis": "source",
-        "path": "oeffentliches-dienstrecht-quiz"
-      },
-      "changedAt": "2026-09-17T10:59:07.000Z",
-      "receipt": null
-    },
-    {
       "id": "revealive",
       "version": "0.1.0",
       "title": "Revealive",
@@ -338,9 +428,9 @@
     },
     {
       "id": "ethic-brawl",
-      "version": null,
+      "version": "1.7.4",
       "title": "Ethic Brawl",
-      "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
+      "description": "2.5D cyberpunk philosophical arena-brawler with local Versus, a complete three-encounter Babylon campaign, a curated 13-fighter release roster with command specials and unique gimmicks, AI showcase play, accessibility settings, deterministic Canvas2D combat, and optional PixiJS and desktop runtime paths; later story routes remain locked authored previews.",
       "kind": "application",
       "status": "provisional",
       "required": true,
@@ -353,8 +443,8 @@
       "gitMode": "submodule",
       "buildMode": "compile",
       "releaseKind": "directory",
-      "availability": "provisional",
-      "url": null,
+      "availability": "verified",
+      "url": "/artifacts/ethic-brawl/1.7.4/index.html",
       "launch": {
         "default": "inline",
         "modes": [
@@ -371,7 +461,11 @@
         "path": "ethic-brawl"
       },
       "changedAt": "2026-09-09T23:47:32.000Z",
-      "receipt": null
+      "receipt": {
+        "version": "1.7.4",
+        "files": 310,
+        "generatedAt": "2026-10-06T15:42:15.206Z"
+      }
     },
     {
       "id": "artifact-handling-standard",
@@ -821,46 +915,6 @@
         "path": "v11-peer-daw"
       },
       "changedAt": "2026-07-19T02:48:09.000Z",
-      "receipt": null
-    },
-    {
-      "id": "vim-tomb-raider",
-      "version": "1.0.0-rc.6",
-      "title": "Vim Tomb Raider",
-      "description": "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum, command-composition puzzles, and evidence-driven practice.",
-      "kind": "application",
-      "status": "experimental",
-      "required": true,
-      "tags": [
-        "vim",
-        "education",
-        "keyboard",
-        "game",
-        "puzzle",
-        "curriculum",
-        "react"
-      ],
-      "sourceKind": "directory",
-      "gitMode": "root",
-      "buildMode": "none",
-      "releaseKind": "directory",
-      "availability": "source-only",
-      "url": "/vim-tomb-raider/index.html",
-      "launch": {
-        "default": "fullscreen",
-        "modes": [
-          "fullscreen",
-          "newWindow"
-        ],
-        "sandbox": "trusted"
-      },
-      "git": {
-        "changedAt": null,
-        "revision": null,
-        "basis": "unknown",
-        "path": "vim-tomb-raider"
-      },
-      "changedAt": null,
       "receipt": null
     }
   ]

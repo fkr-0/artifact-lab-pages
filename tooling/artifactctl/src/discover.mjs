@@ -2,6 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import { pathExists, readJson } from './core.mjs';
 import { adaptV11Catalog } from './v11-adapter.mjs';
+import { loadPortfolio, portfolioManifests } from './portfolio.mjs';
 
 const SKIP_DIRS = new Set([
   '.git',
@@ -37,6 +38,7 @@ async function findNamedFiles(root, name, results = []) {
 
 export async function discoverNativeManifests(options = {}) {
   const rootDir = resolve(options.rootDir || process.cwd());
+  if (await pathExists(join(rootDir, 'inventory.yml'))) return portfolioManifests(await loadPortfolio(rootDir));
   const paths = [];
   const sidecars = resolve(rootDir, 'registry/sources.d');
   if (await pathExists(sidecars)) {

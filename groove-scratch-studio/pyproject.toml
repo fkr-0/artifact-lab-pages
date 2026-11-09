@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "groove-scratch-studio"
+version = "1.4.0"
+description = "Offline deterministic scratch-pattern JSON CLI and WAV renderer"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+codecs = ["soundfile>=0.12"]
+
+[project.scripts]
+groove-scratch = "groove_scratch.cli:main"
+
+[tool.setuptools]
+packages = ["groove_scratch"]
+
+[tool.setuptools.package-data]
+groove_scratch = ["*.json"]

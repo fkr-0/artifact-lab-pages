@@ -9,6 +9,7 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 
 export const HANDOFF_SCHEMA = 'artifacts-v13.5/publication-handoff-v1';
+export const MONOREPO_HANDOFF_SCHEMA = 'artifacts-v13.5/publication-handoff-monorepo-v2';
 export const INTEGRATION_SCHEMA = 'artifacts.fkr.dev/v13.5-pages-integration-v1';
 export const CANONICAL_SOURCE_REPOSITORY = 'fkr-0/artifact-lab-pages';
 export const EXPECTED_V12_LOCAL = 44;
@@ -196,7 +197,18 @@ async function walkRegularFiles(root, current = root) {
   return files.sort();
 }
 function validateHandoff(handoff) {
-  if (!handoff || handoff.schemaVersion !== HANDOFF_SCHEMA) throw new Error('Expected ' + HANDOFF_SCHEMA + ' handoff.');
+  if (!handoff || ![HANDOFF_SCHEMA, MONOREPO_HANDOFF_SCHEMA].includes(handoff.schemaVersion)) {
+    throw new Error('Unrecognized V13.5 publication handoff schema.');
+  }
+  if (handoff.schemaVersion === MONOREPO_HANDOFF_SCHEMA) {
+    if (!/^[0-9a-f]{40}$/u.test(handoff.release?.commit || '') ||
+        handoff.canonicalSource?.revision !== handoff.release.commit ||
+        handoff.canonicalSource?.currentRevision !== handoff.release.commit ||
+        handoff.hub?.path !== 'hub-v13.5' ||
+        !/^[0-9a-f]{40}$/u.test(handoff.hub?.tree || '')) {
+      throw new Error('Monorepo handoff requires an exact source commit and hub subtree tree hash.');
+    }
+  }
   if (handoff.canonicalSource?.repository !== CANONICAL_SOURCE_REPOSITORY) throw new Error('V13.5 handoff targets unexpected canonical source repository.');
   if (handoff.release?.expectedV12Local !== EXPECTED_V12_LOCAL) throw new Error('V13.5 handoff changed the locked V12 parity floor.');
   if (handoff.release?.stagedV12Local !== EXPECTED_V12_LOCAL || handoff.release?.missingV12Local !== 0) throw new Error('V13.5 handoff does not stage the complete V12 parity floor.');
@@ -218,7 +230,7 @@ export async function stageQualifiedV13_5({
   v13Revision = null,
 } = {}) {
   const sourceRoot = resolve(artifactRoot);
-  const configuredV13Root = v13Root || process.env.ARTIFACTS_V13_5_ROOT;
+  const configuredV13Root = v13Root || process.env.ARTIFACTS_V13_5_ROOT || join(sourceRoot, 'hub-v13.5');
   if (!configuredV13Root) throw new Error('Set ARTIFACTS_V13_5_ROOT or pass --v13-root.');
   const releaseRoot = resolve(configuredV13Root);
   const stageRoot = resolve(outDir || join(sourceRoot, '.artifacts-pages-stage'));
@@ -237,8 +249,23 @@ export async function stageQualifiedV13_5({
       currentSourceRevision + ' != ' + handoff.canonicalSource.currentRevision,
     );
   }
+  const isMonorepo = handoff.schemaVersion === MONOREPO_HANDOFF_SCHEMA;
   let sourceTransition;
-  if (artifactSourceRevision) {
+  if (isMonorepo) {
+    if (releaseRoot !== join(sourceRoot, 'hub-v13.5')) {
+      throw new Error('Monorepo handoff must stage the hub from this source checkout.');
+    }
+    if (currentSourceRevision !== handoff.release.commit) {
+      throw new Error('Monorepo publication commit differs from the qualified handoff.');
+    }
+    const { stdout } = await execFileAsync('git', [
+      '-C', sourceRoot, 'rev-parse', 'HEAD:hub-v13.5',
+    ], { encoding: 'utf8', maxBuffer: 1024 * 1024 });
+    if (stdout.trim() !== handoff.hub.tree) {
+      throw new Error('Monorepo hub subtree tree hash differs from the qualified handoff.');
+    }
+    sourceTransition = { mode: 'monorepo-exact', changedPaths: [] };
+  } else if (artifactSourceRevision) {
     sourceTransition = validateSourceTransition({
       pinnedRevision: handoff.canonicalSource?.revision,
       currentRevision: currentSourceRevision,
@@ -450,7 +477,26 @@ export async function stageQualifiedV13_5({
     await assertHash(v13Dist, path, assetManifest.files?.[path]?.sha256);
   }
 
+  // The manifest is authoritative for every runtime byte, not only the
+  // privileged applications. An unlisted file or altered manifest entry is
+  // a publication failure, even when the catalog and route names match.
+  const listedFiles = Object.keys(assetManifest.files || {}).sort();
+  for (const path of listedFiles) {
+    const evidence = assetManifest.files[path];
+    if (!/^[0-9a-f]{64}$/u.test(evidence?.sha256 || '') ||
+        !Number.isSafeInteger(evidence?.bytes) || evidence.bytes < 0) {
+      throw new Error('Invalid release asset manifest entry: ' + path);
+    }
+    await assertHash(v13Dist, path, evidence.sha256);
+    if ((await stat(join(v13Dist, path))).size !== evidence.bytes) {
+      throw new Error('Release asset byte count mismatch for ' + path);
+    }
+  }
   const sourceFiles = await walkRegularFiles(v13Dist);
+  if (JSON.stringify(sourceFiles.filter((path) => !['PUBLICATION_HANDOFF.json', 'asset-manifest.json'].includes(path))) !==
+      JSON.stringify(listedFiles)) {
+    throw new Error('Publication stage inventory differs from the hashed asset manifest.');
+  }
   if (!sourceFiles.includes('PUBLICATION_HANDOFF.json')) throw new Error('V13.5 stage inventory omitted PUBLICATION_HANDOFF.json');
 
   await rm(stageRoot, { recursive: true, force: true });
@@ -485,6 +531,7 @@ export async function stageQualifiedV13_5({
 
   const receipt = {
     schemaVersion: INTEGRATION_SCHEMA,
+    provenance: isMonorepo ? { mode: 'monorepo', commit: currentSourceRevision, hubTree: handoff.hub.tree } : { mode: 'dual-repository' },
     generatedAt: new Date().toISOString(),
     source: {
       repository: CANONICAL_SOURCE_REPOSITORY,
