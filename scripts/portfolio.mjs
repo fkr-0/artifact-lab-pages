@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {cp,mkdir,readFile,rm,writeFile} from 'node:fs/promises';
 import {dirname,join,relative,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {loadPortfolio,planPortfolio,portfolioBaseline,portfolioManifests} from '../tooling/artifactctl/src/portfolio.mjs';
+import {artifactPreparations,loadPortfolio,planPortfolio,portfolioBaseline,portfolioManifests} from '../tooling/artifactctl/src/portfolio.mjs';
 import {executeRecipe,executeRecipes} from '../tooling/artifactctl/src/recipes.mjs';
 import {sealSite,verifySite} from '../tooling/artifactctl/src/site-integrity.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -25,10 +25,15 @@ async function assertClean(){
 }
 async function prepare(p){
  const prepared=await executeRecipes(p,{rootDir:root});
- const byId=Object.fromEntries(prepared.map(x=>[x.id,x]));
- const manifests=portfolioManifests(p);
+ const byId=artifactPreparations(p,prepared);
+ const originals=portfolioManifests(p,{publication:true});
+ const manifests=structuredClone(originals);
  for(const m of manifests){
-  const item=p.artifacts.find(a=>a.id===m.id), input=byId[item.recipe];
+  const item=p.artifacts.find(a=>a.id===m.id), input=byId[item.id];
+  if(input&&m.build.mode!=='compile'){
+   m.source.path=relative(root,input.outputRoot).split('\\').join('/');
+   delete m.release.path;
+  }
   if(input&&m.build.mode==='compile'){
    m.source.path=relative(root,input.sourceRoot).split('\\').join('/');
    m.build.cwd=m.source.path;m.build.output=relative(input.sourceRoot,input.outputRoot).split('\\').join('/')||'.';
@@ -38,6 +43,7 @@ async function prepare(p){
  await mkdir(generated,{recursive:true});
  const json=async(name,value)=>writeFile(join(generated,name),JSON.stringify(value,null,2)+'\n');
  const historical=JSON.parse(await readFile(join(root,'hub-v13.5/catalog/v12-baseline.json'),'utf8'));
+ await json('sources.json',originals);
  await json('baseline.json',portfolioBaseline(p,historical));
  await json('manifests.json',Object.fromEntries(manifests.map(m=>[m.id,m])));
  await json('prepared.json',byId);
@@ -78,7 +84,7 @@ async function main(){
  if(process.env.GITHUB_SHA&&process.env.GITHUB_SHA!==commit)throw new Error('Build differs from GITHUB_SHA');
  const prepared=await prepare(p);
  await run(process.execPath,['scripts/qualify-monorepo.mjs'],{
-  ARTIFACTS_NATIVE_MANIFEST_FILE:join(generated,'manifests.json'),ARTIFACTS_BASELINE_FILE:join(generated,'baseline.json'),ARTIFACTS_PREPARED_FILE:join(generated,'prepared.json'),ARTIFACTS_EDITORIAL_FILE:join(generated,'editorial.json'),
+  ARTIFACTS_PUBLICATION_MANIFEST_FILE:join(generated,'sources.json'),ARTIFACTS_NATIVE_MANIFEST_FILE:join(generated,'manifests.json'),ARTIFACTS_BASELINE_FILE:join(generated,'baseline.json'),ARTIFACTS_PREPARED_FILE:join(generated,'prepared.json'),ARTIFACTS_EDITORIAL_FILE:join(generated,'editorial.json'),
  });
  await assertClean();
  if(git('rev-parse','HEAD')!==commit)throw new Error('Source commit changed during build');

@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { promisify } from 'node:util';
 
@@ -114,7 +114,16 @@ function localReferences(path, contents) {
   return [...refs].sort();
 }
 
-async function copyReachableRoute({ sourceRoot, outputRoot, entryPath }) {
+async function rejectSourceSymlinks(root, path) {
+  let current = root;
+  for (const part of path.split('/')) {
+    current = join(current, part);
+    try { if ((await lstat(current)).isSymbolicLink()) throw new Error('Source symlink is forbidden: ' + path); }
+    catch(error) { if(error.code !== 'ENOENT') throw error; }
+  }
+}
+
+async function copyReachableRoute({ sourceRoot, outputRoot, entryPath, targetEntryPath = entryPath }) {
   const queue = [entryPath];
   const seen = new Set();
   const files = [];
@@ -127,6 +136,7 @@ async function copyReachableRoute({ sourceRoot, outputRoot, entryPath }) {
     seen.add(current);
     if (seen.size > MAX_FILES_PER_ROUTE) throw new Error('Route asset graph exceeds file ceiling: ' + entryPath);
 
+    await rejectSourceSymlinks(sourceRoot, current);
     const sourcePath = join(sourceRoot, current);
     if (!(await exists(sourcePath))) {
       if (current !== entryPath) missingReferences.push(current);
@@ -138,11 +148,13 @@ async function copyReachableRoute({ sourceRoot, outputRoot, entryPath }) {
     bytes += info.size;
     if (bytes > MAX_BYTES_PER_ROUTE) throw new Error('Route asset graph exceeds byte ceiling: ' + entryPath);
 
-    const targetPath = join(outputRoot, current);
+    const target = posix.normalize(posix.join(posix.dirname(targetEntryPath), posix.relative(posix.dirname(entryPath), current)));
+    safeManifestPath(target, 'mapped route asset');
+    const targetPath = join(outputRoot, target);
     await mkdir(dirname(targetPath), { recursive: true });
     const contents = await readFile(sourcePath);
     await writeFile(targetPath, contents);
-    files.push(current);
+    files.push(target);
 
     for (const ref of localReferences(current, contents)) {
       if (!seen.has(ref)) queue.push(ref);
@@ -184,6 +196,7 @@ async function listFiles(root, current = root) {
   const files = [];
   for (const entry of await readdir(current, { withFileTypes: true })) {
     const path = join(current, entry.name);
+    if (entry.isSymbolicLink()) throw new Error('Source symlink is forbidden: ' + path);
     if (entry.isDirectory()) files.push(...(await listFiles(root, path)));
     else if (entry.isFile()) files.push(normalizeSlashes(relative(root, path)));
   }
@@ -426,6 +439,7 @@ async function stageCurrentNativeAdditions({
   baselineItems,
   nativeCatalog,
   nativeManifests = {},
+  preparedReleases = {},
   sourceRoot,
   outputRoot,
   strict,
@@ -444,12 +458,14 @@ async function stageCurrentNativeAdditions({
 
   for (const item of candidates) {
     const manifest = nativeManifests[item.id] || null;
+    const prepared = preparedReleases[item.id];
+    if (['external','inline'].includes(item.availability)) { items.push({...item,deployment:{state:'catalog-only',routePath:null}}); continue; }
 
     if (item.buildMode === 'none' && manifest) {
       const sourcePath = join(sourceRoot, manifest.source?.path || item.id);
-      const releaseSource = manifest.release?.path
+      const releaseSource = prepared?.outputRoot || (manifest.release?.path
         ? join(sourcePath, safeManifestPath(manifest.release.path, item.id + ': release.path'))
-        : sourcePath;
+        : sourcePath);
       const releaseEntrypoint = safeManifestPath(
         manifest.release?.entrypoint || (manifest.source?.kind === 'file' ? basename(sourcePath) : 'index.html'),
         item.id + ': release.entrypoint',
@@ -501,7 +517,8 @@ async function stageCurrentNativeAdditions({
 
     const sourcePath = join(sourceRoot, manifest.source?.path || item.git?.path || item.id);
     const expectedRevision = manifest.source?.git?.revision || item.git?.revision || null;
-    if (expectedRevision && manifest.source?.git?.mode === 'submodule') {
+    if (prepared?.revision && expectedRevision && prepared.revision !== expectedRevision) throw new Error(item.id + ': prepared source pin mismatch');
+    if (!prepared && expectedRevision && manifest.source?.git?.mode === 'submodule') {
       const actualRevision = await gitHead(sourcePath);
       if (actualRevision !== expectedRevision) {
         throw new Error(
@@ -521,7 +538,7 @@ async function stageCurrentNativeAdditions({
       missing.push({ id: item.id, reason: 'compile manifest has no build output' });
       continue;
     }
-    const compiledRoot = join(sourceRoot, buildCwd, buildOutput);
+    const compiledRoot = prepared?.outputRoot || join(sourceRoot, buildCwd, buildOutput);
     const compiledInfo = await stat(compiledRoot).catch(() => null);
     const compiledEntrypointPath = compiledInfo?.isFile() ? compiledRoot : join(compiledRoot, releaseEntrypoint);
     if (!compiledInfo || !(await exists(compiledEntrypointPath))) {
@@ -705,12 +722,16 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
       continue;
     }
 
-    const selectedRoot = await findSourceRoot(roots, path);
+    const preparedCopy = prepared && manifest?.build?.mode !== 'compile';
+    const preparedInfo = preparedCopy ? await stat(prepared.outputRoot) : null;
+    const preparedEntry = preparedCopy ? normalizeSlashes(relative(source, preparedInfo.isFile() ? prepared.outputRoot : join(prepared.outputRoot, manifest?.release?.entrypoint || posix.basename(path)))) : null;
+    if (preparedEntry) safeManifestPath(preparedEntry, 'prepared source');
+    const selectedRoot = preparedCopy ? {root:source,kind:'recipe-copy'} : await findSourceRoot(roots, path);
     if (selectedRoot) {
       const cacheKey = selectedRoot.kind + ':' + path;
       let staged = copiedRoutes.get(cacheKey);
       if (!staged) {
-        staged = await copyReachableRoute({ sourceRoot: selectedRoot.root, outputRoot: output, entryPath: path });
+        staged = await copyReachableRoute({ sourceRoot: selectedRoot.root, outputRoot: output, entryPath: preparedEntry || path, targetEntryPath: path });
         copiedRoutes.set(cacheKey, staged);
       }
 
@@ -786,6 +807,7 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
     baselineItems: baseline.items,
     nativeCatalog,
     nativeManifests,
+    preparedReleases,
     sourceRoot: source,
     outputRoot: output,
     strict,

@@ -138,3 +138,25 @@ test('prepared project releases replace development HTML at stable compatibility
  assert.match(await readFile(join(output,'game/index.html'),'utf8'),/\.\/game.js/);
  assert.equal(await readFile(join(output,'game/game.js'),'utf8'),'/* compiled */');
 });
+
+test('prepared static outputs control both compatibility routes and native additions',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'prepared-copy-')),source=join(root,'source'),output=join(root,'output');
+ await mkdir(join(source,'meme-lab'),{recursive:true});await writeFile(join(source,'meme-lab/meme-lab.html'),'Meme');
+ await mkdir(join(source,'old'),{recursive:true});await writeFile(join(source,'old/index.html'),'OLD');
+ await mkdir(join(source,'.cache/prebuilt'),{recursive:true});await writeFile(join(source,'.cache/prebuilt/index.html'),'NEW');
+ const prepared={outputRoot:join(source,'.cache/prebuilt'),sourceRoot:join(source,'.cache/prebuilt')};
+ const item={id:'static',title:'Static',availability:'provisional',sourceKind:'directory',buildMode:'none',url:'/old/index.html'};
+ const manifest={source:{path:'old',kind:'directory'},build:{mode:'none'},release:{entrypoint:'index.html'}};
+ await assemblePortfolio({baseline:baseline([meme,item]),sourceRoot:source,outputRoot:output,preparedReleases:{static:prepared},nativeManifests:{static:manifest}});
+ assert.equal(await readFile(join(output,'old/index.html'),'utf8'),'NEW');
+ const native={id:'new-static',version:'1',title:'New',buildMode:'none',availability:'source-only'};
+ await assemblePortfolio({baseline:baseline([meme]),sourceRoot:source,outputRoot:output,preparedReleases:{'new-static':prepared},nativeCatalog:{items:[native]},nativeManifests:{'new-static':manifest}});
+ assert.equal(await readFile(join(output,'artifacts/new-static/1/index.html'),'utf8'),'NEW');
+});
+
+test('reachable legacy assets cannot follow symlinks outside source',async()=>{
+ const {symlink}=await import('node:fs/promises');const root=await mkdtemp(join(tmpdir(),'route-symlink-')),source=join(root,'source');
+ await mkdir(join(source,'meme-lab'),{recursive:true});await writeFile(join(root,'secret.js'),'private bytes');
+ await writeFile(join(source,'meme-lab/meme-lab.html'),'<script src="./secret.js"></script>');await symlink(join(root,'secret.js'),join(source,'meme-lab/secret.js'));
+ await assert.rejects(assemblePortfolio({baseline:baseline([meme]),sourceRoot:source,outputRoot:join(root,'out')}),/symlink|contain/i);
+});

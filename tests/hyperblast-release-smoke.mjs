@@ -8,12 +8,9 @@ const shooterPackage = JSON.parse(fs.readFileSync('hyperblast-shooter/package.js
 assert.ok(packageJson.scripts['check:hyperblast']?.includes('test:hyperblast'), 'parent package should expose the scoped Hyperblast release gate');
 assert.match(packageJson.scripts['test:hyperblast'], /npm --prefix hyperblast-shooter test/, 'parent gate should run the standalone repository tests');
 assert.match(pagesWorkflow, /submodules: recursive/, 'Pages checkout should initialize the Hyperblast submodule');
-assert.match(pagesWorkflow, /Run Hyperblast release gate/, 'Pages workflow should name the Hyperblast release gate step');
-assert.match(pagesWorkflow, /npm run check:hyperblast/, 'Pages workflow should run the gate before deploy materialization');
-assert.ok(
-  pagesWorkflow.indexOf('npm run check:hyperblast') < pagesWorkflow.indexOf('Materialize verified V13.5 Pages stage'),
-  'Hyperblast release gate should run before materializing/uploading the Pages artifact',
-);
+assert.match(pagesWorkflow, /run: pnpm check/, 'Pages must run the shared contract gate');
+assert.match(packageJson.scripts.check, /pnpm check:hyperblast/, 'shared contract gate retains Hyperblast qualification');
+assert.ok(pagesWorkflow.indexOf('run: pnpm check') < pagesWorkflow.indexOf('Upload Pages artifact'), 'release checks precede upload');
 
 for (const script of ['test', 'test:e2e', 'check', 'serve']) {
   assert.equal(typeof shooterPackage.scripts[script], 'string', `standalone package should expose ${script}`);

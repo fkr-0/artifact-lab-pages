@@ -105,7 +105,7 @@ async function main() {
     return;
   }
 
-  const manifests = await discoverManifests({ rootDir, adapter });
+  const manifests = options['manifest-file'] ? JSON.parse(await readFile(options['manifest-file'],'utf8')) : await discoverManifests({ rootDir, adapter });
   if (command === 'discover') {
     const out = options.out || join(rootDir, 'registry/generated/discovery.json');
     await writeJson(out, { schemaVersion: 'artifacts.fkr.dev/discovery-v1', generatedAt: new Date().toISOString(), count: manifests.length, items: manifests });

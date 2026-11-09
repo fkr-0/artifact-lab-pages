@@ -111,7 +111,12 @@ test('selective publication rejects a checkout that does not match its immutable
 
 test('Pages builds Revealive for V13.5 consumption', async () => {
   const pages = await readFile(join(rootDir, '.github/workflows/pages.yml'), 'utf8');
-  assert.match(pages, /Install dependencies \(revealive\)[\s\S]*working-directory: revealive/);
-  assert.match(pages, /Build \(revealive\)[\s\S]*pnpm run build[\s\S]*working-directory: revealive/);
+  const {loadPortfolio}=await import('../tooling/artifactctl/src/portfolio.mjs');
+  const {recipes}=await loadPortfolio(rootDir);
+  assert.equal(recipes.revealive.source.kind,'submodule');
+  assert.equal(recipes.revealive.source.recursive,true);
+  assert.equal(recipes.revealive.prepare,'build');
+  assert.deepEqual(recipes.revealive.commands,[['pnpm','run','build']]);
+  assert.match(pages,/run: pnpm build/);
   assert.doesNotMatch(pages, /stage-compiled-publication\.mjs/, 'V13.5 handoff owns Revealive staging; no post-verification re-staging');
 });

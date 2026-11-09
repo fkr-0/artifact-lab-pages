@@ -48,6 +48,7 @@ export function validatePortfolio(p) {
   for (const a of p.artifacts) {
     if (!slug.test(a.id||'') || ids.has(a.id)) throw new Error(`Duplicate or invalid artifact ID: ${a.id}`);
     ids.add(a.id);
+    if (a.publish==='local' && p.recipes[a.recipe]?.enabled===false) throw new Error(`${a.id}: published recipe is disabled`);
     if (a.recipe && !Object.hasOwn(p.recipes,a.recipe)) throw new Error(`${a.id}: unknown recipe ${a.recipe}`);
     if (!a.recipe && !['catalog','reference'].includes(a.publish)) throw new Error(`${a.id}: publishable artifact requires a recipe`);
     if (a.manifest && a.manifest.id!==a.id) throw new Error(`${a.id}: manifest ID differs`);
@@ -74,9 +75,14 @@ export function planPortfolio(p) {
 export async function loadPortfolio(rootDir) {
   return parsePortfolio(await readFile(join(rootDir,'inventory.yml'),'utf8'));
 }
-export function portfolioManifests(p) {
-  return p.artifacts.filter(x=>x.manifest).map(x=>({...structuredClone(x.manifest),__manifestPath:`inventory.yml#${x.id}`}));
+export function portfolioManifests(p, {publication=false}={}) {
+  return p.artifacts.filter(x=>x.manifest && (!publication || x.publish!=='reference')).map(x=>({...structuredClone(x.manifest),__manifestPath:`inventory.yml#${x.id}`}));
 }
 export function portfolioBaseline(p, historical) {
   return {...historical,items:p.artifacts.filter(x=>x.compatibility).map(x=>structuredClone(x.compatibility))};
+}
+
+export function artifactPreparations(p, prepared) {
+  const byRecipe=Object.fromEntries(prepared.map(result=>[result.id,result]));
+  return Object.fromEntries(p.artifacts.filter(a=>a.publish==='local'&&byRecipe[a.recipe]).map(a=>[a.id,byRecipe[a.recipe]]));
 }

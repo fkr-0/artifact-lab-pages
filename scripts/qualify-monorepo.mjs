@@ -59,11 +59,11 @@ if (process.env.GITHUB_SHA && process.env.GITHUB_SHA !== sourceRevision) {
   throw new Error('The Pages checkout differs from GITHUB_SHA.');
 }
 await assertSourceClean();
-await run('npm', ['test'], { cwd: hub });
+await run('npm', ['test'], { cwd: hub, env: {ARTIFACTS_EDITORIAL_FILE:'', ARTIFACTS_NATIVE_MANIFEST_FILE:'', ARTIFACTS_BASELINE_FILE:'', ARTIFACTS_PREPARED_FILE:''} });
 // Regenerate native catalog in an ignored build-only directory, never dirty a
 // committed catalog.json as a side effect of publication.
 await mkdir(dirname(generated), { recursive: true });
-await run(process.execPath, ['tooling/artifactctl/src/cli.mjs', 'catalog', '--out', generated]);
+await run(process.execPath, ['tooling/artifactctl/src/cli.mjs', 'catalog', '--out', generated, ...(process.env.ARTIFACTS_PUBLICATION_MANIFEST_FILE?['--manifest-file',process.env.ARTIFACTS_PUBLICATION_MANIFEST_FILE]:[])]);
 await run(process.execPath, ['scripts/build.mjs'], {
   cwd: hub,
   env: { ARTIFACTS_SOURCE_ROOT: root, ARTIFACTS_NATIVE_CATALOG_FILE: generated },

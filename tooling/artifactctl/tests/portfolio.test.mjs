@@ -34,3 +34,17 @@ test('inventory covers current native and legacy portfolio with one source autho
  assert.equal(p.recipes.revealive.prepare,'build');
  assert.ok(p.artifacts.some(x=>x.compatibility?.url==='/meme-lab/meme-lab.html'));
 });
+
+test('shared recipes map prepared outputs to each selecting artifact',async()=>{
+ const {artifactPreparations}=await import('../src/portfolio.mjs');
+ const p=base();p.artifacts=[{id:'one',title:'One',publish:'local',recipe:'demo'},{id:'two',title:'Two',publish:'local',recipe:'demo'}];
+ const prepared=[{id:'demo',outputRoot:'/resolved/site'}];
+ assert.equal(artifactPreparations(p,prepared).one.outputRoot,'/resolved/site');
+ assert.equal(artifactPreparations(p,prepared).two.outputRoot,'/resolved/site');
+});
+
+test('publication descriptors omit references while discovery preserves historical metadata',()=>{
+ const p=base();p.artifacts[0].manifest={id:'demo'};p.artifacts[0].publish='reference';
+ assert.equal(portfolioManifests(p).length,1);
+ assert.equal(portfolioManifests(p,{publication:true}).length,0);
+});
