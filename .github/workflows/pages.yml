@@ -3,15 +3,24 @@ name: Build and Deploy Pages
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
+    inputs:
+      site_url:
+        description: 'Optional qualified whole-site tar.gz URL (skip source builds)'
+        type: string
+      site_sha256:
+        description: 'Required SHA-256 when site_url is supplied'
+        type: string
+      site_revision:
+        description: 'Required full source commit when site_url is supplied'
+        type: string
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
   cancel-in-progress: true
 
 env:
@@ -21,168 +30,79 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Artifact Lab
+      - name: Checkout publication source
         uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '24'
 
-      - name: Enable Corepack package-manager shims
+      - name: Enable Corepack
         run: corepack enable
 
-      - name: Install dependencies (revealive)
+      - name: Install root tools
         run: pnpm install --frozen-lockfile
-        working-directory: revealive
 
-      - name: Build (revealive)
-        run: pnpm run build
-        working-directory: revealive
+      - name: Validate YAML inventory
+        run: pnpm inventory:check
 
-      - name: Install dependencies (badger-sprawl-runner)
-        run: pnpm install --frozen-lockfile
-        working-directory: badger-sprawl-runner
-
-      # V12 parity requires /badger-sprawl-runner/dist/index.html. This is
-      # generated (not tracked in the submodule), so installing is insufficient.
-      - name: Build (badger-sprawl-runner)
-        run: pnpm run build
-        working-directory: badger-sprawl-runner
-
-      # The V13.5 native superset includes the generated lobby sample. The
-      # pinned peerjslib submodule does not check its dist output into Git.
-      - name: Install dependencies (peerjslib)
-        run: pnpm install --frozen-lockfile
-        working-directory: peerjslib
-
-      - name: Build (peerjslib-lobby-share)
-        run: pnpm run sample:build
-        working-directory: peerjslib
-
-      # Git Recipe Book must be built; its tracked index.html is only a Vite dev entrypoint.
-      - name: Install dependencies (git-recipe-book)
-        run: pnpm install --frozen-lockfile
-        working-directory: git-recipe-book
-
-      - name: Verify Git Recipe Book
-        run: pnpm lint && pnpm test
-        working-directory: git-recipe-book
-        env:
-          # Avoid Node's experimental global Web Storage shadowing jsdom storage.
-          NODE_OPTIONS: --no-experimental-webstorage
-
-      - name: Build (git-recipe-book)
+      - name: Resolve recipes, build releases and qualify complete site
+        if: ${{ !inputs.site_url }}
         run: pnpm build
-        working-directory: git-recipe-book
 
-      - name: Run Hyperblast release gate
-        run: npm run check:hyperblast
+      - name: Import a qualified prebuilt complete site
+        if: ${{ inputs.site_url }}
+        run: pnpm import:site
+        env:
+          SITE_URL: ${{ inputs.site_url }}
+          SITE_SHA256: ${{ inputs.site_sha256 }}
+          SITE_REVISION: ${{ inputs.site_revision }}
 
-      - name: Verify Sudoku and Killer Sudoku uniqueness and solving logic
-        run: node --test tests/sudoku-lab.test.mjs tests/killer-sudoku-lab.test.mjs
+      - name: Check root, tooling and hub contracts
+        if: ${{ !inputs.site_url }}
+        run: pnpm check
 
-      - name: Validate native source registry
-        run: node tooling/artifactctl/src/cli.mjs validate
-
-      # One checkout is the full release authority. The qualification runner
-      # regenerates its catalog under an ignored build directory, checks the
-      # Git commit and hub subtree, stages every route, and hashes all assets.
-      - name: Materialize verified V13.5 Pages stage
-        run: node scripts/qualify-monorepo.mjs
-
-      - name: Verify staged publication receipt
+      - name: Browser smoke against publication output
+        if: ${{ !inputs.site_url }}
         run: |
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const receipt = JSON.parse(fs.readFileSync('.artifacts-pages-stage/V13_5_PAGES_INTEGRATION.json', 'utf8'));
-          const { execFileSync } = require('node:child_process');
-          const expectedTree = execFileSync('git', ['rev-parse', 'HEAD:hub-v13.5'], {encoding:'utf8'}).trim();
-          if (receipt?.v13_5?.revision !== process.env.GITHUB_SHA ||
-              receipt?.source?.currentRevision !== process.env.GITHUB_SHA ||
-              receipt?.provenance?.commit !== process.env.GITHUB_SHA ||
-              receipt?.provenance?.mode !== 'monorepo' ||
-              receipt?.provenance?.hubTree !== expectedTree) {
-            throw new Error('Monorepo revision/subtree mismatch in staged publication receipt');
-          }
-          if (receipt?.v13_5?.stagedV12Local !== 44 || receipt?.v13_5?.missingV12Local !== 0) {
-            throw new Error('V13.5 V12 parity gate failed');
-          }
-          if (receipt?.v13_5?.catalogItems < 55) {
-            throw new Error('V13.5 catalog-size gate failed (floor: 55)');
-          }
-          if (receipt?.deployment?.performed !== false) {
-            throw new Error('Stage receipt must not claim deployment before deploy-pages');
-          }
-          const article = 'research/roborock-local-cloud/index.html';
-          if (!fs.existsSync('.artifacts-pages-stage/' + article)) {
-            throw new Error('Roborock security report is missing from the staged release');
-          }
-          const catalog = JSON.parse(fs.readFileSync('.artifacts-pages-stage/catalog.json', 'utf8'));
-          const entry = catalog.items.find(item => item.id === 'roborock-local-cloud');
-          if (entry?.availability !== 'verified' || entry.url !== '/' + article) {
-            throw new Error('Roborock report is missing from the launchable catalog');
-          }
-          const assets = JSON.parse(fs.readFileSync('.artifacts-pages-stage/asset-manifest.json', 'utf8'));
-          if (!assets.files?.[article]?.sha256) throw new Error('Roborock report has no asset hash evidence');
-          const figureNames = [
-            '01-onboarding', '02-service-channels', '03-registration-sequence',
-            '04-trust-boundaries', '05-five-gates', '06-ca-chain',
-            '07-identity-comparison', '08-persistence',
-          ];
-          if (entry.version !== '1.2.1' || entry.receipt?.files !== 17) {
-            throw new Error('Roborock report lacks complete v1.2 Mermaid figure receipt');
-          }
-          for (const name of figureNames) {
-            for (const ext of ['svg', 'mmd']) {
-              const figure = 'research/roborock-local-cloud/figures/' + name + '.' + ext;
-              if (!fs.existsSync('.artifacts-pages-stage/' + figure) || !assets.files?.[figure]?.sha256) {
-                throw new Error('Missing or unverified Mermaid figure: ' + figure);
-              }
-            }
-          }
-          // The AppHub catalog must expose the same verified PDF/HTML release.
-          const routes = JSON.parse(fs.readFileSync('.artifacts-pages-stage/route-manifest.json', 'utf8'));
-          const item = catalog.items?.find((entry) => entry.id === 'bewusstsein');
-          if (item?.availability !== 'verified' || item.kind !== 'document' ||
-              item.url !== '/artifacts/bewusstsein/0.1.0/index.html' ||
-              !routes.entries?.some((entry) => entry.id === 'bewusstsein' &&
-                entry.path === 'artifacts/bewusstsein/0.1.0/index.html' &&
-                entry.state === 'staged')) {
-            throw new Error('Bewusstsein is not discoverable in the AppHub catalog');
-          }
-          const supplement = receipt?.supplements?.bewusstsein;
-          if (supplement?.route !== '/bewusstsein/' ||
-              supplement?.pdf !== '/bewusstsein/bewusstsein.pdf' ||
-              supplement?.files?.length !== 3) {
-            throw new Error('Bewusstsein publication is missing or unqualified');
-          }
-          const crypto = require('node:crypto');
-          for (const file of supplement.files) {
-            const contents = fs.readFileSync('.artifacts-pages-stage/' + file.path);
-            if (crypto.createHash('sha256').update(contents).digest('hex') !== file.sha256 ||
-                contents.length !== file.bytes) {
-              throw new Error('Bewusstsein stage integrity mismatch: ' + file.path);
-            }
-          }
-          console.log('V13.5 Pages receipt verified:', receipt.v13_5);
-          NODE
+          pnpm exec playwright install --with-deps chromium
+          CHROMIUM_BIN="$(node -e "console.log(require('playwright').chromium.executablePath())")" node hub-v13.5/tests/qualification/browser-smoke.mjs dist/site
+
+      - name: Verify exact publication file inventory
+        run: pnpm verify:site
+        env:
+          SITE_REVISION: ${{ inputs.site_revision || github.sha }}
+
+      - name: Upload qualified site for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualified-site
+          path: dist/site/
+          if-no-files-found: error
 
       - name: Upload Pages artifact
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
         uses: actions/upload-pages-artifact@v5
         with:
-          path: .artifacts-pages-stage
+          path: dist/site
 
   deploy:
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy verified Pages artifact
         id: deployment
         uses: actions/deploy-pages@v5

@@ -334,7 +334,7 @@ function makeHubSelfRecord(hubMetadata = {}) {
 
 
 async function stageEditorialReports(hubRoot, outputRoot) {
-  const manifestPath = join(hubRoot, 'catalog/editorial-reports.json');
+  const manifestPath = process.env.ARTIFACTS_EDITORIAL_FILE || join(hubRoot, 'catalog/editorial-reports.json');
   if (!(await exists(manifestPath))) return { items: [], routes: [] };
   const descriptor = JSON.parse(await readFile(manifestPath, 'utf8'));
   if (descriptor.schemaVersion !== 'artifacts-v13.5/editorial-reports-v1' || !Array.isArray(descriptor.reports)) {
@@ -614,7 +614,7 @@ async function findSourceRoot(roots, path) {
   return null;
 }
 
-export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = [], outputRoot, hubRoot = null, nativeCatalog = null, nativeManifests = {}, strict = true } = {}) {
+export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = [], outputRoot, hubRoot = null, nativeCatalog = null, nativeManifests = {}, preparedReleases = {}, strict = true } = {}) {
   if (!baseline || baseline.schemaVersion !== BASELINE_SCHEMA || !Array.isArray(baseline.items)) {
     throw new Error('Expected ' + BASELINE_SCHEMA + ' baseline.');
   }
@@ -689,6 +689,19 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
         runtimeBytes: staged.bytes,
         missingReferences: [],
       }));
+      continue;
+    }
+
+    const prepared = preparedReleases[item.id];
+    const manifest = nativeManifests[item.id];
+    if (prepared && manifest?.build?.mode === 'compile') {
+      const releaseEntrypoint = manifest.release?.entrypoint || 'index.html';
+      if (posix.basename(path) !== releaseEntrypoint) throw new Error('Compatibility entrypoint differs from prepared release: ' + item.id);
+      const targetRoot = join(output, posix.dirname(path));
+      const staged = await copyBoundedReleaseSource(prepared.outputRoot, targetRoot, {entrypoint:releaseEntrypoint, exclude:manifest.release.exclude || []});
+      const missing = await missingExpectedReleaseFiles(targetRoot,manifest,releaseEntrypoint);
+      if (missing.length) throw new Error('Prepared compatibility release is incomplete: ' + item.id + ' ' + missing.join(', '));
+      entries.push(deploymentRecord(item,'staged',{sourceKind:'recipe-release',sourceTarget:normalizeSlashes(relative(source,prepared.outputRoot)),runtimeFiles:staged.files.map(file=>posix.join(posix.dirname(path),file)),runtimeBytes:staged.bytes,missingReferences:[],revision:prepared.revision}));
       continue;
     }
 
@@ -795,8 +808,10 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
           deployment: { state: 'staged', routePath: 'git-recipe-book/index.html', sourceKind: 'canonical-compiled' },
         };
       }
+      const current = nativeCatalog?.items?.find(candidate=>candidate.id===item.id);
       return {
         ...item,
+        ...(entry?.sourceKind==='recipe-release'?{version:nativeManifests[item.id]?.version||current?.version||item.version,availability:'verified',git:current?.git||item.git,receipt:{version:current?.version||item.version,files:entry.runtimeFiles.length,generatedAt:null}}:{}),
         deployment: { state: entry ? entry.state : 'unknown', routePath: entry ? entry.routePath : null },
       };
     });

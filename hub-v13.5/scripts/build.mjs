@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
-import { homedir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assemblePortfolio } from './portfolio-lib.mjs';
@@ -8,8 +7,8 @@ import { assemblePortfolio } from './portfolio-lib.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 function arg(name) { const index = process.argv.indexOf(name); return index >= 0 ? process.argv[index + 1] : null; }
 
-const baselinePath = resolve(arg('--baseline') || resolve(root, 'catalog/v12-baseline.json'));
-const sourceRoot = resolve(arg('--source-root') || process.env.ARTIFACTS_SOURCE_ROOT || resolve(homedir(), 'code/artifacts'));
+const baselinePath = resolve(arg('--baseline') || process.env.ARTIFACTS_BASELINE_FILE || resolve(root, 'catalog/v12-baseline.json'));
+const sourceRoot = resolve(arg('--source-root') || process.env.ARTIFACTS_SOURCE_ROOT || resolve(root, '..'));
 const outputRoot = resolve(arg('--out') || resolve(root, 'dist'));
 const compatRoot = resolve(arg('--compat-root') || resolve(root, 'catalog/compat-runtime'));
 const strict = !process.argv.includes('--allow-unresolved');
@@ -25,19 +24,20 @@ async function readJson(path) {
 }
 
 const nativeCatalog = await readJson(resolve(process.env.ARTIFACTS_NATIVE_CATALOG_FILE || resolve(sourceRoot, 'registry/generated/catalog.json')));
-const nativeManifests = {};
+const nativeManifests = process.env.ARTIFACTS_NATIVE_MANIFEST_FILE ? await readJson(process.env.ARTIFACTS_NATIVE_MANIFEST_FILE) : {};
+const preparedReleases = process.env.ARTIFACTS_PREPARED_FILE ? await readJson(process.env.ARTIFACTS_PREPARED_FILE) : {};
 if (nativeCatalog && Array.isArray(nativeCatalog.items)) {
   for (const item of nativeCatalog.items) {
     // Compiled baseline releases also need their build/output contracts.
     if (item.id === 'app-hub-v13') continue;
     const manifest = await readJson(resolve(sourceRoot, 'registry/sources.d', item.id + '.json'))
       || await readJson(resolve(sourceRoot, item.id, 'artifact.json'));
-    if (manifest) nativeManifests[item.id] = manifest;
+    if (manifest && !nativeManifests[item.id]) nativeManifests[item.id] = manifest;
   }
 }
 
 try {
-  const result = await assemblePortfolio({ baseline, sourceRoot, fallbackRoots: [{ root: compatRoot, kind: 'v11-compat' }], outputRoot, hubRoot: root, nativeCatalog, nativeManifests, strict });
+  const result = await assemblePortfolio({ baseline, sourceRoot, fallbackRoots: [{ root: compatRoot, kind: 'v11-compat' }], outputRoot, hubRoot: root, nativeCatalog, nativeManifests, preparedReleases, strict });
   const summary = result.parity.summary;
   console.log('V13.5 portfolio: ' + summary.stagedExpected + '/' + summary.expectedLocal +
     ' expected V12 local artifacts staged; ' + summary.missingExpected + ' unresolved.');

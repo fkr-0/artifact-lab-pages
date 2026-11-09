@@ -44,7 +44,7 @@ export async function inventoryRepository(options = {}) {
   const gitlinksResult = await command(rootDir, 'git', ['ls-files', '-s']);
   const nestedResult = await command(rootDir, 'find', [
     '.',
-    '(', '-path', './.git', '-o', '-path', './node_modules', '-o', '-path', './dist', '-o', '-path', './build', '-o', '-path', './.artifacts-deploy-stage', '-o', '-path', './.artifacts-test-module-fix', ')', '-prune',
+    '(', '-path', './.git', '-o', '-path', './.cache', '-o', '-path', './.superpowers', '-o', '-path', './node_modules', '-o', '-path', './dist', '-o', '-path', './build', '-o', '-path', './.artifacts-deploy-stage', '-o', '-path', './.artifacts-test-module-fix', ')', '-prune',
     '-o', '-mindepth', '2', '-name', '.git', '-print', '-prune',
   ]);
 

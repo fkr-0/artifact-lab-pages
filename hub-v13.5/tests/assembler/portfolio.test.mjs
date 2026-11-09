@@ -126,3 +126,15 @@ test('source-only local entries may remain unresolved without weakening expected
   assert.equal(result.parity.summary.missingExpected, 0);
   assert.equal(result.parity.entries.find((entry) => entry.id === 'docs-source').state, 'source-only');
 });
+
+test('prepared project releases replace development HTML at stable compatibility routes',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'prepared-route-'));const source=join(root,'source'),output=join(root,'output'),release=join(source,'.cache/builds/game/dist');
+ await mkdir(release,{recursive:true});await mkdir(join(source,'game'),{recursive:true});
+ await writeFile(join(source,'game/index.html'),'<script src="/src/main.ts"></script>');
+ await writeFile(join(release,'index.html'),'<script src="./game.js"></script>');await writeFile(join(release,'game.js'),'/* compiled */');
+ const item={id:'game',title:'Game',availability:'provisional',sourceKind:'project',buildMode:'compile',url:'/game/index.html'};
+ await mkdir(join(source,'meme-lab'),{recursive:true});await writeFile(join(source,'meme-lab/meme-lab.html'),'Meme');
+ await assemblePortfolio({baseline:baseline([meme,item]),sourceRoot:source,outputRoot:output,preparedReleases:{game:{outputRoot:release,revision:'a'.repeat(40)}},nativeManifests:{game:{build:{mode:'compile'},release:{entrypoint:'index.html'},verify:{expectedFiles:['index.html']}}}});
+ assert.match(await readFile(join(output,'game/index.html'),'utf8'),/\.\/game.js/);
+ assert.equal(await readFile(join(output,'game/game.js'),'utf8'),'/* compiled */');
+});

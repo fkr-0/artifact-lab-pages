@@ -13,7 +13,7 @@ const exec = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hub = join(root, 'hub-v13.5');
 const generated = join(hub, '.generated/catalog.json');
-const stage = join(root, '.artifacts-pages-stage');
+const stage = join(root, 'dist/site');
 
 async function git(...args) {
   const { stdout } = await exec('git', ['-C', root, ...args], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
@@ -33,7 +33,7 @@ async function assertSourceClean() {
   const status = await git('status', '--porcelain', '--untracked-files=normal', '--ignore-submodules=all');
   if (status) throw new Error('Refusing uncommitted or untracked source changes:\n' + status);
   // Preserve the leading status byte (' ' means pinned; '+' means drift).
-  const { stdout: submoduleStatus } = await exec('git', ['-C', root, 'submodule', 'status'],
+  const { stdout: submoduleStatus } = await exec('git', ['-C', root, 'submodule', 'status', '--recursive'],
     { encoding: 'utf8', maxBuffer: 1024 * 1024 });
   const submodules = submoduleStatus.trimEnd();
   for (const line of submodules.split(/\r?\n/u).filter(Boolean)) {
@@ -42,16 +42,11 @@ async function assertSourceClean() {
     if (!match) throw new Error('Invalid submodule status: ' + line);
     const subPath = match[1];
     const { stdout } = await exec('git', ['-C', join(root, subPath),
-      'status', '--porcelain', '--untracked-files=no'],
+      'status', '--porcelain', '--untracked-files=normal'],
       { encoding: 'utf8', maxBuffer: 1024 * 1024 });
     for (const changed of stdout.split(/\r?\n/u).filter(Boolean)) {
       const path = changed.slice(3);
-      // Badger's release build rewrites only its tracked derived dist files.
-      if (subPath !== 'badger-sprawl-runner' ||
-          !/^packages\/(?:progression|sprite-contracts)\/dist\//u.test(path) ||
-          !/^ M /u.test(changed)) {
-        throw new Error('Unreviewed tracked submodule change: ' + subPath + '/' + path);
-      }
+      throw new Error('Dirty submodule source: ' + subPath + '/' + path);
     }
   }
 }
