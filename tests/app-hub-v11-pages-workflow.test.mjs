@@ -6,6 +6,7 @@ assert.ok(Object.hasOwn(workflow.on,'pull_request'),'PRs must qualify without de
 assert.equal(workflow.permissions.contents,'read');assert.equal(workflow.permissions.pages,undefined);
 const build=workflow.jobs.build,deploy=workflow.jobs.deploy;
 assert.equal(build.steps.find(x=>x.uses?.startsWith('actions/checkout')).with.submodules,'recursive');
+assert.equal(build.steps.find(x=>x.uses?.startsWith('actions/setup-node')).with['package-manager-cache'],false,'pnpm must be enabled before cache tools are invoked');
 assert.ok(build.steps.some(x=>x.run==='pnpm build'));
 assert.ok(build.steps.some(x=>x.run==='pnpm verify:site'));
 assert.ok(build.steps.some(x=>x.uses?.startsWith('actions/upload-pages-artifact')&&x.with.path==='dist/site'));
