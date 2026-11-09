@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rename, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
-import { HANDOFF_SCHEMA, INTEGRATION_SCHEMA, stageQualifiedV13_5, validateSourceTransition } from '../scripts/stage-v13-5-publication.mjs';
+import { HANDOFF_SCHEMA, MONOREPO_HANDOFF_SCHEMA, INTEGRATION_SCHEMA, stageQualifiedV13_5, validateSourceTransition } from '../scripts/stage-v13-5-publication.mjs';
 
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 
@@ -424,4 +425,71 @@ test('artifact-source changes require a fresh V13.5 handoff', () => {
     }),
     /outside reviewed publication paths: meme-lab\/meme-lab\.html/,
   );
+});
+
+// Unlike the historical dual-repository fixtures, the monorepo fixture has
+// one real Git root. HEAD and HEAD:hub-v13.5 are independently validated.
+async function monoFixture() {
+  const { artifacts, v13, output } = await fixture();
+  const hub = join(artifacts, 'hub-v13.5');
+  await rename(v13, hub);
+  await writeFile(join(artifacts, '.gitignore'), 'hub-v13.5/dist/\n');
+  await writeFile(join(hub, 'README.md'), 'fixture hub tree\n');
+  const git = (...args) => execFileSync('git', ['-C', artifacts, ...args], {
+    encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+  git('init', '-q');
+  git('config', 'user.name', 'Publication Fixture');
+  git('config', 'user.email', 'publication@invalid.example');
+  git('add', '.gitignore', 'hub-v13.5/README.md');
+  git('commit', '-qm', 'fixture: exact monorepo revision');
+  const sha = git('rev-parse', 'HEAD');
+  const tree = git('rev-parse', 'HEAD:hub-v13.5');
+  const handoffPath = join(hub, 'dist/PUBLICATION_HANDOFF.json');
+  const handoff = JSON.parse(await readFile(handoffPath, 'utf8'));
+  handoff.schemaVersion = MONOREPO_HANDOFF_SCHEMA;
+  handoff.release.commit = sha;
+  handoff.canonicalSource.revision = sha;
+  handoff.canonicalSource.currentRevision = sha;
+  handoff.hub = { path: 'hub-v13.5', tree };
+  await writeFile(handoffPath, JSON.stringify(handoff));
+  return { artifacts, hub, output, handoffPath, sha, tree, git };
+}
+
+test('monorepo mode stages from one Git checkout and retains exact tree provenance', async () => {
+  const { artifacts, hub, output, sha, tree } = await monoFixture();
+  const result = await stageQualifiedV13_5({ artifactRoot: artifacts, v13Root: hub, outDir: output });
+  assert.equal(result.receipt.provenance.mode, 'monorepo');
+  assert.equal(result.receipt.provenance.commit, sha);
+  assert.equal(result.receipt.provenance.hubTree, tree);
+  assert.equal(result.receipt.v13_5.revision, sha);
+  assert.equal(result.receipt.deployment.performed, false);
+});
+
+test('monorepo refuses spoofed source commits, hub trees and alternate release roots', async () => {
+  const f = await monoFixture();
+  const args = { artifactRoot: f.artifacts, v13Root: f.hub, outDir: f.output };
+  const before = JSON.parse(await readFile(f.handoffPath, 'utf8'));
+  await writeFile(f.handoffPath, JSON.stringify({
+    ...before, hub: { ...before.hub, tree: 'f'.repeat(40) },
+  }));
+  await assert.rejects(stageQualifiedV13_5(args), /hub subtree tree hash differs/);
+  await writeFile(f.handoffPath, JSON.stringify(before));
+  await assert.rejects(stageQualifiedV13_5({
+    ...args, artifactSourceRevision: 'f'.repeat(40),
+  }), /checkout does not match the source checkout/);
+  await assert.rejects(stageQualifiedV13_5({
+    ...args, v13Root: f.artifacts,
+  }), /Monorepo handoff must stage the hub|missing.*PUBLICATION_HANDOFF/);
+  f.git('commit', '--allow-empty', '-qm', 'new source state');
+  await assert.rejects(stageQualifiedV13_5(args), /checkout does not match the source checkout/);
+});
+
+test('stage refuses extra unhashed runtime files', async () => {
+  const { artifacts, v13, output } = await fixture();
+  await writeFile(join(v13, 'dist', 'unexpected-runtime.js'), 'malicious payload');
+  await assert.rejects(stageQualifiedV13_5({
+    artifactRoot: artifacts, v13Root: v13, outDir: output,
+    artifactSourceRevision: 'a'.repeat(40), v13Revision: 'b'.repeat(40),
+  }), /stage inventory differs from the hashed asset manifest/);
 });

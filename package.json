@@ -16,7 +16,7 @@
     "test:v13hub": "node tooling/artifactctl/src/cli.mjs validate && pnpm run build:catalog && node --test tests/app-hub-v13.test.mjs tests/publication-site-v13.test.mjs tests/revealive-source-registry.test.mjs tests/revealive-publication-stage.test.mjs",
     "test:e2e:v13hub": "npx playwright test tests/e2e/app-hub-v13-*.spec.mjs --project=chromium",
     "test:e2e": "npx playwright test",
-    "test:e2e:root": "npx playwright test tests/e2e/app-hub-file-share.spec.mjs tests/e2e/brickbreaker.spec.mjs tests/e2e/inline-handler-migrations.spec.mjs tests/e2e/sprite-fan-*.spec.mjs tests/e2e/studios-modernization.spec.mjs tests/e2e/telegram-bot-api-workbench.spec.mjs --project=chromium --workers=6",
+    "test:e2e:root": "npx playwright test tests/e2e/app-hub-file-share.spec.mjs tests/e2e/brickbreaker.spec.mjs tests/e2e/inline-handler-migrations.spec.mjs tests/e2e/oeffentliches-dienstrecht-quiz.spec.mjs tests/e2e/sprite-fan-*.spec.mjs tests/e2e/studios-modernization.spec.mjs tests/e2e/telegram-bot-api-workbench.spec.mjs --project=chromium --workers=6",
     "test:e2e:inline-handlers": "npx playwright test tests/e2e/inline-handler-migrations.spec.mjs --project=chromium",
     "test:e2e:headed": "npx playwright test --headed",
     "test:e2e:ui": "npx playwright test --ui",

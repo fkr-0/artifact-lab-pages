@@ -1,8 +1,9 @@
 {
   "schemaVersion": "artifacts.fkr.dev/v1",
   "id": "ethic-brawl",
+  "version": "1.7.4",
   "title": "Ethic Brawl",
-  "description": "Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue work remains local until browser and release reconciliation is complete.",
+  "description": "2.5D cyberpunk philosophical arena-brawler with local Versus, a complete three-encounter Babylon campaign, a curated 13-fighter release roster with command specials and unique gimmicks, AI showcase play, accessibility settings, deterministic Canvas2D combat, and optional PixiJS and desktop runtime paths; later story routes remain locked authored previews.",
   "kind": "application",
   "status": "provisional",
   "required": true,

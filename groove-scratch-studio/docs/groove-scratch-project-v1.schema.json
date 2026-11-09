@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fkr.dev/schemas/groove-scratch-project-v1.schema.json",
+  "title": "GROOVE Scratch Project v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "source", "selection", "tempo", "timeline", "automation", "patterns", "metadata"],
+  "properties": {
+    "format": {"const": "groove-scratch-project"},
+    "version": {"const": 1},
+    "source": {"type":"object", "additionalProperties":false,"required":["path","sha256"],"properties":{"path":{"type":"string","minLength":1},"sha256":{"oneOf":[{"type":"null"},{"type":"string","pattern":"^[0-9a-f]{64}$"}]}}},
+    "selection": {"type":"object", "additionalProperties":false,"required":["startSeconds","endSeconds"],"properties":{"startSeconds":{"type":"number","minimum":0},"endSeconds":{"type":"number","exclusiveMinimum":0}}},
+    "tempo": {"type":"object", "additionalProperties":false,"required":["bpm","beatsPerBar","subdivisionsPerBeat"],"properties":{"bpm":{"type":"number","minimum":30,"maximum":300},"beatsPerBar":{"const":4},"subdivisionsPerBeat":{"type":"integer","enum":[1,2,4,8,16]}}},
+    "timeline": {"type":"object", "additionalProperties":false,"required":["durationSeconds","loop"],"properties":{"durationSeconds":{"type":"number","exclusiveMinimum":0,"maximum":7200},"loop":{"type":"boolean"}}},
+    "automation": {"type":"object", "additionalProperties":false,"required":["position","gain"],"properties":{"position":{"type":"array","maxItems":200000,"items":{"$ref":"#/$defs/positionPoint"}},"gain":{"type":"array","minItems":2,"maxItems":200000,"items":{"$ref":"#/$defs/gainPoint"}}}},
+    "patterns": {"type":"array","maxItems":20000,"items":{"type":"object","additionalProperties":false,"required":["kind","timeStart","timeEnd","sampleStart","sampleEnd","repeats"],"properties":{"kind":{"enum":["baby","forward","chirp","stab","flare1","orbit1","flare2","orbit2"]},"timeStart":{"type":"number","minimum":0},"timeEnd":{"type":"number","exclusiveMinimum":0},"sampleStart":{"type":"number","minimum":0,"maximum":1},"sampleEnd":{"type":"number","minimum":0,"maximum":1},"repeats":{"type":"integer","minimum":1,"maximum":8}}}},
+    "metadata": {"type":"object","additionalProperties":false,"required":["title"],"properties":{"title":{"type":"string","maxLength":200}}}
+  },
+  "$defs": {
+    "positionPoint": {"type":"object","additionalProperties":false,"required":["t","p"],"properties":{"t":{"type":"number","minimum":0},"p":{"type":"number","minimum":0,"maximum":1}}},
+    "gainPoint": {"type":"object","additionalProperties":false,"required":["t","v"],"properties":{"t":{"type":"number","minimum":0},"v":{"type":"number","minimum":0,"maximum":1}}}
+  }
+}
