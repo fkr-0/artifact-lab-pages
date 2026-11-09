@@ -81,6 +81,7 @@ async function main(){
   ARTIFACTS_NATIVE_MANIFEST_FILE:join(generated,'manifests.json'),ARTIFACTS_BASELINE_FILE:join(generated,'baseline.json'),ARTIFACTS_PREPARED_FILE:join(generated,'prepared.json'),ARTIFACTS_EDITORIAL_FILE:join(generated,'editorial.json'),
  });
  await assertClean();
+ if(git('rev-parse','HEAD')!==commit)throw new Error('Source commit changed during build');
  const recipes=prepared.map(({id,revision,source,prepare,commands})=>({id,revision,source,prepare,commands}));
  await sealSite(site,{commit,inventorySha256:sha256(await readFile(join(root,'inventory.yml'))),recipes});
  console.log(`Qualified site: ${site}; ${commit}; not deployed`);

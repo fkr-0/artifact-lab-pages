@@ -22,8 +22,8 @@ test('V13 site builds native releases and catalogs V11 as provisional', async (t
   assert.ok(result.catalog.items.some((item) => item.id === 'brickbreaker' && item.availability === 'provisional' && item.url === null));
   assert.equal(result.builds.some((entry) => entry.manifest.id === 'brickbreaker'), false);
   assert.match(await readFile(join(temporary, 'site/hub/v13/app.js'), 'utf8'), /renderHub/);
-  assert.match(await readFile(join(temporary, 'site/hub/v13/catalog.json'), 'utf8'), /catalog-v1/);
-  assert.match(await readFile(join(temporary, 'site/hub/v13/vendor/renderHub/receipt.json'), 'utf8'), /library-receipt/);
+  assert.match(await readFile(join(temporary, 'site/catalog/catalog.json'), 'utf8'), /catalog-v1/);
+  assert.match(await readFile(join(temporary, 'site/hub/v13/peer-boundary.js'), 'utf8'), /export/);
   assert.match(await readFile(join(temporary, 'site/catalog/catalog.json'), 'utf8'), /app-hub-v13/);
   const loaded = await loadReceiptBuilds(manifests, join(temporary, 'site/artifacts'));
   assert.equal(loaded.length, result.builds.length);

@@ -48,3 +48,19 @@ test('release extraction rejects traversal and symlinks, extracts regular payloa
  execFileSync('python3',['-c',"import zipfile,sys; z=zipfile.ZipFile(sys.argv[1],'w');z.writestr('index.html','release');z.close()",archive]);
  await extractRelease(archive,join(root,'out'),'zip');assert.equal(await readFile(join(root,'out/index.html'),'utf8'),'release');
 });
+
+test('prebuilt cache bytes must match the locked hash and file names stay contained',async t=>{
+ const root=await fixture(t);const {createHash}=await import('node:crypto');const bytes=Buffer.from('payload'),digest=createHash('sha256').update(bytes).digest('hex');
+ const r={id:'prebuilt',source:{kind:'release',url:'https://example.org/release',sha256:digest,format:'file',filename:'index.html'},prepare:'copy',output:'.',expectedFiles:['index.html']};
+ await mkdir(join(root,'.cache/releases'),{recursive:true});await writeFile(join(root,`.cache/releases/prebuilt-${digest}.download`),bytes);
+ const result=await executeRecipe(r,{rootDir:root});assert.equal(await readFile(join(result.outputRoot,'index.html'),'utf8'),'payload');
+ await writeFile(join(root,`.cache/releases/prebuilt-${digest}.download`),'changed');await assert.rejects(executeRecipe(r,{rootDir:root}),/SHA-256/);
+ await assert.rejects(executeRecipe({...r,source:{...r.source,filename:'../../escape'}},{rootDir:root}),/filename|contained/i);
+});
+test('tar package with a root directory extracts; archive symlinks fail',async t=>{
+ const root=await fixture(t),archive=join(root,'release.tar.gz');
+ execFileSync('tar',['-czf',archive,'-C',join(root,'project'),'.']);await extractRelease(archive,join(root,'out'),'tar.gz');
+ assert.equal(await readFile(join(root,'out/index.html'),'utf8'),'copy bytes');
+ await symlink('/tmp',join(root,'project/escape'));execFileSync('tar',['-czf',archive,'-C',join(root,'project'),'.']);
+ await assert.rejects(extractRelease(archive,join(root,'out2'),'tar.gz'),/unsafe|symlink|link/i);
+});

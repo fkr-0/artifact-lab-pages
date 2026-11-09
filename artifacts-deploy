@@ -11,6 +11,12 @@
 
 set -euo pipefail
 
+# Current publication path; historical source composition requires an explicit opt-in.
+if [[ "${ARTIFACTS_LEGACY_TOOLS:-0}" != "1" ]]; then
+    PORTFOLIO_SCRIPT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+    exec node "$PORTFOLIO_SCRIPT_ROOT/scripts/deploy-site.mjs" "$@"
+fi
+
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 YELLOW='\033[1;33m'

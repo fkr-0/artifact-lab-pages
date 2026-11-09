@@ -14,7 +14,7 @@ limit = 256 * 1024 * 1024
 count = 0
 total = 0
 
-def destination(name, size):
+def destination(name, size, directory=False):
     global count, total
     path = PurePosixPath(name)
     if not name or '\\' in name or path.is_absolute() or '..' in path.parts or ':' in name:
@@ -26,6 +26,8 @@ def destination(name, size):
     total += size
     if count > 10000 or total > limit:
         raise ValueError('archive exceeds release size limit')
+    if directory and out.is_dir():
+        return out
     if out.exists():
         raise ValueError('duplicate archive member: ' + name)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -38,7 +40,7 @@ if kind == 'zip':
             if stat.S_ISLNK(mode) or (stat.S_IFMT(mode) not in (0, stat.S_IFREG, stat.S_IFDIR)):
                 raise ValueError('unsafe archive symlink or special file')
             if member.is_dir():
-                destination(member.filename, 0).mkdir(exist_ok=True)
+                destination(member.filename, 0, directory=True).mkdir(exist_ok=True)
             else:
                 out = destination(member.filename, member.file_size)
                 with bundle.open(member) as src, out.open('xb') as dst:
@@ -47,7 +49,7 @@ else:
     with tarfile.open(archive, 'r:*') as bundle:
         for member in bundle:
             if member.isdir():
-                destination(member.name, 0).mkdir(exist_ok=True)
+                destination(member.name, 0, directory=True).mkdir(exist_ok=True)
             elif member.isfile():
                 out = destination(member.name, member.size)
                 with bundle.extractfile(member) as src, out.open('xb') as dst:

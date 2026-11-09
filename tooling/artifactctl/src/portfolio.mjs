@@ -31,9 +31,11 @@ export function validatePortfolio(p) {
     }
     if (r.source.kind==='release') {
       if (!/^https:\/\//u.test(r.source.url||'') || !/^[a-f0-9]{64}$/u.test(r.source.sha256||'') || !['zip','tar','tar.gz','file'].includes(r.source.format)) throw new Error(`${id}: release requires HTTPS URL, SHA-256 and format`);
+      if (r.source.filename!==undefined) relative(r.source.filename,`${id}: source.filename`);
       if (r.prepare!=='copy') throw new Error(`${id}: prebuilt release must use copy`);
     }
     relative(r.output,`${id}: output`);
+    if (r.prepare!=='copy' && ['.','.git','node_modules'].includes(r.output)) throw new Error(`${id}: unsafe build output`);
     if (r.cwd!==undefined) relative(r.cwd,`${id}: cwd`);
     for (const field of ['install','commands','checks']) if (r[field]!==undefined) argv(r[field],`${id}: ${field}`);
     if (r.prepare==='copy' && (r.install?.length || r.commands?.length)) throw new Error(`${id}: copy cannot install or build`);

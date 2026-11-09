@@ -61,7 +61,7 @@ async function acquireRelease(r,root,env) {
   if(hash(await readFile(archive))!==r.source.sha256)throw new Error('Prebuilt release cache SHA-256 mismatch');
   // Extract afresh; a previous mutable extraction is never release authority.
   await rm(base,{recursive:true,force:true});await mkdir(base,{recursive:true});
-  if(r.source.format==='file')await writeFile(join(base,r.source.filename||'release'),await readFile(archive));
+  if(r.source.format==='file') {const target=await containedPath(base,r.source.filename||'release');await mkdir(dirname(target),{recursive:true});await writeFile(target,await readFile(archive));}
   else await extractRelease(archive,base,r.source.format);
   return base;
 }
@@ -103,6 +103,7 @@ export async function executeRecipe(r,{rootDir,environment=process.env}={}) {
     await rm(buildRoot,{recursive:true,force:true});
     await run('git',['clone','--shared','--no-hardlinks','--no-checkout',sourceRoot,buildRoot],root,env);
     await git(buildRoot,['checkout','--detach',revision],env);
+    await git(buildRoot,['config','remote.origin.url',r.source.repository],env);
     if(r.source.recursive)await run('git',['submodule','update','--init','--recursive'],buildRoot,env);
     sourceRoot=buildRoot;
   }

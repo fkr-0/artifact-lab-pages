@@ -57,13 +57,9 @@ recipes:
     prepare: build
     output: apps/runner/dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - build
+      - [ pnpm, run, build ]
   bathroom-emergency-guide:
     source:
       kind: submodule
@@ -74,13 +70,9 @@ recipes:
     prepare: build
     output: build/site
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - npm
-        - run
-        - build
+      - [ npm, run, build ]
     expectedFiles:
       - index.html
     enabled: false
@@ -104,13 +96,9 @@ recipes:
     prepare: build
     output: dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - build
+      - [ pnpm, run, build ]
   git-recipe-book:
     source:
       kind: local
@@ -118,20 +106,14 @@ recipes:
     prepare: build
     output: dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - build
+      - [ pnpm, run, build ]
     expectedFiles:
       - index.html
     checks:
-      - - pnpm
-        - lint
-      - - pnpm
-        - test
+      - [ pnpm, lint ]
+      - [ pnpm, test ]
     environment:
       NODE_OPTIONS: --no-experimental-webstorage
   groove-scratch-studio:
@@ -158,13 +140,9 @@ recipes:
     prepare: build
     output: dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - build
+      - [ pnpm, run, build ]
     expectedFiles:
       - index.html
   killer-sudoku-lab:
@@ -201,13 +179,9 @@ recipes:
     prepare: build
     output: examples/lobby-chat-file-share/dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - sample:build
+      - [ pnpm, run, sample:build ]
     expectedFiles:
       - index.html
   qr-studio:
@@ -228,13 +202,9 @@ recipes:
     prepare: build
     output: dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - build
+      - [ pnpm, run, build ]
   sprite-fan-atlas-studio:
     source:
       kind: local
@@ -264,13 +234,9 @@ recipes:
     prepare: build
     output: dist
     install:
-      - - pnpm
-        - install
-        - --frozen-lockfile
+      - [ pnpm, install, --frozen-lockfile ]
     commands:
-      - - pnpm
-        - run
-        - build
+      - [ pnpm, run, build ]
   vim-tomb-raider:
     source:
       kind: local
@@ -582,6 +548,48 @@ recipes:
       - figures/07-identity-comparison.mmd
       - figures/08-persistence.svg
       - figures/08-persistence.mmd
+  aster-relay-identity:
+    enabled: false
+    source:
+      kind: local
+      path: aster-relay-identity-nightline-configurable
+    prepare: copy
+    output: .
+  label-sheet-studio:
+    enabled: false
+    source:
+      kind: local
+      path: label-sheet-studio
+    prepare: copy
+    output: .
+  peer-music-groove:
+    enabled: false
+    source:
+      kind: local
+      path: peer-music-groove
+    prepare: copy
+    output: .
+  peernet-orca:
+    enabled: false
+    source:
+      kind: local
+      path: peernet-orca
+    prepare: copy
+    output: .
+  peernetjs:
+    enabled: false
+    source:
+      kind: local
+      path: peernetjs
+    prepare: copy
+    output: .
+  app-hub-v11-reference:
+    enabled: false
+    source:
+      kind: local
+      path: app-hub-v11
+    prepare: copy
+    output: .
 artifacts:
   - id: brickbreaker
     title: BrickBreaker Coop
@@ -592,7 +600,8 @@ artifacts:
       id: brickbreaker
       version: 0.1.0
       title: BrickBreaker Coop
-      description: Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.
+      description: Standalone cooperative brick-breaking arcade game with optional
+        PeerJS multiplayer.
       kind: application
       status: provisional
       required: true
@@ -637,7 +646,8 @@ artifacts:
       id: brickbreaker
       version: 0.1.0
       title: BrickBreaker Coop
-      description: Standalone cooperative brick-breaking arcade game with optional PeerJS multiplayer.
+      description: Standalone cooperative brick-breaking arcade game with optional
+        PeerJS multiplayer.
       kind: application
       status: experimental
       required: true
@@ -755,8 +765,9 @@ artifacts:
       id: oeffentliches-dienstrecht-quiz
       version: 0.1.0
       title: "Dienstrecht: Aktenlauf"
-      description: Clientseitiges Lernquiz zum öffentlichen Dienstrecht mit 19 kapitelweisen Stages,
-        Quellenhinweisen, Browser-Fortschritt, Sounds und Animationen.
+      description: Clientseitiges Lernquiz zum öffentlichen Dienstrecht mit 19
+        kapitelweisen Stages, Quellenhinweisen, Browser-Fortschritt, Sounds und
+        Animationen.
       kind: application
       status: experimental
       required: true
@@ -882,8 +893,9 @@ artifacts:
       id: app-hub-v13
       version: 2.1.0
       title: V13Hub Artifact Observatory
-      description: Local-first discovery, provenance, artifact-health, preview, permissioned collection, opt-in
-        PeerJSNet lobby, and Arcade sprite-atlas tooling surface for Artifact Lab catalogs.
+      description: Local-first discovery, provenance, artifact-health, preview,
+        permissioned collection, opt-in PeerJSNet lobby, and Arcade sprite-atlas
+        tooling surface for Artifact Lab catalogs.
       kind: application
       status: active
       required: true
@@ -941,8 +953,8 @@ artifacts:
       id: artifact-handling-standard
       version: 1.0.0
       title: Artifact Handling Standard
-      description: Normative V12 instructions for files, directories, projects, Git ownership, builds, Markdown,
-        downloads, links, and inline text.
+      description: Normative V12 instructions for files, directories, projects, Git
+        ownership, builds, Markdown, downloads, links, and inline text.
       kind: document
       status: active
       required: true
@@ -979,8 +991,8 @@ artifacts:
       id: artifact-handling-standard
       version: 1.0.0
       title: Artifact Handling Standard
-      description: Normative V12 instructions for files, directories, projects, Git ownership, builds, Markdown,
-        downloads, links, and inline text.
+      description: Normative V12 instructions for files, directories, projects, Git
+        ownership, builds, Markdown, downloads, links, and inline text.
       kind: document
       status: active
       required: true
@@ -1016,8 +1028,9 @@ artifacts:
       schemaVersion: artifacts.fkr.dev/v1
       id: badger-sprawl-runner
       title: Badger Sprawl Runner
-      description: Published independent submodule pinned to the parent-owned reachable revision; a fully verified
-        local 1.4.0 integration candidate exists but remains outside the gitlink until published.
+      description: Published independent submodule pinned to the parent-owned
+        reachable revision; a fully verified local 1.4.0 integration candidate
+        exists but remains outside the gitlink until published.
       kind: application
       status: provisional
       required: true
@@ -1056,8 +1069,9 @@ artifacts:
       id: badger-sprawl-runner
       version: null
       title: Badger Sprawl Runner
-      description: Published independent submodule pinned to the parent-owned reachable revision; a fully verified
-        local 1.4.0 integration candidate exists but remains outside the gitlink until published.
+      description: Published independent submodule pinned to the parent-owned
+        reachable revision; a fully verified local 1.4.0 integration candidate
+        exists but remains outside the gitlink until published.
       kind: application
       status: provisional
       required: true
@@ -1093,8 +1107,9 @@ artifacts:
       id: bathroom-emergency-guide
       version: 5.1.2
       title: Bathroom Emergency Guide
-      description: Independent submodule-sourced, print-first decision guide with an accessible static site, master
-        editions, and eleven standalone route books.
+      description: Independent submodule-sourced, print-first decision guide with an
+        accessible static site, master editions, and eleven standalone route
+        books.
       kind: document
       status: archived
       required: false
@@ -1148,8 +1163,8 @@ artifacts:
       id: bathroom-emergency-guide
       version: 4.14.0-alt.2
       title: Bathroom Emergency Guide
-      description: Root-owned, sourced, print-first decision guide with an accessible static site, master editions,
-        and eleven standalone route books.
+      description: Root-owned, sourced, print-first decision guide with an accessible
+        static site, master editions, and eleven standalone route books.
       kind: document
       status: experimental
       required: false
@@ -1189,8 +1204,9 @@ artifacts:
       id: bewusstsein
       version: 0.1.0
       title: Bewusstsein als semantische Selbstzuschreibung
-      description: Philosophischer Forschungsessay über sprachlich-reflexives Bewusstsein, semantische
-        Selbstzuschreibung und den fehlbaren Fremdnachweis. 45 Seiten, PDF und HTML.
+      description: Philosophischer Forschungsessay über sprachlich-reflexives
+        Bewusstsein, semantische Selbstzuschreibung und den fehlbaren
+        Fremdnachweis. 45 Seiten, PDF und HTML.
       kind: document
       status: active
       required: true
@@ -1236,7 +1252,8 @@ artifacts:
       schemaVersion: artifacts.fkr.dev/v1
       id: ethic-brawl-source
       title: Ethic Brawl source repository
-      description: External source link modeled directly rather than as a fake local artifact release.
+      description: External source link modeled directly rather than as a fake local
+        artifact release.
       kind: link
       status: experimental
       required: false
@@ -1264,7 +1281,8 @@ artifacts:
       id: ethic-brawl-source
       version: null
       title: Ethic Brawl source repository
-      description: External source link modeled directly rather than as a fake local artifact release.
+      description: External source link modeled directly rather than as a fake local
+        artifact release.
       kind: link
       status: experimental
       required: false
@@ -1299,10 +1317,12 @@ artifacts:
       id: ethic-brawl
       version: 1.7.4
       title: Ethic Brawl
-      description: 2.5D cyberpunk philosophical arena-brawler with local Versus, a complete three-encounter Babylon
-        campaign, a curated 13-fighter release roster with command specials and unique gimmicks, AI showcase
-        play, accessibility settings, deterministic Canvas2D combat, and optional PixiJS and desktop runtime
-        paths; later story routes remain locked authored previews.
+      description: 2.5D cyberpunk philosophical arena-brawler with local Versus, a
+        complete three-encounter Babylon campaign, a curated 13-fighter release
+        roster with command specials and unique gimmicks, AI showcase play,
+        accessibility settings, deterministic Canvas2D combat, and optional
+        PixiJS and desktop runtime paths; later story routes remain locked
+        authored previews.
       kind: application
       status: provisional
       required: true
@@ -1342,8 +1362,9 @@ artifacts:
       id: ethic-brawl
       version: null
       title: Ethic Brawl
-      description: Published independent submodule pinned to the parent-owned reachable revision; mixed 1.7 rescue
-        work remains local until browser and release reconciliation is complete.
+      description: Published independent submodule pinned to the parent-owned
+        reachable revision; mixed 1.7 rescue work remains local until browser
+        and release reconciliation is complete.
       kind: application
       status: provisional
       required: true
@@ -1380,8 +1401,9 @@ artifacts:
       id: git-recipe-book
       version: 1.1.0
       title: Git Recipe Book
-      description: Root-owned interactive Git learning application with progressive lessons, an in-browser
-        repository simulator, contextual help, and graph-based workspace views.
+      description: Root-owned interactive Git learning application with progressive
+        lessons, an in-browser repository simulator, contextual help, and
+        graph-based workspace views.
       kind: application
       status: active
       required: false
@@ -1436,8 +1458,9 @@ artifacts:
       id: git-recipe-book
       version: 1.1.0
       title: Git Recipe Book
-      description: Root-owned interactive Git learning application with progressive lessons, an in-browser
-        repository simulator, contextual help, and graph-based workspace views.
+      description: Root-owned interactive Git learning application with progressive
+        lessons, an in-browser repository simulator, contextual help, and
+        graph-based workspace views.
       kind: application
       status: experimental
       required: false
@@ -1477,9 +1500,10 @@ artifacts:
       id: groove-scratch-studio
       version: 1.4.0
       title: GROOVE / Scratch Studio
-      description: Offline client-side turntable and scratch-pattern editor with stable GROOVE Scratch Project v1
-        JSON interchange and a separate agent-friendly local CLI capable of parameterized pattern generation
-        and WAV rendering.
+      description: Offline client-side turntable and scratch-pattern editor with
+        stable GROOVE Scratch Project v1 JSON interchange and a separate
+        agent-friendly local CLI capable of parameterized pattern generation and
+        WAV rendering.
       kind: application
       status: experimental
       required: false
@@ -1528,7 +1552,8 @@ artifacts:
       schemaVersion: artifacts.fkr.dev/v1
       id: hyperblast-shooter
       title: Hyperblast Shooter
-      description: Published independent Hyperblast Shooter 0.2.0 submodule pinned to the parent-owned reachable revision.
+      description: Published independent Hyperblast Shooter 0.2.0 submodule pinned to
+        the parent-owned reachable revision.
       kind: application
       status: provisional
       required: true
@@ -1571,8 +1596,9 @@ artifacts:
       id: hyperblast-shooter
       version: null
       title: Hyperblast Shooter
-      description: Published independent submodule pinned to the parent-owned reachable revision; newer locally
-        verified release branches remain outside the parent gitlink until published.
+      description: Published independent submodule pinned to the parent-owned
+        reachable revision; newer locally verified release branches remain
+        outside the parent gitlink until published.
       kind: application
       status: provisional
       required: true
@@ -1609,8 +1635,9 @@ artifacts:
       id: inf-arrange
       version: 0.0.2
       title: Inf Arrange / Canvas Studio
-      description: Root-owned infinite canvas application for arranging, slicing, cropping, resizing, annotating,
-        and relating images and short text blocks.
+      description: Root-owned infinite canvas application for arranging, slicing,
+        cropping, resizing, annotating, and relating images and short text
+        blocks.
       kind: application
       status: experimental
       required: false
@@ -1666,8 +1693,9 @@ artifacts:
       id: inf-arrange
       version: 0.0.2
       title: Inf Arrange / Canvas Studio
-      description: Root-owned infinite canvas application for arranging, slicing, cropping, resizing, annotating,
-        and relating images and short text blocks.
+      description: Root-owned infinite canvas application for arranging, slicing,
+        cropping, resizing, annotating, and relating images and short text
+        blocks.
       kind: application
       status: experimental
       required: false
@@ -1707,8 +1735,9 @@ artifacts:
       id: killer-sudoku-lab
       version: 1.0.0
       title: Killer Sudoku Lab — The Sum Grid
-      description: An offline Killer Sudoku game with numbered cages, no prefilled digits, unique puzzles, cage-sum
-        and no-repeat logic, pencil marks, hints, undo/redo, keyboard control, and local autosave.
+      description: An offline Killer Sudoku game with numbered cages, no prefilled
+        digits, unique puzzles, cage-sum and no-repeat logic, pencil marks,
+        hints, undo/redo, keyboard control, and local autosave.
       kind: application
       status: experimental
       required: true
@@ -1758,8 +1787,8 @@ artifacts:
       id: nakamotos-disciples
       version: 0.2.0-alpha.13
       title: Nakamoto's Disciples
-      description: Offline-first, interactive Bitcoin laboratory with a persistent Living Network, cryptographic
-        inspectors, and guided protocol lessons.
+      description: Offline-first, interactive Bitcoin laboratory with a persistent
+        Living Network, cryptographic inspectors, and guided protocol lessons.
       kind: application
       status: experimental
       required: true
@@ -1811,8 +1840,8 @@ artifacts:
       id: peerjslib-lobby-share
       version: 0.3.2-sample.1
       title: Peerjslib Lobby Share
-      description: Capability-link PeerJS lobby sample demonstrating typed group chat and bounded binary file
-        sharing from the standalone peerjslib package.
+      description: Capability-link PeerJS lobby sample demonstrating typed group chat
+        and bounded binary file sharing from the standalone peerjslib package.
       kind: application
       status: experimental
       required: false
@@ -1942,8 +1971,8 @@ artifacts:
       schemaVersion: artifacts.fkr.dev/v1
       id: revealive
       title: Revealive
-      description: Client-only Markdown/Org Reveal.js authoring studio, pinned to the independently verified
-        standalone v0.1.0 release.
+      description: Client-only Markdown/Org Reveal.js authoring studio, pinned to the
+        independently verified standalone v0.1.0 release.
       version: 0.1.0
       kind: application
       status: experimental
@@ -1993,8 +2022,9 @@ artifacts:
       id: sprite-fan-atlas-studio
       version: 1.0.0
       title: Sprite Fan Atlas Studio
-      description: Standalone production workbench for sprite slicing, cleanup, review, atlas assembly, geometry,
-        evidence, and Arcade consumer integration.
+      description: Standalone production workbench for sprite slicing, cleanup,
+        review, atlas assembly, geometry, evidence, and Arcade consumer
+        integration.
       kind: application
       status: experimental
       required: true
@@ -2032,8 +2062,9 @@ artifacts:
       id: sprite-fan-atlas-studio
       version: null
       title: Sprite Fan Atlas Studio
-      description: Integrated sprite-sheet cleanup, review, postprocessing, repack, PNG export, and
-        sprites.json/review-report manifest studio for generated sprite assets.
+      description: Integrated sprite-sheet cleanup, review, postprocessing, repack,
+        PNG export, and sprites.json/review-report manifest studio for generated
+        sprite assets.
       kind: application
       status: provisional
       required: false
@@ -2074,8 +2105,9 @@ artifacts:
       id: sudoku-lab
       version: 1.0.0
       title: Sudoku Lab — Expert Grid
-      description: A fully offline, client-side expert Sudoku game with unique puzzles, local autosave, pencil
-        marks, keyboard controls, undo/redo, contextual hints and reveal.
+      description: A fully offline, client-side expert Sudoku game with unique
+        puzzles, local autosave, pencil marks, keyboard controls, undo/redo,
+        contextual hints and reveal.
       kind: application
       status: experimental
       required: true
@@ -2122,8 +2154,9 @@ artifacts:
       schemaVersion: artifacts.fkr.dev/v1
       id: v11-peer-daw
       title: V11 Peer DAW
-      description: Published independent submodule pinned to its parent-owned release revision; newer unpublished
-        child commits remain outside the parent gitlink until explicitly promoted.
+      description: Published independent submodule pinned to its parent-owned release
+        revision; newer unpublished child commits remain outside the parent
+        gitlink until explicitly promoted.
       kind: application
       status: provisional
       required: true
@@ -2163,8 +2196,9 @@ artifacts:
       id: v11-peer-daw
       version: null
       title: V11 Peer DAW
-      description: Published independent submodule pinned to its parent-owned release revision; newer unpublished
-        child commits remain outside the parent gitlink until explicitly promoted.
+      description: Published independent submodule pinned to its parent-owned release
+        revision; newer unpublished child commits remain outside the parent
+        gitlink until explicitly promoted.
       kind: application
       status: provisional
       required: true
@@ -2209,8 +2243,8 @@ artifacts:
         - status
       source:
         kind: inline
-        text: V12 is being introduced additively. V11 remains operational while artifacts move to verified independent
-          release contracts.
+        text: V12 is being introduced additively. V11 remains operational while
+          artifacts move to verified independent release contracts.
         format: plain
         git:
           mode: none
@@ -2242,8 +2276,8 @@ artifacts:
       releaseKind: inline
       availability: inline
       url: null
-      text: V12 is being introduced additively. V11 remains operational while artifacts move to verified independent
-        release contracts.
+      text: V12 is being introduced additively. V11 remains operational while
+        artifacts move to verified independent release contracts.
       launch:
         default: none
         modes:
@@ -2265,8 +2299,9 @@ artifacts:
       id: vim-tomb-raider
       version: 1.0.0-rc.6
       title: Vim Tomb Raider
-      description: "Interactive Vim learning expedition: 42 authored chambers, a 22-room core curriculum,
-        command-composition puzzles, and evidence-driven practice."
+      description: "Interactive Vim learning expedition: 42 authored chambers, a
+        22-room core curriculum, command-composition puzzles, and
+        evidence-driven practice."
       kind: application
       status: experimental
       required: true
@@ -2318,8 +2353,9 @@ artifacts:
       id: file-diff-studio
       version: null
       title: File Diff Studio
-      description: Local-first visual file comparison and merge workbench with DWIM paste, uploads, live line diffs,
-        keyboard navigation, per-change choices, editable result output, undo/redo, and a portable JSON
+      description: Local-first visual file comparison and merge workbench with DWIM
+        paste, uploads, live line diffs, keyboard navigation, per-change
+        choices, editable result output, undo/redo, and a portable JSON
         operation journal.
       kind: application
       status: provisional
@@ -2362,7 +2398,8 @@ artifacts:
       id: v10-local-first-notepad
       version: null
       title: v10 Local-first Notepad
-      description: v10 enhanced portal notepad concept extracted into the v11 utility host with hub-scoped persistence.
+      description: v10 enhanced portal notepad concept extracted into the v11 utility
+        host with hub-scoped persistence.
       kind: application
       status: provisional
       required: false
@@ -2399,8 +2436,8 @@ artifacts:
       id: v10-shared-text-pad
       version: null
       title: v10 Shared Text Pad
-      description: v10 shared text pad ported to the v11 utility host, using BroadcastChannel for same-browser live
-        sync and local fallback storage.
+      description: v10 shared text pad ported to the v11 utility host, using
+        BroadcastChannel for same-browser live sync and local fallback storage.
       kind: application
       status: provisional
       required: false
@@ -2437,7 +2474,8 @@ artifacts:
       id: v4-console-notes
       version: null
       title: v4 Console Notes
-      description: Operator notes surface for the v4 console lineage, ported into the v11 legacy utility host.
+      description: Operator notes surface for the v4 console lineage, ported into the
+        v11 legacy utility host.
       kind: application
       status: provisional
       required: false
@@ -2474,7 +2512,8 @@ artifacts:
       id: v8-native-scratchpad
       version: null
       title: v8 Native Scratchpad
-      description: Native textarea-based v8 scratchpad port in the v11 legacy utility host with local-first autosave.
+      description: Native textarea-based v8 scratchpad port in the v11 legacy utility
+        host with local-first autosave.
       kind: application
       status: provisional
       required: false
@@ -2512,7 +2551,8 @@ artifacts:
       id: v9-quick-notepad
       version: null
       title: v9 Quick Notepad
-      description: v9 embedded Quick Notepad ported to the v11 utility host with local-first autosave.
+      description: v9 embedded Quick Notepad ported to the v11 utility host with
+        local-first autosave.
       kind: application
       status: provisional
       required: false
@@ -2550,8 +2590,8 @@ artifacts:
       id: v9-sci-fi-calculator
       version: null
       title: v9 Sci-Fi Calculator
-      description: Cyberpunk calculator from the v9 embedded utility deck, ported as a standalone v11 tool with
-        history tape.
+      description: Cyberpunk calculator from the v9 embedded utility deck, ported as a
+        standalone v11 tool with history tape.
       kind: application
       status: provisional
       required: false
@@ -2588,9 +2628,9 @@ artifacts:
       id: spc-aether-node
       version: null
       title: Aether Node
-      description: Abstract node-based visual programming tool for creating generative graphics and procedural
-        patterns. Build networks of processing nodes, connect data flows, and export results as images or
-        animations.
+      description: Abstract node-based visual programming tool for creating generative
+        graphics and procedural patterns. Build networks of processing nodes,
+        connect data flows, and export results as images or animations.
       kind: application
       status: provisional
       required: false
@@ -2632,8 +2672,9 @@ artifacts:
       id: minesweeper
       version: null
       title: Classic Minesweeper
-      description: Standalone Minesweeper artifact with original presets, custom boards, timer scoring, flags,
-        chording, keyboard controls, and local best times.
+      description: Standalone Minesweeper artifact with original presets, custom
+        boards, timer scoring, flags, chording, keyboard controls, and local
+        best times.
       kind: application
       status: provisional
       required: false
@@ -2670,8 +2711,9 @@ artifacts:
       id: solitaire
       version: null
       title: Classic Solitaire
-      description: Standalone Klondike Solitaire artifact with draw-one/draw-three modes, stock and waste piles,
-        foundations, tableau moves, scoring, undo, auto-foundation, timer, and best score persistence.
+      description: Standalone Klondike Solitaire artifact with draw-one/draw-three
+        modes, stock and waste piles, foundations, tableau moves, scoring, undo,
+        auto-foundation, timer, and best score persistence.
       kind: application
       status: provisional
       required: false
@@ -2708,9 +2750,9 @@ artifacts:
       id: clausewitz-on-war-interactive
       version: null
       title: "Clausewitz: On War Interactive Atlas"
-      description: Self-contained interactive atlas for exploring Clausewitz's On War through book trees, chapter
-        compartments, concept maps, friction and culminating-point simulations, scenario sliders, and
-        retrieval prompts.
+      description: Self-contained interactive atlas for exploring Clausewitz's On War
+        through book trees, chapter compartments, concept maps, friction and
+        culminating-point simulations, scenario sliders, and retrieval prompts.
       kind: application
       status: provisional
       required: false
@@ -2754,9 +2796,10 @@ artifacts:
       id: club-ledger
       version: null
       title: Club Ledger
-      description: Client-only trusted club finance ledger for importing JSON, inspecting member dues and wallet
-        balances, logging membership fees, transactions, and wallet-to-wallet conversions, then exporting
-        updated JSON.
+      description: Client-only trusted club finance ledger for importing JSON,
+        inspecting member dues and wallet balances, logging membership fees,
+        transactions, and wallet-to-wallet conversions, then exporting updated
+        JSON.
       kind: application
       status: provisional
       required: false
@@ -2797,9 +2840,9 @@ artifacts:
       id: gif-white-to-transparent
       version: null
       title: GIF White→Alpha Preprocessor
-      description: Browser-based GIF preprocessor that removes white backgrounds and replaces with transparency.
-        Upload animated GIF, adjust white threshold with live preview, and download cleaned GIF with proper
-        alpha channel.
+      description: Browser-based GIF preprocessor that removes white backgrounds and
+        replaces with transparency. Upload animated GIF, adjust white threshold
+        with live preview, and download cleaned GIF with proper alpha channel.
       kind: application
       status: provisional
       required: false
@@ -2841,8 +2884,8 @@ artifacts:
       id: bomberman-v10
       version: null
       title: Gridblast Bomberman
-      description: Legacy v10 Bomberman implementation with PeernetLobby one-session multiplayer, target-peer joins,
-        and shared state snapshots.
+      description: Legacy v10 Bomberman implementation with PeernetLobby one-session
+        multiplayer, target-peer joins, and shared state snapshots.
       kind: application
       status: provisional
       required: false
@@ -2881,8 +2924,9 @@ artifacts:
       id: sexy-love-chat
       version: null
       title: Magical Love Chat
-      description: P2P real-time chat application with magical theme and PeerJS networking. Features private
-        messaging, room creation, user presence, emoji support, and persistent chat history via localStorage.
+      description: P2P real-time chat application with magical theme and PeerJS
+        networking. Features private messaging, room creation, user presence,
+        emoji support, and persistent chat history via localStorage.
       kind: application
       status: provisional
       required: false
@@ -2924,7 +2968,8 @@ artifacts:
       id: markdown-viewer
       version: null
       title: Markdown Viewer
-      description: Theme-compliant rendered Markdown viewer for catalog docs and local pasted/dropped Markdown files.
+      description: Theme-compliant rendered Markdown viewer for catalog docs and local
+        pasted/dropped Markdown files.
       kind: application
       status: provisional
       required: false
@@ -2962,9 +3007,10 @@ artifacts:
       id: meme-lab
       version: null
       title: Meme Lab
-      description: Single-file meme generator with template system, drag-and-drop image support, crop editing, text
-        overlay, and PNG export. Features canvas auto-expansion, layer management, undo/redo, clipboard paste,
-        and JSON template save/load for reusable meme compositions.
+      description: Single-file meme generator with template system, drag-and-drop
+        image support, crop editing, text overlay, and PNG export. Features
+        canvas auto-expansion, layer management, undo/redo, clipboard paste, and
+        JSON template save/load for reusable meme compositions.
       kind: application
       status: provisional
       required: false
@@ -3041,8 +3087,8 @@ artifacts:
       id: v10-enhanced
       version: null
       title: NEXUS v10 Enhanced Portal
-      description: The rich v10 portal containing themes, sound, floating panels, and storage management ideas
-        externalized in v11 libs.
+      description: The rich v10 portal containing themes, sound, floating panels, and
+        storage management ideas externalized in v11 libs.
       kind: application
       status: provisional
       required: false
@@ -3081,8 +3127,9 @@ artifacts:
       id: v10-full-portal
       version: null
       title: NEXUS v10 Full Portal
-      description: Full v10 portal compatibility surface for PeernetLobby apps, notepad, shared text pad, sequencer,
-        PeerModGroove launcher, peer console, linked artifacts, and sprite GIF launcher.
+      description: Full v10 portal compatibility surface for PeernetLobby apps,
+        notepad, shared text pad, sequencer, PeerModGroove launcher, peer
+        console, linked artifacts, and sprite GIF launcher.
       kind: legacy
       status: provisional
       required: false
@@ -3121,9 +3168,10 @@ artifacts:
       id: v9-full-portal
       version: null
       title: NEXUS v9 Full Portal
-      description: "Full v9 portal kept as a legacy compatibility surface for all v9 embedded tools: artifacts,
-        notepad, calculator, color picker, palette, lobby chat, local snapshots, mini file, shared sessions,
-        shooter game, and unified user settings."
+      description: "Full v9 portal kept as a legacy compatibility surface for all v9
+        embedded tools: artifacts, notepad, calculator, color picker, palette,
+        lobby chat, local snapshots, mini file, shared sessions, shooter game,
+        and unified user settings."
       kind: legacy
       status: provisional
       required: false
@@ -3161,10 +3209,11 @@ artifacts:
       id: pdf-forge-nexus
       version: null
       title: PDF Forge Nexus
-      description: Client-side PDF manipulator with merge, split, and conversion capabilities. Features
-        drag-and-drop PDF/image loading, page reordering, rotation, multi-page merge, PDF splitting (by N
-        pages, at page, range, or each page), PDF to text extraction, image to PDF conversion, and preview.
-        All processing happens locally with no server upload.
+      description: Client-side PDF manipulator with merge, split, and conversion
+        capabilities. Features drag-and-drop PDF/image loading, page reordering,
+        rotation, multi-page merge, PDF splitting (by N pages, at page, range,
+        or each page), PDF to text extraction, image to PDF conversion, and
+        preview. All processing happens locally with no server upload.
       kind: application
       status: provisional
       required: false
@@ -3205,7 +3254,8 @@ artifacts:
       id: peer-mod-groove
       version: null
       title: PeerModGroove
-      description: Peer-synchronized modular audio app launched from v10/v11 rather than embedded into the hub runtime.
+      description: Peer-synchronized modular audio app launched from v10/v11 rather
+        than embedded into the hub runtime.
       kind: application
       status: provisional
       required: false
@@ -3242,8 +3292,9 @@ artifacts:
       id: spc-procedural-sharepic-studio
       version: null
       title: Procedural Sharepic Studio
-      description: Most feature-rich sharepic generator with template system, procedural backgrounds, text effects,
-        color themes, and export options. Create branded social media images with custom layouts, typography,
+      description: Most feature-rich sharepic generator with template system,
+        procedural backgrounds, text effects, color themes, and export options.
+        Create branded social media images with custom layouts, typography,
         filters, and batch processing capabilities.
       kind: application
       status: provisional
@@ -3286,9 +3337,10 @@ artifacts:
       id: prompt-forge-nexus
       version: null
       title: Prompt Forge Nexus
-      description: Advanced LLM prompt generator with placeholder system, tag-based filtering, prompt operations
-        library, assembly multi-prompt combiner, and 7 cyberpunk themes. Pure client-side with localStorage
-        persistence, export/import, and live preview.
+      description: Advanced LLM prompt generator with placeholder system, tag-based
+        filtering, prompt operations library, assembly multi-prompt combiner,
+        and 7 cyberpunk themes. Pure client-side with localStorage persistence,
+        export/import, and live preview.
       kind: application
       status: provisional
       required: false
@@ -3331,8 +3383,9 @@ artifacts:
       id: reveal-peer-plugin
       version: null
       title: RevealPeerJS
-      description: Reveal.js plugin that connects all slide viewers in a P2P lobby with chat, live polls, Pong
-        challenges, and a top-down arena shooter mini-game.
+      description: Reveal.js plugin that connects all slide viewers in a P2P lobby
+        with chat, live polls, Pong challenges, and a top-down arena shooter
+        mini-game.
       kind: application
       status: provisional
       required: false
@@ -3409,7 +3462,8 @@ artifacts:
       id: sprite-gif-creator
       version: null
       title: Sprite GIF Creator
-      description: Browser-only sprite-sheet splitter, frame editor, PNG exporter, and animated GIF assembler.
+      description: Browser-only sprite-sheet splitter, frame editor, PNG exporter, and
+        animated GIF assembler.
       kind: application
       status: provisional
       required: false
@@ -3445,9 +3499,10 @@ artifacts:
       id: spc-sprite-gif-creator-v2
       version: null
       title: Sprite GIF Creator v2
-      description: Enhanced sprite sheet animator with timeline, frame editing, multiple source support, batch
-        processing, and GIF export. Features source card management, improved batch operations, and
-        pixel-perfect preview controls.
+      description: Enhanced sprite sheet animator with timeline, frame editing,
+        multiple source support, batch processing, and GIF export. Features
+        source card management, improved batch operations, and pixel-perfect
+        preview controls.
       kind: application
       status: provisional
       required: false
@@ -3489,9 +3544,9 @@ artifacts:
       id: storyboard-studio
       version: null
       title: Storyboard Studio
-      description: Client-side illustration and text document builder for arranging imported images, prose,
-        captions, blueprint blocks, slogans, and quotes into printable or self-contained HTML storyboard
-        artifacts.
+      description: Client-side illustration and text document builder for arranging
+        imported images, prose, captions, blueprint blocks, slogans, and quotes
+        into printable or self-contained HTML storyboard artifacts.
       kind: application
       status: provisional
       required: false
@@ -3533,10 +3588,11 @@ artifacts:
       id: telegram-bot-api-workbench
       version: null
       title: Telegram Bot API Workbench
-      description: Security-conscious, self-contained browser console for Telegram bots with status and webhook
-        diagnostics, messaging, update polling, command and chat inspection, generic JSON and multipart method
-        runners, abortable requests, reusable JavaScript snippets, safe profile exchange, and token-redacted
-        logs.
+      description: Security-conscious, self-contained browser console for Telegram
+        bots with status and webhook diagnostics, messaging, update polling,
+        command and chat inspection, generic JSON and multipart method runners,
+        abortable requests, reusable JavaScript snippets, safe profile exchange,
+        and token-redacted logs.
       kind: application
       status: provisional
       required: false
@@ -3580,9 +3636,10 @@ artifacts:
       id: spc-template-engine
       version: null
       title: Template Engine
-      description: Template processing engine for creating and managing reusable design templates. Supports variable
-        substitution, conditional rendering, loops, and custom processing logic for generating dynamic content
-        from templates.
+      description: Template processing engine for creating and managing reusable
+        design templates. Supports variable substitution, conditional rendering,
+        loops, and custom processing logic for generating dynamic content from
+        templates.
       kind: application
       status: provisional
       required: false
@@ -3623,8 +3680,8 @@ artifacts:
       id: v8-collab-code-editor
       version: null
       title: v8 Collab Code Editor
-      description: Full Monaco-based collaborative code editor from the earlier app hub line, exposed through the
-        v11 catalog.
+      description: Full Monaco-based collaborative code editor from the earlier app
+        hub line, exposed through the v11 catalog.
       kind: application
       status: provisional
       required: false
@@ -3662,7 +3719,8 @@ artifacts:
       id: v8-collab-pad-lite
       version: null
       title: v8 Collab Pad Lite
-      description: Textarea-based collaborative editor from the earlier app hub line, exposed through the v11 catalog.
+      description: Textarea-based collaborative editor from the earlier app hub line,
+        exposed through the v11 catalog.
       kind: application
       status: provisional
       required: false
@@ -3699,8 +3757,9 @@ artifacts:
       id: sprite-extractor
       version: null
       title: Sprite Extractor
-      description: Strict sprite extraction copy with alpha auto-detection, manual grid setup, default alpha
-        trimming, per-sprite naming, and named PNG/ZIP export.
+      description: Strict sprite extraction copy with alpha auto-detection, manual
+        grid setup, default alpha trimming, per-sprite naming, and named PNG/ZIP
+        export.
       kind: application
       status: provisional
       required: false
@@ -3737,8 +3796,8 @@ artifacts:
       id: artifacts-toc
       version: null
       title: Artifacts Table of Contents
-      description: Repository-wide curated artifact list. v11 keeps this as information while generated JSON becomes
-        the machine-readable catalog.
+      description: Repository-wide curated artifact list. v11 keeps this as
+        information while generated JSON becomes the machine-readable catalog.
       kind: document
       status: provisional
       required: false
@@ -3776,7 +3835,8 @@ artifacts:
       id: v11-roadmap
       version: null
       title: v11 Modularization Roadmap
-      description: Specs and TODOs for feature areas intentionally not fully implemented in this slice.
+      description: Specs and TODOs for feature areas intentionally not fully
+        implemented in this slice.
       kind: document
       status: provisional
       required: false
@@ -3815,8 +3875,9 @@ artifacts:
       id: font-lab-browser
       version: null
       title: Font Lab Browser
-      description: Single-file, browser-only font builder. Upload a glyph grid image, remove white to transparency,
-        smooth and trace, then export an OTF plus debug assets.
+      description: Single-file, browser-only font builder. Upload a glyph grid image,
+        remove white to transparency, smooth and trace, then export an OTF plus
+        debug assets.
       kind: application
       status: provisional
       required: false
@@ -3854,8 +3915,8 @@ artifacts:
       id: palette-studio
       version: null
       title: Palette Studio
-      description: Advanced palette generator with multiple anchors, role inference, contrast checks, and CSS
-        variable export for readable UI themes.
+      description: Advanced palette generator with multiple anchors, role inference,
+        contrast checks, and CSS variable export for readable UI themes.
       kind: application
       status: provisional
       required: false
@@ -3894,7 +3955,8 @@ artifacts:
       id: app-hub-v12
       version: 1.0.0
       title: Artifacts Hub V12
-      description: Catalog and launcher consuming generated artifact releases without owning their implementations.
+      description: Catalog and launcher consuming generated artifact releases without
+        owning their implementations.
       kind: application
       status: active
       required: true
@@ -3928,10 +3990,11 @@ artifacts:
     editorial:
       id: roborock-local-cloud
       title: "Roborock Local Cloud: TLS and CA Trust"
-      description: "Roborock local-cloud security analysis with eight Mermaid-rendered figures: provisioning,
-        HTTPS/MQTT/local TCP relationships, pairing sequence, trust boundaries, five operational gates, CA
-        issuance, TLS identities and persistence. Includes certificate-acceptance assumptions and comparative
-        matrices."
+      description: "Roborock local-cloud security analysis with eight Mermaid-rendered
+        figures: provisioning, HTTPS/MQTT/local TCP relationships, pairing
+        sequence, trust boundaries, five operational gates, CA issuance, TLS
+        identities and persistence. Includes certificate-acceptance assumptions
+        and comparative matrices."
       source: src/reports/roborock-local-cloud/index.html
       route: research/roborock-local-cloud/index.html
       version: 1.2.1
@@ -3962,3 +4025,45 @@ artifacts:
         - figures/07-identity-comparison.mmd
         - figures/08-persistence.svg
         - figures/08-persistence.mmd
+  - id: aster-relay-identity
+    title: Aster Relay Identity
+    publish: reference
+    recipe: aster-relay-identity
+    note: Tracked source retained; not selected for publication. Enable only with an
+      explicit release boundary and qualification.
+  - id: label-sheet-studio
+    title: Label Sheet Studio
+    publish: reference
+    recipe: label-sheet-studio
+    note: Tracked source retained; not selected for publication. Enable only with an
+      explicit release boundary and qualification.
+  - id: peer-music-groove
+    title: Peer Music Groove
+    publish: reference
+    recipe: peer-music-groove
+    note: Tracked source retained; not selected for publication. Enable only with an
+      explicit release boundary and qualification.
+  - id: peernet-orca
+    title: Peernet ORCA
+    publish: reference
+    recipe: peernet-orca
+    note: Tracked source retained; not selected for publication. Enable only with an
+      explicit release boundary and qualification.
+  - id: peernetjs
+    title: PeernetJS library
+    publish: reference
+    recipe: peernetjs
+    note: Tracked source retained; not selected for publication. Enable only with an
+      explicit release boundary and qualification.
+  - id: app-hub-v11-reference
+    title: Historical App Hub V11
+    publish: reference
+    recipe: app-hub-v11-reference
+    note: Tracked source retained; not selected for publication. Enable only with an
+      explicit release boundary and qualification.
+workspaceOnly:
+  - id: beats
+    path: beats
+    publish: reference
+    note: Ignored local workspace content; absent from clean Git checkouts. Separate
+      deployment; not an input to this site.
