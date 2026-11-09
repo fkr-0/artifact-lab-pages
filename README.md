@@ -86,6 +86,6 @@ project summaries; YAML selects the current publication.
 
 ## Lab infrastructure
 
-[Artifacts Hub V13](./apps/app-hub-v13/) is the current catalog and launcher. [App Hub V11](./app-hub-v11/) and the older [App Hub](./app-hub/) remain compatibility/legacy surfaces; registry, tooling, tests, migration data, and shared libraries are Lab infrastructure rather than artifact projects.
+[Artifacts Hub](./hub-v13.5/) is the current catalog and launcher. [App Hub V11](./app-hub-v11/) and the older [App Hub](./app-hub/) remain compatibility/legacy surfaces; registry, tooling, tests, migration data, and shared libraries are Lab infrastructure rather than artifact projects.
 
-The machine-readable catalog and ownership metadata live under [`registry/`](./registry/). Historical [`ARTIFACTS_TOC.md`](./ARTIFACTS_TOC.md) is retained for compatibility but is not the status authority.
+The authored inventory and ownership metadata live in [`inventory.yml`](./inventory.yml); generated catalogs and compatibility snapshots live under [`registry/`](./registry/). Historical [`ARTIFACTS_TOC.md`](./ARTIFACTS_TOC.md) is retained for compatibility but is not the status authority.

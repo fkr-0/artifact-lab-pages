@@ -3,7 +3,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { buildArtifact } from './build.mjs';
 import { collectGitMetadata, generateCatalog, loadReceiptBuilds, writeCatalog } from './catalog.mjs';
-import { validateManifest, validateUniqueIds } from './core.mjs';
+import { pathExists, validateManifest, validateUniqueIds } from './core.mjs';
+import { loadPortfolio } from './portfolio.mjs';
 import { discoverManifests } from './discover.mjs';
 import { inventoryRepository } from './inventory.mjs';
 import { validateManifestOwnership } from './ownership.mjs';
@@ -58,9 +59,12 @@ Options:
 
 async function validateAll(manifests, rootDir) {
   const ownership = await inventoryRepository({ rootDir });
+  const portfolio = await pathExists(join(rootDir,'inventory.yml')) ? await loadPortfolio(rootDir) : null;
   const entries = [];
   for (const manifest of manifests) {
-    const structural = await validateManifest(manifest, { rootDir });
+    const item=portfolio?.artifacts.find(entry=>entry.id===manifest.id);
+    const acquired = ['git','release'].includes(portfolio?.recipes[item?.recipe]?.source.kind);
+    const structural = await validateManifest(manifest, { rootDir, checkExistence:!acquired });
     const topology = validateManifestOwnership(manifest, ownership);
     entries.push({
       id: manifest.id,

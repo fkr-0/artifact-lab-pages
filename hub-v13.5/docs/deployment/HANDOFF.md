@@ -1,5 +1,9 @@
 # V13.5 publication handoff
 
+> Historical two-repository handoff contract. The current embedded publisher is built
+> through the repository root commands in [the portfolio guide](../../../docs/PORTFOLIO.md). Pages uses the single-checkout pipeline and `dist/site`.
+
+
 ## Deployment authority
 
 V13.5 does not create a second Pages owner.

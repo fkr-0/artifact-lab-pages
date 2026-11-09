@@ -48,3 +48,13 @@ test('publication descriptors omit references while discovery preserves historic
  assert.equal(portfolioManifests(p).length,1);
  assert.equal(portfolioManifests(p,{publication:true}).length,0);
 });
+
+test('declarative validation accepts a pinned foreign project before acquisition',async t=>{
+ const {mkdtemp,mkdir,writeFile,rm}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');const {spawnSync}=await import('node:child_process');
+ const root=await mkdtemp(join(tmpdir(),'foreign-inventory-'));t.after(()=>rm(root,{recursive:true,force:true}));const p=base();
+ p.artifacts[0].publish='local';p.artifacts[0].manifest={schemaVersion:'artifacts.fkr.dev/v1',id:'demo',title:'Demo',status:'active',required:true,kind:'application',source:{kind:'project',path:'not-cloned-yet',git:{mode:'external',repository:p.recipes.demo.source.repository,revision:p.recipes.demo.source.revision}},build:{mode:'none'},release:{kind:'directory',entrypoint:'index.html'}};
+ await writeFile(join(root,'inventory.yml'),stringify(p));
+ const cli=new URL('../src/cli.mjs',import.meta.url).pathname;
+ const result=spawnSync(process.execPath,[cli,'validate','--root',root],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stdout+result.stderr);
+});

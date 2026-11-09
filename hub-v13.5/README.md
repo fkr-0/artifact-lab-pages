@@ -1,5 +1,9 @@
 # Artifacts Hub V13.5
 
+This is the embedded Artifact Lab launcher/publisher. Run `pnpm build`, `pnpm check`,
+and `pnpm serve` from the containing repository; see [the portfolio guide](../docs/PORTFOLIO.md).
+The standalone-repository notes below are preserved migration history.
+
 V13.5 is the recovery/convergence release for artifacts.fkr.dev.
 
 Its product boundary is deliberately simpler than V13:
