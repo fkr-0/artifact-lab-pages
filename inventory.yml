@@ -11,8 +11,6 @@ recipes:
       - index.html
       - lib/brickbreaker-core.mjs
       - lib/brickbreaker-peernet.mjs
-      - lib/peernet-lobby.mjs
-      - lib/standalone-network.mjs
   chado-zen-tea:
     source:
       kind: local
@@ -634,8 +632,6 @@ artifacts:
           - index.html
           - lib/brickbreaker-core.mjs
           - lib/brickbreaker-peernet.mjs
-          - lib/peernet-lobby.mjs
-          - lib/standalone-network.mjs
     export: brickbreaker/artifact.json
     compatibility:
       id: brickbreaker
