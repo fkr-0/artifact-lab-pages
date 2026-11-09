@@ -176,3 +176,10 @@ test('an inventoried built project replaces its old metadata-only record with on
  const records=result.deploymentCatalog.items.filter(x=>x.id==='canvas');assert.equal(records.length,1);assert.equal(records[0].availability,'verified');assert.equal(records[0].url,'/artifacts/canvas/1/index.html');
  assert.equal(await readFile(join(output,'artifacts/canvas/1/index.html'),'utf8'),'COMPILED');
 });
+
+test('a relocatable compiled release rejects root-absolute asset references',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'root-asset-')),source=join(root,'source'),release=join(source,'project/dist');await mkdir(join(source,'meme-lab'),{recursive:true});await writeFile(join(source,'meme-lab/meme-lab.html'),'Meme');await mkdir(release,{recursive:true});await writeFile(join(release,'index.html'),'<script src="/assets/app.js"></script>');
+ const item={id:'app',title:'App',version:'1',buildMode:'compile',availability:'source-only'};
+ const manifest={source:{kind:'project',path:'project'},build:{mode:'compile',cwd:'project',output:'dist'},release:{entrypoint:'index.html'},verify:{relocatable:true}};
+ await assert.rejects(assemblePortfolio({baseline:baseline([meme]),sourceRoot:source,outputRoot:join(root,'out'),nativeCatalog:{items:[item]},nativeManifests:{app:manifest}}),/relocat|absolute/i);
+});

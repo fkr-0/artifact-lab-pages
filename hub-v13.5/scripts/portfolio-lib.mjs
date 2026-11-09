@@ -264,6 +264,10 @@ async function missingExpectedReleaseFiles(stageRoot, manifest, entrypoint) {
     const relativePath = safeManifestPath(file, 'verify.expectedFiles');
     if (!(await exists(join(stageRoot, relativePath)))) missing.push(relativePath);
   }
+  if (manifest.verify?.relocatable && /\.html?$/iu.test(entrypoint) && await exists(join(stageRoot,entrypoint))) {
+    const html=await readFile(join(stageRoot,entrypoint),'utf8');
+    if (/(?:src|href)=["']\/(?!\/)/u.test(html)) throw new Error('Non-relocatable root-absolute reference in ' + entrypoint);
+  }
   return missing;
 }
 

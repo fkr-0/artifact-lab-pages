@@ -1688,6 +1688,7 @@ artifacts:
           - - pnpm
             - run
             - build
+        relocatable: true
     export: registry/sources.d/inf-arrange.json
     compatibility:
       id: inf-arrange
