@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {parse} from 'yaml';
 const workflow=parse(await readFile('.github/workflows/pages.yml','utf8'));
-assert.ok(workflow.on.pull_request,'PRs must qualify without deploying');
+assert.ok(Object.hasOwn(workflow.on,'pull_request'),'PRs must qualify without deploying');
 assert.equal(workflow.permissions.contents,'read');assert.equal(workflow.permissions.pages,undefined);
 const build=workflow.jobs.build,deploy=workflow.jobs.deploy;
 assert.equal(build.steps.find(x=>x.uses?.startsWith('actions/checkout')).with.submodules,'recursive');
