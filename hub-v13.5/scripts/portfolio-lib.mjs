@@ -780,7 +780,7 @@ export async function assemblePortfolio({ baseline, sourceRoot, fallbackRoots = 
   const parity = {
     schemaVersion: PARITY_SCHEMA,
     baseline: baseline.source,
-    sourceRoot: source,
+    sourceRoot: '.',
     summary: {
       catalogItems: entries.length,
       expectedLocal: expected.length,

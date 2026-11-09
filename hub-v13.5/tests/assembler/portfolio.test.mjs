@@ -160,3 +160,9 @@ test('reachable legacy assets cannot follow symlinks outside source',async()=>{
  await writeFile(join(source,'meme-lab/meme-lab.html'),'<script src="./secret.js"></script>');await symlink(join(root,'secret.js'),join(source,'meme-lab/secret.js'));
  await assert.rejects(assemblePortfolio({baseline:baseline([meme]),sourceRoot:source,outputRoot:join(root,'out')}),/symlink|contain/i);
 });
+
+test('public parity metadata does not disclose the build checkout path',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'public-provenance-')),source=join(root,'source');await mkdir(join(source,'meme-lab'),{recursive:true});await writeFile(join(source,'meme-lab/meme-lab.html'),'Meme');
+ const result=await assemblePortfolio({baseline:baseline([meme]),sourceRoot:source,outputRoot:join(root,'out')});
+ assert.equal(result.parity.sourceRoot,'.');
+});
